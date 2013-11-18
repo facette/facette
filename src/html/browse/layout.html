@@ -1,0 +1,9 @@
+{{ define "body" }}{{ template "template_element" }}
+		<header>
+			<h1><a href="/">Facette</a></h1>
+
+			<ul>
+				<li><a class="icon icon-configure" href="/admin/" title="Administration Panel"></a></li>
+			</ul>
+		</header>
+{{ template "content" . }}{{ end }}

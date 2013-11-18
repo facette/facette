@@ -1,0 +1,79 @@
+{{ define "title" }}Administration Panel: {{ if eq .Section "sourcegroups" }}Source{{ else }}Metric{{ end }} Groups — Facette{{ end }}
+
+{{ define "script" }}
+		<script src="/static/jquery.js"></script>
+		<script src="/static/i18next.js"></script>
+		<script src="/static/facette.js"></script>
+{{ end }}
+
+{{ define "content" }}
+		<article data-pane="group-edit" data-paneopts="section: {{ .Section }}{{ if ne .Path "add" }}; id: {{ .Path }}{{ end }}">
+			<header>
+				<h1>Administration Panel — {{ if eq .Path "add" }}New{{ else }}Edit{{ end }} {{ if eq .Section "sourcegroups" }}source{{ else }}metric{{ end }} Group</h1>
+			</header>
+
+			<footer>
+				<button class="danger" name="step-cancel">Cancel</button>
+				<button class="icon icon-prev" name="step-prev">Previous</button>
+				<button class="icon icon-next" name="step-next">Next</button>
+				<button name="step-save">Save Group</button>
+			</footer>
+
+			<section data-step="1">
+				<div class="list" data-list="step-1-items">
+					<h1>Items List <span class="count"></span></h1>
+
+					<fieldset>
+						<label for="origin">Origin</label>
+						<select data-select="origin" id="origin" name="origin">{{ range $_, $name := .Origins }}
+							<option>{{ $name }}</option>{{ end }}
+						</select>
+
+						<label for="type">Match Type</label>
+						<select data-select="type" id="type" name="type">
+							<option value="0">Normal</option>
+							<option value="1">Glob</option>
+							<option value="2">Regexp</option>
+						</select>
+
+						<label for="item">Item</label>
+						<input data-input="{{ substr .Section 0 6 }}" data-inputopts="sources: catalog/{{ substr .Section 0 6 }}s" id="item" name="item" type="text">
+
+						<button name="item-add">Add</button>
+					</fieldset>
+
+					<div class="scrollarea">
+						<div class="listmesg" data-listmesg="step-1-items"></div>
+
+						<div class="listitem" data-listtmpl="step-1-items">
+							<div class="actions">
+								<a class="icon icon-remove" href="#remove-item" title="Remove Item"></a>
+							</div>
+							<dl>
+								<dt class="name pattern"></dt>
+								<dd class="desc">
+									origin: <span class="origin"></span>
+								</dd>
+							</dl>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section data-step="2">
+				<h1>Group Definition</h1>
+
+				<div class="scrollarea">
+					<div class="block">
+						<h2>General Information</h2>
+
+						<label for="group-name">Name:</label>
+						<input class="full input" data-input="group-name" data-inputopts="check: true" id="group-name" name="group-name" type="text">
+
+						<label for="group-desc">Description:</label>
+						<textarea id="group-desc" name="group-desc"></textarea>
+					</div>
+				</div>
+			</section>
+		</article>
+{{ end }}

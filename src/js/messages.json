@@ -1,0 +1,61 @@
+{
+	"collection": {
+		"labl_clone": "Clone collection",
+		"labl_delete": "Delete collection",
+		"labl_collection_name": "Collection name:",
+		"mesg_delete": "You are about to delete a collection. This action can’t be undone.",
+		"mesg_delete_fail": "Unable to delete the collection!",
+		"mesg_exists": "A collection with the same name already exists!",
+		"mesg_graph_missing": "You must at least add one graph!",
+		"mesg_load_nomatch": "Your search doesn’t match any collection",
+		"mesg_none": "No collection defined",
+		"mesg_save_fail": "Unable to save collection!"
+	},
+	"graph": {
+		"labl_clone": "Clone graph",
+		"labl_collapse": "Collapse serie",
+		"labl_delete": "Delete graph",
+		"labl_graph_name": "Graph name:",
+		"labl_serie_name": "Serie name:",
+		"labl_stack_name": "Stack name:",
+		"labl_time_range": "Time range:",
+		"mesg_collapse": "You are about to collapse a serie with grouped elements. This will remove them from associated groups.",
+		"mesg_delete": "You are about to delete a graph. This action can’t be undone.",
+		"mesg_delete_fail": "Unable to delete the graph!",
+		"mesg_exists": "A graph with the same name already exists!",
+		"mesg_item_exists": "An item with the same name already exists!",
+		"mesg_load_nomatch": "Your search doesn’t match any graph",
+		"mesg_loading": "Loading graphs, this may take a while...",
+		"mesg_no_serie": "No more serie",
+		"mesg_none": "No graph defined",
+		"mesg_save_fail": "Unable to save graph!"
+	},
+	"group": {
+		"labl_clone": "Clone group",
+		"labl_delete": "Delete group",
+		"labl_group_name": "Group name:",
+		"mesg_delete": "You are about to delete a group. This action can’t be undone.",
+		"mesg_delete_fail": "Unable to delete the group!",
+		"mesg_exists": "A group with the same name already exists!",
+		"mesg_save_fail": "Unable to save group!"
+	},
+	"item": {
+		"mesg_missing": "You must at least add one item!",
+		"mesg_none": "No item defined"
+	},
+	"list": {
+		"labl_reset": "Reset",
+		"labl_retry": "Retry",
+		"mesg_load_error": "An error occured while loading data",
+		"mesg_load_nomatch": "Your search doesn’t match any item"
+	},
+	"main": {
+		"mesg_loading": "Loading data...",
+		"mesg_server_loading": "Reloading resources, please wait...",
+		"mesg_unsaved_changes": "All unsaved changes will be lost!"
+	},
+	"metric": {
+		"mesg_missing": "You must at least add one metric!",
+		"mesg_none": "No metric defined"
+	}
+}

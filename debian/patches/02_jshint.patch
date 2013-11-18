@@ -1,0 +1,14 @@
+Index: facette/src/js/Makefile
+===================================================================
+--- facette.orig/src/js/Makefile	2013-11-10 13:04:42.299291951 +0100
++++ facette/src/js/Makefile	2013-11-17 09:02:32.709356016 +0100
+@@ -81,8 +81,7 @@
+ 		$(call mesg_ok) || $(call mesg_fail)
+ 
+ lint: $(JS_FILE)
+-	@$(call mesg_start,Checking $(JS_FILE) with JSHint...)
+-	-@$(JSHINT) $(JS_FILE) $(JSHINT_ARGS) && $(call mesg_ok) || $(call mesg_fail)
++	@#PATCH: “Evil” JSHint removal
+ 
+ build: $(JS_FILE_MIN) $(MSG_FILE_MIN)
+ 

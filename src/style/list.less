@@ -1,0 +1,217 @@
+
+section {
+	.list {
+		.listmesg {
+			.message-list;
+			margin: 1em 0;
+		}
+
+
+		.listitem {
+			background-color: @ListItemBackgroundColor;
+			border-radius: 0.35em;
+			line-height: 1.5em;
+			margin-bottom: 1em;
+			overflow: auto;
+			padding: 0.25em 4em 0.25em 1em;
+			position: relative;
+
+			.actions {
+				visibility: hidden;
+
+				a {
+					color: fade(@TextColorB, 25);
+					text-decoration: none;
+
+					&::before {
+						margin-right: 0;
+						text-align: center;
+						width: 1.5em;
+					}
+
+					&:hover {
+						color: @TextColorB;
+					}
+				}
+			}
+
+			& > .actions {
+				float: right;
+				font-size: 1.25em;
+				line-height: 1.5em;
+				list-style-type: none;
+				margin-left: 2em;
+				margin-top: -0.75em;
+				position: absolute;
+				right: 1em;
+				top: 50%;
+
+				a {
+					&::before {
+						text-align: center;
+						width: 100%;
+					}
+				}
+			}
+
+			.date,
+			.desc,
+			.type {
+				color: fade(@TextColorB, 75);
+			}
+
+			.date {
+				visibility: hidden;
+				float: right;
+				line-height: 3em;
+			}
+
+			.name {
+				float: left;
+				margin-right: 0.5em;
+
+				a {
+					color: @TextColorB;
+				}
+
+				& + .actions {
+					a::before {
+						float: left;
+					}
+				}
+			}
+
+			.desc {
+				clear: left;
+				float: left;
+
+				span {
+					color: @TextColorB;
+
+					&.count {
+						background-color: @TextColorB;
+						border-radius: 1em;
+						color: @ListItemBackgroundColor;
+						display: inline-block;
+						font-size: 0.85em;
+						margin-left: 0.5em;
+						min-width: 1.4em;
+						line-height: 1.2em;
+						text-align: center;
+					}
+				}
+			}
+
+			dl {
+				dt {
+					.type {
+						float: left;
+						margin: 0 0.25em;
+						text-transform: uppercase;
+					}
+				}
+
+				dd {
+					clear: left;
+
+					.name {
+						float: none;
+					}
+
+					&.desc {
+						&::before {
+							content: '› ';
+						}
+
+						&:hover {
+							a {
+								visibility: visible;
+							}
+						}
+
+						a {
+							color: fade(@TextColorB, 25);
+							margin-left: 0.25em;
+							text-decoration: none;
+							visibility: hidden;
+
+							&:hover {
+								color: @TextColorB;
+							}
+						}
+					}
+
+					&.block {
+						padding: 0 1em;
+						overflow: auto;
+
+						label,
+						input,
+						.note {
+							float: left;
+						}
+
+						label,
+						input {
+							clear: left;
+						}
+
+						.note {
+							margin: 0.35em 0.75em;
+							padding: 0.25em 0;
+						}
+					}
+				}
+			}
+
+			&:hover {
+				.actions,
+				.date {
+					visibility: visible;
+				}
+			}
+
+			&[draggable=true] {
+				cursor: move;
+			}
+
+			&.dragged {
+				* {
+					opacity: 0.65;
+				}
+			}
+
+			&.linked {
+				display: none;
+			}
+
+			&.active,
+			&.dragover {
+				background-color: @MainColor;
+				color: @BackgroundColor;
+
+				.actions {
+					a {
+						color: fade(@BackgroundColor, 50);
+
+						&:hover {
+							color: @BackgroundColor;
+						}
+					}
+				}
+
+				.date,
+				.desc,
+				.type {
+					color: fade(@BackgroundColor, 75);
+				}
+
+				.desc {
+					span {
+						color: @BackgroundColor;
+					}
+				}
+			}
+		}
+	}
+}

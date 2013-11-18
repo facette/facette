@@ -1,0 +1,48 @@
+{{ define "title" }}Facette{{ end }}
+
+{{ define "script" }}
+		<script src="/static/jquery.js"></script>
+		<script src="/static/i18next.js"></script>
+		<script src="/static/facette.js"></script>
+{{ end }}
+
+{{ define "content" }}
+		<nav>
+			<dl class="tree" data-tree="collections" data-treeopts="url: library/collections">
+				<dt>Collections</dt>
+				<dd class="treecntr">
+					<dl class="treeitem treetmpl">
+						<dt>
+							<a class="treelabl" href="#show-collection">
+								<span class="icon"></span>
+								<span class="name"></span>
+							</a>
+						</dt>
+						<dd class="treecntr"></dd>
+					</dl>
+				</dd>
+				<dd class="placeholder icon icon-info">No collection defined</dd>
+			</dl>
+		</nav>
+
+		<article>
+			<header>
+				<h1>Dashboard</h1>
+			</header>
+
+			<section class="full">
+				<div class="logo">
+					<img src="/static/logo.png" alt="logo">
+				</div>
+
+				<div class="search">
+					<form action="/browse/search" method="get">
+						<p>Search for Source or Collection:</p>
+						<p>
+							<input class="full" name="q" placeholder="e.g. host1.example.net, collection1" type="text">
+						</p>
+					</form>
+				</div>
+			</section>
+		</article>
+{{ end }}

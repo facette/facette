@@ -1,0 +1,65 @@
+
+@fa-version: '4.0.1';
+
+@font-face {
+    font-family: 'FontAwesome';
+    font-style: normal;
+    font-weight: normal;
+    src: url('./fonts/fontawesome-webfont.eot?v=@{fa-version}');
+    src: url('./fonts/fontawesome-webfont.eot?#iefix&v=@{fa-version}') format('embedded-opentype'),
+         url('./fonts/fontawesome-webfont.woff?v=@{fa-version}') format('woff'),
+         url('./fonts/fontawesome-webfont.ttf?v=@{fa-version}') format('truetype'),
+         url('./fonts/fontawesome-webfont.svg#fontawesomeregular?v=@{fa-version}') format('svg');
+}
+
+.icon::before {
+    .icon;
+    display: inline-block;
+    margin-right: 0.5em;
+}
+
+.icon-search::before       { content: '\f002'; }
+.icon-collection::before   { content: '\f00a'; }
+.icon-cross::before        { content: '\f00d'; }
+.icon-configure::before    { content: '\f013'; }
+.icon-time::before         { content: '\f017'; }
+.icon-download::before     { content: '\f019'; }
+.icon-refresh::before      { content: '\f021'; }
+.icon-print::before        { content: '\f02f'; }
+.icon-edit::before         { content: '\f040'; }
+.icon-add::before          { content: '\f055'; }
+.icon-error::before        { content: '\f056'; }
+.icon-remove::before       { content: '\f057'; }
+.icon-success::before      { content: '\f058'; }
+.icon-info::before         { content: '\f05a'; }
+.icon-source::before       { content: '\f05b'; }
+.icon-arrow-left::before   { content: '\f060'; }
+.icon-arrow-right::before  { content: '\f061'; }
+.icon-plus::before         { content: '\f067'; }
+.icon-minus::before        { content: '\f068'; }
+.icon-warning::before      { content: '\f071'; }
+.icon-calendar::before     { content: '\f073'; }
+.icon-folder::before       { content: '\f07b'; }
+.icon-graph::before        { content: '\f080'; }
+.icon-copy::before         { content: '\f0c5'; }
+.icon-reset::before        { content: '\f0e2'; }
+.icon-circle::before       { content: '\f10c'; }
+.icon-circle-plain::before { content: '\f111'; }
+.icon-reframe::before      { content: '\f12a'; }
+.icon-prev::before         { content: '\f137'; }
+.icon-expand::before       { content: '\f150'; }
+.icon-collapse::before     { content: '\f151'; }
+.icon-metric::before       { content: '\f192'; }
+
+.icon-next {
+    &::before {
+        content: '';
+    }
+
+    &::after {
+        .icon;
+        content: '\f138';
+        display: inline-block;
+        margin-left: 0.5em;
+    }
+}

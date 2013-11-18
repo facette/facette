@@ -1,0 +1,13 @@
+Index: facette/src/js/Makefile
+===================================================================
+--- facette.orig/src/js/Makefile	2013-11-17 11:05:41.172411382 +0100
++++ facette/src/js/Makefile	2013-11-17 11:05:59.868570853 +0100
+@@ -4,7 +4,7 @@
+ include ../../Makefile.inc
+ 
+ UGLIFYJS = uglifyjs
+-UGLIFYJS_ARGS = --comments --compress --mangle --screw-ie8
++UGLIFYJS_ARGS =
+ 
+ JSHINT = jshint
+ JSHINT_ARGS = --show-non-errors

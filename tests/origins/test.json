@@ -1,0 +1,7 @@
+{
+	"backend": {
+		"type": "rrd",
+		"path": "../../tests/data",
+		"pattern": "(?P<source>[^/]+)/(?P<metric>.+).rrd"
+	}
+}

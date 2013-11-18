@@ -1,0 +1,188 @@
+
+::-webkit-input-placeholder {
+	color: @FormDisabledTextColor;
+	opacity: 1;
+}
+
+::-moz-placeholder {
+	color: @FormDisabledTextColor;
+	opacity: 1;
+}
+
+:-ms-input-placeholder {
+	color: @FormDisabledTextColor;
+	opacity: 1;
+}
+
+::-moz-focus-inner {
+	border: 0;
+}
+
+button,
+input,
+label,
+select,
+textarea,
+.selectlabel {
+	.box-sizing(border-box);
+	padding: 0.25em;
+}
+
+button,
+input,
+select,
+textarea,
+.selectlabel {
+	.transition(background-color 0.2s, border-color 0.2s);
+	border: 0.2em solid @FormBorderColor;
+	border-radius: 0.35em;
+
+	&:focus {
+		border-color: fade(@MainColor, 75);
+		outline: none !important;
+	}
+}
+
+input,
+select,
+textarea,
+.selectlabel {
+	background-color: @FormBackgroundColor;
+	line-height: normal;
+
+	&:disabled {
+		background-color: @FormDisabledBackgroundColor;
+		color: @FormDisabledTextColor;
+		cursor: default;
+	}
+
+	&.full {
+		width: 100%;
+	}
+}
+
+button {
+	background-color: @FormButtonBackgroundColor;
+	border-color: transparent;
+	color: @FormButtonTextColor;
+	margin: 0 0.25em;
+	padding: 0.25em 0.5em;
+
+	&:hover {
+		background-color: lighten(@FormButtonBackgroundColor, 7.5);
+		border-color: transparent;
+		cursor: pointer;
+	}
+
+	&:disabled {
+		background-color: @FormButtonBackgroundColor;
+		color: fade(@FormButtonTextColor, 25);
+		cursor: default;
+	}
+
+	&.danger {
+		background-color: @FormButtonDangerBackgroundColor;
+
+		&:hover {
+			background-color: lighten(@FormButtonDangerBackgroundColor, 7.5);
+		}
+	}
+
+	&:focus {
+		background-color: @MainColor;
+
+		&:hover {
+			background-color: lighten(@MainColor, 7.5);
+		}
+	}
+}
+
+fieldset {
+	border: none;
+
+	legend {
+		display: none;
+	}
+}
+
+.input,
+.select {
+	display: inline-block;
+	line-height: normal;
+}
+
+.input {
+	position: relative;
+
+	&.full,
+	input {
+		width: 100%;
+	}
+
+	input {
+		margin: 0 !important;
+	}
+
+	&.error {
+		color: @ErrorBackgroundColor;
+
+		::-webkit-input-placeholder {
+			color: fade(@ErrorBackgroundColor, 50);
+			opacity: 1;
+		}
+
+		::-moz-placeholder {
+			color: fade(@ErrorBackgroundColor, 50);
+			opacity: 1;
+		}
+
+		:-ms-input-placeholder {
+			color: fade(@ErrorBackgroundColor, 50);
+			opacity: 1;
+		}
+
+		&::after {
+			.icon;
+			content: '\f071';
+			cursor: help;
+			font-size: 1.2em;
+			line-height: 1.5em;
+			margin-top: -0.75em;
+			position: absolute;
+			right: 0.6em;
+			top: 50%;
+		}
+
+		input {
+			border-color: @ErrorBackgroundColor;
+			color: @ErrorBackgroundColor;
+			padding-right: 2em;
+		}
+	}
+}
+
+.select {
+	.selectlabel {
+		color: @TextColorB;
+		position: relative;
+
+		&::before {
+			content: '\00a0';
+		}
+
+		&::after {
+			.icon;
+			color: fade(@TextColorB, 65);
+			content: '\f078';
+			font-size: 0.8em;
+			height: 1em;
+			line-height: 1em;
+			margin-top: -0.5em;
+			position: absolute;
+			right: 0.3em;
+			text-align: center;
+			top: 50%;
+			width: 1em;
+		}
+	}
+}

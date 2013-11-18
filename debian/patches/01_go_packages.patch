@@ -1,0 +1,28 @@
+Index: facette/src/facette/Makefile
+===================================================================
+--- facette.orig/src/facette/Makefile	2013-11-17 09:15:06.431788424 +0100
++++ facette/src/facette/Makefile	2013-11-17 09:26:18.709525913 +0100
+@@ -6,7 +6,7 @@
+ GIT = git
+
+ GO = go
+-GOPATH = $(realpath $(BUILD_DIR)):$(realpath ../..)
++GOPATH = /usr/share/gocode:$(realpath ../..)
+
+ GOLINT = golint
+ GOLINT_ARGS =
+@@ -31,13 +31,7 @@
+ 	-@$(GOLINT) $(GOLINT_ARGS) . && $(call mesg_ok) || $(call mesg_fail)
+ 
+ depends:
+-	@$(call mesg_start,Fetching Go dependencies...)
+-	@install -m 0755 -d $(BUILD_DIR)/src && cd $(BUILD_DIR)/src && \
+-		while read ENTRY; do \
+-			DEP_DIR=`echo $$ENTRY | awk '{print $$1}'`; \
+-			test -d $$DEP_DIR || $(GIT) clone https://$$ENTRY $$DEP_DIR; \
+-		done <$(MAKEFILE_DIR)/Makefile.deps && \
+-		$(call mesg_ok) || $(call mesg_fail)
++	@#PATCH: unnecessary for Debian packaging
+ 
+ $(BIN_FILES): depends $(SRC_FILES)
+ 	@$(call mesg_start,Building $@ binary file...)

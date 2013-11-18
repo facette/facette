@@ -1,0 +1,32 @@
+Source: facette
+Section: utils
+Priority: optional
+Maintainer: Vincent Batoufflet <vincent@batouffflet.info>
+Build-Depends: debhelper (>= 8.0.0), quilt, dh-golang,
+ golang-go (>= 1.1),
+ golang-golint,
+ golang-context-dev,
+ golang-goset-dev,
+ golang-gouuid-dev,
+ golang-handlers-dev,
+ golang-mux-dev,
+ golang-rrd-dev,
+ node-less,
+ node-uglify,
+ pandoc,
+Standards-Version: 3.9.3
+Homepage: https://github.com/facette/facette
+
+Package: facette
+Architecture: any
+Depends: facette-common (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: graphing web front-end
+ Facette is a graphing web front-end for RRD files.
+
+Package: facette-common
+Architecture: all
+Depends: adduser, ${misc:Depends}
+Description: graphing web front-end - common files
+ Facette is a graphing web front-end for RRD files.
+ .
+ This package contains the architecture independent common files.

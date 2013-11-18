@@ -1,0 +1,45 @@
+{{ define "title" }}Search — Facette{{ end }}
+
+{{ define "script" }}
+		<script src="/static/jquery.js"></script>
+		<script src="/static/i18next.js"></script>
+		<script src="/static/facette.js"></script>
+{{ end }}
+
+{{ define "content" }}{{ $q := .Request.FormValue "q" }}
+		<nav>
+		</nav>
+
+		<article>
+			<header>
+				<h1>Search</h1>
+			</header>
+
+			<section class="full">
+				<div class="block">
+					<form action="/browse/search" method="get">
+						<p>Search for Source or Collection:</p>
+						<p>
+							<input class="full" name="q" placeholder="e.g. host1.example.net, collection1" type="text" value="{{ $q }}">
+						</p>
+					</form>
+				</div>
+
+				<div class="block">
+					<h1>Result <span class="count">{{ .Count }}</span></h1>
+					{{ if eq .Count 0 }}
+					<p class="mesgitem warning">Couldn’t find any item matching “{{ $q }}”</p>{{ else }}
+					<div class="list">{{ range .Sources }}
+						<div class="listitem">
+							<div class="name"><a href="/browse/sources/{{ .Name }}">{{ hl .Name $q }}</a></div>
+							<div class="desc">Source</div>
+						</div>{{ end }}{{ range .Collections }}
+						<div class="listitem">
+							<div class="name"><a href="/browse/collections/{{ .ID }}">{{ hl .Name $q }}</a></div>
+							<div class="desc">Collection</div>
+						</div>{{ end }}
+					</div>{{ end }}
+				</div>
+			</section>
+		</article>
+{{ end }}

@@ -1,0 +1,22 @@
+Index: facette/src/style/Makefile
+===================================================================
+--- facette.orig/src/style/Makefile	2013-11-17 13:11:47.008772576 +0100
++++ facette/src/style/Makefile	2013-11-17 13:27:06.032528807 +0100
+@@ -51,7 +51,7 @@
+ 
+ $(CSS_FILE_MIN): $(TEMP_DIR) $(CSS_FILE)
+ 	@$(call mesg_start,Packing $(CSS_FILE) file...)
+-	@$(LESSC) $(LESSC_ARGS) --yui-compress $(CSS_FILE) >$(CSS_FILE_MIN) && $(call mesg_ok) || $(call mesg_fail)
++	@$(LESSC) $(LESSC_ARGS) --compress $(CSS_FILE) >$(CSS_FILE_MIN) && $(call mesg_ok) || $(call mesg_fail)
+ 
+ $(CSS_FILE_PRINT): $(TEMP_DIR) $(SRC_FILES_PRINT)
+ 	@$(call mesg_start,Merging source files into $(CSS_FILE_PRINT)...)
+@@ -59,7 +59,7 @@
+ 
+ $(CSS_FILE_PRINT_MIN): $(TEMP_DIR) $(CSS_FILE_PRINT)
+ 	@$(call mesg_start,Packing $(CSS_FILE_PRINT) file...)
+-	@$(LESSC) $(LESSC_ARGS) --yui-compress $(CSS_FILE_PRINT) >$(CSS_FILE_PRINT_MIN) && \
++	@$(LESSC) $(LESSC_ARGS) --compress $(CSS_FILE_PRINT) >$(CSS_FILE_PRINT_MIN) && \
+ 		$(call mesg_ok) || $(call mesg_fail)
+ 
+ lint:

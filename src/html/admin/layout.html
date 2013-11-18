@@ -1,0 +1,21 @@
+{{ define "body" }}{{ template "template_element" }}
+		<header>
+			<h1><a href="/admin/">Facette</a></h1>
+
+			<ul>
+				<li><a class="icon icon-arrow-left" href="/" title="Back to Home Page"></a></li>
+			</ul>
+		</header>
+
+		<nav>
+			<dl>
+				<dt>Assets</dt>
+				<dd><a class="icon icon-collection{{ if eq .Section "collections" }} current{{ end }}" href="/admin/collections/">Collections</a></dd>
+				<dd><a class="icon icon-graph{{ if eq .Section "graphs" }} current{{ end }}" href="/admin/graphs/">Graphs</a></dd>
+				<dd><a class="icon icon-source{{ if eq .Section "sourcegroups" }} current{{ end }}" href="/admin/sourcegroups/">Source Groups</a></dd>
+				<dd><a class="icon icon-metric{{ if eq .Section "metricgroups" }} current{{ end }}" href="/admin/metricgroups/">Metric Groups</a></dd>
+				<dt>System</dt>
+				<dd><a class="icon icon-refresh" href="#reload">Reload Resources</a></dd>
+			</dl>
+		</nav>
+{{ template "content" . }}{{ end }}

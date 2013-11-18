@@ -1,0 +1,9 @@
+# Defaults for facette initscript
+# sourced by /etc/init.d/facette
+# installed at /etc/default/facette by the maintainer scripts
+
+# Enable/Disable facette
+ENABLED=false
+
+# Options for facette
+OPTIONS="-c /etc/facette/facette.json"

@@ -1,0 +1,49 @@
+{{ define "title" }}Administration Panel: Collections — Facette{{ end }}
+
+{{ define "script" }}
+		<script src="/static/jquery.js"></script>
+		<script src="/static/i18next.js"></script>
+		<script src="/static/moment.js"></script>
+		<script src="/static/facette.js"></script>
+{{ end }}
+
+{{ define "content" }}
+		<article data-pane="collection-list">
+			<header>
+				<h1>Administration Panel — Collections</h1>
+
+				<nav>
+					<ul>
+						<li><a class="icon icon-add" href="/admin/collections/add" title="Add Collection"></a></li>
+					</ul>
+				</nav>
+
+				<div class="filter icon icon-search">
+					<input data-listfilter="collections" placeholder="Search for Collection" type="text">
+				</div>
+			</header>
+
+			<section class="full">
+				<div class="list" data-list="collections" data-listopts="init: true; url: library/collections; messages: collection">
+					<h1>Collections List <span class="count"></span></h1>
+
+					<div class="listmesg" data-listmesg="collections"></div>
+
+					<div class="listitem" data-listtmpl="collections">
+						<div class="actions">
+							<a class="icon icon-remove" href="#remove-collection" title="Remove Collection"></a>
+						</div>
+						<div class="date">Last updated on <span></span></div>
+						<div>
+							<span class="name"></span>
+							<span class="actions">
+								<a class="icon icon-edit" href="#edit-collection" title="Edit Collection"></a>
+								<a class="icon icon-copy" href="#clone-collection" title="Clone Collection"></a>
+							</span>
+						</div>
+						<div class="desc"></div>
+					</div>
+				</div>
+			</section>
+		</article>
+{{ end }}

@@ -1,0 +1,104 @@
+
+.datepicker {
+	.box-sizing(border-box);
+	background-color: fade(@NavBackgroundColor, 95);
+	border-radius: 0.35em;
+	color: @NavTextColor;
+	overflow: auto;
+	position: absolute;
+	width: 20em !important;
+	z-index: 110;
+
+	.datepicker_header {
+		line-height: 2.5em;
+
+		a {
+			color: @NavTextColor;
+			cursor: pointer;
+			display: inline-block;
+			float: left;
+			height: 2.5em;
+			text-align: center;
+			text-decoration: none;
+			width: 2.5em;
+
+			&::before {
+				margin-right: 0;
+			}
+
+			&:last-of-type {
+				float: right;
+			}
+		}
+
+		span {
+			display: inline-block;
+			float: left;
+			padding: 0 1em;
+		}
+	}
+
+	.datepicker_calendar,
+	.datepicker_timelist {
+		float: left;
+	}
+
+	.datepicker_calendar {
+		width: 16em;
+
+		table {
+			border-spacing: 0.5em 1em;
+			margin: 0 auto;
+
+			th,
+			td {
+				text-align: center;
+				width: 1.5em;
+			}
+
+			td {
+				cursor: pointer;
+
+				&.day_another_month {
+					color: fade(@NavTextColor, 35);
+				}
+
+				&.today {
+					background-color: fade(lighten(@NavBackgroundColor, 20), 95);
+					border-radius: 1em;
+				}
+
+				&.active {
+					background-color: fade(@NavTextColor, 95);
+					border-radius: 1em;
+					color: @NavBackgroundColor;
+				}
+			}
+		}
+	}
+
+	.datepicker_timelist {
+		max-height: 100%;
+		overflow-y: auto;
+		padding: 1em 0;
+		width: 4em;
+
+		.timelist_item {
+			cursor: pointer;
+			float: left;
+			clear: left;
+			margin: 0.1em 0;
+			padding: 0 0.25em;
+
+			&:last-of-type {
+				margin-bottom: 1em;
+			}
+
+			&.active {
+				background-color: fade(@NavTextColor, 95);
+				border-radius: 1em;
+				color: @NavBackgroundColor;
+			}
+		}
+	}
+}

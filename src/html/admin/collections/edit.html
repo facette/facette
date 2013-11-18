@@ -1,0 +1,93 @@
+{{ define "title" }}Administration Panel: Collections — Facette{{ end }}
+
+{{ define "script" }}
+		<script src="/static/jquery.js"></script>
+		<script src="/static/i18next.js"></script>
+		<script src="/static/facette.js"></script>
+{{ end }}
+
+{{ define "content" }}
+		<article data-pane="collection-edit"{{ if ne .Path "add" }} data-paneopts="id: {{ .Path }}"{{ end }}>
+			<header>
+				<h1>Administration Panel — {{ if eq .Path "add" }}New collection{{ else }}Edit collection{{ end }}</h1>
+			</header>
+
+			<footer>
+				<button class="danger" name="step-cancel">Cancel</button>
+				<button class="icon icon-prev" name="step-prev">Previous</button>
+				<button class="icon icon-next" name="step-next">Next</button>
+				<button name="step-save">Save Collection</button>
+			</footer>
+
+			<section data-step="1">
+				<div class="list" data-list="step-1-graphs">
+					<h1>Graphs List <span class="count"></span></h1>
+
+					<fieldset>
+						<label for="graph">Graph</label>
+						<input data-input="graph" data-inputopts="sources: library/graphs" id="graph" name="graph" type="text">
+
+						<button name="graph-add">Add</button>
+					</fieldset>
+
+					<div class="scrollarea">
+						<div class="listmesg" data-listmesg="step-1-graphs"></div>
+
+						<div class="listitem" data-listtmpl="step-1-graphs">
+							<div class="actions">
+								<a class="icon icon-remove" href="#remove-graph" title="Remove Graph"></a>
+							</div>
+							<dl>
+								<dt class="name">Loading...</dt>
+								<dd class="block">
+									<div>
+										<label>Title:</label>
+										<input name="graph-title" type="text">
+									</div>
+									<div>
+										<label>Time Range:</label><span class="note">e.g. -1h, 7d, 1mo, 1y</span>
+										<input name="graph-range" placeholder="-1h" type="text">
+									</div>
+									<div>
+										<label>Sample:</label><span class="note">e.g. 200, 400</span>
+										<input name="graph-sample" type="text">
+									</div>
+									<div>
+										<label>Constants:</label><span class="note">e.g. 123.21</span>
+										<input name="graph-constants" type="text">
+									</div>
+									<div>
+										<label>Percentiles:</label><span class="note">e.g. 68, 95, 99.7</span>
+										<input name="graph-percentiles" type="text">
+									</div>
+								</dd>
+							</dl>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section data-step="2">
+				<h1>Collection Definition</h1>
+
+				<div class="scrollarea">
+					<div class="block">
+						<h2>General Information</h2>
+
+						<label for="collection-name">Name:</label>
+						<input class="full input" data-input="collection-name" data-inputopts="check: true" id="collection-name" name="collection-name" type="text">
+
+						<label for="collection-desc">Description:</label>
+						<textarea id="collection-desc" name="collection-desc"></textarea>
+					</div>
+
+					<div class="block">
+						<h2>Optional Settings</h2>
+
+						<label for="collection-parent">Parent Collection <span class="note">leave empty for top-level collection</span></label>
+						<input data-input="collection" data-inputopts="sources: library/collections{{ if ne .Path "add" }}; exclude: {{ .Path }}{{ end }}" id="collection-parent" name="collection-parent" type="text">
+					</div>
+				</div>
+			</section>
+		</article>
+{{ end }}

@@ -1,0 +1,396 @@
+
+* {
+	margin: 0;
+	padding: 0;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+	font-family: 'Lato', Arial, sans-serif;
+	font-size: 14px;
+}
+
+a {
+	color: @MainColor;
+	outline: none;
+	text-decoration: none;
+
+	&:hover {
+		text-decoration: underline;
+	}
+}
+
+body {
+	background-color: @BackgroundColor;
+	color: @TextColorA;
+
+	& > header,
+	& > nav {
+		width: 20%;
+
+		a {
+			text-decoration: none !important;
+		}
+	}
+
+	& > header {
+		.box-sizing(border-box);
+		background-color: @HeaderBackgroundColor;
+		color: @HeaderTextColor;
+		left: 0;
+		line-height: 3em;
+		padding: 0 1em;
+		position: absolute;
+
+		a {
+			color: @HeaderTextColor;
+		}
+
+		h1 {
+			float: left;
+			font-size: 1.5em;
+			font-weight: normal;
+		}
+
+		ul {
+			float: right;
+			font-size: 1.2em;
+			list-style-type: none;
+			margin-right: -1em;
+
+			li {
+				display: inline-block;
+				line-height: 2.4em;
+				text-align: center;
+				width: 3em;
+
+				a {
+					.transition(background-color 0.2s);
+					display: block;
+
+					&:hover {
+						background-color: lighten(@HeaderBackgroundColor, 7.5);
+					}
+
+					&::before {
+						width: 100%;
+					}
+				}
+			}
+		}
+	}
+
+	& > nav {
+		background-color: @NavBackgroundColor;
+		bottom: 0;
+		color: @NavTextColor;
+		left: 0;
+		overflow-x: hidden;
+		overflow-y: auto;
+		padding: 1em 0;
+		position: absolute;
+		top: 3em;
+
+		& > :last-child {
+			margin-bottom: 2em;
+		}
+
+		a {
+			color: @NavTextColor;
+		}
+
+		& > dl {
+			& > dt {
+				letter-spacing: 0.1em;
+				line-height: 2.5em;
+				padding: 0 1em;
+				text-transform: uppercase;
+			}
+		}
+
+		dl {
+			dd {
+				line-height: 2em;
+				margin: 0.2em 0;
+				position: relative;
+				white-space: nowrap;
+
+				&.placeholder {
+					color: darken(@NavTextColor, 35);
+				}
+
+				a {
+					.transition(background-color 0.2s);
+					display: block;
+					overflow: hidden;
+					padding: 0 1.75em;
+					text-overflow: ellipsis;
+
+					&::before {
+						width: 1.5em;
+					}
+
+					&:hover,
+					&.current {
+						background-color: lighten(@NavBackgroundColor, 7.5);
+					}
+
+					&.current {
+						box-shadow: inset -0.35em 0 0 @MainColor;
+					}
+				}
+			}
+
+			&.tree {
+				.current > dt > a {
+					background-color: lighten(@NavBackgroundColor, 7.5);
+					box-shadow: inset -0.35em 0 0 @MainColor;
+				}
+
+				dd {
+					padding: 0 1.75em;
+
+					a {
+						margin: 0 -1.75em;
+
+						.icon {
+							display: inline-block;
+							width: 1.5em;
+							position: relative;
+
+							&::before {
+								.icon;
+								content: '\f07b';
+								margin-right: 0.5em;
+							}
+						}
+					}
+				}
+			}
+
+			&.folded > dt > a .icon {
+				&::after {
+					.icon;
+					bottom: -0.5em;
+					content: '\f067';
+					font-size: 0.75em;
+					position: absolute;
+					right: 0.25em;
+					text-shadow: 1px 0 0 @NavBackgroundColor,
+								 0 1px  0 @NavBackgroundColor,
+								 -1px 0 0 @NavBackgroundColor,
+								 0 -1px 0 @NavBackgroundColor;
+				}
+			}
+
+			&.unfolded > dt > a .icon::before {
+				content: '\f07c';
+			};
+		}
+	}
+}
+
+article {
+	bottom: 0;
+	left: 20%;
+	overflow: auto;
+	position: absolute;
+	right: 0;
+	top: 0;
+
+	& > header,
+	& > footer,
+	& > section {
+		.box-sizing(border-box);
+		position: absolute;
+		right: 0;
+		width: 100%;
+	}
+
+	& > header {
+		background-color: @MainColor;
+		color: @BackgroundColor;
+		height: 3em;
+		line-height: 3em;
+		padding: 0 2em;
+		top: 0;
+
+		h1,
+		h2 {
+			float: left;
+			font-weight: normal;
+		}
+
+		nav {
+			float: left;
+			font-size: 1.5em;
+			margin-left: 0.75em;
+
+			ul {
+				list-style-type: none;
+
+				li {
+					display: inline-block;
+
+					a {
+						color: fade(@BackgroundColor, 50);
+
+						&:hover {
+							color: @BackgroundColor;
+							text-decoration: none;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	& > footer {
+		background-color: @FooterBackgroundColor;
+		bottom: 0;
+		color: @FooterTextColor;
+		line-height: 4em;
+		padding: 0 2em;
+		text-align: right;
+	}
+
+	& > section {
+		background-color: @BackgroundColor;
+		bottom: 4em;
+		overflow: auto;
+		padding: 2em;
+		top: 3em;
+
+		&.full {
+			bottom: 0;
+		}
+
+		& > :last-child {
+			margin-bottom: 2em;
+		}
+	}
+}
+
+section {
+	.logo,
+	.search {
+		margin: 4em 25%;
+	}
+
+	.logo {
+		text-align: center;
+	}
+
+	h1,
+	h2,
+	p {
+		margin: 1em 0;
+	}
+
+	h1 {
+		font-size: 1.6em;
+		font-weight: normal;
+
+		&:first-of-type {
+			margin-top: 0;
+		}
+
+		.count {
+			color: fade(@TextColorA, 50);
+			font-size: 0.9em;
+			margin-left: 1em;
+		}
+	}
+
+	h2 {
+		color: @TextColorB;
+		font-size: 1.4em;
+		font-weight: normal;
+	}
+
+	.column {
+		.box-sizing(border-box);
+		float: left;
+		width: 50%;
+
+		& + .column {
+			padding-left: 2em;
+			width: 50%;
+		}
+	}
+
+	.block {
+		margin-bottom: 1em;
+
+		label {
+			display: block;
+			margin: 0.35em 0;
+		}
+
+		.input,
+		.select,
+		input[type=text],
+		select,
+		textarea {
+			.box-sizing(border-box);
+			margin-bottom: 0.5em;
+		}
+
+		input[type=text],
+		textarea {
+			width: 100%;
+		}
+
+		select {
+			width: 18em;
+		}
+
+		textarea {
+			height: 4.75em;
+			min-height: 2em;
+			resize: vertical;
+		}
+	}
+
+	.mesgitem {
+		.message-list;
+	}
+}
+
+@media screen and (max-width: 640px) {
+	body {
+		& > header,
+		& > nav {
+			width: 4em;
+		}
+
+		& > nav {
+			dl {
+				dt {
+					display: none;
+				}
+
+				dd {
+					a {
+						.box-sizing(border-box);
+						overflow: hidden;
+						text-indent: 4em;
+						white-space: nowrap;
+						width: 100%;
+
+						&::before {
+							text-indent: -4.5em;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	article {
+		left: 4em;
+	}
+}

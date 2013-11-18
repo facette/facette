@@ -1,0 +1,142 @@
+
+.graphitem {
+	background-color: @GraphBackgroundColor;
+	border-radius: 0.35em;
+	color: @GraphTextColor;
+	margin: 2em 0;
+	border: 1em solid @GraphBackgroundColor;
+	overflow: hidden;
+	position: relative;
+
+	&:first-of-type {
+		margin-top: 0;
+	}
+
+	&:hover {
+		.graphctrl {
+			display: block;
+		}
+	}
+
+	.placeholder {
+		font-size: 1.2em;
+		left: 0;
+		line-height: 2em;
+		margin-top: -1em;
+		position: absolute;
+		text-align: center;
+		top: 50%;
+		width: 100%;
+	}
+
+	.graphctrl {
+		display: none;
+
+		&.active {
+			bottom: 0;
+			left: 0;
+			position: absolute;
+			right: 0;
+			top: 0;
+		}
+
+		.step a,
+		.actions {
+			.no-select;
+			background-color: @GraphControlBackgroundColor;
+			color: @GraphBackgroundColor;
+			opacity: 0.95;
+			position: absolute;
+		}
+
+		a {
+			color: @GraphBackgroundColor;
+			text-decoration: none;
+
+			&:hover {
+				color: lighten(@GraphBackgroundColor, 10);
+			}
+		}
+
+		.step {
+			a {
+				-moz-transition: 0.25s -moz-transform ease-in;
+				-ms-transition: 0.25s -ms-transform ease-in;
+				-o-transition: 0.25s -o-transform ease-in;
+				-webkit-transition: 0.25s -webkit-transform ease-in;
+				transition: 0.25s transform ease-in;
+				display: block;
+				height: 8em;
+				margin-top: -4em;
+				top: 50%;
+				width: 5em;
+
+				&::before {
+					font-size: 3em;
+					line-height: 2.67em;
+					margin-right: 0;
+					text-align: center;
+					width: 1.35em;
+				}
+
+				&[href$="#step-backward"] {
+					.transform(translateX(-6em));
+					border-radius: 0 4em 4em 0;
+					left: 0;
+					text-align: left;
+
+					&.active {
+						.transform(translateX(0));
+					}
+				}
+
+				&[href$="#step-forward"] {
+					.transform(translateX(6em));
+					border-radius: 4em 0 0 4em;
+					right: 0;
+					text-align: right;
+
+					&.active {
+						.transform(translateX(0));
+					}
+				}
+			}
+		}
+
+		.actions {
+			border-radius: 0.25em;
+			cursor: default;
+			font-size: 1.2em;
+			padding: 0.25em;
+			right: 0.25em;
+			top: 0.25em;
+			white-space: nowrap;
+
+			a {
+				display: inline-block;
+				margin: 0 0.1em;
+				text-align: center;
+
+				&::before {
+					margin: 0 0.25em;
+				}
+			}
+
+			.ranges {
+				border-right: 1px solid fade(@GraphBackgroundColor, 50);
+				display: inline-block;
+				font-size: 0.85em;
+				line-height: 1.15em;
+				padding-right: 0.35em;
+
+				a {
+					padding: 0 0.15em;
+				}
+			}
+		}
+	}
+
+	.graphcntr {
+		height: 18em;
+	}
+}

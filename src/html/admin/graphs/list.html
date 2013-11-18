@@ -1,0 +1,49 @@
+{{ define "title" }}Administration Panel: Graphs — Facette{{ end }}
+
+{{ define "script" }}
+		<script src="/static/jquery.js"></script>
+		<script src="/static/i18next.js"></script>
+		<script src="/static/moment.js"></script>
+		<script src="/static/facette.js"></script>
+{{ end }}
+
+{{ define "content" }}
+		<article data-pane="graph-list">
+			<header>
+				<h1>Administration Panel — Graphs</h1>
+
+				<nav>
+					<ul>
+						<li><a class="icon icon-add" href="/admin/graphs/add" title="Add Graph"></a></li>
+					</ul>
+				</nav>
+
+				<div class="filter icon icon-search">
+					<input data-listfilter="graphs" placeholder="Search for Graph" type="text">
+				</div>
+			</header>
+
+			<section class="full">
+				<div class="list" data-list="graphs" data-listopts="init: true; url: library/graphs; messages: graph">
+					<h1>Graphs List <span class="count"></span></h1>
+
+					<div class="listmesg" data-listmesg="graphs"></div>
+
+					<div class="listitem" data-listtmpl="graphs">
+						<div class="actions">
+							<a class="icon icon-remove" href="#remove-graph" title="Remove Graph"></a>
+						</div>
+						<div class="date">Last updated on <span></span></div>
+						<div>
+							<span class="name"></span>
+							<span class="actions">
+								<a class="icon icon-edit" href="#edit-graph" title="Edit Graph"></a>
+								<a class="icon icon-copy" href="#clone-graph" title="Clone Graph"></a>
+							</span>
+						</div>
+						<div class="desc"></div>
+					</div>
+				</div>
+			</section>
+		</article>
+{{ end }}

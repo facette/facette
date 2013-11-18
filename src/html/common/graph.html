@@ -1,0 +1,32 @@
+{{ define "template_graph" }}
+				<div class="graphitem graphtmpl">
+					<div class="placeholder">Loading...</div>
+
+					<div class="graphcntr">
+					</div>
+
+					<div class="graphctrl">
+						<div class="step">
+							<a class="icon icon-arrow-left" href="#step-backward"></a>
+							<a class="icon icon-arrow-right" href="#step-forward"></a>
+						</div>
+
+						<div class="actions">
+							<div class="ranges">
+								<a class="icon icon-calendar" href="#set-time" title="Modify time"></a>
+								<a href="#range-1y">1y</a>
+								<a href="#range-1mo">1mo</a>
+								<a href="#range-7d">7d</a>
+								<a href="#range-1d">1d</a>
+								<a href="#range-3h">3h</a>
+								<a href="#range-1h">1h</a>
+							</div>
+							<a class="icon icon-time" href="#set-range" title="Modify range"></a>
+							<a class="icon icon-refresh" href="#refresh" title="Refresh graph"></a>
+							<a class="icon icon-reframe" href="#reframe-all" title="Propagate time range to all graphs"></a>
+							<a class="icon icon-reset" href="#reset" title="Reset graph"></a>
+							<a class="icon icon-download" href="#save" title="Save graph"></a>
+						</div>
+					</div>
+				</div>
+{{ end }}

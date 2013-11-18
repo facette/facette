@@ -1,0 +1,16 @@
+[ critical ]
+
+none
+
+[ high ]
+
+- add: mandatory fields check in backend
+
+[ medium ]
+
+none
+
+[ low ]
+
+- add: timeline flag support on graphs
+- add: graph “cart” support (collection)

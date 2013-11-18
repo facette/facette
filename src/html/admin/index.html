@@ -1,0 +1,58 @@
+{{ define "title" }}Administration Panel — Facette{{ end }}
+
+{{ define "script" }}
+		<script src="/static/jquery.js"></script>
+		<script src="/static/i18next.js"></script>
+		<script src="/static/moment.js"></script>
+		<script src="/static/facette.js"></script>
+{{ end }}
+
+{{ define "content" }}
+		<article>
+			<header>
+				<h1>Administration Panel</h1>
+			</header>
+
+			<section class="full">
+				<div data-stats="library">
+					<h1>Catalog statistics</h1>
+
+					<table class="stats">
+						<tr>
+							<th>Total Origins:</th>
+							<td class="origins">Loading...</td>
+						</tr>
+						<tr>
+							<th>Total Sources:</th>
+							<td class="sources">Loading...</td>
+						</tr>
+						<tr>
+							<th>Total Metrics:</th>
+							<td class="metrics">Loading...</td>
+						</tr>
+						<tr>
+							<th>Last update:</th>
+							<td class="catalog_updated">Loading...</td>
+						</tr>
+					</table>
+
+					<h1>Library statistics</h1>
+
+					<table class="stats">
+						<tr>
+							<th>Total Collections:</th>
+							<td class="collections">Loading...</td>
+						</tr>
+						<tr>
+							<th>Total Graphs:</th>
+							<td class="graphs">Loading...</td>
+						</tr>
+						<tr>
+							<th>Total Groups:</th>
+							<td class="groups">Loading...</td>
+						</tr>
+					</table>
+				</div>
+			</section>
+		</article>
+{{ end }}

@@ -1,0 +1,229 @@
+{
+	"backend": {
+		"type": "rrd",
+		"path": "/var/lib/collectd/rrd",
+		"pattern": "(?P<source>[^/]+)/(?P<metric>.+).rrd"
+	},
+	"filters": [
+		{"pattern": "/", "rewrite": "."},
+		{"pattern": "^cpu-(\\d+)\\.cpu-(.+)\\.value$", "rewrite": "cpu.$1.$2"},
+		{"pattern": "^df-(.+)\\.df_complex-(.+)\\.value", "rewrite": "df.$1.$2"},
+		{"pattern": "^disk-(.+)\\.disk_(.+)", "rewrite": "disk.$1.$2"},
+		{"pattern": "^entropy\\.entropy", "rewrite": "entropy"},
+		{"pattern": "^interface-(.+)\\.if_(.+)\\.(.+)$", "rewrite": "net.$1.$2.$3"},
+		{"pattern": "^irq.irq-(.+)\\.value$", "rewrite": "irq.$1"},
+		{"pattern": "^load\\.load", "rewrite": "load"},
+		{"pattern": "^memory\\.memory-(.+)\\.value$", "rewrite": "memory.$1"},
+		{"pattern": "^processes\\.ps_state-(.+)\\.value$", "rewrite": "proc.state.$1"},
+		{"pattern": "^processes\\.(.+)\\.value$", "rewrite": "proc.$1"},
+		{"pattern": "^swap\\.swap-(.+)\\.value$", "rewrite": "swap.$1"},
+		{"pattern": "^swap\\.swap_io-(.+)\\.value$", "rewrite": "swap.io.$1"},
+		{"pattern": "^users\\.users\\.value", "rewrite": "users.count"}
+	],
+	"templates": {
+		"00-load": {
+			"stack_mode": 0,
+			"stacks": [
+				{
+					"groups": {
+						"shortterm": {"type": 0, "pattern": "^load\\.shortterm$"},
+						"midterm":   {"type": 0, "pattern": "^load\\.midterm$"},
+						"longterm":  {"type": 0, "pattern": "^load\\.longterm$"}
+					}
+				}
+			],
+			"options": {
+				"title": "Load average"
+			}
+		},
+		"01-cpu": {
+			"stack_mode": 1,
+			"stacks": [
+				{
+					"groups": {
+						"idle":      {"type": 2, "pattern": "^cpu\\.\\d+\\.idle$"},
+						"interrupt": {"type": 2, "pattern": "^cpu\\.\\d+\\.interrupt$"},
+						"nice":      {"type": 2, "pattern": "^cpu\\.\\d+\\.nice$"},
+						"softirq":   {"type": 2, "pattern": "^cpu\\.\\d+\\.softirq$"},
+						"steal":     {"type": 2, "pattern": "^cpu\\.\\d+\\.steal$"},
+						"system":    {"type": 2, "pattern": "^cpu\\.\\d+\\.system$"},
+						"user":      {"type": 2, "pattern": "^cpu\\.\\d+\\.user$"},
+						"wait":      {"type": 2, "pattern": "^cpu\\.\\d+\\.wait$"}
+					}
+				}
+			],
+			"options": {
+				"title": "CPU"
+			}
+		},
+		"02-memory": {
+			"stack_mode": 1,
+			"stacks": [
+				{
+					"groups": {
+						"buffered": {"type": 0, "pattern": "^memory\\.buffered$"},
+						"cached":   {"type": 0, "pattern": "^memory\\.cached$"},
+						"free":     {"type": 0, "pattern": "^memory\\.free$"},
+						"used":     {"type": 0, "pattern": "^memory\\.used$"}
+					}
+				}
+			],
+			"options": {
+				"title": "Memory usage"
+			}
+		},
+		"03-swap": {
+			"stack_mode": 1,
+			"stacks": [
+				{
+					"groups": {
+						"cached": {"type": 0, "pattern": "^swap\\.cached$"},
+						"free":   {"type": 0, "pattern": "^swap\\.free$"},
+						"used":   {"type": 0, "pattern": "^swap\\.used$"}
+					}
+				}
+			],
+			"options": {
+				"title": "Swap usage"
+			}
+		},
+		"04-net-errors": {
+			"split_pattern": "^net\\.([^\\.]+)\\.errors\\.",
+			"stack_mode": 0,
+			"stacks": [
+				{
+					"groups": {
+						"rx": {"type": 0, "pattern": "^net\\.%s\\.errors\\.rx$"},
+						"tx": {"type": 0, "pattern": "^net\\.%s\\.errors\\.tx$"}
+					}
+				}
+			],
+			"options": {
+				"title": "Network - Errors (%s)"
+			}
+		},
+		"04-net-octets": {
+			"split_pattern": "^net\\.([^\\.]+)\\.octets\\.",
+			"stack_mode": 0,
+			"stacks": [
+				{
+					"groups": {
+						"rx": {"type": 0, "pattern": "^net\\.%s\\.octets\\.rx$"},
+						"tx": {"type": 0, "pattern": "^net\\.%s\\.octets\\.tx$"}
+					}
+				}
+			],
+			"options": {
+				"title": "Network - Octets (%s)"
+			}
+		},
+		"04-net-packets": {
+			"split_pattern": "^net\\.([^\\.]+)\\.packets\\.",
+			"stack_mode": 0,
+			"stacks": [
+				{
+					"groups": {
+						"rx": {"type": 0, "pattern": "^net\\.%s\\.packets\\.rx$"},
+						"tx": {"type": 0, "pattern": "^net\\.%s\\.packets\\.tx$"}
+					}
+				}
+			],
+			"options": {
+				"title": "Network - Packets (%s)"
+			}
+		},
+		"05-proc-state": {
+			"stack_mode": 1,
+			"stacks": [
+				{
+					"groups": {
+						"blocked":  {"type": 0, "pattern": "^proc\\.blocked$"},
+						"paging":   {"type": 0, "pattern": "^proc\\.paging$"},
+						"running":  {"type": 0, "pattern": "^proc\\.running$"},
+						"sleeping": {"type": 0, "pattern": "^proc\\.sleeping$"},
+						"stopped":  {"type": 0, "pattern": "^proc\\.stopped$"},
+						"zombies":  {"type": 0, "pattern": "^proc\\.zombies$"}
+					}
+				}
+			],
+			"options": {
+				"title": "Processes states"
+			}
+		},
+		"06-df": {
+			"split_pattern": "^df\\.([^\\.]+)\\.",
+			"stack_mode": 1,
+			"stacks": [
+				{
+					"groups": {
+						"free": {"type": 0, "pattern": "^df\\.%s\\.free$"},
+						"used": {"type": 0, "pattern": "^df\\.%s\\.used$"}
+					}
+				}
+			],
+			"options": {
+				"title": "Disk usage (%s)"
+			}
+		},
+		"07-disk-merged": {
+			"split_pattern": "^disk\\.([^\\.]+)\\.merged\\.",
+			"stack_mode": 0,
+			"stacks": [
+				{
+					"groups": {
+						"read":  {"type": 0, "pattern": "^disk\\.%s\\.merged\\.read$"},
+						"write": {"type": 0, "pattern": "^disk\\.%s\\.merged\\.write$"}
+					}
+				}
+			],
+			"options": {
+				"title": "Disk IO - Merged (%s)"
+			}
+		},
+		"07-disk-octets": {
+			"split_pattern": "^disk\\.([^\\.]+)\\.octets\\.",
+			"stack_mode": 0,
+			"stacks": [
+				{
+					"groups": {
+						"read":  {"type": 0, "pattern": "^disk\\.%s\\.octets\\.read$"},
+						"write": {"type": 0, "pattern": "^disk\\.%s\\.octets\\.write$"}
+					}
+				}
+			],
+			"options": {
+				"title": "Disk IO - Octets (%s)"
+			}
+		},
+		"07-disk-ops": {
+			"split_pattern": "^disk\\.([^\\.]+)\\.ops\\.",
+			"stack_mode": 0,
+			"stacks": [
+				{
+					"groups": {
+						"read":  {"type": 0, "pattern": "^disk\\.%s\\.ops\\.read$"},
+						"write": {"type": 0, "pattern": "^disk\\.%s\\.ops\\.write$"}
+					}
+				}
+			],
+			"options": {
+				"title": "Disk IO - Ops (%s)"
+			}
+		},
+		"07-disk-time": {
+			"split_pattern": "^disk\\.([^\\.]+)\\.time\\.",
+			"stack_mode": 0,
+			"stacks": [
+				{
+					"groups": {
+						"read":  {"type": 0, "pattern": "^disk\\.%s\\.time\\.read$"},
+						"write": {"type": 0, "pattern": "^disk\\.%s\\.time\\.write$"}
+					}
+				}
+			],
+			"options": {
+				"title": "Disk IO - Time (%s)"
+			}
+		}
+	}
+}

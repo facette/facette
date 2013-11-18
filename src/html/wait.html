@@ -1,0 +1,17 @@
+{{ define "title" }}Facette{{ end }}
+
+{{ define "script" }}
+		<script src="/static/jquery.js"></script>
+		<script src="/static/i18next.js"></script>
+		<script src="/static/facette.js"></script>
+{{ end }}
+
+{{ define "body" }}
+		<div class="overlay" id="overlay">
+			<div class="loader" data-overlay="loader">
+				<p class="message">Loading...</p>
+			</div>
+		</div>
+
+		<div data-wait="true"></div>
+{{ end }}

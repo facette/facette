@@ -1,0 +1,68 @@
+#!/usr/bin/make -f
+# -*- Makefile -*-
+
+include ../../Makefile.inc
+
+GIT = git
+
+GO = go
+GOPATH = $(realpath $(BUILD_DIR)):$(realpath ../..)
+
+GOLINT = golint
+GOLINT_ARGS =
+
+BIN_FILES = facetted
+
+SRC_FILES = $(wildcard */*.go)
+
+PKG_TESTS = facette/server \
+	facette/utils
+
+all: lint install
+
+clean:
+	@$(call mesg_start,Cleaning built files...)
+	@(test ! -d $(PREFIX)/bin || (cd $(PREFIX)/bin && rm -rf $(BIN_FILES))) && $(call mesg_ok) || $(call mesg_fail)
+	@$(call mesg_start,Cleaning fetched dependencies...)
+	@rm -rf $(BUILD_DIR)/src && $(call mesg_ok) || $(call mesg_fail)
+	@$(call clean_build)
+
+lint: $(SRC_FILES)
+	@$(call mesg_start,Checking sources with Golint...)
+	-@$(GOLINT) $(GOLINT_ARGS) . && $(call mesg_ok) || $(call mesg_fail)
+
+depends:
+	@$(call mesg_start,Fetching Go dependencies...)
+	@install -m 0755 -d $(BUILD_DIR)/src && cd $(BUILD_DIR)/src && \
+		while read ENTRY; do \
+			DEP_DIR=`echo $$ENTRY | awk '{print $$1}'`; \
+			test -d $$DEP_DIR || $(GIT) clone https://$$ENTRY $$DEP_DIR; \
+		done <$(MAKEFILE_DIR)/Makefile.deps && \
+		$(call mesg_ok) || $(call mesg_fail)
+
+$(BIN_FILES): depends $(SRC_FILES)
+	@$(call mesg_start,Building $@ binary file...)
+	@install -m 0755 -d $(PREFIX)/bin && \
+		$(GO) build -o $(PREFIX)/bin/$@ cmd/$@/$@.go && \
+		$(call mesg_ok) || $(call mesg_fail)
+
+build: $(BIN_FILES)
+
+test: build
+	@$(call mesg_start,Starting facetted daemon...)
+	@install -m 0755 -d $(BUILD_DIR)/tests && (cd $(BUILD_DIR)/tests && \
+		$(PREFIX)/bin/facetted -c ../../tests/facette.json >/dev/null & echo "$$!" >$(BUILD_DIR)/facetted.pid) && \
+		$(call mesg_ok) || $(call mesg_fail)
+
+	@cd $(BUILD_DIR)/tests && for ENTRY in $(PKG_TESTS); do \
+		$(call mesg_start,Running $$ENTRY tests...); \
+		$(GO) test -c -i $$ENTRY && ./`basename $$ENTRY`.test -test.v -c ../../tests/facette.json && \
+			$(call mesg_ok) || $(call mesg_fail); \
+		done
+
+	@$(call mesg_start,Stoppping facetted daemon...)
+	@kill `cat $(BUILD_DIR)/facetted.pid` && rm -f $(BUILD_DIR)/facetted.pid && $(call mesg_ok) || $(call mesg_fail)
+
+install: build
+
+devel: install
