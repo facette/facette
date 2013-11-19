@@ -45,6 +45,7 @@ type Library struct {
 // Update updates the current Library by browsing the filesystem for stored data.
 func (library *Library) Update() error {
 	var (
+		dirPath  string
 		err      error
 		itemType int
 		walkFunc func(filePath string, fileInfo os.FileInfo, err error) error
@@ -84,7 +85,13 @@ func (library *Library) Update() error {
 		LibraryItemGraph,
 		LibraryItemCollection,
 	} {
-		if err = utils.WalkDir(library.getDirPath(itemType), walkFunc); err != nil {
+		dirPath = library.getDirPath(itemType)
+
+		if _, err := os.Stat(dirPath); os.IsNotExist(err) {
+			continue
+		}
+
+		if err = utils.WalkDir(dirPath, walkFunc); err != nil {
 			log.Println("ERROR: " + err.Error())
 		}
 	}
