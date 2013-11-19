@@ -85,10 +85,10 @@ func (server *Server) adminHandle(writer http.ResponseWriter, request *http.Requ
 		"ne":     templateNotEqual,
 		"substr": templateSubstr,
 	}).ParseFiles(
-		path.Join(server.Config.BaseDir, "share", "html", "layout.html"),
-		path.Join(server.Config.BaseDir, "share", "html", "common", "element.html"),
-		path.Join(server.Config.BaseDir, "share", "html", "admin", "layout.html"),
-		path.Join(server.Config.BaseDir, "share", "html", "admin", tmplFolder, tmplFile),
+		path.Join(server.Config.BaseDir, "html", "layout.html"),
+		path.Join(server.Config.BaseDir, "html", "common", "element.html"),
+		path.Join(server.Config.BaseDir, "html", "admin", "layout.html"),
+		path.Join(server.Config.BaseDir, "html", "admin", tmplFolder, tmplFile),
 	); err == nil {
 		err = tmpl.Execute(writer, data)
 	}

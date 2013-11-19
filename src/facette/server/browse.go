@@ -52,11 +52,11 @@ func (server *Server) browseHandleCollection(writer http.ResponseWriter, request
 
 	// Execute template
 	if tmpl, err = tmpl.ParseFiles(
-		path.Join(server.Config.BaseDir, "share", "html", "layout.html"),
-		path.Join(server.Config.BaseDir, "share", "html", "common", "element.html"),
-		path.Join(server.Config.BaseDir, "share", "html", "common", "graph.html"),
-		path.Join(server.Config.BaseDir, "share", "html", "browse", "layout.html"),
-		path.Join(server.Config.BaseDir, "share", "html", "browse", "collection.html"),
+		path.Join(server.Config.BaseDir, "html", "layout.html"),
+		path.Join(server.Config.BaseDir, "html", "common", "element.html"),
+		path.Join(server.Config.BaseDir, "html", "common", "graph.html"),
+		path.Join(server.Config.BaseDir, "html", "browse", "layout.html"),
+		path.Join(server.Config.BaseDir, "html", "browse", "collection.html"),
 	); err != nil {
 		return err
 	}
@@ -74,10 +74,10 @@ func (server *Server) browseHandleIndex(writer http.ResponseWriter, request *htt
 
 	// Execute template
 	if tmpl, err = tmpl.ParseFiles(
-		path.Join(server.Config.BaseDir, "share", "html", "layout.html"),
-		path.Join(server.Config.BaseDir, "share", "html", "common", "element.html"),
-		path.Join(server.Config.BaseDir, "share", "html", "browse", "layout.html"),
-		path.Join(server.Config.BaseDir, "share", "html", "browse", "index.html"),
+		path.Join(server.Config.BaseDir, "html", "layout.html"),
+		path.Join(server.Config.BaseDir, "html", "common", "element.html"),
+		path.Join(server.Config.BaseDir, "html", "browse", "layout.html"),
+		path.Join(server.Config.BaseDir, "html", "browse", "index.html"),
 	); err != nil {
 		return err
 	}
@@ -145,10 +145,10 @@ func (server *Server) browseHandleSearch(writer http.ResponseWriter, request *ht
 		"dump": templateDumpMap,
 		"hl":   templateHighlight,
 	}).ParseFiles(
-		path.Join(server.Config.BaseDir, "share", "html", "layout.html"),
-		path.Join(server.Config.BaseDir, "share", "html", "common", "element.html"),
-		path.Join(server.Config.BaseDir, "share", "html", "browse", "layout.html"),
-		path.Join(server.Config.BaseDir, "share", "html", "browse", "search.html"),
+		path.Join(server.Config.BaseDir, "html", "layout.html"),
+		path.Join(server.Config.BaseDir, "html", "common", "element.html"),
+		path.Join(server.Config.BaseDir, "html", "browse", "layout.html"),
+		path.Join(server.Config.BaseDir, "html", "browse", "search.html"),
 	); err == nil {
 		err = tmpl.Execute(writer, data)
 	}
@@ -187,11 +187,11 @@ func (server *Server) browseHandleSource(writer http.ResponseWriter, request *ht
 
 	// Execute template
 	if tmpl, err = tmpl.ParseFiles(
-		path.Join(server.Config.BaseDir, "share", "html", "layout.html"),
-		path.Join(server.Config.BaseDir, "share", "html", "common", "element.html"),
-		path.Join(server.Config.BaseDir, "share", "html", "common", "graph.html"),
-		path.Join(server.Config.BaseDir, "share", "html", "browse", "layout.html"),
-		path.Join(server.Config.BaseDir, "share", "html", "browse", "collection.html"),
+		path.Join(server.Config.BaseDir, "html", "layout.html"),
+		path.Join(server.Config.BaseDir, "html", "common", "element.html"),
+		path.Join(server.Config.BaseDir, "html", "common", "graph.html"),
+		path.Join(server.Config.BaseDir, "html", "browse", "layout.html"),
+		path.Join(server.Config.BaseDir, "html", "browse", "collection.html"),
 	); err != nil {
 		return err
 	}

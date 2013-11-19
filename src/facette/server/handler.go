@@ -70,8 +70,8 @@ func (server *Server) waitHandle(writer http.ResponseWriter, request *http.Reque
 
 	// Execute template
 	if tmpl, err = template.New("layout.html").ParseFiles(
-		path.Join(server.Config.BaseDir, "share", "html", "layout.html"),
-		path.Join(server.Config.BaseDir, "share", "html", "wait.html"),
+		path.Join(server.Config.BaseDir, "html", "layout.html"),
+		path.Join(server.Config.BaseDir, "html", "wait.html"),
 	); err == nil {
 		err = tmpl.Execute(writer, nil)
 	}

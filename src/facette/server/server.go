@@ -63,7 +63,7 @@ func (server *Server) handleResponse(writer http.ResponseWriter, status int) {
 
 func (server *Server) handleStatic(writer http.ResponseWriter, request *http.Request) {
 	// Handle static files
-	http.ServeFile(writer, request, path.Join(server.Config.BaseDir, "share", "static", request.URL.Path[7:]))
+	http.ServeFile(writer, request, path.Join(server.Config.BaseDir, "static", request.URL.Path[7:]))
 }
 
 // LoadConfig loads the server configuration using confPath as configuration file path.
