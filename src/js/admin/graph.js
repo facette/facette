@@ -366,8 +366,13 @@ function adminGraphSetupTerminate() {
 
         if ($('[data-input=graph-name]').length > 0) {
             inputRegisterCheck('graph-name', function (input) {
+                var value = input.find(':input').val();
+
+                if (!value)
+                    return;
+
                 graphList({
-                    filter: input.find(':input').val()
+                    filter: value
                 }).pipe(function (data) {
                     if (data !== null && data[0].id != graphId) {
                         input
@@ -878,6 +883,16 @@ function adminGraphSetupTerminate() {
                     break;
 
                 case 'step-save':
+                    $item = $(e.target).closest('[data-pane]').find('input[name=graph-name]');
+
+                    if (!$item.val()) {
+                        $item.closest('[data-input]')
+                            .attr('title', $.t('main.mesg_name_missing'))
+                            .addClass('error');
+
+                        return;
+                    }
+
                     graphSave(graphId, adminGraphGetData())
                         .then(function () {
                             PANE_UNLOAD_LOCK = false;

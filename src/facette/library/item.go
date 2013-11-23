@@ -297,8 +297,10 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 		return os.ErrNotExist
 	}
 
-	// Check for name duplicates
-	if itemTemp, err = library.GetItemByName(itemStruct.Name, itemType); err == nil {
+	// Check for name field presence/duplicates
+	if itemStruct.Name == "" {
+		return os.ErrInvalid
+	} else if itemTemp, err = library.GetItemByName(itemStruct.Name, itemType); err == nil {
 		switch itemType {
 		case LibraryItemSourceGroup, LibraryItemMetricGroup:
 			if itemTemp.(*Group).ID != itemStruct.ID {

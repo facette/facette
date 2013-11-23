@@ -121,8 +121,13 @@ function adminCollectionSetupTerminate() {
 
         if ($('[data-input=collection-name]').length > 0) {
             inputRegisterCheck('collection-name', function (input) {
+                var value = input.find(':input').val();
+
+                if (!value)
+                    return;
+
                 collectionList({
-                    filter: input.find(':input').val()
+                    filter: value
                 }).pipe(function (data) {
                     if (data !== null && data[0].id != collectionId) {
                         input
@@ -214,6 +219,16 @@ function adminCollectionSetupTerminate() {
                     break;
 
                 case 'step-save':
+                    $item = $(e.target).closest('[data-pane]').find('input[name=collection-name]');
+
+                    if (!$item.val()) {
+                        $item.closest('[data-input]')
+                            .attr('title', $.t('main.mesg_name_missing'))
+                            .addClass('error');
+
+                        return;
+                    }
+
                     collectionSave(collectionId, adminCollectionGetData())
                         .then(function () {
                             PANE_UNLOAD_LOCK = false;

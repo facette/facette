@@ -319,7 +319,10 @@ func (server *Server) groupHandle(writer http.ResponseWriter, request *http.Requ
 
 		// Store group data
 		err = server.Library.StoreItem(group, groupType)
-		if os.IsExist(err) {
+		if err == os.ErrInvalid {
+			server.handleResponse(writer, http.StatusBadRequest)
+			return
+		} else if os.IsExist(err) {
 			server.handleResponse(writer, http.StatusConflict)
 			return
 		} else if os.IsNotExist(err) {
@@ -449,7 +452,10 @@ func (server *Server) graphHandle(writer http.ResponseWriter, request *http.Requ
 		}
 
 		err = server.Library.StoreItem(graph, library.LibraryItemGraph)
-		if os.IsExist(err) {
+		if err == os.ErrInvalid {
+			server.handleResponse(writer, http.StatusBadRequest)
+			return
+		} else if os.IsExist(err) {
 			server.handleResponse(writer, http.StatusConflict)
 			return
 		} else if os.IsNotExist(err) {
@@ -586,7 +592,10 @@ func (server *Server) collectionHandle(writer http.ResponseWriter, request *http
 
 		// Store collection data
 		err = server.Library.StoreItem(collectionTemp.Collection, library.LibraryItemCollection)
-		if os.IsExist(err) {
+		if err == os.ErrInvalid {
+			server.handleResponse(writer, http.StatusBadRequest)
+			return
+		} else if os.IsExist(err) {
 			server.handleResponse(writer, http.StatusConflict)
 			return
 		} else if os.IsNotExist(err) {

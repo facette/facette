@@ -118,8 +118,13 @@ function adminGroupSetupTerminate() {
 
         if ($('[data-input=group-name]').length > 0) {
             inputRegisterCheck('group-name', function (input) {
+                var value = input.find(':input').val();
+
+                if (!value)
+                    return;
+
                 groupList({
-                    filter: input.find(':input').val()
+                    filter: value
                 }, groupType).pipe(function (data) {
                     if (data !== null && data[0].id != groupId) {
                         input
@@ -220,6 +225,16 @@ function adminGroupSetupTerminate() {
                     break;
 
                 case 'step-save':
+                    $item = $(e.target).closest('[data-pane]').find('input[name=group-name]');
+
+                    if (!$item.val()) {
+                        $item.closest('[data-input]')
+                            .attr('title', $.t('main.mesg_name_missing'))
+                            .addClass('error');
+
+                        return;
+                    }
+
                     groupSave(groupId, adminGroupGetData(), null, groupType)
                         .then(function () {
                             PANE_UNLOAD_LOCK = false;
