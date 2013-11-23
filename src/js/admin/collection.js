@@ -184,6 +184,7 @@ function adminCollectionSetupTerminate() {
             .on('click', 'button', function (e) {
                 var $graph,
                     $fieldset,
+                    $input,
                     $list,
                     name;
 
@@ -219,10 +220,10 @@ function adminCollectionSetupTerminate() {
                     break;
 
                 case 'step-save':
-                    $item = $(e.target).closest('[data-pane]').find('input[name=collection-name]');
+                    $input = $(e.target).closest('[data-pane]').find('input[name=collection-name]');
 
-                    if (!$item.val()) {
-                        $item.closest('[data-input]')
+                    if (!$input.val()) {
+                        $input.closest('[data-input]')
                             .attr('title', $.t('main.mesg_name_missing'))
                             .addClass('error');
 

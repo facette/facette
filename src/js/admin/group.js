@@ -182,6 +182,7 @@ function adminGroupSetupTerminate() {
         $body
             .on('click', 'button', function (e) {
                 var $fieldset,
+                    $input,
                     $item,
                     $list,
                     $select,
@@ -225,10 +226,10 @@ function adminGroupSetupTerminate() {
                     break;
 
                 case 'step-save':
-                    $item = $(e.target).closest('[data-pane]').find('input[name=group-name]');
+                    $input = $(e.target).closest('[data-pane]').find('input[name=group-name]');
 
-                    if (!$item.val()) {
-                        $item.closest('[data-input]')
+                    if (!$input.val()) {
+                        $input.closest('[data-input]')
                             .attr('title', $.t('main.mesg_name_missing'))
                             .addClass('error');
 
