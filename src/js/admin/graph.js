@@ -463,6 +463,11 @@ function adminGraphSetupTerminate() {
                             $item.find('.count').remove();
                             $item.find('a[href$=#expand-serie], a[href$=#collapse-serie]').remove();
                         }
+
+                        // Restore expanded state
+                        if (listMatch('step-1-metrics').find('[data-serie=' + $item.attr('data-serie') +
+                                ']').data('expanded'))
+                            $item.find('a[href$=#expand-serie]').trigger('click');
                     });
                 });
             } else {
@@ -580,6 +585,10 @@ function adminGraphSetupTerminate() {
                 i,
                 name = $itemSrc.attr('data-serie'),
                 value;
+
+            // Set metric expanded
+            listMatch('step-1-metrics').find('[data-serie=' + name + ']')
+                .data('expanded', true);
 
             // Expand serie
             for (i in data) {
