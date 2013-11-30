@@ -5,7 +5,7 @@ var SCROLL_TIMEOUT = null;
 
 function scrollSetupTerminate() {
     // Attach events
-    $('.scrollarea').on('scroll', function (e) {
+    $('.scrollarea').on('scroll', function () {
         var $area = $(this);
 
         if (SCROLL_TIMEOUT)
