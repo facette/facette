@@ -67,6 +67,11 @@ function graphDraw(graph, postpone, delay) {
 
             if (graphOpts.sample)
                 graphOpts.sample = parseInt(graphOpts.sample, 10);
+            else
+                delete graphOpts.sample;
+
+            if (!graphOpts.range)
+                graphOpts.range = GRAPH_DEFAULT_RANGE;
 
             // Set graph options
             graph.data('options', graphOpts);
