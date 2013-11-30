@@ -74,7 +74,7 @@ if (window.Highcharts) {
             element = chart.renderer.text(serie.name, tableLeft + GRAPH_LEGEND_ROW_HEIGHT, tableTop +
                     i * GRAPH_LEGEND_ROW_HEIGHT + GRAPH_LEGEND_ROW_HEIGHT / 2)
                 .attr({
-                    class: 'highcharts-table-serie'
+                    'class': 'highcharts-table-serie'
                 })
                 .css({
                     cursor: 'pointer'
@@ -120,7 +120,7 @@ if (window.Highcharts) {
                 element = chart.renderer.text(key, keyLeft, tableTop + i * GRAPH_LEGEND_ROW_HEIGHT +
                         GRAPH_LEGEND_ROW_HEIGHT / 2)
                     .attr({
-                        class: 'highcharts-table-label'
+                        'class': 'highcharts-table-label'
                     })
                     .css({
                         color: options.plotOptions.area.dataLabels.style.color
@@ -136,7 +136,8 @@ if (window.Highcharts) {
                 element = chart.renderer.text(humanReadable(data[serie.name][key]) || 0, valueLeft,
                         tableTop + i * GRAPH_LEGEND_ROW_HEIGHT + GRAPH_LEGEND_ROW_HEIGHT / 2)
                     .attr({
-                        class: 'highcharts-table-value'
+                        'class': 'highcharts-table-value',
+                        'data-value': data[serie.name][key]
                     })
                     .css({
                         cursor: 'pointer'
@@ -151,7 +152,7 @@ if (window.Highcharts) {
                             element: e.target,
                             name: key,
                             serie: serie,
-                            value: parseFloat($(e.target).text()) || null
+                            value: parseFloat($(e.target).parent().attr('data-value')) || null
                         });
                 });
 
