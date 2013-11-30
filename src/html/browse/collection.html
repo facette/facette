@@ -39,7 +39,7 @@
 				</form>
 			</header>
 
-			<section class="full">{{ if .Collection.Entries }}{{ template "template_graph" }}{{ range $index, $value := .Collection.Entries }}
+			<section class="scrollarea full">{{ if .Collection.Entries }}{{ template "template_graph" }}{{ range $index, $value := .Collection.Entries }}
 				<div data-graph="{{ $value.ID }}" data-graphopts="range: -1h; {{ dump $value.Options }}" id="{{ $value.Options.origin }}-{{ $value.Options.template }}{{ if $value.Options.filter }}-{{ $value.Options.filter }}{{ end }}"></div>{{ end }}{{ else }}
 				<div class="mesgitem warning">Your search doesn’t match any graph <a href="{{ .Request.URL.Path }}">Reset</a></div>{{ end }}
 			</section>

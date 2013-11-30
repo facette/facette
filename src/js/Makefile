@@ -44,6 +44,7 @@ SRC_FILES = intro.js \
 	group.js \
 	stats.js \
 	pane.js \
+	scroll.js \
 	i18n.js \
 	outro.js
 
