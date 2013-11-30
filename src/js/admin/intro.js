@@ -2,4 +2,4 @@
 /* Admin */
 
 var ADMIN_PANES          = {},
-	ADMIN_RELOAD_TIMEOUT = null;
+    ADMIN_RELOAD_TIMEOUT = null;
