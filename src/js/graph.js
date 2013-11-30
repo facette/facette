@@ -118,7 +118,9 @@ function graphDraw(graph, postpone, delay) {
                         .removeAttr('disabled')
                         .find('a:not([href="#refresh"])').show();
 
-                    graph.find('.placeholder').hide();
+                    graph.find('.placeholder')
+                        .removeClass('icon icon-warning')
+                        .hide();
                 }
 
                 startTime = moment(data.start);
@@ -310,6 +312,16 @@ function graphDraw(graph, postpone, delay) {
 
                 $container.highcharts(highchartOpts);
                 $deferred.resolve();
+            }).fail(function () {
+                graph.children('.graphctrl')
+                    .attr('disabled', 'disabled')
+                    .find('a:not([href="#refresh"])').hide();
+
+                graph.find('.placeholder')
+                    .addClass('icon icon-warning')
+                    .text($.t('graph.mesg_load_failed'));
+
+                $deferred.reject();
             });
         }, delay);
     }).promise();
@@ -536,7 +548,7 @@ function graphHandleQueue(force) {
                     $(GRAPH_DRAW_PARENTS[i]).off('scroll', graphHandleQueue);
             }
 
-            $.when.apply(null, $deferreds).then(function () {
+            $.when.apply(null, $deferreds).always(function () {
                 if (GRAPH_DRAW_TIMEOUTS.mesg)
                     clearTimeout(GRAPH_DRAW_TIMEOUTS.mesg);
 
