@@ -76,7 +76,7 @@ func (library *Library) GetGraphTemplate(origin, source, template, filter string
 		stack *Stack
 	)
 
-	id = origin + "\x00" + template + "\x00" + filter
+	id = origin + "\x30" + template + "\x30" + filter
 
 	if _, ok := library.Config.Origins[origin]; !ok {
 		return nil, fmt.Errorf("unknown `%s' origin", origin)

@@ -738,7 +738,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 	}
 
 	if plotReq.Origin != "" && plotReq.Template != "" {
-		plotReq.Graph = plotReq.Origin + "\x00" + plotReq.Template
+		plotReq.Graph = plotReq.Origin + "\x30" + plotReq.Template
 	}
 
 	if plotReq.Time == "" {
@@ -931,7 +931,7 @@ func (server *Server) plotValues(writer http.ResponseWriter, request *http.Reque
 	}
 
 	if plotReq.Origin != "" && plotReq.Template != "" {
-		plotReq.Graph = plotReq.Origin + "\x00" + plotReq.Template
+		plotReq.Graph = plotReq.Origin + "\x30" + plotReq.Template
 	}
 
 	if plotReq.Time == "" {
