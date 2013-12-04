@@ -25,8 +25,8 @@ func (server *Server) reloadHandle(writer http.ResponseWriter, request *http.Req
 
 func (server *Server) statHandle(writer http.ResponseWriter, request *http.Request) {
 	var (
-		metrics *goset.Set
-		sources *goset.Set
+		metrics *set.Set
+		sources *set.Set
 		result  *statResponse
 	)
 
@@ -35,8 +35,8 @@ func (server *Server) statHandle(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	sources = goset.New()
-	metrics = goset.New()
+	sources = set.New()
+	metrics = set.New()
 
 	for _, origin := range server.Catalog.Origins {
 		for key, source := range origin.Sources {

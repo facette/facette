@@ -28,7 +28,7 @@ func (library *Library) ExpandGroup(name string, groupType int) []string {
 		group  *Group
 		item   interface{}
 		re     *regexp.Regexp
-		result *goset.Set
+		result *set.Set
 	)
 
 	if item, err = library.GetItemByName(name, groupType); err != nil {
@@ -38,7 +38,7 @@ func (library *Library) ExpandGroup(name string, groupType int) []string {
 
 	group = item.(*Group)
 
-	result = goset.New()
+	result = set.New()
 
 	for _, entry := range group.Entries {
 		if strings.HasPrefix(entry.Pattern, "regexp:") {

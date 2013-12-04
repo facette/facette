@@ -125,7 +125,7 @@ func (server *Server) libraryList(writer http.ResponseWriter, request *http.Requ
 	var (
 		collection *library.Collection
 		err        error
-		graphSet   *goset.Set
+		graphSet   *set.Set
 		isSource   bool
 		item       interface{}
 		limit      int
@@ -165,7 +165,7 @@ func (server *Server) libraryList(writer http.ResponseWriter, request *http.Requ
 				Description: group.Description, Modified: group.Modified.Format(time.RFC3339)})
 		}
 	} else if request.URL.Path == URLLibraryPath+"/graphs" {
-		graphSet = goset.New()
+		graphSet = set.New()
 
 		// Filter by collection
 		if request.FormValue("collection") != "" {
@@ -625,7 +625,7 @@ func (server *Server) collectionList(writer http.ResponseWriter, request *http.R
 		collectionItem  *collectionItemResponse
 		collectionStack []*library.Collection
 		err             error
-		excludeSet      *goset.Set
+		excludeSet      *set.Set
 		item            interface{}
 		limit           int
 		result          collectionListResponse
@@ -644,7 +644,7 @@ func (server *Server) collectionList(writer http.ResponseWriter, request *http.R
 	}
 
 	// Check for item exclusion
-	excludeSet = goset.New()
+	excludeSet = set.New()
 
 	if request.FormValue("exclude") != "" {
 		if item, err = server.Library.GetItem(request.FormValue("exclude"),

@@ -60,7 +60,7 @@ func (library *Library) GetCollectionTemplate(name string) (*Collection, error) 
 		found      bool
 		options    map[string]string
 		splitItems []string
-		splitSet   *goset.Set
+		splitSet   *set.Set
 		template   *config.TemplateConfig
 		templates  []string
 	)
@@ -85,7 +85,7 @@ func (library *Library) GetCollectionTemplate(name string) (*Collection, error) 
 			template = library.Config.Origins[originName].Templates[templateName]
 
 			if template.SplitPattern != "" {
-				splitSet = goset.New()
+				splitSet = set.New()
 
 				for metricName := range library.Catalog.Origins[originName].Sources[name].Metrics {
 					if chunks = template.SplitRegexp.FindStringSubmatch(metricName); len(chunks) != 2 {

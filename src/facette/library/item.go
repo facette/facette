@@ -265,11 +265,11 @@ func (library *Library) LoadItem(id string, itemType int) error {
 func (library *Library) StoreItem(item interface{}, itemType int) error {
 	var (
 		err        error
-		groupSet   *goset.Set
+		groupSet   *set.Set
 		itemStruct *Item
 		itemTemp   interface{}
-		serieSet   *goset.Set
-		stackSet   *goset.Set
+		serieSet   *set.Set
+		stackSet   *set.Set
 		uuidTemp   *uuid.UUID
 	)
 
@@ -334,9 +334,9 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 
 	case LibraryItemGraph:
 		// Check for definition names duplicates
-		stackSet = goset.New()
-		groupSet = goset.New()
-		serieSet = goset.New()
+		stackSet = set.New()
+		groupSet = set.New()
+		serieSet = set.New()
 
 		for _, stack := range item.(*Graph).Stacks {
 			if stackSet.Has(stack.Name) {

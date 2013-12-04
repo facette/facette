@@ -89,7 +89,7 @@ func (server *Server) originList(writer http.ResponseWriter, request *http.Reque
 
 func (server *Server) originShow(writer http.ResponseWriter, request *http.Request) {
 	var (
-		metrics    *goset.Set
+		metrics    *set.Set
 		originName string
 		response   originShowResponse
 	)
@@ -107,7 +107,7 @@ func (server *Server) originShow(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	metrics = goset.New()
+	metrics = set.New()
 
 	for _, source := range server.Catalog.Origins[originName].Sources {
 		for _, metric := range source.Metrics {
@@ -126,7 +126,7 @@ func (server *Server) sourceList(writer http.ResponseWriter, request *http.Reque
 		err        error
 		limit      int
 		result     []string
-		resultSet  *goset.Set
+		resultSet  *set.Set
 		originName string
 	)
 
@@ -145,7 +145,7 @@ func (server *Server) sourceList(writer http.ResponseWriter, request *http.Reque
 	// Parse catalog for sources list
 	originName = request.FormValue("origin")
 
-	resultSet = goset.New()
+	resultSet = set.New()
 
 	for _, origin := range server.Catalog.Origins {
 		if originName != "" && origin.Name != originName {
@@ -213,8 +213,8 @@ func (server *Server) metricList(writer http.ResponseWriter, request *http.Reque
 		limit       int
 		originName  string
 		response    []string
-		responseSet *goset.Set
-		sourceSet   *goset.Set
+		responseSet *set.Set
+		sourceSet   *set.Set
 	)
 
 	if request.Method != "GET" && request.Method != "HEAD" {
@@ -232,8 +232,8 @@ func (server *Server) metricList(writer http.ResponseWriter, request *http.Reque
 	// Parse catalog for metrics list
 	originName = request.FormValue("origin")
 
-	sourceSet = goset.New()
-	responseSet = goset.New()
+	sourceSet = set.New()
+	responseSet = set.New()
 
 	if strings.HasPrefix(request.FormValue("source"), "group:") {
 		for _, sourceName := range server.Library.ExpandGroup(request.FormValue("source")[6:],
@@ -282,9 +282,9 @@ func (server *Server) metricShow(writer http.ResponseWriter, request *http.Reque
 	var (
 		found      bool
 		metricName string
-		originSet  *goset.Set
+		originSet  *set.Set
 		response   metricShowResponse
-		sourceSet  *goset.Set
+		sourceSet  *set.Set
 	)
 
 	if request.Method != "GET" && request.Method != "HEAD" {
@@ -295,8 +295,8 @@ func (server *Server) metricShow(writer http.ResponseWriter, request *http.Reque
 	// Parse catalog for metric information
 	metricName = mux.Vars(request)["path"]
 
-	originSet = goset.New()
-	sourceSet = goset.New()
+	originSet = set.New()
+	sourceSet = set.New()
 
 	for _, origin := range server.Catalog.Origins {
 		for _, source := range origin.Sources {
