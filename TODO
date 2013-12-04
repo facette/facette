@@ -1,6 +1,6 @@
 [ critical ]
 
-none
+- fix: graph preview request missing values using metric group (expand issue?)
 
 [ high ]
 
@@ -12,5 +12,5 @@ none
 
 [ low ]
 
-- add: timeline flag support on graphs
-- add: graph “cart” support (collection)
+- add: time-line flag support on graphs
+- add: quick collection creation support (aka cart-like support)
