@@ -865,19 +865,14 @@ func (server *Server) plotPrepareQuery(plotReq *plotRequest,
 	var (
 		query         *backend.GroupQuery
 		originBackend backend.BackendHandler
-		serieSource   string
+		serieSources  []string
 	)
 
 	query = &backend.GroupQuery{Name: groupItem.Name, Type: groupItem.Type}
 	originBackend = nil
 
 	for _, serieItem := range groupItem.Series {
-		serieSource = serieItem.Source
-
-		if plotReq.Template != "" {
-			serieSource = plotReq.Source
-		}
-
+		// Check for backend errors or conflicts
 		if _, ok := server.Catalog.Origins[serieItem.Origin]; !ok {
 			return nil, nil, fmt.Errorf("unknown `%s' serie origin", serieItem.Origin)
 		} else if originBackend == nil {
@@ -886,10 +881,30 @@ func (server *Server) plotPrepareQuery(plotReq *plotRequest,
 			return nil, nil, fmt.Errorf("backends differ between series")
 		}
 
-		query.Series = append(query.Series, &backend.SerieQuery{
-			Name:   serieItem.Name,
-			Metric: server.Catalog.GetMetric(serieItem.Origin, serieSource, serieItem.Metric),
-		})
+		if plotReq.Template != "" {
+			serieSources = []string{plotReq.Source}
+		} else if strings.HasPrefix(serieItem.Source, "group:") {
+			serieSources = server.Library.ExpandGroup(serieItem.Source[6:], library.LibraryItemSourceGroup)
+		} else {
+			serieSources = []string{serieItem.Source}
+		}
+
+		for _, serieSource := range serieSources {
+			if strings.HasPrefix(serieItem.Metric, "group:") {
+				for index, serieChunk := range server.Library.ExpandGroup(serieItem.Metric[6:],
+					library.LibraryItemMetricGroup) {
+					query.Series = append(query.Series, &backend.SerieQuery{
+						Name:   fmt.Sprintf("%s-%d", serieItem.Name, index),
+						Metric: server.Catalog.GetMetric(serieItem.Origin, serieSource, serieChunk),
+					})
+				}
+			} else {
+				query.Series = append(query.Series, &backend.SerieQuery{
+					Name:   serieItem.Name,
+					Metric: server.Catalog.GetMetric(serieItem.Origin, serieSource, serieItem.Metric),
+				})
+			}
+		}
 	}
 
 	if len(query.Series) == 0 {
