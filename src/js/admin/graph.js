@@ -455,12 +455,12 @@ function adminGraphSetupTerminate() {
                     $listSeries.find('[data-listitem^=step-2-series-item]').each(function (index) {
                         var $item = $(this);
 
+                        $item.find('.count').text(data[index].length);
+
                         if (data[index].length > 1) {
                             $item.data('expand', data[index]);
-                            $item.find('.count').text(data[index].length);
                             $item.find('a[href$=#collapse-serie]').remove();
                         } else {
-                            $item.find('.count').remove();
                             $item.find('a[href$=#expand-serie], a[href$=#collapse-serie]').remove();
                         }
 
