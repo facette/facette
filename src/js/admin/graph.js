@@ -1041,6 +1041,7 @@ function adminGraphSetupTerminate() {
                 $itemStack,
                 $listMetrics,
                 $listOpers,
+                $listSeries,
                 $pane,
                 i,
                 j,
@@ -1048,6 +1049,7 @@ function adminGraphSetupTerminate() {
 
             $listMetrics = listMatch('step-1-metrics');
             $listOpers   = listMatch('step-2-groups');
+            $listSeries  = listMatch('step-stack-series');
 
             for (i in data.stacks) {
                 $itemStack = data.stacks[i].mode !== STACK_MODE_NONE ? adminGraphCreateStack({
@@ -1085,6 +1087,9 @@ function adminGraphSetupTerminate() {
 
             if ($listMetrics.data('counter') === 0)
                 listSay($listMetrics, $.t('metric.mesg_none'));
+
+            if ($listSeries.data('counter') === 0)
+                listSay($listSeries, $.t('graph.mesg_no_serie'));
 
             listUpdateCount($listMetrics);
         });
