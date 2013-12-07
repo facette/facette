@@ -546,6 +546,9 @@ function adminGraphSetupTerminate() {
                 collapse,
                 name = $item.attr('data-serie').split('-')[0];
 
+            // Unset expansion flag
+            listMatch('step-1-metrics').find('[data-serie=' + name + ']').data('expanded', false);
+
             // Collapse expanded serie
             $series = listMatch('step-2-groups').find('[data-serie^=' + name + '-]');
 
@@ -587,8 +590,7 @@ function adminGraphSetupTerminate() {
                 value;
 
             // Set metric expanded
-            listMatch('step-1-metrics').find('[data-serie=' + name + ']')
-                .data('expanded', true);
+            listMatch('step-1-metrics').find('[data-serie=' + name + ']').data('expanded', true);
 
             // Expand serie
             for (i in data) {
