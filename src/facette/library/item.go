@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/fatih/goset"
 	"github.com/nu7hatch/gouuid"
+	"log"
 	"os"
 	"path"
 	"syscall"
@@ -304,6 +305,7 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 		switch itemType {
 		case LibraryItemSourceGroup, LibraryItemMetricGroup:
 			if itemTemp.(*Group).ID != itemStruct.ID {
+				log.Printf("ERROR: duplicate `%s' group identifier", itemStruct.ID)
 				return os.ErrExist
 			}
 
@@ -311,6 +313,7 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 
 		case LibraryItemGraph:
 			if !item.(*Graph).Volatile && itemTemp.(*Graph).ID != itemStruct.ID {
+				log.Printf("ERROR: duplicate `%s' graph identifier", itemStruct.ID)
 				return os.ErrExist
 			}
 
@@ -318,6 +321,7 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 
 		case LibraryItemCollection:
 			if itemTemp.(*Collection).ID != itemStruct.ID {
+				log.Printf("ERROR: duplicate `%s' collection identifier", itemStruct.ID)
 				return os.ErrExist
 			}
 
@@ -340,6 +344,7 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 
 		for _, stack := range item.(*Graph).Stacks {
 			if stackSet.Has(stack.Name) {
+				log.Printf("ERROR: duplicate `%s' stack name", stack.Name)
 				return os.ErrExist
 			}
 
@@ -347,6 +352,7 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 
 			for _, group := range stack.Groups {
 				if groupSet.Has(group.Name) {
+					log.Printf("ERROR: duplicate `%s' group name", group.Name)
 					return os.ErrExist
 				}
 
@@ -354,6 +360,7 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 
 				for _, serie := range group.Series {
 					if serieSet.Has(serie.Name) {
+						log.Printf("ERROR: duplicate `%s' serie name", serie.Name)
 						return os.ErrExist
 					}
 
