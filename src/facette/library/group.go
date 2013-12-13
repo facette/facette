@@ -1,7 +1,7 @@
 package library
 
 import (
-	"github.com/fatih/goset"
+	"github.com/fatih/set"
 	"log"
 	"path"
 	"regexp"

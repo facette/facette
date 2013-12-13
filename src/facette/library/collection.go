@@ -4,7 +4,7 @@ import (
 	"facette/config"
 	"facette/utils"
 	"fmt"
-	"github.com/fatih/goset"
+	"github.com/fatih/set"
 	"os"
 	"sort"
 	"strings"

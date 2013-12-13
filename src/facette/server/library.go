@@ -7,7 +7,7 @@ import (
 	"facette/library"
 	"facette/utils"
 	"fmt"
-	"github.com/fatih/goset"
+	"github.com/fatih/set"
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"log"

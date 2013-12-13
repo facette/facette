@@ -9,7 +9,7 @@ Not available yet
 ### Requirements
 
  * RRD library Go binding: [rrd][0] (along with librrd library and development files)
- * Goset package: [goset][1]
+ * Set package: [set][1]
  * UUID Go package: [gouuid][2]
  * Gorilla [mux][3] and [handlers][4] packages
 
@@ -54,7 +54,7 @@ Note: the `PREFIX` variable must be prepended to each command if passed during t
 
 
 [0]: https://github.com/ziutek/rrd
-[1]: https://github.com/fatih/goset
+[1]: https://github.com/fatih/set
 [2]: https://github.com/nu7hatch/gouuid
 [3]: https://github.com/gorilla/mux
 [4]: https://github.com/gorilla/handlers

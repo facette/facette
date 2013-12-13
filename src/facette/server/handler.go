@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/fatih/goset"
+	"github.com/fatih/set"
 	"html/template"
 	"log"
 	"net/http"

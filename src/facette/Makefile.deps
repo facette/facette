@@ -1,4 +1,4 @@
-github.com/fatih/goset       -b master
+github.com/fatih/set         -b master
 github.com/gorilla/context   -b master
 github.com/gorilla/handlers  -b master
 github.com/gorilla/mux       -b master

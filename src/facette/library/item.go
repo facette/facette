@@ -3,7 +3,7 @@ package library
 import (
 	"facette/utils"
 	"fmt"
-	"github.com/fatih/goset"
+	"github.com/fatih/set"
 	"github.com/nu7hatch/gouuid"
 	"log"
 	"os"
