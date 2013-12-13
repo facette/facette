@@ -123,8 +123,10 @@ function inputHandleKeyComplete(e) {
         e.target._lastValue = null;
 
         $target
-            .removeData('value')
-            .trigger('change');
+            .removeData('value');
+
+        if (!$target.val())
+            $target.trigger('change');
 
         return;
     } else if (e.which == EVENT_KEY_UP || e.which == EVENT_KEY_DOWN) {
@@ -144,8 +146,8 @@ function inputHandleKeyComplete(e) {
     if (INPUT_TIMEOUTS[name])
         clearTimeout(INPUT_TIMEOUTS[name]);
 
-    // Stop if <Shift> key or value didn't change or empty
-    if (e.shiftKey || e.target.value == e.target._lastValue) {
+    // Stop if value didn't change or empty
+    if (e.target.value == e.target._lastValue) {
         return;
     } else if (!e.target.value) {
         e.target._lastValue = null;
