@@ -48,8 +48,9 @@ Response:
 
 ```javascript
 {
-    "updated": "2013-01-02T12:34:56+01:00",
-    "name": "origin0"
+    "name": "origin0",
+    "backend": "rrd",
+    "updated": "2013-01-02T12:34:56+01:00"
 }
 ```
 

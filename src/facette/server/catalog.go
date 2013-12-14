@@ -31,6 +31,7 @@ func (tuple expandRequest) Swap(i, j int) {
 
 type originShowResponse struct {
 	Name    string `json:"name"`
+	Backend string `json:"backend"`
 	Updated string `json:"updated"`
 }
 
@@ -116,6 +117,7 @@ func (server *Server) originShow(writer http.ResponseWriter, request *http.Reque
 	}
 
 	response.Name = originName
+	response.Backend = server.Config.Origins[originName].Backend["type"]
 	response.Updated = server.Catalog.Updated.Format(time.RFC3339)
 
 	server.handleJSON(writer, response)
