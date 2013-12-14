@@ -91,11 +91,11 @@ Response:
 
 ```javascript
 {
-    "updated": "2013-01-02T12:34:56+01:00",
+    "name": "source0",
     "origins": [
         "origin0"
     ],
-    "name": "source0"
+    "updated": "2013-01-02T12:34:56+01:00"
 }
 ```
 
@@ -137,15 +137,15 @@ Response:
 
 ```javascript
 {
-    "updated": "2013-01-02T12:34:56+01:00",
+    "name": "metric0",
+    "origins": [
+        "origin0"
+    ],
     "sources": [
         "source0",
         "source1"
     ],
-    "origins": [
-        "origin0"
-    ],
-    "name": "metric0"
+    "updated": "2013-01-02T12:34:56+01:00"
 }
 ```
 
@@ -206,10 +206,10 @@ Response:
 ```javascript
 [
     {
-        "modified": "2013-01-02T12:34:56+01:00",
-        "description": "A great group description.",
+        "id": "386c8361-517f-404e-6c34-870983ab66e8",
         "name": "group0",
-        "id": "386c8361-517f-404e-6c34-870983ab66e8"
+        "description": "A great group description.",
+        "modified": "2013-01-02T12:34:56+01:00"
     }
 ]
 ```
@@ -227,15 +227,15 @@ Response:
 
 ```javascript
 {
+    "id": "386c8361-517f-404e-6c34-870983ab66e8",
+    "name": "group0",
+    "description": "A great group description.",
     "entries": [
         {
             "origin": "origin0",
             "pattern": "glob:example.*"
         }
-    ],
-    "description": "A great group description.",
-    "name": "group0",
-    "id": "386c8361-517f-404e-6c34-870983ab66e8"
+    ]
 }
 ```
 
@@ -311,10 +311,10 @@ Response:
 ```javascript
 [
     {
-        "modified": "2013-01-02T12:34:56+01:00",
-        "description": "A great graph description.",
+        "id": "909fe2df-3064-4ee2-5f52-4eca2c953c76",
         "name": "graph0",
-        "id": "909fe2df-3064-4ee2-5f52-4eca2c953c76"
+        "description": "A great graph description.",
+        "modified": "2013-01-02T12:34:56+01:00"
     }
 ]
 ```
@@ -331,6 +331,10 @@ Response:
 
 ```javascript
 {
+    "id": "909fe2df-3064-4ee2-5f52-4eca2c953c76",
+    "name": "graph0",
+    "description": "A great graph description.",
+    "type": 1,
     "stacks": [
         {
             "groups": [
@@ -350,11 +354,7 @@ Response:
             "name": "stack0"
         }
     ],
-    "stack_mode": 0,
-    "type": 1,
-    "description": "A great graph description.",
-    "name": "graph0",
-    "id": "909fe2df-3064-4ee2-5f52-4eca2c953c76"
+    "stack_mode": 0
 }
 ```
 
@@ -431,7 +431,10 @@ Response (plots values are truncated):
 
 ```javascript
 {
-    "modified": "2013-01-02T12:34:56+01:00",
+    "id": "909fe2df-3064-4ee2-5f52-4eca2c953c76",
+    "name": "Chart name",
+    "description": "A great chart description.",
+    "type": 1,
     "stacks": [
         {
             "series": [
@@ -459,14 +462,11 @@ Response (plots values are truncated):
             "name": "stack0"
         }
     ],
-    "id": "909fe2df-3064-4ee2-5f52-4eca2c953c76",
+    "stack_mode": 0,
     "start": "2013-01-01T12:34:56+01:00",
     "end": "2013-01-02T12:34:56+01:00",
     "step": 9.944751381,
-    "name": "Chart name",
-    "description": "A great chart description.",
-    "type": 1,
-    "stack_mode": 0
+    "modified": "2013-01-02T12:34:56+01:00"
 }
 ```
 
@@ -497,9 +497,9 @@ Response:
 {
     "serie0": {
         "min": 0.02,
+        "avg": 0.0315,
         "max": 0.043,
-        "last": 0.02,
-        "avg": 0.0315
+        "last": 0.02
     }
 }
 ```
@@ -526,12 +526,12 @@ Response:
 ```javascript
 [
     {
-        "has_children": false,
-        "parent": null,
-        "modified": "2013-01-02T12:34:56+01:00",
-        "description": "A great collection description.",
+        "id": "916f955a-752c-468f-61b3-ace173a6d2da",
         "name": "collection0",
-        "id": "916f955a-752c-468f-61b3-ace173a6d2da"
+        "description": "A great collection description.",
+        "parent": null,
+        "has_children": false,
+        "modified": "2013-01-02T12:34:56+01:00"
     }
 ]
 ```
@@ -548,6 +548,9 @@ Response:
 
 ```javascript
 {
+    "id": "916f955a-752c-468f-61b3-ace173a6d2da",
+    "name": "collection0",
+    "description": "A great collection description.",
     "entries": [
         {
             "options": {
@@ -559,10 +562,7 @@ Response:
             },
             "id": "909fe2df-3064-4ee2-5f52-4eca2c953c76"
         }
-    ],
-    "description": "A great collection description.",
-    "name": "collection0",
-    "id": "916f955a-752c-468f-61b3-ace173a6d2da"
+    ]
 }
 ```
 
