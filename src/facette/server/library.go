@@ -156,7 +156,7 @@ func (server *Server) libraryList(writer http.ResponseWriter, request *http.Requ
 			}
 
 			if request.FormValue("filter") != "" {
-				if ok, _ := path.Match(request.FormValue("filter"), group.Name); !ok {
+				if ok, _ := path.Match(strings.ToLower(request.FormValue("filter")), strings.ToLower(group.Name)); !ok {
 					continue
 				}
 			}
@@ -192,7 +192,8 @@ func (server *Server) libraryList(writer http.ResponseWriter, request *http.Requ
 				}
 
 				if request.FormValue("filter") != "" {
-					if ok, _ := path.Match(request.FormValue("filter"), graph.Name); !ok {
+					if ok, _ := path.Match(strings.ToLower(request.FormValue("filter")),
+						strings.ToLower(graph.Name)); !ok {
 						continue
 					}
 				}
@@ -668,7 +669,8 @@ func (server *Server) collectionList(writer http.ResponseWriter, request *http.R
 		}
 
 		if request.FormValue("filter") != "" {
-			if ok, _ := path.Match(request.FormValue("filter"), collection.Name); !ok {
+			if ok, _ := path.Match(strings.ToLower(request.FormValue("filter")),
+				strings.ToLower(collection.Name)); !ok {
 				continue
 			}
 		}
