@@ -5,7 +5,7 @@ import (
 	"log"
 )
 
-// A Origin represents a RRD origin input entry (e.g. Collectd data directory path and matching pattern).
+// A Origin represents an origin entry.
 type Origin struct {
 	Name    string
 	Backend BackendHandler

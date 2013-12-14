@@ -1,6 +1,6 @@
 package backend
 
-// A Metric represents a RRD metric entry.
+// A Metric represents a metric entry.
 type Metric struct {
 	Name     string
 	Dataset  string
