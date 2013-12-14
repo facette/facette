@@ -182,12 +182,12 @@ function adminGroupSetupTerminate() {
         $body
             .on('click', 'button', function (e) {
                 var $fieldset,
-                    $input,
                     $item,
                     $list,
                     $select,
                     $origin,
                     name,
+                    skip = false,
                     type;
 
                 switch (e.target.name) {
@@ -226,13 +226,20 @@ function adminGroupSetupTerminate() {
                     break;
 
                 case 'step-save':
-                    $input = $(e.target).closest('[data-pane]').find('input[name=group-name]');
+                    $(e.target).closest('[data-pane]').find('input[name=group-name], textarea[name=group-desc]')
+                        .each(function () {
+                            var $item = $(this);
 
-                    if (!$input.val()) {
-                        $input.closest('[data-input]')
-                            .attr('title', $.t('main.mesg_name_missing'))
-                            .addClass('error');
+                            if (!$item.val()) {
+                                $item.closest('[data-input], textarea')
+                                    .attr('title', $.t('main.mesg_field_mandatory'))
+                                    .addClass('error');
 
+                                skip = true;
+                            }
+                        });
+
+                    if (skip) {
                         return;
                     }
 
@@ -246,6 +253,7 @@ function adminGroupSetupTerminate() {
                                 message: $.t('group.mesg_save_fail')
                             });
                         });
+
                     break;
 
                 case 'step-ok':

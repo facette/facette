@@ -859,14 +859,14 @@ function adminGraphSetupTerminate() {
         $body
             .on('click', 'button', function (e) {
                 var $fieldset,
-                    $input,
                     $item,
                     $itemActive,
                     $list,
                     $metric,
                     $source,
                     $origin,
-                    name;
+                    name,
+                    skip = false;
 
                 switch (e.target.name) {
                 case 'metric-add':
@@ -930,13 +930,20 @@ function adminGraphSetupTerminate() {
                     break;
 
                 case 'step-save':
-                    $input = $(e.target).closest('[data-pane]').find('input[name=graph-name]');
+                    $(e.target).closest('[data-pane]').find('input[name=graph-name], textarea[name=graph-desc]')
+                        .each(function () {
+                            var $item = $(this);
 
-                    if (!$input.val()) {
-                        $input.closest('[data-input]')
-                            .attr('title', $.t('main.mesg_name_missing'))
-                            .addClass('error');
+                            if (!$item.val()) {
+                                $item.closest('[data-input], textarea')
+                                    .attr('title', $.t('main.mesg_field_mandatory'))
+                                    .addClass('error');
 
+                                skip = true;
+                            }
+                        });
+
+                    if (skip) {
                         return;
                     }
 
@@ -950,6 +957,7 @@ function adminGraphSetupTerminate() {
                                 message: $.t('graph.mesg_save_fail')
                             });
                         });
+
                     break;
 
                 case 'step-ok':

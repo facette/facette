@@ -184,9 +184,9 @@ function adminCollectionSetupTerminate() {
             .on('click', 'button', function (e) {
                 var $graph,
                     $fieldset,
-                    $input,
                     $list,
-                    name;
+                    name,
+                    skip = false;
 
                 switch (e.target.name) {
                 case 'graph-add':
@@ -220,13 +220,20 @@ function adminCollectionSetupTerminate() {
                     break;
 
                 case 'step-save':
-                    $input = $(e.target).closest('[data-pane]').find('input[name=collection-name]');
+                    $(e.target).closest('[data-pane]')
+                        .find('input[name=collection-name], textarea[name=collection-desc]').each(function () {
+                            var $item = $(this);
 
-                    if (!$input.val()) {
-                        $input.closest('[data-input]')
-                            .attr('title', $.t('main.mesg_name_missing'))
-                            .addClass('error');
+                            if (!$item.val()) {
+                                $item.closest('[data-input], textarea')
+                                    .attr('title', $.t('main.mesg_field_mandatory'))
+                                    .addClass('error');
 
+                                skip = true;
+                            }
+                        });
+
+                    if (skip) {
                         return;
                     }
 
@@ -240,6 +247,7 @@ function adminCollectionSetupTerminate() {
                                 message: $.t('collection.mesg_save_fail')
                             });
                         });
+
                     break;
 
                 case 'step-ok':

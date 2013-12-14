@@ -52,7 +52,7 @@
     },
     "main": {
         "mesg_loading": "Loading data...",
-        "mesg_name_missing": "Name field is mandatory!",
+        "mesg_field_mandatory": "This field is mandatory!",
         "mesg_server_loading": "Reloading resources, please wait...",
         "mesg_unsaved_changes": "All unsaved changes will be lost!"
     },
