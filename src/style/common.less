@@ -294,10 +294,6 @@ section {
 		font-size: 1.6em;
 		font-weight: normal;
 
-		&:first-of-type {
-			margin-top: 0;
-		}
-
 		.count {
 			color: fade(@TextColorA, 50);
 			font-size: 0.9em;
@@ -309,6 +305,11 @@ section {
 		color: @TextColorB;
 		font-size: 1.4em;
 		font-weight: normal;
+	}
+
+	& > h1:first-of-type,
+	& > *:first-child > h1:first-of-type {
+		margin-top: 0;
 	}
 
 	.column {

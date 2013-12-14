@@ -8,13 +8,16 @@ section {
 
 
 		.listitem {
-			background-color: @ListItemBackgroundColor;
-			border-radius: 0.35em;
+			border-bottom: 1px solid @FooterBackgroundColor;
+			border-top: 1px solid @FooterBackgroundColor;
 			line-height: 1.5em;
-			margin-bottom: 1em;
 			overflow: auto;
-			padding: 0.25em 4em 0.25em 1em;
+			padding: 0.5em 4em 0.5em 1em;
 			position: relative;
+
+			& + .listitem {
+				border-top: none;
+			}
 
 			.actions {
 				visibility: hidden;
@@ -92,7 +95,7 @@ section {
 					&.count {
 						background-color: @TextColorB;
 						border-radius: 1em;
-						color: @ListItemBackgroundColor;
+						color: @BackgroundColor;
 						display: inline-block;
 						font-size: 0.85em;
 						margin-left: 0.5em;
@@ -189,7 +192,12 @@ section {
 			&.active,
 			&.dragover {
 				background-color: @MainColor;
+				border-color: @MainColor;
 				color: @BackgroundColor;
+
+				& + .listitem {
+					border-top-color: @MainColor;
+				}
 
 				.actions {
 					a {
