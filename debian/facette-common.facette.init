@@ -29,18 +29,17 @@ OPTIONS=""
 . /lib/lsb/init-functions
 
 do_start() {
-    start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --chuid facette:facette --test >/dev/null \
-        || return 1
-    start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --chuid facette:facette --background -- \
-        $OPTIONS \
-        || return 2
+    start-stop-daemon --start --quiet --pidfile $PIDFILE --make-pidfile --exec $DAEMON --chuid facette:facette \
+        --test >/dev/null || return 1
+    start-stop-daemon --start --quiet --pidfile $PIDFILE --make-pidfile --exec $DAEMON --chuid facette:facette \
+        --background -- $OPTIONS || return 2
 }
 
 do_stop() {
-    start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE --name $NAME
+    start-stop-daemon --stop --quiet --pidfile $PIDFILE --retry=TERM/30/KILL/5 --name $(basename $DAEMON)
     RETVAL="$?"
     [ "$RETVAL" = 2 ] && return 2
-    start-stop-daemon --stop --quiet --oknodo --retry=0/30/KILL/5 --exec $DAEMON
+    start-stop-daemon --stop --quiet --pidfile $PIDFILE --oknodo --retry=0/30/KILL/5 --exec $DAEMON
     [ "$?" = 2 ] && return 2
     rm -f $PIDFILE
     return "$RETVAL"
