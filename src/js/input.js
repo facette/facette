@@ -201,7 +201,7 @@ function inputHandleKeyComplete(e) {
 
         // Update completion field
         e.target._lastValue = e.target.value;
-    }, 200);
+    }, 500);
 }
 
 function inputInit(element) {
