@@ -214,7 +214,7 @@ function listUpdate(list, listFilter) {
             i,
             namespace;
 
-        if (!data) {
+        if (!data || data instanceof Array && data.length === 0) {
             namespace = list.opts('list').messages || 'item';
 
             if (listFilter) {
@@ -233,6 +233,14 @@ function listUpdate(list, listFilter) {
         listSay(list, null);
 
         for (i in data) {
+            if (typeof data[i] == 'string') {
+                listAppend(list)
+                    .attr('data-itemname', data[i])
+                    .find('.name').text(data[i]);
+
+                continue;
+            }
+
             $item = listAppend(list)
                 .attr('data-itemid', data[i].id);
 

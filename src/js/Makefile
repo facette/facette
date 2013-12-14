@@ -25,6 +25,7 @@ SRC_FILES = intro.js \
 	overlay.js \
 	list.js \
 	tree.js \
+	tooltip.js \
 	menu.js \
 	input.js \
 	select.js \
@@ -34,6 +35,7 @@ SRC_FILES = intro.js \
 	admin/graph.js \
 	admin/collection.js \
 	admin/group.js \
+	admin/catalog.js \
 	admin/outro.js \
 	browse/intro.js \
 	browse/browse.js \

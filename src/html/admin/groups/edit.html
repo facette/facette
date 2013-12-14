@@ -9,7 +9,7 @@
 {{ define "content" }}
 		<article data-pane="group-edit" data-paneopts="section: {{ .Section }}{{ if ne .Path "add" }}; id: {{ .Path }}{{ end }}">
 			<header>
-				<h1>Administration Panel — {{ if eq .Path "add" }}New{{ else }}Edit{{ end }} {{ if eq .Section "sourcegroups" }}source{{ else }}metric{{ end }} Group</h1>
+				<h1>Administration Panel — {{ if eq .Path "add" }}New{{ else }}Edit{{ end }} {{ if eq .Section "sourcegroups" }}Source{{ else }}Metric{{ end }} Group</h1>
 			</header>
 
 			<footer>

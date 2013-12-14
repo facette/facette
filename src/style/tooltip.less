@@ -1,4 +1,5 @@
 
+.tooltip,
 .menu {
 	.box-sizing(border-box);
 	background-color: fade(@NavBackgroundColor, 95);
@@ -20,7 +21,21 @@
 		position: absolute;
 		width: 0;
 	}
+}
 
+.tooltip {
+	margin-left: -1em;
+	margin-top: 2em;
+	padding: 1em;
+
+	.label {
+		color: fade(@NavTextColor, 35);
+		margin-right: 0.25em;
+		text-transform: lowercase;
+	}
+}
+
+.menu {
 	.menucntr {
 		max-height: 10.5em;
 		overflow-y: auto;

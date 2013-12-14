@@ -74,6 +74,9 @@ func (server *Server) adminHandle(writer http.ResponseWriter, request *http.Requ
 		} else if data.Path == "" {
 			tmplFile = "list.html"
 		}
+	} else if data.Section == "origins" || data.Section == "sources" || data.Section == "metrics" {
+		tmplFolder = "catalog"
+		tmplFile = "list.html"
 	} else if data.Section == "" {
 		tmplFolder = ""
 		tmplFile = "index.html"

@@ -42,15 +42,19 @@
     },
     "item": {
         "mesg_missing": "You must at least add one item!",
-        "mesg_none": "No item defined"
+        "mesg_none": "No item defined",
+        "mesg_load_nomatch": "Your search doesn’t match any item"
     },
     "list": {
         "labl_reset": "Reset",
         "labl_retry": "Retry",
-        "mesg_load_error": "An error occured while loading data",
-        "mesg_load_nomatch": "Your search doesn’t match any item"
+        "mesg_load_error": "An error occured while loading data"
     },
     "main": {
+        "labl_backend": "Backend:",
+        "labl_origins": "Origins:",
+        "labl_sources": "Sources:",
+        "labl_updated": "Updated:",
         "mesg_loading": "Loading data...",
         "mesg_field_mandatory": "This field is mandatory!",
         "mesg_server_loading": "Reloading resources, please wait...",

@@ -1,0 +1,38 @@
+{{ define "title" }}Administration Panel: {{ if eq .Section "origins" }}Origins{{ end }}{{ if eq .Section "sources" }}Sources{{ end }}{{ if eq .Section "metrics" }}Metrics{{ end }} — Facette{{ end }}
+
+{{ define "script" }}
+		<script src="/static/jquery.js"></script>
+		<script src="/static/i18next.js"></script>
+		<script src="/static/moment.js"></script>
+		<script src="/static/facette.js"></script>
+{{ end }}
+
+{{ define "content" }}
+		<article data-pane="catalog-list" data-paneopts="section: {{ .Section }}">
+			<header>
+				<h1>Administration Panel — {{ if eq .Section "origins" }}Origins{{ end }}{{ if eq .Section "sources" }}Sources{{ end }}{{ if eq .Section "metrics" }}Metrics{{ end }}</h1>
+
+				<div class="filter icon icon-search">
+					<input data-listfilter="{{ .Section }}" placeholder="Search for {{ if eq .Section "origins" }}Origin{{ end }}{{ if eq .Section "sources" }}Source{{ end }}{{ if eq .Section "metrics" }}Metric{{ end }}" type="text">
+				</div>
+			</header>
+
+			<section class="scrollarea full">
+				<div class="list" data-list="{{ .Section }}" data-listopts="init: true; url: catalog/{{ .Section }}">
+					<h1>{{ if eq .Section "origins" }}Origins{{ end }}{{ if eq .Section "sources" }}Sources{{ end }}{{ if eq .Section "metrics" }}Metrics{{ end }} List <span class="count"></span></h1>
+
+					<div class="listmesg" data-listmesg="{{ .Section }}"></div>
+
+					<div class="listitem" data-listtmpl="{{ .Section }}">
+						<div>
+							<span class="name"></span>
+							<span class="actions">
+								<a class="icon icon-info" href="#show-info" title="Show Information"></a>
+							</span>
+						</div>
+						<div class="desc"></div>
+					</div>
+				</div>
+			</section>
+		</article>
+{{ end }}

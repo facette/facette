@@ -20,7 +20,7 @@ SRC_FILES = intro.less \
 	common.less \
 	icon.less \
 	form.less \
-	menu.less \
+	tooltip.less \
 	date.less \
 	overlay.less \
 	list.less \
