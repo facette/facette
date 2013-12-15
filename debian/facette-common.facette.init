@@ -14,7 +14,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="facette server"
 NAME=facette
-DAEMON=/usr/sbin/facetted
+DAEMON=/usr/sbin/facette
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 

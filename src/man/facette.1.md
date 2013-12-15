@@ -1,14 +1,14 @@
-% FACETTED(1) facetted
+% FACETTE(1) facette
 % Vincent Batoufflet <vincent@batoufflet.info>
 % November 16, 2013
 
 # NAME
 
-facetted - graphing web front-end
+facette - graphing web front-end
 
 # SYNOPSYS
 
-facetted [*options*] -c file
+facette [*options*] -c file
 
 # DESCRIPTION
 
@@ -24,13 +24,13 @@ Facette is a graphing web front-end for RRD files.
 
 # SIGNALS
 
-**facetted** accepts the following signals:
+**facette** accepts the following signals:
 
-SIGINT, SIGTERM\ 
-:   These signals cause **facetted** to terminate.
+SIGINT, SIGTERM\
+:   These signals cause **facette** to terminate.
 
-SIGHUP\ 
-:   This signal causes **facetted** to reload its configuration and to refresh the catalog.
+SIGHUP\
+:   This signal causes **facette** to reload its configuration and to refresh the catalog.
 
 # SEE ALSO
 

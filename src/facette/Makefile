@@ -11,7 +11,7 @@ GOPATH = $(realpath $(BUILD_DIR)):$(realpath ../..)
 GOLINT = golint
 GOLINT_ARGS =
 
-BIN_FILES = facetted
+BIN_FILES = facette
 
 SRC_FILES = $(wildcard */*.go)
 
@@ -49,9 +49,9 @@ $(BIN_FILES): depends $(SRC_FILES)
 build: $(BIN_FILES)
 
 test: build
-	@$(call mesg_start,Starting facetted daemon...)
+	@$(call mesg_start,Starting facette server...)
 	@install -m 0755 -d $(BUILD_DIR)/tests && (cd $(BUILD_DIR)/tests && \
-		$(PREFIX)/bin/facetted -c ../../tests/facette.json >/dev/null & echo "$$!" >$(BUILD_DIR)/facetted.pid) && \
+		$(PREFIX)/bin/facette -c ../../tests/facette.json >/dev/null & echo "$$!" >$(BUILD_DIR)/facette.pid) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 	@cd $(BUILD_DIR)/tests && for ENTRY in $(PKG_TESTS); do \
@@ -60,8 +60,8 @@ test: build
 			$(call mesg_ok) || $(call mesg_fail); \
 		done
 
-	@$(call mesg_start,Stoppping facetted daemon...)
-	@kill `cat $(BUILD_DIR)/facetted.pid` && rm -f $(BUILD_DIR)/facetted.pid && $(call mesg_ok) || $(call mesg_fail)
+	@$(call mesg_start,Stopping facette server...)
+	@kill `cat $(BUILD_DIR)/facette.pid` && rm -f $(BUILD_DIR)/facette.pid && $(call mesg_ok) || $(call mesg_fail)
 
 install: build
 

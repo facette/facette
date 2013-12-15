@@ -26,7 +26,7 @@ Run the building command:
 ```
 cd facette
 make
-./build/facette/bin/facetted -c path/to/config.json
+./build/facette/bin/facette -c path/to/config.json
 ```
 
 By default Facette will be built and installed in the `build` folder. To change its location use the `PREFIX` variable:
