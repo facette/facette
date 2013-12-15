@@ -898,9 +898,9 @@ function adminGraphSetupTerminate() {
                     listSay($list, null);
                     listUpdateCount($list);
 
-                    $origin.val('');
-                    $source.val('');
-                    $metric.val('');
+                    $origin.data('value', null).val('');
+                    $source.data('value', null).val('');
+                    $metric.data('value', null).val('');
 
                     $origin
                         .trigger('change')
@@ -980,6 +980,7 @@ function adminGraphSetupTerminate() {
                     $item,
                     $target = $(e.target),
                     active,
+                    fieldValue,
                     value;
 
                 if ($target.closest('.actions').length > 0)
@@ -998,9 +999,31 @@ function adminGraphSetupTerminate() {
                 $fieldset.find('button[name=metric-add]').toggle(!active);
                 $fieldset.find('button[name=metric-update], button[name=metric-cancel]').toggle(active);
 
-                $fieldset.find('input[name=origin]').val(active ? value.origin : '');
-                $fieldset.find('input[name=source]').val(active ? value.source : '');
-                $fieldset.find('input[name=metric]').val(active ? value.metric : '').trigger('change');
+                $fieldset.find('input[name=origin]')
+                    .data('value', {
+                        name: value.origin,
+                        source: 'catalog/origins'
+                    })
+                    .val(active ? value.origin : '');
+
+                if (value.source.startsWith('group:'))
+                    fieldValue = {name: value.source.substr(6), source: 'library/sourcegroups'};
+                else
+                    fieldValue = {name: value.source, source: 'catalog/sources'};
+
+                $fieldset.find('input[name=source]')
+                    .data('value', fieldValue)
+                    .val(active ? fieldValue.name : '');
+
+                if (value.metric.startsWith('group:'))
+                    fieldValue = {name: value.metric.substr(6), metric: 'library/metricgroups'};
+                else
+                    fieldValue = {name: value.metric, metric: 'catalog/metrics'};
+
+                $fieldset.find('input[name=metric]')
+                    .data('value', fieldValue)
+                    .val(active ? fieldValue.name : '')
+                    .trigger('change');
             })
             .on('change', '[data-step=1] fieldset input', function (e) {
                 var $buttons,
