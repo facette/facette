@@ -141,10 +141,14 @@ function adminGroupSetupTerminate() {
 
         // Register pane steps
         paneStepRegister('group-edit', 1, function () {
+            var $fieldset = $('[data-step=1] fieldset');
+
+            $fieldset.find('button[name=item-update], button[name=item-cancel]').hide();
+
             if (groupId)
                 listSay('step-1-items', null);
 
-            setTimeout(function () { $('[data-step=1] fieldset input:first').trigger('change').select(); }, 0);
+            setTimeout(function () { $fieldset.find('input:first').trigger('change').select(); }, 0);
         });
 
         paneStepRegister('group-edit', 2, function () {
@@ -181,7 +185,9 @@ function adminGroupSetupTerminate() {
         // Attach events
         $body
             .on('click', 'button', function (e) {
-                var $fieldset,
+                var $entry,
+                    $entryActive,
+                    $fieldset,
                     $item,
                     $list,
                     $select,
@@ -192,6 +198,7 @@ function adminGroupSetupTerminate() {
 
                 switch (e.target.name) {
                 case 'item-add':
+                case 'item-update':
                     if (e.target.disabled)
                         return;
 
@@ -201,12 +208,18 @@ function adminGroupSetupTerminate() {
                     $origin   = $fieldset.find('select[name=origin]');
                     $select   = $fieldset.find('select[name=type]');
 
+                    if (e.target.name == 'item-update')
+                        $entryActive = listMatch('step-1-items').find('[data-listitem^=step-1-items-item].active');
+
                     type = $select.children('option:selected').text().toLowerCase();
 
-                    adminGroupCreateItem({
+                    $entry = adminGroupCreateItem({
                         pattern: (parseInt($select.val(), 10) !== 0 ? type + ':' : '') + $item.val(),
                         origin: $origin.val()
                     }).find('.type').text(type);
+
+                    if ($entryActive)
+                        $entryActive.replaceWith($entry);
 
                     listSay($list, null);
                     listUpdateCount($list);
@@ -215,6 +228,16 @@ function adminGroupSetupTerminate() {
 
                     $item
                         .trigger('change')
+                        .focus();
+
+                    PANE_UNLOAD_LOCK = true;
+
+                    break;
+
+                case 'item-cancel':
+                    listMatch('step-1-items').find('[data-listitem^=step-1-items-item].active').trigger('click');
+
+                    $(e.target).closest('fieldset').find('input[name=item]')
                         .focus();
 
                     PANE_UNLOAD_LOCK = true;
@@ -270,6 +293,46 @@ function adminGroupSetupTerminate() {
 
                     break;
                 }
+            })
+            .on('click', '[data-step=1] [data-listitem]', function (e) {
+                var $fieldset,
+                    $item,
+                    $target = $(e.target),
+                    active,
+                    value;
+
+                if ($target.closest('.actions').length > 0)
+                    return;
+
+                $fieldset = $('[data-step=1] fieldset');
+                $item     = $target.closest('[data-listitem]');
+                value     = $item.data('value');
+
+                $item
+                    .toggleClass('active')
+                    .siblings().removeClass('active');
+
+                active = $item.hasClass('active');
+
+                if (value.pattern.startsWith('glob:'))
+                    value = {origin: value.origin, type: MATCH_TYPE_GLOB, item: value.pattern.substr(5)};
+                else if (value.pattern.startsWith('regexp:'))
+                    value = {origin: value.origin, type: MATCH_TYPE_REGEXP, item: value.pattern.substr(7)};
+                else
+                    value = {origin: value.origin, type: MATCH_TYPE_NORMAL, item: value.pattern};
+
+                $fieldset.find('button[name=item-add]').toggle(!active);
+                $fieldset.find('button[name=item-update], button[name=item-cancel]').toggle(active);
+
+                $fieldset.find('select[name=origin]')
+                    .val(active ? value.origin : '');
+
+                $fieldset.find('input[name=item]')
+                    .val(active ? value.item : '');
+
+                $fieldset.find('select[name=type]')
+                    .val(active ? value.type : 0)
+                    .trigger('change');
             })
             .on('change', '[data-step=1] fieldset input', function (e) {
                 var $target = $(e.target),

@@ -858,9 +858,9 @@ function adminGraphSetupTerminate() {
         // Attach events
         $body
             .on('click', 'button', function (e) {
-                var $fieldset,
-                    $item,
-                    $itemActive,
+                var $entry,
+                    $entryActive,
+                    $fieldset,
                     $list,
                     $metric,
                     $source,
@@ -882,18 +882,18 @@ function adminGraphSetupTerminate() {
                     $origin   = $fieldset.find('input[name=origin]');
 
                     if (e.target.name == 'metric-update')
-                        $itemActive = listMatch('step-1-metrics').find('[data-listitem^=step-1-metrics-item].active');
+                        $entryActive = listMatch('step-1-metrics').find('[data-listitem^=step-1-metrics-item].active');
 
-                    $item = adminGraphCreateSerie({
-                        name: $itemActive && $itemActive.data('value').name ||
+                    $entry = adminGraphCreateSerie({
+                        name: $entryActive && $entryActive.data('value').name ||
                             listNextName('step-1-metrics', 'data-serie', 'serie'),
                         origin: $origin.val(),
                         source: ($source.data('value').source.endsWith('groups') ? 'group:' : '') + $source.val(),
                         metric: ($metric.data('value').source.endsWith('groups') ? 'group:' : '') + $metric.val()
                     });
 
-                    if ($itemActive)
-                        $itemActive.replaceWith($item);
+                    if ($entryActive)
+                        $entryActive.replaceWith($entry);
 
                     listSay($list, null);
                     listUpdateCount($list);
@@ -913,8 +913,7 @@ function adminGraphSetupTerminate() {
                 case 'metric-cancel':
                     listMatch('step-1-metrics').find('[data-listitem^=step-1-metrics-item].active').trigger('click');
 
-                    $origin
-                        .trigger('change')
+                    $(e.target).closest('fieldset').find('input[name=origin]')
                         .focus();
 
                     PANE_UNLOAD_LOCK = true;
