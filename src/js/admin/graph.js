@@ -436,10 +436,11 @@ function adminGraphSetupTerminate() {
                     value;
 
                 value = $itemSrc.data('value');
-                query.push([value.origin, value.source, value.metric]);
 
-                if (value.source.startsWith('group:') || value.metric.startsWith('group:'))
+                if (value.source.startsWith('group:') || value.metric.startsWith('group:')) {
+                    query.push([value.origin, value.source, value.metric]);
                     expand = true;
+                }
 
                 $item = adminGraphCreateProxy(PROXY_TYPE_SERIE, value.name, $listSeries);
 
@@ -461,12 +462,15 @@ function adminGraphSetupTerminate() {
                     $listSeries.find('[data-listitem^=step-2-series-item]').each(function (index) {
                         var $item = $(this);
 
-                        $item.find('.count').text(data[index].length);
+                        if (data[index]) {
+                            $item.find('.count').text(data[index].length);
 
-                        if (data[index].length > 1) {
-                            $item.data('expand', data[index]);
-                            $item.find('a[href$=#collapse-serie]').remove();
+                            if (data[index].length > 1) {
+                                $item.data('expand', data[index]);
+                                $item.find('a[href$=#collapse-serie]').remove();
+                            }
                         } else {
+                            $item.find('.count').remove();
                             $item.find('a[href$=#expand-serie], a[href$=#collapse-serie]').remove();
                         }
 
