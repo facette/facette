@@ -171,6 +171,7 @@ function adminGraphCreateProxy(type, name, list) {
 
     $item = listAppend(list)
         .attr(attr, $itemSrc.attr(attr))
+        .data('proxies', [])
         .data('source', $itemSrc);
 
     if ($item.attr('data-list') !== undefined)
@@ -189,9 +190,12 @@ function adminGraphCreateProxy(type, name, list) {
 
 function adminGraphHandleSerieDrag(e) {
     var $group,
+        $item,
+        $itemSrc,
         $list,
         $target = $(e.target),
-        chunks;
+        chunks,
+        serieName;
 
     if (['dragstart', 'dragend'].indexOf(e.type) == -1) {
         $group = $target.closest('.groupitem');
@@ -211,9 +215,9 @@ function adminGraphHandleSerieDrag(e) {
         $target.addClass('dragged');
 
         if ($target.attr('data-group'))
-            e.dataTransfer.setData('text/plain', 'data-group="' + $target.attr('data-group') + '"');
+            e.dataTransfer.setData('text/plain', 'data-group=' + $target.attr('data-group'));
         else
-            e.dataTransfer.setData('text/plain', 'data-serie="' + $target.attr('data-serie') + '"');
+            e.dataTransfer.setData('text/plain', 'data-serie=' + $target.attr('data-serie'));
 
         break;
 
@@ -269,8 +273,21 @@ function adminGraphHandleSerieDrag(e) {
 
         chunks = e.dataTransfer.getData('text/plain').split('=');
 
-        adminGraphCreateProxy(chunks[0] == 'data-group' ? PROXY_TYPE_GROUP : PROXY_TYPE_SERIE, chunks[1],
-            $target);
+        if (chunks[0] == 'data-serie') {
+            $itemSrc = $list.find('[' + e.dataTransfer.getData('text/plain') + ']');
+
+            if ($itemSrc.hasClass('expand')) {
+                serieName = $itemSrc.data('source').attr('data-serie');
+
+                $item = adminGraphCreateProxy(PROXY_TYPE_SERIE, serieName, $target);
+                domFillItem($item, $itemSrc.data('source').data('expands')[chunks[1]]);
+            } else {
+                adminGraphCreateProxy(PROXY_TYPE_SERIE, chunks[1], $target);
+
+            }
+        } else {
+            adminGraphCreateProxy(PROXY_TYPE_GROUP, chunks[1], $target);
+        }
 
         // Remove item from stack
         if (ADMIN_PANES['graph-edit'].active != 'stack')
