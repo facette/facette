@@ -950,18 +950,17 @@ function adminGraphSetupTerminate() {
                     break;
 
                 case 'step-save':
-                    $(e.target).closest('[data-pane]').find('input[name=graph-name], textarea[name=graph-desc]')
-                        .each(function () {
-                            var $item = $(this);
+                    $(e.target).closest('[data-pane]').find('input[name=graph-name]').each(function () {
+                        var $item = $(this);
 
-                            if (!$item.val()) {
-                                $item.closest('[data-input], textarea')
-                                    .attr('title', $.t('main.mesg_field_mandatory'))
-                                    .addClass('error');
+                        if (!$item.val()) {
+                            $item.closest('[data-input], textarea')
+                                .attr('title', $.t('main.mesg_field_mandatory'))
+                                .addClass('error');
 
-                                skip = true;
-                            }
-                        });
+                            skip = true;
+                        }
+                    });
 
                     if (skip) {
                         return;

@@ -249,18 +249,17 @@ function adminGroupSetupTerminate() {
                     break;
 
                 case 'step-save':
-                    $(e.target).closest('[data-pane]').find('input[name=group-name], textarea[name=group-desc]')
-                        .each(function () {
-                            var $item = $(this);
+                    $(e.target).closest('[data-pane]').find('input[name=group-name]').each(function () {
+                        var $item = $(this);
 
-                            if (!$item.val()) {
-                                $item.closest('[data-input], textarea')
-                                    .attr('title', $.t('main.mesg_field_mandatory'))
-                                    .addClass('error');
+                        if (!$item.val()) {
+                            $item.closest('[data-input], textarea')
+                                .attr('title', $.t('main.mesg_field_mandatory'))
+                                .addClass('error');
 
-                                skip = true;
-                            }
-                        });
+                            skip = true;
+                        }
+                    });
 
                     if (skip) {
                         return;
