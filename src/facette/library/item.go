@@ -299,7 +299,8 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 	}
 
 	// Check for name field presence/duplicates
-	if itemStruct.Name == "" {
+	if itemStruct.Name == "" && (itemType != LibraryItemGraph ||
+		itemType == LibraryItemGraph && !item.(*Graph).Volatile) {
 		return os.ErrInvalid
 	} else if itemTemp, err = library.GetItemByName(itemStruct.Name, itemType); err == nil {
 		switch itemType {
