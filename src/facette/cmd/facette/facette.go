@@ -2,12 +2,11 @@ package main
 
 import (
 	"facette/server"
+	"facette/utils"
 	"flag"
 	"fmt"
-	"io"
 	"os"
 	"os/signal"
-	"path"
 	"syscall"
 )
 
@@ -17,28 +16,18 @@ var (
 	flagHelp   bool
 )
 
-func printUsage(output io.Writer) {
-	fmt.Fprintf(output, "Usage: %s [OPTIONS] -c FILE\n\nOptions:\n", path.Base(os.Args[0]))
-
-	flag.VisitAll(func(f *flag.Flag) {
-		fmt.Fprintf(output, "   -%s  %s\n", f.Name, f.Usage)
-	})
-
-	os.Exit(2)
-}
-
 func init() {
 	flag.StringVar(&flagConfig, "c", "", "configuration file path")
 	flag.IntVar(&flagDebug, "d", 0, "debugging level")
 	flag.BoolVar(&flagHelp, "h", false, "display this help and exit")
-	flag.Usage = func() { printUsage(os.Stderr) }
+	flag.Usage = func() { utils.PrintUsage(os.Stderr) }
 	flag.Parse()
 
 	if flagHelp {
-		printUsage(os.Stdout)
+		utils.PrintUsage(os.Stdout)
 	} else if flagConfig == "" {
 		fmt.Fprintf(os.Stderr, "Error: configuration file path is mandatory\n")
-		printUsage(os.Stderr)
+		utils.PrintUsage(os.Stderr)
 	}
 }
 
