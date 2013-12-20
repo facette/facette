@@ -6,7 +6,6 @@ none
 
 - add: provide a `facettectl' utility to handle server (start/stop/restart/reload) and user management
 - fix: location bar focus when pressing tab in completion forms
-- fix: graph load when printing
 
 [ medium ]
 

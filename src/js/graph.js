@@ -326,7 +326,7 @@ function graphDraw(graph, postpone, delay) {
                     .addClass('icon icon-warning')
                     .text($.t('graph.mesg_load_failed'));
 
-                $deferred.reject();
+                $deferred.resolve();
             });
         }, delay);
     }).promise();
@@ -553,7 +553,7 @@ function graphHandleQueue(force) {
                     $(GRAPH_DRAW_PARENTS[i]).off('scroll', graphHandleQueue);
             }
 
-            $.when.apply(null, $deferreds).always(function () {
+            $.when.apply(null, $deferreds).then(function () {
                 if (GRAPH_DRAW_TIMEOUTS.mesg)
                     clearTimeout(GRAPH_DRAW_TIMEOUTS.mesg);
 
