@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"facette/auth"
 	"facette/backend"
-	"facette/config"
+	"facette/common"
 	"facette/library"
 	"fmt"
 	"github.com/gorilla/handlers"
@@ -30,7 +30,7 @@ const (
 
 // Server is the main service handler of Facette.
 type Server struct {
-	Config     *config.Config
+	Config     *common.Config
 	Auth       *auth.Auth
 	Catalog    *backend.Catalog
 	Library    *library.Library
@@ -214,7 +214,7 @@ func NewServer(debugLevel int) (*Server, error) {
 	)
 
 	// Create new server instance
-	server = &Server{Config: &config.Config{}, debugLevel: debugLevel}
+	server = &Server{Config: &common.Config{}, debugLevel: debugLevel}
 	server.Auth = auth.NewAuth(server.Config, debugLevel)
 	server.Catalog = backend.NewCatalog(server.Config, debugLevel)
 	server.Library = library.NewLibrary(server.Config, server.Catalog, debugLevel)

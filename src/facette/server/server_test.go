@@ -3,7 +3,7 @@ package server
 import (
 	"encoding/json"
 	"facette/backend"
-	"facette/config"
+	"facette/common"
 	"facette/library"
 	"flag"
 	"fmt"
@@ -18,7 +18,7 @@ import (
 
 var (
 	flagConfig   string
-	serverConfig *config.Config
+	serverConfig *common.Config
 )
 
 func Test_originList(test *testing.T) {
@@ -882,7 +882,7 @@ func init() {
 	}
 
 	// Load server configuration
-	serverConfig = &config.Config{}
+	serverConfig = &common.Config{}
 	if err = serverConfig.Load(flagConfig); err != nil {
 		fmt.Println("Error: " + err.Error())
 		os.Exit(1)

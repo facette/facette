@@ -1,7 +1,7 @@
 package library
 
 import (
-	"facette/config"
+	"facette/common"
 	"facette/utils"
 	"fmt"
 	"github.com/fatih/set"
@@ -61,7 +61,7 @@ func (library *Library) GetCollectionTemplate(name string) (*Collection, error) 
 		options    map[string]string
 		splitItems []string
 		splitSet   *set.Set
-		template   *config.TemplateConfig
+		template   *common.TemplateConfig
 		templates  []string
 	)
 

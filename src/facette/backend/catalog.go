@@ -1,7 +1,7 @@
 package backend
 
 import (
-	"facette/config"
+	"facette/common"
 	"fmt"
 	"log"
 	"time"
@@ -9,7 +9,7 @@ import (
 
 // Catalog represents the main structure of running Facette's instance (e.g. origins, sources, metrics).
 type Catalog struct {
-	Config     *config.Config
+	Config     *common.Config
 	Origins    map[string]*Origin
 	Updated    time.Time
 	debugLevel int
@@ -93,7 +93,7 @@ func (catalog *Catalog) Update() error {
 }
 
 // NewCatalog creates a new instance of Catalog.
-func NewCatalog(config *config.Config, debugLevel int) *Catalog {
+func NewCatalog(config *common.Config, debugLevel int) *Catalog {
 	// Create new Catalog instance
 	return &Catalog{Config: config, Origins: make(map[string]*Origin), debugLevel: debugLevel}
 }

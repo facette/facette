@@ -2,7 +2,7 @@ package library
 
 import (
 	"facette/backend"
-	"facette/config"
+	"facette/common"
 	"facette/utils"
 	"log"
 	"os"
@@ -32,7 +32,7 @@ const (
 // Library represents the main structure of running Facette's instance library (e.g. sources and metrics groups,
 // graphs, collections).
 type Library struct {
-	Config         *config.Config
+	Config         *common.Config
 	Catalog        *backend.Catalog
 	Groups         map[string]*Group
 	Graphs         map[string]*Graph
@@ -102,7 +102,7 @@ func (library *Library) Update() error {
 }
 
 // NewLibrary creates a new instance of Library.
-func NewLibrary(config *config.Config, catalog *backend.Catalog, debugLevel int) *Library {
+func NewLibrary(config *common.Config, catalog *backend.Catalog, debugLevel int) *Library {
 	var (
 		library *Library
 	)

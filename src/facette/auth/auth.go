@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"facette/config"
+	"facette/common"
 	"facette/utils"
 	"log"
 )
@@ -10,7 +10,7 @@ import (
 
 // Auth represents the main authentication method structure.
 type Auth struct {
-	Config     *config.Config
+	Config     *common.Config
 	Users      map[string]string
 	debugLevel int
 }
@@ -37,7 +37,7 @@ func (auth *Auth) Update() error {
 }
 
 // NewAuth creates a new instance of Auth.
-func NewAuth(config *config.Config, debugLevel int) *Auth {
+func NewAuth(config *common.Config, debugLevel int) *Auth {
 	// Create new Auth instance
 	return &Auth{Config: config, debugLevel: debugLevel}
 }
