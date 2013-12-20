@@ -12,7 +12,8 @@ GOPATH = $(realpath $(BUILD_DIR)):$(realpath ../..)
 GOLINT = golint
 GOLINT_ARGS =
 
-BIN_FILES = facette
+BIN_FILES = facette \
+	facettectl
 
 SRC_FILES = $(wildcard */*.go)
 
