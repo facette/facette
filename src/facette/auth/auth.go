@@ -22,7 +22,7 @@ func (auth *Auth) Update() error {
 	)
 
 	if auth.debugLevel > 0 {
-		log.Printf("DEBUG: load authentication data from `%s' file...\n", auth.Config.AuthFile)
+		log.Printf("DEBUG: loading authentication data from `%s' file...\n", auth.Config.AuthFile)
 	}
 
 	// Empty users map
