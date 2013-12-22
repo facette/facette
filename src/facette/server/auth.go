@@ -1,9 +1,7 @@
 package server
 
 import (
-	"crypto/sha256"
 	"encoding/base64"
-	"hash"
 	"net/http"
 	"strings"
 )
@@ -14,7 +12,6 @@ func (server *Server) handleAuth(writer http.ResponseWriter, request *http.Reque
 		chunks        []string
 		data          []byte
 		err           error
-		hash          hash.Hash
 	)
 
 	authorization = request.Header.Get("Authorization")
@@ -28,20 +25,7 @@ func (server *Server) handleAuth(writer http.ResponseWriter, request *http.Reque
 			return false
 		}
 
-		// Get password hash
-		hash = sha256.New()
-		hash.Write([]byte(chunks[1]))
-
-		chunks[1] = base64.StdEncoding.EncodeToString(hash.Sum(nil))
-
-		// Check for credentials match
-		for login, password := range server.Auth.Users {
-			if login != chunks[0] {
-				continue
-			} else if password != chunks[1] {
-				break
-			}
-
+		if server.Auth.Authenticate(chunks[0], chunks[1]) {
 			return true
 		}
 	}

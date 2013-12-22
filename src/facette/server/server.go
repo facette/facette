@@ -85,7 +85,10 @@ func (server *Server) Reload() error {
 		return err
 	}
 
-	server.Auth.Update()
+	if err = server.Auth.Update(); err != nil {
+		return err
+	}
+
 	server.Catalog.Update()
 	server.Library.Update()
 
