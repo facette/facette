@@ -11,6 +11,10 @@ import (
 	"syscall"
 )
 
+const (
+	cmdUsage = "Usage: %s [OPTIONS]"
+)
+
 var (
 	flagConfig string
 	flagDebug  int
@@ -21,14 +25,14 @@ func init() {
 	flag.StringVar(&flagConfig, "c", common.DefaultConfigFile, "configuration file path")
 	flag.IntVar(&flagDebug, "d", 0, "debugging level")
 	flag.BoolVar(&flagHelp, "h", false, "display this help and exit")
-	flag.Usage = func() { utils.PrintUsage(os.Stderr) }
+	flag.Usage = func() { utils.PrintUsage(os.Stderr, cmdUsage) }
 	flag.Parse()
 
 	if flagHelp {
-		utils.PrintUsage(os.Stdout)
+		utils.PrintUsage(os.Stdout, cmdUsage)
 	} else if flagConfig == "" {
 		fmt.Fprintf(os.Stderr, "Error: configuration file path is mandatory\n")
-		utils.PrintUsage(os.Stderr)
+		utils.PrintUsage(os.Stderr, cmdUsage)
 	}
 }
 

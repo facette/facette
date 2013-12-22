@@ -4,11 +4,11 @@ none
 
 [ high ]
 
-- add: provide a `facettectl' utility to handle server (start/stop/restart/reload) and user management
+none
 
 [ medium ]
 
-none
+- add: provide a `reload' command to the `facettectl' utility to handle server reload
 
 [ low ]
 

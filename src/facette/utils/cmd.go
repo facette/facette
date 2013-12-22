@@ -9,8 +9,9 @@ import (
 )
 
 // PrintUsage prettifies the output of command-line usage.
-func PrintUsage(output io.Writer) {
-	fmt.Fprintf(output, "Usage: %s [OPTIONS] -c FILE\n\nOptions:\n", path.Base(os.Args[0]))
+func PrintUsage(output io.Writer, usage string) {
+	fmt.Fprintf(output, usage, path.Base(os.Args[0]))
+	fmt.Fprint(output, "\n\nOptions:\n")
 
 	flag.VisitAll(func(f *flag.Flag) {
 		fmt.Fprintf(output, "   -%s  %s\n", f.Name, f.Usage)
