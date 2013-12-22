@@ -6,7 +6,7 @@ What is Facette?
 
 [Facette][0] is a graphing web front-end.
 
-Its code is available at [Github][1], and is licensed under the terms of the [BSD license][].
+Its code is available at [Github][1], and is licensed under the terms of the [BSD license][2].
 
 /!\ Important: Facette is currently under development and is **not ready** for a production environment.
 
