@@ -1,6 +1,6 @@
 # Installation — Facette
 
-## From binaries packages
+## From binaries
 
 Not available yet
 
