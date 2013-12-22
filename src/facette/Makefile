@@ -4,6 +4,7 @@
 include ../../Makefile.inc
 
 GIT = git
+HG = hg
 
 GO = go
 GOPATH = $(realpath $(BUILD_DIR)):$(realpath ../..)
@@ -33,17 +34,12 @@ lint: $(SRC_FILES)
 
 depends:
 	@$(call mesg_start,Fetching Go dependencies...)
-	@install -m 0755 -d $(BUILD_DIR)/src && cd $(BUILD_DIR)/src && \
-		while read ENTRY; do \
-			DEP_DIR=`echo $$ENTRY | awk '{print $$1}'`; \
-			test -d $$DEP_DIR || $(GIT) clone https://$$ENTRY $$DEP_DIR; \
-		done <$(MAKEFILE_DIR)/Makefile.deps && \
-		$(call mesg_ok) || $(call mesg_fail)
+	@$(MAKEFILE_DIR)/fetch-depends.sh $(BUILD_DIR)/src && $(call mesg_ok) || $(call mesg_fail)
 
 $(BIN_FILES): depends $(SRC_FILES)
 	@$(call mesg_start,Building $@ binary file...)
 	@install -m 0755 -d $(PREFIX)/bin && \
-		$(GO) build -o $(PREFIX)/bin/$@ cmd/$@/$@.go && \
+		$(GO) build -o $(PREFIX)/bin/$@ cmd/$@/*.go && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 build: $(BIN_FILES)

@@ -1,6 +1,0 @@
-github.com/fatih/set         -b master
-github.com/gorilla/context   -b master
-github.com/gorilla/handlers  -b master
-github.com/gorilla/mux       -b master
-github.com/nu7hatch/gouuid   -b master
-github.com/ziutek/rrd        -b master
