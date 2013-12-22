@@ -1,6 +1,7 @@
 package main
 
 import (
+	"facette/common"
 	"facette/server"
 	"facette/utils"
 	"flag"
@@ -17,7 +18,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&flagConfig, "c", "", "configuration file path")
+	flag.StringVar(&flagConfig, "c", common.DefaultConfigFile, "configuration file path")
 	flag.IntVar(&flagDebug, "d", 0, "debugging level")
 	flag.BoolVar(&flagHelp, "h", false, "display this help and exit")
 	flag.Usage = func() { utils.PrintUsage(os.Stderr) }
