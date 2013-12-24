@@ -99,8 +99,8 @@ install: build
 		install -m 0644 $(JS_FILE_MIN) $(DST_DIR)/$(notdir $(JS_FILE)) && \
 		install -m 0644 $(MSG_FILE_MIN) $(DST_DIR)/$(notdir $(MSG_FILE)) && \
 		$(call mesg_ok) || $(call mesg_fail)
-	@$(call mesg_start,Copying extra files...)
-	@cd extra && for FILE in $(EXT_FILES_MIN); do \
+	@$(call mesg_start,Copying third-party files...)
+	@cd thirdparty && for FILE in $(EXT_FILES_MIN); do \
 		cp -r $$FILE $(DST_DIR)/`echo $$FILE | sed -e 's/\.min\.js$$/.js/'`; \
 		done && $(call mesg_ok) || $(call mesg_fail)
 
@@ -108,5 +108,5 @@ devel: install
 	@$(call mesg_start,Overriding files...)
 	@install -m 0644 $(JS_FILE) $(DST_DIR)/$(notdir $(JS_FILE)) && \
 		install -m 0644 $(MSG_FILE) $(DST_DIR)/$(notdir $(MSG_FILE)) && \
-		cd extra && cp -r $(EXT_FILES) $(DST_DIR)/ && \
+		cd thirdparty && cp -r $(EXT_FILES) $(DST_DIR)/ && \
 		$(call mesg_ok) || $(call mesg_fail)
