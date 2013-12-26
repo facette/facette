@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"regexp"
+	"strings"
 )
 
 // Config represents the main configuration system structure.
@@ -41,7 +42,7 @@ func (config *Config) Load(filePath string) error {
 			originName string
 		)
 
-		if fileInfo.IsDir() {
+		if fileInfo.IsDir() || !strings.HasSuffix(filePath, ".json") {
 			return nil
 		}
 
