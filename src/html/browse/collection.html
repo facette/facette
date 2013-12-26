@@ -18,7 +18,7 @@
 				<dt>Graphs</dt>{{ if .Collection.Entries }}{{ if ne $q "" }}
 				<dd><a href="{{ .Request.URL.Path }}">..</a></dd>{{ end }}{{ range .Collection.Entries }}
 				<dd><a href="#{{ .Options.origin }}-{{ .Options.template }}{{ if .Options.filter }}-{{ .Options.filter }}{{ end }}">{{ .Options.title }}</a></dd>{{ end }}{{ else }}
-				<dd>No graph</dd>{{ end }}
+				<dd class="placeholder icon icon-info">No graph</dd>{{ end }}
 			</dl>
 		</nav>
 
