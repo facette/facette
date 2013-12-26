@@ -56,8 +56,8 @@ function inputHandleClick(e) {
 function inputHandleFocus(e) {
     // Trigger change if value modified
     if (e.target.value != e.target._lastValue) {
-        $(e.target).trigger({
-            type: 'keyup',
+        menuMatch($(e.target).closest('[data-input]').attr('data-input')).trigger({
+            type: 'keydown',
             which: EVENT_KEY_ENTER
         });
     }
@@ -110,8 +110,8 @@ function inputHandleKeyComplete(e) {
     } else if (e.which == EVENT_KEY_ENTER) {
         // Validate completion
         e.target._lastValue = e.target.value;
-
         e.target.setSelectionRange(e.target.value.length, e.target.value.length);
+
         $target.trigger('change');
 
         return;
