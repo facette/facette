@@ -1,8 +1,6 @@
 #!/usr/bin/make -f
 # -*- Makefile -*-
 
-SED = sed
-
 CURL = curl
 CURL_ARGS = --silent
 
@@ -30,7 +28,6 @@ update:
 	@echo 'Updating jquery-simple-datetimepicker...'
 	@$(CURL) $(CURL_ARGS) --output jquery.datepicker.js \
 		https://raw.github.com/mugifly/jquery-simple-datetimepicker/master/jquery.simple-dtpicker.js
-	@$(SED) -re 's/\s+$$//' -i jquery.datepicker.js
 	@$(UGLIFYJS) $(UGLIFYJS_ARGS) --comments '/jquery-simple-datetimepicker/' -- \
 		jquery.datepicker.js >jquery.datepicker.min.js
 	@echo 'Updating canvg...'

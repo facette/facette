@@ -84,7 +84,16 @@
     		days: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
     		months: [ "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre" ],
     		format: 'DD-MM-YYYY hh:mm'
-    		}
+    		},
+    	pl: {
+    		days: ['N', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'So'],
+    		months: [ "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień" ],
+    		sep: '-',
+    		format: 'YYYY-MM-DD hh:mm',
+    		prevMonth: 'Poprzedni miesiąc',
+    		nextMonth: 'Następny miesiąc',
+    		today: 'Dzisiaj'
+    		},
     };
 
 	var PickerObjects = [];
@@ -300,7 +309,11 @@
 		var locale = $picker.data("locale");
 		var format = getDateFormat($picker.data("dateFormat"), locale, $picker.data('dateOnly'));
 
-		$inp.val( getFormattedDate(date, format) );
+		var old = $inp.val();
+		$inp.val(getFormattedDate(date, format));
+		if (old != $inp.val()) { // only trigger if it actually changed to avoid a nasty loop condition
+			$inp.trigger("change");
+		}
 	};
 
 	var getPickedDate = function($obj) {
@@ -347,6 +360,8 @@
 		}
 
 		var isFutureOnly = $picker.data("futureOnly");
+		var minDate = $picker.data("minDate");
+		var maxDate = $picker.data("maxDate");
 
 		var isOutputToInputObject = option.isOutputToInputObject;
 
@@ -412,7 +427,15 @@
 		/* Header ----- */
 		$header.children().remove();
 
-		if (!isFutureOnly || !isCurrentMonth) {
+		var cDate =  new Date(date.getTime());
+		cDate.setMinutes(59);
+		cDate.setHours(23);
+		cDate.setSeconds(59);
+		cDate.setDate(0); // last day of previous month
+
+		if ((!isFutureOnly || !isCurrentMonth)
+			&& ((minDate == null) || (minDate < cDate.getTime()))
+		) {
 			var $link_before_month = $('<a>');
 			$link_before_month.text('<');
 			$link_before_month.prop('alt', translate(locale,'prevMonth'));
@@ -422,16 +445,24 @@
 			});
 		}
 
+		cDate.setMinutes(0);
+		cDate.setHours(0);
+		cDate.setSeconds(0);
+		cDate.setDate(1); // First day of next month
+		cDate.setMonth(date.getMonth() + 1);
+
 		var $now_month = $('<span>');
 		$now_month.text(date.getFullYear() + " " + translate(locale, 'sep') + " " + translate(locale, 'months')[date.getMonth()]);
 
-		var $link_next_month = $('<a>');
-		$link_next_month.text('>');
-		$link_next_month.prop('alt', translate(locale,'nextMonth'));
-		$link_next_month.prop('title', translate(locale,'nextMonth'));
-		$link_next_month.click(function() {
-			nextMonth($picker);
-		});
+		if ((maxDate == null) || (maxDate > cDate.getTime())) {
+			var $link_next_month = $('<a>');
+			$link_next_month.text('>');
+			$link_next_month.prop('alt', translate(locale,'nextMonth'));
+			$link_next_month.prop('title', translate(locale,'nextMonth'));
+			$link_next_month.click(function() {
+				nextMonth($picker);
+			});
+		}
 
 		if (isTodayButton) {
 			var $link_today = $('<a/>');
@@ -474,6 +505,10 @@
 		if(firstWday < 0){
 			i = -7;
 		}
+		var realDayObj =  new Date(date.getTime());
+		realDayObj.setHours(0);
+		realDayObj.setMinutes(0);
+		realDayObj.setSeconds(0);
 		for (var zz = 0; i < cellNum; i++) {
 			var realDay = i + 1 - firstWday;
 			var isPast = isCurrentMonth && realDay < todayDate.getDate();
@@ -492,13 +527,22 @@
 				$td.text(beforeMonthLastDay + realDay);
 				$td.addClass('day_another_month');
 				$td.data("dateStr", dateBeforeMonth.getFullYear() + "/" + (dateBeforeMonth.getMonth() + 1) + "/" + (beforeMonthLastDay + realDay));
+				realDayObj.setDate(beforeMonthLastDay + realDay);
+				realDayObj.setMonth(dateBeforeMonth.getMonth() );
+				realDayObj.setYear(dateBeforeMonth.getFullYear() );
 			} else if (i < firstWday + lastDay) {/* Now months day */
 				$td.text(realDay);
 				$td.data("dateStr", (date.getFullYear()) + "/" + (date.getMonth() + 1) + "/" + realDay);
+				realDayObj.setDate( realDay );
+				realDayObj.setMonth( date.getMonth()  );
+				realDayObj.setYear( date.getFullYear() );
 			} else {/* Next months day */
 				$td.text(realDay - lastDay);
 				$td.addClass('day_another_month');
 				$td.data("dateStr", dateNextMonth.getFullYear() + "/" + (dateNextMonth.getMonth() + 1) + "/" + (realDay - lastDay));
+				realDayObj.setDate( realDay - lastDay );
+				realDayObj.setMonth( dateNextMonth.getMonth() );
+				realDayObj.setYear( dateNextMonth.getFullYear() );
 			}
 
 			if (((i + firstDayDiff) % 7) == 0) {/* Sunday */
@@ -517,7 +561,17 @@
 
 			/* Set event-handler to day cell */
 
-			if (isFutureOnly && isPast) {
+			var realDayObjMN =  new Date(realDayObj.getTime());
+			realDayObjMN.setHours(23);
+			realDayObjMN.setMinutes(59);
+			realDayObjMN.setSeconds(59);
+
+			if (
+				((minDate != null) && (minDate > realDayObjMN.getTime())) // compare to 23:59:59 on the current day (if MIN is 1pm, then we still need to show this day
+				|| ((maxDate != null) && (maxDate < realDayObj.getTime())) // compare to 00:00:00
+			) {
+				$td.addClass('out_of_range');
+			} else if (isFutureOnly && isPast) {
 				$td.addClass('day_in_past');
 			} else {
 				$td.click(function() {
@@ -561,8 +615,11 @@
 			$timelist.children().remove();
 
 			/* Set height to Timelist (Calendar innerHeight - Calendar padding) */
-			$timelist.css("height", $calendar.innerHeight() - 10 + 'px');
+			if ($calendar.innerHeight() > 0) {
+				$timelist.css("height", $calendar.innerHeight() - 10 + 'px');
+			}
 
+			realDayObj =  new Date(date.getTime());
 			/* Output time cells */
 			for (var hour = 0; hour < 24; hour++) {
 				for (var min = 0; min < 60; min += minuteInterval) {
@@ -585,7 +642,15 @@
 
 					/* Set event handler to time cell */
 
-					if (isFutureOnly && isPast) {
+					realDayObj.setHours(hour);
+					realDayObj.setMinutes(min);
+
+					if (
+						((minDate != null) && (minDate > realDayObj.getTime()))
+						|| ((maxDate != null) && (maxDate < realDayObj.getTime()))
+					) {
+						$o.addClass('out_of_range');
+					} else if (isFutureOnly && isPast) {
 						$o.addClass('time_in_past');
 					} else {
 						$o.click(function() {
@@ -683,6 +748,19 @@
 		$picker.data("todayButton", opt.todayButton);
 		$picker.data('futureOnly', opt.futureOnly);
 
+		var minDate = Date.parse(opt.minDate);
+		if (Number.isNaN(minDate)) { // invalid date?
+			$picker.data('minDate', null); // set to null
+		} else {
+			$picker.data('minDate', minDate);
+		}
+
+		var maxDate = Date.parse(opt.maxDate);
+		if (Number.isNaN(maxDate)) { // invalid date?
+			$picker.data('maxDate', null);  // set to null
+		} else {
+			$picker.data('maxDate', maxDate);
+		}
 		$picker.data("state", 0);
 
 		if( 5 <= opt.minuteInterval && opt.minuteInterval <= 30 ){
@@ -785,6 +863,8 @@
 			"todayButton": true,
 			"dateOnly": false,
 			"futureOnly": false,
+			"minDate" : null,
+			"maxDate" : null,
 			"autodateOnStart": true
 		};
 	};
