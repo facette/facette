@@ -54,6 +54,14 @@ function inputHandleClick(e) {
 }
 
 function inputHandleFocus(e) {
+    // Trigger change if value modified
+    if (e.target.value != e.target._lastValue) {
+        $(e.target).trigger({
+            type: 'keyup',
+            which: EVENT_KEY_ENTER
+        });
+    }
+
     // Reset completion state
     e.target._lastValue = null;
 
