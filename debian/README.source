@@ -2,4 +2,4 @@ facette for Debian
 ------------------
 
 git clone https://github.com/facette/facette.git
-tar cJvf facette_0.1~git20131116.orig.tar.xz facette --exclude=.git --exclude=.gitignore --exclude=debian
+tar cJvf facette_0.1~git20131226.orig.tar.xz facette --exclude=.git --exclude=.gitignore --exclude=debian

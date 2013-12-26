@@ -19,6 +19,7 @@ case "$1" in
         set_perms facette facette 0644 /etc/facette/facette.json
         set_perms facette facette 0640 /etc/facette/auth.json
         set_perms facette facette 0755 /var/lib/facette
+        set_perms facette facette 0755 /var/log/facette
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

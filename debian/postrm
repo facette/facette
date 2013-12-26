@@ -13,6 +13,7 @@ case "$1" in
         unset_perms /etc/facette/facette.json
         unset_perms /etc/facette/auth.json
         unset_perms /var/lib/facette
+        unset_perms /var/log/facette
 
         deluser --quiet facette 1>/dev/null 2>&1 || true
     ;;

@@ -1,12 +1,12 @@
 Index: facette/src/js/Makefile
 ===================================================================
---- facette.orig/src/js/Makefile	2013-11-10 13:04:42.299291951 +0100
-+++ facette/src/js/Makefile	2013-11-17 09:02:32.709356016 +0100
-@@ -81,8 +81,7 @@
+--- facette.orig/src/js/Makefile	2013-12-26 11:32:18.807613907 +0100
++++ facette/src/js/Makefile	2013-12-26 11:32:23.931665491 +0100
+@@ -85,8 +85,7 @@
  		$(call mesg_ok) || $(call mesg_fail)
  
  lint: $(JS_FILE)
--	@$(call mesg_start,Checking $(JS_FILE) with JSHint...)
+-	@$(call mesg_start,Checking $(notdir $(JS_FILE)) with JSHint...)
 -	-@$(JSHINT) $(JS_FILE) $(JSHINT_ARGS) && $(call mesg_ok) || $(call mesg_fail)
 +	@#PATCH: “Evil” JSHint removal
  
