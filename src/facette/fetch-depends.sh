@@ -19,7 +19,7 @@ fetch_git() {
 	if [ ! -d "$SRC_DIR/$NAME" ]; then
 		echo "Fetching $NAME..."
 		mkdir -p $SRC_DIR/$NAME
-		git clone $URL $SRC_DIR/$NAME -b $BRANCH
+		git clone --quiet $URL $SRC_DIR/$NAME -b $BRANCH
 	elif [ $UPDATE -ne 0 ]; then
 		echo "Updating $NAME..."
 		git --git-dir $SRC_DIR/$NAME/.git pull
@@ -34,7 +34,7 @@ fetch_hg() {
 	if [ ! -d "$SRC_DIR/$NAME" ]; then
 		echo "Fetching $NAME..."
 		mkdir -p $SRC_DIR/$NAME
-		hg clone $URL $SRC_DIR/$NAME -b $BRANCH
+		hg clone --quiet $URL $SRC_DIR/$NAME -b $BRANCH
 	elif [ $UPDATE -ne 0 ]; then
 		echo "Updating $NAME..."
 		hg -R $SRC_DIR/$NAME pull

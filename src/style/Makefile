@@ -48,19 +48,19 @@ clean:
 	@$(call clean_build)
 
 $(CSS_FILE): $(TEMP_DIR) $(SRC_FILES)
-	@$(call mesg_start,Merging source files into $(CSS_FILE)...)
+	@$(call mesg_start,Merging source files into $(notdir $(CSS_FILE))...)
 	@cat $(SRC_FILES) | $(LESSC) $(LESSC_ARGS) - >$(CSS_FILE) && $(call mesg_ok) || $(call mesg_fail)
 
 $(CSS_FILE_MIN): $(TEMP_DIR) $(CSS_FILE)
-	@$(call mesg_start,Packing $(CSS_FILE) file...)
+	@$(call mesg_start,Packing $(notdir $(CSS_FILE)) file...)
 	@$(LESSC) $(LESSC_ARGS) --yui-compress $(CSS_FILE) >$(CSS_FILE_MIN) && $(call mesg_ok) || $(call mesg_fail)
 
 $(CSS_FILE_PRINT): $(TEMP_DIR) $(SRC_FILES_PRINT)
-	@$(call mesg_start,Merging source files into $(CSS_FILE_PRINT)...)
+	@$(call mesg_start,Merging source files into $(notdir $(CSS_FILE_PRINT))...)
 	@cat $(SRC_FILES_PRINT) | $(LESSC) $(LESSC_ARGS) - >$(CSS_FILE_PRINT) && $(call mesg_ok) || $(call mesg_fail)
 
 $(CSS_FILE_PRINT_MIN): $(TEMP_DIR) $(CSS_FILE_PRINT)
-	@$(call mesg_start,Packing $(CSS_FILE_PRINT) file...)
+	@$(call mesg_start,Packing $(notdir $(CSS_FILE_PRINT)) file...)
 	@$(LESSC) $(LESSC_ARGS) --yui-compress $(CSS_FILE_PRINT) >$(CSS_FILE_PRINT_MIN) && \
 		$(call mesg_ok) || $(call mesg_fail)
 

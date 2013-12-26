@@ -72,11 +72,11 @@ clean:
 	@$(call clean_build)
 
 $(JS_FILE): $(TEMP_DIR) $(SRC_FILES)
-	@$(call mesg_start,Merging origin files into $(JS_FILE)...)
+	@$(call mesg_start,Merging origin files into $(notdir $(JS_FILE))...)
 	@cat $(SRC_FILES) >$(JS_FILE) && $(call mesg_ok) || $(call mesg_fail)
 
 $(JS_FILE_MIN): $(TEMP_DIR) $(JS_FILE)
-	@$(call mesg_start,Packing $(JS_FILE) file...)
+	@$(call mesg_start,Packing $(notdir $(JS_FILE)) file...)
 	@$(UGLIFYJS) $(UGLIFYJS_ARGS) --output $(JS_FILE_MIN) $(JS_FILE) && $(call mesg_ok) || $(call mesg_fail)
 
 $(MSG_FILE_MIN): $(TEMP_DIR) $(MSG_FILE)
@@ -85,7 +85,7 @@ $(MSG_FILE_MIN): $(TEMP_DIR) $(MSG_FILE)
 		$(call mesg_ok) || $(call mesg_fail)
 
 lint: $(JS_FILE)
-	@$(call mesg_start,Checking $(JS_FILE) with JSHint...)
+	@$(call mesg_start,Checking $(notdir $(JS_FILE)) with JSHint...)
 	-@$(JSHINT) $(JS_FILE) $(JSHINT_ARGS) && $(call mesg_ok) || $(call mesg_fail)
 
 build: $(JS_FILE_MIN) $(MSG_FILE_MIN)
