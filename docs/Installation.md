@@ -12,6 +12,7 @@ Not available yet
  * Set package: [set][1]
  * UUID Go package: [gouuid][2]
  * Gorilla [mux][3] and [handlers][4] packages
+ * Gopass package: [gopass][5]
 
 ### Build instructions
 
@@ -58,3 +59,4 @@ Note: the `PREFIX` variable must be prepended to each command if passed during t
 [2]: https://github.com/nu7hatch/gouuid
 [3]: https://github.com/gorilla/mux
 [4]: https://github.com/gorilla/handlers
+[5]: https://github.com/howeyc/gopass
