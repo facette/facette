@@ -40,7 +40,9 @@ function graphDraw(graph, postpone, delay) {
             graph.replaceWith(graphNew);
             graph = graphNew;
 
-            graph.data('setup', true);
+            graph
+                .data('options', graph.opts('graph'))
+                .data('setup', true);
 
             graph.find('.graphctrl .ranges').hide();
         }
@@ -58,7 +60,7 @@ function graphDraw(graph, postpone, delay) {
                 query;
 
             // Parse graph options
-            graphOpts = graph.data('options') || graph.opts('graph');
+            graphOpts = graph.data('options');
 
             if (typeof graphOpts.preview != 'boolean')
                 graphOpts.preview = graphOpts.preview && graphOpts.preview.trim().toLowerCase() == 'true' ? true : false;
@@ -396,7 +398,7 @@ function graphHandleActions(e) {
         // Refresh graph
         graphDraw($graph, false);
     } else if (e.target.href.endsWith('#reset')) {
-        // Reset graph to its sourceal state
+        // Reset graph to its initial state
         $graph.data('options', null);
         graphDraw($graph);
     } else if (e.target.href.endsWith('#save')) {
