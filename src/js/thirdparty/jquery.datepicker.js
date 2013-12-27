@@ -749,14 +749,14 @@
 		$picker.data('futureOnly', opt.futureOnly);
 
 		var minDate = Date.parse(opt.minDate);
-		if (Number.isNaN(minDate)) { // invalid date?
+		if (isNaN(minDate)) { // invalid date?
 			$picker.data('minDate', null); // set to null
 		} else {
 			$picker.data('minDate', minDate);
 		}
 
 		var maxDate = Date.parse(opt.maxDate);
-		if (Number.isNaN(maxDate)) { // invalid date?
+		if (isNaN(maxDate)) { // invalid date?
 			$picker.data('maxDate', null);  // set to null
 		} else {
 			$picker.data('maxDate', maxDate);
