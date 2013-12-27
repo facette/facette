@@ -5,6 +5,7 @@ var GRAPH_DRAW_PARENTS  = [],
     GRAPH_DRAW_QUEUE    = [],
     GRAPH_DRAW_TIMEOUTS = {},
 
+    GRAPH_CONTROL_LOCK    = false,
     GRAPH_CONTROL_TIMEOUT = null,
 
     $graphTemplate;
@@ -466,8 +467,14 @@ function graphHandleMouse(e) {
         margin,
         offset;
 
+    // Handle control lock
+    if (e.type == 'mouseup' || e.type == 'mousedown') {
+        GRAPH_CONTROL_LOCK = e.type == 'mousedown';
+        return;
+    }
+
     // Stop if graph has no control or is disabled
-    if ($control.length === 0 || $control.attr('disabled'))
+    if (GRAPH_CONTROL_LOCK || $control.length === 0 || $control.attr('disabled'))
         return;
 
     if (e.type != 'mousemove') {
@@ -633,7 +640,7 @@ function graphSetupTerminate() {
         .on('resize', graphHandleQueue);
 
     $body
-        .on('mousemove mouseleave', '[data-graph]', graphHandleMouse)
+        .on('mouseup mousedown mousemove mouseleave', '[data-graph]', graphHandleMouse)
         .on('mouseenter mouseleave', '.graphctrl .step, .graphctrl .actions', graphHandleMouse)
         .on('click', '[data-graph] a', graphHandleActions)
         .on('click', '.graphlist a', graphHandleQueue);
