@@ -36,9 +36,17 @@ function listEmpty(list) {
 
     list
         .data('counter', 0)
+        .data('offset', 0)
         .find('[data-listitem^="' + list.attr('data-list') + '-item"]').remove();
 
-    listUpdateCount(list);
+    listUpdateCount(list, 0);
+}
+
+function listGetCount(list) {
+    if (typeof list == 'string')
+        list = listMatch(list);
+
+    return list.find('[data-listitem^="' + list.attr('data-list') + '-item"]').length;
 }
 
 function listInit(element) {
@@ -56,6 +64,7 @@ function listInit(element) {
 
         $item
             .data('counter', 0)
+            .data('offset', 0)
             .data('template', $template)
             .data('container', $template.parent());
 
@@ -73,8 +82,9 @@ function listInit(element) {
     }).promise();
 }
 
-function listMatch(name) {
-    return $('[data-list=' + name + ']');
+function listMatch(name, suffix) {
+    suffix = suffix || '';
+    return $('[data-list' + suffix + '="' + name + '"]');
 }
 
 function listNextName(list, attr, prefix) {
@@ -181,10 +191,25 @@ function listSetupInit() {
     }).promise();
 }
 
-function listUpdate(list, listFilter) {
+function listSetupMoreInit() {
+    var $more;
+
+    $more = $('[data-listmore]');
+
+    if ($more.length > 0) {
+        $body.on('click', '[data-listmore]', function (e) {
+            var listId = e.target.getAttribute('data-listmore');
+            listUpdate(listId, listMatch(listId, 'filter').val(), listGetCount(listId));
+        });
+    }
+}
+
+function listUpdate(list, listFilter, offset) {
     var query,
         timeout,
         url;
+
+    offset = parseInt(offset, 10) || 0;
 
     if (typeof list == 'string')
         list = listMatch(list);
@@ -196,7 +221,11 @@ function listUpdate(list, listFilter) {
         });
     }, 500);
 
-    listEmpty(list);
+    // Empty list if not appending entries
+    if (offset === 0) {
+        listEmpty(list);
+        listMatch(list.attr('data-list'), 'more').attr('disabled', 'disabled');
+    }
 
     // Request data
     url = list.opts('list').url;
@@ -204,15 +233,22 @@ function listUpdate(list, listFilter) {
     query = {
         url: '/' + url,
         type: 'GET',
+        data: {
+            offset: offset,
+            limit: LIST_FETCH_LIMIT
+        }
     };
 
     if (listFilter)
-        query.data = {filter: '*' + listFilter + '*'};
+        query.data.filter = '*' + listFilter + '*';
 
-    return $.ajax(query).pipe(function (data) {
+    return $.ajax(query).done(function (data, status, xhr) {
+        /*jshint unused: true */
+
         var $item,
             i,
-            namespace;
+            namespace,
+            records = parseInt(xhr.getResponseHeader('X-Total-Records'), 10);
 
         if (!data || data instanceof Array && data.length === 0) {
             namespace = list.opts('list').messages || 'item';
@@ -249,7 +285,12 @@ function listUpdate(list, listFilter) {
             $item.find('.date span').text(moment(data[i].modified).format('LLL'));
         }
 
-        listUpdateCount(list);
+        listUpdateCount(list, records);
+
+        if (listGetCount(list) < records)
+            listMatch(list.attr('data-list'), 'more').removeAttr('disabled');
+        else
+            listMatch(list.attr('data-list'), 'more').attr('disabled', 'disabled');
     }).fail(function () {
         listEmpty(list);
         listSay(list, $.t('list.mesg_load_error'), 'error');
@@ -265,14 +306,15 @@ function listUpdate(list, listFilter) {
     });
 }
 
-function listUpdateCount(list) {
+function listUpdateCount(list, count) {
     if (typeof list == 'string')
         list = listMatch(list);
 
     // Update list count
-    list.find('h1 .count').text(list.find('[data-listitem^="' + list.attr('data-list') + '-item"]').length || '');
+    list.find('h1 .count').text((count ? count : listGetCount(list)) || '');
 }
 
 // Register setup callbacks
 setupRegister(SETUP_CALLBACK_TERM, listSetupInit);
 setupRegister(SETUP_CALLBACK_TERM, listSetupFilterInit);
+setupRegister(SETUP_CALLBACK_TERM, listSetupMoreInit);

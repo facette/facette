@@ -52,12 +52,20 @@ func (server *Server) originList(writer http.ResponseWriter, request *http.Reque
 	var (
 		err      error
 		limit    int
+		offset   int
 		response []string
 	)
 
 	if request.Method != "GET" && request.Method != "HEAD" {
 		server.handleResponse(writer, http.StatusMethodNotAllowed)
 		return
+	}
+
+	if request.FormValue("offset") != "" {
+		if offset, err = strconv.Atoi(request.FormValue("offset")); err != nil {
+			server.handleResponse(writer, http.StatusBadRequest)
+			return
+		}
 	}
 
 	if request.FormValue("limit") != "" {
@@ -78,11 +86,20 @@ func (server *Server) originList(writer http.ResponseWriter, request *http.Reque
 		response = append(response, origin.Name)
 	}
 
+	if offset != 0 && offset >= len(response) {
+		server.handleResponse(writer, http.StatusBadRequest)
+		return
+	}
+
+	writer.Header().Add("X-Total-Records", strconv.Itoa(len(response)))
+
 	sort.Strings(response)
 
 	// Shrink responses if limit is set
-	if limit != 0 && len(response) > limit {
-		response = response[:limit]
+	if limit != 0 && len(response) > offset+limit {
+		response = response[offset : offset+limit]
+	} else if offset != 0 {
+		response = response[offset:]
 	}
 
 	server.handleJSON(writer, response)
@@ -125,16 +142,24 @@ func (server *Server) originShow(writer http.ResponseWriter, request *http.Reque
 
 func (server *Server) sourceList(writer http.ResponseWriter, request *http.Request) {
 	var (
-		err        error
-		limit      int
-		result     []string
-		resultSet  *set.Set
-		originName string
+		err         error
+		limit       int
+		offset      int
+		originName  string
+		response    []string
+		responseSet *set.Set
 	)
 
 	if request.Method != "GET" && request.Method != "HEAD" {
 		server.handleResponse(writer, http.StatusMethodNotAllowed)
 		return
+	}
+
+	if request.FormValue("offset") != "" {
+		if offset, err = strconv.Atoi(request.FormValue("offset")); err != nil {
+			server.handleResponse(writer, http.StatusBadRequest)
+			return
+		}
 	}
 
 	if request.FormValue("limit") != "" {
@@ -147,7 +172,7 @@ func (server *Server) sourceList(writer http.ResponseWriter, request *http.Reque
 	// Parse catalog for sources list
 	originName = request.FormValue("origin")
 
-	resultSet = set.New()
+	responseSet = set.New()
 
 	for _, origin := range server.Catalog.Origins {
 		if originName != "" && origin.Name != originName {
@@ -161,19 +186,28 @@ func (server *Server) sourceList(writer http.ResponseWriter, request *http.Reque
 				}
 			}
 
-			resultSet.Add(key)
+			responseSet.Add(key)
 		}
 	}
 
-	result = resultSet.StringSlice()
-	sort.Strings(result)
-
-	// Shrink results if limit is set
-	if limit != 0 && len(result) > limit {
-		result = result[:limit]
+	if offset != 0 && offset >= responseSet.Size() {
+		server.handleResponse(writer, http.StatusBadRequest)
+		return
 	}
 
-	server.handleJSON(writer, result)
+	writer.Header().Add("X-Total-Records", strconv.Itoa(responseSet.Size()))
+
+	response = responseSet.StringSlice()
+	sort.Strings(response)
+
+	// Shrink responses if limit is set
+	if limit != 0 && len(response) > offset+limit {
+		response = response[offset : offset+limit]
+	} else if offset != 0 {
+		response = response[offset:]
+	}
+
+	server.handleJSON(writer, response)
 }
 
 func (server *Server) sourceShow(writer http.ResponseWriter, request *http.Request) {
@@ -213,6 +247,7 @@ func (server *Server) metricList(writer http.ResponseWriter, request *http.Reque
 	var (
 		err         error
 		limit       int
+		offset      int
 		originName  string
 		response    []string
 		responseSet *set.Set
@@ -222,6 +257,13 @@ func (server *Server) metricList(writer http.ResponseWriter, request *http.Reque
 	if request.Method != "GET" && request.Method != "HEAD" {
 		server.handleResponse(writer, http.StatusMethodNotAllowed)
 		return
+	}
+
+	if request.FormValue("offset") != "" {
+		if offset, err = strconv.Atoi(request.FormValue("offset")); err != nil {
+			server.handleResponse(writer, http.StatusBadRequest)
+			return
+		}
 	}
 
 	if request.FormValue("limit") != "" {
@@ -269,12 +311,21 @@ func (server *Server) metricList(writer http.ResponseWriter, request *http.Reque
 		}
 	}
 
+	if offset != 0 && offset >= responseSet.Size() {
+		server.handleResponse(writer, http.StatusBadRequest)
+		return
+	}
+
+	writer.Header().Add("X-Total-Records", strconv.Itoa(responseSet.Size()))
+
 	response = responseSet.StringSlice()
 	sort.Strings(response)
 
 	// Shrink responses if limit is set
-	if limit != 0 && len(response) > limit {
-		response = response[:limit]
+	if limit != 0 && len(response) > offset+limit {
+		response = response[offset : offset+limit]
+	} else if offset != 0 {
+		response = response[offset:]
 	}
 
 	server.handleJSON(writer, response)

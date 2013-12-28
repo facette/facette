@@ -80,9 +80,7 @@ function adminCollectionSetupTerminate() {
                     validate: function () {
                         collectionDelete($item.attr('data-itemid'))
                             .then(function () {
-                                var $list = $item.closest('[data-list]');
-                                $item.remove();
-                                listUpdateCount($list);
+                                listUpdate($item.closest('[data-list]'));
                             })
                             .fail(function () {
                                 overlayCreate('alert', {

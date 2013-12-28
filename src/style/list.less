@@ -1,6 +1,14 @@
 
 section {
 	.list {
+		& + [data-listmore] {
+			margin-top: 2em;
+
+			&:disabled {
+				visibility: hidden;
+			}
+		}
+
 		.listmesg {
 			.message-list;
 			margin: 1em 0;

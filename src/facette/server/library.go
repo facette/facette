@@ -129,13 +129,21 @@ func (server *Server) libraryList(writer http.ResponseWriter, request *http.Requ
 		isSource   bool
 		item       interface{}
 		limit      int
-		result     libraryListResponse
+		offset     int
+		response   libraryListResponse
 		skip       bool
 	)
 
 	if request.Method != "GET" && request.Method != "HEAD" {
 		server.handleResponse(writer, http.StatusMethodNotAllowed)
 		return
+	}
+
+	if request.FormValue("offset") != "" {
+		if offset, err = strconv.Atoi(request.FormValue("offset")); err != nil {
+			server.handleResponse(writer, http.StatusBadRequest)
+			return
+		}
 	}
 
 	if request.FormValue("limit") != "" {
@@ -161,7 +169,7 @@ func (server *Server) libraryList(writer http.ResponseWriter, request *http.Requ
 				}
 			}
 
-			result.Items = append(result.Items, &libraryItemResponse{ID: group.ID, Name: group.Name,
+			response.Items = append(response.Items, &libraryItemResponse{ID: group.ID, Name: group.Name,
 				Description: group.Description, Modified: group.Modified.Format(time.RFC3339)})
 		}
 	} else if request.URL.Path == URLLibraryPath+"/graphs" {
@@ -198,20 +206,29 @@ func (server *Server) libraryList(writer http.ResponseWriter, request *http.Requ
 					}
 				}
 
-				result.Items = append(result.Items, &libraryItemResponse{ID: graph.ID, Name: graph.Name,
+				response.Items = append(response.Items, &libraryItemResponse{ID: graph.ID, Name: graph.Name,
 					Description: graph.Description, Modified: graph.Modified.Format(time.RFC3339)})
 			}
 		}
 	}
 
-	sort.Sort(result)
-
-	// Shrink results if limit is set
-	if limit != 0 && len(result.Items) > limit {
-		result.Items = result.Items[:limit]
+	if offset != 0 && offset >= len(response.Items) {
+		server.handleResponse(writer, http.StatusBadRequest)
+		return
 	}
 
-	server.handleJSON(writer, result.Items)
+	writer.Header().Add("X-Total-Records", strconv.Itoa(len(response.Items)))
+
+	sort.Sort(response)
+
+	// Shrink responses if limit is set
+	if limit != 0 && len(response.Items) > offset+limit {
+		response.Items = response.Items[offset : offset+limit]
+	} else if offset != 0 {
+		response.Items = response.Items[offset:]
+	}
+
+	server.handleJSON(writer, response.Items)
 }
 
 func (server *Server) groupHandle(writer http.ResponseWriter, request *http.Request) {
@@ -629,12 +646,20 @@ func (server *Server) collectionList(writer http.ResponseWriter, request *http.R
 		excludeSet      *set.Set
 		item            interface{}
 		limit           int
-		result          collectionListResponse
+		offset          int
+		response        collectionListResponse
 	)
 
 	if request.Method != "GET" && request.Method != "HEAD" {
 		server.handleResponse(writer, http.StatusMethodNotAllowed)
 		return
+	}
+
+	if request.FormValue("offset") != "" {
+		if offset, err = strconv.Atoi(request.FormValue("offset")); err != nil {
+			server.handleResponse(writer, http.StatusBadRequest)
+			return
+		}
 	}
 
 	if request.FormValue("limit") != "" {
@@ -691,17 +716,26 @@ func (server *Server) collectionList(writer http.ResponseWriter, request *http.R
 			collectionItem.Parent = &collection.Parent.ID
 		}
 
-		result.Items = append(result.Items, collectionItem)
+		response.Items = append(response.Items, collectionItem)
 	}
 
-	sort.Sort(result)
-
-	// Shrink results if limit is set
-	if limit != 0 && len(result.Items) > limit {
-		result.Items = result.Items[:limit]
+	if offset != 0 && offset >= len(response.Items) {
+		server.handleResponse(writer, http.StatusBadRequest)
+		return
 	}
 
-	server.handleJSON(writer, result.Items)
+	writer.Header().Add("X-Total-Records", strconv.Itoa(len(response.Items)))
+
+	sort.Sort(response)
+
+	// Shrink responses if limit is set
+	if limit != 0 && len(response.Items) > offset+limit {
+		response.Items = response.Items[offset : offset+limit]
+	} else if offset != 0 {
+		response.Items = response.Items[offset:]
+	}
+
+	server.handleJSON(writer, response.Items)
 }
 
 func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Request) {
@@ -716,7 +750,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 		plotMax       int
 		plotReq       *plotRequest
 		query         *backend.GroupQuery
-		result        *plotResponse
+		response      *plotResponse
 		stack         *stackResponse
 		startTime     time.Time
 		step          time.Duration
@@ -818,7 +852,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 		}
 	}
 
-	result = &plotResponse{
+	response = &plotResponse{
 		ID:          graph.ID,
 		Start:       startTime.Format(time.RFC3339),
 		End:         endTime.Format(time.RFC3339),
@@ -852,14 +886,14 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 			}
 		}
 
-		result.Stacks = append(result.Stacks, stack)
+		response.Stacks = append(response.Stacks, stack)
 	}
 
 	if plotMax > 0 {
-		result.Step = (endTime.Sub(startTime) / time.Duration(plotMax)).Seconds()
+		response.Step = (endTime.Sub(startTime) / time.Duration(plotMax)).Seconds()
 	}
 
-	server.handleJSON(writer, result)
+	server.handleJSON(writer, response)
 }
 
 func (server *Server) plotPrepareQuery(plotReq *plotRequest,
@@ -926,7 +960,7 @@ func (server *Server) plotValues(writer http.ResponseWriter, request *http.Reque
 		plotReq       *plotRequest
 		query         *backend.GroupQuery
 		refTime       time.Time
-		result        map[string]map[string]common.PlotValue
+		response      map[string]map[string]common.PlotValue
 		values        map[string]map[string]common.PlotValue
 	)
 
@@ -984,7 +1018,7 @@ func (server *Server) plotValues(writer http.ResponseWriter, request *http.Reque
 	}
 
 	// Get plots data
-	result = make(map[string]map[string]common.PlotValue)
+	response = make(map[string]map[string]common.PlotValue)
 	values = make(map[string]map[string]common.PlotValue)
 
 	for _, stackItem := range graph.Stacks {
@@ -1002,10 +1036,10 @@ func (server *Server) plotValues(writer http.ResponseWriter, request *http.Reque
 			}
 
 			for key, value := range values {
-				result[key] = value
+				response[key] = value
 			}
 		}
 	}
 
-	server.handleJSON(writer, result)
+	server.handleJSON(writer, response)
 }

@@ -26,6 +26,7 @@ Optional parameters:
 
  * __filter:__ the [match][3] pattern to apply on origins names (type: `string`)
  * __limit:__ the maximum number of items to return (type: `integer`)
+ * __offset:__ the offset to start fetching from (type: `integer`)
 
 Response:
 
@@ -35,6 +36,8 @@ Response:
     "origin1"
 ]
 ```
+
+A `X-Total-Records` HTTP header containing the total number of records is returned along with the response.
 
 ##### Get a single origin
 
@@ -68,6 +71,7 @@ Optional parameters:
 
  * __filter:__ the [match][3] pattern to apply on sources names (type: `string`)
  * __limit:__ the maximum number of items to return (type: `integerr`)
+ * __offset:__ the offset to start fetching from (type: `integer`)
  * __origin:__ the identifier of the origin to filter on (type: `string`)
 
 Response:
@@ -78,6 +82,8 @@ Response:
     "source1"
 ]
 ```
+
+A `X-Total-Records` HTTP header containing the total number of records is returned along with the response.
 
 ##### Get a single source
 
@@ -113,6 +119,7 @@ Optional parameters:
 
  * __filter:__ the [match][3] pattern to apply on metrics names (type: `string`)
  * __limit:__ the maximum number of items to return (type: `integer`)
+ * __offset:__ the offset to start fetching from (type: `integer`)
  * __origin:__ the identifier of the origin to filter on (type: `string`)
  * __source:__ the identifier of the source to filter on (type: `string`)
 
@@ -124,6 +131,8 @@ Response:
     "metric1"
 ]
 ```
+
+A `X-Total-Records` HTTP header containing the total number of records is returned along with the response.
 
 ##### Get a single metric
 
@@ -200,6 +209,7 @@ Optional parameters:
 
  * __filter:__ the [match][3] pattern to apply on group names (type: `string`)
  * __limit:__ the maximum number of items to return (type: `integer`)
+ * __offset:__ the offset to start fetching from (type: `integer`)
 
 Response:
 
@@ -213,6 +223,8 @@ Response:
     }
 ]
 ```
+
+A `X-Total-Records` HTTP header containing the total number of records is returned along with the response.
 
 ##### Get a single group
 
@@ -305,6 +317,7 @@ Optional parameters:
  * __collection:__ the identifier of the collection to filter on (type: `string`)
  * __filter:__ the [match][3] pattern to apply on graph names (type: `string`)
  * __limit:__ the maximum number of items to return (type: `integer`)
+ * __offset:__ the offset to start fetching from (type: `integer`)
 
 Response:
 
@@ -318,6 +331,8 @@ Response:
     }
 ]
 ```
+
+A `X-Total-Records` HTTP header containing the total number of records is returned along with the response.
 
 ##### Get a single graph
 
@@ -519,6 +534,7 @@ Optional parameters:
  * __exclude:__ the identifier of the collection to exclude from listing (type: `string`)
  * __filter:__ the [match][3] pattern to apply on collection names (type: `string`)
  * __limit:__ the maximum number of items to return (type: `integer`)
+ * __offset:__ the offset to start fetching from (type: `integer`)
  * __parent:__ the identifier of the parent collection to filter on (type: `string`)
 
 Response:
@@ -535,6 +551,8 @@ Response:
     }
 ]
 ```
+
+A `X-Total-Records` HTTP header containing the total number of records is returned along with the response.
 
 ##### Get a single collection
 

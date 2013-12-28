@@ -35,4 +35,6 @@ var EVENT_KEY_TAB    = 9,
     SAVE_MODE_CLONE    = 0,
     SAVE_MODE_VOLATILE = 1,
 
+    LIST_FETCH_LIMIT = 50,
+
     TIME_RFC3339 = 'YYYY-MM-DDTHH:mm:ss.SSSZ';

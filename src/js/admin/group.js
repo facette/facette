@@ -73,9 +73,7 @@ function adminGroupSetupTerminate() {
                     validate: function () {
                         groupDelete($item.attr('data-itemid'), groupType)
                             .then(function () {
-                                var $list = $item.closest('[data-list]');
-                                $item.remove();
-                                listUpdateCount($list);
+                                listUpdate($item.closest('[data-list]'));
                             })
                             .fail(function () {
                                 overlayCreate('alert', {
