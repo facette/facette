@@ -60,7 +60,7 @@ function graphDraw(graph, postpone, delay) {
                 query;
 
             // Parse graph options
-            graphOpts = graph.data('options');
+            graphOpts = graph.data('options') || graph.opts('graph');
 
             if (typeof graphOpts.preview != 'boolean')
                 graphOpts.preview = graphOpts.preview && graphOpts.preview.trim().toLowerCase() == 'true' ? true : false;
