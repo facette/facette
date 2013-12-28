@@ -13,7 +13,7 @@ Its code is available at [Github][1], and is licensed under the terms of the [BS
 Installation
 ------------
 
-Please see `docs/Installation` for build instructions and installation procedures.
+Please see [docs/Installation.md](docs/Installation.md) file for build instructions and installation procedures.
 
 
 [0]: http://facette.io/
