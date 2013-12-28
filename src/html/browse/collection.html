@@ -16,8 +16,8 @@
 		<nav>
 			<dl class="graphlist">
 				<dt>Graphs</dt>{{ if .Collection.Entries }}{{ if ne $q "" }}
-				<dd><a href="{{ .Request.URL.Path }}">..</a></dd>{{ end }}{{ range .Collection.Entries }}
-				<dd><a href="#{{ .Options.origin }}-{{ .Options.template }}{{ if .Options.filter }}-{{ .Options.filter }}{{ end }}">{{ .Options.title }}</a></dd>{{ end }}{{ else }}
+				<dd><a href="{{ .Request.URL.Path }}">..</a></dd>{{ end }}{{ range $index, $entry := .Collection.Entries }}
+				<dd><a href="#graph-{{ $index }}">{{ $entry.Options.title }}</a></dd>{{ end }}{{ else }}
 				<dd class="placeholder icon icon-info">No graph</dd>{{ end }}
 			</dl>
 		</nav>
@@ -40,7 +40,7 @@
 			</header>
 
 			<section class="scrollarea full">{{ if .Collection.Entries }}{{ template "template_graph" }}{{ range $index, $value := .Collection.Entries }}
-				<div data-graph="{{ $value.ID }}" data-graphopts="range: -1h; {{ dump $value.Options }}" id="{{ $value.Options.origin }}-{{ $value.Options.template }}{{ if $value.Options.filter }}-{{ $value.Options.filter }}{{ end }}"></div>{{ end }}{{ else }}
+				<div data-graph="{{ $value.ID }}" data-graphopts="range: -1h; {{ dump $value.Options }}" id="graph-{{ $index }}"></div>{{ end }}{{ else }}
 				<div class="mesgitem warning">Your search doesn’t match any graph <a href="{{ .Request.URL.Path }}">Reset</a></div>{{ end }}
 			</section>
 		</article>

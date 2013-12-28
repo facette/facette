@@ -19,13 +19,15 @@ function adminCollectionGetData() {
         };
 
     listMatch('step-1-graphs').find('[data-listitem^=step-1-graphs-item]').each(function () {
-        var $item = $(this);
+        var $item = $(this),
+            $range = $item.find('input[name=graph-range]'),
+            $title = $item.find('input[name=graph-title]');
 
         data.entries.push({
             id: $item.attr('data-graph'),
             options: {
-                title: $item.find('input[name=graph-title]').val(),
-                range: $item.find('input[name=graph-range]').val(),
+                title: $title.val() || $title.attr('placeholder'),
+                range: $range.val() || $range.attr('placeholder'),
                 sample: $item.find('input[name=graph-sample]').val(),
                 constants: $item.find('input[name=graph-constants]').val(),
                 percentiles: $item.find('input[name=graph-percentiles]').val()
@@ -34,6 +36,14 @@ function adminCollectionGetData() {
     });
 
     return data;
+}
+
+function adminCollectionUpdatePlaceholders(item) {
+    var $title = item.find('input[name=graph-title]'),
+        $range = item.find('input[name=graph-range]');
+
+    $title.attr('placeholder', item.find('.name').text() + ' (' + ($range.val() || $range.attr('placeholder') ||
+        GRAPH_DEFAULT_RANGE) + ')');
 }
 
 function adminCollectionSetupTerminate() {
@@ -182,6 +192,7 @@ function adminCollectionSetupTerminate() {
             .on('click', 'button', function (e) {
                 var $graph,
                     $fieldset,
+                    $item,
                     $list,
                     name,
                     skip = false;
@@ -208,10 +219,12 @@ function adminCollectionSetupTerminate() {
                         return;
                     }
 
-                    adminCollectionCreateGraph({
+                    $item = adminCollectionCreateGraph({
                         id: $graph.data('value').id,
                         name: $graph.val()
                     });
+
+                    adminCollectionUpdatePlaceholders($item);
 
                     listSay($list, null);
                     listUpdateCount($list);
@@ -289,8 +302,11 @@ function adminCollectionSetupTerminate() {
                 if (!e._typing && $target.val())
                     $target.closest('[data-input]').nextAll('button:first').focus();
             })
-            .on('change', '[data-step=1] .scrollarea :input, [data-step=2] :input', function () {
+            .on('change', '[data-step=1] .scrollarea :input, [data-step=2] :input', function (e) {
                 PANE_UNLOAD_LOCK = true;
+
+                if (e.target.name == 'graph-range')
+                    adminCollectionUpdatePlaceholders($(e.target).closest('[data-graph]'));
             })
             .on('keyup', '[data-step=1] fieldset input', adminHandleFieldType);
 
@@ -332,17 +348,10 @@ function adminCollectionSetupTerminate() {
 
             graphList(query).pipe(function (data) {
                 var func = function () {
-                        var $input,
-                            $item = $(this);
+                        var $item = $(this);
 
                         domFillItem($item, data[i]);
-
-                        $input = $item.find('input[name=graph-title]');
-
-                        $input.attr('placeholder',
-                            data[i].name + ' — ' + data[i].description.split('\n')[0].replace(/[\.,;:\s]+$/, '') +
-                            ' (' + ($input.nextAll('input:first').val() || GRAPH_DEFAULT_RANGE).replace(/^-/, '') + ')'
-                        );
+                        adminCollectionUpdatePlaceholders($item);
                     },
                     i;
 
