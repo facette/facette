@@ -197,6 +197,19 @@ function adminCollectionSetupTerminate() {
                     $list     = listMatch('step-1-graphs');
                     $graph    = $fieldset.find('input[name=graph]');
 
+                    if (!$graph.data('value')) {
+                        overlayCreate('alert', {
+                            message: $.t('graph.mesg_unknown'),
+                            callbacks: {
+                                validate: function () {
+                                    setTimeout(function () { $graph.select(); }, 0);
+                                }
+                            }
+                        });
+
+                        return;
+                    }
+
                     adminCollectionCreateGraph({
                         id: $graph.data('value').id,
                         name: $graph.val()

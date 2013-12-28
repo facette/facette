@@ -29,7 +29,8 @@
         "mesg_loading": "Loading graphs, this may take a while...",
         "mesg_no_serie": "No more serie",
         "mesg_none": "No graph defined",
-        "mesg_save_fail": "Unable to save graph!"
+        "mesg_save_fail": "Unable to save graph!",
+        "mesg_unknown": "Requested graph is unknown!"
     },
     "group": {
         "labl_clone": "Clone group",

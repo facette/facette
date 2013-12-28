@@ -382,7 +382,8 @@ function adminGraphSetupTerminate() {
 
                 return inputGetSources(input, {
                     origin: $fieldset.find('input[name=origin]').val(),
-                    source: (source.data('value').source.endsWith('groups') ? 'group:' : '') + source.val()
+                    source: (source.data('value') && source.data('value').source.endsWith('groups') ? 'group:' : '') +
+                        source.val()
                 });
             });
         }
