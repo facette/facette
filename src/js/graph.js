@@ -428,7 +428,7 @@ function graphHandleActions(e) {
             firstDayOfWeek: 1,
             minuteInterval: 10,
             todayButton: false
-        }).select().trigger('click');
+        });
 
         $overlay.find('input[name=range]').val(options.range || '');
     } else if (e.target.href.substr(e.target.href.lastIndexOf('#')).startsWith('#range-')) {
