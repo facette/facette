@@ -331,7 +331,7 @@ jQuery.extend = jQuery.fn.extend = function() {
 						clone = src && jQuery.isPlainObject(src) ? src : {};
 					}
 
-					// Never move sourceal objects, clone them
+					// Never move original objects, clone them
 					target[ name ] = jQuery.extend( deep, clone, copy );
 
 				// Don't bring in undefined values
@@ -731,7 +731,7 @@ jQuery.extend({
 			return fn.apply( context || this, args.concat( core_slice.call( arguments ) ) );
 		};
 
-		// Set the guid of unique handler to the same of sourceal handler, so it can be removed
+		// Set the guid of unique handler to the same of original handler, so it can be removed
 		proxy.guid = fn.guid = fn.guid || jQuery.guid++;
 
 		return proxy;
@@ -1581,7 +1581,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 					return 1;
 				}
 
-				// Maintain sourceal order
+				// Maintain original order
 				return sortInput ?
 					( indexOf.call( sortInput, a ) - indexOf.call( sortInput, b ) ) :
 					0;
@@ -4746,11 +4746,11 @@ jQuery.event = {
 
 	keyHooks: {
 		props: "char charCode key keyCode".split(" "),
-		filter: function( event, sourceal ) {
+		filter: function( event, original ) {
 
 			// Add which for key events
 			if ( event.which == null ) {
-				event.which = sourceal.charCode != null ? sourceal.charCode : sourceal.keyCode;
+				event.which = original.charCode != null ? original.charCode : original.keyCode;
 			}
 
 			return event;
@@ -4759,18 +4759,18 @@ jQuery.event = {
 
 	mouseHooks: {
 		props: "button buttons clientX clientY offsetX offsetY pageX pageY screenX screenY toElement".split(" "),
-		filter: function( event, sourceal ) {
+		filter: function( event, original ) {
 			var eventDoc, doc, body,
-				button = sourceal.button;
+				button = original.button;
 
 			// Calculate pageX/Y if missing and clientX/Y available
-			if ( event.pageX == null && sourceal.clientX != null ) {
+			if ( event.pageX == null && original.clientX != null ) {
 				eventDoc = event.target.ownerDocument || document;
 				doc = eventDoc.documentElement;
 				body = eventDoc.body;
 
-				event.pageX = sourceal.clientX + ( doc && doc.scrollLeft || body && body.scrollLeft || 0 ) - ( doc && doc.clientLeft || body && body.clientLeft || 0 );
-				event.pageY = sourceal.clientY + ( doc && doc.scrollTop  || body && body.scrollTop  || 0 ) - ( doc && doc.clientTop  || body && body.clientTop  || 0 );
+				event.pageX = original.clientX + ( doc && doc.scrollLeft || body && body.scrollLeft || 0 ) - ( doc && doc.clientLeft || body && body.clientLeft || 0 );
+				event.pageY = original.clientY + ( doc && doc.scrollTop  || body && body.scrollTop  || 0 ) - ( doc && doc.clientTop  || body && body.clientTop  || 0 );
 			}
 
 			// Add which for click: 1 === left; 2 === middle; 3 === right
@@ -4791,7 +4791,7 @@ jQuery.event = {
 		// Create a writable copy of the event object and normalize some properties
 		var i, prop, copy,
 			type = event.type,
-			sourcealEvent = event,
+			originalEvent = event,
 			fixHook = this.fixHooks[ type ];
 
 		if ( !fixHook ) {
@@ -4802,12 +4802,12 @@ jQuery.event = {
 		}
 		copy = fixHook.props ? this.props.concat( fixHook.props ) : this.props;
 
-		event = new jQuery.Event( sourcealEvent );
+		event = new jQuery.Event( originalEvent );
 
 		i = copy.length;
 		while ( i-- ) {
 			prop = copy[ i ];
-			event[ prop ] = sourcealEvent[ prop ];
+			event[ prop ] = originalEvent[ prop ];
 		}
 
 		// Support: Cordova 2.5 (WebKit) (#13255)
@@ -4822,7 +4822,7 @@ jQuery.event = {
 			event.target = event.target.parentNode;
 		}
 
-		return fixHook.filter? fixHook.filter( event, sourcealEvent ) : event;
+		return fixHook.filter? fixHook.filter( event, originalEvent ) : event;
 	},
 
 	special: {
@@ -4870,7 +4870,7 @@ jQuery.event = {
 				// Support: Firefox 20+
 				// Firefox doesn't alert if the returnValue field is not set.
 				if ( event.result !== undefined ) {
-					event.sourcealEvent.returnValue = event.result;
+					event.originalEvent.returnValue = event.result;
 				}
 			}
 		}
@@ -4878,7 +4878,7 @@ jQuery.event = {
 
 	simulate: function( type, elem, event, bubble ) {
 		// Piggyback on a donor event to simulate a different one.
-		// Fake sourcealEvent to avoid donor's stopPropagation, but if the
+		// Fake originalEvent to avoid donor's stopPropagation, but if the
 		// simulated event prevents default then we do the same on the donor.
 		var e = jQuery.extend(
 			new jQuery.Event(),
@@ -4886,7 +4886,7 @@ jQuery.event = {
 			{
 				type: type,
 				isSimulated: true,
-				sourcealEvent: {}
+				originalEvent: {}
 			}
 		);
 		if ( bubble ) {
@@ -4914,7 +4914,7 @@ jQuery.Event = function( src, props ) {
 
 	// Event object
 	if ( src && src.type ) {
-		this.sourcealEvent = src;
+		this.originalEvent = src;
 		this.type = src.type;
 
 		// Events bubbling up the document may have been marked as prevented
@@ -4947,7 +4947,7 @@ jQuery.Event.prototype = {
 	isImmediatePropagationStopped: returnFalse,
 
 	preventDefault: function() {
-		var e = this.sourcealEvent;
+		var e = this.originalEvent;
 
 		this.isDefaultPrevented = returnTrue;
 
@@ -4956,7 +4956,7 @@ jQuery.Event.prototype = {
 		}
 	},
 	stopPropagation: function() {
-		var e = this.sourcealEvent;
+		var e = this.originalEvent;
 
 		this.isPropagationStopped = returnTrue;
 
@@ -5639,7 +5639,7 @@ jQuery.fn.extend({
 				scripts = jQuery.map( getAll( fragment, "script" ), disableScript );
 				hasScripts = scripts.length;
 
-				// Use the sourceal fragment for the last item instead of the first because it can end up
+				// Use the original fragment for the last item instead of the first because it can end up
 				// being emptied incorrectly in certain situations (#8070).
 				for ( ; i < l; i++ ) {
 					node = fragment;
@@ -5692,7 +5692,7 @@ jQuery.each({
 	insertBefore: "before",
 	insertAfter: "after",
 	replaceAll: "replaceWith"
-}, function( name, sourceal ) {
+}, function( name, original ) {
 	jQuery.fn[ name ] = function( selector ) {
 		var elems,
 			ret = [],
@@ -5702,7 +5702,7 @@ jQuery.each({
 
 		for ( ; i <= last; i++ ) {
 			elems = i === last ? this : this.clone( true );
-			jQuery( insert[ i ] )[ sourceal ]( elems );
+			jQuery( insert[ i ] )[ original ]( elems );
 
 			// Support: QtWebKit
 			// .get() because core_push.apply(_, arraylike) throws
@@ -5732,7 +5732,7 @@ jQuery.extend({
 			}
 		}
 
-		// Copy the events from the sourceal to the clone
+		// Copy the events from the original to the clone
 		if ( dataAndEvents ) {
 			if ( deepDataAndEvents ) {
 				srcElements = srcElements || getAll( elem );
@@ -5813,7 +5813,7 @@ jQuery.extend({
 		i = 0;
 		while ( (elem = nodes[ i++ ]) ) {
 
-			// #4087 - If source and destination elements are the same, and this is
+			// #4087 - If origin and destination elements are the same, and this is
 			// that element, do not do anything
 			if ( selection && jQuery.inArray( elem, selection ) !== -1 ) {
 				continue;
@@ -6361,7 +6361,7 @@ curCSS = function( elem, name, _computed ) {
 		// this is against the CSSOM draft spec: http://dev.w3.org/csswg/cssom/#resolved-values
 		if ( rnumnonpx.test( ret ) && rmargin.test( name ) ) {
 
-			// Remember the sourceal values
+			// Remember the original values
 			width = style.width;
 			minWidth = style.minWidth;
 			maxWidth = style.maxWidth;
@@ -6838,7 +6838,7 @@ function addToPrefiltersOrTransports( structure ) {
 }
 
 // Base inspection function for prefilters and transports
-function inspectPrefiltersOrTransports( structure, options, sourcealOptions, jqXHR ) {
+function inspectPrefiltersOrTransports( structure, options, originalOptions, jqXHR ) {
 
 	var inspected = {},
 		seekingTransport = ( structure === transports );
@@ -6847,7 +6847,7 @@ function inspectPrefiltersOrTransports( structure, options, sourcealOptions, jqX
 		var selected;
 		inspected[ dataType ] = true;
 		jQuery.each( structure[ dataType ] || [], function( _, prefilterOrFactory ) {
-			var dataTypeOrTransport = prefilterOrFactory( options, sourcealOptions, jqXHR );
+			var dataTypeOrTransport = prefilterOrFactory( options, originalOptions, jqXHR );
 			if( typeof dataTypeOrTransport === "string" && !seekingTransport && !inspected[ dataTypeOrTransport ] ) {
 				options.dataTypes.unshift( dataTypeOrTransport );
 				inspect( dataTypeOrTransport );
@@ -7511,7 +7511,7 @@ function ajaxHandleResponses( s, jqXHR, responses ) {
 	}
 }
 
-/* Chain conversions given the request and the sourceal response
+/* Chain conversions given the request and the original response
  * Also sets the responseXXX fields on the jqXHR instance
  */
 function ajaxConvert( s, response, jqXHR, isSuccess ) {
@@ -7675,7 +7675,7 @@ jQuery.ajaxSetup({
 });
 
 // Detect, normalize options and install callbacks for jsonp requests
-jQuery.ajaxPrefilter( "json jsonp", function( s, sourcealSettings, jqXHR ) {
+jQuery.ajaxPrefilter( "json jsonp", function( s, originalSettings, jqXHR ) {
 
 	var callbackName, overwritten, responseContainer,
 		jsonProp = s.jsonp !== false && ( rjsonp.test( s.url ) ?
@@ -7723,7 +7723,7 @@ jQuery.ajaxPrefilter( "json jsonp", function( s, sourcealSettings, jqXHR ) {
 			// Save back as free
 			if ( s[ callbackName ] ) {
 				// make sure that re-using the options doesn't screw things around
-				s.jsonpCallback = sourcealSettings.jsonpCallback;
+				s.jsonpCallback = originalSettings.jsonpCallback;
 
 				// save the callback name for future use
 				oldCallbacks.push( callbackName );
@@ -7968,8 +7968,8 @@ function Animation( elem, properties, options ) {
 			elem: elem,
 			props: jQuery.extend( {}, properties ),
 			opts: jQuery.extend( true, { specialEasing: {} }, options ),
-			sourcealProperties: properties,
-			sourcealOptions: options,
+			originalProperties: properties,
+			originalOptions: options,
 			startTime: fxNow || createFxNow(),
 			duration: options.duration,
 			tweens: [],
@@ -8608,7 +8608,7 @@ jQuery.fn.offset = function( options ) {
 	}
 
 	// If we don't have gBCR, just use 0,0 rather than error
-	// BlackBerry 5, iOS 3 (sourceal iPhone)
+	// BlackBerry 5, iOS 3 (original iPhone)
 	if ( typeof elem.getBoundingClientRect !== core_strundefined ) {
 		box = elem.getBoundingClientRect();
 	}
