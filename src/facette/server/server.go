@@ -10,9 +10,11 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"log"
+	"mime"
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -62,6 +64,16 @@ func (server *Server) handleResponse(writer http.ResponseWriter, status int) {
 }
 
 func (server *Server) handleStatic(writer http.ResponseWriter, request *http.Request) {
+	var (
+		mimeType string
+	)
+
+	if mimeType = mime.TypeByExtension(filepath.Ext(request.URL.Path)); mimeType == "" {
+		mimeType = "application/octet-stream"
+	}
+
+	writer.Header().Set("Content-Type", mimeType)
+
 	// Handle static files
 	http.ServeFile(writer, request, path.Join(server.Config.BaseDir, "static", request.URL.Path[7:]))
 }
