@@ -1,4 +1,16 @@
 
+function adminHandleFieldType(e) {
+    if (ADMIN_FIELD_TIMEOUT)
+        clearTimeout(ADMIN_FIELD_TIMEOUT);
+
+    ADMIN_FIELD_TIMEOUT = setTimeout(function () {
+        $(e.target).trigger({
+            type: 'change',
+            _typing: true
+        });
+    }, 200);
+}
+
 function adminReloadServer() {
     ADMIN_RELOAD_TIMEOUT = setTimeout(function () {
         overlayCreate('loader', {

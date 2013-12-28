@@ -1076,7 +1076,7 @@ function adminGraphSetupTerminate() {
                 }
 
                 // Select next item
-                if ($target.val()) {
+                if (!e._typing && $target.val()) {
                     $next = $target.closest('[data-input]').nextAll('[data-input], button:visible').first();
 
                     if ($next.attr('data-input') !== undefined)
@@ -1114,6 +1114,7 @@ function adminGraphSetupTerminate() {
                     .attr('disabled', 'disabled')
                     .val('');
             })
+            .on('keyup', '[data-step=1] fieldset input', adminHandleFieldType)
             .on('dragstart dragend dragover dragleave drop', '.dragarea', adminGraphHandleSerieDrag);
 
         // Load graph data

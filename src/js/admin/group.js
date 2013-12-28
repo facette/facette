@@ -344,12 +344,13 @@ function adminGroupSetupTerminate() {
                     $button.removeAttr('disabled');
 
                 // Select next item
-                if ($target.val())
+                if (!e._typing && $target.val())
                     $target.closest('[data-input]').nextAll('button:first').focus();
             })
             .on('change', '[data-step=2] :input', function () {
                 PANE_UNLOAD_LOCK = true;
-            });
+            })
+            .on('keyup', '[data-step=1] fieldset input', adminHandleFieldType);
 
         // Load group data
         if (groupId === null)
