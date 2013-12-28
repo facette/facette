@@ -558,6 +558,9 @@ function adminGraphSetupTerminate() {
                 $item = adminGraphCreateProxy(PROXY_TYPE_SERIE, sourceName, $item)
                     .attr('data-serie', serieName);
 
+                if ($itemSrc.hasClass('expand'))
+                    $item.addClass('expand');
+
                 domFillItem($item, $itemSrc.data('source').data('expands')[serieName]);
             });
 
