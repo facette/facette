@@ -107,7 +107,8 @@
 			border-radius: 0.25em;
 			cursor: default;
 			font-size: 1.2em;
-			padding: 0.25em;
+			overflow: auto;
+			padding: 0.35em 0;
 			right: 0.25em;
 			top: 0.25em;
 			white-space: nowrap;
@@ -122,15 +123,14 @@
 				}
 			}
 
-			.ranges {
+			.actgroup {
 				border-right: 1px solid fade(@GraphBackgroundColor, 50);
-				display: inline-block;
-				font-size: 0.85em;
-				line-height: 1.15em;
-				padding-right: 0.35em;
+				display: block;
+				float: left;
+				padding: 0 0.35em;
 
-				a {
-					padding: 0 0.15em;
+				&:last-of-type {
+					border-right: none;
 				}
 			}
 		}

@@ -405,7 +405,7 @@ function graphHandleActions(e) {
         graphExport($graph);
     } else if (e.target.href.endsWith('#set-range')) {
         // Toggle range selector
-        $(e.target).prevAll('.ranges:first').toggle();
+        $(e.target).closest('.graphctrl').find('.ranges').toggle();
     } else if (e.target.href.endsWith('#set-time')) {
         options = $graph.data('options');
 
@@ -452,6 +452,25 @@ function graphHandleActions(e) {
         graphUpdateOptions($graph, {
             time: moment(graphObj.xAxis[0].min).add(delta).format(TIME_RFC3339),
             range: $graph.data('options').range.replace(/^-/, '')
+        });
+
+        graphDraw($graph);
+    } else if (e.target.href.endsWith('#zoom-in') || e.target.href.endsWith('#zoom-out')) {
+        graphObj = $graph.children('.graphcntr').highcharts();
+
+        delta = graphObj.xAxis[0].max - graphObj.xAxis[0].min;
+
+        if (e.target.href.endsWith('#zoom-in')) {
+            range = timeToRange(delta / 2);
+            delta /= 4;
+        } else {
+            range = timeToRange(delta * 2);
+            delta = (delta / 2) * -1;
+        }
+
+        graphUpdateOptions($graph, {
+            time: moment(graphObj.xAxis[0].min).add(delta).format(TIME_RFC3339),
+            range: range
         });
 
         graphDraw($graph);
