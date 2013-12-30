@@ -281,8 +281,11 @@ function listUpdate(list, listFilter, offset) {
                 .attr('data-itemid', data[i].id);
 
             $item.find('.name').text(data[i].name);
-            $item.find('.desc').text(data[i].description);
+            $item.find('.desc').text(data[i].description || $.t('main.mesg_no_description'));
             $item.find('.date span').text(moment(data[i].modified).format('LLL'));
+
+            if (!data[i].description)
+                $item.find('.desc').addClass('placeholder');
         }
 
         listUpdateCount(list, records);

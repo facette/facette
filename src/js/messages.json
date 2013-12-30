@@ -58,6 +58,7 @@
         "labl_sources": "Sources:",
         "labl_updated": "Updated:",
         "mesg_loading": "Loading data...",
+        "mesg_no_description": "No description available",
         "mesg_field_mandatory": "This field is mandatory!",
         "mesg_reload": "You are about to reload server resources. This may take a while.",
         "mesg_server_loading": "Reloading resources, please wait...",
