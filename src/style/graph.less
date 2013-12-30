@@ -1,12 +1,14 @@
 
 .graphitem {
 	background-color: @GraphBackgroundColor;
-	border-radius: 0.35em;
 	color: @GraphTextColor;
-	margin: 2em 0;
-	border: 1em solid @GraphBackgroundColor;
+	margin: 3em 0;
 	overflow: hidden;
 	position: relative;
+
+	&:hover {
+		outline: 1em solid @GraphBackgroundColor;
+	}
 
 	&:first-of-type {
 		margin-top: 0;

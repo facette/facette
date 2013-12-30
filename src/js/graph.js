@@ -140,6 +140,7 @@ function graphDraw(graph, postpone, delay) {
 
                 highchartOpts = {
                     chart: {
+                        borderRadius: 0,
                         events: {
                             load: function () {
                                 if (!graphOpts.preview)
