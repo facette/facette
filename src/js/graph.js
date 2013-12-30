@@ -45,6 +45,8 @@ function graphDraw(graph, postpone, delay) {
                 .data('setup', true);
 
             graph.find('.graphctrl .ranges').hide();
+
+            graph.find('.placeholder').text(graph.data('options').title || 'N/A');
         }
     }
 
@@ -58,6 +60,8 @@ function graphDraw(graph, postpone, delay) {
         setTimeout(function () {
             var graphOpts,
                 query;
+
+            graph.find('.placeholder').text($.t('main.mesg_loading'));
 
             // Parse graph options
             graphOpts = graph.data('options') || graph.opts('graph');
