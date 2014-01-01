@@ -656,13 +656,13 @@ Response:
 }
 ```
 
-#### Reload service configuration
+#### Reload server configuration
 
 ```
 GET /reload
 ```
 
-Reloads the service configuration files and refreshes back-ends.
+Reloads the server configuration files and refreshes back-ends.
 
 Possible status codes:
 

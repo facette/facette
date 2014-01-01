@@ -47,8 +47,8 @@ access). It uses HTTP Basic authentication as described in the 11.1 section of t
 Authentication configuration handling is still pretty basic and will need some additional work and refine in the future.
 Currently it only stores login and password pairs in a single file.
 
-To create a new user please use the `facettectl` utility (note that you will need to **reload the service** to take into
-account the change):
+To create a new user please use the `facettectl` utility (note that you will need to **reload the server** to take into
+account the change, use `facettectl reload`):
 
 ```
 facettectl useradd facette
