@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 )
 
@@ -39,6 +40,7 @@ func init() {
 func main() {
 	var (
 		err      error
+		fd       *os.File
 		sigChan  chan os.Signal
 		instance *server.Server
 	)
@@ -50,6 +52,17 @@ func main() {
 	} else if err = instance.LoadConfig(flagConfig); err != nil {
 		fmt.Println("Error: " + err.Error())
 		os.Exit(1)
+	}
+
+	// Create .pid file
+	if instance.Config.PidFile != "" {
+		if fd, err = os.OpenFile(instance.Config.PidFile, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644); err != nil {
+			fmt.Println("Error: " + err.Error())
+			os.Exit(1)
+		}
+
+		fd.Write([]byte(strconv.Itoa(os.Getpid()) + "\n"))
+		fd.Close()
 	}
 
 	// Reload server configuration on SIGHUP
@@ -75,4 +88,13 @@ func main() {
 		fmt.Println("Error: " + err.Error())
 		os.Exit(1)
 	}
+
+	if instance.Config.PidFile != "" {
+		if err = os.Remove(instance.Config.PidFile); err != nil {
+			fmt.Println("Error: " + err.Error())
+			os.Exit(1)
+		}
+	}
+
+	os.Exit(0)
 }
