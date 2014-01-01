@@ -13,6 +13,7 @@ Not available yet
  * UUID Go package: [gouuid][2]
  * Gorilla [mux][3] and [handlers][4] packages
  * Gopass package: [gopass][5]
+ * Stoppable net/http listener package: [stoppableListener][6]
 
 ### Build instructions
 
@@ -60,3 +61,4 @@ Note: the `PREFIX` variable must be prepended to each command if passed during t
 [3]: https://github.com/gorilla/mux
 [4]: https://github.com/gorilla/handlers
 [5]: https://github.com/howeyc/gopass
+[6]: https://github.com/etix/stoppableListener

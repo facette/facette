@@ -54,11 +54,19 @@ func main() {
 
 	// Reload server configuration on SIGHUP
 	sigChan = make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGHUP)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGHUP, syscall.SIGTERM)
 
 	go func() {
-		for _ = range sigChan {
-			instance.Reload()
+		for sig := range sigChan {
+			switch sig {
+			case syscall.SIGHUP:
+				instance.Reload()
+				break
+
+			case syscall.SIGINT, syscall.SIGTERM:
+				instance.Stop()
+				break
+			}
 		}
 	}()
 

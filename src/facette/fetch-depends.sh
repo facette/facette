@@ -1,14 +1,15 @@
 #!/bin/bash
 
 read -d '' DEPENDS <<EOF
-git  https://github.com/fatih/set         master
-git  https://github.com/gorilla/context   master
-git  https://github.com/gorilla/handlers  master
-git  https://github.com/gorilla/mux       master
-git  https://github.com/howeyc/gopass     master
-git  https://github.com/nu7hatch/gouuid   master
-git  https://github.com/ziutek/rrd        master
-hg   https://code.google.com/p/go.crypto  default
+git  https://github.com/etix/stoppableListener  master
+git  https://github.com/fatih/set               master
+git  https://github.com/gorilla/context         master
+git  https://github.com/gorilla/handlers        master
+git  https://github.com/gorilla/mux             master
+git  https://github.com/howeyc/gopass           master
+git  https://github.com/nu7hatch/gouuid         master
+git  https://github.com/ziutek/rrd              master
+hg   https://code.google.com/p/go.crypto        default
 EOF
 
 fetch_git() {

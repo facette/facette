@@ -7,10 +7,12 @@ import (
 	"facette/common"
 	"facette/library"
 	"fmt"
+	"github.com/etix/stoppableListener"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"log"
 	"mime"
+	"net"
 	"net/http"
 	"os"
 	"path"
@@ -28,11 +30,14 @@ const (
 	URLCatalogPath string = "/catalog"
 	// URLLibraryPath represents library's base URL path
 	URLLibraryPath string = "/library"
+	// ServerStopWait represents the time to wait before force-closing connections when stopping
+	ServerStopWait int = 5
 )
 
 // Server is the main service handler of Facette.
 type Server struct {
 	Config     *common.Config
+	Listener   *stoppableListener.StoppableListener
 	Auth       *auth.Auth
 	Catalog    *backend.Catalog
 	Library    *library.Library
@@ -113,8 +118,10 @@ func (server *Server) Reload() error {
 func (server *Server) Run() error {
 	var (
 		accessOutput *os.File
+		clientCount  int
 		dirPath      string
 		err          error
+		listener     net.Listener
 		router       *mux.Router
 		serverOutput *os.File
 	)
@@ -217,9 +224,46 @@ func (server *Server) Run() error {
 		accessOutput, _ = os.OpenFile(server.Config.AccessLog, os.O_CREATE|os.O_WRONLY, 0644)
 	}
 
-	// Run server instance
+	// Set HTTP handler
 	http.Handle("/", handlers.CombinedLoggingHandler(accessOutput, router))
-	return http.ListenAndServe(server.Config.BindAddr, nil)
+
+	// Start listener
+	if listener, err = net.Listen("tcp", server.Config.BindAddr); err != nil {
+		return err
+	}
+
+	server.Listener = stoppableListener.Handle(listener)
+
+	err = http.Serve(server.Listener, nil)
+
+	if server.Listener.Stopped {
+		/* Wait for the clients to disconnect */
+		for i := 0; i < ServerStopWait; i++ {
+			if clientCount = server.Listener.ConnCount.Get(); clientCount == 0 {
+				break
+			}
+
+			time.Sleep(1 * time.Second)
+		}
+
+		clientCount = server.Listener.ConnCount.Get()
+
+		if clientCount > 0 {
+			log.Fatalf("INFO: server stopped after %d seconds with %d client(s) still connected", ServerStopWait,
+				clientCount)
+		} else {
+			log.Println("INFO: server stopped gracefully")
+		}
+	} else if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Stop stops the server.
+func (server *Server) Stop() {
+	server.Listener.Stop <- true
 }
 
 // NewServer creates a new instance of Server.
