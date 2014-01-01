@@ -1,5 +1,5 @@
 /*!
- * Facette - Web graphing frontend
+ * Facette - Web graphing front-end
  * @author   Vincent Batoufflet <vincent@facette.io>
  * @link     http://facette.io/
  * @license  BSD
