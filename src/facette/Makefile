@@ -8,6 +8,7 @@ HG = hg
 
 GO = go
 GOPATH = $(realpath $(BUILD_DIR)):$(realpath ../..)
+export GOPATH
 
 GOLINT = golint
 GOLINT_ARGS =
