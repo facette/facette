@@ -66,6 +66,9 @@ func main() {
 		handler = handleUser
 	case "reload":
 		handler = handleServer
+	default:
+		utils.PrintUsage(os.Stderr, cmdUsage)
+		os.Exit(1)
 	}
 
 	err = handler(config, flag.Args())
