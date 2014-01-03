@@ -1,4 +1,4 @@
-Facette
+Facette [![Travis CI](https://api.travis-ci.org/facette/facette.png)](https://travis-ci.org/facette/facette) [![Analytics](https://ga-beacon.appspot.com/UA-27237401-2/facette/README.md)](https://github.com/igrigorik/ga-beacon)
 =======
 
 What is Facette?
