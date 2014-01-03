@@ -5,5 +5,8 @@ go:
  - release
  - tip
 
+before_install:
+ - sudo apt-get install -qq librrd-dev
+
 script:
  - make test
