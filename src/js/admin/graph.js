@@ -984,15 +984,7 @@ function adminGraphSetupTerminate() {
                 case 'step-ok':
                 case 'step-prev':
                 case 'step-next':
-                    name = $(e.target).closest('[data-pane]').attr('data-pane');
-
-                    if (e.target.name == 'step-ok')
-                        paneGoto(name, ADMIN_PANES[name].last);
-                    else if (e.target.name == 'step-prev' && ADMIN_PANES[name].active > 1)
-                        paneGoto(name, ADMIN_PANES[name].active - 1);
-                    else if (e.target.name == 'step-next' && ADMIN_PANES[name].active < ADMIN_PANES[name].count)
-                        paneGoto(name, ADMIN_PANES[name].active + 1);
-
+                    adminHandlePaneStep(e, name);
                     break;
                 }
             })
@@ -1141,13 +1133,13 @@ function adminGraphSetupTerminate() {
 
             for (i in data.stacks) {
                 $itemStack = data.stacks[i].mode !== STACK_MODE_NONE ? adminGraphCreateStack({
-                   name: data.stacks[i].name
+                    name: data.stacks[i].name
                 }) : null;
 
                 for (j in data.stacks[i].groups) {
                     $itemOper = data.stacks[i].groups[j].type !== OPER_GROUP_TYPE_NONE ? adminGraphCreateGroup({
-                     name: data.stacks[i].groups[j].name,
-                     type: data.stacks[i].groups[j].type
+                        name: data.stacks[i].groups[j].name,
+                        type: data.stacks[i].groups[j].type
                     }) : null;
 
                     for (k in data.stacks[i].groups[j].series) {

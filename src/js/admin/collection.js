@@ -276,15 +276,7 @@ function adminCollectionSetupTerminate() {
                 case 'step-ok':
                 case 'step-prev':
                 case 'step-next':
-                    name = $(e.target).closest('[data-pane]').attr('data-pane');
-
-                    if (e.target.name == 'step-ok')
-                        paneGoto(name, ADMIN_PANES[name].last);
-                    else if (e.target.name == 'step-prev' && ADMIN_PANES[name].active > 1)
-                        paneGoto(name, ADMIN_PANES[name].active - 1);
-                    else if (e.target.name == 'step-next' && ADMIN_PANES[name].active < ADMIN_PANES[name].count)
-                        paneGoto(name, ADMIN_PANES[name].active + 1);
-
+                    adminHandlePaneStep(e, name);
                     break;
                 }
             })
