@@ -1,6 +1,5 @@
 
 .graphitem {
-	background-color: @GraphBackgroundColor;
 	color: @GraphTextColor;
 	margin: 3em 0;
 	overflow: hidden;
@@ -20,15 +19,20 @@
 		}
 	}
 
+	&.preview:hover {
+		outline: none;
+	}
+
 	.placeholder {
+		background-color: @GraphBackgroundColor;
+		bottom: 0;
 		font-size: 1.2em;
 		left: 0;
-		line-height: 2em;
-		margin-top: -1em;
+		line-height: 14.4em;
 		position: absolute;
+		right: 0;
 		text-align: center;
-		top: 50%;
-		width: 100%;
+		top: 0;
 	}
 
 	.graphctrl {
