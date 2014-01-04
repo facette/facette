@@ -2,9 +2,25 @@ package server
 
 import (
 	"html/template"
+	"os"
+	"path"
 	"reflect"
+	"strconv"
 	"strings"
 )
+
+func (server *Server) templateAsset(x string) string {
+	var (
+		err      error
+		fileInfo os.FileInfo
+	)
+
+	if fileInfo, err = os.Stat(path.Join(server.Config.BaseDir, x)); err == nil {
+		return x + "?" + strconv.FormatInt(fileInfo.ModTime().Unix(), 10)
+	}
+
+	return x
+}
 
 func templateEqual(x, y interface{}) bool {
 	return reflect.DeepEqual(x, y)

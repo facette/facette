@@ -140,10 +140,11 @@ func (server *Server) browseHandleSearch(writer http.ResponseWriter, request *ht
 
 	// Execute template
 	if tmpl, err = template.New("layout.html").Funcs(template.FuncMap{
-		"eq":   templateEqual,
-		"ne":   templateNotEqual,
-		"dump": templateDumpMap,
-		"hl":   templateHighlight,
+		"asset": server.templateAsset,
+		"eq":    templateEqual,
+		"ne":    templateNotEqual,
+		"dump":  templateDumpMap,
+		"hl":    templateHighlight,
 	}).ParseFiles(
 		path.Join(server.Config.BaseDir, "html", "layout.html"),
 		path.Join(server.Config.BaseDir, "html", "common", "element.html"),
@@ -215,9 +216,10 @@ func (server *Server) browseHandle(writer http.ResponseWriter, request *http.Req
 
 	// Return template data
 	tmpl = template.New("layout.html").Funcs(template.FuncMap{
-		"eq":   templateEqual,
-		"ne":   templateNotEqual,
-		"dump": templateDumpMap,
+		"asset": server.templateAsset,
+		"eq":    templateEqual,
+		"ne":    templateNotEqual,
+		"dump":  templateDumpMap,
 	})
 
 	// Execute template

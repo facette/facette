@@ -84,6 +84,7 @@ func (server *Server) adminHandle(writer http.ResponseWriter, request *http.Requ
 
 	// Return template data
 	if tmpl, err = template.New("layout.html").Funcs(template.FuncMap{
+		"asset":  server.templateAsset,
 		"eq":     templateEqual,
 		"ne":     templateNotEqual,
 		"substr": templateSubstr,

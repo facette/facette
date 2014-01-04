@@ -1,15 +1,15 @@
 {{ define "title" }}{{ .Collection.Name }} — Facette{{ end }}
 
 {{ define "script" }}
-		<script src="/static/jquery.js"></script>
-		<script src="/static/jquery.datepicker.js"></script>
-		<script src="/static/i18next.js"></script>
-		<script src="/static/highcharts.js"></script>
-		<script src="/static/highcharts.exporting.js"></script>
-		<script src="/static/rgbcolor.js"></script>
-		<script src="/static/canvg.js"></script>
-		<script src="/static/moment.js"></script>
-		<script src="/static/facette.js"></script>
+		<script src="{{ asset "/static/jquery.js" }}"></script>
+		<script src="{{ asset "/static/jquery.datepicker.js" }}"></script>
+		<script src="{{ asset "/static/i18next.js" }}"></script>
+		<script src="{{ asset "/static/highcharts.js" }}"></script>
+		<script src="{{ asset "/static/highcharts.exporting.js" }}"></script>
+		<script src="{{ asset "/static/rgbcolor.js" }}"></script>
+		<script src="{{ asset "/static/canvg.js" }}"></script>
+		<script src="{{ asset "/static/moment.js" }}"></script>
+		<script src="{{ asset "/static/facette.js" }}"></script>
 {{ end }}
 
 {{ define "content" }}{{ $q := .Request.FormValue "q" }}
