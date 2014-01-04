@@ -209,7 +209,7 @@ function adminGraphHandleSerieDrag(e) {
 
     switch (e.type) {
     case 'dragstart':
-        if ($target.hasClass('linked'))
+        if ($target.hasClass('linked') || !$target.attr('data-serie') && !$target.attr('data-group'))
             return;
 
         $target.addClass('dragged');
@@ -229,7 +229,7 @@ function adminGraphHandleSerieDrag(e) {
     case 'dragover':
         e.preventDefault();
 
-        if ($target === null)
+        if ($target === null || !e.dataTransfer.getData('text/plain').startsWith('data-'))
             return;
 
         $target.addClass('dragover');
