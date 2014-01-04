@@ -24,3 +24,6 @@ $(function () {
 
 var $body = $(document.body),
     $window = $(window);
+
+// Get URL prefix
+var urlPrefix = $(document.head).find('meta[name=url-prefix]').attr('content') || '';

@@ -303,7 +303,7 @@ function adminGraphSetupTerminate() {
     paneRegister('graph-list', function () {
         // Register links
         linkRegister('edit-graph', function (e) {
-            window.location = '/admin/graphs/' + $(e.target).closest('[data-itemid]').attr('data-itemid');
+            window.location = urlPrefix + '/admin/graphs/' + $(e.target).closest('[data-itemid]').attr('data-itemid');
         });
 
         linkRegister('clone-graph', function (e) {
@@ -470,7 +470,7 @@ function adminGraphSetupTerminate() {
             // Retrieve expanding information
             if (expand) {
                 $.ajax({
-                    url: '/catalog/expand',
+                    url: urlPrefix + '/catalog/expand',
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(query)
@@ -938,7 +938,7 @@ function adminGraphSetupTerminate() {
                     break;
 
                 case 'step-cancel':
-                    window.location = '/admin/graphs/';
+                    window.location = urlPrefix + '/admin/graphs/';
                     break;
 
                 case 'step-save':
@@ -961,7 +961,7 @@ function adminGraphSetupTerminate() {
                     graphSave(graphId, adminGraphGetData())
                         .then(function () {
                             PANE_UNLOAD_LOCK = false;
-                            window.location = '/admin/graphs/';
+                            window.location = urlPrefix + '/admin/graphs/';
                         })
                         .fail(function () {
                             overlayCreate('alert', {

@@ -12,7 +12,7 @@ var GRAPH_DRAW_PARENTS  = [],
 
 function graphDelete(id) {
     return $.ajax({
-        url: '/library/graphs/' + id,
+        url: urlPrefix + '/library/graphs/' + id,
         type: 'DELETE'
     });
 }
@@ -103,7 +103,7 @@ function graphDraw(graph, postpone, delay) {
             }
 
             return $.ajax({
-                url: '/library/graphs/plots',
+                url: urlPrefix + '/library/graphs/plots',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(query),
@@ -599,7 +599,7 @@ function graphHandleQueue(force) {
 
 function graphList(query) {
     return $.ajax({
-        url: '/library/graphs',
+        url: urlPrefix + '/library/graphs',
         type: 'GET',
         data: query,
         dataType: 'json'
@@ -608,7 +608,7 @@ function graphList(query) {
 
 function graphLoad(id) {
     return $.ajax({
-        url: '/library/graphs/' + id,
+        url: urlPrefix + '/library/graphs/' + id,
         type: 'GET',
         dataType: 'json'
     });
@@ -628,7 +628,7 @@ function graphSave(id, query, mode) {
     }
 
     return $.ajax({
-        url: url,
+        url: urlPrefix + url,
         type: method,
         contentType: 'application/json',
         data: JSON.stringify(query)

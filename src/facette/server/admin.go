@@ -13,6 +13,7 @@ import (
 func (server *Server) adminHandle(writer http.ResponseWriter, request *http.Request) {
 	var (
 		data struct {
+			URLPrefix        string
 			Section          string
 			Path             string
 			Origins          []string
@@ -34,6 +35,7 @@ func (server *Server) adminHandle(writer http.ResponseWriter, request *http.Requ
 	}
 
 	// Set template data
+	data.URLPrefix = server.Config.URLPrefix
 	data.Section = mux.Vars(request)["section"]
 	data.Path = mux.Vars(request)["path"]
 

@@ -24,6 +24,7 @@ Optional settings:
 
  * __access_log__: the path to the file to store access logging information (type: `string`, default: `stdout`)
  * __server_log__: the path to the file to store Facette application logging data (type: `string`, default: `stdout`)
+ * __url_prefix__: the URL prefix behind which the server is located (type: `string`)
 
 Example:
 

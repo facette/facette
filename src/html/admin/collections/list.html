@@ -1,10 +1,10 @@
 {{ define "title" }}Administration Panel: Collections — Facette{{ end }}
 
 {{ define "script" }}
-		<script src="{{ asset "/static/jquery.js" }}"></script>
-		<script src="{{ asset "/static/i18next.js" }}"></script>
-		<script src="{{ asset "/static/moment.js" }}"></script>
-		<script src="{{ asset "/static/facette.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/jquery.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/i18next.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/moment.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/facette.js" }}"></script>
 {{ end }}
 
 {{ define "content" }}
@@ -14,7 +14,7 @@
 
 				<nav>
 					<ul>
-						<li><a class="icon icon-add" href="/admin/collections/add" title="Add Collection"></a></li>
+						<li><a class="icon icon-add" href="{{ .URLPrefix }}/admin/collections/add" title="Add Collection"></a></li>
 					</ul>
 				</nav>
 

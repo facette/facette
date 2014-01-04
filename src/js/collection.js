@@ -3,14 +3,14 @@
 
 function collectionDelete(id) {
     return $.ajax({
-        url: '/library/collections/' + id,
+        url: urlPrefix + '/library/collections/' + id,
         type: 'DELETE'
     });
 }
 
 function collectionList(query) {
     return $.ajax({
-        url: '/library/collections',
+        url: urlPrefix + '/library/collections',
         type: 'GET',
         data: query,
         dataType: 'json'
@@ -19,7 +19,7 @@ function collectionList(query) {
 
 function collectionLoad(id) {
     return $.ajax({
-        url: '/library/collections/' + id,
+        url: urlPrefix + '/library/collections/' + id,
         type: 'GET',
         dataType: 'json'
     });
@@ -37,7 +37,7 @@ function collectionSave(id, query, mode) {
     }
 
     return $.ajax({
-        url: url,
+        url: urlPrefix + url,
         type: method,
         contentType: 'application/json',
         data: JSON.stringify(query)

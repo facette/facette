@@ -21,6 +21,7 @@ func (server *Server) browseHandleCollection(writer http.ResponseWriter, request
 
 	var (
 		data struct {
+			URLPrefix  string
 			Collection *collectionData
 			Request    *http.Request
 		}
@@ -29,6 +30,7 @@ func (server *Server) browseHandleCollection(writer http.ResponseWriter, request
 	)
 
 	// Set template data
+	data.URLPrefix = server.Config.URLPrefix
 	data.Collection = &collectionData{Collection: &library.Collection{}}
 
 	data.Collection.ID = mux.Vars(request)["collection"]
@@ -69,8 +71,14 @@ func (server *Server) browseHandleCollection(writer http.ResponseWriter, request
 func (server *Server) browseHandleIndex(writer http.ResponseWriter, request *http.Request,
 	tmpl *template.Template) error {
 	var (
+		data struct {
+			URLPrefix string
+		}
 		err error
 	)
+
+	// Set template data
+	data.URLPrefix = server.Config.URLPrefix
 
 	// Execute template
 	if tmpl, err = tmpl.ParseFiles(
@@ -82,13 +90,14 @@ func (server *Server) browseHandleIndex(writer http.ResponseWriter, request *htt
 		return err
 	}
 
-	return tmpl.Execute(writer, nil)
+	return tmpl.Execute(writer, data)
 }
 
 func (server *Server) browseHandleSearch(writer http.ResponseWriter, request *http.Request) {
 	var (
 		chunks []string
 		data   struct {
+			URLPrefix   string
 			Count       int
 			Request     *http.Request
 			Sources     []*backend.Source
@@ -134,8 +143,9 @@ func (server *Server) browseHandleSearch(writer http.ResponseWriter, request *ht
 		}
 	}
 
+	// Set template data
+	data.URLPrefix = server.Config.URLPrefix
 	data.Count = len(data.Sources) + len(data.Collections)
-
 	data.Request = request
 
 	// Execute template
@@ -169,6 +179,7 @@ func (server *Server) browseHandleSource(writer http.ResponseWriter, request *ht
 	tmpl *template.Template) error {
 	var (
 		data struct {
+			URLPrefix  string
 			Collection *library.Collection
 			Request    *http.Request
 		}
@@ -177,6 +188,9 @@ func (server *Server) browseHandleSource(writer http.ResponseWriter, request *ht
 	)
 
 	sourceName = mux.Vars(request)["source"]
+
+	// Set template data
+	data.URLPrefix = server.Config.URLPrefix
 
 	if data.Collection, err = server.Library.GetCollectionTemplate(sourceName); err != nil {
 		return err
@@ -210,7 +224,7 @@ func (server *Server) browseHandle(writer http.ResponseWriter, request *http.Req
 
 	// Redirect to browse
 	if request.URL.Path == "/" {
-		http.Redirect(writer, request, URLBrowsePath+"/", 301)
+		http.Redirect(writer, request, server.Config.URLPrefix+URLBrowsePath+"/", 301)
 		return
 	}
 

@@ -1,9 +1,9 @@
 {{ define "title" }}Facette{{ end }}
 
 {{ define "script" }}
-		<script src="{{ asset /static/jquery.js }}"></script>
-		<script src="{{ asset /static/i18next.js }}"></script>
-		<script src="{{ asset /static/facette.js }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/jquery.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/i18next.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/facette.js" }}"></script>
 {{ end }}
 
 {{ define "content" }}
@@ -32,11 +32,11 @@
 
 			<section class="scrollarea full">
 				<div class="logo">
-					<img src="{{ asset "/static/logo.png" }}" alt="logo">
+					<img src="{{ .URLPrefix }}{{ asset "/static/logo.png" }}" alt="logo">
 				</div>
 
 				<div class="search">
-					<form action="/browse/search" method="get">
+					<form action="{{ .URLPrefix }}/browse/search" method="get">
 						<p>Search for Source or Collection:</p>
 						<p>
 							<input class="full" name="q" placeholder="e.g. host1.example.net, collection1" type="text">

@@ -1,9 +1,9 @@
 {{ define "title" }}Administration Panel: {{ if eq .Section "sourcegroups" }}Source{{ else }}Metric{{ end }} Groups — Facette{{ end }}
 
 {{ define "script" }}
-		<script src="{{ asset "/static/jquery.js" }}"></script>
-		<script src="{{ asset "/static/i18next.js" }}"></script>
-		<script src="{{ asset "/static/facette.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/jquery.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/i18next.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/facette.js" }}"></script>
 {{ end }}
 
 {{ define "content" }}

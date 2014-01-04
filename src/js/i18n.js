@@ -4,7 +4,7 @@
 function i18nSetupInit() {
     // Load messages resource and initialize i18n support
     return $.ajax({
-        url: '/static/messages.json',
+        url: urlPrefix + '/static/messages.json',
         type: 'GET',
     }).pipe(function (data) {
         $.i18n.init({

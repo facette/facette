@@ -2,10 +2,11 @@
 <html lang="en">
 	<head>
 		<title>{{ template "title" . }}</title>
-		<meta charset="utf-8">
-		<link rel="stylesheet" href="{{ asset "/static/style.css" }}" media="screen">
-		<link rel="stylesheet" href="{{ asset "/static/style.print.css" }}" media="print">
-		<link rel="shortcut icon" href="{{ asset "/static/favicon.png" }}">{{ template "script" . }}</head>
+		<meta charset="utf-8">{{ if ne .URLPrefix "" }}
+		<meta name="url-prefix" content="{{ .URLPrefix }}">{{ end }}
+		<link rel="stylesheet" href="{{ .URLPrefix }}{{ asset "/static/style.css" }}" media="screen">
+		<link rel="stylesheet" href="{{ .URLPrefix }}{{ asset "/static/style.print.css" }}" media="print">
+		<link rel="shortcut icon" href="{{ .URLPrefix }}{{ asset "/static/favicon.png" }}">{{ template "script" . }}</head>
 	<body>
 {{ template "body" . }}
 	</body>

@@ -51,7 +51,8 @@ function adminCollectionSetupTerminate() {
     paneRegister('collection-list', function () {
         // Register links
         linkRegister('edit-collection', function (e) {
-            window.location = '/admin/collections/' + $(e.target).closest('[data-itemid]').attr('data-itemid');
+            window.location = urlPrefix + '/admin/collections/' +
+                $(e.target).closest('[data-itemid]').attr('data-itemid');
         });
 
         linkRegister('clone-collection', function (e) {
@@ -240,7 +241,7 @@ function adminCollectionSetupTerminate() {
                     break;
 
                 case 'step-cancel':
-                    window.location = '/admin/collections/';
+                    window.location = urlPrefix + '/admin/collections/';
                     break;
 
                 case 'step-save':
@@ -263,7 +264,7 @@ function adminCollectionSetupTerminate() {
                     collectionSave(collectionId, adminCollectionGetData())
                         .then(function () {
                             PANE_UNLOAD_LOCK = false;
-                            window.location = '/admin/collections/';
+                            window.location = urlPrefix + '/admin/collections/';
                         })
                         .fail(function () {
                             overlayCreate('alert', {

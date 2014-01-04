@@ -22,7 +22,7 @@ function statsSetupInit() {
 
 function statsUpdate(stats) {
     return $.ajax({
-        url: '/stats',
+        url: urlPrefix + '/stats',
         type: 'GET'
     }).pipe(function (data) {
         domFillItem(stats, data, {

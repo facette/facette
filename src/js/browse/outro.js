@@ -1,5 +1,5 @@
 
-if (String(window.location.pathname).startsWith('/browse/')) {
+if (String(window.location.pathname).startsWith(urlPrefix + '/browse/')) {
     // Register links
     linkRegister('print', browsePrint);
 

@@ -11,7 +11,7 @@ function browseCollectionSetupTerminate() {
                 $item = $target.closest('[data-treeitem]');
 
             if ($target.closest('.icon').length === 0 || !$item.hasClass('folded') && !$item.hasClass('unfolded')) {
-                window.location = '/browse/collections/' + $item.attr('data-treeitem');
+                window.location = urlPrefix + '/browse/collections/' + $item.attr('data-treeitem');
             } else {
                 $item.children('.treecntr')
                     .toggle()

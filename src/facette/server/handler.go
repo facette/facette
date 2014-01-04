@@ -64,16 +64,22 @@ func (server *Server) statHandle(writer http.ResponseWriter, request *http.Reque
 
 func (server *Server) waitHandle(writer http.ResponseWriter, request *http.Request) {
 	var (
+		data struct {
+			URLPrefix string
+		}
 		err  error
 		tmpl *template.Template
 	)
+
+	// Set template data
+	data.URLPrefix = server.Config.URLPrefix
 
 	// Execute template
 	if tmpl, err = template.New("layout.html").ParseFiles(
 		path.Join(server.Config.BaseDir, "html", "layout.html"),
 		path.Join(server.Config.BaseDir, "html", "wait.html"),
 	); err == nil {
-		err = tmpl.Execute(writer, nil)
+		err = tmpl.Execute(writer, data)
 	}
 
 	if err != nil {

@@ -4,7 +4,7 @@ function adminSetupInit() {
     $('[data-step]').hide();
 }
 
-if (String(window.location.pathname).startsWith('/admin/')) {
+if (String(window.location.pathname).startsWith(urlPrefix + '/admin/')) {
     // Register links
     linkRegister('reload', function () {
         overlayCreate('confirm', {

@@ -31,7 +31,7 @@ function inputGetSources(input, args) {
         /*jshint unused: true */
 
         sources[item] = {
-            url: '/' + item,
+            url: urlPrefix + '/' + item,
             type: 'GET',
             data: args
         };

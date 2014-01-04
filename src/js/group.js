@@ -3,14 +3,14 @@
 
 function groupDelete(id, groupType) {
     return $.ajax({
-        url: '/library/' + groupType + '/' + id,
+        url: urlPrefix + '/library/' + groupType + '/' + id,
         type: 'DELETE'
     });
 }
 
 function groupList(query, groupType) {
     return $.ajax({
-        url: '/library/' + groupType,
+        url: urlPrefix + '/library/' + groupType,
         type: 'GET',
         data: query,
         dataType: 'json'
@@ -19,7 +19,7 @@ function groupList(query, groupType) {
 
 function groupLoad(id, groupType) {
     return $.ajax({
-        url: '/library/' + groupType + '/' + id,
+        url: urlPrefix + '/library/' + groupType + '/' + id,
         type: 'GET',
         dataType: 'json'
     });
@@ -37,7 +37,7 @@ function groupSave(id, query, mode, groupType) {
     }
 
     return $.ajax({
-        url: url,
+        url: urlPrefix + url,
         type: method,
         contentType: 'application/json',
         data: JSON.stringify(query)

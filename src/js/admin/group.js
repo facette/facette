@@ -33,7 +33,8 @@ function adminGroupSetupTerminate() {
 
         // Register links
         linkRegister('edit-group', function (e) {
-            window.location = '/admin/' + groupType + '/' + $(e.target).closest('[data-itemid]').attr('data-itemid');
+            window.location = urlPrefix + '/admin/' + groupType + '/' +
+                $(e.target).closest('[data-itemid]').attr('data-itemid');
         });
 
         linkRegister('clone-group', function (e) {
@@ -243,7 +244,7 @@ function adminGroupSetupTerminate() {
                     break;
 
                 case 'step-cancel':
-                    window.location = '/admin/' + groupType + '/';
+                    window.location = urlPrefix + '/admin/' + groupType + '/';
                     break;
 
                 case 'step-save':
@@ -266,7 +267,7 @@ function adminGroupSetupTerminate() {
                     groupSave(groupId, adminGroupGetData(), null, groupType)
                         .then(function () {
                             PANE_UNLOAD_LOCK = false;
-                            window.location = '/admin/' + groupType + '/';
+                            window.location = urlPrefix + '/admin/' + groupType + '/';
                         })
                         .fail(function () {
                             overlayCreate('alert', {

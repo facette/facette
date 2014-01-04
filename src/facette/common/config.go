@@ -20,6 +20,7 @@ type Config struct {
 	AuthFile  string                   `json:"auth_file"`
 	ServerLog string                   `json:"server_log"`
 	AccessLog string                   `json:"access_log"`
+	URLPrefix string                   `json:"url_prefix"`
 	Origins   map[string]*OriginConfig `json:"-"`
 }
 

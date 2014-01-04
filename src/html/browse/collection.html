@@ -1,15 +1,15 @@
 {{ define "title" }}{{ .Collection.Name }} — Facette{{ end }}
 
 {{ define "script" }}
-		<script src="{{ asset "/static/jquery.js" }}"></script>
-		<script src="{{ asset "/static/jquery.datepicker.js" }}"></script>
-		<script src="{{ asset "/static/i18next.js" }}"></script>
-		<script src="{{ asset "/static/highcharts.js" }}"></script>
-		<script src="{{ asset "/static/highcharts.exporting.js" }}"></script>
-		<script src="{{ asset "/static/rgbcolor.js" }}"></script>
-		<script src="{{ asset "/static/canvg.js" }}"></script>
-		<script src="{{ asset "/static/moment.js" }}"></script>
-		<script src="{{ asset "/static/facette.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/jquery.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/jquery.datepicker.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/i18next.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/highcharts.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/highcharts.exporting.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/rgbcolor.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/canvg.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/moment.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/facette.js" }}"></script>
 {{ end }}
 
 {{ define "content" }}{{ $q := .Request.FormValue "q" }}
@@ -32,7 +32,7 @@
 					</ul>
 				</nav>
 
-				<form action="{{ .Request.URL.Path }}" method="get">
+				<form action="{{ .URLPrefix }}{{ .Request.URL.Path }}" method="get">
 					<div class="filter icon icon-search">
 						<input name="q" placeholder="Search for Graph" type="text" value="{{ $q }}">
 					</div>
