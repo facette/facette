@@ -67,7 +67,8 @@ function graphDraw(graph, postpone, delay) {
             graphOpts = graph.data('options') || graph.opts('graph');
 
             if (typeof graphOpts.preview != 'boolean')
-                graphOpts.preview = graphOpts.preview && graphOpts.preview.trim().toLowerCase() == 'true' ? true : false;
+                graphOpts.preview = graphOpts.preview &&
+                    graphOpts.preview.trim().toLowerCase() == 'true' ? true : false;
 
             if (typeof graphOpts.zoom != 'boolean')
                 graphOpts.zoom = graphOpts.zoom && graphOpts.zoom.trim().toLowerCase() == 'false' ? false : true;

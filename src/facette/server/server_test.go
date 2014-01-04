@@ -653,7 +653,8 @@ func Test_collectionHandle(test *testing.T) {
 	}
 }
 
-func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group, expandData, expandBase expandRequest) {
+func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group, expandData,
+	expandBase expandRequest) {
 	var (
 		baseURL      string
 		data         []byte
