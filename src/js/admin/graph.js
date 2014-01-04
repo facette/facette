@@ -562,16 +562,6 @@ function adminGraphSetupTerminate() {
                 domFillItem($item, $itemSrc.data('source').data('expands')[serieName]);
             });
 
-            // Remove excluded items from stacks
-            $listStacks.find('[data-listitem^=step-stack-groups-item]').each(function () {
-                $(this).find('.groupentry').each(function () {
-                    if ((this.getAttribute('data-group') &&
-                            $listSeries.find('[data-group=' + this.getAttribute('data-group') + ']').length === 0) ||
-                            $listSeries.find('[data-serie=' + this.getAttribute('data-serie') + ']').length === 0)
-                        $(this).remove();
-                });
-            });
-
             if ($listSeries.find('[data-listitem^="step-stack-series-item"]:not(.linked)').length > 0)
                 listSay($listSeries, null);
         });
