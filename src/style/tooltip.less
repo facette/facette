@@ -36,6 +36,8 @@
 }
 
 .menu {
+	max-width: 100%;
+
 	.menucntr {
 		max-height: 10.5em;
 		overflow-y: auto;
@@ -48,7 +50,10 @@
 		.menumesg {
 			cursor: default;
 			line-height: 1.75em;
+			overflow: hidden;
 			padding: 0 1em;
+			text-overflow: ellipsis;
+			white-space: nowrap;
 		}
 
 		.menuitem {
