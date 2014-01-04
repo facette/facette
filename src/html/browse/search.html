@@ -6,7 +6,7 @@
 		<script src="{{ .URLPrefix }}{{ asset "/static/facette.js" }}"></script>
 {{ end }}
 
-{{ define "content" }}{{ $q := .Request.FormValue "q" }}
+{{ define "content" }}{{ $prefix := .URLPrefix }}{{ $q := .Request.FormValue "q" }}
 		<nav>
 		</nav>
 
@@ -31,11 +31,11 @@
 					<p class="mesgitem warning">Couldn’t find any item matching “{{ $q }}”</p>{{ else }}
 					<div class="list">{{ range .Sources }}
 						<div class="listitem">
-							<div class="name"><a href="{{ .URLPrefix }}/browse/sources/{{ .Name }}">{{ hl .Name $q }}</a></div>
+							<div class="name"><a href="{{ $prefix }}/browse/sources/{{ .Name }}">{{ hl .Name $q }}</a></div>
 							<div class="desc">Source</div>
 						</div>{{ end }}{{ range .Collections }}
 						<div class="listitem">
-							<div class="name"><a href="{{ .URLPrefix }}/browse/collections/{{ .ID }}">{{ hl .Name $q }}</a></div>
+							<div class="name"><a href="{{ $prefix }}/browse/collections/{{ .ID }}">{{ hl .Name $q }}</a></div>
 							<div class="desc">Collection</div>
 						</div>{{ end }}
 					</div>{{ end }}
