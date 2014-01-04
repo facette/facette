@@ -20,7 +20,7 @@ section {
 			border-top: 1px solid @FooterBackgroundColor;
 			line-height: 1.5em;
 			overflow: auto;
-			padding: 0.5em 4em 0.5em 1em;
+			padding: 0.5em 8em 0.5em 1em;
 			position: relative;
 
 			& + .listitem {
@@ -59,6 +59,8 @@ section {
 				top: 50%;
 
 				a {
+					width: 1.5em;
+
 					&::before {
 						text-align: center;
 						width: 100%;
@@ -150,6 +152,10 @@ section {
 							margin-left: 0.25em;
 							text-decoration: none;
 							visibility: hidden;
+
+							&::before {
+								margin-right: 0;
+							}
 
 							&:hover {
 								color: @TextColorB;

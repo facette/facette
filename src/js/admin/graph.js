@@ -667,6 +667,28 @@ function adminGraphSetupTerminate() {
             PANE_UNLOAD_LOCK = true;
         });
 
+        linkRegister('move-up move-down', function (e) {
+            var $target = $(e.target),
+                $item = $target.closest('.listitem, .groupitem, .groupentry'),
+                $itemNext;
+
+            if (e.target.href.endsWith('#move-up')) {
+                $itemNext = $item.prev('.listitem, .groupitem, .groupentry');
+
+                if ($itemNext.length === 0)
+                    return;
+
+                $item.detach().insertBefore($itemNext);
+            } else {
+                $itemNext = $item.next('.listitem, .groupitem, .groupentry');
+
+                if ($itemNext.length === 0)
+                    return;
+
+                $item.detach().insertAfter($itemNext);
+            }
+        });
+
         linkRegister('remove-group', function (e) {
             var $item,
                 $target = $(e.target),
