@@ -3,6 +3,7 @@ function adminGraphGetGroup(entry) {
     var $color,
         $item,
         $listMetrics = listMatch('step-1-metrics'),
+        $listSeries = listMatch('step-2-series'),
         $listOpers = listMatch('step-2-groups'),
         group;
 
@@ -22,7 +23,7 @@ function adminGraphGetGroup(entry) {
                     ']').data('value')));
         });
     } else {
-        $item = $listMetrics.find('[data-serie=' + entry.attr('data-serie') + ']');
+        $item = $listSeries.find('[data-serie=' + entry.attr('data-serie') + ']');
 
         group = {
             name: entry.attr('data-serie'),
@@ -34,7 +35,8 @@ function adminGraphGetGroup(entry) {
         if (!$.isEmptyObject(entry.data('source').data('expands')))
             group.series.push($.extend({}, entry.data('source').data('expands')[entry.attr('data-serie')]));
         else
-            group.series.push($.extend({}, $item.data('value')));
+            group.series.push($.extend({}, $listMetrics.find('[data-serie=' + entry.attr('data-serie') +
+                ']').data('value')));
     }
 
     $color = $item.find('.color');
@@ -137,6 +139,11 @@ function adminGraphCreateGroup(value, list) {
     $item.find('.name').text(value.name);
     $item.find('.type').text(type);
 
+    if (value.options && value.options.color)
+        $item.find('.color')
+            .removeClass('auto')
+            .css('color', value.options.color);
+
     return $item;
 }
 
@@ -196,6 +203,11 @@ function adminGraphCreateProxy(type, name, list) {
 
     for (key in value)
         $item.find('.' + key + ':first').text($itemSrc.find('.' + key + ':first').text());
+
+    if (value.options && value.options.color)
+        $item.find('.color')
+            .removeClass('auto')
+            .css('color', value.options.color);
 
     return $item;
 }
@@ -1203,16 +1215,14 @@ function adminGraphSetupTerminate() {
                 for (j in data.stacks[i].groups) {
                     $itemOper = data.stacks[i].groups[j].type !== OPER_GROUP_TYPE_NONE ? adminGraphCreateGroup({
                         name: data.stacks[i].groups[j].name,
-                        type: data.stacks[i].groups[j].type
+                        type: data.stacks[i].groups[j].type,
+                        options: data.stacks[i].groups[j].options
                     }) : null;
 
-                    if (data.stacks[i].groups[j].options.color)
-                        $itemOper.find('.color')
-                            .removeClass('auto')
-                            .css('color', data.stacks[i].groups[j].options.color);
-
                     for (k in data.stacks[i].groups[j].series) {
-                        $itemSerie = adminGraphCreateSerie(data.stacks[i].groups[j].series[k]);
+                        $itemSerie = adminGraphCreateSerie($.extend(data.stacks[i].groups[j].series[k], {
+                            options: data.stacks[i].groups[j].options
+                        }));
 
                         if ($itemOper)
                             adminGraphCreateProxy(PROXY_TYPE_SERIE, data.stacks[i].groups[j].series[k].name,
