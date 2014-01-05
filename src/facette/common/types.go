@@ -10,7 +10,8 @@ type PlotValue float64
 
 // MarshalJSON handles JSON marshaling of the PlotValue type.
 func (value PlotValue) MarshalJSON() ([]byte, error) {
-	if math.IsNaN(float64(value)) || math.Floor(float64(value)) == 0 {
+	// Make NaN and very small values null
+	if math.IsNaN(float64(value)) || math.Exp(float64(value)) == 1 {
 		return json.Marshal(nil)
 	}
 
