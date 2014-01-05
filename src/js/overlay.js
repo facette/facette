@@ -18,17 +18,27 @@ function overlayCreate(type, args) {
         .data('args', args)
         .on('click', 'button', function (e) {
             var $item,
-                args;
+                args,
+                value = null;
 
-            if (e.target.name != 'cancel' && e.target.name != 'validate')
+            if (['cancel', 'reset', 'validate'].indexOf(e.target.name) == -1)
                 return;
 
             $item = $(e.target).closest('[data-overlay]');
             args  = $item.data('args');
 
             if (args && args.callbacks) {
+                if (type == 'prompt') {
+                    if (e.target.name == 'reset') {
+                        value = args.reset;
+                        e.target.name = 'validate';
+                    } else {
+                        value = $item.find('input[name=value]').val();
+                    }
+                }
+
                 if (args.callbacks[e.target.name])
-                    args.callbacks[e.target.name](type == 'prompt' ? $item.find('input[type=text]').val() : null);
+                    args.callbacks[e.target.name](value);
 
                 if (args.callbacks.terminate)
                     args.callbacks.terminate();
@@ -60,6 +70,9 @@ function overlayCreate(type, args) {
 
             if (args.value)
                 $input.val(args.value);
+
+            if (args.reset === undefined)
+                $item.find('button[name=reset]').remove();
 
             setTimeout(function () { $input.select(); }, 0);
         }

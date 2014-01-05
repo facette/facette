@@ -17,6 +17,20 @@ function humanReadable(number) {
     return (Math.round((number / Math.pow(1000, index) * 100)) / 100) + units[index];
 }
 
+function rgbToHex(value) {
+    var chunks;
+
+    if (!value)
+        return null;
+
+    chunks = value.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*\d+)?\)$/);
+
+    return '#' +
+        ('0' + parseInt(chunks[1], 10).toString(16)).slice(-2) +
+        ('0' + parseInt(chunks[2], 10).toString(16)).slice(-2) +
+        ('0' + parseInt(chunks[3], 10).toString(16)).slice(-2);
+}
+
 function splitAttributeValue(value) {
     var entries = $.map(value.split(';'), $.trim),
         chunks,

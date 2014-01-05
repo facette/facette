@@ -1,15 +1,20 @@
 
 function adminGraphGetGroup(entry) {
-    var $group,
+    var $color,
+        $item,
         $listMetrics = listMatch('step-1-metrics'),
         $listOpers = listMatch('step-2-groups'),
         group;
 
     if (entry.attr('data-group')) {
-        $group = $listOpers.find('[data-group=' + entry.attr('data-group') + ']');
-        group  = $.extend({series: []}, $group.data('value'));
+        $item = $listOpers.find('[data-group=' + entry.attr('data-group') + ']');
 
-        $group.find('.groupentry').each(function () {
+        group = $.extend({
+            series: [],
+            options: {}
+        }, $item.data('value'));
+
+        $item.find('.groupentry').each(function () {
             if (!$.isEmptyObject(entry.data('source').data('expands')))
                 group.series.push($.extend({}, entry.data('source').data('expands')[this.getAttribute('data-serie')]));
             else
@@ -17,18 +22,25 @@ function adminGraphGetGroup(entry) {
                     ']').data('value')));
         });
     } else {
+        $item = $listMetrics.find('[data-serie=' + entry.attr('data-serie') + ']');
+
         group = {
             name: entry.attr('data-serie'),
             type: OPER_GROUP_TYPE_NONE,
-            series: []
+            series: [],
+            options: {}
         };
 
         if (!$.isEmptyObject(entry.data('source').data('expands')))
             group.series.push($.extend({}, entry.data('source').data('expands')[entry.attr('data-serie')]));
         else
-            group.series.push($.extend({}, $listMetrics.find('[data-serie=' + entry.attr('data-serie') +
-                ']').data('value')));
+            group.series.push($.extend({}, $item.data('value')));
     }
+
+    $color = $item.find('.color');
+
+    if (!$color.hasClass('auto'))
+        group.options.color = rgbToHex($color.css('color'));
 
     return group;
 }
@@ -890,6 +902,46 @@ function adminGraphSetupTerminate() {
             });
         });
 
+        linkRegister('set-color', function (e) {
+            var $target = $(e.target),
+                $color = $target.closest('.listitem, .groupitem').find('.color'),
+                $overlay;
+
+            $overlay = overlayCreate('prompt', {
+                message: $.t('graph.labl_color'),
+                callbacks: {
+                    validate: function (data) {
+                        PANE_UNLOAD_LOCK = true;
+
+                        if (!data) {
+                            $color
+                                .addClass('auto')
+                                .removeAttr('style');
+
+                            return;
+                        }
+
+                        $color
+                            .removeClass('auto')
+                            .css('color', data);
+                    }
+                },
+                labels: {
+                    reset: {
+                        text: $.t('main.labl_reset_default')
+                    },
+                    validate: {
+                        text: $.t('graph.labl_color_set')
+                    }
+                },
+                reset: ''
+            });
+
+            $overlay.find('input[name=value]')
+                .attr('type', 'color')
+                .val(!$color.hasClass('auto') ? rgbToHex($color.css('color')) : '#ffffff');
+        });
+
         // Attach events
         $body
             .on('click', 'button', function (e) {
@@ -1153,6 +1205,11 @@ function adminGraphSetupTerminate() {
                         name: data.stacks[i].groups[j].name,
                         type: data.stacks[i].groups[j].type
                     }) : null;
+
+                    if (data.stacks[i].groups[j].options.color)
+                        $itemOper.find('.color')
+                            .removeClass('auto')
+                            .css('color', data.stacks[i].groups[j].options.color);
 
                     for (k in data.stacks[i].groups[j].series) {
                         $itemSerie = adminGraphCreateSerie(data.stacks[i].groups[j].series[k]);

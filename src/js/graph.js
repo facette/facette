@@ -307,7 +307,8 @@ function graphDraw(graph, postpone, delay) {
                             id: data.stacks[i].series[j].name,
                             name: data.stacks[i].series[j].name,
                             stack: data.stacks[i].name,
-                            data: data.stacks[i].series[j].plots
+                            data: data.stacks[i].series[j].plots,
+                            color: data.stacks[i].series[j].options.color || null
                         });
 
                         info[data.stacks[i].series[j].name] = data.stacks[i].series[j].info;

@@ -33,9 +33,10 @@ type Serie struct {
 
 // OperGroup represents a subset of Stack entry.
 type OperGroup struct {
-	Name   string   `json:"name"`
-	Type   int      `json:"type"`
-	Series []*Serie `json:"series"`
+	Name    string            `json:"name"`
+	Type    int               `json:"type"`
+	Series  []*Serie          `json:"series"`
+	Options map[string]string `json:"options"`
 }
 
 // Stack represents a set of OperGroup entries in a Graph instance.

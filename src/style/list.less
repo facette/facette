@@ -80,6 +80,28 @@ section {
 				line-height: 3em;
 			}
 
+			.color {
+				float: left;
+				text-decoration: none;
+
+				&::before {
+					.icon;
+					content: '\f111';
+					cursor: pointer;
+					display: inline-block;
+					margin-right: 0.35em;
+					text-align: center;
+				}
+
+				&.auto {
+					color: @FooterBackgroundColor;
+
+					&::before {
+						content: '\f10c';
+					}
+				}
+			}
+
 			.name {
 				float: left;
 				margin-right: 0.5em;

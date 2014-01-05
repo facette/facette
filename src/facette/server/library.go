@@ -98,9 +98,10 @@ type statResponse struct {
 }
 
 type serieResponse struct {
-	Name  string                      `json:"name"`
-	Plots []common.PlotValue          `json:"plots"`
-	Info  map[string]common.PlotValue `json:"info"`
+	Name    string                      `json:"name"`
+	Plots   []common.PlotValue          `json:"plots"`
+	Info    map[string]common.PlotValue `json:"info"`
+	Options map[string]string           `json:"options"`
 }
 
 type stackResponse struct {
@@ -745,6 +746,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 		data          map[string]map[string]map[string]*backend.PlotResult
 		endTime       time.Time
 		err           error
+		groupOptions  map[string]map[string]string
 		item          interface{}
 		originBackend backend.BackendHandler
 		plotMax       int
@@ -831,6 +833,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 	step = endTime.Sub(startTime) / time.Duration(plotReq.Sample)
 
 	// Get plots data
+	groupOptions = make(map[string]map[string]string)
 	data = make(map[string]map[string]map[string]*backend.PlotResult)
 
 	for _, stackItem := range graph.Stacks {
@@ -842,6 +845,8 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 				server.handleResponse(writer, http.StatusBadRequest)
 				return
 			}
+
+			groupOptions[groupItem.Name] = groupItem.Options
 
 			if data[stackItem.Name][groupItem.Name], err = originBackend.GetPlots(query, startTime, endTime, step,
 				plotReq.Percentiles); err != nil {
@@ -872,16 +877,17 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 	for stackName, stackItem := range data {
 		stack = &stackResponse{Name: stackName}
 
-		for _, groupItem := range stackItem {
+		for groupName, groupItem := range stackItem {
 			for serieName, serieResult := range groupItem {
 				if len(serieResult.Plots) > plotMax {
 					plotMax = len(serieResult.Plots)
 				}
 
 				stack.Series = append(stack.Series, &serieResponse{
-					Name:  serieName,
-					Plots: serieResult.Plots,
-					Info:  serieResult.Info,
+					Name:    serieName,
+					Plots:   serieResult.Plots,
+					Info:    serieResult.Info,
+					Options: groupOptions[groupName],
 				})
 			}
 		}
