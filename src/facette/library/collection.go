@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/fatih/set"
 	"os"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -54,15 +55,18 @@ func (library *Library) FilterCollection(collection *Collection, filter string) 
 // GetCollectionTemplate generates a Collection based on origins templates.
 func (library *Library) GetCollectionTemplate(name string) (*Collection, error) {
 	var (
-		chunks     []string
-		collection *Collection
-		count      int
-		found      bool
-		options    map[string]string
-		splitItems []string
-		splitSet   *set.Set
-		template   *common.TemplateConfig
-		templates  []string
+		chunks        []string
+		collection    *Collection
+		count         int
+		found         bool
+		options       map[string]string
+		pattern       string
+		patternMatch  bool
+		patternRegexp *regexp.Regexp
+		splitItems    []string
+		splitSet      *set.Set
+		template      *common.TemplateConfig
+		templates     []string
 	)
 
 	collection = &Collection{Item: Item{Name: name}}
@@ -122,6 +126,34 @@ func (library *Library) GetCollectionTemplate(name string) (*Collection, error) 
 					count += 1
 				}
 			} else {
+				pattern = ""
+				patternMatch = false
+
+				for _, stackItem := range template.Stacks {
+					for _, groupItem := range stackItem.Groups {
+						if pattern != "" {
+							pattern += "|"
+						}
+
+						pattern += groupItem.Pattern
+					}
+				}
+
+				patternRegexp = regexp.MustCompile(pattern)
+
+				for metricName := range library.Catalog.Origins[originName].Sources[name].Metrics {
+					if !patternRegexp.MatchString(metricName) {
+						continue
+					}
+
+					patternMatch = true
+					break
+				}
+
+				if !patternMatch {
+					continue
+				}
+
 				options = make(map[string]string)
 
 				if template.Options != nil {
