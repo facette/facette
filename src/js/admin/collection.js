@@ -160,17 +160,7 @@ function adminCollectionSetupTerminate() {
         });
 
         paneStepRegister('collection-edit', 2, function () {
-            if (listMatch('step-1-graphs').find('[data-listitem^=step-1-graphs-item]').length === 0) {
-                overlayCreate('alert', {
-                    message: $.t('collection.mesg_graph_missing'),
-                    callbacks: {
-                        validate: function () {
-                            setTimeout(function () { $('[data-step=1] fieldset input:first').select(); }, 0);
-                        }
-                    }
-                });
-                return false;
-            }
+            setTimeout(function () { $('[data-step=2] :input:first').select(); });
         });
 
         // Register links

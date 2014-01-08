@@ -12,7 +12,7 @@
 		<script src="{{ .URLPrefix }}{{ asset "/static/facette.js" }}"></script>
 {{ end }}
 
-{{ define "content" }}{{ $q := .Request.FormValue "q" }}
+{{ define "content" }}{{ $prefix := .URLPrefix }}{{ $q := .Request.FormValue "q" }}
 		<nav>
 			<dl class="graphlist">
 				<dt>Graphs</dt>{{ if .Collection.Entries }}{{ if ne $q "" }}
@@ -40,7 +40,12 @@
 			</header>
 
 			<section class="scrollarea full">{{ if .Collection.Entries }}{{ template "template_graph" }}{{ range $index, $value := .Collection.Entries }}
-				<div data-graph="{{ $value.ID }}" data-graphopts="range: -1h; {{ dump $value.Options }}" id="graph-{{ $index }}"></div>{{ end }}{{ else }}
+				<div data-graph="{{ $value.ID }}" data-graphopts="range: -1h; {{ dump $value.Options }}" id="graph-{{ $index }}"></div>{{ end }}{{ else if .Collection.Children }}
+				<h1>Sub-Collections</h1>
+				<ul>{{ range $index, $value := .Collection.Children }}
+					<li><a href="{{ $prefix }}/browse/collections/{{ $value.ID }}">{{ $value.Name }}</a></li>{{ end }}
+				</ul>{{ else if eq $q "" }}
+				<div class="mesgitem info">The collection is emty</div>{{ else }}
 				<div class="mesgitem warning">Your search doesn’t match any graph <a href="{{ .Request.URL.Path }}">Reset</a></div>{{ end }}
 			</section>
 		</article>
