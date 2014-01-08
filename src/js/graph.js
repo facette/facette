@@ -94,11 +94,15 @@ function graphDraw(graph, postpone, delay) {
                 }) : undefined
             };
 
-            if (graphOpts.origin && graphOpts.template) {
-                query.origin   = graphOpts.origin;
-                query.source   = graphOpts.source;
-                query.template = graphOpts.template;
-                query.filter   = graphOpts.filter;
+            if (graphOpts.origin && (graphOpts.template || graphOpts.metric)) {
+                query.origin = graphOpts.origin;
+                query.source = graphOpts.source;
+                query.filter = graphOpts.filter;
+
+                if (graphOpts.template)
+                    query.template = graphOpts.template;
+                else
+                    query.metric = graphOpts.metric;
             } else {
                 query.graph = graph.attr('data-graph');
             }

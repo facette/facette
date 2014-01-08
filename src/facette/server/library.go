@@ -33,6 +33,7 @@ type plotRequest struct {
 	Graph       string    `json:"graph"`
 	Origin      string    `json:"origin"`
 	Source      string    `json:"source"`
+	Metric      string    `json:"metric"`
 	Template    string    `json:"template"`
 	Filter      string    `json:"filter"`
 }
@@ -777,6 +778,8 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 
 	if plotReq.Origin != "" && plotReq.Template != "" {
 		plotReq.Graph = plotReq.Origin + "\x30" + plotReq.Template
+	} else if plotReq.Origin != "" && plotReq.Metric != "" {
+		plotReq.Graph = plotReq.Origin + "\x30" + plotReq.Metric
 	}
 
 	if plotReq.Time == "" {
@@ -814,6 +817,8 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 	// Get graph from library
 	if plotReq.Template != "" {
 		graph, err = server.Library.GetGraphTemplate(plotReq.Origin, plotReq.Source, plotReq.Template, plotReq.Filter)
+	} else if plotReq.Metric != "" {
+		graph, err = server.Library.GetGraphMetric(plotReq.Origin, plotReq.Source, plotReq.Metric)
 	} else if item, err = server.Library.GetItem(plotReq.Graph, library.LibraryItemGraph); err == nil {
 		graph = item.(*library.Graph)
 	}

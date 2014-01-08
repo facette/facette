@@ -67,7 +67,34 @@ func (library *Library) getTemplateID(origin, name string) (string, error) {
 	return id.String(), nil
 }
 
-// GetGraphTemplate gets a graph item.
+// GetGraphMetric gets a graph metric item.
+func (library *Library) GetGraphMetric(origin, source, metric string) (*Graph, error) {
+	if _, ok := library.Catalog.Origins[origin]; !ok {
+		return nil, fmt.Errorf("unknown `%s' origin", origin)
+	} else if _, ok := library.Catalog.Origins[origin].Sources[source]; !ok {
+		return nil, fmt.Errorf("unknown `%s' source for `%s' origin", source, origin)
+	} else if _, ok := library.Catalog.Origins[origin].Sources[source].Metrics[metric]; !ok {
+		return nil, fmt.Errorf("unknown `%s' metric for `%s' source", metric, source)
+	}
+
+	return &Graph{
+		Item: Item{ID: origin + "\x30" + metric, Name: metric},
+		Stacks: []*Stack{&Stack{
+			Name: "stack0",
+			Groups: []*OperGroup{&OperGroup{
+				Name: metric,
+				Series: []*Serie{&Serie{
+					Name:   metric,
+					Origin: origin,
+					Source: source,
+					Metric: metric,
+				}},
+			}},
+		}},
+	}, nil
+}
+
+// GetGraphTemplate gets a graph template item.
 func (library *Library) GetGraphTemplate(origin, source, template, filter string) (*Graph, error) {
 	var (
 		graph *Graph

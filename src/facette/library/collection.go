@@ -59,6 +59,7 @@ func (library *Library) GetCollectionTemplate(name string) (*Collection, error) 
 		collection    *Collection
 		count         int
 		found         bool
+		metricSet     *set.Set
 		options       map[string]string
 		pattern       string
 		patternMatch  bool
@@ -85,6 +86,14 @@ func (library *Library) GetCollectionTemplate(name string) (*Collection, error) 
 
 		sort.Strings(templates)
 
+		// Prepare metrics
+		metricSet = set.New()
+
+		for metricName := range library.Catalog.Origins[originName].Sources[name].Metrics {
+			metricSet.Add(metricName)
+		}
+
+		// Parse template entries
 		for _, templateName := range templates {
 			template = library.Config.Origins[originName].Templates[templateName]
 
@@ -96,6 +105,7 @@ func (library *Library) GetCollectionTemplate(name string) (*Collection, error) 
 						continue
 					}
 
+					metricSet.Remove(metricName)
 					splitSet.Add(chunks[1])
 				}
 
@@ -146,8 +156,8 @@ func (library *Library) GetCollectionTemplate(name string) (*Collection, error) 
 						continue
 					}
 
+					metricSet.Remove(metricName)
 					patternMatch = true
-					break
 				}
 
 				if !patternMatch {
@@ -171,6 +181,22 @@ func (library *Library) GetCollectionTemplate(name string) (*Collection, error) 
 
 				count += 1
 			}
+		}
+
+		// Handle non-template metrics
+		for _, metricName := range metricSet.StringSlice() {
+			options = make(map[string]string)
+			options["origin"] = originName
+			options["source"] = name
+			options["metric"] = metricName
+			options["title"] = metricName
+
+			collection.Entries = append(collection.Entries, &CollectionEntry{
+				ID:      fmt.Sprintf("unnamed%d", count),
+				Options: options,
+			})
+
+			count += 1
 		}
 	}
 
