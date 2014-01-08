@@ -249,6 +249,7 @@ func (library *Library) LoadItem(id string, itemType int) error {
 		if tmpCollection.Parent != "" {
 			if item, err = library.GetItem(tmpCollection.Parent, LibraryItemCollection); err == nil {
 				library.Collections[id].Parent = item.(*Collection)
+				library.Collections[id].ParentID = library.Collections[id].Parent.ID
 				library.Collections[id].Parent.Children = append(library.Collections[id].Parent.Children,
 					library.Collections[id])
 			}

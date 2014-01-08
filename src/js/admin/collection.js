@@ -320,6 +320,14 @@ function adminCollectionSetupTerminate() {
             $pane.find('input[name=collection-name]').val(data.name);
             $pane.find('textarea[name=collection-desc]').val(data.description);
 
+            if (data.parent) {
+                collectionLoad(data.parent).pipe(function (data) {
+                    $pane.find('input[name=collection-parent]')
+                        .data('value', data)
+                        .val(data.name);
+                });
+            }
+
             if ($listGraphs.data('counter') === 0)
                 listSay($listGraphs, $.t('graph.mesg_none'));
 

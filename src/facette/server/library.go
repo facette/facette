@@ -606,6 +606,7 @@ func (server *Server) collectionHandle(writer http.ResponseWriter, request *http
 
 			if collection != nil {
 				collectionTemp.Collection.Parent = collection
+				collectionTemp.Collection.ParentID = collectionTemp.Collection.Parent.ID
 				collection.Children = append(collection.Children, collectionTemp.Collection)
 			}
 		}

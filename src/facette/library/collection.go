@@ -22,6 +22,7 @@ type Collection struct {
 	Item
 	Entries  []*CollectionEntry `json:"entries"`
 	Parent   *Collection        `json:"-"`
+	ParentID string             `json:"parent"`
 	Children []*Collection      `json:"-"`
 }
 
