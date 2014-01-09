@@ -39,11 +39,7 @@ function adminCollectionGetData() {
 }
 
 function adminCollectionUpdatePlaceholders(item) {
-    var $title = item.find('input[name=graph-title]'),
-        $range = item.find('input[name=graph-range]');
-
-    $title.attr('placeholder', item.find('.name').text() + ' (' + ($range.val() || $range.attr('placeholder') ||
-        GRAPH_DEFAULT_RANGE) + ')');
+    item.find('input[name=graph-title]').attr('placeholder', item.find('.name').text());
 }
 
 function adminCollectionSetupTerminate() {
