@@ -135,7 +135,7 @@ func (server *Server) Run() error {
 		dirPath, _ = path.Split(server.Config.ServerLog)
 		os.MkdirAll(dirPath, 0755)
 
-		serverOutput, _ = os.OpenFile(server.Config.ServerLog, os.O_CREATE|os.O_WRONLY, 0644)
+		serverOutput, _ = os.OpenFile(server.Config.ServerLog, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		log.SetOutput(serverOutput)
 	}
 
