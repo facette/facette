@@ -12,7 +12,7 @@ type Source struct {
 }
 
 // AppendMetric adds a new Metric entry into the Source instance.
-func (source *Source) AppendMetric(name, dsName, filePath string) *Metric {
+func (source *Source) AppendMetric(name, origName string) *Metric {
 	var (
 		metric *Metric
 	)
@@ -22,7 +22,7 @@ func (source *Source) AppendMetric(name, dsName, filePath string) *Metric {
 	}
 
 	// Append new metric instance into source
-	metric = &Metric{Name: name, Dataset: dsName, FilePath: filePath, source: source}
+	metric = &Metric{Name: name, OriginalName: origName, source: source}
 	source.Metrics[name] = metric
 
 	return metric

@@ -19,12 +19,19 @@ type RRDBackendHandler struct {
 	Path    string
 	Pattern string
 	origin  *Origin
+	metrics map[string]map[string]*RRDMetric
+}
+
+// RRDMetric represents the main structure of a RRD metric information.
+type RRDMetric struct {
+	Dataset  string
+	FilePath string
 }
 
 // GetPlots calculates and returns plot data based on a time interval.
 func (handler *RRDBackendHandler) GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
 	percentiles []float64) (map[string]*PlotResult, error) {
-	return rrdGetData(query, startTime, endTime, step, percentiles, false)
+	return handler.rrdGetData(query, startTime, endTime, step, percentiles, false)
 }
 
 // GetValue calculates and returns plot data at a specific reference time.
@@ -38,7 +45,8 @@ func (handler *RRDBackendHandler) GetValue(query *GroupQuery, refTime time.Time,
 
 	result = make(map[string]map[string]common.PlotValue)
 
-	if data, err = rrdGetData(query, refTime.Add(-1*time.Minute), refTime, time.Minute, percentiles, true); err != nil {
+	if data, err = handler.rrdGetData(query, refTime.Add(-1*time.Minute), refTime, time.Minute, percentiles,
+		true); err != nil {
 		return nil, err
 	}
 
@@ -84,8 +92,10 @@ func (handler *RRDBackendHandler) Update() error {
 	walkFunc = func(filePath string, fileInfo os.FileInfo, err error) error {
 		var (
 			info       map[string]interface{}
-			metricPath string
+			metric     string
+			metricName string
 			mode       os.FileMode
+			source     string
 			submatch   []string
 		)
 
@@ -100,8 +110,6 @@ func (handler *RRDBackendHandler) Update() error {
 			return nil
 		}
 
-		var source, metric string
-
 		if re.SubexpNames()[1] == "source" {
 			source = submatch[1]
 			metric = submatch[2]
@@ -110,8 +118,8 @@ func (handler *RRDBackendHandler) Update() error {
 			metric = submatch[1]
 		}
 
-		if _, ok := handler.origin.Sources[source]; !ok {
-			handler.origin.AppendSource(source)
+		if _, ok := handler.metrics[source]; !ok {
+			handler.metrics[source] = make(map[string]*RRDMetric)
 		}
 
 		// Extract metric information from .rrd file
@@ -121,25 +129,10 @@ func (handler *RRDBackendHandler) Update() error {
 
 		if _, ok := info["ds.index"]; ok {
 			for dsName := range info["ds.index"].(map[string]interface{}) {
-				metricPath = metric + "/" + dsName
+				metricName = metric + "/" + dsName
 
-				for _, filter := range handler.origin.catalog.Config.Origins[handler.origin.Name].Filters {
-					if !filter.PatternRegexp.MatchString(metricPath) {
-						continue
-					}
-
-					if filter.Discard {
-						if handler.origin.catalog.debugLevel > 2 {
-							log.Printf("DEBUG: discarding `%s' metric...", metricPath)
-						}
-
-						return nil
-					} else if filter.Rewrite != "" {
-						metricPath = filter.PatternRegexp.ReplaceAllString(metricPath, filter.Rewrite)
-					}
-				}
-
-				handler.origin.Sources[source].AppendMetric(metricPath, dsName, filePath)
+				handler.origin.inputChan <- [2]string{source, metricName}
+				handler.metrics[source][metricName] = &RRDMetric{Dataset: dsName, FilePath: filePath}
 			}
 		}
 
@@ -153,12 +146,8 @@ func (handler *RRDBackendHandler) Update() error {
 	return nil
 }
 
-func init() {
-	BackendHandlers["rrd"] = NewRRDBackendHandler
-}
-
-func rrdGetData(query *GroupQuery, startTime, endTime time.Time, step time.Duration, percentiles []float64,
-	infoOnly bool) (map[string]*PlotResult, error) {
+func (handler *RRDBackendHandler) rrdGetData(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
+	percentiles []float64, infoOnly bool) (map[string]*PlotResult, error) {
 	var (
 		count      int
 		data       rrd.XportResult
@@ -209,14 +198,16 @@ func rrdGetData(query *GroupQuery, startTime, endTime time.Time, step time.Durat
 
 			count += 1
 
-			graph.Def(serieTemp, serie.Metric.FilePath, serie.Metric.Dataset, "AVERAGE")
+			graph.Def(serieTemp, handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].FilePath,
+				handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].Dataset, "AVERAGE")
 
 			// Set graph information request
 			rrdSetGraph(graph, serieTemp, serieName, percentiles)
 
 			// Set plots request
 			if !infoOnly {
-				xport.Def(serieTemp, serie.Metric.FilePath, serie.Metric.Dataset, "AVERAGE")
+				xport.Def(serieTemp, handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].FilePath,
+					handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].Dataset, "AVERAGE")
 				xport.XportDef(serieTemp, serieTemp)
 			}
 
@@ -237,10 +228,12 @@ func rrdGetData(query *GroupQuery, startTime, endTime time.Time, step time.Durat
 
 			serieTemp = serieName + fmt.Sprintf("-tmp%d", index)
 
-			graph.Def(serieTemp, serie.Metric.FilePath, serie.Metric.Dataset, "AVERAGE")
+			graph.Def(serieTemp, handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].FilePath,
+				handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].Dataset, "AVERAGE")
 
 			if !infoOnly {
-				xport.Def(serieTemp, serie.Metric.FilePath, serie.Metric.Dataset, "AVERAGE")
+				xport.Def(serieTemp, handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].FilePath,
+					handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].Dataset, "AVERAGE")
 			}
 
 			if len(stack) == 0 {
@@ -300,6 +293,10 @@ func rrdGetData(query *GroupQuery, startTime, endTime time.Time, step time.Durat
 	data.FreeValues()
 
 	return result, nil
+}
+
+func init() {
+	BackendHandlers["rrd"] = NewRRDBackendHandler
 }
 
 func rrdParseInfo(info rrd.GraphInfo, data map[string]*PlotResult) {
@@ -365,6 +362,7 @@ func NewRRDBackendHandler(origin *Origin, config map[string]string) error {
 		Path:    config["path"],
 		Pattern: config["pattern"],
 		origin:  origin,
+		metrics: make(map[string]map[string]*RRDMetric),
 	}
 
 	return nil

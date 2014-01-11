@@ -14,6 +14,11 @@ const (
 	OperGroupTypeSum
 )
 
+var (
+	// BackendHandlers represents the list of available backend handlers.
+	BackendHandlers = make(map[string]func(*Origin, map[string]string) error)
+)
+
 // SerieQuery represents a serie entry in a GroupQuery.
 type SerieQuery struct {
 	Name   string
@@ -41,8 +46,3 @@ type BackendHandler interface {
 		percentiles []float64) (map[string]map[string]common.PlotValue, error)
 	Update() error
 }
-
-var (
-	// BackendHandlers represents the list of available backend handlers.
-	BackendHandlers = make(map[string]func(*Origin, map[string]string) error)
-)

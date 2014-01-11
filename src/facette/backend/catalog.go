@@ -22,13 +22,44 @@ func (catalog *Catalog) AddOrigin(name string, config map[string]string) (*Origi
 		origin *Origin
 	)
 
-	origin = &Origin{Name: name, Sources: make(map[string]*Source), catalog: catalog}
-
 	if _, ok := config["type"]; !ok {
 		return nil, fmt.Errorf("missing backend type")
 	} else if _, ok := BackendHandlers[config["type"]]; !ok {
 		return nil, fmt.Errorf("unknown `%s' backend type", config["type"])
 	}
+
+	origin = &Origin{Name: name, Sources: make(map[string]*Source), catalog: catalog}
+	origin.inputChan = make(chan [2]string)
+
+	go func() {
+		var (
+			displayName string
+		)
+
+		for entry := range origin.inputChan {
+			if _, ok := origin.Sources[entry[0]]; !ok {
+				origin.AppendSource(entry[0])
+			}
+
+			for _, filter := range catalog.Config.Origins[name].Filters {
+				if !filter.PatternRegexp.MatchString(entry[1]) {
+					continue
+				}
+
+				if filter.Discard {
+					if catalog.debugLevel > 2 {
+						log.Printf("DEBUG: discarding `%s' metric...", entry[1])
+					}
+				} else if filter.Rewrite != "" {
+					displayName = filter.PatternRegexp.ReplaceAllString(entry[1], filter.Rewrite)
+				} else {
+					displayName = entry[1]
+				}
+			}
+
+			origin.Sources[entry[0]].AppendMetric(displayName, entry[1])
+		}
+	}()
 
 	if err = BackendHandlers[config["type"]](origin, config); err != nil {
 		return nil, err

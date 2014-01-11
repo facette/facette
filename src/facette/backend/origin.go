@@ -7,10 +7,11 @@ import (
 
 // A Origin represents an origin entry.
 type Origin struct {
-	Name    string
-	Backend BackendHandler
-	Sources map[string]*Source
-	catalog *Catalog
+	Name      string
+	Backend   BackendHandler
+	Sources   map[string]*Source
+	catalog   *Catalog
+	inputChan chan [2]string
 }
 
 // AppendSource adds a new Source entry into the Origin instance.
