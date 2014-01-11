@@ -95,6 +95,59 @@
     		today: 'Dzisiaj'
     		},
     };
+	/* ----- */
+
+	var PickerHandler = function($picker, $input){
+		this.$pickerObject = $picker;
+		this.$inputObject = $input;
+	};
+
+	/* Get a picker */
+	PickerHandler.prototype.getPicker = function(){
+		return this.$pickerObject;
+	};
+
+	/* Get a input-field */
+	PickerHandler.prototype.getInput = function(){
+		return this.$inputObject;
+	};
+
+	/* Show a picker */
+	PickerHandler.prototype.show = function(){
+		var $picker = this.$pickerObject;
+		var $input = this.$inputObject;
+
+		$picker.show();
+
+		if ($picker.data('isInline') == false) { // Float mode
+			// Move position of a picker
+			var _position = $input.parent().css('position');
+			if(_position === 'relative' || _position === 'absolute'){
+				$picker.parent().css("top", $input.outerHeight() + 2 + "px");
+			}
+			else{
+				$picker.parent().css("top", $input.position().top + $input.outerHeight() + 2 + "px");
+				$picker.parent().css("left", $input.position().left + "px");
+			}
+		}
+	};
+
+	/* Hide a picker */
+	PickerHandler.prototype.hide = function(){
+		var $picker = this.$pickerObject;
+		var $input = this.$inputObject;
+		$picker.hide();
+	};
+
+	/* Destroy a picker */
+	PickerHandler.prototype.destroy = function(){
+		var $picker = this.$pickerObject;
+		var picker_id = $picker.data('pickerId');
+		PickerObjects[picker_id] = null;
+		$picker.remove();
+	};
+
+	/* ----- */
 
 	var PickerObjects = [];
 	var InputObjects = [];
@@ -123,6 +176,11 @@
 
 	var beforeMonth = function($obj) {
 		var $picker = getParentPickerObject($obj);
+
+		if ($picker.data('stateAllowBeforeMonth') == false) { // Not allowed
+			return;
+		}
+
 		var date = getPickedDate($picker);
 		var targetMonth_lastDay = new Date(date.getFullYear(), date.getMonth(), 0).getDate();
 		if (targetMonth_lastDay < date.getDate()) {
@@ -368,6 +426,9 @@
 		var minuteInterval = $picker.data("minuteInterval");
 		var firstDayOfWeek = $picker.data("firstDayOfWeek");
 
+		var minTime = $picker.data("minTime");
+		var maxTime = $picker.data("maxTime");
+
 		/* Read locale option */
 		var locale = $picker.data("locale");
 		if (!lang.hasOwnProperty(locale)) {
@@ -384,6 +445,10 @@
 		var isCurrentYear = todayDate.getFullYear() == date.getFullYear();
 		var isCurrentMonth = isCurrentYear && todayDate.getMonth() == date.getMonth();
 		var isCurrentDay = isCurrentMonth && todayDate.getDate() == date.getDate();
+		var isPastMonth = false;
+		if (date.getFullYear() < todayDate.getFullYear() || (isCurrentYear && date.getMonth() < todayDate.getMonth())) {
+			isPastMonth = true;
+		}
 
 		/* Collect each part */
 		var $header = $picker.children('.datepicker_header');
@@ -443,6 +508,9 @@
 			$link_before_month.click(function() {
 				beforeMonth($picker);
 			});
+			$picker.data('stateAllowBeforeMonth', true);
+		} else {
+			$picker.data('stateAllowBeforeMonth', false);
 		}
 
 		cDate.setMinutes(0);
@@ -511,7 +579,8 @@
 		realDayObj.setSeconds(0);
 		for (var zz = 0; i < cellNum; i++) {
 			var realDay = i + 1 - firstWday;
-			var isPast = isCurrentMonth && realDay < todayDate.getDate();
+
+			var isPast = isPastMonth || (isCurrentMonth && realDay < todayDate.getDate());
 
 			if (i % 7 == 0) {
 				$tr = $('<tr>');
@@ -620,27 +689,25 @@
 			}
 
 			realDayObj =  new Date(date.getTime());
+			$timelist.css("height", $calendar.innerHeight() - 10 + 'px');
+
 			/* Output time cells */
-			for (var hour = 0; hour < 24; hour++) {
-				for (var min = 0; min < 60; min += minuteInterval) {
-					var $o = $('<div>');
-					var isPastTime = hour < todayDate.getHours() || (hour == todayDate.getHours() && min < todayDate.getMinutes());
-					var isPast = isCurrentDay && isPastTime;
+			var hour = minTime[0];
+			var min = minTime[1];
 
-					$o.addClass('timelist_item');
-					$o.text(zpadding(hour) + ":" + zpadding(min));
+			while( hour*100+min < maxTime[0]*100+maxTime[1] ){
 
-					$o.data("hour", hour);
-					$o.data("min", min);
+				var $o = $('<div>');
+				var isPastTime = hour < todayDate.getHours() || (hour == todayDate.getHours() && min < todayDate.getMinutes());
+				var isPast = isCurrentDay && isPastTime;
 
-					$timelist.append($o);
+				$o.addClass('timelist_item');
+				$o.text(zpadding(hour) + ":" + zpadding(min));
 
-					if (hour == date.getHours() && min == date.getMinutes()) {/* selected time */
-						$o.addClass('active');
-						timelist_activeTimeCell_offsetTop = $o.offset().top;
-					}
+				$o.data("hour", hour);
+				$o.data("min", min);
 
-					/* Set event handler to time cell */
+				$timelist.append($o);
 
 					realDayObj.setHours(hour);
 					realDayObj.setMinutes(min);
@@ -685,6 +752,53 @@
 							}
 						});
 					}
+
+				if (hour == date.getHours() && min == date.getMinutes()) {/* selected time */
+					$o.addClass('active');
+					timelist_activeTimeCell_offsetTop = $o.offset().top;
+				}
+
+				/* Set event handler to time cell */
+
+				if (isFutureOnly && isPast) {
+					$o.addClass('time_in_past');
+				} else {
+					$o.click(function() {
+						if ($(this).hasClass('hover')) {
+							$(this).removeClass('hover');
+						}
+						$(this).addClass('active');
+
+						var $picker = getParentPickerObject($(this));
+						var date = getPickedDate($picker);
+						var hour = $(this).data("hour");
+						var min = $(this).data("min");
+						draw($picker, {
+							"isAnim": false,
+							"isOutputToInputObject": true
+						}, date.getFullYear(), date.getMonth(), date.getDate(), hour, min);
+
+						if ($picker.data("isInline") == false && $picker.data("closeOnSelected")){
+							// Close a picker
+							ActivePickerId = -1;
+							$picker.hide();
+						}
+					});
+
+					$o.hover(function() {
+						if (! $(this).hasClass('active')) {
+							$(this).addClass('hover');
+						}
+					}, function() {
+						if ($(this).hasClass('hover')) {
+							$(this).removeClass('hover');
+						}
+					});
+				}
+				min += minuteInterval;
+				if(min >= 60){
+					min=min-60;
+					hour++;
 				}
 			}
 
@@ -716,6 +830,11 @@
 	var init = function($obj, opt) {
 		/* Container */
 		var $picker = $('<div>');
+
+		$picker.destroy = function() {
+			window.alert('destroy!');
+		};
+
 		$picker.addClass('datepicker');
 		$obj.append($picker);
 
@@ -747,6 +866,8 @@
 		$picker.data("calendarMouseScroll", opt.calendarMouseScroll);
 		$picker.data("todayButton", opt.todayButton);
 		$picker.data('futureOnly', opt.futureOnly);
+		$picker.data('onShow', opt.onShow);
+		$picker.data('onHide', opt.onHide);
 
 		var minDate = Date.parse(opt.minDate);
 		if (isNaN(minDate)) { // invalid date?
@@ -768,6 +889,28 @@
 		} else {
 			$picker.data("minuteInterval", 30);
 		}
+	        opt.minTime = opt.minTime.split(':');
+	        opt.maxTime = opt.maxTime.split(':');
+
+		if(! ((opt.minTime[0] >= 0 ) && (opt.minTime[0] <24 ))){
+			opt.minTime[0]="00";
+		}
+		if(! ((opt.maxTime[0] >= 0 ) && (opt.maxTime[0] <24 ))){
+			opt.maxTime[0]="23";
+		}
+		if(! ((opt.minTime[1] >= 0 ) && (opt.minTime[1] <60 ))){
+			opt.minTime[1]="00";
+		}
+		if(! ((opt.maxTime[1] >= 0 ) && (opt.maxTime[1] <24 ))){
+			opt.maxTime[1]="59";
+		}
+		opt.minTime[0]=parseInt(opt.minTime[0]);
+		opt.minTime[1]=parseInt(opt.minTime[1]);
+		opt.maxTime[0]=parseInt(opt.maxTime[0]);
+		opt.maxTime[1]=parseInt(opt.maxTime[1]);
+		$picker.data('minTime', opt.minTime);
+		$picker.data('maxTime', opt.maxTime);
+
 
 		/* Header */
 		var $header = $('<div>');
@@ -865,7 +1008,11 @@
 			"futureOnly": false,
 			"minDate" : null,
 			"maxDate" : null,
-			"autodateOnStart": true
+			"autodateOnStart": true,
+			"minTime":"00:00",
+			"maxTime":"23:59",
+			"onShow": null,
+			"onHide": null
 		};
 	};
 
@@ -972,14 +1119,15 @@
 					var $input = $(this);
 					var $picker = $(PickerObjects[$input.data('pickerId')]);
 					ActivePickerId = $input.data('pickerId');
-					$picker.show();
-					var _position = $(input).parent().css('position');
-					if(_position === 'relative' || _position === 'absolute'){
-						$picker.parent().css("top", $input.outerHeight() + 2 + "px");
-					}
-					else{
-						$picker.parent().css("top", $input.position().top + $input.outerHeight() + 2 + "px");
-						$picker.parent().css("left", $input.position().left + "px");
+
+					// Show a picker
+					var handler = new PickerHandler($picker, $input);
+					handler.show();
+
+					// Call a event-hanlder
+					var func = $picker.data('onShow');
+					if (func != null) {
+						func(handler);
 					}
 				});
 			}
@@ -992,9 +1140,13 @@
 			for(var i=0;i<PickerObjects.length;i++){
 				var $picker = $(PickerObjects[i]);
 				if(ActivePickerId != i){	/* if not-active picker */
-					if($picker.data("inputObjectId") != null && $picker.data("isInline") == false){
+					if($picker.data("inputObjectId") != null && $picker.data("isInline") == false && $picker.css('display') != 'none'){
 						/* if append input-field && float picker */
-						$picker.hide();
+
+						// Hide a picker
+						var $input = InputObjects[$picker.data("inputObjectId")];
+						var handler = new PickerHandler($picker, $input);
+						handler.hide();
 					}
 				}
 			}
