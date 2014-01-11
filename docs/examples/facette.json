@@ -3,8 +3,11 @@
 	"base_dir": "/usr/share/facette",
 	"data_dir": "/var/lib/facette",
 	"pid_file": "/var/run/facette/facette.pid",
-	"auth_file": "/etc/facette/auth.json",
 	"origin_dir": "/etc/facette/origins",
 	"access_log": "/var/log/facette/access.log",
-	"server_log": "/var/log/facette/server.log"
+	"server_log": "/var/log/facette/server.log",
+	"auth": {
+		"type": "basic",
+		"path": "/etc/facette/auth.json"
+	}
 }
