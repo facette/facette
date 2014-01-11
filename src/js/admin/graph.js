@@ -10,10 +10,10 @@ function adminGraphGetGroup(entry) {
     if (entry.attr('data-group')) {
         $item = $listOpers.find('[data-group=' + entry.attr('data-group') + ']');
 
-        group = $.extend({
+        group = $.extend($item.data('value'), {
             series: [],
             options: {}
-        }, $item.data('value'));
+        });
 
         $item.find('.groupentry').each(function () {
             if (!$.isEmptyObject(entry.data('source').data('expands')))
