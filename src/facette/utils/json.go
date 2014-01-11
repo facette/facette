@@ -2,9 +2,11 @@ package utils
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
+	"strings"
 	"time"
 )
 
@@ -59,7 +61,7 @@ func JSONLoad(filePath string, result interface{}) (os.FileInfo, error) {
 	}
 
 	if err = json.Unmarshal(data, result); err != nil {
-		return nil, err
+		return nil, jsonError(string(data), err)
 	}
 
 	fd.Close()
@@ -69,4 +71,23 @@ func JSONLoad(filePath string, result interface{}) (os.FileInfo, error) {
 	}
 
 	return fileInfo, nil
+}
+
+func jsonError(data string, err error) error {
+	var (
+		line      int
+		lineStart int
+		position  int
+		ok        bool
+		syntax    *json.SyntaxError
+	)
+
+	if syntax, ok = err.(*json.SyntaxError); !ok {
+		return err
+	}
+
+	lineStart = strings.LastIndex(data[:syntax.Offset], "\n")
+	line, position = strings.Count(data[:syntax.Offset], "\n")+1, int(syntax.Offset)-lineStart-1
+
+	return fmt.Errorf("%s (line: %d, pos: %d)", err.Error(), line, position)
 }
