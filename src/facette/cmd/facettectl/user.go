@@ -17,9 +17,9 @@ func handleUser(config *common.Config, args []string) error {
 		err error
 	)
 
-	cmd = &cmdAuth{auth: auth.NewAuth(config, flagDebug)}
+	cmd = &cmdAuth{handler: auth.AuthBasicHandler{Config: config.Auth}}
 
-	if err = cmd.auth.Update(); err != nil {
+	if err = cmd.handler.Update(); err != nil {
 		return err
 	}
 
@@ -36,7 +36,7 @@ func handleUser(config *common.Config, args []string) error {
 }
 
 type cmdAuth struct {
-	auth *auth.Auth
+	handler auth.AuthBasicHandler
 }
 
 func (cmd *cmdAuth) list(args []string) error {
@@ -44,7 +44,7 @@ func (cmd *cmdAuth) list(args []string) error {
 		return os.ErrInvalid
 	}
 
-	for name := range cmd.auth.Users {
+	for name := range cmd.handler.Users {
 		fmt.Println(name)
 	}
 
@@ -52,7 +52,7 @@ func (cmd *cmdAuth) list(args []string) error {
 }
 
 func (cmd *cmdAuth) save() error {
-	return utils.JSONDump(cmd.auth.Config.AuthFile, &cmd.auth.Users, time.Now())
+	return utils.JSONDump(cmd.handler.Config["path"], &cmd.handler.Users, time.Now())
 }
 
 func (cmd *cmdAuth) set(args []string, create bool) error {
@@ -66,7 +66,7 @@ func (cmd *cmdAuth) set(args []string, create bool) error {
 	}
 
 	// Check for possible conflicts
-	_, exists = cmd.auth.Users[args[0]]
+	_, exists = cmd.handler.Users[args[0]]
 
 	if create && exists {
 		return fmt.Errorf("user `%s' already exists", args[0])
@@ -83,7 +83,7 @@ func (cmd *cmdAuth) set(args []string, create bool) error {
 		return fmt.Errorf("passwords don't match")
 	}
 
-	cmd.auth.Users[args[0]] = cmd.auth.Hash(string(password))
+	cmd.handler.Users[args[0]] = cmd.handler.Hash(string(password))
 
 	return cmd.save()
 }
@@ -93,7 +93,7 @@ func (cmd *cmdAuth) unset(args []string) error {
 		return os.ErrInvalid
 	}
 
-	delete(cmd.auth.Users, args[0])
+	delete(cmd.handler.Users, args[0])
 
 	return cmd.save()
 }

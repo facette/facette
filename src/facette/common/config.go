@@ -17,10 +17,10 @@ type Config struct {
 	DataDir   string                   `json:"data_dir"`
 	OriginDir string                   `json:"origin_dir"`
 	PidFile   string                   `json:"pid_file"`
-	AuthFile  string                   `json:"auth_file"`
 	ServerLog string                   `json:"server_log"`
 	AccessLog string                   `json:"access_log"`
 	URLPrefix string                   `json:"url_prefix"`
+	Auth      map[string]string        `json:"auth"`
 	Origins   map[string]*OriginConfig `json:"-"`
 }
 

@@ -36,13 +36,13 @@ const (
 
 // Server is the main service handler of Facette.
 type Server struct {
-	Config     *common.Config
-	Listener   *stoppableListener.StoppableListener
-	Auth       *auth.Auth
-	Catalog    *backend.Catalog
-	Library    *library.Library
-	Loading    bool
-	debugLevel int
+	Config      *common.Config
+	Listener    *stoppableListener.StoppableListener
+	AuthHandler auth.AuthHandler
+	Catalog     *backend.Catalog
+	Library     *library.Library
+	Loading     bool
+	debugLevel  int
 }
 
 func (server *Server) handleJSON(writer http.ResponseWriter, data interface{}) {
@@ -102,7 +102,7 @@ func (server *Server) Reload() error {
 		return err
 	}
 
-	if err = server.Auth.Update(); err != nil {
+	if err = server.AuthHandler.Update(); err != nil {
 		return err
 	}
 
@@ -139,7 +139,12 @@ func (server *Server) Run() error {
 		log.SetOutput(serverOutput)
 	}
 
-	log.Printf("INFO: server about to listen on %s", server.Config.BindAddr)
+	// Prepare authentication backend
+	if server.AuthHandler, err = auth.NewAuth(server.Config, server.debugLevel); err != nil {
+		return err
+	}
+
+	go server.AuthHandler.Update()
 
 	// Get origins from configuration
 	for originName, origin := range server.Config.Origins {
@@ -148,8 +153,9 @@ func (server *Server) Run() error {
 		}
 	}
 
+	log.Printf("INFO: server about to listen on %s", server.Config.BindAddr)
+
 	// Initialize instance
-	go server.Auth.Update()
 	go server.Catalog.Update()
 	go server.Library.Update()
 
@@ -274,7 +280,6 @@ func NewServer(debugLevel int) (*Server, error) {
 
 	// Create new server instance
 	server = &Server{Config: &common.Config{}, debugLevel: debugLevel}
-	server.Auth = auth.NewAuth(server.Config, debugLevel)
 	server.Catalog = backend.NewCatalog(server.Config, debugLevel)
 	server.Library = library.NewLibrary(server.Config, server.Catalog, debugLevel)
 

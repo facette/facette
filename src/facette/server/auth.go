@@ -25,7 +25,7 @@ func (server *Server) handleAuth(writer http.ResponseWriter, request *http.Reque
 			return false
 		}
 
-		if server.Auth.Authenticate(chunks[0], chunks[1]) {
+		if server.AuthHandler.Authenticate(chunks[0], chunks[1]) {
 			return true
 		}
 	}
