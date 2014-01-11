@@ -3,10 +3,10 @@
 
 include ../../Makefile.inc
 
-UGLIFYJS = uglifyjs
+UGLIFYJS ?= uglifyjs
 UGLIFYJS_ARGS = --comments --compress --mangle --screw-ie8
 
-JSHINT = jshint
+JSHINT ?= jshint
 JSHINT_ARGS = --show-non-errors
 
 JS_FILE = $(TEMP_DIR)/facette.js

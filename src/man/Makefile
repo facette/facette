@@ -3,7 +3,7 @@
 
 include ../../Makefile.inc
 
-PANDOC = pandoc
+PANDOC ?= pandoc
 PANDOC_ARGS = --standalone --to man
 
 DST_DIR = $(PREFIX)/share/man

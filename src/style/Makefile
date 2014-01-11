@@ -3,7 +3,7 @@
 
 include ../../Makefile.inc
 
-LESSC = lessc
+LESSC ?= lessc
 LESSC_ARGS = --no-color
 
 CSS_FILE = $(TEMP_DIR)/style.css

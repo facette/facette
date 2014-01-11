@@ -3,14 +3,15 @@
 
 include ../../Makefile.inc
 
-GIT = git
-HG = hg
+GIT ?= git
+HG ?= hg
 
-GO = go
 GOPATH = $(realpath $(BUILD_DIR)):$(realpath ../..)
 export GOPATH
 
-GOLINT = golint
+GO ?= go
+
+GOLINT ?= golint
 GOLINT_ARGS =
 
 BIN_FILES = facette \
