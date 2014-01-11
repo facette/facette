@@ -203,6 +203,7 @@ func (library *Library) LoadItem(id string, itemType int) error {
 		item          interface{}
 		err           error
 		fileInfo      os.FileInfo
+		filePath      string
 		tmpCollection *struct {
 			*Collection
 			Parent string `json:"parent"`
@@ -215,8 +216,11 @@ func (library *Library) LoadItem(id string, itemType int) error {
 	switch itemType {
 	case LibraryItemSourceGroup, LibraryItemMetricGroup:
 		tmpGroup = &Group{}
-		if fileInfo, err = utils.JSONLoad(library.getFilePath(id, itemType), &tmpGroup); err != nil {
-			return err
+
+		filePath = library.getFilePath(id, itemType)
+
+		if fileInfo, err = utils.JSONLoad(filePath, &tmpGroup); err != nil {
+			return fmt.Errorf("in %s, %s", filePath, err.Error())
 		}
 
 		library.Groups[id] = tmpGroup
@@ -226,8 +230,11 @@ func (library *Library) LoadItem(id string, itemType int) error {
 
 	case LibraryItemGraph:
 		tmpGraph = &Graph{}
-		if fileInfo, err = utils.JSONLoad(library.getFilePath(id, itemType), &tmpGraph); err != nil {
-			return err
+
+		filePath = library.getFilePath(id, itemType)
+
+		if fileInfo, err = utils.JSONLoad(filePath, &tmpGraph); err != nil {
+			return fmt.Errorf("in %s, %s", filePath, err.Error())
 		}
 
 		library.Graphs[id] = tmpGraph
@@ -236,8 +243,10 @@ func (library *Library) LoadItem(id string, itemType int) error {
 		break
 
 	case LibraryItemCollection:
-		if fileInfo, err = utils.JSONLoad(library.getFilePath(id, LibraryItemCollection), &tmpCollection); err != nil {
-			return err
+		filePath = library.getFilePath(id, LibraryItemCollection)
+
+		if fileInfo, err = utils.JSONLoad(filePath, &tmpCollection); err != nil {
+			return fmt.Errorf("in %s, %s", filePath, err.Error())
 		}
 
 		if !library.ItemExists(id, LibraryItemCollection) {
