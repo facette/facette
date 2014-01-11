@@ -29,9 +29,9 @@ OPTIONS=""
 . /lib/lsb/init-functions
 
 do_start() {
-    start-stop-daemon --start --quiet --pidfile $PIDFILE --make-pidfile --exec $DAEMON --chuid facette:facette \
+    start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --chuid facette:facette \
         --test >/dev/null || return 1
-    start-stop-daemon --start --quiet --pidfile $PIDFILE --make-pidfile --exec $DAEMON --chuid facette:facette \
+    start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --chuid facette:facette \
         --background -- $OPTIONS || return 2
 }
 
