@@ -45,65 +45,7 @@ function adminCollectionUpdatePlaceholders(item) {
 function adminCollectionSetupTerminate() {
     // Register admin panes
     paneRegister('collection-list', function () {
-        // Register links
-        linkRegister('edit-collection', function (e) {
-            window.location = urlPrefix + '/admin/collections/' +
-                $(e.target).closest('[data-itemid]').attr('data-itemid');
-        });
-
-        linkRegister('clone-collection', function (e) {
-            var $item = $(e.target).closest('[data-itemid]');
-
-            overlayCreate('prompt', {
-                message: $.t('collection.labl_collection_name'),
-                value: $item.find('.name').text() + ' (clone)',
-                callbacks: {
-                    validate: function (data) {
-                        if (!data)
-                            return;
-
-                        collectionSave($item.attr('data-itemid'), {
-                            name: data
-                        }, SAVE_MODE_CLONE).then(function () {
-                            listUpdate($item.closest('[data-list]'),
-                                $item.closest('[data-pane]').find('[data-listfilter=collections]').val());
-                        });
-                    }
-                },
-                labels: {
-                    validate: {
-                        text: $.t('collection.labl_clone')
-                    }
-                }
-            });
-        });
-
-        linkRegister('remove-collection', function (e) {
-            var $item = $(e.target).closest('[data-itemid]');
-
-            overlayCreate('confirm', {
-                message: $.t('collection.mesg_delete'),
-                callbacks: {
-                    validate: function () {
-                        collectionDelete($item.attr('data-itemid'))
-                            .then(function () {
-                                listUpdate($item.closest('[data-list]'));
-                            })
-                            .fail(function () {
-                                overlayCreate('alert', {
-                                    message: $.t('collection.mesg_delete_fail')
-                                });
-                            });
-                    }
-                },
-                labels: {
-                    validate: {
-                        text: $.t('collection.labl_delete'),
-                        style: 'danger'
-                    }
-                }
-            });
-        });
+        adminItemHandlePaneList('collection');
     });
 
     paneRegister('collection-edit', function () {
@@ -131,9 +73,9 @@ function adminCollectionSetupTerminate() {
                 if (!value)
                     return;
 
-                collectionList({
+                itemList({
                     filter: value
-                }).pipe(function (data) {
+                }, 'collections').pipe(function (data) {
                     if (data !== null && data[0].id != collectionId) {
                         input
                             .attr('title', $.t('collection.mesg_exists'))
@@ -181,8 +123,7 @@ function adminCollectionSetupTerminate() {
                     $fieldset,
                     $item,
                     $list,
-                    name,
-                    skip = false;
+                    name;
 
                 switch (e.target.name) {
                 case 'graph-add':
@@ -231,33 +172,8 @@ function adminCollectionSetupTerminate() {
                     break;
 
                 case 'step-save':
-                    $(e.target).closest('[data-pane]').find('input[name=collection-name]').each(function () {
-                        var $item = $(this);
-
-                        if (!$item.val()) {
-                            $item.closest('[data-input], textarea')
-                                .attr('title', $.t('main.mesg_field_mandatory'))
-                                .addClass('error');
-
-                            skip = true;
-                        }
-                    });
-
-                    if (skip) {
-                        return;
-                    }
-
-                    collectionSave(collectionId, adminCollectionGetData())
-                        .then(function () {
-                            PANE_UNLOAD_LOCK = false;
-                            window.location = urlPrefix + '/admin/collections/';
-                        })
-                        .fail(function () {
-                            overlayCreate('alert', {
-                                message: $.t('collection.mesg_save_fail')
-                            });
-                        });
-
+                    adminItemHandlePaneSave($(e.target).closest('[data-pane]'), collectionId, 'collection',
+                        adminCollectionGetData);
                     break;
 
                 case 'step-ok':
@@ -293,7 +209,7 @@ function adminCollectionSetupTerminate() {
         if (collectionId === null)
             return;
 
-        collectionLoad(collectionId).pipe(function (data) {
+        itemLoad(collectionId, 'collections').pipe(function (data) {
             var $item,
                 $listGraphs,
                 $pane,
@@ -317,7 +233,7 @@ function adminCollectionSetupTerminate() {
             $pane.find('textarea[name=collection-desc]').val(data.description);
 
             if (data.parent) {
-                collectionLoad(data.parent).pipe(function (data) {
+                itemLoad(data.parent, 'collections').pipe(function (data) {
                     $pane.find('input[name=collection-parent]')
                         .data('value', data)
                         .val(data.name);
@@ -333,7 +249,7 @@ function adminCollectionSetupTerminate() {
             if (collectionId)
                 query.collection = collectionId;
 
-            graphList(query).pipe(function (data) {
+            itemList(query, 'graphs').pipe(function (data) {
                 var func = function () {
                         var $item = $(this);
 

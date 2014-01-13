@@ -7,7 +7,7 @@
 {{ end }}
 
 {{ define "content" }}
-		<article data-pane="collection-edit"{{ if ne .Path "add" }} data-paneopts="id: {{ .Path }}"{{ end }}>
+		<article data-pane="collection-edit" data-paneopts="section: {{ .Section }}{{ if ne .Path "add" }}; id: {{ .Path }}{{ end }}">
 			<header>
 				<h1>Administration Panel — {{ if eq .Path "add" }}New collection{{ else }}Edit collection{{ end }}</h1>
 			</header>

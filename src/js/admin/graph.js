@@ -325,64 +325,7 @@ function adminGraphHandleSerieDrag(e) {
 function adminGraphSetupTerminate() {
     // Register admin panes
     paneRegister('graph-list', function () {
-        // Register links
-        linkRegister('edit-graph', function (e) {
-            window.location = urlPrefix + '/admin/graphs/' + $(e.target).closest('[data-itemid]').attr('data-itemid');
-        });
-
-        linkRegister('clone-graph', function (e) {
-            var $item = $(e.target).closest('[data-itemid]');
-
-            overlayCreate('prompt', {
-                message: $.t('graph.labl_graph_name'),
-                value: $item.find('.name').text() + ' (clone)',
-                callbacks: {
-                    validate: function (data) {
-                        if (!data)
-                            return;
-
-                        graphSave($item.attr('data-itemid'), {
-                            name: data
-                        }, SAVE_MODE_CLONE).then(function () {
-                            listUpdate($item.closest('[data-list]'),
-                                $item.closest('[data-pane]').find('[data-listfilter=graphs]').val());
-                        });
-                    }
-                },
-                labels: {
-                    validate: {
-                        text: $.t('graph.labl_clone')
-                    }
-                }
-            });
-        });
-
-        linkRegister('remove-graph', function (e) {
-            var $item = $(e.target).closest('[data-itemid]');
-
-            overlayCreate('confirm', {
-                message: $.t('graph.mesg_delete'),
-                callbacks: {
-                    validate: function () {
-                        graphDelete($item.attr('data-itemid'))
-                            .then(function () {
-                                listUpdate($item.closest('[data-list]'));
-                            })
-                            .fail(function () {
-                                overlayCreate('alert', {
-                                    message: $.t('graph.mesg_delete_fail')
-                                });
-                            });
-                    }
-                },
-                labels: {
-                    validate: {
-                        text: $.t('graph.labl_delete'),
-                        style: 'danger'
-                    }
-                }
-            });
-        });
+        adminItemHandlePaneList('graph');
     });
 
     paneRegister('graph-edit', function () {
@@ -417,9 +360,9 @@ function adminGraphSetupTerminate() {
                 if (!value)
                     return;
 
-                graphList({
+                itemList({
                     filter: value
-                }).pipe(function (data) {
+                }, 'graphs').pipe(function (data) {
                     if (data !== null && data[0].id != graphId) {
                         input
                             .attr('title', $.t('graph.mesg_exists'))
@@ -964,8 +907,7 @@ function adminGraphSetupTerminate() {
                     $metric,
                     $source,
                     $origin,
-                    name,
-                    skip = false;
+                    name;
 
                 switch (e.target.name) {
                 case 'metric-add':
@@ -1028,33 +970,7 @@ function adminGraphSetupTerminate() {
                     break;
 
                 case 'step-save':
-                    $(e.target).closest('[data-pane]').find('input[name=graph-name]').each(function () {
-                        var $item = $(this);
-
-                        if (!$item.val()) {
-                            $item.closest('[data-input], textarea')
-                                .attr('title', $.t('main.mesg_field_mandatory'))
-                                .addClass('error');
-
-                            skip = true;
-                        }
-                    });
-
-                    if (skip) {
-                        return;
-                    }
-
-                    graphSave(graphId, adminGraphGetData())
-                        .then(function () {
-                            PANE_UNLOAD_LOCK = false;
-                            window.location = urlPrefix + '/admin/graphs/';
-                        })
-                        .fail(function () {
-                            overlayCreate('alert', {
-                                message: $.t('graph.mesg_save_fail')
-                            });
-                        });
-
+                    adminItemHandlePaneSave($(e.target).closest('[data-pane]'), graphId, 'graph', adminGraphGetData);
                     break;
 
                 case 'step-ok':
@@ -1168,7 +1084,7 @@ function adminGraphSetupTerminate() {
                     paneGoto('graph-edit', 'stack', true);
                 }
 
-                graphSave(null, adminGraphGetData(), SAVE_MODE_VOLATILE).pipe(function (data, status, xhr) {
+                itemSave(null, 'graphs', adminGraphGetData(), SAVE_MODE_VOLATILE).pipe(function (data, status, xhr) {
                     /*jshint unused: true */
                     var location = xhr.getResponseHeader('Location');
 
@@ -1191,7 +1107,7 @@ function adminGraphSetupTerminate() {
         if (graphId === null)
             return;
 
-        graphLoad(graphId).pipe(function (data) {
+        itemLoad(graphId, 'graphs').pipe(function (data) {
             var $itemOper,
                 $itemSerie,
                 $itemStack,

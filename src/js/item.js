@@ -1,36 +1,38 @@
 
-/* Collection */
+/* Item */
 
-function collectionDelete(id) {
+function itemDelete(id, itemType) {
     return $.ajax({
-        url: urlPrefix + '/library/collections/' + id,
+        url: urlPrefix + '/library/' + itemType + '/' + id,
         type: 'DELETE'
     });
 }
 
-function collectionList(query) {
+function itemList(query, itemType) {
     return $.ajax({
-        url: urlPrefix + '/library/collections',
+        url: urlPrefix + '/library/' + itemType,
         type: 'GET',
         data: query,
         dataType: 'json'
     });
 }
 
-function collectionLoad(id) {
+function itemLoad(id, itemType) {
     return $.ajax({
-        url: urlPrefix + '/library/collections/' + id,
+        url: urlPrefix + '/library/' + itemType + '/' + id,
         type: 'GET',
         dataType: 'json'
     });
 }
 
-function collectionSave(id, query, mode) {
-    var url = '/library/collections',
+function itemSave(id, itemType, query, mode) {
+    var url = '/library/' + itemType,
         method = 'POST';
 
     if (mode === SAVE_MODE_CLONE) {
         url += '?inherit=' + id;
+    } else if (mode === SAVE_MODE_VOLATILE) {
+        url += '?volatile=1';
     } else if (id !== null) {
         url += '/' + id;
         method = 'PUT';

@@ -10,13 +10,6 @@ var GRAPH_DRAW_PARENTS  = [],
 
     $graphTemplate;
 
-function graphDelete(id) {
-    return $.ajax({
-        url: urlPrefix + '/library/graphs/' + id,
-        type: 'DELETE'
-    });
-}
-
 function graphDraw(graph, postpone, delay) {
     var graphNew;
 
@@ -601,44 +594,6 @@ function graphHandleQueue(force) {
             });
         }, 200);
     }).promise();
-}
-
-function graphList(query) {
-    return $.ajax({
-        url: urlPrefix + '/library/graphs',
-        type: 'GET',
-        data: query,
-        dataType: 'json'
-    });
-}
-
-function graphLoad(id) {
-    return $.ajax({
-        url: urlPrefix + '/library/graphs/' + id,
-        type: 'GET',
-        dataType: 'json'
-    });
-}
-
-function graphSave(id, query, mode) {
-    var url = '/library/graphs',
-        method = 'POST';
-
-    if (mode === SAVE_MODE_CLONE) {
-        url += '?inherit=' + id;
-    } else if (mode === SAVE_MODE_VOLATILE) {
-        url += '?volatile=1';
-    } else if (id !== null) {
-        url += '/' + id;
-        method = 'PUT';
-    }
-
-    return $.ajax({
-        url: urlPrefix + url,
-        type: method,
-        contentType: 'application/json',
-        data: JSON.stringify(query)
-    });
 }
 
 function graphSetupTerminate() {

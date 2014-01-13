@@ -29,68 +29,7 @@ function adminGroupSetupTerminate() {
 
     // Register admin panes
     paneRegister('group-list', function () {
-        var groupType = paneMatch('group-list').opts('pane').section;
-
-        // Register links
-        linkRegister('edit-group', function (e) {
-            window.location = urlPrefix + '/admin/' + groupType + '/' +
-                $(e.target).closest('[data-itemid]').attr('data-itemid');
-        });
-
-        linkRegister('clone-group', function (e) {
-            var $item = $(e.target).closest('[data-itemid]');
-
-            overlayCreate('prompt', {
-                message: $.t('group.labl_group_name'),
-                value: $item.find('.name').text() + ' (clone)',
-                callbacks: {
-                    validate: function (data) {
-                        if (!data)
-                            return;
-
-                        groupSave($item.attr('data-itemid'), {
-                            name: data
-                        }, SAVE_MODE_CLONE, groupType).then(function () {
-                            listUpdate($item.closest('[data-list]'),
-                                $item.closest('[data-pane]')
-                                    .find('[data-listfilter=' + groupType + ']').val());
-                        });
-                    }
-                },
-                labels: {
-                    validate: {
-                        text: $.t('group.labl_clone')
-                    }
-                }
-            });
-        });
-
-        linkRegister('remove-group', function (e) {
-            var $item = $(e.target).closest('[data-itemid]');
-
-            overlayCreate('confirm', {
-                message: $.t('group.mesg_delete'),
-                callbacks: {
-                    validate: function () {
-                        groupDelete($item.attr('data-itemid'), groupType)
-                            .then(function () {
-                                listUpdate($item.closest('[data-list]'));
-                            })
-                            .fail(function () {
-                                overlayCreate('alert', {
-                                    message: $.t('group.mesg_delete_fail')
-                                });
-                            });
-                    }
-                },
-                labels: {
-                    validate: {
-                        text: $.t('group.labl_delete'),
-                        style: 'danger'
-                    }
-                }
-            });
-        });
+        adminItemHandlePaneList('group');
     });
 
     paneRegister('group-edit', function () {
@@ -122,7 +61,7 @@ function adminGroupSetupTerminate() {
                 if (!value)
                     return;
 
-                groupList({
+                itemList({
                     filter: value
                 }, groupType).pipe(function (data) {
                     if (data !== null && data[0].id != groupId) {
@@ -192,7 +131,6 @@ function adminGroupSetupTerminate() {
                     $select,
                     $origin,
                     name,
-                    skip = false,
                     type;
 
                 switch (e.target.name) {
@@ -248,33 +186,7 @@ function adminGroupSetupTerminate() {
                     break;
 
                 case 'step-save':
-                    $(e.target).closest('[data-pane]').find('input[name=group-name]').each(function () {
-                        var $item = $(this);
-
-                        if (!$item.val()) {
-                            $item.closest('[data-input], textarea')
-                                .attr('title', $.t('main.mesg_field_mandatory'))
-                                .addClass('error');
-
-                            skip = true;
-                        }
-                    });
-
-                    if (skip) {
-                        return;
-                    }
-
-                    groupSave(groupId, adminGroupGetData(), null, groupType)
-                        .then(function () {
-                            PANE_UNLOAD_LOCK = false;
-                            window.location = urlPrefix + '/admin/' + groupType + '/';
-                        })
-                        .fail(function () {
-                            overlayCreate('alert', {
-                                message: $.t('group.mesg_save_fail')
-                            });
-                        });
-
+                    adminItemHandlePaneSave($(e.target).closest('[data-pane]'), groupId, 'group', adminGroupGetData);
                     break;
 
                 case 'step-ok':
@@ -347,7 +259,7 @@ function adminGroupSetupTerminate() {
         if (groupId === null)
             return;
 
-        groupLoad(groupId, groupType).pipe(function (data) {
+        itemLoad(groupId, groupType).pipe(function (data) {
             var $item,
                 $listItems,
                 $pane,

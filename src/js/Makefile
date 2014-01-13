@@ -32,6 +32,7 @@ SRC_FILES = intro.js \
 	link.js \
 	admin/intro.js \
 	admin/admin.js \
+	admin/item.js \
 	admin/graph.js \
 	admin/collection.js \
 	admin/group.js \
@@ -41,9 +42,8 @@ SRC_FILES = intro.js \
 	browse/browse.js \
 	browse/collection.js \
 	browse/outro.js \
+	item.js \
 	graph.js \
-	collection.js \
-	group.js \
 	stats.js \
 	pane.js \
 	i18n.js \
