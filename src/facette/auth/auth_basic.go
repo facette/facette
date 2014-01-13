@@ -9,7 +9,7 @@ import (
 	"log"
 )
 
-// AuthBasicHandler represents the main authentication method structure.
+// AuthBasicHandler represents the main basic authentication method structure.
 type AuthBasicHandler struct {
 	Config     map[string]string
 	Users      map[string]string
@@ -25,7 +25,7 @@ func (handler *AuthBasicHandler) Authenticate(login, password string) bool {
 	return handler.Hash(password) == handler.Users[login]
 }
 
-// Hash generate the password hash.
+// Hash generates the password hash.
 func (handler *AuthBasicHandler) Hash(password string) string {
 	var (
 		hash hash.Hash

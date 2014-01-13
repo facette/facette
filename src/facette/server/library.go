@@ -171,8 +171,12 @@ func (server *Server) libraryList(writer http.ResponseWriter, request *http.Requ
 				}
 			}
 
-			response.Items = append(response.Items, &libraryItemResponse{ID: group.ID, Name: group.Name,
-				Description: group.Description, Modified: group.Modified.Format(time.RFC3339)})
+			response.Items = append(response.Items, &libraryItemResponse{
+				ID:          group.ID,
+				Name:        group.Name,
+				Description: group.Description,
+				Modified:    group.Modified.Format(time.RFC3339),
+			})
 		}
 	} else if request.URL.Path == URLLibraryPath+"/graphs" {
 		graphSet = set.New()
@@ -208,8 +212,12 @@ func (server *Server) libraryList(writer http.ResponseWriter, request *http.Requ
 					}
 				}
 
-				response.Items = append(response.Items, &libraryItemResponse{ID: graph.ID, Name: graph.Name,
-					Description: graph.Description, Modified: graph.Modified.Format(time.RFC3339)})
+				response.Items = append(response.Items, &libraryItemResponse{
+					ID:          graph.ID,
+					Name:        graph.Name,
+					Description: graph.Description,
+					Modified:    graph.Modified.Format(time.RFC3339),
+				})
 			}
 		}
 	}
@@ -281,6 +289,7 @@ func (server *Server) groupHandle(writer http.ResponseWriter, request *http.Requ
 
 		// Get group from library
 		item, err = server.Library.GetItem(groupID, groupType)
+
 		if os.IsNotExist(err) {
 			server.handleResponse(writer, http.StatusNotFound)
 			return
@@ -408,6 +417,7 @@ func (server *Server) graphHandle(writer http.ResponseWriter, request *http.Requ
 
 		// Get graph from library
 		item, err = server.Library.GetItem(graphID, library.LibraryItemGraph)
+
 		if os.IsNotExist(err) {
 			server.handleResponse(writer, http.StatusNotFound)
 			return
@@ -436,6 +446,7 @@ func (server *Server) graphHandle(writer http.ResponseWriter, request *http.Requ
 		if request.Method == "POST" && request.FormValue("inherit") != "" {
 			// Get graph from library
 			item, err = server.Library.GetItem(request.FormValue("inherit"), library.LibraryItemGraph)
+
 			if os.IsNotExist(err) {
 				server.handleResponse(writer, http.StatusNotFound)
 				return
@@ -546,6 +557,7 @@ func (server *Server) collectionHandle(writer http.ResponseWriter, request *http
 
 		// Get collection from library
 		item, err = server.Library.GetItem(collectionID, library.LibraryItemCollection)
+
 		if os.IsNotExist(err) {
 			server.handleResponse(writer, http.StatusNotFound)
 			return
@@ -571,11 +583,16 @@ func (server *Server) collectionHandle(writer http.ResponseWriter, request *http
 			return
 		}
 
-		collectionTemp = &tmpCollection{Collection: &library.Collection{Item: library.Item{ID: collectionID}}}
+		collectionTemp = &tmpCollection{
+			Collection: &library.Collection{
+				Item: library.Item{ID: collectionID},
+			},
+		}
 
 		if request.Method == "POST" && request.FormValue("inherit") != "" {
 			// Get collection from library
 			item, err = server.Library.GetItem(request.FormValue("inherit"), library.LibraryItemCollection)
+
 			if os.IsNotExist(err) {
 				server.handleResponse(writer, http.StatusNotFound)
 				return
@@ -691,8 +708,8 @@ func (server *Server) collectionList(writer http.ResponseWriter, request *http.R
 	// Get and filter collections list
 	for _, collection := range server.Library.Collections {
 		if request.FormValue("parent") != "" && (request.FormValue("parent") == "" &&
-			collection.Parent != nil || request.FormValue("parent") != "" && (collection.Parent == nil ||
-			collection.Parent.ID != request.FormValue("parent"))) {
+			collection.Parent != nil || request.FormValue("parent") != "" &&
+			(collection.Parent == nil || collection.Parent.ID != request.FormValue("parent"))) {
 			continue
 		}
 
@@ -942,14 +959,22 @@ func (server *Server) plotPrepareQuery(plotReq *plotRequest,
 				for index, serieChunk := range server.Library.ExpandGroup(serieItem.Metric[6:],
 					library.LibraryItemMetricGroup) {
 					query.Series = append(query.Series, &backend.SerieQuery{
-						Name:   fmt.Sprintf("%s-%d", serieItem.Name, index),
-						Metric: server.Catalog.GetMetric(serieItem.Origin, serieSource, serieChunk),
+						Name: fmt.Sprintf("%s-%d", serieItem.Name, index),
+						Metric: server.Catalog.GetMetric(
+							serieItem.Origin,
+							serieSource,
+							serieChunk,
+						),
 					})
 				}
 			} else {
 				query.Series = append(query.Series, &backend.SerieQuery{
-					Name:   serieItem.Name,
-					Metric: server.Catalog.GetMetric(serieItem.Origin, serieSource, serieItem.Metric),
+					Name: serieItem.Name,
+					Metric: server.Catalog.GetMetric(
+						serieItem.Origin,
+						serieSource,
+						serieItem.Metric,
+					),
 				})
 			}
 		}

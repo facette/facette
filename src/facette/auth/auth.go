@@ -16,6 +16,7 @@ type AuthHandler interface {
 	Update() error
 }
 
+// NewAuth creates a new AuthHandler instance.
 func NewAuth(config *common.Config, debugLevel int) (AuthHandler, error) {
 	if _, ok := config.Auth["type"]; !ok {
 		return nil, fmt.Errorf("missing authentication handler type")

@@ -48,9 +48,7 @@ func (cmd *cmdServer) reload(args []string) error {
 
 	if data, err = ioutil.ReadFile(cmd.config.PidFile); err != nil {
 		return err
-	}
-
-	if pid, err = strconv.Atoi(strings.Trim(string(data), "\n")); err != nil {
+	} else if pid, err = strconv.Atoi(strings.Trim(string(data), "\n")); err != nil {
 		return err
 	}
 

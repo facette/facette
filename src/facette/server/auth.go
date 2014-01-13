@@ -19,13 +19,9 @@ func (server *Server) handleAuth(writer http.ResponseWriter, request *http.Reque
 	if strings.HasPrefix(authorization, "Basic ") {
 		if data, err = base64.StdEncoding.DecodeString(authorization[6:]); err != nil {
 			return false
-		}
-
-		if chunks = strings.Split(string(data), ":"); len(chunks) != 2 {
+		} else if chunks = strings.Split(string(data), ":"); len(chunks) != 2 {
 			return false
-		}
-
-		if server.AuthHandler.Authenticate(chunks[0], chunks[1]) {
+		} else if server.AuthHandler.Authenticate(chunks[0], chunks[1]) {
 			return true
 		}
 	}

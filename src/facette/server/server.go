@@ -212,7 +212,7 @@ func (server *Server) Run() error {
 	router.HandleFunc(URLBrowsePath+"/", server.browseHandle)
 	router.HandleFunc(URLBrowsePath+"/sources/{source}", server.browseHandle)
 	router.HandleFunc(URLBrowsePath+"/collections/{collection}", server.browseHandle)
-	router.HandleFunc(URLBrowsePath+"/search", server.browseHandleSearch)
+	router.HandleFunc(URLBrowsePath+"/search", server.browseHandle)
 
 	router.HandleFunc("/reload", server.reloadHandle)
 

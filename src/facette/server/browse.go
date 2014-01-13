@@ -93,7 +93,8 @@ func (server *Server) browseHandleIndex(writer http.ResponseWriter, request *htt
 	return tmpl.Execute(writer, data)
 }
 
-func (server *Server) browseHandleSearch(writer http.ResponseWriter, request *http.Request) {
+func (server *Server) browseHandleSearch(writer http.ResponseWriter, request *http.Request,
+	tmpl *template.Template) error {
 	var (
 		chunks []string
 		data   struct {
@@ -103,16 +104,15 @@ func (server *Server) browseHandleSearch(writer http.ResponseWriter, request *ht
 			Sources     []*backend.Source
 			Collections []*library.Collection
 		}
-		err  error
-		tmpl *template.Template
+		err error
 	)
 
-	if request.Method != "GET" && request.Method != "HEAD" {
-		server.handleResponse(writer, http.StatusMethodNotAllowed)
-		return
-	}
+	// Set template data
+	data.URLPrefix = server.Config.URLPrefix
+	data.Count = len(data.Sources) + len(data.Collections)
+	data.Request = request
 
-	// Perform search
+	// Perform search filtering
 	if request.FormValue("q") != "" {
 		for _, chunk := range strings.Split(strings.ToLower(request.FormValue("q")), " ") {
 			chunks = append(chunks, strings.Trim(chunk, " \t"))
@@ -143,36 +143,17 @@ func (server *Server) browseHandleSearch(writer http.ResponseWriter, request *ht
 		}
 	}
 
-	// Set template data
-	data.URLPrefix = server.Config.URLPrefix
-	data.Count = len(data.Sources) + len(data.Collections)
-	data.Request = request
-
 	// Execute template
-	if tmpl, err = template.New("layout.html").Funcs(template.FuncMap{
-		"asset": server.templateAsset,
-		"eq":    templateEqual,
-		"ne":    templateNotEqual,
-		"dump":  templateDumpMap,
-		"hl":    templateHighlight,
-	}).ParseFiles(
+	if tmpl, err = tmpl.ParseFiles(
 		path.Join(server.Config.BaseDir, "html", "layout.html"),
 		path.Join(server.Config.BaseDir, "html", "common", "element.html"),
 		path.Join(server.Config.BaseDir, "html", "browse", "layout.html"),
 		path.Join(server.Config.BaseDir, "html", "browse", "search.html"),
 	); err == nil {
-		err = tmpl.Execute(writer, data)
+		return err
 	}
 
-	if err != nil {
-		if os.IsNotExist(err) {
-			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, http.StatusNotFound)
-		} else {
-			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, http.StatusInternalServerError)
-		}
-	}
+	return tmpl.Execute(writer, data)
 }
 
 func (server *Server) browseHandleSource(writer http.ResponseWriter, request *http.Request,
@@ -222,6 +203,11 @@ func (server *Server) browseHandle(writer http.ResponseWriter, request *http.Req
 		tmpl *template.Template
 	)
 
+	if request.Method != "GET" && request.Method != "HEAD" {
+		server.handleResponse(writer, http.StatusMethodNotAllowed)
+		return
+	}
+
 	// Redirect to browse
 	if request.URL.Path == "/" {
 		http.Redirect(writer, request, server.Config.URLPrefix+URLBrowsePath+"/", 301)
@@ -234,6 +220,7 @@ func (server *Server) browseHandle(writer http.ResponseWriter, request *http.Req
 		"eq":    templateEqual,
 		"ne":    templateNotEqual,
 		"dump":  templateDumpMap,
+		"hl":    templateHighlight,
 	})
 
 	// Execute template
@@ -241,6 +228,8 @@ func (server *Server) browseHandle(writer http.ResponseWriter, request *http.Req
 		err = server.browseHandleSource(writer, request, tmpl)
 	} else if mux.Vars(request)["collection"] != "" {
 		err = server.browseHandleCollection(writer, request, tmpl)
+	} else if strings.HasSuffix(request.URL.Path, "/search") {
+		err = server.browseHandleSearch(writer, request, tmpl)
 	} else {
 		err = server.browseHandleIndex(writer, request, tmpl)
 	}
