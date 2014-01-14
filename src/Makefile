@@ -4,4 +4,4 @@
 SUB_DIRS=$(wildcard */)
 
 all %:
-	@for i in $(SUB_DIRS); do make --no-print-directory -C $$i $@; done
+	@for i in $(SUB_DIRS); do make --no-print-directory -C $$i $@ || exit $$?; done

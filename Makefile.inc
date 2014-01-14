@@ -13,7 +13,7 @@ PREFIX ?= $(BUILD_DIR)/facette
 mesg_start = echo "$(shell tput setaf 4)$(shell basename $(CURDIR)):$(shell tput sgr0) $(1)"
 mesg_step = echo "$(1)"
 mesg_ok = echo "result: $(shell tput setaf 2)ok$(shell tput sgr0)"
-mesg_fail = echo "result: $(shell tput setaf 1)fail$(shell tput sgr0)"
+mesg_fail = (echo "result: $(shell tput setaf 1)fail$(shell tput sgr0)" && false)
 
 clean_build = test ! -d $(BUILD_DIR) || find $(BUILD_DIR) -type d -empty -delete
 
