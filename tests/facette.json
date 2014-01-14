@@ -2,8 +2,12 @@
 	"bind": ":7778",
 	"base_dir": "../facette",
 	"data_dir": "data",
-	"auth_file": "../../tests/auth.json",
+	"pid_file": "facette.pid",
 	"origin_dir": "../../tests/origins",
 	"server_log": "facette.log",
-	"access_log": "access.log"
+	"access_log": "access.log",
+	"auth": {
+		"type": "basic",
+		"path": "../../tests/auth.json"
+	}
 }
