@@ -109,7 +109,6 @@ func (server *Server) browseHandleSearch(writer http.ResponseWriter, request *ht
 
 	// Set template data
 	data.URLPrefix = server.Config.URLPrefix
-	data.Count = len(data.Sources) + len(data.Collections)
 	data.Request = request
 
 	// Perform search filtering
@@ -143,13 +142,15 @@ func (server *Server) browseHandleSearch(writer http.ResponseWriter, request *ht
 		}
 	}
 
+	data.Count = len(data.Sources) + len(data.Collections)
+
 	// Execute template
 	if tmpl, err = tmpl.ParseFiles(
 		path.Join(server.Config.BaseDir, "html", "layout.html"),
 		path.Join(server.Config.BaseDir, "html", "common", "element.html"),
 		path.Join(server.Config.BaseDir, "html", "browse", "layout.html"),
 		path.Join(server.Config.BaseDir, "html", "browse", "search.html"),
-	); err == nil {
+	); err != nil {
 		return err
 	}
 
