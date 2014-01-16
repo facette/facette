@@ -8,6 +8,7 @@ DST_DIR = $(PREFIX)/share/html
 SRC_FILES = common \
 	admin \
 	browse \
+	error.html \
 	wait.html \
 	layout.html
 

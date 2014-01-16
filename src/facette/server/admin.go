@@ -100,12 +100,12 @@ func (server *Server) adminHandle(writer http.ResponseWriter, request *http.Requ
 	}
 
 	if err != nil {
+		log.Println("ERROR: " + err.Error())
+
 		if os.IsNotExist(err) {
-			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, http.StatusNotFound)
+			server.handleError(writer, http.StatusNotFound)
 		} else {
-			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, http.StatusInternalServerError)
+			server.handleError(writer, http.StatusInternalServerError)
 		}
 	}
 }

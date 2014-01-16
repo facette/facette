@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"encoding/json"
 	"facette/auth"
 	"facette/backend"
@@ -10,6 +11,7 @@ import (
 	"github.com/etix/stoppableListener"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"html/template"
 	"log"
 	"mime"
 	"net"
@@ -43,6 +45,50 @@ type Server struct {
 	Library     *library.Library
 	Loading     bool
 	debugLevel  int
+}
+
+func (server *Server) handleError(writer http.ResponseWriter, status int) {
+	var (
+		data struct {
+			URLPrefix string
+			Status    int
+		}
+		err      error
+		tmpl     *template.Template
+		tmplData *bytes.Buffer
+	)
+
+	// Set template data
+	data.URLPrefix = server.Config.URLPrefix
+	data.Status = status
+
+	// Execute template
+	tmplData = bytes.NewBuffer(nil)
+
+	if tmpl, err = template.New("layout.html").Funcs(template.FuncMap{
+		"asset": server.templateAsset,
+		"eq":    templateEqual,
+		"ne":    templateNotEqual,
+	}).ParseFiles(
+		path.Join(server.Config.BaseDir, "html", "layout.html"),
+		path.Join(server.Config.BaseDir, "html", "error.html"),
+	); err == nil {
+		err = tmpl.Execute(tmplData, data)
+	}
+
+	if err != nil {
+		log.Println("ERROR: " + err.Error())
+
+		if os.IsNotExist(err) {
+			server.handleResponse(writer, http.StatusNotFound)
+		} else {
+			server.handleResponse(writer, http.StatusInternalServerError)
+		}
+	}
+
+	// Handle HTTP response with status code
+	writer.WriteHeader(status)
+	writer.Write(tmplData.Bytes())
 }
 
 func (server *Server) handleJSON(writer http.ResponseWriter, data interface{}) {
@@ -161,6 +207,10 @@ func (server *Server) Run() error {
 
 	// Register routes
 	router = mux.NewRouter()
+
+	router.NotFoundHandler = http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		server.handleError(writer, http.StatusNotFound)
+	})
 
 	router.PathPrefix("/static/").HandlerFunc(server.handleStatic)
 

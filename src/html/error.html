@@ -1,0 +1,31 @@
+{{ define "title" }}Error — Facette{{ end }}
+
+{{ define "script" }}
+{{ end }}
+
+{{ define "body" }}
+		<header>
+			<h1><a href="{{ .URLPrefix }}/">Facette</a></h1>
+		</header>
+
+		<nav>
+			<dl class="graphlist">
+				<dt>Menu</dt>
+				<dd><a class="icon icon-arrow-left" href="{{ .URLPrefix }}/">Back to Home Page</a></dd>
+			</dl>
+		</nav>
+
+		<article>
+			<header>
+				<h1>Error</h1>
+			</header>
+
+			<section>
+				{{ if eq .Status 404 }}
+				<h1>Not Found</h1>
+				<p>The requested page was not found or no longer exists.</p>{{ else if eq .Status 500 }}
+				<h1>Internal Server Error</h1>
+				<p>The server encountered an error and could not complete your request.</p>{{ end }}
+			</section>
+		</article>
+{{ end }}

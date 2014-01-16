@@ -35,8 +35,7 @@ func (server *Server) browseHandleCollection(writer http.ResponseWriter, request
 
 	data.Collection.ID = mux.Vars(request)["collection"]
 
-	if item, err = server.Library.GetItem(data.Collection.ID,
-		library.LibraryItemCollection); err != nil {
+	if item, err = server.Library.GetItem(data.Collection.ID, library.LibraryItemCollection); err != nil {
 		return err
 	}
 
@@ -236,12 +235,12 @@ func (server *Server) browseHandle(writer http.ResponseWriter, request *http.Req
 	}
 
 	if err != nil {
+		log.Println("ERROR: " + err.Error())
+
 		if os.IsNotExist(err) {
-			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, http.StatusNotFound)
+			server.handleError(writer, http.StatusNotFound)
 		} else {
-			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, http.StatusInternalServerError)
+			server.handleError(writer, http.StatusInternalServerError)
 		}
 	}
 }
