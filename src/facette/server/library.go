@@ -604,6 +604,7 @@ func (server *Server) collectionHandle(writer http.ResponseWriter, request *http
 
 			*collectionTemp.Collection = *item.(*library.Collection)
 			collectionTemp.Collection.ID = ""
+			collectionTemp.Collection.Children = nil
 		}
 
 		collectionTemp.Collection.Modified = time.Now()
