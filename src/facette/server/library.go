@@ -762,7 +762,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 	var (
 		body          []byte
 		graph         *library.Graph
-		data          map[string]map[string]map[string]*backend.PlotResult
+		data          []map[string]*backend.PlotResult
 		endTime       time.Time
 		err           error
 		groupOptions  map[string]map[string]string
@@ -770,6 +770,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 		originBackend backend.BackendHandler
 		plotMax       int
 		plotReq       *plotRequest
+		plotResult    map[string]*backend.PlotResult
 		query         *backend.GroupQuery
 		response      *plotResponse
 		stack         *stackResponse
@@ -857,11 +858,8 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 
 	// Get plots data
 	groupOptions = make(map[string]map[string]string)
-	data = make(map[string]map[string]map[string]*backend.PlotResult)
 
 	for _, stackItem := range graph.Stacks {
-		data[stackItem.Name] = make(map[string]map[string]*backend.PlotResult)
-
 		for _, groupItem := range stackItem.Groups {
 			if query, originBackend, err = server.plotPrepareQuery(plotReq, groupItem); err != nil {
 				log.Println("ERROR: " + err.Error())
@@ -871,12 +869,14 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 
 			groupOptions[groupItem.Name] = groupItem.Options
 
-			if data[stackItem.Name][groupItem.Name], err = originBackend.GetPlots(query, startTime, endTime, step,
+			if plotResult, err = originBackend.GetPlots(query, startTime, endTime, step,
 				plotReq.Percentiles); err != nil {
 				log.Println("ERROR: " + err.Error())
 				server.handleResponse(writer, http.StatusInternalServerError)
 				return
 			}
+
+			data = append(data, plotResult)
 		}
 	}
 
@@ -897,11 +897,13 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	for stackName, stackItem := range data {
-		stack = &stackResponse{Name: stackName}
+	for _, stackItem := range graph.Stacks {
+		stack = &stackResponse{Name: stackItem.Name}
 
-		for groupName, groupItem := range stackItem {
-			for serieName, serieResult := range groupItem {
+		for _, groupItem := range stackItem.Groups {
+			plotResult, data = data[0], data[1:]
+
+			for serieName, serieResult := range plotResult {
 				if len(serieResult.Plots) > plotMax {
 					plotMax = len(serieResult.Plots)
 				}
@@ -910,7 +912,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 					Name:    serieName,
 					Plots:   serieResult.Plots,
 					Info:    serieResult.Info,
-					Options: groupOptions[groupName],
+					Options: groupOptions[groupItem.Name],
 				})
 			}
 		}
