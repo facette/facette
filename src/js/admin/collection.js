@@ -18,7 +18,7 @@ function adminCollectionGetData() {
             entries: []
         };
 
-    listMatch('step-1-graphs').find('[data-listitem^=step-1-graphs-item]').each(function () {
+    listGetItems('step-1-graphs').each(function () {
         var $item = $(this),
             $range = $item.find('input[name=graph-range]'),
             $title = $item.find('input[name=graph-title]');
@@ -110,7 +110,7 @@ function adminCollectionSetupTerminate() {
 
             listUpdateCount($list);
 
-            if ($list.find('[data-listitem^="' + $list.attr('data-list') + '-item"]').length === 0)
+            if (listGetCount($list) === 0)
                 listSay($list, $.t('graph.mesg_none'), 'info');
 
             PANE_UNLOAD_LOCK = true;

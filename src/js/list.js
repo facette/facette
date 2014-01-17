@@ -34,19 +34,25 @@ function listEmpty(list) {
     if (typeof list == 'string')
         list = listMatch(list);
 
-    list
-        .data('counter', 0)
-        .data('offset', 0)
-        .find('[data-listitem^="' + list.attr('data-list') + '-item"]').remove();
+    list.data({
+        counter: 0,
+        offset: 0
+    });
+
+    listGetItems(list).remove();
 
     listUpdateCount(list, 0);
 }
 
-function listGetCount(list) {
+function listGetCount(list, filter) {
+    return listGetItems(list, filter).length;
+}
+
+function listGetItems(list, filter) {
     if (typeof list == 'string')
         list = listMatch(list);
 
-    return list.find('[data-listitem^="' + list.attr('data-list') + '-item"]').length;
+    return list.find('[data-listitem^="' + list.attr('data-list') + '-item"]' + (filter || ''));
 }
 
 function listInit(element) {
@@ -87,13 +93,14 @@ function listMatch(name, suffix) {
     return $('[data-list' + suffix + '="' + name + '"]');
 }
 
-function listNextName(list, attr, prefix) {
-    var max = -1;
+function listNextName(list, attr) {
+    var max = -1,
+        prefix = attr.substr(5);
 
     if (typeof list == 'string')
         list = listMatch(list);
 
-    list.find('[data-listitem^="' + list.attr('data-list') + '-item"]').each(function () {
+    listGetItems(list).each(function () {
         var name = this.getAttribute(attr),
             value;
 

@@ -54,7 +54,7 @@ function adminGraphGetStacks() {
         stacks = [];
 
     // Retrieve defined stacks
-    $listStacks.find('[data-listitem^=step-stack-groups-item]').each(function () {
+    listGetItems($listStacks).each(function () {
         var $item = $(this);
 
         groups = [];
@@ -72,13 +72,13 @@ function adminGraphGetStacks() {
     // Create new stack with remaining items
     groups = [];
 
-    $listSeries.find('[data-listitem^=step-stack-series-item]:not(.linked)').each(function () {
+    listGetItems($listSeries, ':not(.linked)').each(function () {
         groups.push(adminGraphGetGroup($(this)));
     });
 
     if (groups.length > 0) {
         stacks.push({
-            name: listNextName($listStacks, 'data-stack', 'stack'),
+            name: listNextName($listStacks, 'data-stack'),
             groups: groups
         });
     }
@@ -216,7 +216,7 @@ function adminGraphHandleSerieDrag(e) {
     var $group,
         $item,
         $itemSrc,
-        $list,
+        $listSeries,
         $target = $(e.target),
         chunks,
         serieName;
@@ -279,15 +279,15 @@ function adminGraphHandleSerieDrag(e) {
 
         // Set item linked
         if (ADMIN_PANES['graph-edit'].active == 'stack')
-            $list = listMatch('step-stack-series');
+            $listSeries = listMatch('step-stack-series');
         else
-            $list = listMatch('step-2-series');
+            $listSeries = listMatch('step-2-series');
 
-        $list.find('[' + e.dataTransfer.getData('text/plain') + ']')
+        $listSeries.find('[' + e.dataTransfer.getData('text/plain') + ']')
             .addClass('linked');
 
-        if ($list.find('[data-listitem^="' + $list.attr('data-list') + '-item"]:not(.linked)').length === 0)
-            listSay($list, $.t('graph.mesg_no_serie'));
+        if (listGetCount($listSeries, ':not(.linked)') === 0)
+            listSay($listSeries, $.t('graph.mesg_no_serie'));
 
         // Handle drop'n'create
         if (e.target.tagName == 'A') {
@@ -389,7 +389,7 @@ function adminGraphSetupTerminate() {
         });
 
         paneStepRegister('graph-edit', 2, function () {
-            var $items = listMatch('step-1-metrics').find('[data-listitem^=step-1-metrics-item]'),
+            var $items = listGetItems('step-1-metrics'),
                 $listOpers,
                 $listSeries,
                 expand = false,
@@ -442,7 +442,7 @@ function adminGraphSetupTerminate() {
                     contentType: 'application/json',
                     data: JSON.stringify(query)
                 }).pipe(function (data) {
-                    $listSeries.find('[data-listitem^=step-2-series-item]').each(function (index) {
+                    listGetItems($listSeries).each(function (index) {
                         var $item = $(this);
 
                         if (data[index]) {
@@ -727,7 +727,7 @@ function adminGraphSetupTerminate() {
 
             listUpdateCount($list);
 
-            if ($list.find('[data-listitem^="' + $list.attr('data-list') + '-item"]').length === 0)
+            if (listGetCount($list) === 0)
                 listSay($list, $.t('metric.mesg_none'), 'info');
 
             PANE_UNLOAD_LOCK = true;

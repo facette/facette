@@ -17,7 +17,7 @@ function adminGroupGetData() {
             entries: []
         };
 
-    listMatch('step-1-items').find('[data-listitem^=step-1-items-item]').each(function () {
+    listGetItems('step-1-items').each(function () {
         data.entries.push($(this).data('value'));
     });
 
@@ -90,7 +90,7 @@ function adminGroupSetupTerminate() {
         });
 
         paneStepRegister('group-edit', 2, function () {
-            if (listMatch('step-1-items').find('[data-listitem^=step-1-items-item]').length === 0) {
+            if (listGetCount('step-1-items') === 0) {
                 overlayCreate('alert', {
                     message: $.t('item.mesg_missing'),
                     callbacks: {
@@ -114,7 +114,7 @@ function adminGroupSetupTerminate() {
 
             listUpdateCount($list);
 
-            if ($list.find('[data-listitem^="' + $list.attr('data-list') + '-item"]').length === 0)
+            if (listGetCount($list) === 0)
                 listSay($list, $.t('item.mesg_none'), 'info');
 
             PANE_UNLOAD_LOCK = true;
@@ -146,7 +146,7 @@ function adminGroupSetupTerminate() {
                     $select   = $fieldset.find('select[name=type]');
 
                     if (e.target.name == 'item-update')
-                        $entryActive = listMatch('step-1-items').find('[data-listitem^=step-1-items-item].active');
+                        $entryActive = listGetItems('step-1-items', '.active');
 
                     type = $select.children('option:selected').text().toLowerCase();
 
@@ -172,7 +172,7 @@ function adminGroupSetupTerminate() {
                     break;
 
                 case 'item-cancel':
-                    listMatch('step-1-items').find('[data-listitem^=step-1-items-item].active').trigger('click');
+                    listGetItems('step-1-items', '.active').trigger('click');
 
                     $(e.target).closest('fieldset').find('input[name=item]')
                         .focus();
