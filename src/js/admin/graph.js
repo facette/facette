@@ -656,6 +656,11 @@ function adminGraphSetupTerminate() {
 
                 domFillItem($item, expands[serieName]);
 
+                if (expands[serieName].options && expands[serieName].options.color)
+                    $item.find('.color')
+                        .removeClass('auto')
+                        .css('color', expands[serieName].options.color);
+
                 $item.find('.count').remove();
                 $item.find('a[href$=#expand-serie]').remove();
 
@@ -881,6 +886,8 @@ function adminGraphSetupTerminate() {
 
                         if ($item.attr('data-group'))
                             value = $item.data('value');
+                        else if ($item.hasClass('expand'))
+                            value = $item.data('source').data('expands')[$item.attr('data-serie')];
                         else
                             value = $item.data('source').data('value');
 
