@@ -68,11 +68,12 @@ function listInit(element) {
         $template = $item.find('[data-listtmpl="' + element.getAttribute('data-list') + '"]')
             .removeAttr('data-listtmpl');
 
-        $item
-            .data('counter', 0)
-            .data('offset', 0)
-            .data('template', $template)
-            .data('container', $template.parent());
+        $item.data({
+            counter: 0,
+            offset: 0,
+            template: $template,
+            container: $template.parent()
+        });
 
         $template.detach();
 

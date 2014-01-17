@@ -8,7 +8,7 @@ function adminGraphGetGroup(entry) {
         group;
 
     if (entry.attr('data-group')) {
-        $item = $listOpers.find('[data-group=' + entry.attr('data-group') + ']');
+        $item = $listOpers.find('[data-group="' + entry.attr('data-group') + '"]');
 
         group = $.extend($item.data('value'), {
             series: [],
@@ -19,8 +19,8 @@ function adminGraphGetGroup(entry) {
             if (!$.isEmptyObject(entry.data('source').data('expands')))
                 group.series.push($.extend({}, entry.data('source').data('expands')[this.getAttribute('data-serie')]));
             else
-                group.series.push($.extend({}, $listMetrics.find('[data-serie=' + this.getAttribute('data-serie') +
-                    ']').data('value')));
+                group.series.push($.extend({}, $listMetrics.find('[data-serie="' + this.getAttribute('data-serie') +
+                    '"]').data('value')));
         });
     } else {
         $item = $listSeries.find('[data-serie=' + entry.attr('data-serie') + ']');
@@ -99,35 +99,56 @@ function adminGraphGetData() {
     return data;
 }
 
-function adminGraphCreateSerie(value) {
-    var $item = listAppend(listMatch('step-1-metrics'))
-        .attr('data-serie', value.name)
-        .data('proxies', [])
-        .data('expands', {})
-        .data('value', value);
+function adminGraphCreateSerie(name, value) {
+    var $item,
+        $list = listMatch('step-1-metrics');
+
+    // Set defaults
+    if (!name)
+        name = listNextName($list, 'data-serie');
+
+    if (!value.name)
+        value.name = name;
+
+    // Create new serie
+    $item = listAppend($list)
+        .attr('data-serie', name)
+        .data({
+            expands: {},
+            proxies: [],
+            value: value
+        });
 
     domFillItem($item, value);
 
     return $item;
 }
 
-function adminGraphCreateGroup(value, list) {
+function adminGraphCreateGroup(name, value) {
     var $item,
+        $list = listMatch('step-2-groups'),
         type;
 
-    list = list || listMatch('step-2-groups');
+    // Set defaults
+    if (!name)
+        name = listNextName($list, 'data-group');
 
     if (!value.name)
-        value.name = listNextName(list, 'data-group', 'group');
+        value.name = name;
 
-    $item = listAppend(list)
-        .attr('data-list', value.name)
-        .attr('data-group', value.name)
-        .data('proxies', [])
-        .data('value', value);
+    // Create new group
+    $item = listAppend($list)
+        .attr({
+            'data-group': name,
+            'data-list': name
+        })
+        .data({
+            proxies: [],
+            value: value
+        });
 
     $item.find('[data-listtmpl]')
-        .attr('data-listtmpl', value.name);
+        .attr('data-listtmpl', name);
 
     if (value.type == OPER_GROUP_TYPE_AVG)
         type = 'avg';
@@ -136,8 +157,11 @@ function adminGraphCreateGroup(value, list) {
     else
         type = '';
 
-    $item.find('.name').text(value.name);
-    $item.find('.type').text(type);
+    // Update group
+    domFillItem($item, {
+        name: value.name,
+        type: type
+    });
 
     if (value.options && value.options.color)
         $item.find('.color')
@@ -148,61 +172,77 @@ function adminGraphCreateGroup(value, list) {
 }
 
 function adminGraphCreateStack(value) {
-    var $item;
+    var $item,
+        $list = listMatch('step-stack-groups'),
+        name;
+
+    // Set defaults
+    name = listNextName($list, 'data-stack');
 
     if (!value.name)
-        value.name = listNextName('step-stack-groups', 'data-stack', 'stack');
+        value.name = name;
 
-    $item = listAppend('step-stack-groups')
-        .attr('data-list', value.name)
-        .attr('data-stack', value.name)
+    $item = listAppend($list)
+        .attr({
+            'data-stack': value.name,
+            'data-list': value.name
+        })
         .data('value', value);
 
     $item.find('[data-listtmpl]')
-        .attr('data-listtmpl', value.name);
+        .attr('data-listtmpl', name);
 
-    $item.find('.name').text(value.name);
+    domFillItem($item, {
+        name: value.name,
+    });
 
     return $item;
 }
 
-function adminGraphCreateProxy(type, name, list) {
+function adminGraphCreateProxy(type, item, list) {
     var $item,
-        $itemSrc,
         attr,
-        key,
+        name,
         value;
 
-    if (type !== PROXY_TYPE_SERIE && type !== PROXY_TYPE_GROUP) {
+    switch (type) {
+    case PROXY_TYPE_SERIE:
+        attr = 'data-serie';
+        break;
+
+    case PROXY_TYPE_GROUP:
+        attr = 'data-group';
+        break;
+
+    default:
         console.error("Unknown `" + type + "' proxy type");
         return;
     }
 
-    if (type == PROXY_TYPE_SERIE) {
-        $itemSrc = listMatch('step-1-metrics').find('[data-serie=' + name + ']')
-            .add(listMatch('step-2-series').find('[data-serie=' + name + ']'))
-            .first();
-        attr = 'data-serie';
-    } else {
-        $itemSrc = listMatch('step-2-groups').find('[data-group=' + name + ']');
-        attr = 'data-group';
-    }
+    name = item.attr(attr);
 
     $item = listAppend(list)
-        .attr(attr, $itemSrc.attr(attr))
-        .data('proxies', [])
-        .data('source', $itemSrc);
+        .attr(attr, name)
+        .data('source', item);
 
     if ($item.attr('data-list') !== undefined)
         $item.attr('data-list', name).find('[data-listtmpl]').attr('data-listtmpl', name);
 
-    $itemSrc.data('proxies').push($item);
+    item.data('proxies').push($item);
 
-    // Copy element values
-    value = $itemSrc.data('value');
+    // Update proxy
+    value = $.extend({}, item.data('value'));
 
-    for (key in value)
-        $item.find('.' + key + ':first').text($itemSrc.find('.' + key + ':first').text());
+    if (type == PROXY_TYPE_GROUP) {
+        if (value.type == OPER_GROUP_TYPE_AVG)
+            value.type = 'avg';
+        else if (value.type == OPER_GROUP_TYPE_SUM)
+            value.type = 'sum';
+        else
+            delete value.type;
+    }
+
+    domFillItem($item, value);
 
     if (value.options && value.options.color)
         $item.find('.color')
@@ -218,8 +258,7 @@ function adminGraphHandleSerieDrag(e) {
         $itemSrc,
         $listSeries,
         $target = $(e.target),
-        chunks,
-        serieName;
+        chunks;
 
     if (['dragstart', 'dragend'].indexOf(e.type) == -1) {
         $group = $target.closest('.groupitem');
@@ -298,19 +337,18 @@ function adminGraphHandleSerieDrag(e) {
         chunks = e.dataTransfer.getData('text/plain').split('=');
 
         if (chunks[0] == 'data-serie') {
-            $itemSrc = $list.find('[' + e.dataTransfer.getData('text/plain') + ']');
+            $itemSrc = listMatch('step-2-series').find('[' + e.dataTransfer.getData('text/plain') + ']');
+
+            $item = adminGraphCreateProxy(PROXY_TYPE_SERIE, $itemSrc.data('source'), $target);
 
             if ($itemSrc.hasClass('expand')) {
-                serieName = $itemSrc.data('source').attr('data-serie');
-
-                $item = adminGraphCreateProxy(PROXY_TYPE_SERIE, serieName, $target);
+                $item.attr('data-serie', chunks[1]);
                 domFillItem($item, $itemSrc.data('source').data('expands')[chunks[1]]);
-            } else {
-                adminGraphCreateProxy(PROXY_TYPE_SERIE, chunks[1], $target);
-
             }
         } else {
-            adminGraphCreateProxy(PROXY_TYPE_GROUP, chunks[1], $target);
+            $itemSrc = listMatch('step-stack-series').find('[' + e.dataTransfer.getData('text/plain') + ']');
+
+            adminGraphCreateProxy(PROXY_TYPE_GROUP, $itemSrc.data('source'), $target);
         }
 
         // Remove item from stack
@@ -393,7 +431,7 @@ function adminGraphSetupTerminate() {
                 $listOpers,
                 $listSeries,
                 expand = false,
-                query = [];
+                expandQuery = [];
 
             if ($items.length === 0) {
                 overlayCreate('alert', {
@@ -416,22 +454,20 @@ function adminGraphSetupTerminate() {
             $items.each(function () {
                 var $item,
                     $itemSrc = $(this),
-                    value;
-
-                value = $itemSrc.data('value');
+                    value = $itemSrc.data('value');
 
                 if (value.source.startsWith('group:') || value.metric.startsWith('group:')) {
-                    query.push([value.origin, value.source, value.metric]);
+                    expandQuery.push([value.origin, value.source, value.metric]);
                     expand = true;
                 }
 
-                $item = adminGraphCreateProxy(PROXY_TYPE_SERIE, value.name, $listSeries);
+                $item = adminGraphCreateProxy(PROXY_TYPE_SERIE, $itemSrc, $listSeries);
 
-                if ($listOpers.find('[data-serie=' + value.name + ']').length > 0)
+                if ($listOpers.find('[data-serie="' + $itemSrc.attr('data-serie') + '"]').length > 0)
                     $item.addClass('linked');
             });
 
-            if ($listSeries.find('[data-listitem^="step-2-series-item"]:not(.linked)').length > 0)
+            if (listGetCount($listSeries, ':not(.linked)') > 0)
                 listSay($listSeries, null);
 
             // Retrieve expanding information
@@ -440,7 +476,7 @@ function adminGraphSetupTerminate() {
                     url: urlPrefix + '/catalog/expand',
                     type: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify(query)
+                    data: JSON.stringify(expandQuery)
                 }).pipe(function (data) {
                     listGetItems($listSeries).each(function (index) {
                         var $item = $(this);
@@ -477,11 +513,8 @@ function adminGraphSetupTerminate() {
         });
 
         paneStepRegister('graph-edit', 'stack', function () {
-            var $listSeries,
-                $listStacks;
-
-            $listSeries = listMatch('step-stack-series');
-            $listStacks = listMatch('step-stack-groups');
+            var $listSeries = listMatch('step-stack-series'),
+                $listStacks = listMatch('step-stack-groups');
 
             listEmpty($listSeries);
 
@@ -489,84 +522,86 @@ function adminGraphSetupTerminate() {
                 listEmpty($listStacks);
 
             // Retrieve defined groups
-            listMatch('step-2-groups').find('[data-listitem^=step-2-groups-item]').each(function () {
-                var $item = adminGraphCreateProxy(PROXY_TYPE_GROUP, this.getAttribute('data-group'), $listSeries);
+            listGetItems('step-2-groups').each(function () {
+                var $item,
+                    $itemSrc = $(this);
 
-                if ($listStacks.find('[data-group=' + this.getAttribute('data-group') + ']').length > 0)
+                $item = adminGraphCreateProxy(PROXY_TYPE_GROUP, $itemSrc, $listSeries);
+
+                if ($listStacks.find('[data-group="' + $itemSrc.attr('data-group') + '"]').length > 0)
                     $item.addClass('linked');
 
-                $(this).find('.groupentry').each(function () {
-                    adminGraphCreateProxy(PROXY_TYPE_SERIE, this.getAttribute('data-serie'), $item);
+                $itemSrc.find('.groupentry').each(function () {
+                    adminGraphCreateProxy(PROXY_TYPE_SERIE, $(this).data('source'), $item);
                 });
             });
 
             // Create groups for each remaining items
-            listMatch('step-2-series').find('[data-listitem^=step-2-series-item]:not(.linked)').each(function () {
+            listGetItems('step-2-series').each(function () {
                 var $item,
+                    $itemMain,
                     $itemSrc = $(this),
-                    serieName = $itemSrc.attr('data-serie'),
-                    sourceName;
+                    value;
+
+                if ($itemSrc.hasClass('linked')) {
+                    $listStacks.find('[data-serie="' + $itemSrc.attr('data-serie') + '"]').remove();
+                    return;
+                }
+
+                $itemMain = adminGraphCreateProxy(PROXY_TYPE_SERIE, $itemSrc.data('source'), $listSeries);
+
+                if ($listStacks.find('[data-serie="' + $itemSrc.attr('data-serie') + '"]').length > 0)
+                    $itemMain.addClass('linked');
+
+                $item = adminGraphCreateProxy(PROXY_TYPE_SERIE, $itemSrc.data('source'), $itemMain);
+
+                if ($itemSrc.hasClass('expand')) {
+                    value = $itemSrc.data('source').data('expands')[$itemSrc.attr('data-serie')];
+                    $itemMain.find('.name:first').text(value.name);
+                } else {
+                    value = $itemSrc.data('source').data('value');
+                }
+
+                domFillItem($item, value);
 
                 if ($itemSrc.hasClass('expand'))
-                    sourceName = $itemSrc.data('source').attr('data-serie');
-                else
-                    sourceName = serieName;
-
-                $item = adminGraphCreateProxy(PROXY_TYPE_SERIE, sourceName, $listSeries)
-                    .attr('data-serie', serieName);
-
-                domFillItem($item, $itemSrc.data('source').data('expands')[serieName]);
-
-                if ($listStacks.find('[data-serie=' + serieName + ']').length > 0)
-                    $item.addClass('linked');
-
-                $item = adminGraphCreateProxy(PROXY_TYPE_SERIE, sourceName, $item)
-                    .attr('data-serie', serieName);
-
-                if ($itemSrc.hasClass('expand'))
-                    $item.addClass('expand');
-
-                domFillItem($item, $itemSrc.data('source').data('expands')[serieName]);
+                    $itemMain.addClass('expand');
             });
 
-            if ($listSeries.find('[data-listitem^="step-stack-series-item"]:not(.linked)').length > 0)
+            if (listGetCount($listSeries, ':not(.linked)') > 0)
                 listSay($listSeries, null);
         });
 
         // Register links
-        linkRegister('add-avg add-sum', function (e) {
-            // Add operation group
-            adminGraphCreateGroup({
-                type: e.target.href.substr(-3) == 'avg' ? OPER_GROUP_TYPE_AVG : OPER_GROUP_TYPE_SUM
-            });
-
-            PANE_UNLOAD_LOCK = true;
-        });
-
-        linkRegister('add-stack', function () {
-            // Add operation group
-            adminGraphCreateStack({});
+        linkRegister('add-avg add-sum add-stack', function (e) {
+            if (e.target.href.substr(-5) == 'stack') {
+                // Add stack group
+                adminGraphCreateStack({});
+            } else {
+                // Add operation group
+                adminGraphCreateGroup(null, {
+                    type: e.target.href.substr(-3) == 'avg' ? OPER_GROUP_TYPE_AVG : OPER_GROUP_TYPE_SUM
+                });
+            }
 
             PANE_UNLOAD_LOCK = true;
         });
 
         linkRegister('collapse-serie', function (e) {
             var $target = $(e.target),
-                $item = $target.closest('[data-listitem]'),
+                $item = $target.closest('[data-serie]'),
                 $series,
                 collapse,
                 name = $item.attr('data-serie').split('-')[0];
 
-            // Unset expansion flag
-            listMatch('step-1-metrics').find('[data-serie=' + name + ']')
-                .data('expands', {});
-
             // Collapse expanded serie
-            $series = listMatch('step-2-groups').find('[data-serie^=' + name + '-]');
+            $series = listMatch('step-2-groups').find('[data-serie^="' + name + '-"]');
 
             collapse = function () {
-                $item.siblings('[data-serie=' + name + ']').removeClass('linked');
-                $item.siblings('[data-serie^=' + name + '-]').andSelf().remove();
+                $item.data('source').data('expands', {});
+
+                $item.siblings('[data-serie="' + name + '"]').removeClass('linked');
+                $item.siblings('[data-serie^="' + name + '-"]').andSelf().remove();
 
                 $series.remove();
 
@@ -594,31 +629,32 @@ function adminGraphSetupTerminate() {
         linkRegister('expand-serie', function (e) {
             var $target = $(e.target),
                 $item,
-                $itemSrc = $target.closest('[data-listitem]'),
-                $list = $itemSrc.closest('[data-list]'),
+                $itemSrc = $target.closest('[data-serie]'),
+                $listSeries = $itemSrc.closest('[data-list]'),
                 data = $itemSrc.data('expand'),
-                expands = {},
+                expands = $itemSrc.data('source').data('expands'),
                 i,
                 name = $itemSrc.attr('data-serie'),
-                value;
+                serieName;
 
             // Expand serie
             for (i in data) {
-                value = {
-                    name: name + '-' + i,
-                    origin: data[i][0],
-                    source: data[i][1],
-                    metric: data[i][2]
-                };
+                serieName = name + '-' + i;
 
-                $item = adminGraphCreateProxy(PROXY_TYPE_SERIE, name, $list)
-                    .attr('data-serie', name + '-' + i)
+                $item = adminGraphCreateProxy(PROXY_TYPE_SERIE, $itemSrc.data('source'), $listSeries)
+                    .attr('data-serie', serieName)
                     .addClass('expand');
 
-                expands[name + '-' + i] = value;
+                if (!expands[serieName]) {
+                    expands[serieName] = {
+                        name: serieName,
+                        origin: data[i][0],
+                        source: data[i][1],
+                        metric: data[i][2]
+                    };
+                }
 
-                domFillItem($item, value);
-                $item.find('.name').text($item.attr('data-serie'));
+                domFillItem($item, expands[serieName]);
 
                 $item.find('.count').remove();
                 $item.find('a[href$=#expand-serie]').remove();
@@ -628,8 +664,6 @@ function adminGraphSetupTerminate() {
 
                 $itemSrc = $item;
             }
-
-            $item.data('source').data('expands', expands);
 
             PANE_UNLOAD_LOCK = true;
         });
@@ -664,20 +698,7 @@ function adminGraphSetupTerminate() {
 
             // Remove operation group item
             $item = $target.closest('.groupitem');
-
-            $item.find('.groupentry').each(function () {
-                var $entry = $(this),
-                    $item;
-
-                if ($entry.attr('data-group'))
-                    $item = $target.closest('[data-step]').find('[data-group=' + $entry.attr('data-group') + '].linked')
-                        .removeClass('linked');
-                else
-                    $item = $target.closest('[data-step]').find('[data-serie=' + $entry.attr('data-serie') + '].linked')
-                        .removeClass('linked');
-
-                listSay(ADMIN_PANES['graph-edit'].active == 'stack' ? 'step-stack-series' : 'step-2-series', null);
-            });
+            $item.find('.groupentry a[href=#remove-item]').trigger('click');
 
             // Remove proxy items
             data = $item.data('proxies');
@@ -697,10 +718,10 @@ function adminGraphSetupTerminate() {
 
             // Remove item from group
             if ($entry.attr('data-group') !== undefined)
-                $item = $target.closest('[data-step]').find('[data-group=' + $entry.attr('data-group') + ']')
+                $item = $target.closest('[data-step]').find('[data-group="' + $entry.attr('data-group') + '"]')
                     .removeClass('linked');
             else
-                $item = $target.closest('[data-step]').find('[data-serie=' + $entry.attr('data-serie') + ']')
+                $item = $target.closest('[data-step]').find('[data-serie="' + $entry.attr('data-serie') + '"]')
                     .removeClass('linked');
 
             listSay(ADMIN_PANES['graph-edit'].active == 'stack' ? 'step-stack-series' : 'step-2-series', null);
@@ -735,93 +756,50 @@ function adminGraphSetupTerminate() {
             $('[data-step=1] fieldset input[name=origin]').focus();
         });
 
-        linkRegister('rename-serie rename-group', function (e) {
+        linkRegister('rename-serie rename-group rename-stack', function (e) {
             var $target = $(e.target),
                 $input,
                 $item,
                 $overlay,
                 attrName,
+                serieName,
                 value;
 
-            if (e.target.href.endsWith('#rename-group'))
+            if (e.target.href.endsWith('#rename-stack'))
+                attrName = 'data-stack';
+            else if (e.target.href.endsWith('#rename-group'))
                 attrName = 'data-group';
             else
                 attrName = 'data-serie';
 
-            $item = $target.closest('[' + attrName + ']');
-            value = $item.attr(attrName);
+            $item     = $target.closest('[' + attrName + ']');
+            serieName = $item.attr(attrName);
+
+            if ($item.data('source')) {
+                value = $item.hasClass('expand') ? $item.data('source').data('expands')[serieName].name :
+                    $item.data('source').data('value').name;
+            } else {
+                value = $item.data('value').name;
+            }
 
             $overlay = overlayCreate('prompt', {
-                message: $.t('graph.labl_serie_name'),
+                message: $.t(e.target.href.endsWith('#rename-stack') ? 'graph.labl_stack_name' :
+                    'graph.labl_serie_name'),
                 callbacks: {
                     validate: function (data) {
                         if (!data)
                             return;
 
-                        paneMatch('graph-edit').find('[' + attrName + '="' + value + '"]').each(function () {
-                            var $item = $(this),
-                                value = $item.data('value');
+                        if ($item.data('source')) {
+                            if ($item.hasClass('expand'))
+                                $item.data('source').data('expands')[serieName].name = data;
+                            else
+                                $item.data('source').data('value').name = data;
+                        } else {
+                            $item.data('value').name = data;
+                        }
 
-                            if (value)
-                                $item.data('value').name = data;
-
-                            $item
-                                .attr(attrName, data)
-                                .find('.name').text(data);
-
-                            PANE_UNLOAD_LOCK = true;
-                        });
-                    }
-                }
-            });
-
-            $input = $overlay.find('input[type=text]')
-                .attr('data-input', 'rename-serie')
-                .attr('data-inputopts', 'check: true');
-
-            inputInit($input.get(0));
-
-            $input.val(value);
-
-            inputRegisterCheck('rename-serie', function (input) {
-                var valueNew = input.find(':input').val();
-
-                if (valueNew != value && paneMatch('graph-edit').find('[' + attrName + '="' +
-                        valueNew + '"]').length > 0) {
-                    input
-                        .attr('title', $.t('graph.mesg_item_exists'))
-                        .addClass('error');
-
-                    $overlay.find('button[name=validate]')
-                        .attr('disabled', 'disabled');
-                } else {
-                    input
-                        .removeAttr('title')
-                        .removeClass('error');
-
-                    $overlay.find('button[name=validate]')
-                        .removeAttr('disabled');
-                }
-            });
-        });
-
-        linkRegister('rename-stack', function (e) {
-            var $target = $(e.target),
-                $input,
-                $item = $target.closest('[data-stack]'),
-                $overlay,
-                value = $item.attr('data-stack');
-
-            $overlay = overlayCreate('prompt', {
-                message: $.t('graph.labl_stack_name'),
-                callbacks: {
-                    validate: function (value) {
-                        if (!value)
-                            return;
-
-                        $item
-                            .attr('data-stack', value)
-                            .find('.name:first').text(value);
+                        paneMatch('graph-edit').find('[' + attrName + '="' + serieName + '"] .name:first').text(data);
 
                         PANE_UNLOAD_LOCK = true;
                     }
@@ -829,17 +807,33 @@ function adminGraphSetupTerminate() {
             });
 
             $input = $overlay.find('input[type=text]')
-                .attr('data-input', 'rename-stack')
-                .attr('data-inputopts', 'check: true');
+                .attr({
+                    'data-input': 'rename-item',
+                    'data-inputopts': 'check: true'
+                });
 
             inputInit($input.get(0));
 
             $input.val(value);
 
-            inputRegisterCheck('rename-stack', function (input) {
-                var valueNew = input.find(':input').val();
+            inputRegisterCheck('rename-item', function (input) {
+                var valueNew = input.find(':input').val(),
+                    values = [];
 
-                if (valueNew != value && paneMatch('graph-edit').find('[data-stack="' + valueNew + '"]').length > 0) {
+                listGetItems('step-1-metrics').add(listGetItems('step-2-groups')).each(function () {
+                    var $item = $(this),
+                        serieName;
+
+                    values.push($(this).data('value').name);
+
+                    if (!$item.data('expands'))
+                        return;
+
+                    for (serieName in $item.data('expands'))
+                        values.push($item.data('expands')[serieName].name);
+                });
+
+                if (values.indexOf(valueNew) != -1) {
                     input
                         .attr('title', $.t('graph.mesg_item_exists'))
                         .addClass('error');
@@ -923,11 +917,12 @@ function adminGraphSetupTerminate() {
                     $origin   = $fieldset.find('input[name=origin]');
 
                     if (e.target.name == 'metric-update')
-                        $entryActive = listMatch('step-1-metrics').find('[data-listitem^=step-1-metrics-item].active');
+                        $entryActive = listGetItems($list, '.active');
 
-                    $entry = adminGraphCreateSerie({
-                        name: $entryActive && $entryActive.data('value').name ||
-                            listNextName('step-1-metrics', 'data-serie', 'serie'),
+                    name = $entryActive && $entryActive.data('value').name || null;
+
+                    $entry = adminGraphCreateSerie(name, {
+                        name: name,
                         origin: $origin.val(),
                         source: ($source.data('value').source.endsWith('groups') ? 'group:' : '') + $source.val(),
                         metric: ($metric.data('value').source.endsWith('groups') ? 'group:' : '') + $metric.val()
@@ -1129,27 +1124,26 @@ function adminGraphSetupTerminate() {
                 }) : null;
 
                 for (j in data.stacks[i].groups) {
-                    $itemOper = data.stacks[i].groups[j].type !== OPER_GROUP_TYPE_NONE ? adminGraphCreateGroup({
+                    $itemOper = data.stacks[i].groups[j].type !== OPER_GROUP_TYPE_NONE ? adminGraphCreateGroup(null, {
                         name: data.stacks[i].groups[j].name,
                         type: data.stacks[i].groups[j].type,
                         options: data.stacks[i].groups[j].options
                     }) : null;
 
                     for (k in data.stacks[i].groups[j].series) {
-                        $itemSerie = adminGraphCreateSerie($.extend(data.stacks[i].groups[j].series[k], {
-                            options: data.stacks[i].groups[j].options
+                        $itemSerie = adminGraphCreateSerie(null, $.extend(data.stacks[i].groups[j].series[k], {
+                            options: data.stacks[i].groups[j].type === OPER_GROUP_TYPE_NONE ?
+                                data.stacks[i].groups[j].options : null
                         }));
 
                         if ($itemOper)
-                            adminGraphCreateProxy(PROXY_TYPE_SERIE, data.stacks[i].groups[j].series[k].name,
-                                $itemOper);
+                            adminGraphCreateProxy(PROXY_TYPE_SERIE, $itemSerie, $itemOper);
                         else if ($itemStack)
-                            adminGraphCreateProxy(PROXY_TYPE_SERIE, data.stacks[i].groups[j].series[k].name,
-                                $itemStack);
+                            adminGraphCreateProxy(PROXY_TYPE_SERIE, $itemSerie, $itemStack);
                     }
 
                     if ($itemOper && $itemStack)
-                        adminGraphCreateProxy(PROXY_TYPE_GROUP, data.stacks[i].groups[j].name, $itemStack);
+                        adminGraphCreateProxy(PROXY_TYPE_GROUP, $itemOper, $itemStack);
                 }
             }
 

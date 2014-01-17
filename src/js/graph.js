@@ -33,9 +33,10 @@ function graphDraw(graph, postpone, delay) {
             graph.replaceWith(graphNew);
             graph = graphNew;
 
-            graph
-                .data('options', graph.opts('graph'))
-                .data('setup', true);
+            graph.data({
+                options: graph.opts('graph'),
+                setup: true
+            });
 
             graph.find('.graphctrl .ranges').hide();
 
