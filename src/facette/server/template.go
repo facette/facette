@@ -36,6 +36,10 @@ func templateDumpMap(x map[string]string) string {
 	)
 
 	for key, value := range x {
+		if value == "" {
+			continue
+		}
+
 		chunks = append(chunks, key+": "+value)
 	}
 

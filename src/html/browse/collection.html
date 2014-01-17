@@ -40,7 +40,7 @@
 			</header>
 
 			<section class="scrollarea full">{{ if .Collection.Entries }}{{ template "template_graph" }}{{ range $index, $value := .Collection.Entries }}
-				<div data-graph="{{ $value.ID }}" data-graphopts="range: -1h; {{ dump $value.Options }}" id="graph-{{ $index }}"></div>{{ end }}{{ else if .Collection.Children }}
+				<div data-graph="{{ $value.ID }}" data-graphopts="{{ dump $value.Options }}" id="graph-{{ $index }}"></div>{{ end }}{{ else if .Collection.Children }}
 				<h1>Sub-Collections</h1>
 				<ul>{{ range $index, $value := .Collection.Children }}
 					<li><a href="{{ $prefix }}/browse/collections/{{ $value.ID }}">{{ $value.Name }}</a></li>{{ end }}

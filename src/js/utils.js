@@ -31,15 +31,20 @@ function rgbToHex(value) {
         ('0' + parseInt(chunks[3], 10).toString(16)).slice(-2);
 }
 
-function splitAttributeValue(value) {
-    var entries = $.map(value.split(';'), $.trim),
-        chunks,
+function splitAttributeValue(attrValue) {
+    var entries = $.map(attrValue.split(';'), $.trim),
         i,
-        result = {};
+        index,
+        key,
+        result = {},
+        value;
 
     for (i in entries) {
-        chunks = $.map(entries[i].split(':'), $.trim);
-        result[chunks[0]] = chunks[1];
+        index = entries[i].indexOf(':');
+        key   = entries[i].substr(0, index).trim();
+        value = entries[i].substr(index + 1).trim();
+
+        result[key] = value;
     }
 
     return result;
