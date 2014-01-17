@@ -799,7 +799,9 @@ function adminGraphSetupTerminate() {
                             $item.data('value').name = data;
                         }
 
-                        paneMatch('graph-edit').find('[' + attrName + '="' + serieName + '"] .name:first').text(data);
+                        paneMatch('graph-edit').find('[' + attrName + '="' + serieName + '"]').each(function () {
+                            $(this).find('.name:first').text(data);
+                        });
 
                         PANE_UNLOAD_LOCK = true;
                     }
