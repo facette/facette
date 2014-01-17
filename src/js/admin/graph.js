@@ -853,13 +853,16 @@ function adminGraphSetupTerminate() {
 
         linkRegister('set-color', function (e) {
             var $target = $(e.target),
-                $color = $target.closest('.listitem, .groupitem').find('.color'),
+                $item = $target.closest('[data-serie], [data-group]'),
+                $color = $item.find('.color'),
                 $overlay;
 
             $overlay = overlayCreate('prompt', {
                 message: $.t('graph.labl_color'),
                 callbacks: {
                     validate: function (data) {
+                        var value;
+
                         PANE_UNLOAD_LOCK = true;
 
                         if (!data) {
@@ -873,6 +876,15 @@ function adminGraphSetupTerminate() {
                         $color
                             .removeClass('auto')
                             .css('color', data);
+
+                        if ($item.attr('data-group'))
+                            value = $item.data('value');
+                        else
+                            value = $item.data('source').data('value');
+
+                        value.options = $.extend(value.options || {}, {
+                            color: data
+                        });
                     }
                 },
                 labels: {
