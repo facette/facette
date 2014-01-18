@@ -623,6 +623,7 @@ function adminGraphSetupTerminate() {
             var $target = $(e.target),
                 $item,
                 $itemSrc = $target.closest('[data-serie]'),
+                $itemRef = $itemSrc,
                 $listSeries = $itemSrc.closest('[data-list]'),
                 data = $itemSrc.data('expand'),
                 expands = $itemSrc.data('source').data('expands'),
@@ -637,6 +638,8 @@ function adminGraphSetupTerminate() {
                 $item = adminGraphCreateProxy(PROXY_TYPE_SERIE, $itemSrc.data('source'), $listSeries)
                     .attr('data-serie', serieName)
                     .addClass('expand');
+
+                $item.detach().insertAfter($itemRef);
 
                 if (!expands[serieName]) {
                     expands[serieName] = {
@@ -660,7 +663,7 @@ function adminGraphSetupTerminate() {
                 if (parseInt(i, 10) === 0)
                     $itemSrc.addClass('linked');
 
-                $itemSrc = $item;
+                $itemRef = $item;
             }
 
             PANE_UNLOAD_LOCK = true;
