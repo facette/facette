@@ -200,7 +200,6 @@ func (library *Library) ItemExists(id string, itemType int) bool {
 // LoadItem loads an item from the filesystem by its identifier.
 func (library *Library) LoadItem(id string, itemType int) error {
 	var (
-		item          interface{}
 		err           error
 		fileInfo      os.FileInfo
 		filePath      string
@@ -256,12 +255,7 @@ func (library *Library) LoadItem(id string, itemType int) error {
 		*library.Collections[id] = *tmpCollection.Collection
 
 		if tmpCollection.Parent != "" {
-			if item, err = library.GetItem(tmpCollection.Parent, LibraryItemCollection); err == nil {
-				library.Collections[id].Parent = item.(*Collection)
-				library.Collections[id].ParentID = library.Collections[id].Parent.ID
-				library.Collections[id].Parent.Children = append(library.Collections[id].Parent.Children,
-					library.Collections[id])
-			}
+			library.Collections[id].ParentID = tmpCollection.Parent
 		}
 
 		library.Collections[id].Modified = fileInfo.ModTime()

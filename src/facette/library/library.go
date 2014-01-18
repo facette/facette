@@ -96,6 +96,21 @@ func (library *Library) Update() error {
 		}
 	}
 
+	// Update collection items parent-children relations
+	for _, collection := range library.Collections {
+		if collection.ParentID == "" {
+			continue
+		}
+
+		if _, ok := library.Collections[collection.ParentID]; !ok {
+			log.Println("ERROR: unknown `%s' parent identifier", collection.ParentID)
+			continue
+		}
+
+		collection.Parent = library.Collections[collection.ParentID]
+		collection.Parent.Children = append(collection.Parent.Children, collection)
+	}
+
 	log.Println("INFO: library update completed")
 
 	return nil

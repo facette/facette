@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -618,14 +619,29 @@ func (server *Server) collectionHandle(writer http.ResponseWriter, request *http
 			return
 		}
 
-		// Get parent collection
+		// Update parent relation
 		if item, _ = server.Library.GetItem(collectionTemp.Parent, library.LibraryItemCollection); item != nil {
 			collection = item.(*library.Collection)
 
-			if collection != nil {
-				collectionTemp.Collection.Parent = collection
-				collectionTemp.Collection.ParentID = collectionTemp.Collection.Parent.ID
-				collection.Children = append(collection.Children, collectionTemp.Collection)
+			// Register parent relation
+			collectionTemp.Collection.Parent = collection
+			collectionTemp.Collection.ParentID = collectionTemp.Collection.Parent.ID
+			collection.Children = append(collection.Children, collectionTemp.Collection)
+		} else {
+			// Remove existing parent relation
+			if item, _ = server.Library.GetItem(collectionTemp.Collection.ID,
+				library.LibraryItemCollection); item != nil {
+				collection = item.(*library.Collection)
+
+				if collection.Parent != nil {
+					for index, child := range collection.Parent.Children {
+						if reflect.DeepEqual(child, collection) {
+							collection.Parent.Children = append(collection.Parent.Children[:index],
+								collection.Parent.Children[index+1:]...)
+							break
+						}
+					}
+				}
 			}
 		}
 
