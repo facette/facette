@@ -565,7 +565,8 @@ function adminGraphSetupTerminate() {
                     return;
                 }
 
-                $itemMain = adminGraphCreateProxy(PROXY_TYPE_SERIE, $itemSrc.data('source'), $listSeries);
+                $itemMain = adminGraphCreateProxy(PROXY_TYPE_SERIE, $itemSrc.data('source'), $listSeries)
+                    .attr('data-serie', $itemSrc.attr('data-serie'));
 
                 if ($listStacks.find('[data-serie="' + $itemSrc.attr('data-serie') + '"]').length > 0)
                     $itemMain.addClass('linked');

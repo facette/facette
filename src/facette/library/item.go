@@ -348,7 +348,10 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 		serieSet = set.New()
 
 		for _, stack := range item.(*Graph).Stacks {
-			if stackSet.Has(stack.Name) {
+			if stack == nil {
+				log.Println("ERROR: stack is null")
+				return os.ErrInvalid
+			} else if stackSet.Has(stack.Name) {
 				log.Printf("ERROR: duplicate `%s' stack name", stack.Name)
 				return os.ErrExist
 			}
@@ -356,7 +359,10 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 			stackSet.Add(stack.Name)
 
 			for _, group := range stack.Groups {
-				if groupSet.Has(group.Name) {
+				if group == nil {
+					log.Printf("ERROR: found null group in `%s' stack", stack.Name)
+					return os.ErrInvalid
+				} else if groupSet.Has(group.Name) {
 					log.Printf("ERROR: duplicate `%s' group name", group.Name)
 					return os.ErrExist
 				}
@@ -364,7 +370,10 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 				groupSet.Add(group.Name)
 
 				for _, serie := range group.Series {
-					if serieSet.Has(serie.Name) {
+					if serie == nil {
+						log.Printf("ERROR: found null serie in `%s' group", group.Name)
+						return os.ErrInvalid
+					} else if serieSet.Has(serie.Name) {
 						log.Printf("ERROR: duplicate `%s' serie name", serie.Name)
 						return os.ErrExist
 					}
