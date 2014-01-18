@@ -160,18 +160,19 @@ func init() {
 func rrdGetData(query *GroupQuery, startTime, endTime time.Time, step time.Duration, percentiles []float64,
 	infoOnly bool) (map[string]*PlotResult, error) {
 	var (
-		count     int
-		data      rrd.XportResult
-		err       error
-		graph     *rrd.Grapher
-		graphInfo rrd.GraphInfo
-		i         int
-		result    map[string]*PlotResult
-		serieName string
-		series    map[string]string
-		serieTemp string
-		stack     []string
-		xport     *rrd.Exporter
+		count      int
+		data       rrd.XportResult
+		err        error
+		graph      *rrd.Grapher
+		graphInfo  rrd.GraphInfo
+		i          int
+		result     map[string]*PlotResult
+		serieCount int
+		serieName  string
+		series     map[string]string
+		serieTemp  string
+		stack      []string
+		xport      *rrd.Exporter
 	)
 
 	result = make(map[string]*PlotResult)
@@ -192,27 +193,35 @@ func rrdGetData(query *GroupQuery, startTime, endTime time.Time, step time.Durat
 
 	switch query.Type {
 	case OperGroupTypeNone:
+		serieCount = len(query.Series)
+
 		for _, serie := range query.Series {
 			if serie.Metric == nil {
 				continue
 			}
 
-			serieName = fmt.Sprintf("serie%d", count)
+			serieTemp = fmt.Sprintf("serie%d", count)
+			serieName = serie.Name
+
+			if serieCount > 1 {
+				serieName += fmt.Sprintf("-%d", count)
+			}
+
 			count += 1
 
-			graph.Def(serieName, serie.Metric.FilePath, serie.Metric.Dataset, "AVERAGE")
+			graph.Def(serieTemp, serie.Metric.FilePath, serie.Metric.Dataset, "AVERAGE")
 
 			// Set graph information request
-			rrdSetGraph(graph, serieName, serie.Name, percentiles)
+			rrdSetGraph(graph, serieTemp, serieName, percentiles)
 
 			// Set plots request
 			if !infoOnly {
-				xport.Def(serieName, serie.Metric.FilePath, serie.Metric.Dataset, "AVERAGE")
-				xport.XportDef(serieName, serieName)
+				xport.Def(serieTemp, serie.Metric.FilePath, serie.Metric.Dataset, "AVERAGE")
+				xport.XportDef(serieTemp, serieTemp)
 			}
 
 			// Set serie matching
-			series[serieName] = serie.Name
+			series[serieTemp] = serieName
 		}
 
 		break
