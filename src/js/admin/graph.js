@@ -353,6 +353,28 @@ function adminGraphHandleSerieDrag(e) {
     }
 }
 
+function adminGraphRestorePosition() {
+    var $parent = null,
+        items = [];
+
+    listGetItems('step-2-series').each(function () {
+        var $item = $(this);
+
+        if (!$parent)
+            $parent = $item.parent();
+
+        items.push([$item.detach(), adminGraphGetValue($item).position]);
+    });
+
+    items.sort(function (x, y) {
+        return x[1] - y[1];
+    });
+
+    $.each(items, function (i, item) { /*jshint unused: true */
+        item[0].appendTo($parent);
+    });
+}
+
 function adminGraphSetupTerminate() {
     // Register admin panes
     paneRegister('graph-list', function () {
@@ -459,6 +481,8 @@ function adminGraphSetupTerminate() {
                 if ($listOpers.find('[data-serie="' + $itemSrc.attr('data-serie') + '"]').length > 0)
                     $item.addClass('linked');
             });
+
+            adminGraphRestorePosition();
 
             if (listGetCount($listSeries, ':not(.linked)') > 0)
                 listSay($listSeries, null);
@@ -666,6 +690,8 @@ function adminGraphSetupTerminate() {
                 $itemRef = $item;
             }
 
+            adminGraphRestorePosition();
+
             PANE_UNLOAD_LOCK = true;
         });
 
@@ -689,6 +715,15 @@ function adminGraphSetupTerminate() {
 
                 $item.detach().insertAfter($itemNext);
             }
+
+            // Save positions
+            if (ADMIN_PANES['graph-edit'].active == 'stack' || !$item.hasClass('listitem'))
+                return;
+
+            listGetItems('step-2-series').each(function () {
+                var $item = $(this);
+                adminGraphGetValue($item).position = $item.index();
+            });
         });
 
         linkRegister('remove-group', function (e) {
