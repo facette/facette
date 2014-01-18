@@ -18,7 +18,7 @@
 			</header>
 
 			<section class="scrollarea full">
-				<div class="list" data-list="{{ .Section }}" data-listopts="init: true; url: catalog/{{ .Section }}">
+				<div class="list" data-list="{{ .Section }}" data-listopts="init: true; url: catalog/{{ .Section }}; messages: {{ substr .Section 0 6 }}">
 					<h1>{{ if eq .Section "origins" }}Origins{{ end }}{{ if eq .Section "sources" }}Sources{{ end }}{{ if eq .Section "metrics" }}Metrics{{ end }} List <span class="count"></span></h1>
 
 					<div class="listmesg" data-listmesg="{{ .Section }}"></div>

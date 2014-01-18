@@ -30,7 +30,7 @@
         "mesg_load_nomatch": "Your search doesn’t match any graph",
         "mesg_loading": "Loading graphs, this may take a while...",
         "mesg_no_serie": "No more serie",
-        "mesg_none": "No graph defined",
+        "mesg_none_defined": "No graph defined",
         "mesg_save_fail": "Unable to save graph!",
         "mesg_unknown": "Requested graph is unknown!"
     },
@@ -45,7 +45,8 @@
     },
     "item": {
         "mesg_missing": "You must at least add one item!",
-        "mesg_none": "No item defined",
+        "mesg_none": "No item found",
+        "mesg_none_defined": "No item defined",
         "mesg_load_nomatch": "Your search doesn’t match any item"
     },
     "list": {
@@ -69,6 +70,13 @@
     },
     "metric": {
         "mesg_missing": "You must at least add one metric!",
-        "mesg_none": "No metric defined"
+        "mesg_none": "No metric found",
+        "mesg_none_defined": "No metric defined"
+    },
+    "origin": {
+        "mesg_none": "No origin found"
+    },
+    "source": {
+        "mesg_none": "No source found"
     }
 }

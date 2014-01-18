@@ -111,7 +111,7 @@ function adminCollectionSetupTerminate() {
             listUpdateCount($list);
 
             if (listGetCount($list) === 0)
-                listSay($list, $.t('graph.mesg_none'), 'info');
+                listSay($list, $.t('graph.mesg_none_defined'), 'info');
 
             PANE_UNLOAD_LOCK = true;
         });
@@ -241,7 +241,7 @@ function adminCollectionSetupTerminate() {
             }
 
             if ($listGraphs.data('counter') === 0)
-                listSay($listGraphs, $.t('graph.mesg_none'));
+                listSay($listGraphs, $.t('graph.mesg_none_defined'));
 
             listUpdateCount($listGraphs);
 

@@ -785,7 +785,7 @@ function adminGraphSetupTerminate() {
             listUpdateCount($list);
 
             if (listGetCount($list) === 0)
-                listSay($list, $.t('metric.mesg_none'), 'info');
+                listSay($list, $.t('metric.mesg_none_defined'), 'info');
 
             PANE_UNLOAD_LOCK = true;
 
@@ -1190,7 +1190,7 @@ function adminGraphSetupTerminate() {
             $pane.find('select[name=stack-mode]').val(data.stack_mode);
 
             if ($listMetrics.data('counter') === 0)
-                listSay($listMetrics, $.t('metric.mesg_none'));
+                listSay($listMetrics, $.t('metric.mesg_none_defined'));
 
             if ($listSeries.data('counter') === 0)
                 listSay($listSeries, $.t('graph.mesg_no_serie'));
