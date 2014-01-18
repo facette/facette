@@ -241,12 +241,11 @@ func (server *Server) Run() error {
 	router.HandleFunc(URLCatalogPath+"/metrics", server.metricList)
 	router.HandleFunc(URLCatalogPath+"/metrics/{path:.*}", server.metricShow)
 
-	router.HandleFunc(URLCatalogPath+"/expand", server.expandList)
-
 	router.HandleFunc(URLLibraryPath+"/sourcegroups", server.groupHandle)
 	router.HandleFunc(URLLibraryPath+"/sourcegroups/{id}", server.groupHandle)
 	router.HandleFunc(URLLibraryPath+"/metricgroups", server.groupHandle)
 	router.HandleFunc(URLLibraryPath+"/metricgroups/{id}", server.groupHandle)
+	router.HandleFunc(URLLibraryPath+"/expand", server.groupExpand)
 
 	router.HandleFunc(URLLibraryPath+"/graphs", server.graphHandle)
 	router.HandleFunc(URLLibraryPath+"/graphs/plots", server.plotHandle)

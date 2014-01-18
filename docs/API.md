@@ -158,38 +158,6 @@ Response:
 }
 ```
 
-##### Expand query tuples
-
-```
-POST /catalog/expand
-```
-
-Takes an array of query tuples from the request body and returns their expanded versions.
-
-A query tuple consists of a list of 3 values: origin, source and metric.
-
-When querying the back-end, both source and metric fields can be a reference to a group, then beginning with `group:`
-prefix.
-
-```javascript
-[
-        ["origin0", "host1.renm.org", "group:group0"]
-]
-```
-
-Response:
-
-```javascript
-[
-    [
-        ["origin0", "host1.renm.org", "metric0"],
-        ["origin0", "host1.renm.org", "metric1"],
-        ["origin0", "host1.renm.org", "metric2"],
-        ["origin0", "host1.renm.org", "metric3"]
-    ]
-]
-```
-
 ### Library
 
 All library items are identified by an [universally unique identifier][4] (UUID), each 36 characters long.
@@ -301,6 +269,38 @@ Removes an existing group item from the library.
 Possible status codes:
 
  * __404 Not Found:__ the item to delete does not exist
+
+##### Expand query tuples
+
+```
+POST /library/expand
+```
+
+Takes an array of query tuples from the request body and returns their expanded versions.
+
+A query tuple consists of a list of 3 values: origin, source and metric.
+
+When querying the back-end, both source and metric fields can be a reference to a group, then beginning with `group:`
+prefix.
+
+```javascript
+[
+        ["origin0", "host1.renm.org", "group:group0"]
+]
+```
+
+Response:
+
+```javascript
+[
+    [
+        ["origin0", "host1.renm.org", "metric0"],
+        ["origin0", "host1.renm.org", "metric1"],
+        ["origin0", "host1.renm.org", "metric2"],
+        ["origin0", "host1.renm.org", "metric3"]
+    ]
+]
+```
 
 #### Graphs
 

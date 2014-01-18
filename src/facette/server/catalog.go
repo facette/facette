@@ -1,12 +1,9 @@
 package server
 
 import (
-	"encoding/json"
 	"facette/library"
 	"github.com/fatih/set"
 	"github.com/gorilla/mux"
-	"io/ioutil"
-	"log"
 	"net/http"
 	"path"
 	"sort"
@@ -14,20 +11,6 @@ import (
 	"strings"
 	"time"
 )
-
-type expandRequest [][3]string
-
-func (tuple expandRequest) Len() int {
-	return len(tuple)
-}
-
-func (tuple expandRequest) Less(i, j int) bool {
-	return tuple[i][0]+tuple[i][1]+tuple[i][2] < tuple[j][0]+tuple[j][1]+tuple[j][2]
-}
-
-func (tuple expandRequest) Swap(i, j int) {
-	tuple[i], tuple[j] = tuple[j], tuple[i]
-}
 
 type originShowResponse struct {
 	Name    string `json:"name"`
@@ -371,57 +354,6 @@ func (server *Server) metricShow(writer http.ResponseWriter, request *http.Reque
 		Origins: originSet.StringSlice(),
 		Sources: sourceSet.StringSlice(),
 		Updated: server.Catalog.Updated.Format(time.RFC3339),
-	}
-
-	server.handleJSON(writer, response)
-}
-
-func (server *Server) expandList(writer http.ResponseWriter, request *http.Request) {
-	var (
-		body     []byte
-		err      error
-		item     expandRequest
-		query    expandRequest
-		response []expandRequest
-	)
-
-	if request.Method != "POST" {
-		server.handleResponse(writer, http.StatusMethodNotAllowed)
-		return
-	}
-
-	body, _ = ioutil.ReadAll(request.Body)
-
-	if err = json.Unmarshal(body, &query); err != nil {
-		log.Println("ERROR: " + err.Error())
-		server.handleResponse(writer, http.StatusBadRequest)
-		return
-	}
-
-	for _, entry := range query {
-		item = expandRequest{}
-
-		if strings.HasPrefix(entry[1], "group:") {
-			for _, sourceName := range server.Library.ExpandGroup(entry[1][6:], library.LibraryItemSourceGroup) {
-				if strings.HasPrefix(entry[2], "group:") {
-					for _, metricName := range server.Library.ExpandGroup(entry[2][6:],
-						library.LibraryItemMetricGroup) {
-						item = append(item, [3]string{entry[0], sourceName, metricName})
-					}
-				} else {
-					item = append(item, [3]string{entry[0], sourceName, entry[2]})
-				}
-			}
-		} else if strings.HasPrefix(entry[2], "group:") {
-			for _, metricName := range server.Library.ExpandGroup(entry[2][6:], library.LibraryItemMetricGroup) {
-				item = append(item, [3]string{entry[0], entry[1], metricName})
-			}
-		} else {
-			item = append(item, entry)
-		}
-
-		sort.Sort(item)
-		response = append(response, item)
 	}
 
 	server.handleJSON(writer, response)
