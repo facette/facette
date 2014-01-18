@@ -13,10 +13,7 @@ function adminGraphGetData() {
 }
 
 function adminGraphGetGroup(entry) {
-    var $item,
-        $listMetrics = listMatch('step-1-metrics'),
-        $listSeries = listMatch('step-2-series'),
-        group;
+    var group;
 
     if (entry.attr('data-group')) {
         group = $.extend({
@@ -37,7 +34,9 @@ function adminGraphGetGroup(entry) {
         };
 
         group.series.push(adminGraphGetValue(entry));
-        group.options = group.series[0].options;
+
+        if (group.series[0])
+            group.options = group.series[0].options || {};
     }
 
     return group;
@@ -673,14 +672,14 @@ function adminGraphSetupTerminate() {
                 $itemNext;
 
             if (e.target.href.endsWith('#move-up')) {
-                $itemNext = $item.prev('.listitem, .groupitem, .groupentry');
+                $itemNext = $item.prevAll('.listitem, .groupitem, .groupentry').filter(':not(.linked):last');
 
                 if ($itemNext.length === 0)
                     return;
 
                 $item.detach().insertBefore($itemNext);
             } else {
-                $itemNext = $item.next('.listitem, .groupitem, .groupentry');
+                $itemNext = $item.nextAll('.listitem, .groupitem, .groupentry').filter(':not(.linked):first');
 
                 if ($itemNext.length === 0)
                     return;
