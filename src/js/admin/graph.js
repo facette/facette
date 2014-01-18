@@ -1,30 +1,34 @@
 
+function adminGraphGetData() {
+    var $pane = paneMatch('graph-edit'),
+        data = {
+            name: $pane.find('input[name=graph-name]').val(),
+            description: $pane.find('textarea[name=graph-desc]').val(),
+            type: parseInt($pane.find('select[name=graph-type]').val(), 10),
+            stack_mode: parseInt($pane.find('select[name=stack-mode]').val(), 10),
+            stacks: adminGraphGetStacks()
+        };
+
+    return data;
+}
+
 function adminGraphGetGroup(entry) {
-    var $color,
-        $item,
+    var $item,
         $listMetrics = listMatch('step-1-metrics'),
         $listSeries = listMatch('step-2-series'),
-        $listOpers = listMatch('step-2-groups'),
         group;
 
     if (entry.attr('data-group')) {
-        $item = $listOpers.find('[data-group="' + entry.attr('data-group') + '"]');
-
-        group = $.extend($item.data('value'), {
+        group = $.extend({
             series: [],
             options: {}
-        });
+        }, adminGraphGetValue(entry));
 
-        $item.find('.groupentry').each(function () {
-            if (!$.isEmptyObject(entry.data('source').data('expands')))
-                group.series.push($.extend({}, entry.data('source').data('expands')[this.getAttribute('data-serie')]));
-            else
-                group.series.push($.extend({}, $listMetrics.find('[data-serie="' + this.getAttribute('data-serie') +
-                    '"]').data('value')));
-        });
+        listMatch('step-2-groups').find('[data-group="' + entry.attr('data-group') + '"] .groupentry')
+            .each(function () {
+                group.series.push(adminGraphGetValue($(this)));
+            });
     } else {
-        $item = $listSeries.find('[data-serie=' + entry.attr('data-serie') + ']');
-
         group = {
             name: entry.attr('data-serie'),
             type: OPER_GROUP_TYPE_NONE,
@@ -32,17 +36,9 @@ function adminGraphGetGroup(entry) {
             options: {}
         };
 
-        if (!$.isEmptyObject(entry.data('source').data('expands')))
-            group.series.push($.extend({}, entry.data('source').data('expands')[entry.attr('data-serie')]));
-        else
-            group.series.push($.extend({}, $listMetrics.find('[data-serie=' + entry.attr('data-serie') +
-                ']').data('value')));
+        group.series.push(adminGraphGetValue(entry));
+        group.options = group.series[0].options;
     }
-
-    $color = $item.find('.color');
-
-    if (!$color.hasClass('auto'))
-        group.options.color = rgbToHex($color.css('color'));
 
     return group;
 }
@@ -86,17 +82,15 @@ function adminGraphGetStacks() {
     return stacks;
 }
 
-function adminGraphGetData() {
-    var $pane = paneMatch('graph-edit'),
-        data = {
-            name: $pane.find('input[name=graph-name]').val(),
-            description: $pane.find('textarea[name=graph-desc]').val(),
-            type: parseInt($pane.find('select[name=graph-type]').val(), 10),
-            stack_mode: parseInt($pane.find('select[name=stack-mode]').val(), 10),
-            stacks: adminGraphGetStacks()
-        };
-
-    return data;
+function adminGraphGetValue(item) {
+    if (item.data('source')) {
+        if (item.hasClass('expand'))
+            return item.data('source').data('expands')[item.attr('data-serie')];
+        else
+            return item.data('source').data('value');
+    } else {
+        return item.data('value');
+    }
 }
 
 function adminGraphCreateSerie(name, value) {
@@ -722,7 +716,7 @@ function adminGraphSetupTerminate() {
                 $item;
 
             // Remove item from group
-            if ($entry.attr('data-group') !== undefined)
+            if ($entry.attr('data-group'))
                 $item = $target.closest('[data-step]').find('[data-group="' + $entry.attr('data-group') + '"]')
                     .removeClass('linked');
             else
@@ -780,12 +774,7 @@ function adminGraphSetupTerminate() {
             $item     = $target.closest('[' + attrName + ']');
             serieName = $item.attr(attrName);
 
-            if ($item.data('source')) {
-                value = $item.hasClass('expand') ? $item.data('source').data('expands')[serieName].name :
-                    $item.data('source').data('value').name;
-            } else {
-                value = $item.data('value').name;
-            }
+            value = adminGraphGetValue($item).name;
 
             $overlay = overlayCreate('prompt', {
                 message: $.t(e.target.href.endsWith('#rename-stack') ? 'graph.labl_stack_name' :
@@ -795,14 +784,7 @@ function adminGraphSetupTerminate() {
                         if (!data)
                             return;
 
-                        if ($item.data('source')) {
-                            if ($item.hasClass('expand'))
-                                $item.data('source').data('expands')[serieName].name = data;
-                            else
-                                $item.data('source').data('value').name = data;
-                        } else {
-                            $item.data('value').name = data;
-                        }
+                        adminGraphGetValue($item).name = data;
 
                         paneMatch('graph-edit').find('[' + attrName + '="' + serieName + '"]').each(function () {
                             $(this).find('.name:first').text(data);
@@ -884,12 +866,7 @@ function adminGraphSetupTerminate() {
                             .removeClass('auto')
                             .css('color', data);
 
-                        if ($item.attr('data-group'))
-                            value = $item.data('value');
-                        else if ($item.hasClass('expand'))
-                            value = $item.data('source').data('expands')[$item.attr('data-serie')];
-                        else
-                            value = $item.data('source').data('value');
+                        value = adminGraphGetValue($item);
 
                         value.options = $.extend(value.options || {}, {
                             color: data
