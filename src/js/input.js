@@ -151,12 +151,14 @@ function inputHandleKeyComplete(e) {
     if (INPUT_TIMEOUTS[name])
         clearTimeout(INPUT_TIMEOUTS[name]);
 
+    if (!e.target.value)
+        $target.removeData('value');
+
     // Stop if value didn't change or empty
     if (e.target.value == e.target._lastValue) {
         return;
     } else if (!e.target.value) {
         e.target._lastValue = null;
-        $target.removeData('value');
         return;
     }
 
