@@ -33,13 +33,15 @@ func (catalog *Catalog) AddOrigin(name string, config map[string]string) (*Origi
 
 	go func() {
 		var (
-			displayName string
+			originalName string
 		)
 
 		for entry := range origin.inputChan {
 			if _, ok := origin.Sources[entry[0]]; !ok {
 				origin.AppendSource(entry[0])
 			}
+
+			originalName = entry[1]
 
 			for _, filter := range catalog.Config.Origins[name].Filters {
 				if !filter.PatternRegexp.MatchString(entry[1]) {
@@ -51,13 +53,11 @@ func (catalog *Catalog) AddOrigin(name string, config map[string]string) (*Origi
 						log.Printf("DEBUG: discarding `%s' metric...", entry[1])
 					}
 				} else if filter.Rewrite != "" {
-					displayName = filter.PatternRegexp.ReplaceAllString(entry[1], filter.Rewrite)
-				} else {
-					displayName = entry[1]
+					entry[1] = filter.PatternRegexp.ReplaceAllString(entry[1], filter.Rewrite)
 				}
 			}
 
-			origin.Sources[entry[0]].AppendMetric(displayName, entry[1])
+			origin.Sources[entry[0]].AppendMetric(entry[1], originalName)
 		}
 	}()
 
