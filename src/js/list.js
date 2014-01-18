@@ -250,9 +250,7 @@ function listUpdate(list, listFilter, offset) {
     if (listFilter)
         query.data.filter = '*' + listFilter + '*';
 
-    return $.ajax(query).done(function (data, status, xhr) {
-        /*jshint unused: true */
-
+    return $.ajax(query).done(function (data, status, xhr) { /*jshint unused: true */
         var $item,
             i,
             namespace,

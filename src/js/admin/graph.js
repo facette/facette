@@ -1114,13 +1114,13 @@ function adminGraphSetupTerminate() {
                     paneGoto('graph-edit', 'stack', true);
                 }
 
-                itemSave(null, 'graphs', adminGraphGetData(), SAVE_MODE_VOLATILE).pipe(function (data, status, xhr) {
-                    /*jshint unused: true */
-                    var location = xhr.getResponseHeader('Location');
+                itemSave(null, 'graphs', adminGraphGetData(), SAVE_MODE_VOLATILE)
+                    .pipe(function (data, status, xhr) { /*jshint unused: true */
+                        var location = xhr.getResponseHeader('Location');
 
-                    graphDraw($target.closest('[data-step]').find('[data-graph]').attr('data-graph',
-                        location.substr(location.lastIndexOf('/') + 1)));
-                });
+                        graphDraw($target.closest('[data-step]').find('[data-graph]').attr('data-graph',
+                            location.substr(location.lastIndexOf('/') + 1)));
+                    });
             })
             .on('change', '[data-step=3] :input', function () {
                 PANE_UNLOAD_LOCK = true;

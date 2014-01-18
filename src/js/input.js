@@ -27,9 +27,7 @@ function inputGetSources(input, args) {
     // Get sources requests
     items = $.map((input.opts('input').sources || '').split(','), $.trim) || [];
 
-    $.each(items, function (i, item) {
-        /*jshint unused: true */
-
+    $.each(items, function (i, item) { /*jshint unused: true */
         sources[item] = {
             url: urlPrefix + '/' + item,
             type: 'GET',
@@ -69,8 +67,7 @@ function inputHandleFocus(e) {
     if (!INPUT_REQUESTS[name])
         return;
 
-    $.each(INPUT_REQUESTS[name], function (i, request) {
-        /*jshint unused: true */
+    $.each(INPUT_REQUESTS[name], function (i, request) { /*jshint unused: true */
         request.abort();
     });
 }
@@ -192,9 +189,7 @@ function inputHandleKeyComplete(e) {
                 xhr._source = i;
             };
 
-            source.success = function (data, textStatus, xhr) {
-                /*jshint unused: true */
-
+            source.success = function (data, textStatus, xhr) { /*jshint unused: true */
                 items[xhr._source] = data;
             };
 
@@ -283,9 +278,7 @@ function inputUpdate(input, data) {
         if (!entries)
             return;
 
-        $.each(entries, function (i, entry) {
-            /*jshint unused: true */
-
+        $.each(entries, function (i, entry) { /*jshint unused: true */
             if (typeof entry == 'string') {
                 entry = {
                     name: entry,

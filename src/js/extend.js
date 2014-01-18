@@ -98,9 +98,7 @@ if (window.Highcharts) {
             keys = Object.keys(data[serie.name]);
             keys.sort();
 
-            $.each(keys, function (i, key) {
-                /*jshint unused: true */
-
+            $.each(keys, function (i, key) { /*jshint unused: true */
                 if (columnKeys.indexOf(key) != -1)
                     return;
 
@@ -108,9 +106,7 @@ if (window.Highcharts) {
             });
         });
 
-        $.each(columnKeys, function (i, key) {
-            /*jshint unused: true */
-
+        $.each(columnKeys, function (i, key) { /*jshint unused: true */
             var box,
                 element,
                 keyLeft = cellLeft,

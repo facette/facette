@@ -4,9 +4,7 @@
 var LINK_CALLBACKS = {};
 
 function linkRegister(fragments, callback) {
-    $.each($.map(fragments.split(' '), $.trim), function (i, fragment) {
-        /*jshint unused: true */
-
+    $.each($.map(fragments.split(' '), $.trim), function (i, fragment) { /*jshint unused: true */
         LINK_CALLBACKS[fragment] = callback;
     });
 }
