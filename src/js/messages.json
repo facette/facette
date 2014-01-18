@@ -28,7 +28,7 @@
         "mesg_item_exists": "An item with the same name already exists!",
         "mesg_load_failed": "Failed to load graph",
         "mesg_load_nomatch": "Your search doesn’t match any graph",
-        "mesg_loading": "Loading graphs, this may take a while...",
+        "mesg_loading": "Loading graphs, this may take a while…",
         "mesg_no_serie": "No more serie",
         "mesg_none_defined": "No graph defined",
         "mesg_save_fail": "Unable to save graph!",
@@ -44,6 +44,8 @@
         "mesg_save_fail": "Unable to save group!"
     },
     "item": {
+        "labl_matching": "Matching items:",
+        "labl_total": "Total:",
         "mesg_missing": "You must at least add one item!",
         "mesg_none": "No item found",
         "mesg_none_defined": "No item defined",
@@ -61,11 +63,11 @@
         "labl_sources": "Sources:",
         "labl_updated": "Updated:",
         "labl_reset_default": "Reset to Default",
-        "mesg_loading": "Loading data...",
+        "mesg_loading": "Loading data…",
         "mesg_no_description": "No description available",
         "mesg_field_mandatory": "This field is mandatory!",
         "mesg_reload": "You are about to reload server resources. This may take a while.",
-        "mesg_server_loading": "Reloading resources, please wait...",
+        "mesg_server_loading": "Reloading resources, please wait…",
         "mesg_unsaved_changes": "All unsaved changes will be lost!"
     },
     "metric": {

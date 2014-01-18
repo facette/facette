@@ -24,7 +24,7 @@ Returns an array listing the available origins.
 
 Optional parameters:
 
- * __filter:__ the [match][3] pattern to apply on origins names (type: `string`)
+ * __filter:__ the [pattern](#filter-patterns) to apply on origins names (type: `string`)
  * __limit:__ the maximum number of items to return (type: `integer`)
  * __offset:__ the offset to start fetching from (type: `integer`)
 
@@ -69,7 +69,7 @@ Returns an array listing the available sources.
 
 Optional parameters:
 
- * __filter:__ the [match][3] pattern to apply on sources names (type: `string`)
+ * __filter:__ the [pattern](#filter-patterns) pattern to apply on sources names (type: `string`)
  * __limit:__ the maximum number of items to return (type: `integerr`)
  * __offset:__ the offset to start fetching from (type: `integer`)
  * __origin:__ the identifier of the origin to filter on (type: `string`)
@@ -117,7 +117,7 @@ Returns an array listing the available metrics.
 
 Optional parameters:
 
- * __filter:__ the [match][3] pattern to apply on metrics names (type: `string`)
+ * __filter:__ the [pattern](#filter-patterns) pattern to apply on metrics names (type: `string`)
  * __limit:__ the maximum number of items to return (type: `integer`)
  * __offset:__ the offset to start fetching from (type: `integer`)
  * __origin:__ the identifier of the origin to filter on (type: `string`)
@@ -175,7 +175,7 @@ Returns an array of objects listing the available groups.
 
 Optional parameters:
 
- * __filter:__ the [match][3] pattern to apply on group names (type: `string`)
+ * __filter:__ the [pattern](#filter-patterns) pattern to apply on group names (type: `string`)
  * __limit:__ the maximum number of items to return (type: `integer`)
  * __offset:__ the offset to start fetching from (type: `integer`)
 
@@ -315,7 +315,7 @@ Returns an array of objects listing the available graphs.
 Optional parameters:
 
  * __collection:__ the identifier of the collection to filter on (type: `string`)
- * __filter:__ the [match][3] pattern to apply on graph names (type: `string`)
+ * __filter:__ the [pattern](#filter-patterns) pattern to apply on graph names (type: `string`)
  * __limit:__ the maximum number of items to return (type: `integer`)
  * __offset:__ the offset to start fetching from (type: `integer`)
 
@@ -464,7 +464,7 @@ Response (plots values are truncated):
                         0.348,
                         0.351,
                         0.42300000000000004,
-                        ...
+                        …
                         0,
                         0.10500000000000001,
                         0.42400000000000004,
@@ -532,7 +532,7 @@ Returns an array of objects listing the available collections.
 Optional parameters:
 
  * __exclude:__ the identifier of the collection to exclude from listing (type: `string`)
- * __filter:__ the [match][3] pattern to apply on collection names (type: `string`)
+ * __filter:__ the [pattern](#filter-patterns) pattern to apply on collection names (type: `string`)
  * __limit:__ the maximum number of items to return (type: `integer`)
  * __offset:__ the offset to start fetching from (type: `integer`)
  * __parent:__ the identifier of the parent collection to filter on (type: `string`)
@@ -667,6 +667,14 @@ Reloads the server configuration files and refreshes back-ends.
 Possible status codes:
 
  * __503 Service Unavailable:__ the server is reloading its configuration
+
+### Filter patterns
+
+Some of the API calls can take a filter as optional parameter, those filters can be:
+
+ * a [match][3] pattern (e.g. `glob:host*`)
+ * a regexp pattern (e.g. `regexp:host[13]\.example\.net`)
+ * a simple value (e.g. `host1.example.net`)
 
 ### HTTP Status Codes
 

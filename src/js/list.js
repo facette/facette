@@ -248,7 +248,7 @@ function listUpdate(list, listFilter, offset) {
     };
 
     if (listFilter)
-        query.data.filter = '*' + listFilter + '*';
+        query.data.filter = 'glob:*' + listFilter + '*';
 
     return $.ajax(query).done(function (data, status, xhr) { /*jshint unused: true */
         var $item,

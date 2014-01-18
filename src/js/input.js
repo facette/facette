@@ -22,7 +22,7 @@ function inputGetSources(input, args) {
 
     // Set filter if any
     if ($field.val())
-        args.filter = $field.val() + '*';
+        args.filter = 'glob:' + $field.val() + '*';
 
     // Get sources requests
     items = $.map((input.opts('input').sources || '').split(','), $.trim) || [];

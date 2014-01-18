@@ -2,10 +2,10 @@ package server
 
 import (
 	"facette/library"
+	"facette/utils"
 	"github.com/fatih/set"
 	"github.com/gorilla/mux"
 	"net/http"
-	"path"
 	"sort"
 	"strconv"
 	"strings"
@@ -61,7 +61,7 @@ func (server *Server) originList(writer http.ResponseWriter, request *http.Reque
 	// Parse catalog for sources list
 	for _, origin := range server.Catalog.Origins {
 		if request.FormValue("filter") != "" {
-			if ok, _ := path.Match(strings.ToLower(request.FormValue("filter")), strings.ToLower(origin.Name)); !ok {
+			if !utils.FilterMatch(strings.ToLower(request.FormValue("filter")), strings.ToLower(origin.Name)) {
 				continue
 			}
 		}
@@ -164,7 +164,7 @@ func (server *Server) sourceList(writer http.ResponseWriter, request *http.Reque
 
 		for key := range origin.Sources {
 			if request.FormValue("filter") != "" {
-				if ok, _ := path.Match(strings.ToLower(request.FormValue("filter")), strings.ToLower(key)); !ok {
+				if !utils.FilterMatch(strings.ToLower(request.FormValue("filter")), strings.ToLower(key)) {
 					continue
 				}
 			}
@@ -284,7 +284,7 @@ func (server *Server) metricList(writer http.ResponseWriter, request *http.Reque
 
 			for key := range source.Metrics {
 				if request.FormValue("filter") != "" {
-					if ok, _ := path.Match(strings.ToLower(request.FormValue("filter")), strings.ToLower(key)); !ok {
+					if !utils.FilterMatch(strings.ToLower(request.FormValue("filter")), strings.ToLower(key)) {
 						continue
 					}
 				}

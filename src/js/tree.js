@@ -56,7 +56,7 @@ function treeUpdate(tree) {
     // Set query timeout
     timeout = setTimeout(function () {
             overlayCreate('loader', {
-            message: 'Loading data...'
+            message: $.t('main.mesg_loading')
         });
     }, 500);
 

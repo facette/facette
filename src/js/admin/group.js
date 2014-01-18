@@ -120,6 +120,41 @@ function adminGroupSetupTerminate() {
             PANE_UNLOAD_LOCK = true;
         });
 
+        linkRegister('test-pattern', function (e) {
+            var $target = $(e.target),
+                $item = $target.closest('[data-listitem]');
+
+            $.ajax({
+                url: urlPrefix + '/catalog/' + (groupType == 'sourcegroups' ? 'sources' : 'metrics'),
+                type: 'GET',
+                data: {
+                    filter: $item.data('value').pattern,
+                    limit: PATTERN_TEST_LIMIT
+                }
+            }).done(function (data, status, xhr) { /*jshint unused: true */
+                var $tooltip,
+                    records = parseInt(xhr.getResponseHeader('X-Total-Records'), 10);
+
+                $tooltip = tooltipCreate('info', function (state) {
+                    $item.toggleClass('action', state);
+                }).appendTo($body)
+                    .css({
+                        top: $target.offset().top,
+                        left: $target.offset().left
+                    });
+
+                $tooltip.html('<span class="label">' + $.t('item.labl_matching') + '</span><br>');
+
+                $.each(data, function (i, entry) { /*jshint unused: true */
+                    $tooltip.append(entry + '<br>');
+                });
+
+                if (records > data.length)
+                    $tooltip.append('…<br><span class="label">' + $.t('item.labl_total') + '</span> ' +
+                        (records - data.length));
+            });
+        });
+
         // Attach events
         $body
             .on('click', 'button', function (e) {

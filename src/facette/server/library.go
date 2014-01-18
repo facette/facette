@@ -13,7 +13,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path"
 	"reflect"
 	"sort"
 	"strconv"
@@ -181,7 +180,7 @@ func (server *Server) libraryList(writer http.ResponseWriter, request *http.Requ
 			}
 
 			if request.FormValue("filter") != "" {
-				if ok, _ := path.Match(strings.ToLower(request.FormValue("filter")), strings.ToLower(group.Name)); !ok {
+				if !utils.FilterMatch(strings.ToLower(request.FormValue("filter")), strings.ToLower(group.Name)) {
 					continue
 				}
 			}
@@ -221,8 +220,7 @@ func (server *Server) libraryList(writer http.ResponseWriter, request *http.Requ
 				}
 
 				if request.FormValue("filter") != "" {
-					if ok, _ := path.Match(strings.ToLower(request.FormValue("filter")),
-						strings.ToLower(graph.Name)); !ok {
+					if !utils.FilterMatch(strings.ToLower(request.FormValue("filter")), strings.ToLower(graph.Name)) {
 						continue
 					}
 				}
@@ -796,8 +794,7 @@ func (server *Server) collectionList(writer http.ResponseWriter, request *http.R
 		}
 
 		if request.FormValue("filter") != "" {
-			if ok, _ := path.Match(strings.ToLower(request.FormValue("filter")),
-				strings.ToLower(collection.Name)); !ok {
+			if !utils.FilterMatch(strings.ToLower(request.FormValue("filter")), strings.ToLower(collection.Name)) {
 				continue
 			}
 		}

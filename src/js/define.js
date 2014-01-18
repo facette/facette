@@ -37,4 +37,6 @@ var EVENT_KEY_TAB    = 9,
 
     LIST_FETCH_LIMIT = 50,
 
+    PATTERN_TEST_LIMIT = 10,
+
     TIME_RFC3339 = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
