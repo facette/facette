@@ -295,10 +295,6 @@ func (handler *RRDBackendHandler) rrdGetData(query *GroupQuery, startTime, endTi
 	return result, nil
 }
 
-func init() {
-	BackendHandlers["rrd"] = NewRRDBackendHandler
-}
-
 func rrdParseInfo(info rrd.GraphInfo, data map[string]*PlotResult) {
 	var (
 		chunks     []string
@@ -350,20 +346,21 @@ func rrdSetGraph(graph *rrd.Grapher, serieName, itemName string, percentiles []f
 	}
 }
 
-// NewRRDBackendHandler creates a new instance of BackendHandler.
-func NewRRDBackendHandler(origin *Origin, config map[string]string) error {
-	if _, ok := config["path"]; !ok {
-		return fmt.Errorf("missing `path' mandatory backend definition")
-	} else if _, ok := config["pattern"]; !ok {
-		return fmt.Errorf("missing `pattern' mandatory backend definition")
-	}
+func init() {
+	BackendHandlers["rrd"] = func(origin *Origin, config map[string]string) error {
+		if _, ok := config["path"]; !ok {
+			return fmt.Errorf("missing `path' mandatory backend setting")
+		} else if _, ok := config["pattern"]; !ok {
+			return fmt.Errorf("missing `pattern' mandatory backend setting")
+		}
 
-	origin.Backend = &RRDBackendHandler{
-		Path:    config["path"],
-		Pattern: config["pattern"],
-		origin:  origin,
-		metrics: make(map[string]map[string]*RRDMetric),
-	}
+		origin.Backend = &RRDBackendHandler{
+			Path:    config["path"],
+			Pattern: config["pattern"],
+			origin:  origin,
+			metrics: make(map[string]map[string]*RRDMetric),
+		}
 
-	return nil
+		return nil
+	}
 }

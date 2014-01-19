@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"facette/common"
 	"fmt"
 )
 
@@ -17,12 +16,12 @@ type AuthHandler interface {
 }
 
 // NewAuth creates a new AuthHandler instance.
-func NewAuth(config *common.Config, debugLevel int) (AuthHandler, error) {
-	if _, ok := config.Auth["type"]; !ok {
+func NewAuth(config map[string]string, debugLevel int) (AuthHandler, error) {
+	if _, ok := config["type"]; !ok {
 		return nil, fmt.Errorf("missing authentication handler type")
-	} else if _, ok := AuthHandlers[config.Auth["type"]]; !ok {
-		return nil, fmt.Errorf("unknown `%s' authentication handler", config.Auth["type"])
+	} else if _, ok := AuthHandlers[config["type"]]; !ok {
+		return nil, fmt.Errorf("unknown `%s' authentication handler", config["type"])
 	}
 
-	return AuthHandlers[config.Auth["type"]](config.Auth, debugLevel), nil
+	return AuthHandlers[config["type"]](config, debugLevel), nil
 }

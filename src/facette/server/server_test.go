@@ -873,7 +873,7 @@ func init() {
 		err error
 	)
 
-	flag.StringVar(&flagConfig, "c", "", "configuration file path")
+	flag.StringVar(&flagConfig, "c", common.DefaultConfigFile, "configuration file path")
 	flag.Parse()
 
 	if flagConfig == "" {

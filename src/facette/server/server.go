@@ -186,7 +186,7 @@ func (server *Server) Run() error {
 	}
 
 	// Prepare authentication backend
-	if server.AuthHandler, err = auth.NewAuth(server.Config, server.debugLevel); err != nil {
+	if server.AuthHandler, err = auth.NewAuth(server.Config.Auth, server.debugLevel); err != nil {
 		return err
 	}
 
