@@ -58,6 +58,9 @@ function adminGraphGetStacks() {
             groups.push(adminGraphGetGroup($(this)));
         });
 
+        if (groups.length === 0)
+            return;
+
         stacks.push({
             name: $item.attr('data-stack'),
             groups: groups
