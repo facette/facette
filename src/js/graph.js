@@ -248,7 +248,8 @@ function graphDraw(graph, postpone, delay) {
                         hover: {
                             lineWidth: 2.5
                         }
-                    }
+                    },
+                    threshold: 0
                 };
 
                 // Enable full features when not in preview
