@@ -33,31 +33,43 @@ func (catalog *Catalog) AddOrigin(name string, config map[string]string) (*Origi
 
 	go func() {
 		var (
-			originalName string
+			originalSource string
+			originalMetric string
 		)
 
 		for entry := range origin.inputChan {
-			if _, ok := origin.Sources[entry[0]]; !ok {
-				origin.AppendSource(entry[0])
-			}
-
-			originalName = entry[1]
+			originalSource, originalMetric = entry[0], entry[1]
 
 			for _, filter := range catalog.Config.Origins[name].Filters {
-				if !filter.PatternRegexp.MatchString(entry[1]) {
+				if filter.Target != "source" && filter.Target != "metric" && filter.Target != "" {
+					log.Printf("ERROR: unknown `%s' filter target", filter.Target)
 					continue
 				}
 
-				if filter.Discard {
-					if catalog.debugLevel > 2 {
-						log.Printf("DEBUG: discarding `%s' metric...", entry[1])
+				if (filter.Target == "source" || filter.Target == "") && filter.PatternRegexp.MatchString(entry[0]) {
+					if filter.Discard {
+						goto nextEntry
 					}
-				} else if filter.Rewrite != "" {
+
+					entry[0] = filter.PatternRegexp.ReplaceAllString(entry[0], filter.Rewrite)
+				}
+
+				if (filter.Target == "metric" || filter.Target == "") && filter.PatternRegexp.MatchString(entry[1]) {
+					if filter.Discard {
+						goto nextEntry
+					}
+
 					entry[1] = filter.PatternRegexp.ReplaceAllString(entry[1], filter.Rewrite)
 				}
 			}
 
-			origin.Sources[entry[0]].AppendMetric(entry[1], originalName)
+			if _, ok := origin.Sources[entry[0]]; !ok {
+				origin.AppendSource(entry[0], originalSource)
+			}
+
+			origin.Sources[entry[0]].AppendMetric(entry[1], originalMetric)
+
+		nextEntry:
 		}
 	}()
 

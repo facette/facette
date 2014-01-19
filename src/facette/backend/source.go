@@ -6,9 +6,10 @@ import (
 
 // An Source represents the source of a set of Metric entries (e.g. an host name).
 type Source struct {
-	Name    string
-	Metrics map[string]*Metric
-	origin  *Origin
+	Name         string
+	OriginalName string
+	Metrics      map[string]*Metric
+	origin       *Origin
 }
 
 // AppendMetric adds a new Metric entry into the Source instance.

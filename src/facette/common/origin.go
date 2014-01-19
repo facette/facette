@@ -10,6 +10,7 @@ type OriginFilterConfig struct {
 	Pattern       string         `json:"pattern"`
 	Rewrite       string         `json:"rewrite"`
 	Discard       bool           `json:"discard"`
+	Target        string         `json:"target"`
 	PatternRegexp *regexp.Regexp `json:"-"`
 }
 

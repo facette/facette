@@ -15,7 +15,7 @@ type Origin struct {
 }
 
 // AppendSource adds a new Source entry into the Origin instance.
-func (origin *Origin) AppendSource(name string) *Source {
+func (origin *Origin) AppendSource(name, origName string) *Source {
 	var (
 		source *Source
 	)
@@ -25,7 +25,7 @@ func (origin *Origin) AppendSource(name string) *Source {
 	}
 
 	// Append new source instance into origin
-	source = &Source{Name: name, Metrics: make(map[string]*Metric), origin: origin}
+	source = &Source{Name: name, OriginalName: origName, Metrics: make(map[string]*Metric), origin: origin}
 	origin.Sources[name] = source
 
 	return source

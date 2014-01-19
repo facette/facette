@@ -5,20 +5,20 @@
 		"pattern": "(?P<source>[^/]+)/(?P<metric>.+).rrd"
 	},
 	"filters": [
-		{"pattern": "/", "rewrite": "."},
-		{"pattern": "^cpu-(\\d+)\\.cpu-(.+)\\.value$", "rewrite": "cpu.$1.$2"},
-		{"pattern": "^df-(.+)\\.df_complex-(.+)\\.value", "rewrite": "df.$1.$2"},
-		{"pattern": "^disk-(.+)\\.disk_(.+)", "rewrite": "disk.$1.$2"},
-		{"pattern": "^entropy\\.entropy", "rewrite": "entropy"},
-		{"pattern": "^interface-(.+)\\.if_(.+)\\.(.+)$", "rewrite": "net.$1.$2.$3"},
-		{"pattern": "^irq.irq-(.+)\\.value$", "rewrite": "irq.$1"},
-		{"pattern": "^load\\.load", "rewrite": "load"},
-		{"pattern": "^memory\\.memory-(.+)\\.value$", "rewrite": "memory.$1"},
-		{"pattern": "^processes\\.ps_state-(.+)\\.value$", "rewrite": "proc.state.$1"},
-		{"pattern": "^processes\\.(.+)\\.value$", "rewrite": "proc.$1"},
-		{"pattern": "^swap\\.swap-(.+)\\.value$", "rewrite": "swap.$1"},
-		{"pattern": "^swap\\.swap_io-(.+)\\.value$", "rewrite": "swap.io.$1"},
-		{"pattern": "^users\\.users\\.value", "rewrite": "users.count"}
+		{"pattern": "/", "rewrite": ".", "target": "metric"},
+		{"pattern": "^cpu-(\\d+)\\.cpu-(.+)\\.value$", "rewrite": "cpu.$1.$2", "target": "metric"},
+		{"pattern": "^df-(.+)\\.df_complex-(.+)\\.value", "rewrite": "df.$1.$2", "target": "metric"},
+		{"pattern": "^disk-(.+)\\.disk_(.+)", "rewrite": "disk.$1.$2", "target": "metric"},
+		{"pattern": "^entropy\\.entropy", "rewrite": "entropy", "target": "metric"},
+		{"pattern": "^interface-(.+)\\.if_(.+)\\.(.+)$", "rewrite": "net.$1.$2.$3", "target": "metric"},
+		{"pattern": "^irq.irq-(.+)\\.value$", "rewrite": "irq.$1", "target": "metric"},
+		{"pattern": "^load\\.load", "rewrite": "load", "target": "metric"},
+		{"pattern": "^memory\\.memory-(.+)\\.value$", "rewrite": "memory.$1", "target": "metric"},
+		{"pattern": "^processes\\.ps_state-(.+)\\.value$", "rewrite": "proc.state.$1", "target": "metric"},
+		{"pattern": "^processes\\.(.+)\\.value$", "rewrite": "proc.$1", "target": "metric"},
+		{"pattern": "^swap\\.swap-(.+)\\.value$", "rewrite": "swap.$1", "target": "metric"},
+		{"pattern": "^swap\\.swap_io-(.+)\\.value$", "rewrite": "swap.io.$1", "target": "metric"},
+		{"pattern": "^users\\.users\\.value", "rewrite": "users.count", "target": "metric"}
 	],
 	"templates": {
 		"00-load": {
