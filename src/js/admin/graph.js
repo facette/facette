@@ -1105,7 +1105,7 @@ function adminGraphSetupTerminate() {
             .on('change', '[data-step=3] select', function (e) {
                 var $target = $(e.target);
 
-                if (!e._select)
+                if (e._init || !e._select)
                     return;
 
                 if (e.target.name == 'stack-mode') {
@@ -1187,8 +1187,16 @@ function adminGraphSetupTerminate() {
 
             $pane.find('input[name=graph-name]').val(data.name);
             $pane.find('textarea[name=graph-desc]').val(data.description);
-            $pane.find('select[name=graph-type]').val(data.type);
-            $pane.find('select[name=stack-mode]').val(data.stack_mode);
+
+            $pane.find('select[name=graph-type]').val(data.type).trigger({
+                type: 'change',
+                _init: true
+            });
+
+            $pane.find('select[name=stack-mode]').val(data.stack_mode).trigger({
+                type: 'change',
+                _init: true
+            });
 
             if ($listMetrics.data('counter') === 0)
                 listSay($listMetrics, $.t('metric.mesg_none_defined'));

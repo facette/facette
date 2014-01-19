@@ -14,7 +14,10 @@ function selectHandleChange(e) {
     $select = $target.closest('[data-select]');
 
     // Set current item
-    $select.find('[data-menuitem="' + $target.val() + '"]').trigger('click');
+    $select.find('[data-menuitem="' + $target.val() + '"]').trigger({
+        type: 'click',
+        _init: e._init || false
+    });
 }
 
 function selectHandleClick(e) {
@@ -32,6 +35,7 @@ function selectHandleClick(e) {
             .val($item.data('value'))
             .trigger({
                 type: 'change',
+                _init: e._init || false,
                 _select: true
             });
 
