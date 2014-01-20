@@ -32,6 +32,10 @@ func FilterMatch(pattern, value string) bool {
 	)
 
 	if strings.HasPrefix(pattern, "glob:") {
+		// Remove slashes from pattern and value as `path.Match' does not handle them
+		pattern = strings.Replace(pattern, "/", "\x30", -1)
+		value = strings.Replace(value, "/", "\x30", -1)
+
 		ok, _ := path.Match(pattern[5:], value)
 		return ok
 	} else if strings.HasPrefix(pattern, "regexp:") {
