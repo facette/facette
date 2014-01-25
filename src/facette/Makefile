@@ -50,17 +50,19 @@ build: $(BIN_FILES)
 test: build
 	@$(call mesg_start,Starting facette server...)
 	@install -m 0755 -d $(BUILD_DIR)/tests && (cd $(BUILD_DIR)/tests && \
-		$(PREFIX)/bin/facette -c ../../tests/facette.json >/dev/null & echo "$$!" >$(BUILD_DIR)/facette.pid) && \
+		$(PREFIX)/bin/facette -c ../../tests/facette.json >/dev/null &) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
-	@cd $(BUILD_DIR)/tests && for ENTRY in $(PKG_TESTS); do \
+	@cd $(BUILD_DIR)/tests && set -e && for ENTRY in $(PKG_TESTS); do \
 		$(call mesg_start,Running $$ENTRY tests...); \
 		$(GO) test -c -i $$ENTRY && ./`basename $$ENTRY`.test -test.v -c ../../tests/facette.json && \
-			$(call mesg_ok) || $(call mesg_fail); \
+			$(call mesg_ok) || ( kill `cat $(BUILD_DIR)/tests/facette.pid` && rm -f $(BUILD_DIR)/tests/facette.pid && \
+			$(call mesg_fail) ); \
 		done
 
 	@$(call mesg_start,Stopping facette server...)
-	@kill `cat $(BUILD_DIR)/facette.pid` && rm -f $(BUILD_DIR)/facette.pid && $(call mesg_ok) || $(call mesg_fail)
+	@kill `cat $(BUILD_DIR)/tests/facette.pid` && rm -f $(BUILD_DIR)/tests/facette.pid && \
+		$(call mesg_ok) || $(call mesg_fail)
 
 install: build
 

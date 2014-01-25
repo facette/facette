@@ -4,8 +4,8 @@
 	"data_dir": "data",
 	"pid_file": "facette.pid",
 	"origin_dir": "../../tests/origins",
-	"server_log": "facette.log",
 	"access_log": "access.log",
+	"server_log": "facette.log",
 	"auth": {
 		"type": "basic",
 		"path": "../../tests/auth.json"
