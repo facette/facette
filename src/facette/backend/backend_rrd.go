@@ -198,16 +198,49 @@ func (handler *RRDBackendHandler) rrdGetData(query *GroupQuery, startTime, endTi
 
 			count += 1
 
-			graph.Def(serieTemp, handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].FilePath,
-				handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].Dataset, "AVERAGE")
+			graph.Def(
+				serieTemp+"-orig0",
+				handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].FilePath,
+				handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].Dataset,
+				"AVERAGE",
+			)
+
+			if serie.Scale != 0 {
+				graph.CDef(serieTemp+"-orig1", fmt.Sprintf("%s-orig0,%f,*", serieTemp, serie.Scale))
+			} else {
+				graph.CDef(serieTemp+"-orig1", serieTemp+"-orig0")
+			}
+
+			if query.Scale != 0 {
+				graph.CDef(serieTemp, fmt.Sprintf("%s-orig1,%f,*", serieTemp, query.Scale))
+			} else {
+				graph.CDef(serieTemp, serieTemp+"-orig1")
+			}
 
 			// Set graph information request
 			rrdSetGraph(graph, serieTemp, serieName, percentiles)
 
 			// Set plots request
 			if !infoOnly {
-				xport.Def(serieTemp, handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].FilePath,
-					handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].Dataset, "AVERAGE")
+				xport.Def(
+					serieTemp+"-orig0",
+					handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].FilePath,
+					handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].Dataset,
+					"AVERAGE",
+				)
+
+				if serie.Scale != 0 {
+					xport.CDef(serieTemp+"-orig1", fmt.Sprintf("%s-orig0,%f,*", serieTemp, serie.Scale))
+				} else {
+					xport.CDef(serieTemp+"-orig1", serieTemp+"-orig0")
+				}
+
+				if query.Scale != 0 {
+					xport.CDef(serieTemp, fmt.Sprintf("%s-orig1,%f,*", serieTemp, query.Scale))
+				} else {
+					xport.CDef(serieTemp, serieTemp+"-orig1")
+				}
+
 				xport.XportDef(serieTemp, serieTemp)
 			}
 
@@ -228,12 +261,20 @@ func (handler *RRDBackendHandler) rrdGetData(query *GroupQuery, startTime, endTi
 
 			serieTemp = serieName + fmt.Sprintf("-tmp%d", index)
 
-			graph.Def(serieTemp, handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].FilePath,
-				handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].Dataset, "AVERAGE")
+			graph.Def(
+				serieTemp,
+				handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].FilePath,
+				handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].Dataset,
+				"AVERAGE",
+			)
 
 			if !infoOnly {
-				xport.Def(serieTemp, handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].FilePath,
-					handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].Dataset, "AVERAGE")
+				xport.Def(
+					serieTemp,
+					handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].FilePath,
+					handler.metrics[serie.Metric.source.Name][serie.Metric.OriginalName].Dataset,
+					"AVERAGE",
+				)
 			}
 
 			if len(stack) == 0 {
@@ -247,14 +288,27 @@ func (handler *RRDBackendHandler) rrdGetData(query *GroupQuery, startTime, endTi
 			stack = append(stack, strconv.Itoa(len(query.Series)), "/")
 		}
 
-		graph.CDef(serieName, strings.Join(stack, ","))
+		graph.CDef(serieName+"-orig", strings.Join(stack, ","))
+
+		if query.Scale != 0 {
+			graph.CDef(serieName, fmt.Sprintf("%s-orig,%f,*", serieName, query.Scale))
+		} else {
+			graph.CDef(serieName, serieName+"-orig")
+		}
 
 		// Set graph information request
 		rrdSetGraph(graph, serieName, query.Name, percentiles)
 
 		// Set plots request
 		if !infoOnly {
-			xport.CDef(serieName, strings.Join(stack, ","))
+			xport.CDef(serieName+"-orig", strings.Join(stack, ","))
+
+			if query.Scale != 0 {
+				xport.CDef(serieName, fmt.Sprintf("%s-orig,%f,*", serieName, query.Scale))
+			} else {
+				xport.CDef(serieName, serieName+"-orig")
+			}
+
 			xport.XportDef(serieName, serieName)
 		}
 

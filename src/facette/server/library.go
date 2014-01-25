@@ -1014,7 +1014,12 @@ func (server *Server) plotPrepareQuery(plotReq *plotRequest,
 		serieSources  []string
 	)
 
-	query = &backend.GroupQuery{Name: groupItem.Name, Type: groupItem.Type}
+	query = &backend.GroupQuery{
+		Name:  groupItem.Name,
+		Type:  groupItem.Type,
+		Scale: groupItem.Scale,
+	}
+
 	originBackend = nil
 
 	for _, serieItem := range groupItem.Series {
@@ -1046,6 +1051,7 @@ func (server *Server) plotPrepareQuery(plotReq *plotRequest,
 							serieSource,
 							serieChunk,
 						),
+						Scale: serieItem.Scale,
 					})
 				}
 			} else {
@@ -1056,6 +1062,7 @@ func (server *Server) plotPrepareQuery(plotReq *plotRequest,
 						serieSource,
 						serieItem.Metric,
 					),
+					Scale: serieItem.Scale,
 				})
 			}
 		}

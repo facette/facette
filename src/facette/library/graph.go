@@ -25,10 +25,11 @@ const (
 
 // Serie represents a instance of a Graph serie.
 type Serie struct {
-	Name   string `json:"name"`
-	Origin string `json:"origin"`
-	Source string `json:"source"`
-	Metric string `json:"metric"`
+	Name   string  `json:"name"`
+	Origin string  `json:"origin"`
+	Source string  `json:"source"`
+	Metric string  `json:"metric"`
+	Scale  float64 `json:"scale"`
 }
 
 // OperGroup represents a subset of Stack entry.
@@ -36,6 +37,7 @@ type OperGroup struct {
 	Name    string                 `json:"name"`
 	Type    int                    `json:"type"`
 	Series  []*Serie               `json:"series"`
+	Scale   float64                `json:"scale"`
 	Options map[string]interface{} `json:"options"`
 }
 

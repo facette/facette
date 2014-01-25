@@ -23,6 +23,7 @@ var (
 type SerieQuery struct {
 	Name   string
 	Metric *Metric
+	Scale  float64
 }
 
 // GroupQuery represents a plot group query.
@@ -30,6 +31,7 @@ type GroupQuery struct {
 	Name   string
 	Type   int
 	Series []*SerieQuery
+	Scale  float64
 }
 
 // PlotResult represents a plot request result.
