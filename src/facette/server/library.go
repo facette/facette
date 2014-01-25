@@ -116,7 +116,7 @@ type serieResponse struct {
 	Name    string                      `json:"name"`
 	Plots   []common.PlotValue          `json:"plots"`
 	Info    map[string]common.PlotValue `json:"info"`
-	Options map[string]string           `json:"options"`
+	Options map[string]interface{}      `json:"options"`
 }
 
 type stackResponse struct {
@@ -844,7 +844,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 		data          []map[string]*backend.PlotResult
 		endTime       time.Time
 		err           error
-		groupOptions  map[string]map[string]string
+		groupOptions  map[string]map[string]interface{}
 		item          interface{}
 		originBackend backend.BackendHandler
 		plotMax       int
@@ -936,7 +936,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 	step = endTime.Sub(startTime) / time.Duration(plotReq.Sample)
 
 	// Get plots data
-	groupOptions = make(map[string]map[string]string)
+	groupOptions = make(map[string]map[string]interface{})
 
 	for _, stackItem := range graph.Stacks {
 		for _, groupItem := range stackItem.Groups {
