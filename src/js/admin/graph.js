@@ -1126,7 +1126,10 @@ function adminGraphSetupTerminate() {
                             location.substr(location.lastIndexOf('/') + 1)));
                     });
             })
-            .on('change', '[data-step=3] :input', function () {
+            .on('change', '[data-step=3] :input', function (e) {
+                if (e._init || !e._select)
+                    return;
+
                 PANE_UNLOAD_LOCK = true;
             })
             .on('keydown', '[data-step=1] fieldset input', function (e) {
