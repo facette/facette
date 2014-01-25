@@ -164,6 +164,9 @@ function adminGraphCreateGroup(name, value) {
             .removeClass('auto')
             .css('color', value.options.color);
 
+    if (value.scale !== 0)
+        $item.find('a[href=#set-scale]').text(value.scale.toPrecision(3));
+
     return $item;
 }
 
@@ -244,6 +247,9 @@ function adminGraphCreateProxy(type, item, list) {
         $item.find('.color')
             .removeClass('auto')
             .css('color', value.options.color);
+
+    if (value.scale !== 0)
+        $item.find('a[href=#set-scale]').text(value.scale.toPrecision(3));
 
     return $item;
 }
@@ -685,6 +691,9 @@ function adminGraphSetupTerminate() {
                         .removeClass('auto')
                         .css('color', expands[serieName].options.color);
 
+                if (expands[serieName].scale !== 0)
+                    $item.find('a[href=#set-scale]').text(expands[serieName].scale);
+
                 $item.find('.count').remove();
                 $item.find('a[href$=#expand-serie]').remove();
 
@@ -928,6 +937,53 @@ function adminGraphSetupTerminate() {
             $overlay.find('input[name=value]')
                 .attr('type', 'color')
                 .val(!$color.hasClass('auto') ? rgbToHex($color.css('color')) : '#ffffff');
+        });
+
+        linkRegister('set-scale', function (e) {
+            var $target = $(e.target),
+                $item = $target.closest('[data-serie], [data-group]'),
+                $scale = $item.find('a[href=#set-scale]'),
+                value = adminGraphGetValue($item);
+
+            $.ajax({
+                    url: urlPrefix + '/resources',
+                    type: 'GET'
+                }).pipe(function (data) {
+                    var $input,
+                        $overlay;
+
+                    $overlay = overlayCreate('select', {
+                        message: $.t('graph.labl_scale'),
+                        value: value.scale,
+                        callbacks: {
+                            validate: function (data) {
+                                data = parseFloat(data);
+                                value.scale = data;
+                                $scale.text(data ? data.toPrecision(3) : '');
+                            }
+                        },
+                        labels: {
+                            validate: {
+                                text: $.t('graph.labl_scale_set')
+                            }
+                        },
+                        reset: 0,
+                        options: data.scales
+                    });
+
+                    $input = $overlay.find('input[name=value]');
+
+                    $overlay.find('select')
+                        .on('change', function (e) {
+                            if (e.target.value)
+                                $input.val(e.target.value);
+                        })
+                        .val(value.scale)
+                        .trigger({
+                            type: 'change',
+                            _init: true
+                        });
+                });
         });
 
         // Attach events

@@ -7,7 +7,8 @@ var OVERLAY_TEMPLATES = {},
 
 function overlayCreate(type, args) {
     var $input,
-        $item;
+        $item,
+        $select;
 
     if (!OVERLAY_TEMPLATES[type]) {
         console.error("Unable find `" + type + "' overlay");
@@ -28,7 +29,7 @@ function overlayCreate(type, args) {
             args  = $item.data('args');
 
             if (args && args.callbacks) {
-                if (type == 'prompt') {
+                if (type == 'prompt' || type == 'select') {
                     if (e.target.name == 'reset') {
                         value = args.reset;
                         e.target.name = 'validate';
@@ -65,7 +66,20 @@ function overlayCreate(type, args) {
             });
         }
 
-        if (type == 'prompt') {
+        if (type == 'prompt' || type == 'select') {
+            if (type == 'select') {
+                $select = $item.find('[data-select]');
+
+                if (args.options)
+                    $.each(args.options, function (i, value) { /*jshint unused: true */
+                        $(document.createElement('option')).appendTo($select)
+                            .attr('value', value[1])
+                            .text(value[0]);
+                    });
+
+                selectInit($select.get(0));
+            }
+
             $input = $item.find('input[type=text]:first');
 
             if (args.value)
