@@ -790,7 +790,7 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 	// Test group expansion
 	data, _ = json.Marshal(expandData)
 
-	response = execTestRequest(test, "POST", fmt.Sprintf("http://%s%s/expand", serverConfig.BindAddr, URLCatalogPath),
+	response = execTestRequest(test, "POST", fmt.Sprintf("http://%s%s/expand", serverConfig.BindAddr, URLLibraryPath),
 		strings.NewReader(string(data)), false, &expandResult)
 
 	if response.StatusCode != http.StatusOK {
