@@ -101,17 +101,6 @@ func (response collectionListResponse) Swap(i, j int) {
 	response.Items[i], response.Items[j] = response.Items[j], response.Items[i]
 }
 
-type statResponse struct {
-	Origins        int    `json:"origins"`
-	Sources        int    `json:"sources"`
-	Metrics        int    `json:"metrics"`
-	CatalogUpdated string `json:"catalog_updated"`
-
-	Graphs      int `json:"graphs"`
-	Collections int `json:"collections"`
-	Groups      int `json:"groups"`
-}
-
 type serieResponse struct {
 	Name    string                      `json:"name"`
 	Plots   []common.PlotValue          `json:"plots"`

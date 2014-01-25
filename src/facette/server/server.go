@@ -264,7 +264,7 @@ func (server *Server) Run() error {
 	router.HandleFunc(URLBrowsePath+"/search", server.browseHandle)
 
 	router.HandleFunc("/reload", server.reloadHandle)
-
+	router.HandleFunc("/resources", server.resourceHandle)
 	router.HandleFunc("/stats", server.statHandle)
 
 	router.HandleFunc("/", server.browseHandle)

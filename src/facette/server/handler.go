@@ -10,6 +10,21 @@ import (
 	"time"
 )
 
+type resourceResponse struct {
+	Scales [][2]interface{} `json:"scales"`
+}
+
+type statResponse struct {
+	Origins        int    `json:"origins"`
+	Sources        int    `json:"sources"`
+	Metrics        int    `json:"metrics"`
+	CatalogUpdated string `json:"catalog_updated"`
+
+	Graphs      int `json:"graphs"`
+	Collections int `json:"collections"`
+	Groups      int `json:"groups"`
+}
+
 func (server *Server) reloadHandle(writer http.ResponseWriter, request *http.Request) {
 	if request.Method != "GET" && request.Method != "HEAD" {
 		server.handleResponse(writer, http.StatusMethodNotAllowed)
@@ -21,6 +36,18 @@ func (server *Server) reloadHandle(writer http.ResponseWriter, request *http.Req
 	server.Reload()
 
 	server.handleJSON(writer, statusResponse{"OK"})
+}
+
+func (server *Server) resourceHandle(writer http.ResponseWriter, request *http.Request) {
+	var (
+		result *resourceResponse
+	)
+
+	result = &resourceResponse{
+		Scales: server.Config.Scales,
+	}
+
+	server.handleJSON(writer, result)
 }
 
 func (server *Server) statHandle(writer http.ResponseWriter, request *http.Request) {
