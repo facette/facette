@@ -7,7 +7,7 @@
 	"access_log": "/var/log/facette/access.log",
 	"server_log": "/var/log/facette/server.log",
 	"auth": {
-		"type": "basic",
+		"type": "simple",
 		"path": "/etc/facette/auth.json"
 	},
 	"scales": [

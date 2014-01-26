@@ -7,7 +7,7 @@
 	"access_log": "access.log",
 	"server_log": "facette.log",
 	"auth": {
-		"type": "basic",
+		"type": "simple",
 		"path": "../../tests/auth.json"
 	}
 }

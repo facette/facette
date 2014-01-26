@@ -9,15 +9,15 @@ import (
 	"log"
 )
 
-// AuthBasicHandler represents the main basic authentication method structure.
-type AuthBasicHandler struct {
+// AuthSimpleHandler represents the main simple authentication method structure.
+type AuthSimpleHandler struct {
 	Config     map[string]string
 	Users      map[string]string
 	debugLevel int
 }
 
 // Authenticate tries to match user login name with its password.
-func (handler *AuthBasicHandler) Authenticate(login, password string) bool {
+func (handler *AuthSimpleHandler) Authenticate(login, password string) bool {
 	if _, ok := handler.Users[login]; !ok {
 		return false
 	}
@@ -26,7 +26,7 @@ func (handler *AuthBasicHandler) Authenticate(login, password string) bool {
 }
 
 // Hash generates the password hash.
-func (handler *AuthBasicHandler) Hash(password string) string {
+func (handler *AuthSimpleHandler) Hash(password string) string {
 	var (
 		hash hash.Hash
 	)
@@ -39,7 +39,7 @@ func (handler *AuthBasicHandler) Hash(password string) string {
 }
 
 // Update updates the authentication base content.
-func (handler *AuthBasicHandler) Update() error {
+func (handler *AuthSimpleHandler) Update() error {
 	var (
 		err error
 	)
@@ -60,7 +60,7 @@ func (handler *AuthBasicHandler) Update() error {
 }
 
 func init() {
-	AuthHandlers["basic"] = func(config map[string]string, debugLevel int) AuthHandler {
-		return &AuthBasicHandler{Config: config, debugLevel: debugLevel}
+	AuthHandlers["simple"] = func(config map[string]string, debugLevel int) AuthHandler {
+		return &AuthSimpleHandler{Config: config, debugLevel: debugLevel}
 	}
 }

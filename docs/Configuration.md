@@ -44,7 +44,7 @@ Example:
 ### Authentication Configuration
 
 An authentication is required to alter Facette configuration (e.g. graphs creation, resources reload, Read-Write API
-access). It uses HTTP Basic authentication as described in the 11.1 section of the [RFC 1945][1] document.
+access). It uses HTTP Basic authentication as described in the 11.1 section of the [RFC 1945][2] document.
 
 Authentication configuration handling is still pretty basic and will need some additional work and refine in the future.
 Currently it only stores login and password pairs in a single file.
