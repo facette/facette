@@ -36,6 +36,10 @@ const (
 	ServerStopWait int = 5
 )
 
+type statusResponse struct {
+	Message string `json:"message"`
+}
+
 // Server is the main service handler of Facette.
 type Server struct {
 	Config      *common.Config
