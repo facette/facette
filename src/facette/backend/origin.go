@@ -37,7 +37,6 @@ func (origin *Origin) Update() error {
 		log.Printf("DEBUG: updating origin `%s'...\n", origin.Name)
 	}
 
-	// Empty sources map
 	origin.Sources = make(map[string]*Source)
 
 	if origin.Backend == nil {

@@ -196,13 +196,6 @@ func (server *Server) Run() error {
 
 	go server.AuthHandler.Update()
 
-	// Get origins from configuration
-	for originName, origin := range server.Config.Origins {
-		if _, err = server.Catalog.AddOrigin(originName, origin.Backend); err != nil {
-			log.Printf("ERROR: %s\n", err.Error())
-		}
-	}
-
 	log.Printf("INFO: server about to listen on %s", server.Config.BindAddr)
 
 	// Initialize instance

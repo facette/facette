@@ -115,6 +115,15 @@ func (catalog *Catalog) Update() error {
 
 	log.Println("INFO: catalog update started")
 
+	// Get origins from configuration
+	catalog.Origins = make(map[string]*Origin)
+
+	for originName, origin := range catalog.Config.Origins {
+		if _, err = catalog.AddOrigin(originName, origin.Backend); err != nil {
+			log.Printf("ERROR: %s\n", err.Error())
+		}
+	}
+
 	// Update catalog origins
 	for _, origin := range catalog.Origins {
 		if err = origin.Update(); err != nil {
