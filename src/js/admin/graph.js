@@ -164,7 +164,7 @@ function adminGraphCreateGroup(name, value) {
             .removeClass('auto')
             .css('color', value.options.color);
 
-    if (value.scale !== 0)
+    if (value.scale)
         $item.find('a[href=#set-scale]').text(value.scale.toPrecision(3));
 
     return $item;
@@ -248,7 +248,7 @@ function adminGraphCreateProxy(type, item, list) {
             .removeClass('auto')
             .css('color', value.options.color);
 
-    if (value.scale !== 0)
+    if (value.scale)
         $item.find('a[href=#set-scale]').text(value.scale.toPrecision(3));
 
     return $item;
