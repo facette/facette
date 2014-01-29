@@ -1019,8 +1019,10 @@ function adminGraphSetupTerminate() {
                     $entry = adminGraphCreateSerie(name, {
                         name: name,
                         origin: $origin.val(),
-                        source: ($source.data('value').source.endsWith('groups') ? 'group:' : '') + $source.val(),
-                        metric: ($metric.data('value').source.endsWith('groups') ? 'group:' : '') + $metric.val()
+                        source: ($source.data('value') && $source.data('value').source.endsWith('groups') ?
+                            'group:' : '') + $source.val(),
+                        metric: ($metric.data('value') && $metric.data('value').source.endsWith('groups') ?
+                            'group:' : '') + $metric.val()
                     });
 
                     if ($entryActive)
