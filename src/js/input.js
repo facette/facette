@@ -52,9 +52,11 @@ function inputHandleClick(e) {
 }
 
 function inputHandleFocus(e) {
+    var name = $(e.target).closest('[data-input]').attr('data-input');
+
     // Trigger change if value modified
     if (e.target.value != e.target._lastValue) {
-        menuMatch($(e.target).closest('[data-input]').attr('data-input')).trigger({
+        menuMatch(name).trigger({
             type: 'keydown',
             which: EVENT_KEY_ENTER
         });
