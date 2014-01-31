@@ -295,7 +295,7 @@ func (server *Server) Run() error {
 				break
 			}
 
-			time.Sleep(1 * time.Second)
+			time.Sleep(time.Second)
 		}
 
 		clientCount = server.Listener.ConnCount.Get()
