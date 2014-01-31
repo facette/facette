@@ -904,10 +904,15 @@ function adminGraphSetupTerminate() {
 
                         PANE_UNLOAD_LOCK = true;
 
+                        value = adminGraphGetValue($item);
+
                         if (!data) {
                             $color
                                 .addClass('auto')
                                 .removeAttr('style');
+
+                            if (value.options)
+                                delete value.options.color;
 
                             return;
                         }
@@ -915,8 +920,6 @@ function adminGraphSetupTerminate() {
                         $color
                             .removeClass('auto')
                             .css('color', data);
-
-                        value = adminGraphGetValue($item);
 
                         value.options = $.extend(value.options || {}, {
                             color: data
