@@ -21,7 +21,9 @@
 			</header>
 
 			<section>
-				{{ if eq .Status 404 }}
+				{{ if eq .Status 401 }}
+				<h1>Authorization Required</h1>
+				<p>An authorization is required for accessing this resource.</p>{{ else if eq .Status 404 }}
 				<h1>Not Found</h1>
 				<p>The requested page was not found or no longer exists.</p>{{ else if eq .Status 500 }}
 				<h1>Internal Server Error</h1>

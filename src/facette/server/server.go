@@ -82,12 +82,7 @@ func (server *Server) handleError(writer http.ResponseWriter, status int) {
 
 	if err != nil {
 		log.Println("ERROR: " + err.Error())
-
-		if os.IsNotExist(err) {
-			server.handleResponse(writer, http.StatusNotFound)
-		} else {
-			server.handleResponse(writer, http.StatusInternalServerError)
-		}
+		server.handleResponse(writer, status)
 	}
 
 	// Handle HTTP response with status code

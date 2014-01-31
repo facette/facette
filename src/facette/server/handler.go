@@ -30,6 +30,7 @@ func (server *Server) reloadHandle(writer http.ResponseWriter, request *http.Req
 		server.handleResponse(writer, http.StatusMethodNotAllowed)
 		return
 	} else if !server.handleAuth(writer, request) {
+		server.handleResponse(writer, http.StatusUnauthorized)
 		return
 	}
 

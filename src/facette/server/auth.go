@@ -27,7 +27,6 @@ func (server *Server) handleAuth(writer http.ResponseWriter, request *http.Reque
 	}
 
 	writer.Header().Add("WWW-Authenticate", "Basic realm=\"Authorization Required\"")
-	server.handleResponse(writer, http.StatusUnauthorized)
 
 	return false
 }

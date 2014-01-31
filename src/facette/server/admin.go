@@ -31,6 +31,7 @@ func (server *Server) adminHandle(writer http.ResponseWriter, request *http.Requ
 	)
 
 	if !server.handleAuth(writer, request) {
+		server.handleError(writer, http.StatusUnauthorized)
 		return
 	}
 

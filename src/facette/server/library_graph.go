@@ -30,6 +30,7 @@ func (server *Server) graphHandle(writer http.ResponseWriter, request *http.Requ
 			server.handleResponse(writer, http.StatusMethodNotAllowed)
 			return
 		} else if !server.handleAuth(writer, request) {
+			server.handleResponse(writer, http.StatusUnauthorized)
 			return
 		}
 
@@ -77,6 +78,7 @@ func (server *Server) graphHandle(writer http.ResponseWriter, request *http.Requ
 			server.handleResponse(writer, http.StatusUnsupportedMediaType)
 			return
 		} else if !server.handleAuth(writer, request) {
+			server.handleResponse(writer, http.StatusUnauthorized)
 			return
 		}
 
