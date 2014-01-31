@@ -524,7 +524,7 @@ function graphHandleMouse(e) {
     }
 
     // Handle steps display
-    margin = ($graph.outerWidth(true) - $graph.innerWidth()) * 3;
+    margin = $graph.innerWidth() / 8;
     offset = $graph.offset();
 
     if ($target.closest('.actions').length === 0) {
