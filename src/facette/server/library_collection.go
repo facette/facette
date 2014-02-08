@@ -175,6 +175,11 @@ func (server *Server) collectionHandle(writer http.ResponseWriter, request *http
 			}
 		}
 
+		// Keep current children list
+		if item, _ = server.Library.GetItem(collectionTemp.Collection.ID, library.LibraryItemCollection); item != nil {
+			collectionTemp.Collection.Children = item.(*library.Collection).Children
+		}
+
 		// Store collection data
 		err = server.Library.StoreItem(collectionTemp.Collection, library.LibraryItemCollection)
 		if err == os.ErrInvalid {
