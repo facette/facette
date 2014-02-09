@@ -1,2 +1,3 @@
 build
-pkg
+thirdparty/checkouts
+tmp

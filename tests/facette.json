@@ -1,13 +1,13 @@
 {
 	"bind": ":7778",
-	"base_dir": "../facette",
-	"data_dir": "data",
-	"pid_file": "facette.pid",
-	"origin_dir": "../../tests/origins",
-	"access_log": "access.log",
-	"server_log": "facette.log",
+	"base_dir": "tmp",
+	"data_dir": "tmp/tests/data",
+	"pid_file": "tmp/tests/facette.pid",
+	"origin_dir": "tests/origins",
+	"access_log": "tmp/tests/access.log",
+	"server_log": "tmp/tests/facette.log",
 	"auth": {
 		"type": "simple",
-		"path": "../../tests/auth.json"
+		"path": "tests/auth.json"
 	}
 }
