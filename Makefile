@@ -131,9 +131,20 @@ SCRIPT_SRC = cmd/facette/js/intro.js \
 
 SCRIPT_OUTPUT = $(TEMP_DIR)/static/facette.js
 
+SCRIPT_EXTRA = cmd/facette/js/thirdparty/jquery.js \
+	cmd/facette/js/thirdparty/jquery.datepicker.js \
+	cmd/facette/js/thirdparty/highcharts.js \
+	cmd/facette/js/thirdparty/highcharts.exporting.js \
+	cmd/facette/js/thirdparty/i18next.js \
+	cmd/facette/js/thirdparty/moment.js \
+	cmd/facette/js/thirdparty/canvg.js \
+	cmd/facette/js/thirdparty/rgbcolor.js
+
+SCRIPT_EXTRA_OUTPUT = $(addprefix $(TEMP_DIR)/static/, $(notdir $(SCRIPT_EXTRA)))
+
 MESG_SRC = cmd/facette/js/messages.json
 
-MESG_OUTPUT = $(TEMP_DIR)/static/$(MESG_SRC)
+MESG_OUTPUT = $(TEMP_DIR)/static/$(notdir $(MESG_SRC))
 
 STYLE_SRC = cmd/facette/style/intro.less \
 	cmd/facette/style/define.less \
@@ -157,6 +168,13 @@ STYLE_PRINT_SRC = cmd/facette/style/intro.less \
 
 STYLE_PRINT_OUTPUT = $(TEMP_DIR)/static/style.print.css
 
+STYLE_EXTRA = cmd/facette/style/extra/favicon.png \
+	cmd/facette/style/extra/fonts \
+	cmd/facette/style/extra/loader.gif \
+	cmd/facette/style/extra/logo.png
+
+STYLE_EXTRA_OUTPUT = $(addprefix $(TEMP_DIR)/static/, $(notdir $(STYLE_EXTRA)))
+
 HTML_SRC = cmd/facette/html/common \
 	cmd/facette/html/admin \
 	cmd/facette/html/browse \
@@ -172,6 +190,11 @@ $(SCRIPT_OUTPUT): $(SCRIPT_SRC)
 		$(call mesg_ok) || $(call mesg_fail)
 	@$(call mesg_start,static,Packing $(notdir $(SCRIPT_OUTPUT:.js=.src.js)) file...)
 	@$(UGLIFYJS) $(UGLIFYSCRIPT_ARGS) --output $(SCRIPT_OUTPUT) $(SCRIPT_OUTPUT:.js=.src.js) && \
+		$(call mesg_ok) || $(call mesg_fail)
+
+$(SCRIPT_EXTRA_OUTPUT): $(SCRIPT_EXTRA)
+	@$(call mesg_start,static,Copying third-party files...)
+	@cp -r $(SCRIPT_EXTRA) $(TEMP_DIR)/static/ && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 $(MESG_OUTPUT): $(MESG_SRC)
@@ -196,16 +219,26 @@ $(STYLE_PRINT_OUTPUT): $(STYLE_PRINT_SRC)
 	@$(LESSC) $(LESSC_ARGS) --yui-compress $(STYLE_PRINT_OUTPUT:.css=.src.css) >$(STYLE_PRINT_OUTPUT) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
+$(STYLE_EXTRA_OUTPUT): $(STYLE_EXTRA)
+	@$(call mesg_start,static,Copying extra files...)
+	@cp -r $(STYLE_EXTRA) $(TEMP_DIR)/static/ && \
+		$(call mesg_ok) || $(call mesg_fail)
+
 $(HTML_OUTPUT): $(HTML_SRC)
 	@$(call mesg_start,static,Copying HTML files...)
 	@install -d -m 0755 $(HTML_OUTPUT) && cp -r $(HTML_SRC) $(HTML_OUTPUT)/ && \
 		$(call mesg_ok) || $(call mesg_fail)
 
-build-static: $(SCRIPT_OUTPUT) $(MESG_FILE) $(STYLE_OUTPUT) $(STYLE_PRINT_OUTPUT) $(HTML_OUTPUT)
+build-static: $(SCRIPT_OUTPUT) $(SCRIPT_EXTRA_OUTPUT) $(MESG_OUTPUT) $(STYLE_OUTPUT) $(STYLE_PRINT_OUTPUT) \
+	$(STYLE_EXTRA_OUTPUT) $(HTML_OUTPUT)
 
 install-static: build-static
 	@$(call mesg_start,install,Installing static files...)
-	@install -d -m 0755 $(PREFIX)/share && cp -Rp $(SCRIPT_OUTPUT) $(STYLE_OUTPUT) $(HTML_OUTPUT) $(PREFIX)/share && \
+	@install -d -m 0755 $(PREFIX)/share/static && cp -Rp $(SCRIPT_OUTPUT) $(SCRIPT_EXTRA_OUTPUT) $(MESG_OUTPUT) \
+		$(STYLE_OUTPUT) $(STYLE_PRINT_OUTPUT) $(STYLE_EXTRA_OUTPUT) $(PREFIX)/share/static && \
+		$(call mesg_ok) || $(call mesg_fail)
+	@$(call mesg_start,install,Installing HTML files...)
+	@cp -Rp $(HTML_OUTPUT) $(PREFIX)/share && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 lint-static: $(SCRIPT_OUTPUT)
