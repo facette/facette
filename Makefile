@@ -249,7 +249,7 @@ lint-static: $(SCRIPT_OUTPUT)
 # Test
 PKG_SRC = $(wildcard pkg/*)
 
-test-pkg:
+test-pkg: $(TEMP_DIR)/src/github.com/facette/facette
 	@install -d -m 0755 $(TEMP_DIR)/tests && (cd $(TEMP_DIR)/tests; for ENTRY in $(PKG_SRC); do \
 		$(call mesg_start,test,Testing $$ENTRY package...); \
 		$(GO) test -c -i ../../$$ENTRY && \
