@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/facette/facette/pkg/common"
+	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/utils"
 )
 
@@ -31,7 +31,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&flagConfig, "c", common.DefaultConfigFile, "configuration file path")
+	flag.StringVar(&flagConfig, "c", config.DefaultConfigFile, "configuration file path")
 	flag.IntVar(&flagDebug, "d", 0, "debugging level")
 	flag.BoolVar(&flagHelp, "h", false, "display this help and exit")
 	flag.Usage = func() { utils.PrintUsage(os.Stderr, cmdUsage) }
@@ -47,13 +47,13 @@ func init() {
 
 func main() {
 	var (
-		config  *common.Config
+		cfg     *config.Config
 		err     error
-		handler func(*common.Config, []string) error
+		handler func(*config.Config, []string) error
 	)
 
-	config = &common.Config{}
-	if err = config.Load(flagConfig); err != nil {
+	cfg = &config.Config{}
+	if err = cfg.Load(flagConfig); err != nil {
 		fmt.Println("Error: " + err.Error())
 		os.Exit(1)
 	}
@@ -72,7 +72,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = handler(config, flag.Args())
+	err = handler(cfg, flag.Args())
 
 	switch err {
 	case nil:

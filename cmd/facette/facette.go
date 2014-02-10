@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"syscall"
 
-	"github.com/facette/facette/pkg/common"
+	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/server"
 	"github.com/facette/facette/pkg/utils"
 )
@@ -24,7 +24,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&flagConfig, "c", common.DefaultConfigFile, "configuration file path")
+	flag.StringVar(&flagConfig, "c", config.DefaultConfigFile, "configuration file path")
 	flag.IntVar(&flagDebug, "d", 0, "debugging level")
 	flag.BoolVar(&flagHelp, "h", false, "display this help and exit")
 	flag.Usage = func() { utils.PrintUsage(os.Stderr, cmdUsage) }

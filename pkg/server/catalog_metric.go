@@ -8,17 +8,11 @@ import (
 	"time"
 
 	"github.com/facette/facette/pkg/library"
+	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 	"github.com/facette/facette/thirdparty/github.com/gorilla/mux"
 )
-
-type metricShowResponse struct {
-	Name    string   `json:"name"`
-	Origins []string `json:"origins"`
-	Sources []string `json:"sources"`
-	Updated string   `json:"updated"`
-}
 
 func (server *Server) metricList(writer http.ResponseWriter, request *http.Request) {
 	var (
@@ -113,7 +107,7 @@ func (server *Server) metricShow(writer http.ResponseWriter, request *http.Reque
 		found      bool
 		metricName string
 		originSet  *set.Set
-		response   metricShowResponse
+		response   types.MetricResponse
 		sourceSet  *set.Set
 	)
 
@@ -143,7 +137,7 @@ func (server *Server) metricShow(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	response = metricShowResponse{
+	response = types.MetricResponse{
 		Name:    metricName,
 		Origins: originSet.StringSlice(),
 		Sources: sourceSet.StringSlice(),

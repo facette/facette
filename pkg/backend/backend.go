@@ -3,7 +3,7 @@ package backend
 import (
 	"time"
 
-	"github.com/facette/facette/pkg/common"
+	"github.com/facette/facette/pkg/types"
 )
 
 const (
@@ -37,8 +37,8 @@ type GroupQuery struct {
 
 // PlotResult represents a plot request result.
 type PlotResult struct {
-	Plots []common.PlotValue
-	Info  map[string]common.PlotValue
+	Plots []types.PlotValue
+	Info  map[string]types.PlotValue
 }
 
 // BackendHandler represents the main interface of backend handlers.
@@ -46,6 +46,6 @@ type BackendHandler interface {
 	GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
 		percentiles []float64) (map[string]*PlotResult, error)
 	GetValue(query *GroupQuery, refTime time.Time,
-		percentiles []float64) (map[string]map[string]common.PlotValue, error)
+		percentiles []float64) (map[string]map[string]types.PlotValue, error)
 	Update() error
 }

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facette/facette/pkg/common"
+	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/ziutek/rrd"
 )
@@ -37,14 +37,14 @@ func (handler *RRDBackendHandler) GetPlots(query *GroupQuery, startTime, endTime
 
 // GetValue calculates and returns plot data at a specific reference time.
 func (handler *RRDBackendHandler) GetValue(query *GroupQuery, refTime time.Time,
-	percentiles []float64) (map[string]map[string]common.PlotValue, error) {
+	percentiles []float64) (map[string]map[string]types.PlotValue, error) {
 	var (
 		data   map[string]*PlotResult
 		err    error
-		result map[string]map[string]common.PlotValue
+		result map[string]map[string]types.PlotValue
 	)
 
-	result = make(map[string]map[string]common.PlotValue)
+	result = make(map[string]map[string]types.PlotValue)
 
 	if data, err = handler.rrdGetData(query, refTime.Add(-1*time.Minute), refTime, time.Minute, percentiles,
 		true); err != nil {
@@ -329,11 +329,11 @@ func (handler *RRDBackendHandler) rrdGetData(query *GroupQuery, startTime, endTi
 		}
 
 		for index, serieName := range data.Legends {
-			result[series[serieName]] = &PlotResult{Info: make(map[string]common.PlotValue)}
+			result[series[serieName]] = &PlotResult{Info: make(map[string]types.PlotValue)}
 
 			for i = 0; i < data.RowCnt; i++ {
 				result[series[serieName]].Plots = append(result[series[serieName]].Plots,
-					common.PlotValue(data.ValueAt(index, i)))
+					types.PlotValue(data.ValueAt(index, i)))
 			}
 		}
 	}
@@ -365,10 +365,10 @@ func rrdParseInfo(info rrd.GraphInfo, data map[string]*PlotResult) {
 		}
 
 		if data[chunks[0]] == nil {
-			data[chunks[0]] = &PlotResult{Info: make(map[string]common.PlotValue)}
+			data[chunks[0]] = &PlotResult{Info: make(map[string]types.PlotValue)}
 		}
 
-		data[chunks[0]].Info[chunks[1]] = common.PlotValue(chunkFloat)
+		data[chunks[0]].Info[chunks[1]] = types.PlotValue(chunkFloat)
 	}
 }
 

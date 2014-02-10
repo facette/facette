@@ -13,32 +13,11 @@ import (
 	"time"
 
 	"github.com/facette/facette/pkg/library"
+	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 	"github.com/facette/facette/thirdparty/github.com/gorilla/mux"
 )
-
-type collectionItemResponse struct {
-	libraryItemResponse
-	Parent      *string `json:"parent"`
-	HasChildren bool    `json:"has_children"`
-}
-
-type collectionListResponse struct {
-	Items []*collectionItemResponse `json:"items"`
-}
-
-func (response collectionListResponse) Len() int {
-	return len(response.Items)
-}
-
-func (response collectionListResponse) Less(i, j int) bool {
-	return response.Items[i].Name < response.Items[j].Name
-}
-
-func (response collectionListResponse) Swap(i, j int) {
-	response.Items[i], response.Items[j] = response.Items[j], response.Items[i]
-}
 
 func (server *Server) collectionHandle(writer http.ResponseWriter, request *http.Request) {
 	type tmpCollection struct {
@@ -213,14 +192,14 @@ func (server *Server) collectionHandle(writer http.ResponseWriter, request *http
 func (server *Server) collectionList(writer http.ResponseWriter, request *http.Request) {
 	var (
 		collection      *library.Collection
-		collectionItem  *collectionItemResponse
+		collectionItem  *types.CollectionResponse
 		collectionStack []*library.Collection
 		err             error
 		excludeSet      *set.Set
 		item            interface{}
 		limit           int
 		offset          int
-		response        collectionListResponse
+		response        types.CollectionListResponse
 	)
 
 	if request.Method != "GET" && request.Method != "HEAD" {
@@ -277,7 +256,7 @@ func (server *Server) collectionList(writer http.ResponseWriter, request *http.R
 			continue
 		}
 
-		collectionItem = &collectionItemResponse{libraryItemResponse: libraryItemResponse{
+		collectionItem = &types.CollectionResponse{ItemResponse: types.ItemResponse{
 			ID:          collection.ID,
 			Name:        collection.Name,
 			Description: collection.Description,

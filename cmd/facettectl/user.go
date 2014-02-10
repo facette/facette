@@ -7,12 +7,12 @@ import (
 	"time"
 
 	"github.com/facette/facette/pkg/auth"
-	"github.com/facette/facette/pkg/common"
+	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/howeyc/gopass"
 )
 
-func handleUser(config *common.Config, args []string) error {
+func handleUser(config *config.Config, args []string) error {
 	var (
 		cmd *cmdAuth
 		err error

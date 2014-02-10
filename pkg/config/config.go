@@ -1,4 +1,4 @@
-package common
+package config
 
 import (
 	"fmt"
@@ -8,6 +8,11 @@ import (
 	"strings"
 
 	"github.com/facette/facette/pkg/utils"
+)
+
+const (
+	// DefaultConfigFile represents the default configuration file location.
+	DefaultConfigFile = "/etc/facette/facette.json"
 )
 
 // Config represents the main configuration system structure.

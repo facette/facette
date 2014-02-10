@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/facette/facette/pkg/common"
+	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
@@ -68,7 +68,7 @@ func (library *Library) GetCollectionTemplate(name string) (*Collection, error) 
 		patternRegexp *regexp.Regexp
 		splitItems    []string
 		splitSet      *set.Set
-		template      *common.TemplateConfig
+		template      *config.TemplateConfig
 		templates     []string
 	)
 

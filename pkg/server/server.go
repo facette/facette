@@ -17,7 +17,7 @@ import (
 
 	"github.com/facette/facette/pkg/auth"
 	"github.com/facette/facette/pkg/backend"
-	"github.com/facette/facette/pkg/common"
+	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/thirdparty/github.com/etix/stoppableListener"
 	"github.com/facette/facette/thirdparty/github.com/gorilla/handlers"
@@ -43,7 +43,7 @@ type statusResponse struct {
 
 // Server is the main service handler of Facette.
 type Server struct {
-	Config      *common.Config
+	Config      *config.Config
 	Listener    *stoppableListener.StoppableListener
 	AuthHandler auth.AuthHandler
 	Catalog     *backend.Catalog
@@ -321,7 +321,7 @@ func NewServer(debugLevel int) (*Server, error) {
 	)
 
 	// Create new server instance
-	server = &Server{Config: &common.Config{}, debugLevel: debugLevel}
+	server = &Server{Config: &config.Config{}, debugLevel: debugLevel}
 	server.Catalog = backend.NewCatalog(server.Config, debugLevel)
 	server.Library = library.NewLibrary(server.Config, server.Catalog, debugLevel)
 

@@ -7,16 +7,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 	"github.com/facette/facette/thirdparty/github.com/gorilla/mux"
 )
-
-type originShowResponse struct {
-	Name    string `json:"name"`
-	Backend string `json:"backend"`
-	Updated string `json:"updated"`
-}
 
 func (server *Server) originList(writer http.ResponseWriter, request *http.Request) {
 	var (
@@ -79,7 +74,7 @@ func (server *Server) originShow(writer http.ResponseWriter, request *http.Reque
 	var (
 		metrics    *set.Set
 		originName string
-		response   originShowResponse
+		response   types.OriginResponse
 	)
 
 	if request.Method != "GET" && request.Method != "HEAD" {

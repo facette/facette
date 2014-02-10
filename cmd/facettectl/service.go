@@ -8,10 +8,10 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/facette/facette/pkg/common"
+	"github.com/facette/facette/pkg/config"
 )
 
-func handleServer(config *common.Config, args []string) error {
+func handleServer(config *config.Config, args []string) error {
 	var (
 		cmd *cmdServer
 	)
@@ -27,7 +27,7 @@ func handleServer(config *common.Config, args []string) error {
 }
 
 type cmdServer struct {
-	config *common.Config
+	config *config.Config
 }
 
 func (cmd *cmdServer) reload(args []string) error {

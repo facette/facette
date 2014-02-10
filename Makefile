@@ -56,11 +56,13 @@ $(TEMP_DIR)/src/github.com/facette/facette:
 		$(call mesg_ok) || $(call mesg_fail)
 
 # Binaries
-BIN_SRC = $(wildcard cmd/*)
+BIN_SRC = $(wildcard cmd/*/*.go)
 
-BIN_OUTPUT = $(addprefix $(TEMP_DIR)/bin/, $(notdir $(BIN_SRC)))
+BIN_OUTPUT = $(addprefix $(TEMP_DIR)/bin/, $(notdir $(wildcard cmd/*)))
 
-$(BIN_OUTPUT): $(BIN_SRC) $(TEMP_DIR)/src/github.com/facette/facette
+PKG_SRC = $(wildcard pkg/*/*.go)
+
+$(BIN_OUTPUT): $(PKG_SRC) $(BIN_SRC) $(TEMP_DIR)/src/github.com/facette/facette
 	@$(call mesg_start,$(notdir $@),Building $(notdir $@)...)
 	@install -d -m 0755 $(dir $@) && $(GO) build -o $@ cmd/$(notdir $@)/*.go && \
 		$(call mesg_ok) || $(call mesg_fail)
@@ -215,7 +217,7 @@ lint-static: $(SCRIPT_OUTPUT)
 PKG_SRC = $(wildcard pkg/*)
 
 test-pkg:
-	@(cd $(TEMP_DIR)/tests; for ENTRY in $(PKG_SRC); do \
+	@install -d -m 0755 $(TEMP_DIR)/tests && (cd $(TEMP_DIR)/tests; for ENTRY in $(PKG_SRC); do \
 		$(call mesg_start,test,Testing $$ENTRY package...); \
 		$(GO) test -c -i ../../$$ENTRY && \
 			(test ! -f ./`basename $$ENTRY`.test || ./`basename $$ENTRY`.test -test.v=true) && \
@@ -228,9 +230,9 @@ test-server:
 		$(call mesg_ok) || $(call mesg_fail)
 
 	@$(call mesg_start,test,Running server tests...)
-	@(cd $(TEMP_DIR)/tests; $(GO) test -c -i ../../cmd/facette && \
-		./facette.test -test.v=true -c ../../tests/facette.json && \
-		$(call mesg_ok) || (kill -2 `cat facette.pid`; $(call mesg_fail)))
+	@(cd $(TEMP_DIR)/tests; $(GO) test -c -i ../../cmd/facette) && \
+		./$(TEMP_DIR)/tests/facette.test -test.v=true -c tests/facette.json && \
+		$(call mesg_ok) || (kill -2 `cat $(TEMP_DIR)/tests/facette.pid`; $(call mesg_fail))
 
 	@$(call mesg_start,test,Stopping facette server...)
 	@kill -2 `cat $(TEMP_DIR)/tests/facette.pid` && \

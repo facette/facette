@@ -11,53 +11,14 @@ import (
 	"time"
 
 	"github.com/facette/facette/pkg/backend"
-	"github.com/facette/facette/pkg/common"
 	"github.com/facette/facette/pkg/library"
+	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
 )
 
 const (
 	defaultPlotSample = 400
 )
-
-type plotRequest struct {
-	Time        string    `json:"time"`
-	Range       string    `json:"range"`
-	Sample      int       `json:"sample"`
-	Constants   []float64 `json:"constants"`
-	Percentiles []float64 `json:"percentiles"`
-	Graph       string    `json:"graph"`
-	Origin      string    `json:"origin"`
-	Source      string    `json:"source"`
-	Metric      string    `json:"metric"`
-	Template    string    `json:"template"`
-	Filter      string    `json:"filter"`
-}
-
-type serieResponse struct {
-	Name    string                      `json:"name"`
-	Plots   []common.PlotValue          `json:"plots"`
-	Info    map[string]common.PlotValue `json:"info"`
-	Options map[string]interface{}      `json:"options"`
-}
-
-type stackResponse struct {
-	Name   string           `json:"name"`
-	Series []*serieResponse `json:"series"`
-}
-
-type plotResponse struct {
-	ID          string           `json:"id"`
-	Start       string           `json:"start"`
-	End         string           `json:"end"`
-	Step        float64          `json:"step"`
-	Name        string           `json:"name"`
-	Description string           `json:"description"`
-	Type        int              `json:"type"`
-	StackMode   int              `json:"stack_mode"`
-	Stacks      []*stackResponse `json:"stacks"`
-	Modified    time.Time        `json:"modified"`
-}
 
 func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Request) {
 	var (
@@ -70,11 +31,11 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 		item          interface{}
 		originBackend backend.BackendHandler
 		plotMax       int
-		plotReq       *plotRequest
+		plotReq       *types.PlotRequest
 		plotResult    map[string]*backend.PlotResult
 		query         *backend.GroupQuery
-		response      *plotResponse
-		stack         *stackResponse
+		response      *types.PlotResponse
+		stack         *types.StackResponse
 		startTime     time.Time
 		step          time.Duration
 	)
@@ -181,7 +142,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 		}
 	}
 
-	response = &plotResponse{
+	response = &types.PlotResponse{
 		ID:          graph.ID,
 		Start:       startTime.Format(time.RFC3339),
 		End:         endTime.Format(time.RFC3339),
@@ -199,7 +160,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 	}
 
 	for _, stackItem := range graph.Stacks {
-		stack = &stackResponse{Name: stackItem.Name}
+		stack = &types.StackResponse{Name: stackItem.Name}
 
 		for _, groupItem := range stackItem.Groups {
 			plotResult, data = data[0], data[1:]
@@ -209,7 +170,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 					plotMax = len(serieResult.Plots)
 				}
 
-				stack.Series = append(stack.Series, &serieResponse{
+				stack.Series = append(stack.Series, &types.SerieResponse{
 					Name:    serieName,
 					Plots:   serieResult.Plots,
 					Info:    serieResult.Info,
@@ -228,7 +189,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 	server.handleJSON(writer, response)
 }
 
-func (server *Server) plotPrepareQuery(plotReq *plotRequest,
+func (server *Server) plotPrepareQuery(plotReq *types.PlotRequest,
 	groupItem *library.OperGroup) (*backend.GroupQuery, backend.BackendHandler, error) {
 	var (
 		metric        *backend.Metric
@@ -319,11 +280,11 @@ func (server *Server) plotValues(writer http.ResponseWriter, request *http.Reque
 		graph         *library.Graph
 		item          interface{}
 		originBackend backend.BackendHandler
-		plotReq       *plotRequest
+		plotReq       *types.PlotRequest
 		query         *backend.GroupQuery
 		refTime       time.Time
-		response      map[string]map[string]common.PlotValue
-		values        map[string]map[string]common.PlotValue
+		response      map[string]map[string]types.PlotValue
+		values        map[string]map[string]types.PlotValue
 	)
 
 	if request.Method != "POST" && request.Method != "HEAD" {
@@ -380,8 +341,8 @@ func (server *Server) plotValues(writer http.ResponseWriter, request *http.Reque
 	}
 
 	// Get plots data
-	response = make(map[string]map[string]common.PlotValue)
-	values = make(map[string]map[string]common.PlotValue)
+	response = make(map[string]map[string]types.PlotValue)
+	values = make(map[string]map[string]types.PlotValue)
 
 	for _, stackItem := range graph.Stacks {
 		for _, groupItem := range stackItem.Groups {

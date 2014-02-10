@@ -7,16 +7,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 	"github.com/facette/facette/thirdparty/github.com/gorilla/mux"
 )
-
-type sourceShowResponse struct {
-	Name    string   `json:"name"`
-	Origins []string `json:"origins"`
-	Updated string   `json:"updated"`
-}
 
 func (server *Server) sourceList(writer http.ResponseWriter, request *http.Request) {
 	var (
@@ -92,7 +87,7 @@ func (server *Server) sourceShow(writer http.ResponseWriter, request *http.Reque
 	var (
 		found      bool
 		sourceName string
-		response   sourceShowResponse
+		response   types.SourceResponse
 	)
 
 	if request.Method != "GET" && request.Method != "HEAD" {

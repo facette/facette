@@ -9,32 +9,10 @@ import (
 	"time"
 
 	"github.com/facette/facette/pkg/library"
+	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
-
-type libraryItemResponse struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Modified    string `json:"modified"`
-}
-
-type libraryListResponse struct {
-	Items []*libraryItemResponse `json:"items"`
-}
-
-func (response libraryListResponse) Len() int {
-	return len(response.Items)
-}
-
-func (response libraryListResponse) Less(i, j int) bool {
-	return response.Items[i].Name < response.Items[j].Name
-}
-
-func (response libraryListResponse) Swap(i, j int) {
-	response.Items[i], response.Items[j] = response.Items[j], response.Items[i]
-}
 
 func (server *Server) libraryList(writer http.ResponseWriter, request *http.Request) {
 	var (
@@ -45,7 +23,7 @@ func (server *Server) libraryList(writer http.ResponseWriter, request *http.Requ
 		item       interface{}
 		limit      int
 		offset     int
-		response   libraryListResponse
+		response   types.ItemListResponse
 		skip       bool
 	)
 
@@ -84,7 +62,7 @@ func (server *Server) libraryList(writer http.ResponseWriter, request *http.Requ
 				}
 			}
 
-			response.Items = append(response.Items, &libraryItemResponse{
+			response.Items = append(response.Items, &types.ItemResponse{
 				ID:          group.ID,
 				Name:        group.Name,
 				Description: group.Description,
@@ -124,7 +102,7 @@ func (server *Server) libraryList(writer http.ResponseWriter, request *http.Requ
 					}
 				}
 
-				response.Items = append(response.Items, &libraryItemResponse{
+				response.Items = append(response.Items, &types.ItemResponse{
 					ID:          graph.ID,
 					Name:        graph.Name,
 					Description: graph.Description,

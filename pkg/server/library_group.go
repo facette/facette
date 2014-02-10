@@ -11,31 +11,18 @@ import (
 	"time"
 
 	"github.com/facette/facette/pkg/library"
+	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/gorilla/mux"
 )
-
-type expandRequest [][3]string
-
-func (tuple expandRequest) Len() int {
-	return len(tuple)
-}
-
-func (tuple expandRequest) Less(i, j int) bool {
-	return tuple[i][0]+tuple[i][1]+tuple[i][2] < tuple[j][0]+tuple[j][1]+tuple[j][2]
-}
-
-func (tuple expandRequest) Swap(i, j int) {
-	tuple[i], tuple[j] = tuple[j], tuple[i]
-}
 
 func (server *Server) groupExpand(writer http.ResponseWriter, request *http.Request) {
 	var (
 		body     []byte
 		err      error
-		item     expandRequest
-		query    expandRequest
-		response []expandRequest
+		item     types.ExpandRequest
+		query    types.ExpandRequest
+		response []types.ExpandRequest
 	)
 
 	if request.Method != "POST" {
@@ -52,7 +39,7 @@ func (server *Server) groupExpand(writer http.ResponseWriter, request *http.Requ
 	}
 
 	for _, entry := range query {
-		item = expandRequest{}
+		item = types.ExpandRequest{}
 
 		if strings.HasPrefix(entry[1], "group:") {
 			for _, sourceName := range server.Library.ExpandGroup(entry[1][6:], library.LibraryItemSourceGroup) {
