@@ -17,29 +17,24 @@ import (
 )
 
 func (server *Server) groupExpand(writer http.ResponseWriter, request *http.Request) {
-	var (
-		body     []byte
-		err      error
-		item     types.ExpandRequest
-		query    types.ExpandRequest
-		response []types.ExpandRequest
-	)
-
 	if request.Method != "POST" {
 		server.handleResponse(writer, http.StatusMethodNotAllowed)
 		return
 	}
 
-	body, _ = ioutil.ReadAll(request.Body)
+	body, _ := ioutil.ReadAll(request.Body)
+	query := types.ExpandRequest{}
 
-	if err = json.Unmarshal(body, &query); err != nil {
+	if err := json.Unmarshal(body, &query); err != nil {
 		log.Println("ERROR: " + err.Error())
 		server.handleResponse(writer, http.StatusBadRequest)
 		return
 	}
 
+	response := []types.ExpandRequest{}
+
 	for _, entry := range query {
-		item = types.ExpandRequest{}
+		item := types.ExpandRequest{}
 
 		if strings.HasPrefix(entry[1], "group:") {
 			for _, sourceName := range server.Library.ExpandGroup(entry[1][6:], library.LibraryItemSourceGroup) {
@@ -68,16 +63,9 @@ func (server *Server) groupExpand(writer http.ResponseWriter, request *http.Requ
 }
 
 func (server *Server) groupHandle(writer http.ResponseWriter, request *http.Request) {
-	var (
-		body      []byte
-		err       error
-		group     *library.Group
-		groupID   string
-		groupType int
-		item      interface{}
-	)
+	var groupType int
 
-	groupID = mux.Vars(request)["id"]
+	groupID := mux.Vars(request)["id"]
 
 	if strings.HasPrefix(request.URL.Path, URLLibraryPath+"/sourcegroups") {
 		groupType = library.LibraryItemSourceGroup
@@ -96,7 +84,7 @@ func (server *Server) groupHandle(writer http.ResponseWriter, request *http.Requ
 		}
 
 		// Remove group from library
-		err = server.Library.DeleteItem(groupID, groupType)
+		err := server.Library.DeleteItem(groupID, groupType)
 		if os.IsNotExist(err) {
 			server.handleResponse(writer, http.StatusNotFound)
 			return
@@ -115,8 +103,7 @@ func (server *Server) groupHandle(writer http.ResponseWriter, request *http.Requ
 		}
 
 		// Get group from library
-		item, err = server.Library.GetItem(groupID, groupType)
-
+		item, err := server.Library.GetItem(groupID, groupType)
 		if os.IsNotExist(err) {
 			server.handleResponse(writer, http.StatusNotFound)
 			return
@@ -132,6 +119,8 @@ func (server *Server) groupHandle(writer http.ResponseWriter, request *http.Requ
 		break
 
 	case "POST", "PUT":
+		var group *library.Group
+
 		if request.Method == "POST" && groupID != "" || request.Method == "PUT" && groupID == "" {
 			server.handleResponse(writer, http.StatusMethodNotAllowed)
 			return
@@ -145,7 +134,7 @@ func (server *Server) groupHandle(writer http.ResponseWriter, request *http.Requ
 
 		if request.Method == "POST" && request.FormValue("inherit") != "" {
 			// Get group from library
-			item, err = server.Library.GetItem(request.FormValue("inherit"), groupType)
+			item, err := server.Library.GetItem(request.FormValue("inherit"), groupType)
 			if os.IsNotExist(err) {
 				server.handleResponse(writer, http.StatusNotFound)
 				return
@@ -166,16 +155,16 @@ func (server *Server) groupHandle(writer http.ResponseWriter, request *http.Requ
 		group.Modified = time.Now()
 
 		// Parse input JSON for group data
-		body, _ = ioutil.ReadAll(request.Body)
+		body, _ := ioutil.ReadAll(request.Body)
 
-		if err = json.Unmarshal(body, &group); err != nil {
+		if err := json.Unmarshal(body, group); err != nil {
 			log.Println("ERROR: " + err.Error())
 			server.handleResponse(writer, http.StatusBadRequest)
 			return
 		}
 
 		// Store group data
-		err = server.Library.StoreItem(group, groupType)
+		err := server.Library.StoreItem(group, groupType)
 		if err == os.ErrInvalid {
 			server.handleResponse(writer, http.StatusBadRequest)
 			return

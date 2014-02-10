@@ -41,11 +41,7 @@ func (server *Server) reloadHandle(writer http.ResponseWriter, request *http.Req
 }
 
 func (server *Server) resourceHandle(writer http.ResponseWriter, request *http.Request) {
-	var (
-		result *resourceResponse
-	)
-
-	result = &resourceResponse{
+	result := &resourceResponse{
 		Scales: server.Config.Scales,
 	}
 
@@ -53,19 +49,13 @@ func (server *Server) resourceHandle(writer http.ResponseWriter, request *http.R
 }
 
 func (server *Server) statHandle(writer http.ResponseWriter, request *http.Request) {
-	var (
-		metrics *set.Set
-		sources *set.Set
-		result  *statResponse
-	)
-
 	if request.Method != "GET" && request.Method != "HEAD" {
 		server.handleResponse(writer, http.StatusMethodNotAllowed)
 		return
 	}
 
-	sources = set.New()
-	metrics = set.New()
+	sources := set.New()
+	metrics := set.New()
 
 	for _, origin := range server.Catalog.Origins {
 		for key, source := range origin.Sources {
@@ -77,7 +67,7 @@ func (server *Server) statHandle(writer http.ResponseWriter, request *http.Reque
 		}
 	}
 
-	result = &statResponse{
+	result := &statResponse{
 		Origins:        len(server.Catalog.Origins),
 		Sources:        sources.Size(),
 		Metrics:        metrics.Size(),
@@ -92,22 +82,19 @@ func (server *Server) statHandle(writer http.ResponseWriter, request *http.Reque
 }
 
 func (server *Server) waitHandle(writer http.ResponseWriter, request *http.Request) {
-	var (
-		data struct {
-			URLPrefix string
-		}
-		err  error
-		tmpl *template.Template
-	)
+	var data struct {
+		URLPrefix string
+	}
 
 	// Set template data
 	data.URLPrefix = server.Config.URLPrefix
 
 	// Execute template
-	if tmpl, err = template.New("layout.html").ParseFiles(
+	tmpl, err := template.New("layout.html").ParseFiles(
 		path.Join(server.Config.BaseDir, "html", "layout.html"),
 		path.Join(server.Config.BaseDir, "html", "wait.html"),
-	); err == nil {
+	)
+	if err == nil {
 		err = tmpl.Execute(writer, data)
 	}
 

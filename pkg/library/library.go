@@ -45,12 +45,7 @@ type Library struct {
 
 // Update updates the current Library by browsing the filesystem for stored data.
 func (library *Library) Update() error {
-	var (
-		dirPath  string
-		err      error
-		itemType int
-		walkFunc func(filePath string, fileInfo os.FileInfo, err error) error
-	)
+	var itemType int
 
 	// Empty library maps
 	library.Groups = make(map[string]*Group)
@@ -58,18 +53,13 @@ func (library *Library) Update() error {
 	library.TemplateGraphs = make(map[string]*Graph)
 	library.Collections = make(map[string]*Collection)
 
-	walkFunc = func(filePath string, fileInfo os.FileInfo, fileError error) error {
-		var (
-			itemID string
-			mode   os.FileMode
-		)
-
-		mode = fileInfo.Mode() & os.ModeType
+	walkFunc := func(filePath string, fileInfo os.FileInfo, fileError error) error {
+		mode := fileInfo.Mode() & os.ModeType
 		if mode != 0 || !strings.HasSuffix(filePath, ".json") {
 			return nil
 		}
 
-		_, itemID = path.Split(filePath[:len(filePath)-5])
+		_, itemID := path.Split(filePath[:len(filePath)-5])
 
 		if library.debugLevel > 1 {
 			log.Printf("DEBUG: loading `%s' item from `%s' file...", itemID, filePath)
@@ -80,19 +70,19 @@ func (library *Library) Update() error {
 
 	log.Println("INFO: library update started")
 
-	for _, itemType = range []int{
+	for _, itemType := range []int{
 		LibraryItemSourceGroup,
 		LibraryItemMetricGroup,
 		LibraryItemGraph,
 		LibraryItemCollection,
 	} {
-		dirPath = library.getDirPath(itemType)
+		dirPath := library.getDirPath(itemType)
 
 		if _, err := os.Stat(dirPath); os.IsNotExist(err) {
 			continue
 		}
 
-		if err = utils.WalkDir(dirPath, walkFunc); err != nil {
+		if err := utils.WalkDir(dirPath, walkFunc); err != nil {
 			log.Println("ERROR: " + err.Error())
 		}
 	}
@@ -119,12 +109,8 @@ func (library *Library) Update() error {
 
 // NewLibrary creates a new instance of Library.
 func NewLibrary(config *config.Config, catalog *backend.Catalog, debugLevel int) *Library {
-	var (
-		library *Library
-	)
-
 	// Create new Library instance
-	library = &Library{Config: config, Catalog: catalog, debugLevel: debugLevel}
+	library := &Library{Config: config, Catalog: catalog, debugLevel: debugLevel}
 
 	// Compile ID validation regexp
 	library.idRegexp = regexp.MustCompile(UUIDPattern)

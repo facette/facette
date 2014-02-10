@@ -16,13 +16,9 @@ import (
 
 func (server *Server) metricList(writer http.ResponseWriter, request *http.Request) {
 	var (
-		err         error
-		limit       int
-		offset      int
-		originName  string
-		response    []string
-		responseSet *set.Set
-		sourceSet   *set.Set
+		err    error
+		limit  int
+		offset int
 	)
 
 	if request.Method != "GET" && request.Method != "HEAD" {
@@ -45,10 +41,10 @@ func (server *Server) metricList(writer http.ResponseWriter, request *http.Reque
 	}
 
 	// Parse catalog for metrics list
-	originName = request.FormValue("origin")
+	originName := request.FormValue("origin")
 
-	sourceSet = set.New()
-	responseSet = set.New()
+	sourceSet := set.New()
+	responseSet := set.New()
 
 	if strings.HasPrefix(request.FormValue("source"), "group:") {
 		for _, sourceName := range server.Library.ExpandGroup(request.FormValue("source")[6:],
@@ -89,7 +85,7 @@ func (server *Server) metricList(writer http.ResponseWriter, request *http.Reque
 
 	writer.Header().Add("X-Total-Records", strconv.Itoa(responseSet.Size()))
 
-	response = responseSet.StringSlice()
+	response := responseSet.StringSlice()
 	sort.Strings(response)
 
 	// Shrink responses if limit is set
@@ -103,13 +99,7 @@ func (server *Server) metricList(writer http.ResponseWriter, request *http.Reque
 }
 
 func (server *Server) metricShow(writer http.ResponseWriter, request *http.Request) {
-	var (
-		found      bool
-		metricName string
-		originSet  *set.Set
-		response   types.MetricResponse
-		sourceSet  *set.Set
-	)
+	found := false
 
 	if request.Method != "GET" && request.Method != "HEAD" {
 		server.handleResponse(writer, http.StatusMethodNotAllowed)
@@ -117,10 +107,10 @@ func (server *Server) metricShow(writer http.ResponseWriter, request *http.Reque
 	}
 
 	// Parse catalog for metric information
-	metricName = mux.Vars(request)["path"]
+	metricName := mux.Vars(request)["path"]
 
-	originSet = set.New()
-	sourceSet = set.New()
+	originSet := set.New()
+	sourceSet := set.New()
 
 	for _, origin := range server.Catalog.Origins {
 		for _, source := range origin.Sources {
@@ -137,7 +127,7 @@ func (server *Server) metricShow(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	response = types.MetricResponse{
+	response := types.MetricResponse{
 		Name:    metricName,
 		Origins: originSet.StringSlice(),
 		Sources: sourceSet.StringSlice(),

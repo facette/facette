@@ -46,14 +46,11 @@ func init() {
 }
 
 func main() {
-	var (
-		cfg     *config.Config
-		err     error
-		handler func(*config.Config, []string) error
-	)
+	var handler func(*config.Config, []string) error
 
-	cfg = &config.Config{}
-	if err = cfg.Load(flagConfig); err != nil {
+	cfg := &config.Config{}
+
+	if err := cfg.Load(flagConfig); err != nil {
 		fmt.Println("Error: " + err.Error())
 		os.Exit(1)
 	}
@@ -72,8 +69,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = handler(cfg, flag.Args())
-
+	err := handler(cfg, flag.Args())
 	switch err {
 	case nil:
 		break

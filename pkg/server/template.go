@@ -10,12 +10,7 @@ import (
 )
 
 func (server *Server) templateAsset(x string) string {
-	var (
-		err      error
-		fileInfo os.FileInfo
-	)
-
-	if fileInfo, err = os.Stat(path.Join(server.Config.BaseDir, x)); err == nil {
+	if fileInfo, err := os.Stat(path.Join(server.Config.BaseDir, x)); err == nil {
 		return x + "?" + strconv.FormatInt(fileInfo.ModTime().Unix(), 10)
 	}
 
@@ -31,9 +26,7 @@ func templateNotEqual(x, y interface{}) bool {
 }
 
 func templateDumpMap(x map[string]string) string {
-	var (
-		chunks []string
-	)
+	chunks := []string{}
 
 	for key, value := range x {
 		if value == "" {

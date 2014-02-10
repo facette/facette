@@ -11,13 +11,8 @@ func Test_Clone(test *testing.T) {
 		FieldB int
 	}
 
-	var (
-		dstStruct testStruct
-		srcStruct testStruct
-	)
-
-	srcStruct = testStruct{"test", 42}
-	dstStruct = testStruct{}
+	srcStruct := testStruct{"test", 42}
+	dstStruct := testStruct{}
 
 	Clone(srcStruct, &dstStruct)
 

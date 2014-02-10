@@ -24,24 +24,20 @@ type Group struct {
 
 // ExpandGroup returns the list of items matching the group name based on its groupType.
 func (library *Library) ExpandGroup(name string, groupType int) []string {
-	var (
-		err    error
-		group  *Group
-		item   interface{}
-		re     *regexp.Regexp
-		result *set.Set
-	)
 
-	if item, err = library.GetItemByName(name, groupType); err != nil {
+	item, err := library.GetItemByName(name, groupType)
+	if err != nil {
 		log.Printf("ERROR: " + err.Error())
 		return []string{}
 	}
 
-	group = item.(*Group)
+	group := item.(*Group)
 
-	result = set.New()
+	result := set.New()
 
 	for _, entry := range group.Entries {
+		var re *regexp.Regexp
+
 		if strings.HasPrefix(entry.Pattern, "regexp:") {
 			re = regexp.MustCompile(entry.Pattern[7:])
 		}

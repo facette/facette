@@ -15,15 +15,7 @@ import (
 )
 
 func (server *Server) graphHandle(writer http.ResponseWriter, request *http.Request) {
-	var (
-		body    []byte
-		graph   *library.Graph
-		graphID string
-		err     error
-		item    interface{}
-	)
-
-	graphID = mux.Vars(request)["id"]
+	graphID := mux.Vars(request)["id"]
 
 	switch request.Method {
 	case "DELETE":
@@ -36,7 +28,7 @@ func (server *Server) graphHandle(writer http.ResponseWriter, request *http.Requ
 		}
 
 		// Remove graph from library
-		err = server.Library.DeleteItem(graphID, library.LibraryItemGraph)
+		err := server.Library.DeleteItem(graphID, library.LibraryItemGraph)
 		if os.IsNotExist(err) {
 			server.handleResponse(writer, http.StatusNotFound)
 			return
@@ -55,8 +47,7 @@ func (server *Server) graphHandle(writer http.ResponseWriter, request *http.Requ
 		}
 
 		// Get graph from library
-		item, err = server.Library.GetItem(graphID, library.LibraryItemGraph)
-
+		item, err := server.Library.GetItem(graphID, library.LibraryItemGraph)
 		if os.IsNotExist(err) {
 			server.handleResponse(writer, http.StatusNotFound)
 			return
@@ -72,6 +63,8 @@ func (server *Server) graphHandle(writer http.ResponseWriter, request *http.Requ
 		break
 
 	case "POST", "PUT":
+		var graph *library.Graph
+
 		if request.Method == "POST" && graphID != "" || request.Method == "PUT" && graphID == "" {
 			server.handleResponse(writer, http.StatusMethodNotAllowed)
 			return
@@ -85,8 +78,7 @@ func (server *Server) graphHandle(writer http.ResponseWriter, request *http.Requ
 
 		if request.Method == "POST" && request.FormValue("inherit") != "" {
 			// Get graph from library
-			item, err = server.Library.GetItem(request.FormValue("inherit"), library.LibraryItemGraph)
-
+			item, err := server.Library.GetItem(request.FormValue("inherit"), library.LibraryItemGraph)
 			if os.IsNotExist(err) {
 				server.handleResponse(writer, http.StatusNotFound)
 				return
@@ -107,9 +99,9 @@ func (server *Server) graphHandle(writer http.ResponseWriter, request *http.Requ
 		graph.Modified = time.Now()
 
 		// Parse input JSON for graph data
-		body, _ = ioutil.ReadAll(request.Body)
+		body, _ := ioutil.ReadAll(request.Body)
 
-		if err = json.Unmarshal(body, graph); err != nil {
+		if err := json.Unmarshal(body, graph); err != nil {
 			log.Println("ERROR: " + err.Error())
 			server.handleResponse(writer, http.StatusBadRequest)
 			return
@@ -122,7 +114,7 @@ func (server *Server) graphHandle(writer http.ResponseWriter, request *http.Requ
 			graph.Volatile = false
 		}
 
-		err = server.Library.StoreItem(graph, library.LibraryItemGraph)
+		err := server.Library.StoreItem(graph, library.LibraryItemGraph)
 		if err == os.ErrInvalid {
 			server.handleResponse(writer, http.StatusBadRequest)
 			return

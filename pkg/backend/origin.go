@@ -16,16 +16,12 @@ type Origin struct {
 
 // AppendSource adds a new Source entry into the Origin instance.
 func (origin *Origin) AppendSource(name, origName string) *Source {
-	var (
-		source *Source
-	)
-
 	if origin.catalog.debugLevel > 2 {
 		log.Printf("DEBUG: appending `%s' source into origin...\n", name)
 	}
 
 	// Append new source instance into origin
-	source = &Source{Name: name, OriginalName: origName, Metrics: make(map[string]*Metric), origin: origin}
+	source := &Source{Name: name, OriginalName: origName, Metrics: make(map[string]*Metric), origin: origin}
 	origin.Sources[name] = source
 
 	return source

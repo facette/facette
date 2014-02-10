@@ -13,14 +13,9 @@ import (
 )
 
 func handleUser(config *config.Config, args []string) error {
-	var (
-		cmd *cmdAuth
-		err error
-	)
+	cmd := &cmdAuth{handler: auth.AuthSimpleHandler{Config: config.Auth}}
 
-	cmd = &cmdAuth{handler: auth.AuthSimpleHandler{Config: config.Auth}}
-
-	if err = cmd.handler.Update(); err != nil {
+	if err := cmd.handler.Update(); err != nil {
 		return err
 	}
 
@@ -57,14 +52,11 @@ func (cmd *cmdAuth) save() error {
 }
 
 func (cmd *cmdAuth) set(args []string, create bool) error {
-	var (
-		exists   bool
-		password []byte
-	)
-
 	if len(args) != 1 {
 		return os.ErrInvalid
 	}
+
+	exists := false
 
 	// Check for possible conflicts
 	_, exists = cmd.handler.Users[args[0]]
@@ -77,7 +69,7 @@ func (cmd *cmdAuth) set(args []string, create bool) error {
 
 	// Set user password
 	fmt.Print("Password: ")
-	password = gopass.GetPasswd()
+	password := gopass.GetPasswd()
 
 	fmt.Print("Repeat Password: ")
 	if !bytes.Equal(password, gopass.GetPasswd()) {

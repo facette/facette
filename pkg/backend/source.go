@@ -14,16 +14,12 @@ type Source struct {
 
 // AppendMetric adds a new Metric entry into the Source instance.
 func (source *Source) AppendMetric(name, origName string) *Metric {
-	var (
-		metric *Metric
-	)
-
 	if source.origin.catalog.debugLevel > 2 {
 		log.Printf("DEBUG: appending `%s' metric for `%s' source...\n", name, source.Name)
 	}
 
 	// Append new metric instance into source
-	metric = &Metric{Name: name, OriginalName: origName, source: source}
+	metric := &Metric{Name: name, OriginalName: origName, source: source}
 	source.Metrics[name] = metric
 
 	return metric

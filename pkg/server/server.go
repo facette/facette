@@ -53,31 +53,27 @@ type Server struct {
 }
 
 func (server *Server) handleError(writer http.ResponseWriter, status int) {
-	var (
-		data struct {
-			URLPrefix string
-			Status    int
-		}
-		err      error
-		tmpl     *template.Template
-		tmplData *bytes.Buffer
-	)
+	var data struct {
+		URLPrefix string
+		Status    int
+	}
 
 	// Set template data
 	data.URLPrefix = server.Config.URLPrefix
 	data.Status = status
 
 	// Execute template
-	tmplData = bytes.NewBuffer(nil)
+	tmplData := bytes.NewBuffer(nil)
 
-	if tmpl, err = template.New("layout.html").Funcs(template.FuncMap{
+	tmpl, err := template.New("layout.html").Funcs(template.FuncMap{
 		"asset": server.templateAsset,
 		"eq":    templateEqual,
 		"ne":    templateNotEqual,
 	}).ParseFiles(
 		path.Join(server.Config.BaseDir, "html", "layout.html"),
 		path.Join(server.Config.BaseDir, "html", "error.html"),
-	); err == nil {
+	)
+	if err == nil {
 		err = tmpl.Execute(tmplData, data)
 	}
 
@@ -92,13 +88,9 @@ func (server *Server) handleError(writer http.ResponseWriter, status int) {
 }
 
 func (server *Server) handleJSON(writer http.ResponseWriter, data interface{}) {
-	var (
-		err    error
-		output []byte
-	)
-
 	// Handle HTTP JSON response
-	if output, err = json.Marshal(data); err != nil {
+	output, err := json.Marshal(data)
+	if err != nil {
 		log.Println("ERROR: " + err.Error())
 		server.handleResponse(writer, http.StatusInternalServerError)
 		return
@@ -115,11 +107,8 @@ func (server *Server) handleResponse(writer http.ResponseWriter, status int) {
 }
 
 func (server *Server) handleStatic(writer http.ResponseWriter, request *http.Request) {
-	var (
-		mimeType string
-	)
-
-	if mimeType = mime.TypeByExtension(filepath.Ext(request.URL.Path)); mimeType == "" {
+	mimeType := mime.TypeByExtension(filepath.Ext(request.URL.Path))
+	if mimeType == "" {
 		mimeType = "application/octet-stream"
 	}
 
@@ -136,19 +125,15 @@ func (server *Server) LoadConfig(confPath string) error {
 
 // Reload reloads the configuration and refreshes both catalog and library.
 func (server *Server) Reload() error {
-	var (
-		err error
-	)
-
 	log.Printf("INFO: reloading configuration from `%s' file", server.Config.Path)
 
 	server.Loading = true
 
-	if err = server.Config.Reload(); err != nil {
+	if err := server.Config.Reload(); err != nil {
 		return err
 	}
 
-	if err = server.AuthHandler.Update(); err != nil {
+	if err := server.AuthHandler.Update(); err != nil {
 		return err
 	}
 
@@ -162,15 +147,7 @@ func (server *Server) Reload() error {
 
 // Run starts the server, loading configuration and serving HTTP responses.
 func (server *Server) Run() error {
-	var (
-		accessOutput *os.File
-		clientCount  int
-		dirPath      string
-		err          error
-		listener     net.Listener
-		router       *mux.Router
-		serverOutput *os.File
-	)
+	var accessOutput *os.File
 
 	if server.Config == nil {
 		return fmt.Errorf("configuration should be loaded first")
@@ -178,18 +155,20 @@ func (server *Server) Run() error {
 
 	// Set server logging ouput
 	if server.Config.ServerLog != "" {
-		dirPath, _ = path.Split(server.Config.ServerLog)
+		dirPath, _ := path.Split(server.Config.ServerLog)
 		os.MkdirAll(dirPath, 0755)
 
-		serverOutput, _ = os.OpenFile(server.Config.ServerLog, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		serverOutput, _ := os.OpenFile(server.Config.ServerLog, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		log.SetOutput(serverOutput)
 	}
 
 	// Prepare authentication backend
-	if server.AuthHandler, err = auth.NewAuth(server.Config.Auth, server.debugLevel); err != nil {
+	authHandler, err := auth.NewAuth(server.Config.Auth, server.debugLevel)
+	if err != nil {
 		return err
 	}
 
+	server.AuthHandler = authHandler
 	go server.AuthHandler.Update()
 
 	log.Printf("INFO: server about to listen on %s", server.Config.BindAddr)
@@ -199,7 +178,7 @@ func (server *Server) Run() error {
 	go server.Library.Update()
 
 	// Register routes
-	router = mux.NewRouter()
+	router := mux.NewRouter()
 
 	router.NotFoundHandler = http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		server.handleError(writer, http.StatusNotFound)
@@ -266,7 +245,7 @@ func (server *Server) Run() error {
 	if server.Config.AccessLog == "" {
 		accessOutput = os.Stderr
 	} else {
-		dirPath, _ = path.Split(server.Config.AccessLog)
+		dirPath, _ := path.Split(server.Config.AccessLog)
 		os.MkdirAll(dirPath, 0755)
 
 		accessOutput, _ = os.OpenFile(server.Config.AccessLog, os.O_CREATE|os.O_WRONLY, 0644)
@@ -276,25 +255,25 @@ func (server *Server) Run() error {
 	http.Handle("/", handlers.CombinedLoggingHandler(accessOutput, router))
 
 	// Start listener
-	if listener, err = net.Listen("tcp", server.Config.BindAddr); err != nil {
+	listener, err := net.Listen("tcp", server.Config.BindAddr)
+	if err != nil {
 		return err
 	}
 
 	server.Listener = stoppableListener.Handle(listener)
-
 	err = http.Serve(server.Listener, nil)
 
 	if server.Listener.Stopped {
 		/* Wait for the clients to disconnect */
 		for i := 0; i < ServerStopWait; i++ {
-			if clientCount = server.Listener.ConnCount.Get(); clientCount == 0 {
+			if clientCount := server.Listener.ConnCount.Get(); clientCount == 0 {
 				break
 			}
 
 			time.Sleep(time.Second)
 		}
 
-		clientCount = server.Listener.ConnCount.Get()
+		clientCount := server.Listener.ConnCount.Get()
 
 		if clientCount > 0 {
 			log.Fatalf("INFO: server stopped after %d seconds with %d client(s) still connected", ServerStopWait,
@@ -316,12 +295,12 @@ func (server *Server) Stop() {
 
 // NewServer creates a new instance of Server.
 func NewServer(debugLevel int) (*Server, error) {
-	var (
-		server *Server
-	)
-
 	// Create new server instance
-	server = &Server{Config: &config.Config{}, debugLevel: debugLevel}
+	server := &Server{
+		Config:     &config.Config{},
+		debugLevel: debugLevel,
+	}
+
 	server.Catalog = backend.NewCatalog(server.Config, debugLevel)
 	server.Library = library.NewLibrary(server.Config, server.Catalog, debugLevel)
 

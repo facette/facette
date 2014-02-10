@@ -15,12 +15,9 @@ import (
 
 func (server *Server) sourceList(writer http.ResponseWriter, request *http.Request) {
 	var (
-		err         error
-		limit       int
-		offset      int
-		originName  string
-		response    []string
-		responseSet *set.Set
+		err    error
+		limit  int
+		offset int
 	)
 
 	if request.Method != "GET" && request.Method != "HEAD" {
@@ -43,9 +40,9 @@ func (server *Server) sourceList(writer http.ResponseWriter, request *http.Reque
 	}
 
 	// Parse catalog for sources list
-	originName = request.FormValue("origin")
+	originName := request.FormValue("origin")
 
-	responseSet = set.New()
+	responseSet := set.New()
 
 	for _, origin := range server.Catalog.Origins {
 		if originName != "" && origin.Name != originName {
@@ -70,7 +67,7 @@ func (server *Server) sourceList(writer http.ResponseWriter, request *http.Reque
 
 	writer.Header().Add("X-Total-Records", strconv.Itoa(responseSet.Size()))
 
-	response = responseSet.StringSlice()
+	response := responseSet.StringSlice()
 	sort.Strings(response)
 
 	// Shrink responses if limit is set
@@ -84,11 +81,7 @@ func (server *Server) sourceList(writer http.ResponseWriter, request *http.Reque
 }
 
 func (server *Server) sourceShow(writer http.ResponseWriter, request *http.Request) {
-	var (
-		found      bool
-		sourceName string
-		response   types.SourceResponse
-	)
+	found := false
 
 	if request.Method != "GET" && request.Method != "HEAD" {
 		server.handleResponse(writer, http.StatusMethodNotAllowed)
@@ -96,7 +89,12 @@ func (server *Server) sourceShow(writer http.ResponseWriter, request *http.Reque
 	}
 
 	// Parse catalog for source information
-	sourceName = mux.Vars(request)["name"]
+	sourceName := mux.Vars(request)["name"]
+
+	response := types.SourceResponse{
+		Name:    sourceName,
+		Updated: server.Catalog.Updated.Format(time.RFC3339),
+	}
 
 	for _, origin := range server.Catalog.Origins {
 		if _, ok := origin.Sources[sourceName]; ok {
@@ -109,9 +107,6 @@ func (server *Server) sourceShow(writer http.ResponseWriter, request *http.Reque
 		server.handleResponse(writer, http.StatusNotFound)
 		return
 	}
-
-	response.Name = sourceName
-	response.Updated = server.Catalog.Updated.Format(time.RFC3339)
 
 	server.handleJSON(writer, response)
 }

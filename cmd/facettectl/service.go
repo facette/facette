@@ -12,11 +12,7 @@ import (
 )
 
 func handleServer(config *config.Config, args []string) error {
-	var (
-		cmd *cmdServer
-	)
-
-	cmd = &cmdServer{config: config}
+	cmd := &cmdServer{config: config}
 
 	switch args[0] {
 	case "reload":
@@ -31,25 +27,23 @@ type cmdServer struct {
 }
 
 func (cmd *cmdServer) reload(args []string) error {
-	var (
-		data []byte
-		err  error
-		pid  int
-	)
-
 	if len(args) > 0 {
 		return os.ErrInvalid
 	}
 
 	if cmd.config.PidFile == "" {
 		return fmt.Errorf("missing pid configuration")
-	} else if _, err = os.Stat(cmd.config.PidFile); os.IsNotExist(err) {
+	} else if _, err := os.Stat(cmd.config.PidFile); os.IsNotExist(err) {
 		return fmt.Errorf("missing pid file")
 	}
 
-	if data, err = ioutil.ReadFile(cmd.config.PidFile); err != nil {
+	data, err := ioutil.ReadFile(cmd.config.PidFile)
+	if err != nil {
 		return err
-	} else if pid, err = strconv.Atoi(strings.Trim(string(data), "\n")); err != nil {
+	}
+
+	pid, err := strconv.Atoi(strings.Trim(string(data), "\n"))
+	if err != nil {
 		return err
 	}
 

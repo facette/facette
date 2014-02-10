@@ -39,35 +39,31 @@ func init() {
 }
 
 func main() {
-	var (
-		err      error
-		fd       *os.File
-		sigChan  chan os.Signal
-		instance *server.Server
-	)
-
 	// Create new server instance and load configuration
-	if instance, err = server.NewServer(flagDebug); err != nil {
+	instance, err := server.NewServer(flagDebug)
+	if err != nil {
 		fmt.Println("Error: " + err.Error())
 		os.Exit(1)
-	} else if err = instance.LoadConfig(flagConfig); err != nil {
+	} else if err := instance.LoadConfig(flagConfig); err != nil {
 		fmt.Println("Error: " + err.Error())
 		os.Exit(1)
 	}
 
 	// Create .pid file
 	if instance.Config.PidFile != "" {
-		if fd, err = os.OpenFile(instance.Config.PidFile, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644); err != nil {
+		fd, err := os.OpenFile(instance.Config.PidFile, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+		if err != nil {
 			fmt.Println("Error: " + err.Error())
 			os.Exit(1)
 		}
 
+		defer fd.Close()
+
 		fd.Write([]byte(strconv.Itoa(os.Getpid()) + "\n"))
-		fd.Close()
 	}
 
 	// Reload server configuration on SIGHUP
-	sigChan = make(chan os.Signal, 1)
+	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGHUP, syscall.SIGTERM)
 
 	go func() {

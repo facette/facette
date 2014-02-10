@@ -12,24 +12,17 @@ import (
 )
 
 func (server *Server) adminHandle(writer http.ResponseWriter, request *http.Request) {
-	var (
-		data struct {
-			URLPrefix        string
-			Section          string
-			Path             string
-			Origins          []string
-			GraphTypeArea    int
-			GraphTypeLine    int
-			StackModeNone    int
-			StackModeNormal  int
-			StackModePercent int
-		}
-		err        error
-		groupType  int
-		tmpl       *template.Template
-		tmplFile   string
-		tmplFolder string
-	)
+	var data struct {
+		URLPrefix        string
+		Section          string
+		Path             string
+		Origins          []string
+		GraphTypeArea    int
+		GraphTypeLine    int
+		StackModeNone    int
+		StackModeNormal  int
+		StackModePercent int
+	}
 
 	if !server.handleAuth(writer, request) {
 		server.handleError(writer, http.StatusUnauthorized)
@@ -41,7 +34,8 @@ func (server *Server) adminHandle(writer http.ResponseWriter, request *http.Requ
 	data.Section = mux.Vars(request)["section"]
 	data.Path = mux.Vars(request)["path"]
 
-	tmplFile = "unknown"
+	tmplFile := "unknown"
+	tmplFolder := ""
 
 	if data.Section == "graphs" || data.Section == "collections" {
 		tmplFolder = data.Section
@@ -61,6 +55,8 @@ func (server *Server) adminHandle(writer http.ResponseWriter, request *http.Requ
 			tmplFile = "list.html"
 		}
 	} else if data.Section == "sourcegroups" || data.Section == "metricgroups" {
+		var groupType int
+
 		tmplFolder = "groups"
 
 		for originName := range server.Catalog.Origins {
@@ -87,7 +83,7 @@ func (server *Server) adminHandle(writer http.ResponseWriter, request *http.Requ
 	}
 
 	// Return template data
-	if tmpl, err = template.New("layout.html").Funcs(template.FuncMap{
+	tmpl, err := template.New("layout.html").Funcs(template.FuncMap{
 		"asset":  server.templateAsset,
 		"eq":     templateEqual,
 		"ne":     templateNotEqual,
@@ -97,7 +93,8 @@ func (server *Server) adminHandle(writer http.ResponseWriter, request *http.Requ
 		path.Join(server.Config.BaseDir, "html", "common", "element.html"),
 		path.Join(server.Config.BaseDir, "html", "admin", "layout.html"),
 		path.Join(server.Config.BaseDir, "html", "admin", tmplFolder, tmplFile),
-	); err == nil {
+	)
+	if err == nil {
 		err = tmpl.Execute(writer, data)
 	}
 

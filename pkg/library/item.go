@@ -28,9 +28,7 @@ func (item *Item) GetItem() *Item {
 }
 
 func (library *Library) getDirPath(itemType int) string {
-	var (
-		dirName string
-	)
+	var dirName string
 
 	switch itemType {
 	case LibraryItemSourceGroup:
@@ -59,10 +57,6 @@ func (library *Library) getFilePath(id string, itemType int) string {
 
 // DeleteItem removes an existing item from the library.
 func (library *Library) DeleteItem(id string, itemType int) error {
-	var (
-		err error
-	)
-
 	if !library.ItemExists(id, itemType) {
 		return os.ErrNotExist
 	}
@@ -76,7 +70,7 @@ func (library *Library) DeleteItem(id string, itemType int) error {
 
 	// Remove stored JSON
 	if itemType != LibraryItemGraph || itemType == LibraryItemGraph && !library.Graphs[id].Volatile {
-		if err = syscall.Unlink(library.getFilePath(id, itemType)); err != nil {
+		if err := syscall.Unlink(library.getFilePath(id, itemType)); err != nil {
 			return err
 		}
 	}
@@ -101,10 +95,6 @@ func (library *Library) DeleteItem(id string, itemType int) error {
 
 // GetItem gets an item from the library by its identifier.
 func (library *Library) GetItem(id string, itemType int) (interface{}, error) {
-	var (
-		item interface{}
-	)
-
 	if !library.ItemExists(id, itemType) {
 		return nil, os.ErrNotExist
 	}
@@ -114,7 +104,7 @@ func (library *Library) GetItem(id string, itemType int) (interface{}, error) {
 		return library.Groups[id], nil
 
 	case LibraryItemGraph:
-		item = library.Graphs[id]
+		item := library.Graphs[id]
 
 		if library.Graphs[id].Volatile {
 			delete(library.Graphs, id)
@@ -171,9 +161,7 @@ func (library *Library) GetItemByName(name string, itemType int) (interface{}, e
 
 // ItemExists returns whether an item existsn the library or not.
 func (library *Library) ItemExists(id string, itemType int) bool {
-	var (
-		exists bool
-	)
+	exists := false
 
 	switch itemType {
 	case LibraryItemSourceGroup, LibraryItemMetricGroup:
@@ -200,26 +188,15 @@ func (library *Library) ItemExists(id string, itemType int) bool {
 
 // LoadItem loads an item from the filesystem by its identifier.
 func (library *Library) LoadItem(id string, itemType int) error {
-	var (
-		err           error
-		fileInfo      os.FileInfo
-		filePath      string
-		tmpCollection *struct {
-			*Collection
-			Parent string `json:"parent"`
-		}
-		tmpGraph *Graph
-		tmpGroup *Group
-	)
-
 	// Load item from file
 	switch itemType {
 	case LibraryItemSourceGroup, LibraryItemMetricGroup:
-		tmpGroup = &Group{}
+		tmpGroup := &Group{}
 
-		filePath = library.getFilePath(id, itemType)
+		filePath := library.getFilePath(id, itemType)
 
-		if fileInfo, err = utils.JSONLoad(filePath, &tmpGroup); err != nil {
+		fileInfo, err := utils.JSONLoad(filePath, &tmpGroup)
+		if err != nil {
 			return fmt.Errorf("in %s, %s", filePath, err.Error())
 		}
 
@@ -229,11 +206,12 @@ func (library *Library) LoadItem(id string, itemType int) error {
 		break
 
 	case LibraryItemGraph:
-		tmpGraph = &Graph{}
+		tmpGraph := &Graph{}
 
-		filePath = library.getFilePath(id, itemType)
+		filePath := library.getFilePath(id, itemType)
 
-		if fileInfo, err = utils.JSONLoad(filePath, &tmpGraph); err != nil {
+		fileInfo, err := utils.JSONLoad(filePath, &tmpGraph)
+		if err != nil {
 			return fmt.Errorf("in %s, %s", filePath, err.Error())
 		}
 
@@ -243,9 +221,15 @@ func (library *Library) LoadItem(id string, itemType int) error {
 		break
 
 	case LibraryItemCollection:
-		filePath = library.getFilePath(id, LibraryItemCollection)
+		var tmpCollection *struct {
+			*Collection
+			Parent string `json:"parent"`
+		}
 
-		if fileInfo, err = utils.JSONLoad(filePath, &tmpCollection); err != nil {
+		filePath := library.getFilePath(id, LibraryItemCollection)
+
+		fileInfo, err := utils.JSONLoad(filePath, &tmpCollection)
+		if err != nil {
 			return fmt.Errorf("in %s, %s", filePath, err.Error())
 		}
 
@@ -269,15 +253,7 @@ func (library *Library) LoadItem(id string, itemType int) error {
 
 // StoreItem stores an item into the library.
 func (library *Library) StoreItem(item interface{}, itemType int) error {
-	var (
-		err        error
-		groupSet   *set.Set
-		itemStruct *Item
-		itemTemp   interface{}
-		serieSet   *set.Set
-		stackSet   *set.Set
-		uuidTemp   *uuid.UUID
-	)
+	var itemStruct *Item
 
 	switch itemType {
 	case LibraryItemSourceGroup, LibraryItemMetricGroup:
@@ -294,7 +270,8 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 	}
 
 	if itemStruct.ID == "" {
-		if uuidTemp, err = uuid.NewV4(); err != nil {
+		uuidTemp, err := uuid.NewV4()
+		if err != nil {
 			return err
 		}
 
@@ -307,7 +284,10 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 	if itemStruct.Name == "" && (itemType != LibraryItemGraph ||
 		itemType == LibraryItemGraph && !item.(*Graph).Volatile) {
 		return os.ErrInvalid
-	} else if itemTemp, err = library.GetItemByName(itemStruct.Name, itemType); err == nil {
+	}
+
+	itemTemp, err := library.GetItemByName(itemStruct.Name, itemType)
+	if err == nil {
 		switch itemType {
 		case LibraryItemSourceGroup, LibraryItemMetricGroup:
 			if itemTemp.(*Group).ID != itemStruct.ID {
@@ -344,9 +324,9 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 
 	case LibraryItemGraph:
 		// Check for definition names duplicates
-		stackSet = set.New()
-		groupSet = set.New()
-		serieSet = set.New()
+		stackSet := set.New()
+		groupSet := set.New()
+		serieSet := set.New()
 
 		for _, stack := range item.(*Graph).Stacks {
 			if stack == nil {
@@ -396,7 +376,7 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 
 	// Store JSON data
 	if itemType != LibraryItemGraph || itemType == LibraryItemGraph && !item.(*Graph).Volatile {
-		if err = utils.JSONDump(library.getFilePath(itemStruct.ID, itemType), item, itemStruct.Modified); err != nil {
+		if err := utils.JSONDump(library.getFilePath(itemStruct.ID, itemType), item, itemStruct.Modified); err != nil {
 			return err
 		}
 	}

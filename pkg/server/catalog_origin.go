@@ -15,10 +15,9 @@ import (
 
 func (server *Server) originList(writer http.ResponseWriter, request *http.Request) {
 	var (
-		err      error
-		limit    int
-		offset   int
-		response []string
+		err    error
+		limit  int
+		offset int
 	)
 
 	if request.Method != "GET" && request.Method != "HEAD" {
@@ -41,6 +40,8 @@ func (server *Server) originList(writer http.ResponseWriter, request *http.Reque
 	}
 
 	// Parse catalog for sources list
+	response := []string{}
+
 	for _, origin := range server.Catalog.Origins {
 		if request.FormValue("filter") != "" {
 			if !utils.FilterMatch(strings.ToLower(request.FormValue("filter")), strings.ToLower(origin.Name)) {
@@ -71,26 +72,20 @@ func (server *Server) originList(writer http.ResponseWriter, request *http.Reque
 }
 
 func (server *Server) originShow(writer http.ResponseWriter, request *http.Request) {
-	var (
-		metrics    *set.Set
-		originName string
-		response   types.OriginResponse
-	)
-
 	if request.Method != "GET" && request.Method != "HEAD" {
 		server.handleResponse(writer, http.StatusMethodNotAllowed)
 		return
 	}
 
 	// Parse catalog for source information
-	originName = mux.Vars(request)["name"]
+	originName := mux.Vars(request)["name"]
 
 	if _, ok := server.Catalog.Origins[originName]; !ok {
 		server.handleResponse(writer, http.StatusNotFound)
 		return
 	}
 
-	metrics = set.New()
+	metrics := set.New()
 
 	for _, source := range server.Catalog.Origins[originName].Sources {
 		for _, metric := range source.Metrics {
@@ -98,9 +93,11 @@ func (server *Server) originShow(writer http.ResponseWriter, request *http.Reque
 		}
 	}
 
-	response.Name = originName
-	response.Backend = server.Config.Origins[originName].Backend["type"]
-	response.Updated = server.Catalog.Updated.Format(time.RFC3339)
+	response := types.OriginResponse{
+		Name:    originName,
+		Backend: server.Config.Origins[originName].Backend["type"],
+		Updated: server.Catalog.Updated.Format(time.RFC3339),
+	}
 
 	server.handleJSON(writer, response)
 }

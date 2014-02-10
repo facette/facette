@@ -22,22 +22,10 @@ const (
 
 func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Request) {
 	var (
-		body          []byte
-		graph         *library.Graph
-		data          []map[string]*backend.PlotResult
-		endTime       time.Time
-		err           error
-		groupOptions  map[string]map[string]interface{}
-		item          interface{}
-		originBackend backend.BackendHandler
-		plotMax       int
-		plotReq       *types.PlotRequest
-		plotResult    map[string]*backend.PlotResult
-		query         *backend.GroupQuery
-		response      *types.PlotResponse
-		stack         *types.StackResponse
-		startTime     time.Time
-		step          time.Duration
+		graph     *library.Graph
+		endTime   time.Time
+		err       error
+		startTime time.Time
 	)
 
 	if request.Method != "POST" && request.Method != "HEAD" {
@@ -49,9 +37,11 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 	}
 
 	// Parse input JSON for graph data
-	body, _ = ioutil.ReadAll(request.Body)
+	body, _ := ioutil.ReadAll(request.Body)
 
-	if err = json.Unmarshal(body, &plotReq); err != nil {
+	plotReq := &types.PlotRequest{}
+
+	if err := json.Unmarshal(body, plotReq); err != nil {
 		log.Println("ERROR: " + err.Error())
 		server.handleResponse(writer, http.StatusBadRequest)
 		return
@@ -100,7 +90,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 		graph, err = server.Library.GetGraphTemplate(plotReq.Origin, plotReq.Source, plotReq.Template, plotReq.Filter)
 	} else if plotReq.Metric != "" {
 		graph, err = server.Library.GetGraphMetric(plotReq.Origin, plotReq.Source, plotReq.Metric)
-	} else if item, err = server.Library.GetItem(plotReq.Graph, library.LibraryItemGraph); err == nil {
+	} else if item, err := server.Library.GetItem(plotReq.Graph, library.LibraryItemGraph); err == nil {
 		graph = item.(*library.Graph)
 	}
 
@@ -116,14 +106,17 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	step = endTime.Sub(startTime) / time.Duration(plotReq.Sample)
+	step := endTime.Sub(startTime) / time.Duration(plotReq.Sample)
 
 	// Get plots data
-	groupOptions = make(map[string]map[string]interface{})
+	groupOptions := make(map[string]map[string]interface{})
+
+	data := []map[string]*backend.PlotResult{}
 
 	for _, stackItem := range graph.Stacks {
 		for _, groupItem := range stackItem.Groups {
-			if query, originBackend, err = server.plotPrepareQuery(plotReq, groupItem); err != nil {
+			query, originBackend, err := server.plotPrepareQuery(plotReq, groupItem)
+			if err != nil {
 				log.Println("ERROR: " + err.Error())
 				server.handleResponse(writer, http.StatusBadRequest)
 				return
@@ -131,8 +124,8 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 
 			groupOptions[groupItem.Name] = groupItem.Options
 
-			if plotResult, err = originBackend.GetPlots(query, startTime, endTime, step,
-				plotReq.Percentiles); err != nil {
+			plotResult, err := originBackend.GetPlots(query, startTime, endTime, step, plotReq.Percentiles)
+			if err != nil {
 				log.Println("ERROR: " + err.Error())
 				server.handleResponse(writer, http.StatusInternalServerError)
 				return
@@ -142,7 +135,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 		}
 	}
 
-	response = &types.PlotResponse{
+	response := &types.PlotResponse{
 		ID:          graph.ID,
 		Start:       startTime.Format(time.RFC3339),
 		End:         endTime.Format(time.RFC3339),
@@ -159,10 +152,14 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 
+	plotMax := 0
+
 	for _, stackItem := range graph.Stacks {
-		stack = &types.StackResponse{Name: stackItem.Name}
+		stack := &types.StackResponse{Name: stackItem.Name}
 
 		for _, groupItem := range stackItem.Groups {
+			var plotResult map[string]*backend.PlotResult
+
 			plotResult, data = data[0], data[1:]
 
 			for serieName, serieResult := range plotResult {
@@ -191,14 +188,10 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 
 func (server *Server) plotPrepareQuery(plotReq *types.PlotRequest,
 	groupItem *library.OperGroup) (*backend.GroupQuery, backend.BackendHandler, error) {
-	var (
-		metric        *backend.Metric
-		originBackend backend.BackendHandler
-		query         *backend.GroupQuery
-		serieSources  []string
-	)
 
-	query = &backend.GroupQuery{
+	var originBackend backend.BackendHandler
+
+	query := &backend.GroupQuery{
 		Name:  groupItem.Name,
 		Type:  groupItem.Type,
 		Scale: groupItem.Scale,
@@ -216,6 +209,8 @@ func (server *Server) plotPrepareQuery(plotReq *types.PlotRequest,
 			return nil, nil, fmt.Errorf("backends differ between series")
 		}
 
+		serieSources := []string{}
+
 		if plotReq.Template != "" {
 			serieSources = []string{plotReq.Source}
 		} else if strings.HasPrefix(serieItem.Source, "group:") {
@@ -228,7 +223,7 @@ func (server *Server) plotPrepareQuery(plotReq *types.PlotRequest,
 			if strings.HasPrefix(serieItem.Metric, "group:") {
 				for index, serieChunk := range server.Library.ExpandGroup(serieItem.Metric[6:],
 					library.LibraryItemMetricGroup) {
-					metric = server.Catalog.GetMetric(
+					metric := server.Catalog.GetMetric(
 						serieItem.Origin,
 						serieSource,
 						serieChunk,
@@ -246,7 +241,7 @@ func (server *Server) plotPrepareQuery(plotReq *types.PlotRequest,
 					})
 				}
 			} else {
-				metric = server.Catalog.GetMetric(
+				metric := server.Catalog.GetMetric(
 					serieItem.Origin,
 					serieSource,
 					serieItem.Metric,
@@ -275,16 +270,10 @@ func (server *Server) plotPrepareQuery(plotReq *types.PlotRequest,
 
 func (server *Server) plotValues(writer http.ResponseWriter, request *http.Request) {
 	var (
-		body          []byte
-		err           error
-		graph         *library.Graph
-		item          interface{}
-		originBackend backend.BackendHandler
-		plotReq       *types.PlotRequest
-		query         *backend.GroupQuery
-		refTime       time.Time
-		response      map[string]map[string]types.PlotValue
-		values        map[string]map[string]types.PlotValue
+		err     error
+		graph   *library.Graph
+		item    interface{}
+		refTime time.Time
 	)
 
 	if request.Method != "POST" && request.Method != "HEAD" {
@@ -296,9 +285,11 @@ func (server *Server) plotValues(writer http.ResponseWriter, request *http.Reque
 	}
 
 	// Parse input JSON for graph data
-	body, _ = ioutil.ReadAll(request.Body)
+	body, _ := ioutil.ReadAll(request.Body)
 
-	if err = json.Unmarshal(body, &plotReq); err != nil {
+	plotReq := &types.PlotRequest{}
+
+	if err := json.Unmarshal(body, &plotReq); err != nil {
 		log.Println("ERROR: " + err.Error())
 		server.handleResponse(writer, http.StatusBadRequest)
 		return
@@ -341,18 +332,19 @@ func (server *Server) plotValues(writer http.ResponseWriter, request *http.Reque
 	}
 
 	// Get plots data
-	response = make(map[string]map[string]types.PlotValue)
-	values = make(map[string]map[string]types.PlotValue)
+	response := make(map[string]map[string]types.PlotValue)
 
 	for _, stackItem := range graph.Stacks {
 		for _, groupItem := range stackItem.Groups {
-			if query, originBackend, err = server.plotPrepareQuery(plotReq, groupItem); err != nil {
+			query, originBackend, err := server.plotPrepareQuery(plotReq, groupItem)
+			if err != nil {
 				log.Println("ERROR: " + err.Error())
 				server.handleResponse(writer, http.StatusBadRequest)
 				return
 			}
 
-			if values, err = originBackend.GetValue(query, refTime, plotReq.Percentiles); err != nil {
+			values, err := originBackend.GetValue(query, refTime, plotReq.Percentiles)
+			if err != nil {
 				log.Println("ERROR: " + err.Error())
 				server.handleResponse(writer, http.StatusInternalServerError)
 				return

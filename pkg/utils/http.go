@@ -7,14 +7,9 @@ import (
 
 // RequestGetContentType returns the HTTP request `Content-Type' header value.
 func RequestGetContentType(request *http.Request) string {
-	var (
-		contentType string
-		index       int
-	)
+	contentType := request.Header.Get("Content-Type")
 
-	contentType = request.Header.Get("Content-Type")
-	index = strings.Index(contentType, ";")
-
+	index := strings.Index(contentType, ";")
 	if index != -1 {
 		return contentType[:index]
 	}

@@ -22,16 +22,11 @@ var (
 )
 
 func Test_originList(test *testing.T) {
-	var (
-		base     []string
-		response *http.Response
-		result   []string
-	)
-
-	base = []string{"test"}
+	base := []string{"test"}
+	result := []string{}
 
 	// Test GET on source list
-	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/origins", serverConfig.BindAddr),
+	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/origins", serverConfig.BindAddr),
 		nil, false, &result)
 
 	if response.StatusCode != http.StatusOK {
@@ -46,17 +41,11 @@ func Test_originList(test *testing.T) {
 }
 
 func Test_originShow(test *testing.T) {
-	var (
-		base     *types.SourceResponse
-		response *http.Response
-		result   *types.SourceResponse
-	)
-
-	base = &types.SourceResponse{Name: "source1", Origins: []string{"test"}}
-	result = &types.SourceResponse{}
+	base := &types.SourceResponse{Name: "source1", Origins: []string{"test"}}
+	result := &types.SourceResponse{}
 
 	// Test GET on source item
-	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/source1", serverConfig.BindAddr),
+	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/source1", serverConfig.BindAddr),
 		nil, false, &result)
 	result.Updated = ""
 
@@ -80,16 +69,11 @@ func Test_originShow(test *testing.T) {
 }
 
 func Test_sourceList(test *testing.T) {
-	var (
-		base     []string
-		response *http.Response
-		result   []string
-	)
-
-	base = []string{"source1", "source2"}
+	base := []string{"source1", "source2"}
+	result := []string{}
 
 	// Test GET on source list
-	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources", serverConfig.BindAddr), nil,
+	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources", serverConfig.BindAddr), nil,
 		false, &result)
 
 	if response.StatusCode != http.StatusOK {
@@ -104,17 +88,11 @@ func Test_sourceList(test *testing.T) {
 }
 
 func Test_sourceShow(test *testing.T) {
-	var (
-		base     *types.SourceResponse
-		response *http.Response
-		result   *types.SourceResponse
-	)
-
-	base = &types.SourceResponse{Name: "source1", Origins: []string{"test"}}
-	result = &types.SourceResponse{}
+	base := &types.SourceResponse{Name: "source1", Origins: []string{"test"}}
+	result := &types.SourceResponse{}
 
 	// Test GET on source item
-	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/source1", serverConfig.BindAddr),
+	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/source1", serverConfig.BindAddr),
 		nil, false, &result)
 	result.Updated = ""
 
@@ -138,16 +116,11 @@ func Test_sourceShow(test *testing.T) {
 }
 
 func Test_metricList(test *testing.T) {
-	var (
-		base     []string
-		response *http.Response
-		result   []string
-	)
-
 	// Test #1 GET on metrics list
-	base = []string{"database1/test", "database2/test", "database3/test"}
+	base := []string{"database1/test", "database2/test", "database3/test"}
+	result := []string{}
 
-	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/metrics", serverConfig.BindAddr), nil,
+	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/metrics", serverConfig.BindAddr), nil,
 		false, &result)
 
 	if response.StatusCode != http.StatusOK {
@@ -178,18 +151,12 @@ func Test_metricList(test *testing.T) {
 }
 
 func Test_metricShow(test *testing.T) {
-	var (
-		base     *types.MetricResponse
-		response *http.Response
-		result   *types.MetricResponse
-	)
-
-	base = &types.MetricResponse{Name: "database2/test", Sources: []string{"source1", "source2"},
+	base := &types.MetricResponse{Name: "database2/test", Sources: []string{"source1", "source2"},
 		Origins: []string{"test"}}
-	result = &types.MetricResponse{}
+	result := &types.MetricResponse{}
 
 	// Test GET on metric item
-	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/metrics/database2/test",
+	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/metrics/database2/test",
 		serverConfig.BindAddr), nil, false, &result)
 	result.Updated = ""
 
@@ -214,17 +181,13 @@ func Test_metricShow(test *testing.T) {
 }
 
 func Test_sourceGroupHandle(test *testing.T) {
-	var (
-		expandBase types.ExpandRequest
-		expandData types.ExpandRequest
-		group      *library.Group
-	)
-
 	// Define a sample source group
-	group = &library.Group{Item: library.Item{Name: "group1", Description: "A great group description."}}
+	group := &library.Group{Item: library.Item{Name: "group1", Description: "A great group description."}}
 	group.Entries = append(group.Entries, &library.GroupEntry{Pattern: "glob:source*", Origin: "test"})
 
-	expandData = types.ExpandRequest{[3]string{"test", "group:group1-updated", "database1/test"}}
+	expandData := types.ExpandRequest{[3]string{"test", "group:group1-updated", "database1/test"}}
+
+	expandBase := types.ExpandRequest{}
 	expandBase = append(expandBase, [3]string{"test", "source1", "database1/test"})
 	expandBase = append(expandBase, [3]string{"test", "source2", "database1/test"})
 
@@ -232,18 +195,14 @@ func Test_sourceGroupHandle(test *testing.T) {
 }
 
 func Test_metricGroupHandle(test *testing.T) {
-	var (
-		expandBase types.ExpandRequest
-		expandData types.ExpandRequest
-		group      *library.Group
-	)
-
 	// Define a sample metric group
-	group = &library.Group{Item: library.Item{Name: "group1", Description: "A great group description."}}
+	group := &library.Group{Item: library.Item{Name: "group1", Description: "A great group description."}}
 	group.Entries = append(group.Entries, &library.GroupEntry{Pattern: "database1/test", Origin: "test"})
 	group.Entries = append(group.Entries, &library.GroupEntry{Pattern: "regexp:database[23]/test", Origin: "test"})
 
-	expandData = types.ExpandRequest{[3]string{"test", "source1", "group:group1-updated"}}
+	expandData := types.ExpandRequest{[3]string{"test", "source1", "group:group1-updated"}}
+
+	expandBase := types.ExpandRequest{}
 	expandBase = append(expandBase, [3]string{"test", "source1", "database1/test"})
 	expandBase = append(expandBase, [3]string{"test", "source1", "database2/test"})
 	expandBase = append(expandBase, [3]string{"test", "source1", "database3/test"})
@@ -252,24 +211,12 @@ func Test_metricGroupHandle(test *testing.T) {
 }
 
 func Test_graphHandle(test *testing.T) {
-	var (
-		baseURL     string
-		graphBase   *library.Graph
-		graphResult *library.Graph
-		data        []byte
-		group       *library.OperGroup
-		listBase    *types.ItemListResponse
-		listResult  *types.ItemListResponse
-		response    *http.Response
-		stack       *library.Stack
-	)
-
-	baseURL = fmt.Sprintf("http://%s/library/graphs", serverConfig.BindAddr)
+	baseURL := fmt.Sprintf("http://%s/library/graphs", serverConfig.BindAddr)
 
 	// Define a sample graph
-	stack = &library.Stack{Name: "stack0"}
+	stack := &library.Stack{Name: "stack0"}
 
-	group = &library.OperGroup{Name: "group0", Type: backend.OperGroupTypeAvg}
+	group := &library.OperGroup{Name: "group0", Type: backend.OperGroupTypeAvg}
 	group.Series = append(group.Series, &library.Serie{Name: "serie0", Origin: "test", Source: "source1",
 		Metric: "database1/test"})
 	group.Series = append(group.Series, &library.Serie{Name: "serie1", Origin: "test", Source: "source2",
@@ -283,15 +230,15 @@ func Test_graphHandle(test *testing.T) {
 
 	stack.Groups = append(stack.Groups, group)
 
-	graphBase = &library.Graph{Item: library.Item{Name: "graph1", Description: "A great graph description."},
+	graphBase := &library.Graph{Item: library.Item{Name: "graph1", Description: "A great graph description."},
 		StackMode: library.StackModeNormal}
 	graphBase.Stacks = append(graphBase.Stacks, stack)
 
 	// Test #1 GET on graphs list
-	listBase = &types.ItemListResponse{}
-	listResult = &types.ItemListResponse{}
+	listBase := &types.ItemListResponse{}
+	listResult := &types.ItemListResponse{}
 
-	response = execTestRequest(test, "GET", baseURL, nil, false, &listResult.Items)
+	response := execTestRequest(test, "GET", baseURL, nil, false, &listResult.Items)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
@@ -312,7 +259,7 @@ func Test_graphHandle(test *testing.T) {
 	}
 
 	// Test POST into graph
-	data, _ = json.Marshal(graphBase)
+	data, _ := json.Marshal(graphBase)
 
 	response = execTestRequest(test, "POST", baseURL, strings.NewReader(string(data)), false, nil)
 
@@ -336,7 +283,7 @@ func Test_graphHandle(test *testing.T) {
 	graphBase.ID = response.Header.Get("Location")[strings.LastIndex(response.Header.Get("Location"), "/")+1:]
 
 	// Test #1 GET on graph item
-	graphResult = &library.Graph{}
+	graphResult := &library.Graph{}
 
 	response = execTestRequest(test, "GET", baseURL+"/"+graphBase.ID, nil, false, &graphResult)
 
@@ -485,20 +432,12 @@ func Test_graphHandle(test *testing.T) {
 }
 
 func Test_collectionHandle(test *testing.T) {
-	var (
-		baseURL        string
-		collectionBase struct {
-			*library.Collection
-			Parent string `json:"parent"`
-		}
-		collectionResult *library.Collection
-		data             []byte
-		listBase         *types.ItemListResponse
-		listResult       *types.ItemListResponse
-		response         *http.Response
-	)
+	var collectionBase struct {
+		*library.Collection
+		Parent string `json:"parent"`
+	}
 
-	baseURL = fmt.Sprintf("http://%s/library/collections", serverConfig.BindAddr)
+	baseURL := fmt.Sprintf("http://%s/library/collections", serverConfig.BindAddr)
 
 	// Define a sample collection
 	collectionBase.Collection = &library.Collection{Item: library.Item{Name: "collection0",
@@ -515,10 +454,10 @@ func Test_collectionHandle(test *testing.T) {
 			Options: map[string]string{"range": "-1w"}})
 
 	// Test #1 GET on collections list
-	listBase = &types.ItemListResponse{}
-	listResult = &types.ItemListResponse{}
+	listBase := &types.ItemListResponse{}
+	listResult := &types.ItemListResponse{}
 
-	response = execTestRequest(test, "GET", baseURL, nil, false, &listResult.Items)
+	response := execTestRequest(test, "GET", baseURL, nil, false, &listResult.Items)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
@@ -539,7 +478,7 @@ func Test_collectionHandle(test *testing.T) {
 	}
 
 	// Test POST into collection
-	data, _ = json.Marshal(collectionBase)
+	data, _ := json.Marshal(collectionBase)
 
 	response = execTestRequest(test, "POST", baseURL, strings.NewReader(string(data)), false, nil)
 
@@ -563,7 +502,7 @@ func Test_collectionHandle(test *testing.T) {
 	collectionBase.ID = response.Header.Get("Location")[strings.LastIndex(response.Header.Get("Location"), "/")+1:]
 
 	// Test #1 GET on collection item
-	collectionResult = &library.Collection{}
+	collectionResult := &library.Collection{}
 
 	response = execTestRequest(test, "GET", baseURL+"/"+collectionBase.ID, nil, false, &collectionResult)
 
@@ -659,23 +598,14 @@ func Test_collectionHandle(test *testing.T) {
 
 func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group, expandData,
 	expandBase types.ExpandRequest) {
-	var (
-		baseURL      string
-		data         []byte
-		expandResult []types.ExpandRequest
-		groupResult  *library.Group
-		listBase     *types.ItemListResponse
-		listResult   *types.ItemListResponse
-		response     *http.Response
-	)
 
-	baseURL = fmt.Sprintf("http://%s/library/%s", serverConfig.BindAddr, urlPrefix)
+	baseURL := fmt.Sprintf("http://%s/library/%s", serverConfig.BindAddr, urlPrefix)
 
 	// Test #1 GET on groups list
-	listBase = &types.ItemListResponse{}
-	listResult = &types.ItemListResponse{}
+	listBase := &types.ItemListResponse{}
+	listResult := &types.ItemListResponse{}
 
-	response = execTestRequest(test, "GET", baseURL, nil, false, &listResult.Items)
+	response := execTestRequest(test, "GET", baseURL, nil, false, &listResult.Items)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
@@ -696,7 +626,7 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 	}
 
 	// Test POST into group
-	data, _ = json.Marshal(groupBase)
+	data, _ := json.Marshal(groupBase)
 
 	response = execTestRequest(test, "POST", baseURL, strings.NewReader(string(data)), false, nil)
 
@@ -720,7 +650,7 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 	groupBase.ID = response.Header.Get("Location")[strings.LastIndex(response.Header.Get("Location"), "/")+1:]
 
 	// Test #1 GET on group item
-	groupResult = &library.Group{}
+	groupResult := &library.Group{}
 
 	response = execTestRequest(test, "GET", baseURL+"/"+groupBase.ID, nil, false, &groupResult)
 
@@ -794,6 +724,8 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 	// Test group expansion
 	data, _ = json.Marshal(expandData)
 
+	expandResult := []types.ExpandRequest{}
+
 	response = execTestRequest(test, "POST", fmt.Sprintf("http://%s/library/expand", serverConfig.BindAddr),
 		strings.NewReader(string(data)), false, &expandResult)
 
@@ -832,15 +764,9 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 
 func execTestRequest(test *testing.T, method, url string, data io.Reader, auth bool,
 	result interface{}) *http.Response {
-	var (
-		body     []byte
-		client   *http.Client
-		err      error
-		request  *http.Request
-		response *http.Response
-	)
 
-	if request, err = http.NewRequest(method, url, data); err != nil {
+	request, err := http.NewRequest(method, url, data)
+	if err != nil {
 		test.Fatal(err.Error())
 	}
 
@@ -853,16 +779,18 @@ func execTestRequest(test *testing.T, method, url string, data io.Reader, auth b
 		request.Header.Add("Content-Type", "application/json")
 	}
 
-	client = &http.Client{}
+	client := &http.Client{}
 
-	if response, err = client.Do(request); err != nil {
+	response, err := client.Do(request)
+	if err != nil {
 		test.Fatal(err.Error())
 	}
 
 	defer response.Body.Close()
 
 	if result != nil {
-		if body, err = ioutil.ReadAll(response.Body); err != nil {
+		body, err := ioutil.ReadAll(response.Body)
+		if err != nil {
 			test.Fatal(err.Error())
 		}
 
@@ -873,13 +801,9 @@ func execTestRequest(test *testing.T, method, url string, data io.Reader, auth b
 }
 
 func init() {
-	var (
-		err error
-	)
-
 	// Load server configuration
 	serverConfig = &config.Config{}
-	if err = serverConfig.Load(flagConfig); err != nil {
+	if err := serverConfig.Load(flagConfig); err != nil {
 		fmt.Println("Error: " + err.Error())
 		os.Exit(1)
 	}

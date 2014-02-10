@@ -16,15 +16,9 @@ import (
 
 func (server *Server) libraryList(writer http.ResponseWriter, request *http.Request) {
 	var (
-		collection *library.Collection
-		err        error
-		graphSet   *set.Set
-		isSource   bool
-		item       interface{}
-		limit      int
-		offset     int
-		response   types.ItemListResponse
-		skip       bool
+		err    error
+		limit  int
+		offset int
 	)
 
 	if request.Method != "GET" && request.Method != "HEAD" {
@@ -46,8 +40,10 @@ func (server *Server) libraryList(writer http.ResponseWriter, request *http.Requ
 		}
 	}
 
+	response := types.ItemListResponse{}
+
 	if request.URL.Path == URLLibraryPath+"/sourcegroups" || request.URL.Path == URLLibraryPath+"/metricgroups" {
-		isSource = request.URL.Path == URLLibraryPath+"/sourcegroups"
+		isSource := request.URL.Path == URLLibraryPath+"/sourcegroups"
 
 		// Get and filter source groups list
 		for _, group := range server.Library.Groups {
@@ -70,11 +66,13 @@ func (server *Server) libraryList(writer http.ResponseWriter, request *http.Requ
 			})
 		}
 	} else if request.URL.Path == URLLibraryPath+"/graphs" {
-		graphSet = set.New()
+		skip := false
+
+		graphSet := set.New()
 
 		// Filter by collection
 		if request.FormValue("collection") != "" {
-			item, err = server.Library.GetItem(request.FormValue("collection"), library.LibraryItemCollection)
+			item, err := server.Library.GetItem(request.FormValue("collection"), library.LibraryItemCollection)
 			if os.IsNotExist(err) {
 				skip = true
 			} else if err != nil {
@@ -82,7 +80,7 @@ func (server *Server) libraryList(writer http.ResponseWriter, request *http.Requ
 				return
 			}
 
-			collection = item.(*library.Collection)
+			collection := item.(*library.Collection)
 
 			for _, graph := range collection.Entries {
 				graphSet.Add(graph.ID)

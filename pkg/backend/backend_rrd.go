@@ -32,22 +32,18 @@ type RRDMetric struct {
 // GetPlots calculates and returns plot data based on a time interval.
 func (handler *RRDBackendHandler) GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
 	percentiles []float64) (map[string]*PlotResult, error) {
+
 	return handler.rrdGetData(query, startTime, endTime, step, percentiles, false)
 }
 
 // GetValue calculates and returns plot data at a specific reference time.
 func (handler *RRDBackendHandler) GetValue(query *GroupQuery, refTime time.Time,
 	percentiles []float64) (map[string]map[string]types.PlotValue, error) {
-	var (
-		data   map[string]*PlotResult
-		err    error
-		result map[string]map[string]types.PlotValue
-	)
 
-	result = make(map[string]map[string]types.PlotValue)
+	result := make(map[string]map[string]types.PlotValue)
 
-	if data, err = handler.rrdGetData(query, refTime.Add(-1*time.Minute), refTime, time.Minute, percentiles,
-		true); err != nil {
+	data, err := handler.rrdGetData(query, refTime.Add(-1*time.Minute), refTime, time.Minute, percentiles, true)
+	if err != nil {
 		return nil, err
 	}
 
@@ -60,18 +56,11 @@ func (handler *RRDBackendHandler) GetValue(query *GroupQuery, refTime time.Time,
 
 // Update triggers a full backend data update.
 func (handler *RRDBackendHandler) Update() error {
-	var (
-		err      error
-		groups   map[string]bool
-		re       *regexp.Regexp
-		walkFunc func(filePath string, fileInfo os.FileInfo, err error) error
-	)
-
 	// Compile pattern
-	re = regexp.MustCompile(handler.Pattern)
+	re := regexp.MustCompile(handler.Pattern)
 
 	// Validate pattern keywords
-	groups = make(map[string]bool)
+	groups := make(map[string]bool)
 
 	for _, key := range re.SubexpNames() {
 		if key == "" {
@@ -90,23 +79,25 @@ func (handler *RRDBackendHandler) Update() error {
 	}
 
 	// Search for files and parse their path for source/metric pairs
-	walkFunc = func(filePath string, fileInfo os.FileInfo, err error) error {
+	walkFunc := func(filePath string, fileInfo os.FileInfo, err error) error {
 		var (
-			info       map[string]interface{}
-			metric     string
-			metricName string
-			mode       os.FileMode
-			source     string
-			submatch   []string
+			metric string
+			source string
 		)
 
+		// Stop if previous error
 		if err != nil {
-			// Stop if previous error
 			return err
-		} else if mode = fileInfo.Mode() & os.ModeType; mode != 0 {
-			// Skip non-files
+		}
+
+		// Skip non-files
+		mode := fileInfo.Mode() & os.ModeType
+		if mode != 0 {
 			return nil
-		} else if submatch = re.FindStringSubmatch(filePath[len(handler.Path)+1:]); len(submatch) == 0 {
+		}
+
+		submatch := re.FindStringSubmatch(filePath[len(handler.Path)+1:])
+		if len(submatch) == 0 {
 			log.Printf("WARNING: file `%s' does not match pattern", filePath)
 			return nil
 		}
@@ -124,13 +115,14 @@ func (handler *RRDBackendHandler) Update() error {
 		}
 
 		// Extract metric information from .rrd file
-		if info, err = rrd.Info(filePath); err != nil {
+		info, err := rrd.Info(filePath)
+		if err != nil {
 			return err
 		}
 
 		if _, ok := info["ds.index"]; ok {
 			for dsName := range info["ds.index"].(map[string]interface{}) {
-				metricName = metric + "/" + dsName
+				metricName := metric + "/" + dsName
 
 				handler.origin.inputChan <- [2]string{source, metricName}
 				handler.metrics[source][metricName] = &RRDMetric{Dataset: dsName, FilePath: filePath}
@@ -140,7 +132,8 @@ func (handler *RRDBackendHandler) Update() error {
 		return err
 	}
 
-	if err = utils.WalkDir(handler.Path, walkFunc); err != nil {
+	err := utils.WalkDir(handler.Path, walkFunc)
+	if err != nil {
 		return err
 	}
 
@@ -149,31 +142,8 @@ func (handler *RRDBackendHandler) Update() error {
 
 func (handler *RRDBackendHandler) rrdGetData(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
 	percentiles []float64, infoOnly bool) (map[string]*PlotResult, error) {
-	var (
-		count      int
-		data       rrd.XportResult
-		err        error
-		graph      *rrd.Grapher
-		graphInfo  rrd.GraphInfo
-		i          int
-		result     map[string]*PlotResult
-		serieCount int
-		serieName  string
-		series     map[string]string
-		serieTemp  string
-		stack      []string
-		xport      *rrd.Exporter
-	)
 
-	result = make(map[string]*PlotResult)
-	series = make(map[string]string)
-
-	stack = nil
-	graph = rrd.NewGrapher()
-
-	if !infoOnly {
-		xport = rrd.NewExporter()
-	}
+	var xport *rrd.Exporter
 
 	if len(query.Series) == 0 {
 		return nil, fmt.Errorf("group has no series")
@@ -181,17 +151,29 @@ func (handler *RRDBackendHandler) rrdGetData(query *GroupQuery, startTime, endTi
 		query.Type = OperGroupTypeNone
 	}
 
+	result := make(map[string]*PlotResult)
+	series := make(map[string]string)
+
+	stack := []string{}
+	graph := rrd.NewGrapher()
+
+	if !infoOnly {
+		xport = rrd.NewExporter()
+	}
+
+	count := 0
+
 	switch query.Type {
 	case OperGroupTypeNone:
-		serieCount = len(query.Series)
+		serieCount := len(query.Series)
 
 		for _, serie := range query.Series {
 			if serie.Metric == nil {
 				continue
 			}
 
-			serieTemp = fmt.Sprintf("serie%d", count)
-			serieName = serie.Name
+			serieTemp := fmt.Sprintf("serie%d", count)
+			serieName := serie.Name
 
 			if serieCount > 1 {
 				serieName += fmt.Sprintf("-%d", count)
@@ -252,7 +234,7 @@ func (handler *RRDBackendHandler) rrdGetData(query *GroupQuery, startTime, endTi
 		break
 
 	case OperGroupTypeAvg, OperGroupTypeSum:
-		serieName = fmt.Sprintf("serie%d", count)
+		serieName := fmt.Sprintf("serie%d", count)
 		count += 1
 
 		for index, serie := range query.Series {
@@ -260,7 +242,7 @@ func (handler *RRDBackendHandler) rrdGetData(query *GroupQuery, startTime, endTi
 				continue
 			}
 
-			serieTemp = serieName + fmt.Sprintf("-tmp%d", index)
+			serieTemp := serieName + fmt.Sprintf("-tmp%d", index)
 
 			graph.Def(
 				serieTemp,
@@ -323,15 +305,18 @@ func (handler *RRDBackendHandler) rrdGetData(query *GroupQuery, startTime, endTi
 	}
 
 	// Get plots
+	data := rrd.XportResult{}
+
 	if !infoOnly {
-		if data, err = xport.Xport(startTime, endTime, step); err != nil {
+		data, err := xport.Xport(startTime, endTime, step)
+		if err != nil {
 			return nil, err
 		}
 
 		for index, serieName := range data.Legends {
 			result[series[serieName]] = &PlotResult{Info: make(map[string]types.PlotValue)}
 
-			for i = 0; i < data.RowCnt; i++ {
+			for i := 0; i < data.RowCnt; i++ {
 				result[series[serieName]].Plots = append(result[series[serieName]].Plots,
 					types.PlotValue(data.ValueAt(index, i)))
 			}
@@ -339,7 +324,8 @@ func (handler *RRDBackendHandler) rrdGetData(query *GroupQuery, startTime, endTi
 	}
 
 	// Parse graph information
-	if graphInfo, _, err = graph.Graph(startTime, endTime); err != nil {
+	graphInfo, _, err := graph.Graph(startTime, endTime)
+	if err != nil {
 		return nil, err
 	}
 
@@ -351,16 +337,11 @@ func (handler *RRDBackendHandler) rrdGetData(query *GroupQuery, startTime, endTi
 }
 
 func rrdParseInfo(info rrd.GraphInfo, data map[string]*PlotResult) {
-	var (
-		chunks     []string
-		chunkFloat float64
-		err        error
-	)
-
 	for _, value := range info.Print {
-		chunks = strings.SplitN(value, ",", 3)
+		chunks := strings.SplitN(value, ",", 3)
 
-		if chunkFloat, err = strconv.ParseFloat(chunks[2], 64); err != nil {
+		chunkFloat, err := strconv.ParseFloat(chunks[2], 64)
+		if err != nil {
 			chunkFloat = math.NaN()
 		}
 

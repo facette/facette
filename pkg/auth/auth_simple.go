@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
-	"hash"
 	"log"
 
 	"github.com/facette/facette/pkg/utils"
@@ -28,12 +27,8 @@ func (handler *AuthSimpleHandler) Authenticate(login, password string) bool {
 
 // Hash generates the password hash.
 func (handler *AuthSimpleHandler) Hash(password string) string {
-	var (
-		hash hash.Hash
-	)
-
 	// Get password hash
-	hash = sha256.New()
+	hash := sha256.New()
 	hash.Write([]byte(password))
 
 	return base64.StdEncoding.EncodeToString(hash.Sum(nil))
@@ -41,10 +36,6 @@ func (handler *AuthSimpleHandler) Hash(password string) string {
 
 // Update updates the authentication base content.
 func (handler *AuthSimpleHandler) Update() error {
-	var (
-		err error
-	)
-
 	if _, ok := handler.Config["path"]; !ok {
 		return fmt.Errorf("missing `path' authentication backend setting")
 	}
@@ -56,7 +47,7 @@ func (handler *AuthSimpleHandler) Update() error {
 	// Empty users map
 	handler.Users = make(map[string]string)
 
-	_, err = utils.JSONLoad(handler.Config["path"], &handler.Users)
+	_, err := utils.JSONLoad(handler.Config["path"], &handler.Users)
 	return err
 }
 

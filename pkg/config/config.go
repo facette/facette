@@ -33,29 +33,22 @@ type Config struct {
 
 // Load loads the configuration from the filesystem using the filePath paramater as origin path.
 func (config *Config) Load(filePath string) error {
-	var (
-		err       error
-		errOutput error
-		walkFunc  func(filePath string, fileInfo os.FileInfo, err error) error
-	)
+	var errOutput error
 
-	if _, err = utils.JSONLoad(filePath, &config); err != nil {
+	_, err := utils.JSONLoad(filePath, &config)
+	if err != nil {
 		return err
 	}
 
 	// Load origin definitions
 	config.Origins = make(map[string]*OriginConfig)
 
-	walkFunc = func(filePath string, fileInfo os.FileInfo, err error) error {
-		var (
-			originName string
-		)
-
+	walkFunc := func(filePath string, fileInfo os.FileInfo, err error) error {
 		if fileInfo.IsDir() || !strings.HasSuffix(filePath, ".json") {
 			return nil
 		}
 
-		_, originName = path.Split(filePath[:len(filePath)-5])
+		_, originName := path.Split(filePath[:len(filePath)-5])
 
 		config.Origins[originName] = &OriginConfig{}
 

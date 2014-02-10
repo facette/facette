@@ -25,16 +25,7 @@ func (server *Server) collectionHandle(writer http.ResponseWriter, request *http
 		Parent string `json:"parent"`
 	}
 
-	var (
-		body           []byte
-		collection     *library.Collection
-		collectionID   string
-		collectionTemp *tmpCollection
-		err            error
-		item           interface{}
-	)
-
-	collectionID = mux.Vars(request)["id"]
+	collectionID := mux.Vars(request)["id"]
 
 	switch request.Method {
 	case "DELETE":
@@ -47,7 +38,7 @@ func (server *Server) collectionHandle(writer http.ResponseWriter, request *http
 		}
 
 		// Remove collection from library
-		err = server.Library.DeleteItem(collectionID, library.LibraryItemCollection)
+		err := server.Library.DeleteItem(collectionID, library.LibraryItemCollection)
 		if os.IsNotExist(err) {
 			server.handleResponse(writer, http.StatusNotFound)
 			return
@@ -66,8 +57,7 @@ func (server *Server) collectionHandle(writer http.ResponseWriter, request *http
 		}
 
 		// Get collection from library
-		item, err = server.Library.GetItem(collectionID, library.LibraryItemCollection)
-
+		item, err := server.Library.GetItem(collectionID, library.LibraryItemCollection)
 		if os.IsNotExist(err) {
 			server.handleResponse(writer, http.StatusNotFound)
 			return
@@ -94,7 +84,7 @@ func (server *Server) collectionHandle(writer http.ResponseWriter, request *http
 			return
 		}
 
-		collectionTemp = &tmpCollection{
+		collectionTemp := &tmpCollection{
 			Collection: &library.Collection{
 				Item: library.Item{ID: collectionID},
 			},
@@ -102,8 +92,7 @@ func (server *Server) collectionHandle(writer http.ResponseWriter, request *http
 
 		if request.Method == "POST" && request.FormValue("inherit") != "" {
 			// Get collection from library
-			item, err = server.Library.GetItem(request.FormValue("inherit"), library.LibraryItemCollection)
-
+			item, err := server.Library.GetItem(request.FormValue("inherit"), library.LibraryItemCollection)
 			if os.IsNotExist(err) {
 				server.handleResponse(writer, http.StatusNotFound)
 				return
@@ -121,17 +110,17 @@ func (server *Server) collectionHandle(writer http.ResponseWriter, request *http
 		collectionTemp.Collection.Modified = time.Now()
 
 		// Parse input JSON for collection data
-		body, _ = ioutil.ReadAll(request.Body)
+		body, _ := ioutil.ReadAll(request.Body)
 
-		if err = json.Unmarshal(body, &collectionTemp); err != nil {
+		if err := json.Unmarshal(body, &collectionTemp); err != nil {
 			log.Println("ERROR: " + err.Error())
 			server.handleResponse(writer, http.StatusBadRequest)
 			return
 		}
 
 		// Update parent relation
-		if item, _ = server.Library.GetItem(collectionTemp.Parent, library.LibraryItemCollection); item != nil {
-			collection = item.(*library.Collection)
+		if item, _ := server.Library.GetItem(collectionTemp.Parent, library.LibraryItemCollection); item != nil {
+			collection := item.(*library.Collection)
 
 			// Register parent relation
 			collectionTemp.Collection.Parent = collection
@@ -139,9 +128,9 @@ func (server *Server) collectionHandle(writer http.ResponseWriter, request *http
 			collection.Children = append(collection.Children, collectionTemp.Collection)
 		} else {
 			// Remove existing parent relation
-			if item, _ = server.Library.GetItem(collectionTemp.Collection.ID,
+			if item, _ := server.Library.GetItem(collectionTemp.Collection.ID,
 				library.LibraryItemCollection); item != nil {
-				collection = item.(*library.Collection)
+				collection := item.(*library.Collection)
 
 				if collection.Parent != nil {
 					for index, child := range collection.Parent.Children {
@@ -156,12 +145,12 @@ func (server *Server) collectionHandle(writer http.ResponseWriter, request *http
 		}
 
 		// Keep current children list
-		if item, _ = server.Library.GetItem(collectionTemp.Collection.ID, library.LibraryItemCollection); item != nil {
+		if item, _ := server.Library.GetItem(collectionTemp.Collection.ID, library.LibraryItemCollection); item != nil {
 			collectionTemp.Collection.Children = item.(*library.Collection).Children
 		}
 
 		// Store collection data
-		err = server.Library.StoreItem(collectionTemp.Collection, library.LibraryItemCollection)
+		err := server.Library.StoreItem(collectionTemp.Collection, library.LibraryItemCollection)
 		if err == os.ErrInvalid {
 			server.handleResponse(writer, http.StatusBadRequest)
 			return
@@ -191,15 +180,9 @@ func (server *Server) collectionHandle(writer http.ResponseWriter, request *http
 
 func (server *Server) collectionList(writer http.ResponseWriter, request *http.Request) {
 	var (
-		collection      *library.Collection
-		collectionItem  *types.CollectionResponse
-		collectionStack []*library.Collection
-		err             error
-		excludeSet      *set.Set
-		item            interface{}
-		limit           int
-		offset          int
-		response        types.CollectionListResponse
+		err    error
+		limit  int
+		offset int
 	)
 
 	if request.Method != "GET" && request.Method != "HEAD" {
@@ -222,22 +205,25 @@ func (server *Server) collectionList(writer http.ResponseWriter, request *http.R
 	}
 
 	// Check for item exclusion
-	excludeSet = set.New()
+	excludeSet := set.New()
+
+	collectionStack := []*library.Collection{}
 
 	if request.FormValue("exclude") != "" {
-		if item, err = server.Library.GetItem(request.FormValue("exclude"),
-			library.LibraryItemCollection); err == nil {
+		if item, err := server.Library.GetItem(request.FormValue("exclude"), library.LibraryItemCollection); err == nil {
 			collectionStack = append(collectionStack, item.(*library.Collection))
 		}
 
 		for len(collectionStack) > 0 {
-			collection, collectionStack = collectionStack[0], collectionStack[1:]
+			collection, collectionStack := collectionStack[0], collectionStack[1:]
 			excludeSet.Add(collection.ID)
 			collectionStack = append(collectionStack, collection.Children...)
 		}
 	}
 
 	// Get and filter collections list
+	response := types.CollectionListResponse{}
+
 	for _, collection := range server.Library.Collections {
 		if request.FormValue("parent") != "" && (request.FormValue("parent") == "" &&
 			collection.Parent != nil || request.FormValue("parent") != "" &&
@@ -245,10 +231,9 @@ func (server *Server) collectionList(writer http.ResponseWriter, request *http.R
 			continue
 		}
 
-		if request.FormValue("filter") != "" {
-			if !utils.FilterMatch(strings.ToLower(request.FormValue("filter")), strings.ToLower(collection.Name)) {
-				continue
-			}
+		if request.FormValue("filter") != "" && !utils.FilterMatch(strings.ToLower(request.FormValue("filter")),
+			strings.ToLower(collection.Name)) {
+			continue
 		}
 
 		// Skip excluded items
@@ -256,7 +241,7 @@ func (server *Server) collectionList(writer http.ResponseWriter, request *http.R
 			continue
 		}
 
-		collectionItem = &types.CollectionResponse{ItemResponse: types.ItemResponse{
+		collectionItem := &types.CollectionResponse{ItemResponse: types.ItemResponse{
 			ID:          collection.ID,
 			Name:        collection.Name,
 			Description: collection.Description,

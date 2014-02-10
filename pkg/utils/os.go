@@ -6,25 +6,17 @@ import (
 )
 
 func walkDir(dirPath string, linkPath string, walkFunc filepath.WalkFunc) error {
-	var (
-		err error
-	)
-
-	if _, err = os.Stat(dirPath); err != nil {
+	if _, err := os.Stat(dirPath); err != nil {
 		return err
 	}
 
 	// Search for files recursively
 	internalFunc := func(filePath string, fileInfo os.FileInfo, err error) error {
-		var (
-			mode     os.FileMode
-			realPath string
-		)
-
-		mode = fileInfo.Mode() & os.ModeType
+		mode := fileInfo.Mode() & os.ModeType
 
 		if mode == os.ModeSymlink {
-			if realPath, err = filepath.EvalSymlinks(filePath); err != nil {
+			realPath, err := filepath.EvalSymlinks(filePath)
+			if err != nil {
 				return err
 			}
 

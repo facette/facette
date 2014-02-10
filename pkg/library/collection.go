@@ -7,7 +7,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
@@ -29,15 +28,11 @@ type Collection struct {
 
 // FilterCollection filters collection entries by graphs titles.
 func (library *Library) FilterCollection(collection *Collection, filter string) *Collection {
-	var (
-		collectionTemp *Collection
-	)
-
 	if filter == "" {
 		return nil
 	}
 
-	collectionTemp = &Collection{}
+	collectionTemp := &Collection{}
 	*collectionTemp = *collection
 	collectionTemp.Entries = nil
 
@@ -56,32 +51,21 @@ func (library *Library) FilterCollection(collection *Collection, filter string) 
 
 // GetCollectionTemplate generates a Collection based on origins templates.
 func (library *Library) GetCollectionTemplate(name string) (*Collection, error) {
-	var (
-		chunks        []string
-		collection    *Collection
-		count         int
-		found         bool
-		metricSet     *set.Set
-		options       map[string]string
-		pattern       string
-		patternMatch  bool
-		patternRegexp *regexp.Regexp
-		splitItems    []string
-		splitSet      *set.Set
-		template      *config.TemplateConfig
-		templates     []string
-	)
+	found := false
 
-	collection = &Collection{Item: Item{Name: name}}
+	collection := &Collection{Item: Item{Name: name}}
 
 	for originName, origin := range library.Catalog.Origins {
 		if _, ok := origin.Sources[name]; !ok {
 			continue
 		}
 
+		count := 0
 		found = true
 
 		// Get sorted templates list
+		templates := []string{}
+
 		for templateName := range library.Config.Origins[originName].Templates {
 			templates = append(templates, templateName)
 		}
@@ -89,7 +73,7 @@ func (library *Library) GetCollectionTemplate(name string) (*Collection, error) 
 		sort.Strings(templates)
 
 		// Prepare metrics
-		metricSet = set.New()
+		metricSet := set.New()
 
 		for metricName := range library.Catalog.Origins[originName].Sources[name].Metrics {
 			metricSet.Add(metricName)
@@ -97,13 +81,14 @@ func (library *Library) GetCollectionTemplate(name string) (*Collection, error) 
 
 		// Parse template entries
 		for _, templateName := range templates {
-			template = library.Config.Origins[originName].Templates[templateName]
+			template := library.Config.Origins[originName].Templates[templateName]
 
 			if template.SplitPattern != "" {
-				splitSet = set.New()
+				splitSet := set.New()
 
 				for metricName := range library.Catalog.Origins[originName].Sources[name].Metrics {
-					if chunks = template.SplitRegexp.FindStringSubmatch(metricName); len(chunks) != 2 {
+					chunks := template.SplitRegexp.FindStringSubmatch(metricName)
+					if len(chunks) != 2 {
 						continue
 					}
 
@@ -111,11 +96,11 @@ func (library *Library) GetCollectionTemplate(name string) (*Collection, error) 
 					splitSet.Add(chunks[1])
 				}
 
-				splitItems = splitSet.StringSlice()
+				splitItems := splitSet.StringSlice()
 				sort.Strings(splitItems)
 
 				for _, itemName := range splitItems {
-					options = make(map[string]string)
+					options := make(map[string]string)
 
 					if template.Options != nil {
 						utils.Clone(template.Options, &options)
@@ -138,8 +123,8 @@ func (library *Library) GetCollectionTemplate(name string) (*Collection, error) 
 					count += 1
 				}
 			} else {
-				pattern = ""
-				patternMatch = false
+				pattern := ""
+				patternMatch := false
 
 				for _, stackItem := range template.Stacks {
 					for _, groupItem := range stackItem.Groups {
@@ -151,7 +136,7 @@ func (library *Library) GetCollectionTemplate(name string) (*Collection, error) 
 					}
 				}
 
-				patternRegexp = regexp.MustCompile(pattern)
+				patternRegexp := regexp.MustCompile(pattern)
 
 				for metricName := range library.Catalog.Origins[originName].Sources[name].Metrics {
 					if !patternRegexp.MatchString(metricName) {
@@ -166,7 +151,7 @@ func (library *Library) GetCollectionTemplate(name string) (*Collection, error) 
 					continue
 				}
 
-				options = make(map[string]string)
+				options := make(map[string]string)
 
 				if template.Options != nil {
 					utils.Clone(template.Options, &options)
@@ -187,7 +172,7 @@ func (library *Library) GetCollectionTemplate(name string) (*Collection, error) 
 
 		// Handle non-template metrics
 		for _, metricName := range metricSet.StringSlice() {
-			options = make(map[string]string)
+			options := make(map[string]string)
 			options["origin"] = originName
 			options["source"] = name
 			options["metric"] = metricName

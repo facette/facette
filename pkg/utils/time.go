@@ -21,20 +21,15 @@ const (
 
 // TimeApplyRange applies a string defined time range to a specific date.
 func TimeApplyRange(refTime time.Time, input string) (time.Time, error) {
-	var (
-		chunks   []int
-		err      error
-		intVal   int
-		modifier int
-		newTime  time.Time
-		re       *regexp.Regexp
-	)
+	re := regexp.MustCompile(durationRegexp)
 
-	re = regexp.MustCompile(durationRegexp)
+	modifier := 1
 
-	modifier = 1
+	chunks := []int{}
 
 	for key, value := range re.FindStringSubmatch(strings.Trim(input, " ")) {
+		var intVal int
+
 		if key == 0 {
 			continue
 		} else if key == 1 {
@@ -46,19 +41,23 @@ func TimeApplyRange(refTime time.Time, input string) (time.Time, error) {
 		}
 
 		if value == "" {
-			intVal = 0
-		} else if intVal, err = strconv.Atoi(value); err != nil {
-			return newTime, fmt.Errorf("invalid range")
+			chunks = append(chunks, 0)
+			continue
+		}
+
+		intVal, err := strconv.Atoi(value)
+		if err != nil {
+			return time.Time{}, fmt.Errorf("invalid range")
 		}
 
 		chunks = append(chunks, intVal*modifier)
 	}
 
 	if len(chunks) == 0 {
-		return newTime, fmt.Errorf("invalid range")
+		return time.Time{}, fmt.Errorf("invalid range")
 	}
 
-	newTime = refTime.
+	newTime := refTime.
 		AddDate(chunks[0], chunks[1], chunks[2]).
 		Add(time.Duration(chunks[3]) * time.Hour).
 		Add(time.Duration(chunks[4]) * time.Minute).

@@ -18,28 +18,18 @@ type Catalog struct {
 
 // AddOrigin adds a new Origin entry into the Catalog instance.
 func (catalog *Catalog) AddOrigin(name string, config map[string]string) (*Origin, error) {
-	var (
-		err    error
-		origin *Origin
-	)
-
 	if _, ok := config["type"]; !ok {
 		return nil, fmt.Errorf("missing backend type")
 	} else if _, ok := BackendHandlers[config["type"]]; !ok {
 		return nil, fmt.Errorf("unknown `%s' backend type", config["type"])
 	}
 
-	origin = &Origin{Name: name, Sources: make(map[string]*Source), catalog: catalog}
+	origin := &Origin{Name: name, Sources: make(map[string]*Source), catalog: catalog}
 	origin.inputChan = make(chan [2]string)
 
 	go func() {
-		var (
-			originalSource string
-			originalMetric string
-		)
-
 		for entry := range origin.inputChan {
-			originalSource, originalMetric = entry[0], entry[1]
+			originalSource, originalMetric := entry[0], entry[1]
 
 			for _, filter := range catalog.Config.Origins[name].Filters {
 				if filter.Target != "source" && filter.Target != "metric" && filter.Target != "" {
@@ -74,7 +64,8 @@ func (catalog *Catalog) AddOrigin(name string, config map[string]string) (*Origi
 		}
 	}()
 
-	if err = BackendHandlers[config["type"]](origin, config); err != nil {
+	err := BackendHandlers[config["type"]](origin, config)
+	if err != nil {
 		return nil, err
 	}
 
@@ -107,12 +98,9 @@ func (catalog *Catalog) MetricExists(origin, source, name string) bool {
 
 // Update updates the current Catalog by updating its origins.
 func (catalog *Catalog) Update() error {
-	var (
-		err     error
-		success bool
-	)
+	var err error
 
-	success = true
+	success := true
 
 	log.Println("INFO: catalog update started")
 

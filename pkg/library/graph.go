@@ -58,12 +58,8 @@ type Graph struct {
 }
 
 func (library *Library) getTemplateID(origin, name string) (string, error) {
-	var (
-		err error
-		id  *uuid.UUID
-	)
-
-	if id, err = uuid.NewV3(uuid.NamespaceURL, []byte(origin+name)); err != nil {
+	id, err := uuid.NewV3(uuid.NamespaceURL, []byte(origin+name))
+	if err != nil {
 		return "", err
 	}
 
@@ -99,15 +95,7 @@ func (library *Library) GetGraphMetric(origin, source, metric string) (*Graph, e
 
 // GetGraphTemplate gets a graph template item.
 func (library *Library) GetGraphTemplate(origin, source, template, filter string) (*Graph, error) {
-	var (
-		graph *Graph
-		group *OperGroup
-		id    string
-		re    *regexp.Regexp
-		stack *Stack
-	)
-
-	id = origin + "\x30" + template + "\x30" + filter
+	id := origin + "\x30" + template + "\x30" + filter
 
 	if _, ok := library.Config.Origins[origin]; !ok {
 		return nil, fmt.Errorf("unknown `%s' origin", origin)
@@ -117,22 +105,24 @@ func (library *Library) GetGraphTemplate(origin, source, template, filter string
 
 	// Load template from filesystem if needed
 	if !library.ItemExists(id, LibraryItemGraphTemplate) {
-		graph = &Graph{
+		graph := &Graph{
 			Item:      Item{Name: template, Modified: library.Config.Origins[origin].Modified},
 			StackMode: library.Config.Origins[origin].Templates[template].StackMode,
 		}
 
 		for i, tmplStack := range library.Config.Origins[origin].Templates[template].Stacks {
-			stack = &Stack{Name: fmt.Sprintf("stack%d", i)}
+			stack := &Stack{Name: fmt.Sprintf("stack%d", i)}
 
 			for groupName, tmplGroup := range tmplStack.Groups {
+				var re *regexp.Regexp
+
 				if filter != "" {
 					re = regexp.MustCompile(strings.Replace(tmplGroup.Pattern, "%s", regexp.QuoteMeta(filter), 1))
 				} else {
 					re = regexp.MustCompile(tmplGroup.Pattern)
 				}
 
-				group = &OperGroup{Name: groupName, Type: tmplGroup.Type}
+				group := &OperGroup{Name: groupName, Type: tmplGroup.Type}
 
 				for metricName := range library.Catalog.Origins[origin].Sources[source].Metrics {
 					if !re.MatchString(metricName) {
