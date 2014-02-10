@@ -75,7 +75,7 @@ install-bin: build-bin
 	@install -d -m 0755 $(PREFIX) && cp -Rp $(TEMP_DIR)/bin $(PREFIX) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
-lint-bin:
+lint-bin: build-bin
 	@$(call mesg_start,lint,Checking sources with Golint...)
 	@$(GOLINT) $(GOLINT_ARGS) cmd pkg && $(call mesg_ok) || $(call mesg_fail)
 
@@ -224,7 +224,7 @@ test-pkg:
 			$(call mesg_ok) || $(call mesg_fail); \
 	done)
 
-test-server:
+test-server: build-bin
 	@$(call mesg_start,test,Starting facette server...)
 	@install -d -m 0755 $(TEMP_DIR)/tests && ($(TEMP_DIR)/bin/facette -c tests/facette.json >/dev/null &) && \
 		$(call mesg_ok) || $(call mesg_fail)
