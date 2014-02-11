@@ -1,13 +1,13 @@
-Index: facette/src/js/Makefile
+Index: facette/Makefile
 ===================================================================
---- facette.orig/src/js/Makefile	2013-11-17 11:05:41.172411382 +0100
-+++ facette/src/js/Makefile	2013-11-17 11:05:59.868570853 +0100
-@@ -4,7 +4,7 @@
- include ../../Makefile.inc
+--- facette.orig/Makefile	2014-02-11 08:53:28.558502554 +0100
++++ facette/Makefile	2014-02-11 08:54:13.554965146 +0100
+@@ -25,7 +25,7 @@
+ PANDOC_ARGS = --standalone --to man
  
- UGLIFYJS = uglifyjs
--UGLIFYJS_ARGS = --comments --compress --mangle --screw-ie8
-+UGLIFYJS_ARGS =
+ UGLIFYJS ?= uglifyjs
+-UGLIFYSCRIPT_ARGS = --comments --compress --mangle --screw-ie8
++UGLIFYSCRIPT_ARGS =
  
- JSHINT = jshint
+ JSHINT ?= jshint
  JSHINT_ARGS = --show-non-errors

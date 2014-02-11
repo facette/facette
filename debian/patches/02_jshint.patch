@@ -1,14 +1,15 @@
-Index: facette/src/js/Makefile
+Index: facette/Makefile
 ===================================================================
---- facette.orig/src/js/Makefile	2013-12-30 09:05:42.607235346 +0100
-+++ facette/src/js/Makefile	2013-12-30 11:37:33.423173174 +0100
-@@ -84,8 +84,7 @@
+--- facette.orig/Makefile	2014-02-11 00:20:04.037793998 +0100
++++ facette/Makefile	2014-02-11 08:53:17.818392083 +0100
+@@ -242,9 +242,7 @@
  		$(call mesg_ok) || $(call mesg_fail)
  
- lint: $(JS_FILE)
--	@$(call mesg_start,Checking $(notdir $(JS_FILE)) with JSHint...)
--	-@$(JSHINT) $(JS_FILE) $(JSHINT_ARGS) && $(call mesg_ok) || $(call mesg_fail)
+ lint-static: $(SCRIPT_OUTPUT)
+-	@$(call mesg_start,lint,Checking $(notdir $(SCRIPT_OUTPUT:.js=.src.js)) with JSHint...)
+-	-@$(JSHINT) $(JSHINT_ARGS) $(SCRIPT_OUTPUT:.js=.src.js) && \
+-		$(call mesg_ok) || $(call mesg_fail)
 +	@#PATCH: “Evil” JSHint removal
  
- build: $(JS_FILE_MIN) $(MSG_FILE_MIN)
- 
+ # Test
+ PKG_SRC = $(wildcard pkg/*)

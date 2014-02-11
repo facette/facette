@@ -1,22 +1,22 @@
-Index: facette/src/style/Makefile
+Index: facette/Makefile
 ===================================================================
---- facette.orig/src/style/Makefile	2013-12-26 11:30:04.000000000 +0100
-+++ facette/src/style/Makefile	2013-12-26 11:33:08.320112465 +0100
-@@ -53,7 +53,7 @@
- 
- $(CSS_FILE_MIN): $(TEMP_DIR) $(CSS_FILE)
- 	@$(call mesg_start,Packing $(notdir $(CSS_FILE)) file...)
--	@$(LESSC) $(LESSC_ARGS) --yui-compress $(CSS_FILE) >$(CSS_FILE_MIN) && $(call mesg_ok) || $(call mesg_fail)
-+	@$(LESSC) $(LESSC_ARGS) --compress $(CSS_FILE) >$(CSS_FILE_MIN) && $(call mesg_ok) || $(call mesg_fail)
- 
- $(CSS_FILE_PRINT): $(TEMP_DIR) $(SRC_FILES_PRINT)
- 	@$(call mesg_start,Merging source files into $(notdir $(CSS_FILE_PRINT))...)
-@@ -61,7 +61,7 @@
- 
- $(CSS_FILE_PRINT_MIN): $(TEMP_DIR) $(CSS_FILE_PRINT)
- 	@$(call mesg_start,Packing $(notdir $(CSS_FILE_PRINT)) file...)
--	@$(LESSC) $(LESSC_ARGS) --yui-compress $(CSS_FILE_PRINT) >$(CSS_FILE_PRINT_MIN) && \
-+	@$(LESSC) $(LESSC_ARGS) --compress $(CSS_FILE_PRINT) >$(CSS_FILE_PRINT_MIN) && \
+--- facette.orig/Makefile	2014-02-11 08:54:13.554965146 +0100
++++ facette/Makefile	2014-02-11 08:54:53.555376381 +0100
+@@ -208,7 +208,7 @@
+ 	@install -d -m 0755 $(TEMP_DIR)/static && cat $(STYLE_SRC) >$(STYLE_OUTPUT:.css=.src.css) && \
+ 		$(call mesg_ok) || $(call mesg_fail)
+ 	@$(call mesg_start,static,Packing $(notdir $(STYLE_OUTPUT:.css=.src.css)) file...)
+-	@$(LESSC) $(LESSC_ARGS) --yui-compress $(STYLE_OUTPUT:.css=.src.css) >$(STYLE_OUTPUT) && \
++	@$(LESSC) $(LESSC_ARGS) --compress $(STYLE_OUTPUT:.css=.src.css) >$(STYLE_OUTPUT) && \
  		$(call mesg_ok) || $(call mesg_fail)
  
- lint:
+ $(STYLE_PRINT_OUTPUT): $(STYLE_PRINT_SRC)
+@@ -216,7 +216,7 @@
+ 	@install -d -m 0755 $(TEMP_DIR)/static && cat $(STYLE_PRINT_SRC) >$(STYLE_PRINT_OUTPUT:.css=.src.css) && \
+ 		$(call mesg_ok) || $(call mesg_fail)
+ 	@$(call mesg_start,static,Packing $(notdir $(STYLE_PRINT_OUTPUT:.css=.src.css)) file...)
+-	@$(LESSC) $(LESSC_ARGS) --yui-compress $(STYLE_PRINT_OUTPUT:.css=.src.css) >$(STYLE_PRINT_OUTPUT) && \
++	@$(LESSC) $(LESSC_ARGS) --compress $(STYLE_PRINT_OUTPUT:.css=.src.css) >$(STYLE_PRINT_OUTPUT) && \
+ 		$(call mesg_ok) || $(call mesg_fail)
+ 
+ $(STYLE_EXTRA_OUTPUT): $(STYLE_EXTRA)
