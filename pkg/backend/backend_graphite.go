@@ -196,14 +196,34 @@ func graphiteBuildQueryURL(target string, startTime, endTime time.Time) (string,
 
 func graphiteExtractPlotResult(graphitePlots []graphitePlot) (*PlotResult, error) {
 	var (
-		pr *PlotResult
+		pr              *PlotResult
+		min, max, total float64
 	)
 
-	pr = &PlotResult{}
+	pr = &PlotResult{Info: make(map[string]types.PlotValue)}
 
 	for _, plotPoint := range graphitePlots[0].Datapoints {
+		// Actual plot value
 		pr.Plots = append(pr.Plots, types.PlotValue(plotPoint[0]))
+
+		// Minimum value (exclude NaN values)
+		if plotPoint[0] < min {
+			min = plotPoint[0]
+		}
+
+		// Maximum value
+		if plotPoint[0] > max {
+			max = plotPoint[0]
+		}
+
+		// Total, to be used for average computation
+		total += plotPoint[0]
 	}
+
+	pr.Info["min"] = types.PlotValue(min)
+	pr.Info["max"] = types.PlotValue(max)
+	pr.Info["avg"] = types.PlotValue(total / float64(len(pr.Plots)))
+	pr.Info["last"] = types.PlotValue(pr.Plots[len(pr.Plots)-1])
 
 	return pr, nil
 }
