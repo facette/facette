@@ -4,11 +4,12 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"github.com/facette/facette/pkg/types"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/facette/facette/pkg/types"
 )
 
 const (
