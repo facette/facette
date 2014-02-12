@@ -95,6 +95,9 @@ if (window.Highcharts) {
             cellLeft = Math.max(cellLeft, box.x + box.width + GRAPH_LEGEND_ROW_HEIGHT);
 
             // Update column keys list
+            if (!data[serie.name])
+                return;
+
             keys = Object.keys(data[serie.name]);
             keys.sort();
 
@@ -113,6 +116,8 @@ if (window.Highcharts) {
                 valueLeft = 0;
 
             $.each(chart.series, function (i, serie) {
+                var value;
+
                 element = chart.renderer.text(key, keyLeft, tableTop + i * GRAPH_LEGEND_ROW_HEIGHT +
                         GRAPH_LEGEND_ROW_HEIGHT / 2)
                     .attr({
@@ -129,11 +134,13 @@ if (window.Highcharts) {
                     valueLeft = box.x + box.width + GRAPH_LEGEND_ROW_HEIGHT * 0.35;
                 }
 
-                element = chart.renderer.text(humanReadable(data[serie.name][key]) || 0, valueLeft,
+                value = data[serie.name] && data[serie.name][key] ? data[serie.name][key] : null;
+
+                element = chart.renderer.text(value !== null ? humanReadable(value) : 'null', valueLeft,
                         tableTop + i * GRAPH_LEGEND_ROW_HEIGHT + GRAPH_LEGEND_ROW_HEIGHT / 2)
                     .attr({
                         'class': 'highcharts-table-value',
-                        'data-value': data[serie.name][key]
+                        'data-value': value
                     })
                     .css({
                         cursor: 'pointer'
