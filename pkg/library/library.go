@@ -70,7 +70,7 @@ func (library *Library) Update() error {
 
 	log.Println("INFO: library update started")
 
-	for _, itemType := range []int{
+	for _, itemType = range []int{
 		LibraryItemSourceGroup,
 		LibraryItemMetricGroup,
 		LibraryItemGraph,
