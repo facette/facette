@@ -3,12 +3,13 @@ package backend
 import (
 	"crypto/tls"
 	"encoding/json"
-	"facette/common"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/facette/facette/pkg/types"
 )
 
 const (
@@ -31,7 +32,7 @@ func (handler *GraphiteBackendHandler) GetPlots(query *GroupQuery, startTime, en
 
 // GetValue calculates and returns plot data at a specific reference time.
 func (handler *GraphiteBackendHandler) GetValue(query *GroupQuery, refTime time.Time,
-	percentiles []float64) (map[string]map[string]common.PlotValue, error) {
+	percentiles []float64) (map[string]map[string]types.PlotValue, error) {
 
 	return nil, nil
 }
@@ -92,13 +93,7 @@ func (handler *GraphiteBackendHandler) Update() error {
 			facetteMetric = metric[sourceSepIndex+1:]
 		}
 
-		if _, ok := handler.origin.Sources[facetteSource]; !ok {
-			handler.origin.AppendSource(facetteSource)
-		}
-
-		// TODO; 2nd and 3rd arguments of AppendMetric() don't make sense outside of the RRD backend,
-		// this function should be more backend-agnostic
-		handler.origin.Sources[facetteSource].AppendMetric(facetteMetric, "", "")
+		handler.origin.inputChan <- [2]string{facetteSource, facetteMetric}
 	}
 
 	return nil
