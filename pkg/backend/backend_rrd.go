@@ -165,8 +165,6 @@ func (handler *RRDBackendHandler) rrdGetData(query *GroupQuery, startTime, endTi
 
 	switch query.Type {
 	case OperGroupTypeNone:
-		serieCount := len(query.Series)
-
 		for _, serie := range query.Series {
 			if serie.Metric == nil {
 				continue
@@ -174,10 +172,6 @@ func (handler *RRDBackendHandler) rrdGetData(query *GroupQuery, startTime, endTi
 
 			serieTemp := fmt.Sprintf("serie%d", count)
 			serieName := serie.Name
-
-			if serieCount > 1 {
-				serieName += fmt.Sprintf("-%d", count)
-			}
 
 			count += 1
 

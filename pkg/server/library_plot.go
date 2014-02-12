@@ -219,9 +219,11 @@ func (server *Server) plotPrepareQuery(plotReq *types.PlotRequest,
 			serieSources = []string{serieItem.Source}
 		}
 
+		index := 0
+
 		for _, serieSource := range serieSources {
 			if strings.HasPrefix(serieItem.Metric, "group:") {
-				for index, serieChunk := range server.Library.ExpandGroup(serieItem.Metric[6:],
+				for _, serieChunk := range server.Library.ExpandGroup(serieItem.Metric[6:],
 					library.LibraryItemMetricGroup) {
 					metric := server.Catalog.GetMetric(
 						serieItem.Origin,
@@ -239,6 +241,8 @@ func (server *Server) plotPrepareQuery(plotReq *types.PlotRequest,
 						Metric: metric,
 						Scale:  serieItem.Scale,
 					})
+
+					index += 1
 				}
 			} else {
 				metric := server.Catalog.GetMetric(
@@ -252,11 +256,20 @@ func (server *Server) plotPrepareQuery(plotReq *types.PlotRequest,
 						serieItem.Origin)
 				}
 
-				query.Series = append(query.Series, &backend.SerieQuery{
-					Name:   serieItem.Name,
+				serie := &backend.SerieQuery{
 					Metric: metric,
 					Scale:  serieItem.Scale,
-				})
+				}
+
+				if len(serieSources) > 1 {
+					serie.Name = fmt.Sprintf("%s-%d", serieItem.Name, index)
+				} else {
+					serie.Name = serieItem.Name
+				}
+
+				query.Series = append(query.Series, serie)
+
+				index += 1
 			}
 		}
 	}
