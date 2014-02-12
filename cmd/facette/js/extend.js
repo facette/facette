@@ -134,7 +134,7 @@ if (window.Highcharts) {
                     valueLeft = box.x + box.width + GRAPH_LEGEND_ROW_HEIGHT * 0.35;
                 }
 
-                value = data[serie.name] && data[serie.name][key] ? data[serie.name][key] : null;
+                value = data[serie.name] && data[serie.name][key] !== undefined ? data[serie.name][key] : null;
 
                 element = chart.renderer.text(value !== null ? humanReadable(value) : 'null', valueLeft,
                         tableTop + i * GRAPH_LEGEND_ROW_HEIGHT + GRAPH_LEGEND_ROW_HEIGHT / 2)
