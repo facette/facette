@@ -4,16 +4,16 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"github.com/facette/facette/pkg/types"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
-
-	"github.com/facette/facette/pkg/types"
 )
 
 const (
 	graphiteMetricsURL string = "/metrics/index.json"
+	graphiteRenderURL  string = "/render"
 )
 
 // GraphiteBackendHandler represents the main structure of the Graphite backend.
@@ -23,11 +23,74 @@ type GraphiteBackendHandler struct {
 	origin               *Origin
 }
 
+type graphitePlot struct {
+	Target     string
+	Datapoints [][2]float64
+}
+
 // GetPlots calculates and returns plot data based on a time interval.
 func (handler *GraphiteBackendHandler) GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
 	percentiles []float64) (map[string]*PlotResult, error) {
+	var (
+		data             []byte
+		err              error
+		graphitePlots    []graphitePlot
+		graphiteQueryURL string
+		httpClient       http.Client
+		httpTransport    http.RoundTripper
+		pr               map[string]*PlotResult
+		queryURL         string
+		target           string
+		res              *http.Response
+	)
 
-	return nil, nil
+	if handler.AllowBadCertificates {
+		httpTransport = &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+	} else {
+		httpTransport = &http.Transport{}
+	}
+
+	httpClient = http.Client{Transport: httpTransport}
+
+	pr = make(map[string]*PlotResult)
+
+	for _, s := range query.Series {
+		if s.Metric == nil {
+			continue
+		}
+
+		target = fmt.Sprintf("%s.%s", s.Metric.source.OriginalName, s.Metric.OriginalName)
+
+		if queryURL, err = graphiteBuildQueryURL(target, startTime, endTime); err != nil {
+			return nil, fmt.Errorf("unable to build Graphite query URL: %s", err)
+		}
+
+		graphiteQueryURL = fmt.Sprintf("%s%s", strings.TrimSuffix(handler.URL, "/"), queryURL)
+
+		if res, err = httpClient.Get(graphiteQueryURL); err != nil {
+			return nil, err
+		}
+
+		if err = graphiteCheckBackendResponse(res); err != nil {
+			return nil, fmt.Errorf("invalid HTTP backend response: %s", err)
+		}
+
+		if data, err = ioutil.ReadAll(res.Body); err != nil {
+			return nil, fmt.Errorf("unable to read HTTP response body: %s", err)
+		}
+
+		if err = json.Unmarshal(data, &graphitePlots); err != nil {
+			return nil, fmt.Errorf("unable to unmarshal JSON data: %s", err)
+		}
+
+		if pr[s.Name], err = graphiteExtractPlotResult(graphitePlots); err != nil {
+			return nil, fmt.Errorf("unable to extract plot values from backend response: %s", err)
+		}
+	}
+
+	return pr, nil
 }
 
 // GetValue calculates and returns plot data at a specific reference time.
@@ -65,13 +128,8 @@ func (handler *GraphiteBackendHandler) Update() error {
 		return err
 	}
 
-	if res.StatusCode != 200 {
-		return fmt.Errorf("invalid HTTP status code (%d), expecting 200", res.StatusCode)
-	}
-
-	if res.Header.Get("Content-Type") != "application/json" {
-		return fmt.Errorf("invalid HTTP response content type (%s), expecting \"application/json\"",
-			res.Header["Content-Type"])
+	if err = graphiteCheckBackendResponse(res); err != nil {
+		return fmt.Errorf("invalid HTTP backend response: %s", err)
 	}
 
 	if data, err = ioutil.ReadAll(res.Body); err != nil {
@@ -79,7 +137,7 @@ func (handler *GraphiteBackendHandler) Update() error {
 	}
 
 	if err = json.Unmarshal(data, &metrics); err != nil {
-		return fmt.Errorf("unable to unmarshall JSON data: %s", err)
+		return fmt.Errorf("unable to unmarshal JSON data: %s", err)
 	}
 
 	for _, metric := range metrics {
@@ -101,6 +159,52 @@ func (handler *GraphiteBackendHandler) Update() error {
 
 func init() {
 	BackendHandlers["graphite"] = NewGraphiteBackendHandler
+}
+
+func graphiteCheckBackendResponse(res *http.Response) error {
+	if res.StatusCode != 200 {
+		return fmt.Errorf("got HTTP status code %d, expected 200", res.StatusCode)
+	}
+
+	if res.Header.Get("Content-Type") != "application/json" {
+		return fmt.Errorf("got HTTP content type \"%s\", expected \"application/json\"",
+			res.Header["Content-Type"])
+	}
+
+	return nil
+}
+
+func graphiteBuildQueryURL(target string, startTime, endTime time.Time) (string, error) {
+	var (
+		fromTime         int
+		untilTime        int
+		graphiteQueryURL string
+	)
+
+	fromTime = int(time.Now().Sub(startTime).Seconds())
+	untilTime = int(time.Now().Sub(endTime).Seconds())
+
+	graphiteQueryURL = fmt.Sprintf("%s?format=json&target=%s&from=-%ds&until=-%ds",
+		graphiteRenderURL,
+		target,
+		fromTime,
+		untilTime)
+
+	return graphiteQueryURL, nil
+}
+
+func graphiteExtractPlotResult(graphitePlots []graphitePlot) (*PlotResult, error) {
+	var (
+		pr *PlotResult
+	)
+
+	pr = &PlotResult{}
+
+	for _, plotPoint := range graphitePlots[0].Datapoints {
+		pr.Plots = append(pr.Plots, types.PlotValue(plotPoint[0]))
+	}
+
+	return pr, nil
 }
 
 // NewGraphiteBackendHandler creates a new instance of BackendHandler.
