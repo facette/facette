@@ -798,7 +798,7 @@ function adminGraphSetupTerminate() {
             listUpdateCount($list);
 
             if (listGetCount($list) === 0)
-                listSay($list, $.t('metric.mesg_none_defined'), 'info');
+                listSay($list, $.t('metric.mesg_none'), 'info');
 
             PANE_UNLOAD_LOCK = true;
 
@@ -1266,7 +1266,7 @@ function adminGraphSetupTerminate() {
             });
 
             if ($listMetrics.data('counter') === 0)
-                listSay($listMetrics, $.t('metric.mesg_none_defined'));
+                listSay($listMetrics, $.t('metric.mesg_none'));
 
             if ($listSeries.data('counter') === 0)
                 listSay($listSeries, $.t('graph.mesg_no_serie'));

@@ -115,7 +115,7 @@ function adminGroupSetupTerminate() {
             listUpdateCount($list);
 
             if (listGetCount($list) === 0)
-                listSay($list, $.t('item.mesg_none_defined'), 'info');
+                listSay($list, $.t('item.mesg_none'), 'info');
 
             PANE_UNLOAD_LOCK = true;
         });
@@ -311,7 +311,7 @@ function adminGroupSetupTerminate() {
             $pane.find('textarea[name=group-desc]').val(data.description);
 
             if ($listItems.data('counter') === 0)
-                listSay($listItems, $.t('item.mesg_none_defined'));
+                listSay($listItems, $.t('item.mesg_none'));
 
             listUpdateCount($listItems);
         });
