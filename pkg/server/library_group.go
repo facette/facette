@@ -36,19 +36,21 @@ func (server *Server) groupExpand(writer http.ResponseWriter, request *http.Requ
 	for _, entry := range query {
 		item := types.ExpandRequest{}
 
-		if strings.HasPrefix(entry[1], "group:") {
-			for _, sourceName := range server.Library.ExpandGroup(entry[1][6:], library.LibraryItemSourceGroup) {
-				if strings.HasPrefix(entry[2], "group:") {
-					for _, metricName := range server.Library.ExpandGroup(entry[2][6:],
-						library.LibraryItemMetricGroup) {
+		if strings.HasPrefix(entry[1], library.LibraryGroupPrefix) {
+			for _, sourceName := range server.Library.ExpandGroup(strings.TrimPrefix(entry[1],
+				library.LibraryGroupPrefix), library.LibraryItemSourceGroup) {
+				if strings.HasPrefix(entry[2], library.LibraryGroupPrefix) {
+					for _, metricName := range server.Library.ExpandGroup(strings.TrimPrefix(entry[2],
+						library.LibraryGroupPrefix), library.LibraryItemMetricGroup) {
 						item = append(item, [3]string{entry[0], sourceName, metricName})
 					}
 				} else {
 					item = append(item, [3]string{entry[0], sourceName, entry[2]})
 				}
 			}
-		} else if strings.HasPrefix(entry[2], "group:") {
-			for _, metricName := range server.Library.ExpandGroup(entry[2][6:], library.LibraryItemMetricGroup) {
+		} else if strings.HasPrefix(entry[2], library.LibraryGroupPrefix) {
+			for _, metricName := range server.Library.ExpandGroup(strings.TrimPrefix(entry[2],
+				library.LibraryGroupPrefix), library.LibraryItemMetricGroup) {
 				item = append(item, [3]string{entry[0], entry[1], metricName})
 			}
 		} else {

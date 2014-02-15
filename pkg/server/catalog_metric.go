@@ -46,9 +46,9 @@ func (server *Server) metricList(writer http.ResponseWriter, request *http.Reque
 	sourceSet := set.New()
 	responseSet := set.New()
 
-	if strings.HasPrefix(request.FormValue("source"), "group:") {
-		for _, sourceName := range server.Library.ExpandGroup(request.FormValue("source")[6:],
-			library.LibraryItemSourceGroup) {
+	if strings.HasPrefix(request.FormValue("source"), library.LibraryGroupPrefix) {
+		for _, sourceName := range server.Library.ExpandGroup(strings.TrimPrefix(request.FormValue("source"),
+			library.LibraryGroupPrefix), library.LibraryItemSourceGroup) {
 			sourceSet.Add(sourceName)
 		}
 	} else if request.FormValue("source") != "" {

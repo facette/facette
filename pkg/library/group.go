@@ -9,6 +9,15 @@ import (
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
 
+const (
+	// LibraryGroupPrefix represents the prefix for sources and metrics groups names.
+	LibraryGroupPrefix = "group:"
+	// LibraryMatchPrefixGlob represents the prefix for glob matching patterns.
+	LibraryMatchPrefixGlob = "glob:"
+	// LibraryMatchPrefixRegexp represents the prefix for regexp matching patterns.
+	LibraryMatchPrefixRegexp = "regexp:"
+)
+
 // GroupEntry represents a subset of a Group entry.
 type GroupEntry struct {
 	Pattern string `json:"pattern"`
@@ -38,8 +47,8 @@ func (library *Library) ExpandGroup(name string, groupType int) []string {
 	for _, entry := range group.Entries {
 		var re *regexp.Regexp
 
-		if strings.HasPrefix(entry.Pattern, "regexp:") {
-			re = regexp.MustCompile(entry.Pattern[7:])
+		if strings.HasPrefix(entry.Pattern, LibraryMatchPrefixRegexp) {
+			re = regexp.MustCompile(strings.TrimPrefix(entry.Pattern, LibraryMatchPrefixRegexp))
 		}
 
 		if _, ok := library.Catalog.Origins[entry.Origin]; !ok {
@@ -49,11 +58,12 @@ func (library *Library) ExpandGroup(name string, groupType int) []string {
 
 		if groupType == LibraryItemSourceGroup {
 			for _, source := range library.Catalog.Origins[entry.Origin].Sources {
-				if strings.HasPrefix(entry.Pattern, "glob:") {
-					if ok, _ := path.Match(entry.Pattern[5:], source.Name); !ok {
+				if strings.HasPrefix(entry.Pattern, LibraryMatchPrefixGlob) {
+					if ok, _ := path.Match(strings.TrimPrefix(entry.Pattern, LibraryMatchPrefixGlob),
+						source.Name); !ok {
 						continue
 					}
-				} else if strings.HasPrefix(entry.Pattern, "regexp:") {
+				} else if strings.HasPrefix(entry.Pattern, LibraryMatchPrefixRegexp) {
 					if !re.MatchString(source.Name) {
 						continue
 					}
@@ -66,11 +76,12 @@ func (library *Library) ExpandGroup(name string, groupType int) []string {
 		} else if groupType == LibraryItemMetricGroup {
 			for _, source := range library.Catalog.Origins[entry.Origin].Sources {
 				for _, metric := range source.Metrics {
-					if strings.HasPrefix(entry.Pattern, "glob:") {
-						if ok, _ := path.Match(entry.Pattern[5:], metric.Name); !ok {
+					if strings.HasPrefix(entry.Pattern, LibraryMatchPrefixGlob) {
+						if ok, _ := path.Match(strings.TrimPrefix(entry.Pattern, LibraryMatchPrefixGlob),
+							metric.Name); !ok {
 							continue
 						}
-					} else if strings.HasPrefix(entry.Pattern, "regexp:") {
+					} else if strings.HasPrefix(entry.Pattern, LibraryMatchPrefixRegexp) {
 						if !re.MatchString(metric.Name) {
 							continue
 						}

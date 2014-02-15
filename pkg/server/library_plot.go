@@ -213,8 +213,9 @@ func (server *Server) plotPrepareQuery(plotReq *types.PlotRequest,
 
 		if plotReq.Template != "" {
 			serieSources = []string{plotReq.Source}
-		} else if strings.HasPrefix(serieItem.Source, "group:") {
-			serieSources = server.Library.ExpandGroup(serieItem.Source[6:], library.LibraryItemSourceGroup)
+		} else if strings.HasPrefix(serieItem.Source, library.LibraryGroupPrefix) {
+			serieSources = server.Library.ExpandGroup(strings.TrimPrefix(serieItem.Source, library.LibraryGroupPrefix),
+				library.LibraryItemSourceGroup)
 		} else {
 			serieSources = []string{serieItem.Source}
 		}
@@ -222,9 +223,9 @@ func (server *Server) plotPrepareQuery(plotReq *types.PlotRequest,
 		index := 0
 
 		for _, serieSource := range serieSources {
-			if strings.HasPrefix(serieItem.Metric, "group:") {
-				for _, serieChunk := range server.Library.ExpandGroup(serieItem.Metric[6:],
-					library.LibraryItemMetricGroup) {
+			if strings.HasPrefix(serieItem.Metric, library.LibraryGroupPrefix) {
+				for _, serieChunk := range server.Library.ExpandGroup(strings.TrimPrefix(serieItem.Metric,
+					library.LibraryGroupPrefix), library.LibraryItemMetricGroup) {
 					metric := server.Catalog.GetMetric(
 						serieItem.Origin,
 						serieSource,
