@@ -35,10 +35,10 @@ func (server *Server) adminHandle(writer http.ResponseWriter, request *http.Requ
 	data.Path = mux.Vars(request)["path"]
 
 	tmplFile := "unknown"
-	tmplFolder := ""
+	tmplPrefix := ""
 
 	if data.Section == "graphs" || data.Section == "collections" {
-		tmplFolder = data.Section
+		tmplPrefix = data.Section[:len(data.Section)-1] + "_"
 
 		data.GraphTypeArea = library.GraphTypeArea
 		data.GraphTypeLine = library.GraphTypeLine
@@ -57,7 +57,7 @@ func (server *Server) adminHandle(writer http.ResponseWriter, request *http.Requ
 	} else if data.Section == "sourcegroups" || data.Section == "metricgroups" {
 		var groupType int
 
-		tmplFolder = "groups"
+		tmplPrefix = "group_"
 
 		for originName := range server.Catalog.Origins {
 			data.Origins = append(data.Origins, originName)
@@ -75,10 +75,10 @@ func (server *Server) adminHandle(writer http.ResponseWriter, request *http.Requ
 			tmplFile = "list.html"
 		}
 	} else if data.Section == "origins" || data.Section == "sources" || data.Section == "metrics" {
-		tmplFolder = "catalog"
+		tmplPrefix = "catalog_"
 		tmplFile = "list.html"
 	} else if data.Section == "" {
-		tmplFolder = ""
+		tmplPrefix = ""
 		tmplFile = "index.html"
 	}
 
@@ -92,7 +92,7 @@ func (server *Server) adminHandle(writer http.ResponseWriter, request *http.Requ
 		path.Join(server.Config.BaseDir, "html", "layout.html"),
 		path.Join(server.Config.BaseDir, "html", "common", "element.html"),
 		path.Join(server.Config.BaseDir, "html", "admin", "layout.html"),
-		path.Join(server.Config.BaseDir, "html", "admin", tmplFolder, tmplFile),
+		path.Join(server.Config.BaseDir, "html", "admin", tmplPrefix+tmplFile),
 	)
 	if err == nil {
 		err = tmpl.Execute(writer, data)

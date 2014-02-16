@@ -175,14 +175,10 @@ STYLE_EXTRA = cmd/facette/style/extra/favicon.png \
 
 STYLE_EXTRA_OUTPUT = $(addprefix $(TEMP_DIR)/static/, $(notdir $(STYLE_EXTRA)))
 
-HTML_SRC = cmd/facette/html/common \
-	cmd/facette/html/admin \
-	cmd/facette/html/browse \
-	cmd/facette/html/error.html \
-	cmd/facette/html/wait.html \
-	cmd/facette/html/layout.html
+HTML_SRC = $(wildcard cmd/facette/html/*/*.html) \
+	$(wildcard cmd/facette/html/*.html)
 
-HTML_OUTPUT = $(TEMP_DIR)/static/html
+HTML_OUTPUT = $(TEMP_DIR)/html
 
 $(SCRIPT_OUTPUT): $(SCRIPT_SRC)
 	@$(call mesg_start,static,Merging script files into $(notdir $(SCRIPT_OUTPUT:.js=.src.js))...)
@@ -226,7 +222,8 @@ $(STYLE_EXTRA_OUTPUT): $(STYLE_EXTRA)
 
 $(HTML_OUTPUT): $(HTML_SRC)
 	@$(call mesg_start,static,Copying HTML files...)
-	@install -d -m 0755 $(HTML_OUTPUT) && cp -r $(HTML_SRC) $(HTML_OUTPUT)/ && \
+	@install -d -m 0755 $(HTML_OUTPUT) && \
+		(cd cmd/facette/html; cp -r --parents $(HTML_SRC:cmd/facette/html/%=%) ../../../$(HTML_OUTPUT)/) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 build-static: $(SCRIPT_OUTPUT) $(SCRIPT_EXTRA_OUTPUT) $(MESG_OUTPUT) $(STYLE_OUTPUT) $(STYLE_PRINT_OUTPUT) \
