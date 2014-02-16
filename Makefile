@@ -33,7 +33,7 @@ JSHINT_ARGS = --show-non-errors
 LESSC ?= lessc
 LESSC_ARGS = --no-color
 
-all: install
+all: build lint
 
 clean:
 	@$(call mesg_start,main,Cleaning temporary files...)
@@ -72,7 +72,7 @@ build-bin: $(BIN_OUTPUT)
 
 install-bin: build-bin
 	@$(call mesg_start,install,Installing binaries...)
-	@install -d -m 0755 $(PREFIX) && cp -Rp $(TEMP_DIR)/bin $(PREFIX) && \
+	@install -d -m 0755 $(PREFIX)/bin && rm -f $(BIN_OUTPUT:tmp/%=$(PREFIX)/%) && cp $(BIN_OUTPUT) $(PREFIX)/bin && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 lint-bin: build-bin
