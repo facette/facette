@@ -1,3 +1,2 @@
 var/lib/facette
 var/log/facette
-var/run/facette
