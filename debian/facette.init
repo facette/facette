@@ -28,7 +28,7 @@ OPTIONS=""
 . /lib/init/vars.sh
 . /lib/lsb/init-functions
 
-[ -d $(dirname $PIDFILE) ] || install -d -o facette -u facette -m 0755 $(dirname $PIDFILE)
+[ -d $(dirname $PIDFILE) ] || install -d -o facette -g facette -m 0755 $(dirname $PIDFILE)
 
 do_start() {
     start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --chuid facette:facette \
