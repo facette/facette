@@ -27,6 +27,36 @@ body {
 	background-color: @BackgroundColor;
 	color: @TextColorA;
 
+	& > .console {
+		background-color: @FormButtonDangerBackgroundColor;
+		color: @FormButtonDangerTextColor;
+		display: none;
+		left: 20%;
+		line-height: 3em;
+		padding: 0 1em;
+		position: absolute;
+		right: 0;
+		top: 0;
+		z-index: 10;
+
+		.message::before {
+			font-size: 1.75em;
+			line-height: normal;
+			vertical-align: middle;
+		}
+
+		.close {
+			color: fade(@FormButtonDangerTextColor, 50);
+			float: right;
+			text-transform: lowercase;
+
+			&:hover {
+				color: inherit;
+				text-decoration: none;
+			}
+		}
+	}
+
 	& > header,
 	& > nav {
 		width: 20%;

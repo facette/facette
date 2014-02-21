@@ -119,7 +119,8 @@ function graphDraw(graph, postpone, delay) {
                 if (data.message) {
                     graph.children('.graphctrl')
                         .attr('disabled', 'disabled')
-                        .find('a:not([href="#refresh"])').hide();
+                        .find('a:not([href="#refresh"])')
+                            .attr('disabled', 'disabled');
 
                     graph.find('.placeholder').text(data.message);
 
@@ -127,7 +128,8 @@ function graphDraw(graph, postpone, delay) {
                 } else {
                     graph.children('.graphctrl')
                         .removeAttr('disabled')
-                        .find('a:not([href="#refresh"])').show();
+                        .find('a:not([href="#refresh"])')
+                            .removeAttr('disabled');
 
                     graph.find('.placeholder')
                         .removeClass('icon icon-warning')
@@ -329,7 +331,8 @@ function graphDraw(graph, postpone, delay) {
             }).fail(function () {
                 graph.children('.graphctrl')
                     .attr('disabled', 'disabled')
-                    .find('a:not([href="#refresh"])').hide();
+                    .find('a:not([href="#refresh"])')
+                        .attr('disabled', 'disabled');
 
                 graph.find('.placeholder')
                     .addClass('icon icon-warning')
@@ -384,6 +387,11 @@ function graphHandleActions(e) {
         delta,
         options,
         range;
+
+    if (e.target.getAttribute('disabled') == 'disabled') {
+        e.preventDefault();
+        return;
+    }
 
     if (e.target.href.endsWith('#reframe-all')) {
         // Apply current options to siblings

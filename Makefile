@@ -100,8 +100,10 @@ install-man: build-man
 SCRIPT_SRC = cmd/facette/js/intro.js \
 	cmd/facette/js/define.js \
 	cmd/facette/js/extend.js \
+	cmd/facette/js/ajax.js \
 	cmd/facette/js/utils.js \
 	cmd/facette/js/setup.js \
+	cmd/facette/js/console.js \
 	cmd/facette/js/overlay.js \
 	cmd/facette/js/list.js \
 	cmd/facette/js/tree.js \

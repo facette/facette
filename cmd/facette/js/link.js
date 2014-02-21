@@ -16,7 +16,9 @@ function linkHandleClick(e) {
         if (!e.target.href || !e.target.href.endsWith('#' + fragment))
             continue;
 
-        LINK_CALLBACKS[fragment](e);
+        if (e.target.getAttribute('disabled') != 'disabled')
+            LINK_CALLBACKS[fragment](e);
+
         e.preventDefault();
     }
 }

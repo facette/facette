@@ -69,6 +69,7 @@
         "mesg_field_mandatory": "This field is mandatory!",
         "mesg_reload": "You are about to reload server resources. This may take a while.",
         "mesg_server_loading": "Reloading resources, please wait…",
+        "mesg_unknown_error": "An unhandled error has occured.",
         "mesg_unsaved_changes": "All unsaved changes will be lost!"
     },
     "metric": {

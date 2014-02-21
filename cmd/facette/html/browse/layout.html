@@ -1,4 +1,9 @@
 {{ define "body" }}{{ template "template_element" }}
+		<div class="console" id="console">
+			<span class="message icon icon-error"></span>
+			<a class="close" href="#console-close">Close</a>
+		</div>
+
 		<header>
 			<h1><a href="{{ .URLPrefix }}/">Facette</a></h1>
 
