@@ -1034,11 +1034,9 @@ function adminGraphSetupTerminate() {
                     listSay($list, null);
                     listUpdateCount($list);
 
-                    $origin.data('value', null).val('');
-                    $source.data('value', null).val('');
                     $metric.data('value', null).val('');
 
-                    $origin
+                    $metric
                         .trigger('change')
                         .focus();
 
