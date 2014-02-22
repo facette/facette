@@ -119,10 +119,11 @@ function adminCollectionSetupTerminate() {
         // Attach events
         $body
             .on('click', 'button', function (e) {
-                var $graph,
-                    $fieldset,
+                var $fieldset,
+                    $graph,
                     $item,
                     $list,
+                    $target = $(e.target),
                     name;
 
                 switch (e.target.name) {
@@ -130,11 +131,32 @@ function adminCollectionSetupTerminate() {
                     if (e.target.disabled)
                         return;
 
-                    $fieldset = $(e.target).closest('fieldset');
+                    $fieldset = $target.closest('fieldset');
                     $list     = listMatch('step-1-graphs');
                     $graph    = $fieldset.find('input[name=graph]');
 
                     if (!$graph.data('value')) {
+                        if (!e._retry) {
+                            $.ajax({
+                                url: urlPrefix + '/library/graphs',
+                                type: 'GET',
+                                data: {
+                                    filter: $graph.val()
+                                },
+                                dataType: 'json'
+                            }).pipe(function (data) {
+                                if (data)
+                                    $graph.data('value', data[0]);
+
+                                $target.trigger({
+                                    type: 'click',
+                                    _retry: true
+                                });
+                            });
+
+                            return;
+                        }
+
                         overlayCreate('alert', {
                             message: $.t('graph.mesg_unknown'),
                             callbacks: {
@@ -172,7 +194,7 @@ function adminCollectionSetupTerminate() {
                     break;
 
                 case 'step-save':
-                    adminItemHandlePaneSave($(e.target).closest('[data-pane]'), collectionId, 'collection',
+                    adminItemHandlePaneSave($target.closest('[data-pane]'), collectionId, 'collection',
                         adminCollectionGetData);
                     break;
 
