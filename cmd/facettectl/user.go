@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/facette/facette/pkg/auth"
@@ -76,6 +77,10 @@ func (cmd *cmdAuth) set(args []string, create bool) error {
 		return fmt.Errorf("passwords don't match")
 	}
 
+	if len(password) == 0 && !confirm("Warning: password is empty\nDo you want to continue?") {
+		return nil
+	}
+
 	cmd.handler.Users[args[0]] = cmd.handler.Hash(string(password))
 
 	return cmd.save()
@@ -86,7 +91,31 @@ func (cmd *cmdAuth) unset(args []string) error {
 		return os.ErrInvalid
 	}
 
+	// Check for possible conflicts
+	if _, exists := cmd.handler.Users[args[0]]; !exists {
+		return fmt.Errorf("user `%s' not found", args[0])
+	}
+
+	if !confirm(fmt.Sprintf("Warning: you are about to delete `%s' user\nDo you want to continue?", args[0])) {
+		return nil
+	}
+
 	delete(cmd.handler.Users, args[0])
 
 	return cmd.save()
+}
+
+func confirm(message string) bool {
+	var answer string
+
+	fmt.Print(message + " [y/N] ")
+	fmt.Scanln(&answer)
+
+	answer = strings.ToLower(string(answer))
+
+	if answer == "y" || answer == "yes" {
+		return true
+	}
+
+	return false
 }
