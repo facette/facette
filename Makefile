@@ -45,6 +45,8 @@ build: build-bin build-man build-static
 
 install: install-bin install-man install-static
 
+devel: devel-static
+
 lint: lint-bin lint-static
 
 test: test-pkg test-server
@@ -238,6 +240,11 @@ install-static: build-static
 		$(call mesg_ok) || $(call mesg_fail)
 	@$(call mesg_start,install,Installing HTML files...)
 	@cp -Rp $(HTML_OUTPUT) $(PREFIX)/share && \
+		$(call mesg_ok) || $(call mesg_fail)
+
+devel-static: install-static
+	@$(call mesg_start,install,Installing static development files...)
+	@cp $(SCRIPT_OUTPUT:.js=.src.js) $(PREFIX)/share/static/$(notdir $(SCRIPT_OUTPUT)) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 lint-static: $(SCRIPT_OUTPUT)
