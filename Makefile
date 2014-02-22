@@ -45,7 +45,7 @@ build: build-bin build-man build-static
 
 install: install-bin install-man install-static
 
-devel: devel-static
+devel: install devel-static
 
 lint: lint-bin lint-static
 
