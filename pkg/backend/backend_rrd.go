@@ -137,6 +137,9 @@ func (handler *RRDBackendHandler) Update() error {
 		return err
 	}
 
+	// Close channel once updated
+	close(handler.origin.inputChan)
+
 	return nil
 }
 

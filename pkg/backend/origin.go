@@ -39,5 +39,45 @@ func (origin *Origin) Update() error {
 		return fmt.Errorf("backend for `%s' origin is not initialized", origin.Name)
 	}
 
+	// Create update channel
+	origin.inputChan = make(chan [2]string)
+
+	go func() {
+		for entry := range origin.inputChan {
+			originalSource, originalMetric := entry[0], entry[1]
+
+			for _, filter := range origin.catalog.Config.Origins[origin.Name].Filters {
+				if filter.Target != "source" && filter.Target != "metric" && filter.Target != "" {
+					log.Printf("ERROR: unknown `%s' filter target", filter.Target)
+					continue
+				}
+
+				if (filter.Target == "source" || filter.Target == "") && filter.PatternRegexp.MatchString(entry[0]) {
+					if filter.Discard {
+						goto nextEntry
+					}
+
+					entry[0] = filter.PatternRegexp.ReplaceAllString(entry[0], filter.Rewrite)
+				}
+
+				if (filter.Target == "metric" || filter.Target == "") && filter.PatternRegexp.MatchString(entry[1]) {
+					if filter.Discard {
+						goto nextEntry
+					}
+
+					entry[1] = filter.PatternRegexp.ReplaceAllString(entry[1], filter.Rewrite)
+				}
+			}
+
+			if _, ok := origin.Sources[entry[0]]; !ok {
+				origin.AppendSource(entry[0], originalSource)
+			}
+
+			origin.Sources[entry[0]].AppendMetric(entry[1], originalMetric)
+
+		nextEntry:
+		}
+	}()
+
 	return origin.Backend.Update()
 }
