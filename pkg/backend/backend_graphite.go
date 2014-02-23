@@ -176,31 +176,34 @@ func graphiteCheckBackendResponse(res *http.Response) error {
 }
 
 func graphiteBuildQueryURL(target string, startTime, endTime time.Time) (string, error) {
-	var (
-		fromTime         int
-		untilTime        int
-		graphiteQueryURL string
-	)
+	now := time.Now()
 
-	fromTime = int(time.Now().Sub(startTime).Seconds())
-	untilTime = int(time.Now().Sub(endTime).Seconds())
+	fromTime := 0
 
-	graphiteQueryURL = fmt.Sprintf("%s?format=json&target=%s&from=-%ds&until=-%ds",
-		graphiteRenderURL,
-		target,
-		fromTime,
-		untilTime)
+	if startTime.Before(now) {
+		fromTime = int(now.Sub(startTime).Seconds())
+	}
+
+	graphiteQueryURL := fmt.Sprintf("%s?format=json&target=%s&from=-%ds", graphiteRenderURL, target, fromTime)
+
+	// Only specify "until" parameter if endTime is still in the past
+	if endTime.Before(now) {
+		untilTime := int(time.Now().Sub(endTime).Seconds())
+		graphiteQueryURL = fmt.Sprintf("%s&until=-%ds", graphiteQueryURL, untilTime)
+	}
 
 	return graphiteQueryURL, nil
 }
 
 func graphiteExtractPlotResult(graphitePlots []graphitePlot) (*PlotResult, error) {
-	var (
-		pr              *PlotResult
-		min, max, total float64
-	)
+	var min, max, total float64
 
-	pr = &PlotResult{Info: make(map[string]types.PlotValue)}
+	pr := &PlotResult{Info: make(map[string]types.PlotValue)}
+
+	// Return an empty plotResult if Graphite API didn't return any datapoint matching the query
+	if len(graphitePlots) == 0 || len(graphitePlots[0].Datapoints) == 0 {
+		return pr, nil
+	}
 
 	for _, plotPoint := range graphitePlots[0].Datapoints {
 		// Actual plot value
