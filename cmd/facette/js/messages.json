@@ -58,7 +58,7 @@
         "mesg_load_error": "An error occured while loading data"
     },
     "main": {
-        "labl_backend": "Backend:",
+        "labl_connector": "Connector:",
         "labl_origins": "Origins:",
         "labl_reload": "Reload Resources",
         "labl_sources": "Sources:",

@@ -52,7 +52,7 @@ Response:
 ```javascript
 {
     "name": "origin0",
-    "backend": "rrd",
+    "connector": "rrd",
     "updated": "2013-01-02T12:34:56+01:00"
 }
 ```

@@ -21,7 +21,7 @@ func (value PlotValue) MarshalJSON() ([]byte, error) {
 	return json.Marshal(float64(value))
 }
 
-// PlotRequest represents a eplot request struct in the server library backend.
+// PlotRequest represents a eplot request struct in the server library.
 type PlotRequest struct {
 	Time        string    `json:"time"`
 	Range       string    `json:"range"`
@@ -36,7 +36,7 @@ type PlotRequest struct {
 	Filter      string    `json:"filter"`
 }
 
-// SerieResponse represents a serie response struct in the server library backend.
+// SerieResponse represents a serie response struct in the server library.
 type SerieResponse struct {
 	Name    string                 `json:"name"`
 	Plots   []PlotValue            `json:"plots"`
@@ -44,13 +44,13 @@ type SerieResponse struct {
 	Options map[string]interface{} `json:"options"`
 }
 
-// StackResponse represents a stack response struct in the server library backend.
+// StackResponse represents a stack response struct in the server library.
 type StackResponse struct {
 	Name   string           `json:"name"`
 	Series []*SerieResponse `json:"series"`
 }
 
-// PlotResponse represents a plot response struct in the server library backend.
+// PlotResponse represents a plot response struct in the server library.
 type PlotResponse struct {
 	ID          string           `json:"id"`
 	Start       string           `json:"start"`

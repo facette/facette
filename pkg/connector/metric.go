@@ -1,4 +1,4 @@
-package backend
+package connector
 
 // A Metric represents a metric entry.
 type Metric struct {

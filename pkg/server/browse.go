@@ -8,7 +8,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/facette/facette/pkg/backend"
+	"github.com/facette/facette/pkg/connector"
 	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/thirdparty/github.com/gorilla/mux"
 )
@@ -97,7 +97,7 @@ func (server *Server) browseHandleSearch(writer http.ResponseWriter, request *ht
 		URLPrefix   string
 		Count       int
 		Request     *http.Request
-		Sources     []*backend.Source
+		Sources     []*connector.Source
 		Collections []*library.Collection
 	}
 

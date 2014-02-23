@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facette/facette/pkg/backend"
+	"github.com/facette/facette/pkg/connector"
 	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
@@ -111,11 +111,11 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 	// Get plots data
 	groupOptions := make(map[string]map[string]interface{})
 
-	data := []map[string]*backend.PlotResult{}
+	data := []map[string]*connector.PlotResult{}
 
 	for _, stackItem := range graph.Stacks {
 		for _, groupItem := range stackItem.Groups {
-			query, originBackend, err := server.plotPrepareQuery(plotReq, groupItem)
+			query, originConnector, err := server.plotPrepareQuery(plotReq, groupItem)
 			if err != nil {
 				log.Println("ERROR: " + err.Error())
 				server.handleResponse(writer, http.StatusBadRequest)
@@ -124,7 +124,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 
 			groupOptions[groupItem.Name] = groupItem.Options
 
-			plotResult, err := originBackend.GetPlots(query, startTime, endTime, step, plotReq.Percentiles)
+			plotResult, err := originConnector.GetPlots(query, startTime, endTime, step, plotReq.Percentiles)
 			if err != nil {
 				log.Println("ERROR: " + err.Error())
 				server.handleResponse(writer, http.StatusInternalServerError)
@@ -158,7 +158,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 		stack := &types.StackResponse{Name: stackItem.Name}
 
 		for _, groupItem := range stackItem.Groups {
-			var plotResult map[string]*backend.PlotResult
+			var plotResult map[string]*connector.PlotResult
 
 			plotResult, data = data[0], data[1:]
 
@@ -187,26 +187,26 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 }
 
 func (server *Server) plotPrepareQuery(plotReq *types.PlotRequest,
-	groupItem *library.OperGroup) (*backend.GroupQuery, backend.BackendHandler, error) {
+	groupItem *library.OperGroup) (*connector.GroupQuery, connector.ConnectorHandler, error) {
 
-	var originBackend backend.BackendHandler
+	var originConnector connector.ConnectorHandler
 
-	query := &backend.GroupQuery{
+	query := &connector.GroupQuery{
 		Name:  groupItem.Name,
 		Type:  groupItem.Type,
 		Scale: groupItem.Scale,
 	}
 
-	originBackend = nil
+	originConnector = nil
 
 	for _, serieItem := range groupItem.Series {
-		// Check for backend errors or conflicts
+		// Check for connectors errors or conflicts
 		if _, ok := server.Catalog.Origins[serieItem.Origin]; !ok {
 			return nil, nil, fmt.Errorf("unknown `%s' serie origin", serieItem.Origin)
-		} else if originBackend == nil {
-			originBackend = server.Catalog.Origins[serieItem.Origin].Backend
-		} else if originBackend != server.Catalog.Origins[serieItem.Origin].Backend {
-			return nil, nil, fmt.Errorf("backends differ between series")
+		} else if originConnector == nil {
+			originConnector = server.Catalog.Origins[serieItem.Origin].Connector
+		} else if originConnector != server.Catalog.Origins[serieItem.Origin].Connector {
+			return nil, nil, fmt.Errorf("connectors differ between series")
 		}
 
 		serieSources := []string{}
@@ -237,7 +237,7 @@ func (server *Server) plotPrepareQuery(plotReq *types.PlotRequest,
 							serieItem.Origin)
 					}
 
-					query.Series = append(query.Series, &backend.SerieQuery{
+					query.Series = append(query.Series, &connector.SerieQuery{
 						Name:   fmt.Sprintf("%s-%d", serieItem.Name, index),
 						Metric: metric,
 						Scale:  serieItem.Scale,
@@ -257,7 +257,7 @@ func (server *Server) plotPrepareQuery(plotReq *types.PlotRequest,
 						serieItem.Origin)
 				}
 
-				serie := &backend.SerieQuery{
+				serie := &connector.SerieQuery{
 					Metric: metric,
 					Scale:  serieItem.Scale,
 				}
@@ -279,7 +279,7 @@ func (server *Server) plotPrepareQuery(plotReq *types.PlotRequest,
 		return nil, nil, fmt.Errorf("no serie defined")
 	}
 
-	return query, originBackend, nil
+	return query, originConnector, nil
 }
 
 func (server *Server) plotValues(writer http.ResponseWriter, request *http.Request) {
@@ -350,14 +350,14 @@ func (server *Server) plotValues(writer http.ResponseWriter, request *http.Reque
 
 	for _, stackItem := range graph.Stacks {
 		for _, groupItem := range stackItem.Groups {
-			query, originBackend, err := server.plotPrepareQuery(plotReq, groupItem)
+			query, originConnector, err := server.plotPrepareQuery(plotReq, groupItem)
 			if err != nil {
 				log.Println("ERROR: " + err.Error())
 				server.handleResponse(writer, http.StatusBadRequest)
 				return
 			}
 
-			values, err := originBackend.GetValue(query, refTime, plotReq.Percentiles)
+			values, err := originConnector.GetValue(query, refTime, plotReq.Percentiles)
 			if err != nil {
 				log.Println("ERROR: " + err.Error())
 				server.handleResponse(writer, http.StatusInternalServerError)

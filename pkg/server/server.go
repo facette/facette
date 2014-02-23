@@ -16,8 +16,8 @@ import (
 	"time"
 
 	"github.com/facette/facette/pkg/auth"
-	"github.com/facette/facette/pkg/backend"
 	"github.com/facette/facette/pkg/config"
+	"github.com/facette/facette/pkg/connector"
 	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/thirdparty/github.com/etix/stoppableListener"
 	"github.com/facette/facette/thirdparty/github.com/gorilla/handlers"
@@ -46,7 +46,7 @@ type Server struct {
 	Config      *config.Config
 	Listener    *stoppableListener.StoppableListener
 	AuthHandler auth.AuthHandler
-	Catalog     *backend.Catalog
+	Catalog     *connector.Catalog
 	Library     *library.Library
 	Loading     bool
 	debugLevel  int
@@ -301,7 +301,7 @@ func NewServer(debugLevel int) (*Server, error) {
 		debugLevel: debugLevel,
 	}
 
-	server.Catalog = backend.NewCatalog(server.Config, debugLevel)
+	server.Catalog = connector.NewCatalog(server.Config, debugLevel)
 	server.Library = library.NewLibrary(server.Config, server.Catalog, debugLevel)
 
 	return server, nil

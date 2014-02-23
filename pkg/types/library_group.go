@@ -1,6 +1,6 @@
 package types
 
-// ExpandRequest represents an expand request struct in the server library backend.
+// ExpandRequest represents an expand request struct in the server library.
 type ExpandRequest [][3]string
 
 func (tuple ExpandRequest) Len() int {

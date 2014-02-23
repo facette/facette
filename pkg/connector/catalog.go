@@ -1,4 +1,4 @@
-package backend
+package connector
 
 import (
 	"fmt"
@@ -19,14 +19,14 @@ type Catalog struct {
 // AddOrigin adds a new Origin entry into the Catalog instance.
 func (catalog *Catalog) AddOrigin(name string, config map[string]string) (*Origin, error) {
 	if _, ok := config["type"]; !ok {
-		return nil, fmt.Errorf("missing backend type")
-	} else if _, ok := BackendHandlers[config["type"]]; !ok {
-		return nil, fmt.Errorf("unknown `%s' backend type", config["type"])
+		return nil, fmt.Errorf("missing connector type")
+	} else if _, ok := ConnectorHandlers[config["type"]]; !ok {
+		return nil, fmt.Errorf("unknown `%s' connector type", config["type"])
 	}
 
 	origin := &Origin{Name: name, Sources: make(map[string]*Source), catalog: catalog}
 
-	err := BackendHandlers[config["type"]](origin, config)
+	err := ConnectorHandlers[config["type"]](origin, config)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func (catalog *Catalog) Update() error {
 	catalog.Origins = make(map[string]*Origin)
 
 	for originName, origin := range catalog.Config.Origins {
-		if _, err = catalog.AddOrigin(originName, origin.Backend); err != nil {
+		if _, err = catalog.AddOrigin(originName, origin.Connector); err != nil {
 			log.Printf("ERROR: %s\n", err.Error())
 		}
 	}

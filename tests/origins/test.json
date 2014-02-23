@@ -1,5 +1,5 @@
 {
-	"backend": {
+	"connector": {
 		"type": "rrd",
 		"path": "tests/data",
 		"pattern": "(?P<source>[^/]+)/(?P<metric>.+).rrd"

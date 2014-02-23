@@ -1,5 +1,5 @@
 {
-	"backend": {
+	"connector": {
 		"type": "rrd",
 		"path": "/var/lib/collectd/rrd",
 		"pattern": "(?P<source>[^/]+)/(?P<metric>.+).rrd"

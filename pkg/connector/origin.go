@@ -1,4 +1,4 @@
-package backend
+package connector
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 // A Origin represents an origin entry.
 type Origin struct {
 	Name      string
-	Backend   BackendHandler
+	Connector ConnectorHandler
 	Sources   map[string]*Source
 	catalog   *Catalog
 	inputChan chan [2]string
@@ -35,8 +35,8 @@ func (origin *Origin) Update() error {
 
 	origin.Sources = make(map[string]*Source)
 
-	if origin.Backend == nil {
-		return fmt.Errorf("backend for `%s' origin is not initialized", origin.Name)
+	if origin.Connector == nil {
+		return fmt.Errorf("connector for `%s' origin is not initialized", origin.Name)
 	}
 
 	// Create update channel
@@ -79,5 +79,5 @@ func (origin *Origin) Update() error {
 		}
 	}()
 
-	return origin.Backend.Update()
+	return origin.Connector.Update()
 }

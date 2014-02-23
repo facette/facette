@@ -1,6 +1,6 @@
 package types
 
-// ItemResponse represents an item response struct in the server library backend.
+// ItemResponse represents an item response struct in the server library.
 type ItemResponse struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`
@@ -8,7 +8,7 @@ type ItemResponse struct {
 	Modified    string `json:"modified"`
 }
 
-// ItemListResponse represents an items list response struct in the server library backend.
+// ItemListResponse represents an items list response struct in the server library.
 type ItemListResponse struct {
 	Items []*ItemResponse `json:"items"`
 }

@@ -16,7 +16,7 @@ type OriginFilterConfig struct {
 
 // OriginConfig represents a Origin entry in the configuration system.
 type OriginConfig struct {
-	Backend   map[string]string          `json:"backend"`
+	Connector map[string]string          `json:"connector"`
 	Filters   []*OriginFilterConfig      `json:"filters"`
 	Templates map[string]*TemplateConfig `json:"templates"`
 	Modified  time.Time                  `json:"-"`

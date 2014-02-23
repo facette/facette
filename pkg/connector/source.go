@@ -1,4 +1,4 @@
-package backend
+package connector
 
 import (
 	"log"

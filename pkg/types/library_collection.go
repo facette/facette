@@ -1,13 +1,13 @@
 package types
 
-// CollectionResponse represents a collection response struct in the server library backend.
+// CollectionResponse represents a collection response struct in the server library.
 type CollectionResponse struct {
 	ItemResponse
 	Parent      *string `json:"parent"`
 	HasChildren bool    `json:"has_children"`
 }
 
-// CollectionListResponse represents a collections list response struct in the server library backend.
+// CollectionListResponse represents a collections list response struct in the server library.
 type CollectionListResponse struct {
 	Items []*CollectionResponse `json:"items"`
 }

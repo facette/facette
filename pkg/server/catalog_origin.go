@@ -94,9 +94,9 @@ func (server *Server) originShow(writer http.ResponseWriter, request *http.Reque
 	}
 
 	response := types.OriginResponse{
-		Name:    originName,
-		Backend: server.Config.Origins[originName].Backend["type"],
-		Updated: server.Catalog.Updated.Format(time.RFC3339),
+		Name:      originName,
+		Connector: server.Config.Origins[originName].Connector["type"],
+		Updated:   server.Catalog.Updated.Format(time.RFC3339),
 	}
 
 	server.handleJSON(writer, response)

@@ -1,4 +1,4 @@
-package backend
+package connector
 
 import (
 	"fmt"
@@ -15,8 +15,8 @@ import (
 	"github.com/facette/facette/thirdparty/github.com/ziutek/rrd"
 )
 
-// RRDBackendHandler represents the main structure of the RRD backend.
-type RRDBackendHandler struct {
+// RRDConnectorHandler represents the main structure of the RRD connector.
+type RRDConnectorHandler struct {
 	Path    string
 	Pattern string
 	origin  *Origin
@@ -30,14 +30,14 @@ type RRDMetric struct {
 }
 
 // GetPlots calculates and returns plot data based on a time interval.
-func (handler *RRDBackendHandler) GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
+func (handler *RRDConnectorHandler) GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
 	percentiles []float64) (map[string]*PlotResult, error) {
 
 	return handler.rrdGetData(query, startTime, endTime, step, percentiles, false)
 }
 
 // GetValue calculates and returns plot data at a specific reference time.
-func (handler *RRDBackendHandler) GetValue(query *GroupQuery, refTime time.Time,
+func (handler *RRDConnectorHandler) GetValue(query *GroupQuery, refTime time.Time,
 	percentiles []float64) (map[string]map[string]types.PlotValue, error) {
 
 	result := make(map[string]map[string]types.PlotValue)
@@ -54,8 +54,8 @@ func (handler *RRDBackendHandler) GetValue(query *GroupQuery, refTime time.Time,
 	return result, err
 }
 
-// Update triggers a full backend data update.
-func (handler *RRDBackendHandler) Update() error {
+// Update triggers a full connector data update.
+func (handler *RRDConnectorHandler) Update() error {
 	// Compile pattern
 	re := regexp.MustCompile(handler.Pattern)
 
@@ -143,7 +143,7 @@ func (handler *RRDBackendHandler) Update() error {
 	return nil
 }
 
-func (handler *RRDBackendHandler) rrdGetData(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
+func (handler *RRDConnectorHandler) rrdGetData(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
 	percentiles []float64, infoOnly bool) (map[string]*PlotResult, error) {
 
 	var xport *rrd.Exporter
@@ -380,14 +380,14 @@ func rrdSetGraph(graph *rrd.Grapher, serieName, itemName string, percentiles []f
 }
 
 func init() {
-	BackendHandlers["rrd"] = func(origin *Origin, config map[string]string) error {
+	ConnectorHandlers["rrd"] = func(origin *Origin, config map[string]string) error {
 		if _, ok := config["path"]; !ok {
-			return fmt.Errorf("missing `path' mandatory backend setting")
+			return fmt.Errorf("missing `path' mandatory connector setting")
 		} else if _, ok := config["pattern"]; !ok {
-			return fmt.Errorf("missing `pattern' mandatory backend setting")
+			return fmt.Errorf("missing `pattern' mandatory connector setting")
 		}
 
-		origin.Backend = &RRDBackendHandler{
+		origin.Connector = &RRDConnectorHandler{
 			Path:    config["path"],
 			Pattern: config["pattern"],
 			origin:  origin,

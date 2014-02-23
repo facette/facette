@@ -1,4 +1,4 @@
-package backend
+package connector
 
 import (
 	"time"
@@ -16,8 +16,8 @@ const (
 )
 
 var (
-	// BackendHandlers represents the list of available backend handlers.
-	BackendHandlers = make(map[string]func(*Origin, map[string]string) error)
+	// ConnectorHandlers represents the list of available connector handlers.
+	ConnectorHandlers = make(map[string]func(*Origin, map[string]string) error)
 )
 
 // SerieQuery represents a serie entry in a GroupQuery.
@@ -41,8 +41,8 @@ type PlotResult struct {
 	Info  map[string]types.PlotValue
 }
 
-// BackendHandler represents the main interface of backend handlers.
-type BackendHandler interface {
+// ConnectorHandler represents the main interface of connector handlers.
+type ConnectorHandler interface {
 	GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
 		percentiles []float64) (map[string]*PlotResult, error)
 	GetValue(query *GroupQuery, refTime time.Time,
