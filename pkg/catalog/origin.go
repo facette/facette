@@ -3,6 +3,7 @@ package connector
 import (
 	"fmt"
 	"log"
+	"sync"
 )
 
 // A Origin represents an origin entry.
@@ -28,7 +29,7 @@ func (origin *Origin) AppendSource(name, origName string) *Source {
 }
 
 // Update updates the current Origin by parsing the filesystem for sources or metrics.
-func (origin *Origin) Update() error {
+func (origin *Origin) Update(wait *sync.WaitGroup) error {
 	if origin.catalog.debugLevel > 1 {
 		log.Printf("DEBUG: updating origin `%s'...\n", origin.Name)
 	}
@@ -42,7 +43,11 @@ func (origin *Origin) Update() error {
 	// Create update channel
 	origin.inputChan = make(chan [2]string)
 
+	wait.Add(1)
+
 	go func() {
+		defer wait.Done()
+
 		for entry := range origin.inputChan {
 			originalSource, originalMetric := entry[0], entry[1]
 

@@ -3,6 +3,7 @@ package connector
 import (
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/facette/facette/pkg/config"
@@ -76,12 +77,16 @@ func (catalog *Catalog) Update() error {
 	}
 
 	// Update catalog origins
+	wait := &sync.WaitGroup{}
+
 	for _, origin := range catalog.Origins {
-		if err = origin.Update(); err != nil {
+		if err = origin.Update(wait); err != nil {
 			log.Println("ERROR: " + err.Error())
 			success = false
 		}
 	}
+
+	wait.Wait()
 
 	// Handle output information
 	if !success {
