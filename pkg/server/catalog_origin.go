@@ -7,11 +7,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 	"github.com/facette/facette/thirdparty/github.com/gorilla/mux"
 )
+
+// OriginResponse represents an origin response struct in the server catalog.
+type OriginResponse struct {
+	Name      string `json:"name"`
+	Connector string `json:"connector"`
+	Updated   string `json:"updated"`
+}
 
 func (server *Server) originList(writer http.ResponseWriter, request *http.Request) {
 	var (
@@ -93,7 +99,7 @@ func (server *Server) originShow(writer http.ResponseWriter, request *http.Reque
 		}
 	}
 
-	response := types.OriginResponse{
+	response := OriginResponse{
 		Name:      originName,
 		Connector: server.Config.Origins[originName].Connector["type"],
 		Updated:   server.Catalog.Updated.Format(time.RFC3339),

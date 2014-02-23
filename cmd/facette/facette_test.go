@@ -14,7 +14,7 @@ import (
 	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/library"
-	"github.com/facette/facette/pkg/types"
+	"github.com/facette/facette/pkg/server"
 )
 
 var (
@@ -41,8 +41,8 @@ func Test_originList(test *testing.T) {
 }
 
 func Test_originShow(test *testing.T) {
-	base := &types.SourceResponse{Name: "source1", Origins: []string{"test"}}
-	result := &types.SourceResponse{}
+	base := &server.SourceResponse{Name: "source1", Origins: []string{"test"}}
+	result := &server.SourceResponse{}
 
 	// Test GET on source item
 	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/source1", serverConfig.BindAddr),
@@ -88,8 +88,8 @@ func Test_sourceList(test *testing.T) {
 }
 
 func Test_sourceShow(test *testing.T) {
-	base := &types.SourceResponse{Name: "source1", Origins: []string{"test"}}
-	result := &types.SourceResponse{}
+	base := &server.SourceResponse{Name: "source1", Origins: []string{"test"}}
+	result := &server.SourceResponse{}
 
 	// Test GET on source item
 	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/source1", serverConfig.BindAddr),
@@ -151,9 +151,9 @@ func Test_metricList(test *testing.T) {
 }
 
 func Test_metricShow(test *testing.T) {
-	base := &types.MetricResponse{Name: "database2/test", Sources: []string{"source1", "source2"},
+	base := &server.MetricResponse{Name: "database2/test", Sources: []string{"source1", "source2"},
 		Origins: []string{"test"}}
-	result := &types.MetricResponse{}
+	result := &server.MetricResponse{}
 
 	// Test GET on metric item
 	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/metrics/database2/test",
@@ -185,9 +185,9 @@ func Test_sourceGroupHandle(test *testing.T) {
 	group := &library.Group{Item: library.Item{Name: "group1", Description: "A great group description."}}
 	group.Entries = append(group.Entries, &library.GroupEntry{Pattern: "glob:source*", Origin: "test"})
 
-	expandData := types.ExpandRequest{[3]string{"test", "group:group1-updated", "database1/test"}}
+	expandData := server.ExpandRequest{[3]string{"test", "group:group1-updated", "database1/test"}}
 
-	expandBase := types.ExpandRequest{}
+	expandBase := server.ExpandRequest{}
 	expandBase = append(expandBase, [3]string{"test", "source1", "database1/test"})
 	expandBase = append(expandBase, [3]string{"test", "source2", "database1/test"})
 
@@ -200,9 +200,9 @@ func Test_metricGroupHandle(test *testing.T) {
 	group.Entries = append(group.Entries, &library.GroupEntry{Pattern: "database1/test", Origin: "test"})
 	group.Entries = append(group.Entries, &library.GroupEntry{Pattern: "regexp:database[23]/test", Origin: "test"})
 
-	expandData := types.ExpandRequest{[3]string{"test", "source1", "group:group1-updated"}}
+	expandData := server.ExpandRequest{[3]string{"test", "source1", "group:group1-updated"}}
 
-	expandBase := types.ExpandRequest{}
+	expandBase := server.ExpandRequest{}
 	expandBase = append(expandBase, [3]string{"test", "source1", "database1/test"})
 	expandBase = append(expandBase, [3]string{"test", "source1", "database2/test"})
 	expandBase = append(expandBase, [3]string{"test", "source1", "database3/test"})
@@ -235,8 +235,8 @@ func Test_graphHandle(test *testing.T) {
 	graphBase.Stacks = append(graphBase.Stacks, stack)
 
 	// Test #1 GET on graphs list
-	listBase := &types.ItemListResponse{}
-	listResult := &types.ItemListResponse{}
+	listBase := &server.ItemListResponse{}
+	listResult := &server.ItemListResponse{}
 
 	response := execTestRequest(test, "GET", baseURL, nil, false, &listResult.Items)
 
@@ -298,15 +298,15 @@ func Test_graphHandle(test *testing.T) {
 	}
 
 	// Test #2 GET on graphs list
-	listBase = &types.ItemListResponse{}
+	listBase = &server.ItemListResponse{}
 
-	listBase.Items = append(listBase.Items, &types.ItemResponse{
+	listBase.Items = append(listBase.Items, &server.ItemResponse{
 		ID:          graphBase.ID,
 		Name:        graphBase.Name,
 		Description: graphBase.Description,
 	})
 
-	listResult = &types.ItemListResponse{}
+	listResult = &server.ItemListResponse{}
 
 	response = execTestRequest(test, "GET", baseURL, nil, false, &listResult.Items)
 
@@ -454,8 +454,8 @@ func Test_collectionHandle(test *testing.T) {
 			Options: map[string]string{"range": "-1w"}})
 
 	// Test #1 GET on collections list
-	listBase := &types.ItemListResponse{}
-	listResult := &types.ItemListResponse{}
+	listBase := &server.ItemListResponse{}
+	listResult := &server.ItemListResponse{}
 
 	response := execTestRequest(test, "GET", baseURL, nil, false, &listResult.Items)
 
@@ -517,11 +517,11 @@ func Test_collectionHandle(test *testing.T) {
 	}
 
 	// Test #2 GET on collections list
-	listBase = &types.ItemListResponse{}
-	listBase.Items = append(listBase.Items, &types.ItemResponse{ID: collectionBase.ID, Name: collectionBase.Name,
+	listBase = &server.ItemListResponse{}
+	listBase.Items = append(listBase.Items, &server.ItemResponse{ID: collectionBase.ID, Name: collectionBase.Name,
 		Description: collectionBase.Description})
 
-	listResult = &types.ItemListResponse{}
+	listResult = &server.ItemListResponse{}
 
 	response = execTestRequest(test, "GET", baseURL, nil, false, &listResult.Items)
 
@@ -597,13 +597,13 @@ func Test_collectionHandle(test *testing.T) {
 }
 
 func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group, expandData,
-	expandBase types.ExpandRequest) {
+	expandBase server.ExpandRequest) {
 
 	baseURL := fmt.Sprintf("http://%s/library/%s", serverConfig.BindAddr, urlPrefix)
 
 	// Test #1 GET on groups list
-	listBase := &types.ItemListResponse{}
-	listResult := &types.ItemListResponse{}
+	listBase := &server.ItemListResponse{}
+	listResult := &server.ItemListResponse{}
 
 	response := execTestRequest(test, "GET", baseURL, nil, false, &listResult.Items)
 
@@ -665,11 +665,11 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 	}
 
 	// Test #2 GET on groups list
-	listBase = &types.ItemListResponse{}
-	listBase.Items = append(listBase.Items, &types.ItemResponse{ID: groupBase.ID, Name: groupBase.Name,
+	listBase = &server.ItemListResponse{}
+	listBase.Items = append(listBase.Items, &server.ItemResponse{ID: groupBase.ID, Name: groupBase.Name,
 		Description: groupBase.Description})
 
-	listResult = &types.ItemListResponse{}
+	listResult = &server.ItemListResponse{}
 
 	response = execTestRequest(test, "GET", baseURL, nil, false, &listResult.Items)
 
@@ -724,7 +724,7 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 	// Test group expansion
 	data, _ = json.Marshal(expandData)
 
-	expandResult := []types.ExpandRequest{}
+	expandResult := []server.ExpandRequest{}
 
 	response = execTestRequest(test, "POST", fmt.Sprintf("http://%s/library/expand", serverConfig.BindAddr),
 		strings.NewReader(string(data)), false, &expandResult)

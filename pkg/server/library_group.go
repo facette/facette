@@ -11,10 +11,24 @@ import (
 	"time"
 
 	"github.com/facette/facette/pkg/library"
-	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/gorilla/mux"
 )
+
+// ExpandRequest represents an expand request struct in the server library.
+type ExpandRequest [][3]string
+
+func (tuple ExpandRequest) Len() int {
+	return len(tuple)
+}
+
+func (tuple ExpandRequest) Less(i, j int) bool {
+	return tuple[i][0]+tuple[i][1]+tuple[i][2] < tuple[j][0]+tuple[j][1]+tuple[j][2]
+}
+
+func (tuple ExpandRequest) Swap(i, j int) {
+	tuple[i], tuple[j] = tuple[j], tuple[i]
+}
 
 func (server *Server) groupExpand(writer http.ResponseWriter, request *http.Request) {
 	if request.Method != "POST" {
@@ -23,7 +37,7 @@ func (server *Server) groupExpand(writer http.ResponseWriter, request *http.Requ
 	}
 
 	body, _ := ioutil.ReadAll(request.Body)
-	query := types.ExpandRequest{}
+	query := ExpandRequest{}
 
 	if err := json.Unmarshal(body, &query); err != nil {
 		log.Println("ERROR: " + err.Error())
@@ -31,10 +45,10 @@ func (server *Server) groupExpand(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	response := []types.ExpandRequest{}
+	response := []ExpandRequest{}
 
 	for _, entry := range query {
-		item := types.ExpandRequest{}
+		item := ExpandRequest{}
 
 		if strings.HasPrefix(entry[1], library.LibraryGroupPrefix) {
 			for _, sourceName := range server.Library.ExpandGroup(strings.TrimPrefix(entry[1],

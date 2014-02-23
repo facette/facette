@@ -13,11 +13,34 @@ import (
 	"time"
 
 	"github.com/facette/facette/pkg/library"
-	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 	"github.com/facette/facette/thirdparty/github.com/gorilla/mux"
 )
+
+// CollectionResponse represents a collection response struct in the server library.
+type CollectionResponse struct {
+	ItemResponse
+	Parent      *string `json:"parent"`
+	HasChildren bool    `json:"has_children"`
+}
+
+// CollectionListResponse represents a collections list response struct in the server library.
+type CollectionListResponse struct {
+	Items []*CollectionResponse `json:"items"`
+}
+
+func (response CollectionListResponse) Len() int {
+	return len(response.Items)
+}
+
+func (response CollectionListResponse) Less(i, j int) bool {
+	return response.Items[i].Name < response.Items[j].Name
+}
+
+func (response CollectionListResponse) Swap(i, j int) {
+	response.Items[i], response.Items[j] = response.Items[j], response.Items[i]
+}
 
 func (server *Server) collectionHandle(writer http.ResponseWriter, request *http.Request) {
 	type tmpCollection struct {
@@ -222,7 +245,7 @@ func (server *Server) collectionList(writer http.ResponseWriter, request *http.R
 	}
 
 	// Get and filter collections list
-	response := types.CollectionListResponse{}
+	response := CollectionListResponse{}
 
 	for _, collection := range server.Library.Collections {
 		if request.FormValue("parent") != "" && (request.FormValue("parent") == "" &&
@@ -241,7 +264,7 @@ func (server *Server) collectionList(writer http.ResponseWriter, request *http.R
 			continue
 		}
 
-		collectionItem := &types.CollectionResponse{ItemResponse: types.ItemResponse{
+		collectionItem := &CollectionResponse{ItemResponse: ItemResponse{
 			ID:          collection.ID,
 			Name:        collection.Name,
 			Description: collection.Description,

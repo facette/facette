@@ -7,11 +7,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 	"github.com/facette/facette/thirdparty/github.com/gorilla/mux"
 )
+
+// SourceResponse represents a source response struct in the server catalog.
+type SourceResponse struct {
+	Name    string   `json:"name"`
+	Origins []string `json:"origins"`
+	Updated string   `json:"updated"`
+}
 
 func (server *Server) sourceList(writer http.ResponseWriter, request *http.Request) {
 	var (
@@ -91,7 +97,7 @@ func (server *Server) sourceShow(writer http.ResponseWriter, request *http.Reque
 	// Parse catalog for source information
 	sourceName := mux.Vars(request)["name"]
 
-	response := types.SourceResponse{
+	response := SourceResponse{
 		Name:    sourceName,
 		Updated: server.Catalog.Updated.Format(time.RFC3339),
 	}

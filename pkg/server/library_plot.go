@@ -20,6 +20,49 @@ const (
 	defaultPlotSample = 400
 )
 
+// PlotRequest represents a eplot request struct in the server library.
+type PlotRequest struct {
+	Time        string    `json:"time"`
+	Range       string    `json:"range"`
+	Sample      int       `json:"sample"`
+	Constants   []float64 `json:"constants"`
+	Percentiles []float64 `json:"percentiles"`
+	Graph       string    `json:"graph"`
+	Origin      string    `json:"origin"`
+	Source      string    `json:"source"`
+	Metric      string    `json:"metric"`
+	Template    string    `json:"template"`
+	Filter      string    `json:"filter"`
+}
+
+// SerieResponse represents a serie response struct in the server library.
+type SerieResponse struct {
+	Name    string                     `json:"name"`
+	Plots   []types.PlotValue          `json:"plots"`
+	Info    map[string]types.PlotValue `json:"info"`
+	Options map[string]interface{}     `json:"options"`
+}
+
+// StackResponse represents a stack response struct in the server library.
+type StackResponse struct {
+	Name   string           `json:"name"`
+	Series []*SerieResponse `json:"series"`
+}
+
+// PlotResponse represents a plot response struct in the server library.
+type PlotResponse struct {
+	ID          string           `json:"id"`
+	Start       string           `json:"start"`
+	End         string           `json:"end"`
+	Step        float64          `json:"step"`
+	Name        string           `json:"name"`
+	Description string           `json:"description"`
+	Type        int              `json:"type"`
+	StackMode   int              `json:"stack_mode"`
+	Stacks      []*StackResponse `json:"stacks"`
+	Modified    time.Time        `json:"modified"`
+}
+
 func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Request) {
 	var (
 		graph     *library.Graph
@@ -39,7 +82,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 	// Parse input JSON for graph data
 	body, _ := ioutil.ReadAll(request.Body)
 
-	plotReq := &types.PlotRequest{}
+	plotReq := &PlotRequest{}
 
 	if err := json.Unmarshal(body, plotReq); err != nil {
 		log.Println("ERROR: " + err.Error())
@@ -135,7 +178,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 		}
 	}
 
-	response := &types.PlotResponse{
+	response := &PlotResponse{
 		ID:          graph.ID,
 		Start:       startTime.Format(time.RFC3339),
 		End:         endTime.Format(time.RFC3339),
@@ -155,7 +198,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 	plotMax := 0
 
 	for _, stackItem := range graph.Stacks {
-		stack := &types.StackResponse{Name: stackItem.Name}
+		stack := &StackResponse{Name: stackItem.Name}
 
 		for _, groupItem := range stackItem.Groups {
 			var plotResult map[string]*connector.PlotResult
@@ -167,7 +210,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 					plotMax = len(serieResult.Plots)
 				}
 
-				stack.Series = append(stack.Series, &types.SerieResponse{
+				stack.Series = append(stack.Series, &SerieResponse{
 					Name:    serieName,
 					Plots:   serieResult.Plots,
 					Info:    serieResult.Info,
@@ -186,8 +229,8 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 	server.handleJSON(writer, response)
 }
 
-func (server *Server) plotPrepareQuery(plotReq *types.PlotRequest,
-	groupItem *library.OperGroup) (*connector.GroupQuery, connector.ConnectorHandler, error) {
+func (server *Server) plotPrepareQuery(plotReq *PlotRequest, groupItem *library.OperGroup) (*connector.GroupQuery,
+	connector.ConnectorHandler, error) {
 
 	var originConnector connector.ConnectorHandler
 
@@ -301,7 +344,7 @@ func (server *Server) plotValues(writer http.ResponseWriter, request *http.Reque
 	// Parse input JSON for graph data
 	body, _ := ioutil.ReadAll(request.Body)
 
-	plotReq := &types.PlotRequest{}
+	plotReq := &PlotRequest{}
 
 	if err := json.Unmarshal(body, &plotReq); err != nil {
 		log.Println("ERROR: " + err.Error())
