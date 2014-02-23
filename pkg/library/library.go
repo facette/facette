@@ -34,7 +34,7 @@ const (
 // graphs, collections).
 type Library struct {
 	Config         *config.Config
-	Catalog        *connector.Catalog
+	Catalog        *catalog.Catalog
 	Groups         map[string]*Group
 	Graphs         map[string]*Graph
 	TemplateGraphs map[string]*Graph
@@ -108,7 +108,7 @@ func (library *Library) Update() error {
 }
 
 // NewLibrary creates a new instance of Library.
-func NewLibrary(config *config.Config, catalog *connector.Catalog, debugLevel int) *Library {
+func NewLibrary(config *config.Config, catalog *catalog.Catalog, debugLevel int) *Library {
 	// Create new Library instance
 	library := &Library{Config: config, Catalog: catalog, debugLevel: debugLevel}
 

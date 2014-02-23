@@ -46,7 +46,7 @@ type Server struct {
 	Config      *config.Config
 	Listener    *stoppableListener.StoppableListener
 	AuthHandler auth.AuthHandler
-	Catalog     *connector.Catalog
+	Catalog     *catalog.Catalog
 	Library     *library.Library
 	Loading     bool
 	debugLevel  int
@@ -301,7 +301,7 @@ func NewServer(debugLevel int) (*Server, error) {
 		debugLevel: debugLevel,
 	}
 
-	server.Catalog = connector.NewCatalog(server.Config, debugLevel)
+	server.Catalog = catalog.NewCatalog(server.Config, debugLevel)
 	server.Library = library.NewLibrary(server.Config, server.Catalog, debugLevel)
 
 	return server, nil

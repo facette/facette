@@ -154,7 +154,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 	// Get plots data
 	groupOptions := make(map[string]map[string]interface{})
 
-	data := []map[string]*connector.PlotResult{}
+	data := []map[string]*catalog.PlotResult{}
 
 	for _, stackItem := range graph.Stacks {
 		for _, groupItem := range stackItem.Groups {
@@ -201,7 +201,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 		stack := &StackResponse{Name: stackItem.Name}
 
 		for _, groupItem := range stackItem.Groups {
-			var plotResult map[string]*connector.PlotResult
+			var plotResult map[string]*catalog.PlotResult
 
 			plotResult, data = data[0], data[1:]
 
@@ -229,12 +229,12 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 	server.handleJSON(writer, response)
 }
 
-func (server *Server) plotPrepareQuery(plotReq *PlotRequest, groupItem *library.OperGroup) (*connector.GroupQuery,
-	connector.ConnectorHandler, error) {
+func (server *Server) plotPrepareQuery(plotReq *PlotRequest, groupItem *library.OperGroup) (*catalog.GroupQuery,
+	catalog.ConnectorHandler, error) {
 
-	var originConnector connector.ConnectorHandler
+	var originConnector catalog.ConnectorHandler
 
-	query := &connector.GroupQuery{
+	query := &catalog.GroupQuery{
 		Name:  groupItem.Name,
 		Type:  groupItem.Type,
 		Scale: groupItem.Scale,
@@ -280,7 +280,7 @@ func (server *Server) plotPrepareQuery(plotReq *PlotRequest, groupItem *library.
 							serieItem.Origin)
 					}
 
-					query.Series = append(query.Series, &connector.SerieQuery{
+					query.Series = append(query.Series, &catalog.SerieQuery{
 						Name:   fmt.Sprintf("%s-%d", serieItem.Name, index),
 						Metric: metric,
 						Scale:  serieItem.Scale,
@@ -300,7 +300,7 @@ func (server *Server) plotPrepareQuery(plotReq *PlotRequest, groupItem *library.
 						serieItem.Origin)
 				}
 
-				serie := &connector.SerieQuery{
+				serie := &catalog.SerieQuery{
 					Metric: metric,
 					Scale:  serieItem.Scale,
 				}

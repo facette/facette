@@ -97,7 +97,7 @@ func (server *Server) browseHandleSearch(writer http.ResponseWriter, request *ht
 		URLPrefix   string
 		Count       int
 		Request     *http.Request
-		Sources     []*connector.Source
+		Sources     []*catalog.Source
 		Collections []*library.Collection
 	}
 

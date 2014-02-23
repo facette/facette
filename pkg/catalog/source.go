@@ -1,4 +1,4 @@
-package connector
+package catalog
 
 import (
 	"log"

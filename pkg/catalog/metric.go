@@ -1,4 +1,4 @@
-package connector
+package catalog
 
 // A Metric represents a metric entry.
 type Metric struct {
