@@ -41,7 +41,6 @@ func (handler *GraphiteBackendHandler) GetPlots(query *GroupQuery, startTime, en
 		httpTransport    http.RoundTripper
 		pr               map[string]*PlotResult
 		queryURL         string
-		target           string
 		res              *http.Response
 	)
 
@@ -57,38 +56,30 @@ func (handler *GraphiteBackendHandler) GetPlots(query *GroupQuery, startTime, en
 
 	pr = make(map[string]*PlotResult)
 
-	for _, s := range query.Series {
-		if s.Metric == nil {
-			continue
-		}
+	if queryURL, err = graphiteBuildQueryURL(query, startTime, endTime); err != nil {
+		return nil, fmt.Errorf("unable to build Graphite query URL: %s", err)
+	}
 
-		target = fmt.Sprintf("%s.%s", s.Metric.source.OriginalName, s.Metric.OriginalName)
+	graphiteQueryURL = fmt.Sprintf("%s%s", strings.TrimSuffix(handler.URL, "/"), queryURL)
 
-		if queryURL, err = graphiteBuildQueryURL(target, startTime, endTime); err != nil {
-			return nil, fmt.Errorf("unable to build Graphite query URL: %s", err)
-		}
+	if res, err = httpClient.Get(graphiteQueryURL); err != nil {
+		return nil, err
+	}
 
-		graphiteQueryURL = fmt.Sprintf("%s%s", strings.TrimSuffix(handler.URL, "/"), queryURL)
+	if err = graphiteCheckBackendResponse(res); err != nil {
+		return nil, fmt.Errorf("invalid HTTP backend response: %s", err)
+	}
 
-		if res, err = httpClient.Get(graphiteQueryURL); err != nil {
-			return nil, err
-		}
+	if data, err = ioutil.ReadAll(res.Body); err != nil {
+		return nil, fmt.Errorf("unable to read HTTP response body: %s", err)
+	}
 
-		if err = graphiteCheckBackendResponse(res); err != nil {
-			return nil, fmt.Errorf("invalid HTTP backend response: %s", err)
-		}
+	if err = json.Unmarshal(data, &graphitePlots); err != nil {
+		return nil, fmt.Errorf("unable to unmarshal JSON data: %s", err)
+	}
 
-		if data, err = ioutil.ReadAll(res.Body); err != nil {
-			return nil, fmt.Errorf("unable to read HTTP response body: %s", err)
-		}
-
-		if err = json.Unmarshal(data, &graphitePlots); err != nil {
-			return nil, fmt.Errorf("unable to unmarshal JSON data: %s", err)
-		}
-
-		if pr[s.Name], err = graphiteExtractPlotResult(graphitePlots); err != nil {
-			return nil, fmt.Errorf("unable to extract plot values from backend response: %s", err)
-		}
+	if pr[query.Name], err = graphiteExtractPlotResult(graphitePlots); err != nil {
+		return nil, fmt.Errorf("unable to extract plot values from backend response: %s", err)
 	}
 
 	return pr, nil
@@ -175,21 +166,49 @@ func graphiteCheckBackendResponse(res *http.Response) error {
 	return nil
 }
 
-func graphiteBuildQueryURL(target string, startTime, endTime time.Time) (string, error) {
+func graphiteBuildQueryURL(query *GroupQuery, startTime, endTime time.Time) (string, error) {
+	var (
+		target  string
+		targets []string
+	)
+
 	now := time.Now()
 
 	fromTime := 0
+
+	graphiteQueryURL := fmt.Sprintf("%s?format=json", graphiteRenderURL)
+
+	if query.Type == OperGroupTypeNone {
+		target = fmt.Sprintf("%s.%s", query.Series[0].Metric.source.OriginalName, query.Series[0].Metric.OriginalName)
+	} else {
+		targets = make([]string, 0)
+
+		for _, s := range query.Series {
+			targets = append(targets, fmt.Sprintf("%s.%s", s.Metric.source.OriginalName, s.Metric.OriginalName))
+		}
+
+		target = fmt.Sprintf("group(%s)", strings.Join(targets, ","))
+
+		switch query.Type {
+		case OperGroupTypeAvg:
+			target = fmt.Sprintf("averageSeries(%s)", target)
+		case OperGroupTypeSum:
+			target = fmt.Sprintf("sumSeries(%s)", target)
+		}
+	}
+
+	graphiteQueryURL += fmt.Sprintf("&target=%s", target)
 
 	if startTime.Before(now) {
 		fromTime = int(now.Sub(startTime).Seconds())
 	}
 
-	graphiteQueryURL := fmt.Sprintf("%s?format=json&target=%s&from=-%ds", graphiteRenderURL, target, fromTime)
+	graphiteQueryURL += fmt.Sprintf("&from=-%ds", fromTime)
 
 	// Only specify "until" parameter if endTime is still in the past
 	if endTime.Before(now) {
 		untilTime := int(time.Now().Sub(endTime).Seconds())
-		graphiteQueryURL = fmt.Sprintf("%s&until=-%ds", graphiteQueryURL, untilTime)
+		graphiteQueryURL += fmt.Sprintf("&until=-%ds", untilTime)
 	}
 
 	return graphiteQueryURL, nil
