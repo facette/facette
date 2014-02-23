@@ -1,4 +1,4 @@
-package backend
+package connector
 
 import (
 	"crypto/tls"
@@ -17,8 +17,8 @@ const (
 	graphiteRenderURL  string = "/render"
 )
 
-// GraphiteBackendHandler represents the main structure of the Graphite backend.
-type GraphiteBackendHandler struct {
+// GraphiteConnectorHandler represents the main structure of the Graphite backend.
+type GraphiteConnectorHandler struct {
 	URL                  string
 	AllowBadCertificates bool
 	origin               *Origin
@@ -30,7 +30,7 @@ type graphitePlot struct {
 }
 
 // GetPlots calculates and returns plot data based on a time interval.
-func (handler *GraphiteBackendHandler) GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
+func (handler *GraphiteConnectorHandler) GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
 	percentiles []float64) (map[string]*PlotResult, error) {
 	var (
 		data             []byte
@@ -66,7 +66,7 @@ func (handler *GraphiteBackendHandler) GetPlots(query *GroupQuery, startTime, en
 		return nil, err
 	}
 
-	if err = graphiteCheckBackendResponse(res); err != nil {
+	if err = graphiteCheckConnectorResponse(res); err != nil {
 		return nil, fmt.Errorf("invalid HTTP backend response: %s", err)
 	}
 
@@ -86,14 +86,14 @@ func (handler *GraphiteBackendHandler) GetPlots(query *GroupQuery, startTime, en
 }
 
 // GetValue calculates and returns plot data at a specific reference time.
-func (handler *GraphiteBackendHandler) GetValue(query *GroupQuery, refTime time.Time,
+func (handler *GraphiteConnectorHandler) GetValue(query *GroupQuery, refTime time.Time,
 	percentiles []float64) (map[string]map[string]types.PlotValue, error) {
 
 	return nil, nil
 }
 
 // Update triggers a full backend data update.
-func (handler *GraphiteBackendHandler) Update() error {
+func (handler *GraphiteConnectorHandler) Update() error {
 	var (
 		data           []byte
 		err            error
@@ -120,7 +120,7 @@ func (handler *GraphiteBackendHandler) Update() error {
 		return err
 	}
 
-	if err = graphiteCheckBackendResponse(res); err != nil {
+	if err = graphiteCheckConnectorResponse(res); err != nil {
 		return fmt.Errorf("invalid HTTP backend response: %s", err)
 	}
 
@@ -150,10 +150,10 @@ func (handler *GraphiteBackendHandler) Update() error {
 }
 
 func init() {
-	BackendHandlers["graphite"] = NewGraphiteBackendHandler
+	ConnectorHandlers["graphite"] = NewGraphiteConnectorHandler
 }
 
-func graphiteCheckBackendResponse(res *http.Response) error {
+func graphiteCheckConnectorResponse(res *http.Response) error {
 	if res.StatusCode != 200 {
 		return fmt.Errorf("got HTTP status code %d, expected 200", res.StatusCode)
 	}
@@ -250,27 +250,27 @@ func graphiteExtractPlotResult(graphitePlots []graphitePlot) (*PlotResult, error
 	return pr, nil
 }
 
-// NewGraphiteBackendHandler creates a new instance of BackendHandler.
-func NewGraphiteBackendHandler(origin *Origin, config map[string]string) error {
+// NewGraphiteConnectorHandler creates a new instance of ConnectorHandler.
+func NewGraphiteConnectorHandler(origin *Origin, config map[string]string) error {
 	var (
-		graphiteBackend *GraphiteBackendHandler
+		graphiteConnector *GraphiteConnectorHandler
 	)
 
 	if _, present := config["url"]; !present {
 		return fmt.Errorf("missing `url' mandatory backend definition")
 	}
 
-	graphiteBackend = &GraphiteBackendHandler{
+	graphiteConnector = &GraphiteConnectorHandler{
 		URL:                  config["url"],
 		AllowBadCertificates: false,
 		origin:               origin,
 	}
 
 	if config["allow_bad_certificates"] == "yes" {
-		graphiteBackend.AllowBadCertificates = true
+		graphiteConnector.AllowBadCertificates = true
 	}
 
-	origin.Backend = graphiteBackend
+	origin.Connector = graphiteConnector
 
 	return nil
 }
