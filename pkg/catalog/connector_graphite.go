@@ -1,4 +1,4 @@
-package connector
+package catalog
 
 import (
 	"crypto/tls"
@@ -32,6 +32,7 @@ type graphitePlot struct {
 // GetPlots calculates and returns plot data based on a time interval.
 func (handler *GraphiteConnectorHandler) GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
 	percentiles []float64) (map[string]*PlotResult, error) {
+
 	var (
 		data             []byte
 		err              error
@@ -145,6 +146,9 @@ func (handler *GraphiteConnectorHandler) Update() error {
 
 		handler.origin.inputChan <- [2]string{facetteSource, facetteMetric}
 	}
+
+	// Close channel once updated
+	close(handler.origin.inputChan)
 
 	return nil
 }
