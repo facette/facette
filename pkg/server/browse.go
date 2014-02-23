@@ -8,7 +8,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/facette/facette/pkg/connector"
+	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/thirdparty/github.com/gorilla/mux"
 )

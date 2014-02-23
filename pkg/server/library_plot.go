@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facette/facette/pkg/connector"
+	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"

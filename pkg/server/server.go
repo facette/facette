@@ -16,8 +16,8 @@ import (
 	"time"
 
 	"github.com/facette/facette/pkg/auth"
+	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/config"
-	"github.com/facette/facette/pkg/connector"
 	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/thirdparty/github.com/etix/stoppableListener"
 	"github.com/facette/facette/thirdparty/github.com/gorilla/handlers"
