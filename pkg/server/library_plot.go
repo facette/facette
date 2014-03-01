@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facette/facette/pkg/catalog"
+	"github.com/facette/facette/pkg/connector"
 	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
@@ -154,7 +154,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 	// Get plots data
 	groupOptions := make(map[string]map[string]interface{})
 
-	data := []map[string]*catalog.PlotResult{}
+	data := []map[string]*connector.PlotResult{}
 
 	for _, stackItem := range graph.Stacks {
 		for _, groupItem := range stackItem.Groups {
@@ -201,7 +201,7 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 		stack := &StackResponse{Name: stackItem.Name}
 
 		for _, groupItem := range stackItem.Groups {
-			var plotResult map[string]*catalog.PlotResult
+			var plotResult map[string]*connector.PlotResult
 
 			plotResult, data = data[0], data[1:]
 
@@ -229,12 +229,12 @@ func (server *Server) plotHandle(writer http.ResponseWriter, request *http.Reque
 	server.handleJSON(writer, response)
 }
 
-func (server *Server) plotPrepareQuery(plotReq *PlotRequest, groupItem *library.OperGroup) (*catalog.GroupQuery,
-	catalog.ConnectorHandler, error) {
+func (server *Server) plotPrepareQuery(plotReq *PlotRequest, groupItem *library.OperGroup) (*connector.GroupQuery,
+	connector.Connector, error) {
 
-	var originConnector catalog.ConnectorHandler
+	var originConnector connector.Connector
 
-	query := &catalog.GroupQuery{
+	query := &connector.GroupQuery{
 		Name:  groupItem.Name,
 		Type:  groupItem.Type,
 		Scale: groupItem.Scale,
@@ -280,10 +280,13 @@ func (server *Server) plotPrepareQuery(plotReq *PlotRequest, groupItem *library.
 							serieItem.Origin)
 					}
 
-					query.Series = append(query.Series, &catalog.SerieQuery{
-						Name:   fmt.Sprintf("%s-%d", serieItem.Name, index),
-						Metric: metric,
-						Scale:  serieItem.Scale,
+					query.Series = append(query.Series, &connector.SerieQuery{
+						Name: fmt.Sprintf("%s-%d", serieItem.Name, index),
+						Metric: &connector.MetricQuery{
+							Name:       metric.OriginalName,
+							SourceName: metric.Source.OriginalName,
+						},
+						Scale: serieItem.Scale,
 					})
 
 					index += 1
@@ -300,9 +303,12 @@ func (server *Server) plotPrepareQuery(plotReq *PlotRequest, groupItem *library.
 						serieItem.Origin)
 				}
 
-				serie := &catalog.SerieQuery{
-					Metric: metric,
-					Scale:  serieItem.Scale,
+				serie := &connector.SerieQuery{
+					Metric: &connector.MetricQuery{
+						Name:       metric.OriginalName,
+						SourceName: metric.Source.OriginalName,
+					},
+					Scale: serieItem.Scale,
 				}
 
 				if len(serieSources) > 1 {
@@ -323,95 +329,4 @@ func (server *Server) plotPrepareQuery(plotReq *PlotRequest, groupItem *library.
 	}
 
 	return query, originConnector, nil
-}
-
-func (server *Server) plotValues(writer http.ResponseWriter, request *http.Request) {
-	var (
-		err     error
-		graph   *library.Graph
-		item    interface{}
-		refTime time.Time
-	)
-
-	if request.Method != "POST" && request.Method != "HEAD" {
-		server.handleResponse(writer, http.StatusMethodNotAllowed)
-		return
-	} else if utils.RequestGetContentType(request) != "application/json" {
-		server.handleResponse(writer, http.StatusUnsupportedMediaType)
-		return
-	}
-
-	// Parse input JSON for graph data
-	body, _ := ioutil.ReadAll(request.Body)
-
-	plotReq := &PlotRequest{}
-
-	if err := json.Unmarshal(body, &plotReq); err != nil {
-		log.Println("ERROR: " + err.Error())
-		server.handleResponse(writer, http.StatusBadRequest)
-		return
-	}
-
-	if plotReq.Origin != "" && plotReq.Template != "" {
-		plotReq.Graph = plotReq.Origin + "\x30" + plotReq.Template
-	}
-
-	if plotReq.Time == "" {
-		refTime = time.Now()
-	} else if refTime, err = time.Parse(time.RFC3339, plotReq.Time); err != nil {
-		log.Println("ERROR: " + err.Error())
-		server.handleResponse(writer, http.StatusBadRequest)
-		return
-	}
-
-	if plotReq.Sample == 0 {
-		plotReq.Sample = defaultPlotSample
-	}
-
-	// Get graph from library
-	if plotReq.Template != "" {
-		graph, err = server.Library.GetGraphTemplate(plotReq.Origin, plotReq.Source, plotReq.Template, plotReq.Filter)
-	} else {
-		item, err = server.Library.GetItem(plotReq.Graph, library.LibraryItemGraph)
-		graph = item.(*library.Graph)
-	}
-
-	if err != nil {
-		log.Println("ERROR: " + err.Error())
-
-		if os.IsNotExist(err) {
-			server.handleResponse(writer, http.StatusNotFound)
-		} else {
-			server.handleResponse(writer, http.StatusInternalServerError)
-		}
-
-		return
-	}
-
-	// Get plots data
-	response := make(map[string]map[string]types.PlotValue)
-
-	for _, stackItem := range graph.Stacks {
-		for _, groupItem := range stackItem.Groups {
-			query, originConnector, err := server.plotPrepareQuery(plotReq, groupItem)
-			if err != nil {
-				log.Println("ERROR: " + err.Error())
-				server.handleResponse(writer, http.StatusBadRequest)
-				return
-			}
-
-			values, err := originConnector.GetValue(query, refTime, plotReq.Percentiles)
-			if err != nil {
-				log.Println("ERROR: " + err.Error())
-				server.handleResponse(writer, http.StatusInternalServerError)
-				return
-			}
-
-			for key, value := range values {
-				response[key] = value
-			}
-		}
-	}
-
-	server.handleJSON(writer, response)
 }

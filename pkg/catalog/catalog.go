@@ -9,7 +9,7 @@ import (
 	"github.com/facette/facette/pkg/config"
 )
 
-// Catalog represents the main structure of running Facette's instance (e.g. origins, sources, metrics).
+// Catalog represents the main structure of a catalog instance.
 type Catalog struct {
 	Config     *config.Config
 	Origins    map[string]*Origin
@@ -17,70 +17,42 @@ type Catalog struct {
 	debugLevel int
 }
 
-// AddOrigin adds a new Origin entry into the Catalog instance.
-func (catalog *Catalog) AddOrigin(name string, config map[string]string) (*Origin, error) {
-	if _, ok := config["type"]; !ok {
-		return nil, fmt.Errorf("missing connector type")
-	} else if _, ok := ConnectorHandlers[config["type"]]; !ok {
-		return nil, fmt.Errorf("unknown `%s' connector type", config["type"])
-	}
-
-	origin := &Origin{Name: name, Sources: make(map[string]*Source), catalog: catalog}
-
-	err := ConnectorHandlers[config["type"]](origin, config)
-	if err != nil {
-		return nil, err
-	}
-
-	catalog.Origins[name] = origin
-
-	return origin, nil
-}
-
 // GetMetric returns an existing Metric entry based on its origin, source and name.
 func (catalog *Catalog) GetMetric(origin, source, name string) *Metric {
-	if !catalog.MetricExists(origin, source, name) {
+	if _, ok := catalog.Origins[origin]; !ok {
+		return nil
+	} else if _, ok := catalog.Origins[origin].Sources[source]; !ok {
+		return nil
+	} else if _, ok := catalog.Origins[origin].Sources[source].Metrics[name]; !ok {
 		return nil
 	}
 
 	return catalog.Origins[origin].Sources[source].Metrics[name]
 }
 
-// MetricExists returns whether a metric exists or not.
-func (catalog *Catalog) MetricExists(origin, source, name string) bool {
-	if _, ok := catalog.Origins[origin]; ok {
-		if _, ok := catalog.Origins[origin].Sources[source]; ok {
-			if _, ok := catalog.Origins[origin].Sources[source].Metrics[name]; ok {
-				return true
-			}
-		}
-	}
-
-	return false
-}
-
-// Update updates the current Catalog by updating its origins.
-func (catalog *Catalog) Update() error {
-	var err error
-
+// Refresh updates the current Catalog by refreshing its origins.
+func (catalog *Catalog) Refresh() error {
 	success := true
 
-	log.Println("INFO: catalog update started")
+	log.Println("INFO: catalog refresh started")
 
 	// Get origins from configuration
 	catalog.Origins = make(map[string]*Origin)
 
-	for originName, origin := range catalog.Config.Origins {
-		if _, err = catalog.AddOrigin(originName, origin.Connector); err != nil {
+	for originName, originConfig := range catalog.Config.Origins {
+		origin, err := NewOrigin(originName, originConfig.Connector, catalog)
+		if err != nil {
 			log.Printf("ERROR: %s\n", err.Error())
 		}
+
+		catalog.Origins[originName] = origin
 	}
 
 	// Update catalog origins
 	wait := &sync.WaitGroup{}
 
 	for _, origin := range catalog.Origins {
-		if err = origin.Update(wait); err != nil {
+		if err := origin.Refresh(wait); err != nil {
 			log.Println("ERROR: " + err.Error())
 			success = false
 		}
@@ -90,18 +62,22 @@ func (catalog *Catalog) Update() error {
 
 	// Handle output information
 	if !success {
-		log.Println("INFO: catalog update failed")
-		return err
+		log.Println("INFO: catalog refresh failed")
+		return fmt.Errorf("unable to refresh catalog")
 	}
 
 	catalog.Updated = time.Now()
 
-	log.Println("INFO: catalog update completed")
+	log.Println("INFO: catalog refresh completed")
+
 	return nil
 }
 
 // NewCatalog creates a new instance of Catalog.
 func NewCatalog(config *config.Config, debugLevel int) *Catalog {
-	// Create new Catalog instance
-	return &Catalog{Config: config, Origins: make(map[string]*Origin), debugLevel: debugLevel}
+	return &Catalog{
+		Config:     config,
+		Origins:    make(map[string]*Origin),
+		debugLevel: debugLevel,
+	}
 }

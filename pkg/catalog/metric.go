@@ -4,5 +4,14 @@ package catalog
 type Metric struct {
 	Name         string
 	OriginalName string
-	source       *Source
+	Source       *Source
+}
+
+// NewMetric creates a new Metric instances.
+func NewMetric(name, originalName string, source *Source) *Metric {
+	return &Metric{
+		Name:         name,
+		OriginalName: originalName,
+		Source:       source,
+	}
 }

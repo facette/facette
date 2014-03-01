@@ -1,4 +1,4 @@
-package catalog
+package connector
 
 import (
 	"time"
@@ -16,14 +16,27 @@ const (
 )
 
 var (
-	// ConnectorHandlers represents the list of available connector handlers.
-	ConnectorHandlers = make(map[string]func(*Origin, map[string]string) error)
+	// Connectors represents the list of all available connector handlers.
+	Connectors = make(map[string]func(*chan [2]string, map[string]string) (interface{}, error))
 )
+
+// Connector represents the main interface of connector handlers.
+type Connector interface {
+	GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
+		percentiles []float64) (map[string]*PlotResult, error)
+	Refresh() error
+}
+
+// MetricQuery represents a metric entry in a SerieQuery.
+type MetricQuery struct {
+	Name       string
+	SourceName string
+}
 
 // SerieQuery represents a serie entry in a GroupQuery.
 type SerieQuery struct {
 	Name   string
-	Metric *Metric
+	Metric *MetricQuery
 	Scale  float64
 }
 
@@ -39,13 +52,4 @@ type GroupQuery struct {
 type PlotResult struct {
 	Plots []types.PlotValue
 	Info  map[string]types.PlotValue
-}
-
-// ConnectorHandler represents the main interface of connector handlers.
-type ConnectorHandler interface {
-	GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
-		percentiles []float64) (map[string]*PlotResult, error)
-	GetValue(query *GroupQuery, refTime time.Time,
-		percentiles []float64) (map[string]map[string]types.PlotValue, error)
-	Update() error
 }

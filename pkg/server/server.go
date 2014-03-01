@@ -137,7 +137,7 @@ func (server *Server) Reload() error {
 		return err
 	}
 
-	server.Catalog.Update()
+	server.Catalog.Refresh()
 	server.Library.Update()
 
 	server.Loading = false
@@ -174,7 +174,7 @@ func (server *Server) Run() error {
 	log.Printf("INFO: server about to listen on %s", server.Config.BindAddr)
 
 	// Initialize instance
-	go server.Catalog.Update()
+	go server.Catalog.Refresh()
 	go server.Library.Update()
 
 	// Register routes
@@ -221,7 +221,6 @@ func (server *Server) Run() error {
 
 	router.HandleFunc(URLLibraryPath+"/graphs", server.graphHandle)
 	router.HandleFunc(URLLibraryPath+"/graphs/plots", server.plotHandle)
-	router.HandleFunc(URLLibraryPath+"/graphs/values", server.plotValues)
 	router.HandleFunc(URLLibraryPath+"/graphs/{id}", server.graphHandle)
 
 	router.HandleFunc(URLLibraryPath+"/collections", server.collectionHandle)

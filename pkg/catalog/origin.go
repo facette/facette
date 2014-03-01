@@ -4,41 +4,30 @@ import (
 	"fmt"
 	"log"
 	"sync"
+
+	"github.com/facette/facette/pkg/connector"
 )
 
-// A Origin represents an origin entry.
+// An Origin represents an origin entry.
 type Origin struct {
 	Name      string
-	Connector ConnectorHandler
+	Connector connector.Connector
 	Sources   map[string]*Source
-	catalog   *Catalog
+	Catalog   *Catalog
 	inputChan chan [2]string
 }
 
-// AppendSource adds a new Source entry into the Origin instance.
-func (origin *Origin) AppendSource(name, origName string) *Source {
-	if origin.catalog.debugLevel > 2 {
-		log.Printf("DEBUG: appending `%s' source into origin...\n", name)
+// Refresh updates the current Origin by querying its Connector for sources and metrics.
+func (origin *Origin) Refresh(wait *sync.WaitGroup) error {
+	if origin.Connector == nil {
+		return fmt.Errorf("connector for `%s' origin is not initialized", origin.Name)
 	}
 
-	// Append new source instance into origin
-	source := &Source{Name: name, OriginalName: origName, Metrics: make(map[string]*Metric), origin: origin}
-	origin.Sources[name] = source
-
-	return source
-}
-
-// Update updates the current Origin by parsing the filesystem for sources or metrics.
-func (origin *Origin) Update(wait *sync.WaitGroup) error {
-	if origin.catalog.debugLevel > 1 {
+	if origin.Catalog.debugLevel > 1 {
 		log.Printf("DEBUG: updating origin `%s'...\n", origin.Name)
 	}
 
 	origin.Sources = make(map[string]*Source)
-
-	if origin.Connector == nil {
-		return fmt.Errorf("connector for `%s' origin is not initialized", origin.Name)
-	}
 
 	// Create update channel
 	origin.inputChan = make(chan [2]string)
@@ -51,7 +40,7 @@ func (origin *Origin) Update(wait *sync.WaitGroup) error {
 		for entry := range origin.inputChan {
 			originalSource, originalMetric := entry[0], entry[1]
 
-			for _, filter := range origin.catalog.Config.Origins[origin.Name].Filters {
+			for _, filter := range origin.Catalog.Config.Origins[origin.Name].Filters {
 				if filter.Target != "source" && filter.Target != "metric" && filter.Target != "" {
 					log.Printf("ERROR: unknown `%s' filter target", filter.Target)
 					continue
@@ -75,14 +64,44 @@ func (origin *Origin) Update(wait *sync.WaitGroup) error {
 			}
 
 			if _, ok := origin.Sources[entry[0]]; !ok {
-				origin.AppendSource(entry[0], originalSource)
+				origin.Sources[entry[0]] = NewSource(entry[0], originalSource, origin)
 			}
 
-			origin.Sources[entry[0]].AppendMetric(entry[1], originalMetric)
+			if origin.Catalog.debugLevel > 2 {
+				log.Printf("DEBUG: appending `%s' metric for `%s' source...\n", entry[1], entry[0])
+			}
+
+			origin.Sources[entry[0]].Metrics[entry[1]] = NewMetric(entry[1], originalMetric, origin.Sources[entry[0]])
 
 		nextEntry:
 		}
 	}()
 
-	return origin.Connector.Update()
+	return origin.Connector.Refresh()
+}
+
+// NewOrigin creates a new Origin instance.
+func NewOrigin(name string, config map[string]string, catalog *Catalog) (*Origin, error) {
+	if _, ok := config["type"]; !ok {
+		return nil, fmt.Errorf("missing connector type")
+	} else if _, ok := connector.Connectors[config["type"]]; !ok {
+		return nil, fmt.Errorf("unknown `%s' connector type", config["type"])
+	}
+
+	origin := &Origin{
+		Name:    name,
+		Sources: make(map[string]*Source),
+		Catalog: catalog,
+	}
+
+	handler, err := connector.Connectors[config["type"]](&origin.inputChan, config)
+	if err != nil {
+		return nil, err
+	}
+
+	origin.Connector = handler.(connector.Connector)
+
+	catalog.Origins[name] = origin
+
+	return origin, nil
 }

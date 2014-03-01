@@ -11,8 +11,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/config"
+	"github.com/facette/facette/pkg/connector"
 	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/pkg/server"
 )
@@ -216,7 +216,7 @@ func Test_graphHandle(test *testing.T) {
 	// Define a sample graph
 	stack := &library.Stack{Name: "stack0"}
 
-	group := &library.OperGroup{Name: "group0", Type: catalog.OperGroupTypeAvg}
+	group := &library.OperGroup{Name: "group0", Type: connector.OperGroupTypeAvg}
 	group.Series = append(group.Series, &library.Serie{Name: "serie0", Origin: "test", Source: "source1",
 		Metric: "database1/test"})
 	group.Series = append(group.Series, &library.Serie{Name: "serie1", Origin: "test", Source: "source2",
@@ -224,7 +224,7 @@ func Test_graphHandle(test *testing.T) {
 
 	stack.Groups = append(stack.Groups, group)
 
-	group = &library.OperGroup{Name: "serie2", Type: catalog.OperGroupTypeNone}
+	group = &library.OperGroup{Name: "serie2", Type: connector.OperGroupTypeNone}
 	group.Series = append(group.Series, &library.Serie{Name: "serie2", Origin: "test", Source: "group:group1",
 		Metric: "database2/test"})
 
