@@ -9,15 +9,15 @@ import (
 	"github.com/facette/facette/pkg/utils"
 )
 
-// AuthSimpleHandler represents the main simple authentication method structure.
-type AuthSimpleHandler struct {
+// SimpleHandler represents the main structue of the simple authentication handler.
+type SimpleHandler struct {
 	Config     map[string]string
 	Users      map[string]string
 	debugLevel int
 }
 
 // Authenticate tries to match user login name with its password.
-func (handler *AuthSimpleHandler) Authenticate(login, password string) bool {
+func (handler *SimpleHandler) Authenticate(login, password string) bool {
 	if _, ok := handler.Users[login]; !ok {
 		return false
 	}
@@ -26,25 +26,23 @@ func (handler *AuthSimpleHandler) Authenticate(login, password string) bool {
 }
 
 // Hash generates the password hash.
-func (handler *AuthSimpleHandler) Hash(password string) string {
-	// Get password hash
+func (handler *SimpleHandler) Hash(password string) string {
 	hash := sha256.New()
 	hash.Write([]byte(password))
 
 	return base64.StdEncoding.EncodeToString(hash.Sum(nil))
 }
 
-// Update updates the authentication base content.
-func (handler *AuthSimpleHandler) Update() error {
+// Refresh updates the content of the authentication base.
+func (handler *SimpleHandler) Refresh() error {
 	if _, ok := handler.Config["path"]; !ok {
-		return fmt.Errorf("missing `path' authentication backend setting")
+		return fmt.Errorf("missing `path' authentication handler setting")
 	}
 
 	if handler.debugLevel > 0 {
 		log.Printf("DEBUG: loading authentication data from `%s' file...\n", handler.Config["path"])
 	}
 
-	// Empty users map
 	handler.Users = make(map[string]string)
 
 	_, err := utils.JSONLoad(handler.Config["path"], &handler.Users)
@@ -52,7 +50,7 @@ func (handler *AuthSimpleHandler) Update() error {
 }
 
 func init() {
-	AuthHandlers["simple"] = func(config map[string]string, debugLevel int) AuthHandler {
-		return &AuthSimpleHandler{Config: config, debugLevel: debugLevel}
+	Handlers["simple"] = func(config map[string]string, debugLevel int) Handler {
+		return &SimpleHandler{Config: config, debugLevel: debugLevel}
 	}
 }

@@ -5,23 +5,23 @@ import (
 )
 
 var (
-	// AuthHandlers represents the list of available auth handlers.
-	AuthHandlers = make(map[string]func(map[string]string, int) AuthHandler)
+	// Handlers represents the list of available auth handlers.
+	Handlers = make(map[string]func(map[string]string, int) Handler)
 )
 
-// AuthHandler represents the main interface of auth handlers.
-type AuthHandler interface {
+// Handler represents the main interface of a authentication handler.
+type Handler interface {
 	Authenticate(login, password string) bool
-	Update() error
+	Refresh() error
 }
 
-// NewAuth creates a new AuthHandler instance.
-func NewAuth(config map[string]string, debugLevel int) (AuthHandler, error) {
+// NewAuth creates a new authentication handler instance.
+func NewAuth(config map[string]string, debugLevel int) (Handler, error) {
 	if _, ok := config["type"]; !ok {
 		return nil, fmt.Errorf("missing authentication handler type")
-	} else if _, ok := AuthHandlers[config["type"]]; !ok {
+	} else if _, ok := Handlers[config["type"]]; !ok {
 		return nil, fmt.Errorf("unknown `%s' authentication handler", config["type"])
 	}
 
-	return AuthHandlers[config["type"]](config, debugLevel), nil
+	return Handlers[config["type"]](config, debugLevel), nil
 }

@@ -14,9 +14,9 @@ import (
 )
 
 func handleUser(config *config.Config, args []string) error {
-	cmd := &cmdAuth{handler: auth.AuthSimpleHandler{Config: config.Auth}}
+	cmd := &cmdAuth{handler: auth.SimpleHandler{Config: config.Auth}}
 
-	if err := cmd.handler.Update(); err != nil {
+	if err := cmd.handler.Refresh(); err != nil {
 		return err
 	}
 
@@ -33,7 +33,7 @@ func handleUser(config *config.Config, args []string) error {
 }
 
 type cmdAuth struct {
-	handler auth.AuthSimpleHandler
+	handler auth.SimpleHandler
 }
 
 func (cmd *cmdAuth) list(args []string) error {

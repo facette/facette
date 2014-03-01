@@ -45,7 +45,7 @@ type statusResponse struct {
 type Server struct {
 	Config      *config.Config
 	Listener    *stoppableListener.StoppableListener
-	AuthHandler auth.AuthHandler
+	AuthHandler auth.Handler
 	Catalog     *catalog.Catalog
 	Library     *library.Library
 	Loading     bool
@@ -133,7 +133,7 @@ func (server *Server) Reload() error {
 		return err
 	}
 
-	if err := server.AuthHandler.Update(); err != nil {
+	if err := server.AuthHandler.Refresh(); err != nil {
 		return err
 	}
 
@@ -169,7 +169,7 @@ func (server *Server) Run() error {
 	}
 
 	server.AuthHandler = authHandler
-	go server.AuthHandler.Update()
+	go server.AuthHandler.Refresh()
 
 	log.Printf("INFO: server about to listen on %s", server.Config.BindAddr)
 
