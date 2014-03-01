@@ -46,7 +46,7 @@ func (server *Server) originList(writer http.ResponseWriter, request *http.Reque
 	}
 
 	// Parse catalog for sources list
-	response := []string{}
+	response := make([]string, 0)
 
 	for _, origin := range server.Catalog.Origins {
 		if request.FormValue("filter") != "" {

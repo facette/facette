@@ -107,7 +107,7 @@ func (server *Server) browseHandleSearch(writer http.ResponseWriter, request *ht
 
 	// Perform search filtering
 	if request.FormValue("q") != "" {
-		chunks := []string{}
+		chunks := make([]string, 0)
 
 		for _, chunk := range strings.Split(strings.ToLower(request.FormValue("q")), " ") {
 			chunks = append(chunks, strings.Trim(chunk, " \t"))

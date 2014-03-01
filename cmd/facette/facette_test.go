@@ -23,7 +23,7 @@ var (
 
 func Test_originList(test *testing.T) {
 	base := []string{"test"}
-	result := []string{}
+	result := make([]string, 0)
 
 	// Test GET on source list
 	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/origins", serverConfig.BindAddr),
@@ -70,7 +70,7 @@ func Test_originShow(test *testing.T) {
 
 func Test_sourceList(test *testing.T) {
 	base := []string{"source1", "source2"}
-	result := []string{}
+	result := make([]string, 0)
 
 	// Test GET on source list
 	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources", serverConfig.BindAddr), nil,
@@ -118,7 +118,7 @@ func Test_sourceShow(test *testing.T) {
 func Test_metricList(test *testing.T) {
 	// Test #1 GET on metrics list
 	base := []string{"database1/test", "database2/test", "database3/test"}
-	result := []string{}
+	result := make([]string, 0)
 
 	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/metrics", serverConfig.BindAddr), nil,
 		false, &result)

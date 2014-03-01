@@ -25,7 +25,7 @@ func TimeApplyRange(refTime time.Time, input string) (time.Time, error) {
 
 	modifier := 1
 
-	chunks := []int{}
+	chunks := make([]int, 0)
 
 	for key, value := range re.FindStringSubmatch(strings.Trim(input, " ")) {
 		var intVal int

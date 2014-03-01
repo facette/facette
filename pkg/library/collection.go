@@ -64,7 +64,7 @@ func (library *Library) GetCollectionTemplate(name string) (*Collection, error) 
 		found = true
 
 		// Get sorted templates list
-		templates := []string{}
+		templates := make([]string, 0)
 
 		for templateName := range library.Config.Origins[originName].Templates {
 			templates = append(templates, templateName)

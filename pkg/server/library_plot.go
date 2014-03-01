@@ -252,7 +252,7 @@ func (server *Server) plotPrepareQuery(plotReq *PlotRequest, groupItem *library.
 			return nil, nil, fmt.Errorf("connectors differ between series")
 		}
 
-		serieSources := []string{}
+		serieSources := make([]string, 0)
 
 		if plotReq.Template != "" {
 			serieSources = []string{plotReq.Source}

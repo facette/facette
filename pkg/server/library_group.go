@@ -45,7 +45,7 @@ func (server *Server) groupExpand(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	response := []ExpandRequest{}
+	response := make([]ExpandRequest, 0)
 
 	for _, entry := range query {
 		item := ExpandRequest{}

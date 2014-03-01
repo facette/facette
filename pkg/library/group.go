@@ -37,7 +37,7 @@ func (library *Library) ExpandGroup(name string, groupType int) []string {
 	item, err := library.GetItemByName(name, groupType)
 	if err != nil {
 		log.Printf("ERROR: " + err.Error())
-		return []string{}
+		return make([]string, 0)
 	}
 
 	group := item.(*Group)
