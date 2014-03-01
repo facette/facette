@@ -50,7 +50,7 @@ func (handler *SimpleHandler) Refresh() error {
 }
 
 func init() {
-	Handlers["simple"] = func(config map[string]string, debugLevel int) Handler {
+	Handlers["simple"] = func(config map[string]string, debugLevel int) interface{} {
 		return &SimpleHandler{Config: config, debugLevel: debugLevel}
 	}
 }

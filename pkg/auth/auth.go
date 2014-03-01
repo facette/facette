@@ -7,7 +7,7 @@ import (
 
 var (
 	// Handlers represents the list of available auth handlers.
-	Handlers = make(map[string]func(map[string]string, int) Handler)
+	Handlers = make(map[string]func(map[string]string, int) interface{})
 )
 
 // Handler represents the main interface of a authentication handler.
@@ -24,5 +24,5 @@ func NewAuth(config map[string]string, debugLevel int) (Handler, error) {
 		return nil, fmt.Errorf("unknown `%s' authentication handler", config["type"])
 	}
 
-	return Handlers[config["type"]](config, debugLevel), nil
+	return Handlers[config["type"]](config, debugLevel).(Handler), nil
 }
