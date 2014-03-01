@@ -1,3 +1,4 @@
+// Package connector implements the connectors handling third-party data sources.
 package connector
 
 import (

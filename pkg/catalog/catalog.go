@@ -1,3 +1,4 @@
+// Package catalog implements the service catalog handling immutable data: origins, sources and metrics.
 package catalog
 
 import (
