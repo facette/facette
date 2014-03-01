@@ -18,7 +18,7 @@ type Catalog struct {
 	debugLevel int
 }
 
-// GetMetric returns an existing Metric entry based on its origin, source and name.
+// GetMetric returns an existing metric entry based on its origin, source and name.
 func (catalog *Catalog) GetMetric(origin, source, name string) *Metric {
 	if _, ok := catalog.Origins[origin]; !ok {
 		return nil
@@ -31,7 +31,7 @@ func (catalog *Catalog) GetMetric(origin, source, name string) *Metric {
 	return catalog.Origins[origin].Sources[source].Metrics[name]
 }
 
-// Refresh updates the current Catalog by refreshing its origins.
+// Refresh updates the current catalog by refreshing its origins.
 func (catalog *Catalog) Refresh() error {
 	success := true
 
@@ -74,7 +74,7 @@ func (catalog *Catalog) Refresh() error {
 	return nil
 }
 
-// NewCatalog creates a new instance of Catalog.
+// NewCatalog creates a new instance of catalog.
 func NewCatalog(config *config.Config, debugLevel int) *Catalog {
 	return &Catalog{
 		Config:     config,

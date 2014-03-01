@@ -18,7 +18,7 @@ func Clone(src, dst interface{}) {
 	decoder.Decode(dst)
 }
 
-// FilterMatch checks a glob or regexp pattern over a given value.
+// FilterMatch checks a glob or a regexp pattern over a given value.
 func FilterMatch(pattern, value string) bool {
 	if strings.HasPrefix(pattern, "glob:") {
 		// Remove slashes from pattern and value as `path.Match' does not handle them

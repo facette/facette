@@ -1,6 +1,6 @@
 package catalog
 
-// An Source represents the source of a set of Metric entries (e.g. an host name).
+// Source represents the source of a set of metric entries (e.g. an host name).
 type Source struct {
 	Name         string
 	OriginalName string
@@ -8,7 +8,7 @@ type Source struct {
 	Origin       *Origin
 }
 
-// NewSource creates a new Source instance.
+// NewSource creates a new source instance.
 func NewSource(name, originalName string, origin *Origin) *Source {
 	return &Source{
 		Name:         name,

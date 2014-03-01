@@ -24,31 +24,7 @@ const (
 	StackModePercent
 )
 
-// Serie represents a instance of a Graph serie.
-type Serie struct {
-	Name   string  `json:"name"`
-	Origin string  `json:"origin"`
-	Source string  `json:"source"`
-	Metric string  `json:"metric"`
-	Scale  float64 `json:"scale"`
-}
-
-// OperGroup represents a subset of Stack entry.
-type OperGroup struct {
-	Name    string                 `json:"name"`
-	Type    int                    `json:"type"`
-	Series  []*Serie               `json:"series"`
-	Scale   float64                `json:"scale"`
-	Options map[string]interface{} `json:"options"`
-}
-
-// Stack represents a set of OperGroup entries in a Graph instance.
-type Stack struct {
-	Name   string       `json:"name"`
-	Groups []*OperGroup `json:"groups"`
-}
-
-// Graph represents a graph entry in a Library.
+// Graph represents a graph containing list of series.
 type Graph struct {
 	Item
 	Type      int      `json:"type"`
@@ -57,13 +33,28 @@ type Graph struct {
 	Volatile  bool     `json:"-"`
 }
 
-func (library *Library) getTemplateID(origin, name string) (string, error) {
-	id, err := uuid.NewV3(uuid.NamespaceURL, []byte(origin+name))
-	if err != nil {
-		return "", err
-	}
+// Stack represents a set of operation group entries.
+type Stack struct {
+	Name   string       `json:"name"`
+	Groups []*OperGroup `json:"groups"`
+}
 
-	return id.String(), nil
+// OperGroup represents an operation group entry.
+type OperGroup struct {
+	Name    string                 `json:"name"`
+	Type    int                    `json:"type"`
+	Series  []*Serie               `json:"series"`
+	Scale   float64                `json:"scale"`
+	Options map[string]interface{} `json:"options"`
+}
+
+// Serie represents a serie entry.
+type Serie struct {
+	Name   string  `json:"name"`
+	Origin string  `json:"origin"`
+	Source string  `json:"source"`
+	Metric string  `json:"metric"`
+	Scale  float64 `json:"scale"`
 }
 
 // GetGraphMetric gets a graph metric item.
@@ -152,4 +143,13 @@ func (library *Library) GetGraphTemplate(origin, source, template, filter string
 	}
 
 	return library.TemplateGraphs[id], nil
+}
+
+func (library *Library) getTemplateID(origin, name string) (string, error) {
+	id, err := uuid.NewV3(uuid.NamespaceURL, []byte(origin+name))
+	if err != nil {
+		return "", err
+	}
+
+	return id.String(), nil
 }

@@ -1,3 +1,4 @@
+// Package auth implements the authentication handlers.
 package auth
 
 import (

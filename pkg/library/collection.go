@@ -11,19 +11,19 @@ import (
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
 
-// CollectionEntry represents a Collection entry structure.
-type CollectionEntry struct {
-	ID      string            `json:"id"`
-	Options map[string]string `json:"options"`
-}
-
-// Collection represents a Collection entry in a Library.
+// Collection represents a collection of graphs.
 type Collection struct {
 	Item
 	Entries  []*CollectionEntry `json:"entries"`
 	Parent   *Collection        `json:"-"`
 	ParentID string             `json:"parent"`
 	Children []*Collection      `json:"-"`
+}
+
+// CollectionEntry represents a collection entry.
+type CollectionEntry struct {
+	ID      string            `json:"id"`
+	Options map[string]string `json:"options"`
 }
 
 // FilterCollection filters collection entries by graphs titles.
@@ -49,7 +49,7 @@ func (library *Library) FilterCollection(collection *Collection, filter string) 
 	return collectionTemp
 }
 
-// GetCollectionTemplate generates a Collection based on origins templates.
+// GetCollectionTemplate generates a collection based on origins templates.
 func (library *Library) GetCollectionTemplate(name string) (*Collection, error) {
 	found := false
 

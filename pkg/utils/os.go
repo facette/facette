@@ -31,7 +31,7 @@ func walkDir(dirPath string, linkPath string, walkFunc filepath.WalkFunc) error 
 	return filepath.Walk(dirPath, internalFunc)
 }
 
-// WalkDir browses dirPath on the filesystem executing walkFunc for each found files.
+// WalkDir browses a directory on the filesystem executing a callback function for each found files.
 func WalkDir(dirPath string, walkFunc filepath.WalkFunc) error {
 	return walkDir(dirPath, "", walkFunc)
 }

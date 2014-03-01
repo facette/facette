@@ -13,7 +13,7 @@ import (
 	"github.com/facette/facette/thirdparty/github.com/nu7hatch/gouuid"
 )
 
-// Item represents the base structure of a Library item.
+// Item represents the base structure of a library item.
 type Item struct {
 	path        string
 	ID          string    `json:"id"`
@@ -22,37 +22,9 @@ type Item struct {
 	Modified    time.Time `json:"-"`
 }
 
-// GetItem returns the base structure of a Library item.
+// GetItem returns the base structure of a library item.
 func (item *Item) GetItem() *Item {
 	return item
-}
-
-func (library *Library) getDirPath(itemType int) string {
-	var dirName string
-
-	switch itemType {
-	case LibraryItemSourceGroup:
-		dirName = "sourcegroups"
-		break
-
-	case LibraryItemMetricGroup:
-		dirName = "metricgroups"
-		break
-
-	case LibraryItemGraph:
-		dirName = "graphs"
-		break
-
-	case LibraryItemCollection:
-		dirName = "collections"
-		break
-	}
-
-	return path.Join(library.Config.DataDir, dirName)
-}
-
-func (library *Library) getFilePath(id string, itemType int) string {
-	return path.Join(library.getDirPath(itemType), id[0:2], id[2:4], id+".json")
 }
 
 // DeleteItem removes an existing item from the library.
@@ -159,7 +131,7 @@ func (library *Library) GetItemByName(name string, itemType int) (interface{}, e
 	return nil, os.ErrNotExist
 }
 
-// ItemExists returns whether an item existsn the library or not.
+// ItemExists returns whether an item exists the library or not.
 func (library *Library) ItemExists(id string, itemType int) bool {
 	exists := false
 
@@ -186,7 +158,7 @@ func (library *Library) ItemExists(id string, itemType int) bool {
 	return exists
 }
 
-// LoadItem loads an item from the filesystem by its identifier.
+// LoadItem loads an item by its identifier.
 func (library *Library) LoadItem(id string, itemType int) error {
 	// Load item from file
 	switch itemType {
@@ -382,4 +354,32 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 	}
 
 	return nil
+}
+
+func (library *Library) getDirPath(itemType int) string {
+	var dirName string
+
+	switch itemType {
+	case LibraryItemSourceGroup:
+		dirName = "sourcegroups"
+		break
+
+	case LibraryItemMetricGroup:
+		dirName = "metricgroups"
+		break
+
+	case LibraryItemGraph:
+		dirName = "graphs"
+		break
+
+	case LibraryItemCollection:
+		dirName = "collections"
+		break
+	}
+
+	return path.Join(library.Config.DataDir, dirName)
+}
+
+func (library *Library) getFilePath(id string, itemType int) string {
+	return path.Join(library.getDirPath(itemType), id[0:2], id[2:4], id+".json")
 }

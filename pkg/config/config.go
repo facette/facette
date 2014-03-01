@@ -1,3 +1,4 @@
+// Package config implements the service configuration handling.
 package config
 
 import (
@@ -15,7 +16,7 @@ const (
 	DefaultConfigFile = "/etc/facette/facette.json"
 )
 
-// Config represents the main configuration system structure.
+// Config represents the main of the service configuration system.
 type Config struct {
 	Path      string                   `json:"-"`
 	BindAddr  string                   `json:"bind"`
@@ -31,7 +32,7 @@ type Config struct {
 	Origins   map[string]*OriginConfig `json:"-"`
 }
 
-// Load loads the configuration from the filesystem using the filePath paramater as origin path.
+// Load loads the configuration from the filesystem.
 func (config *Config) Load(filePath string) error {
 	var errOutput error
 
@@ -48,13 +49,12 @@ func (config *Config) Load(filePath string) error {
 			return nil
 		}
 
-		_, originName := path.Split(filePath[:len(filePath)-5])
+		_, originName := path.Split(strings.TrimSuffix(filePath, ".json"))
 
 		config.Origins[originName] = &OriginConfig{}
 
 		if fileInfo, err = utils.JSONLoad(filePath, config.Origins[originName]); err != nil {
 			err = fmt.Errorf("in %s, %s", filePath, err.Error())
-
 			if errOutput == nil {
 				errOutput = err
 			}
@@ -89,7 +89,7 @@ func (config *Config) Load(filePath string) error {
 	return nil
 }
 
-// Reload reloads the configuration from the filesystem.
+// Reload reloads the configuration.
 func (config *Config) Reload() error {
 	return config.Load(config.Path)
 }

@@ -19,7 +19,7 @@ const (
 		"$"
 )
 
-// TimeApplyRange applies a string defined time range to a specific date.
+// TimeApplyRange applies a string-defined time range to a specific date.
 func TimeApplyRange(refTime time.Time, input string) (time.Time, error) {
 	re := regexp.MustCompile(durationRegexp)
 

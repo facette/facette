@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// JSONDump dumps the data structure in JSON format in filePath on the filesystem.
+// JSONDump dumps the data structure using JSON format on the filesystem.
 func JSONDump(filePath string, data interface{}, modTime time.Time) error {
 	output, err := json.MarshalIndent(data, "", "    ")
 	if err != nil {
@@ -31,7 +31,7 @@ func JSONDump(filePath string, data interface{}, modTime time.Time) error {
 	return nil
 }
 
-// JSONLoad loads the JSON formatted data in result from filePath on the filesystem.
+// JSONLoad loads the JSON formatted data in result from the filesystem.
 func JSONLoad(filePath string, result interface{}) (os.FileInfo, error) {
 	if _, err := os.Stat(filePath); err != nil {
 		return nil, err

@@ -8,7 +8,7 @@ import (
 	"github.com/facette/facette/pkg/connector"
 )
 
-// An Origin represents an origin entry.
+// Origin represents an origin of source sets (e.g. a Collectd or Graphite instance).
 type Origin struct {
 	Name      string
 	Connector connector.Connector
@@ -17,7 +17,7 @@ type Origin struct {
 	inputChan chan [2]string
 }
 
-// Refresh updates the current Origin by querying its Connector for sources and metrics.
+// Refresh updates the current origin by querying its connector for sources and metrics.
 func (origin *Origin) Refresh(wait *sync.WaitGroup) error {
 	if origin.Connector == nil {
 		return fmt.Errorf("connector for `%s' origin is not initialized", origin.Name)
@@ -80,7 +80,7 @@ func (origin *Origin) Refresh(wait *sync.WaitGroup) error {
 	return origin.Connector.Refresh()
 }
 
-// NewOrigin creates a new Origin instance.
+// NewOrigin creates a new origin instance.
 func NewOrigin(name string, config map[string]string, catalog *Catalog) (*Origin, error) {
 	if _, ok := config["type"]; !ok {
 		return nil, fmt.Errorf("missing connector type")

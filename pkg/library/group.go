@@ -18,20 +18,20 @@ const (
 	LibraryMatchPrefixRegexp = "regexp:"
 )
 
-// GroupEntry represents a subset of a Group entry.
-type GroupEntry struct {
-	Pattern string `json:"pattern"`
-	Origin  string `json:"origin"`
-}
-
-// Group represents an source/metric group structure.
+// Group represents a source or metric group.
 type Group struct {
 	Item
 	Type    int           `json:"-"`
 	Entries []*GroupEntry `json:"entries"`
 }
 
-// ExpandGroup returns the list of items matching the group name based on its groupType.
+// GroupEntry represents a group entry.
+type GroupEntry struct {
+	Pattern string `json:"pattern"`
+	Origin  string `json:"origin"`
+}
+
+// ExpandGroup expands a group returning a list of matching items.
 func (library *Library) ExpandGroup(name string, groupType int) []string {
 
 	item, err := library.GetItemByName(name, groupType)

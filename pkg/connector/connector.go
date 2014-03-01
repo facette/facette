@@ -21,7 +21,7 @@ var (
 	Connectors = make(map[string]func(*chan [2]string, map[string]string) (interface{}, error))
 )
 
-// Connector represents the main interface of connector handlers.
+// Connector represents the main interface of a connector handler.
 type Connector interface {
 	GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
 		percentiles []float64) (map[string]*PlotResult, error)

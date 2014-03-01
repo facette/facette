@@ -138,7 +138,7 @@ func (server *Server) Reload() error {
 	}
 
 	server.Catalog.Refresh()
-	server.Library.Update()
+	server.Library.Refresh()
 
 	server.Loading = false
 
@@ -175,7 +175,7 @@ func (server *Server) Run() error {
 
 	// Initialize instance
 	go server.Catalog.Refresh()
-	go server.Library.Update()
+	go server.Library.Refresh()
 
 	// Register routes
 	router := mux.NewRouter()

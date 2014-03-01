@@ -1,3 +1,5 @@
+// Package library implements the service library handling user-defined items (e.g. sources and metrics groups, graphs,
+// collections).
 package library
 
 import (
@@ -30,8 +32,7 @@ const (
 	UUIDPattern = "^\\d{8}-(?:\\d{4}-){3}\\d{12}$"
 )
 
-// Library represents the main structure of running Facette's instance library (e.g. sources and metrics groups,
-// graphs, collections).
+// Library represents the main structure of library instance.
 type Library struct {
 	Config         *config.Config
 	Catalog        *catalog.Catalog
@@ -43,8 +44,8 @@ type Library struct {
 	idRegexp       *regexp.Regexp
 }
 
-// Update updates the current Library by browsing the filesystem for stored data.
-func (library *Library) Update() error {
+// Refresh updates the current library by browsing the filesystem for stored data.
+func (library *Library) Refresh() error {
 	var itemType int
 
 	// Empty library maps
@@ -107,13 +108,12 @@ func (library *Library) Update() error {
 	return nil
 }
 
-// NewLibrary creates a new instance of Library.
+// NewLibrary creates a new instance of library.
 func NewLibrary(config *config.Config, catalog *catalog.Catalog, debugLevel int) *Library {
-	// Create new Library instance
-	library := &Library{Config: config, Catalog: catalog, debugLevel: debugLevel}
-
-	// Compile ID validation regexp
-	library.idRegexp = regexp.MustCompile(UUIDPattern)
-
-	return library
+	return &Library{
+		Config:     config,
+		Catalog:    catalog,
+		debugLevel: debugLevel,
+		idRegexp:   regexp.MustCompile(UUIDPattern),
+	}
 }
