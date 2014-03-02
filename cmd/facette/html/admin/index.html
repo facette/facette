@@ -14,45 +14,43 @@
 			</header>
 
 			<section class="scrollarea full">
-				<div data-stats="library">
-					<h1>Catalog statistics</h1>
+				<h1>Catalog statistics</h1>
 
-					<table class="stats">
-						<tr>
-							<th>Total Origins:</th>
-							<td class="origins">Loading...</td>
-						</tr>
-						<tr>
-							<th>Total Sources:</th>
-							<td class="sources">Loading...</td>
-						</tr>
-						<tr>
-							<th>Total Metrics:</th>
-							<td class="metrics">Loading...</td>
-						</tr>
-						<tr>
-							<th>Last update:</th>
-							<td class="catalog_updated">Loading...</td>
-						</tr>
-					</table>
+				<table class="stats">
+					<tr>
+						<th>Total Origins:</th>
+						<td> {{ .Stats.Origins }}</td>
+					</tr>
+					<tr>
+						<th>Total Sources:</th>
+						<td>{{ .Stats.Sources }}</td>
+					</tr>
+					<tr>
+						<th>Total Metrics:</th>
+						<td>{{ .Stats.Metrics }}</td>
+					</tr>
+					<tr>
+						<th>Last update:</th>
+						<td>{{ .Stats.CatalogUpdated }}</td>
+					</tr>
+				</table>
 
-					<h1>Library statistics</h1>
+				<h1>Library statistics</h1>
 
-					<table class="stats">
-						<tr>
-							<th>Total Collections:</th>
-							<td class="collections">Loading...</td>
-						</tr>
-						<tr>
-							<th>Total Graphs:</th>
-							<td class="graphs">Loading...</td>
-						</tr>
-						<tr>
-							<th>Total Groups:</th>
-							<td class="groups">Loading...</td>
-						</tr>
-					</table>
-				</div>
+				<table class="stats">
+					<tr>
+						<th>Total Collections:</th>
+						<td>{{ .Stats.Collections }}</td>
+					</tr>
+					<tr>
+						<th>Total Graphs:</th>
+						<td>{{ .Stats.Graphs }}</td>
+					</tr>
+					<tr>
+						<th>Total Groups:</th>
+						<td>{{ .Stats.Groups }}</td>
+					</tr>
+				</table>
 			</section>
 		</article>
 {{ end }}

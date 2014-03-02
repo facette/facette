@@ -62,7 +62,7 @@ type SerieResponse struct {
 }
 
 func (server *Server) handleGraph(writer http.ResponseWriter, request *http.Request) {
-	graphID := strings.TrimPrefix(request.URL.Path, URLLibraryPath+"/graphs/")
+	graphID := strings.TrimPrefix(request.URL.Path, URLLibraryPath+"graphs/")
 
 	switch request.Method {
 	case "DELETE":

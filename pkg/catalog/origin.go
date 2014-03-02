@@ -67,7 +67,7 @@ func (origin *Origin) Refresh(wait *sync.WaitGroup) error {
 				origin.Sources[entry[0]] = NewSource(entry[0], originalSource, origin)
 			}
 
-			if origin.Catalog.debugLevel > 2 {
+			if origin.Catalog.debugLevel > 3 {
 				log.Printf("DEBUG: appending `%s' metric for `%s' source...\n", entry[1], entry[0])
 			}
 

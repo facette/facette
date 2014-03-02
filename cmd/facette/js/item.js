@@ -10,7 +10,7 @@ function itemDelete(id, itemType) {
 
 function itemList(query, itemType) {
     return $.ajax({
-        url: urlPrefix + '/library/' + itemType,
+        url: urlPrefix + '/library/' + itemType + '/',
         type: 'GET',
         data: query,
         dataType: 'json'
@@ -26,7 +26,7 @@ function itemLoad(id, itemType) {
 }
 
 function itemSave(id, itemType, query, mode) {
-    var url = '/library/' + itemType,
+    var url = '/library/' + itemType + '/',
         method = 'POST';
 
     if (mode === SAVE_MODE_CLONE) {

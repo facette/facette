@@ -35,11 +35,11 @@ func (server *Server) handleGroup(writer http.ResponseWriter, request *http.Requ
 		groupType int
 	)
 
-	if strings.HasPrefix(request.URL.Path, URLLibraryPath+"/sourcegroups") {
-		groupID = strings.TrimPrefix(request.URL.Path, URLLibraryPath+"/sourcegroups/")
+	if strings.HasPrefix(request.URL.Path, URLLibraryPath+"sourcegroups") {
+		groupID = strings.TrimPrefix(request.URL.Path, URLLibraryPath+"sourcegroups/")
 		groupType = library.LibraryItemSourceGroup
-	} else if strings.HasPrefix(request.URL.Path, URLLibraryPath+"/metricgroups") {
-		groupID = strings.TrimPrefix(request.URL.Path, URLLibraryPath+"/metricgroups/")
+	} else if strings.HasPrefix(request.URL.Path, URLLibraryPath+"metricgroups") {
+		groupID = strings.TrimPrefix(request.URL.Path, URLLibraryPath+"metricgroups/")
 		groupType = library.LibraryItemMetricGroup
 	}
 
@@ -161,7 +161,7 @@ func (server *Server) handleGroupList(writer http.ResponseWriter, request *http.
 	response := make(ItemListResponse, 0)
 
 	// Fill groups list
-	isSource := strings.HasPrefix(request.URL.Path, URLLibraryPath+"/sourcegroups/")
+	isSource := strings.HasPrefix(request.URL.Path, URLLibraryPath+"sourcegroups/")
 
 	for _, group := range server.Library.Groups {
 		if isSource && group.Type != library.LibraryItemSourceGroup ||

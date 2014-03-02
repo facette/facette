@@ -18,10 +18,14 @@ import (
 )
 
 const (
+	// URLAdminPath represents the administration panel base URL path
+	URLAdminPath string = "/admin/"
+	// URLBrowsePath represents the browse pages base URL path
+	URLBrowsePath string = "/browse/"
 	// URLCatalogPath represents the catalog base URL path
-	URLCatalogPath string = "/catalog"
+	URLCatalogPath string = "/catalog/"
 	// URLLibraryPath represents the library base URL path
-	URLLibraryPath string = "/library"
+	URLLibraryPath string = "/library/"
 	// ServerStopWait represents the time to wait before force-closing connections when stopping server.
 	ServerStopWait int = 10
 )
@@ -105,16 +109,26 @@ func (server *Server) Run() error {
 	// Prepare router
 	router := NewRouter(server.debugLevel)
 
-	router.HandleFunc(URLCatalogPath+"/origins/", server.handleOrigin)
-	router.HandleFunc(URLCatalogPath+"/sources/", server.handleSource)
-	router.HandleFunc(URLCatalogPath+"/metrics/", server.handleMetric)
+	router.HandleFunc("/static/", server.handleStatic)
 
-	router.HandleFunc(URLLibraryPath+"/sourcegroups/", server.handleGroup)
-	router.HandleFunc(URLLibraryPath+"/metricgroups/", server.handleGroup)
-	router.HandleFunc(URLLibraryPath+"/expand", server.handleGroupExpand)
-	router.HandleFunc(URLLibraryPath+"/graphs/plots", server.handleGraphPlots)
-	router.HandleFunc(URLLibraryPath+"/graphs/", server.handleGraph)
-	router.HandleFunc(URLLibraryPath+"/collections/", server.handleCollection)
+	router.HandleFunc(URLCatalogPath+"origins/", server.handleOrigin)
+	router.HandleFunc(URLCatalogPath+"sources/", server.handleSource)
+	router.HandleFunc(URLCatalogPath+"metrics/", server.handleMetric)
+
+	router.HandleFunc(URLLibraryPath+"sourcegroups/", server.handleGroup)
+	router.HandleFunc(URLLibraryPath+"metricgroups/", server.handleGroup)
+	router.HandleFunc(URLLibraryPath+"expand", server.handleGroupExpand)
+	router.HandleFunc(URLLibraryPath+"graphs/plots", server.handleGraphPlots)
+	router.HandleFunc(URLLibraryPath+"graphs/", server.handleGraph)
+	router.HandleFunc(URLLibraryPath+"collections/", server.handleCollection)
+
+	router.HandleFunc(URLAdminPath, server.handleAdmin)
+
+	router.HandleFunc(URLBrowsePath, server.handleBrowse)
+
+	router.HandleFunc("/reload", server.handleReload)
+	router.HandleFunc("/resources", server.handleResource)
+	router.HandleFunc("/stats", server.handleStats)
 
 	http.Handle("/", router)
 

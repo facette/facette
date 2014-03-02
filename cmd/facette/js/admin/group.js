@@ -125,7 +125,7 @@ function adminGroupSetupTerminate() {
                 $item = $target.closest('[data-listitem]');
 
             $.ajax({
-                url: urlPrefix + '/catalog/' + (groupType == 'sourcegroups' ? 'sources' : 'metrics'),
+                url: urlPrefix + '/catalog/' + (groupType == 'sourcegroups' ? 'sources' : 'metrics') + '/',
                 type: 'GET',
                 data: {
                     filter: $item.data('value').pattern,

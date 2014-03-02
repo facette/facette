@@ -138,7 +138,7 @@ function adminCollectionSetupTerminate() {
                     if (!$graph.data('value')) {
                         if (!e._retry) {
                             $.ajax({
-                                url: urlPrefix + '/library/graphs',
+                                url: urlPrefix + '/library/graphs/',
                                 type: 'GET',
                                 data: {
                                     filter: $graph.val()

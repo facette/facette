@@ -43,7 +43,7 @@ func (server *Server) handleCollection(writer http.ResponseWriter, request *http
 		Parent string `json:"parent"`
 	}
 
-	collectionID := strings.TrimPrefix(request.URL.Path, URLLibraryPath+"/collections/")
+	collectionID := strings.TrimPrefix(request.URL.Path, URLLibraryPath+"collections/")
 
 	switch request.Method {
 	case "DELETE":

@@ -128,7 +128,6 @@ SCRIPT_SRC = cmd/facette/js/intro.js \
 	cmd/facette/js/browse/outro.js \
 	cmd/facette/js/item.js \
 	cmd/facette/js/graph.js \
-	cmd/facette/js/stats.js \
 	cmd/facette/js/pane.js \
 	cmd/facette/js/i18n.js \
 	cmd/facette/js/outro.js
