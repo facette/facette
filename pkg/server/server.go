@@ -130,6 +130,8 @@ func (server *Server) Run() error {
 	router.HandleFunc("/resources", server.handleResource)
 	router.HandleFunc("/stats", server.handleStats)
 
+	router.HandleFunc("/", server.handleBrowse)
+
 	http.Handle("/", router)
 
 	// Start serving HTTP requests
