@@ -100,10 +100,10 @@ func (handler *RRDConnector) Refresh() error {
 
 		if _, ok := info["ds.index"]; ok {
 			for dsName := range info["ds.index"].(map[string]interface{}) {
-				metricName += "/" + dsName
+				metricFullName := metricName + "/" + dsName
 
-				*handler.inputChan <- [2]string{sourceName, metricName}
-				handler.metrics[sourceName][metricName] = &rrdMetric{Dataset: dsName, FilePath: filePath}
+				*handler.inputChan <- [2]string{sourceName, metricFullName}
+				handler.metrics[sourceName][metricFullName] = &rrdMetric{Dataset: dsName, FilePath: filePath}
 			}
 		}
 
