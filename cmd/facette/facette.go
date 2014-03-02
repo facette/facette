@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 
 	"github.com/facette/facette/pkg/config"
@@ -25,27 +24,7 @@ var (
 
 func main() {
 	// Create new server instance and load configuration
-	instance, err := server.NewServer(flagDebug)
-	if err != nil {
-		fmt.Println("Error: " + err.Error())
-		os.Exit(1)
-	} else if err := instance.LoadConfig(flagConfig); err != nil {
-		fmt.Println("Error: " + err.Error())
-		os.Exit(1)
-	}
-
-	// Create .pid file
-	if instance.Config.PidFile != "" {
-		fd, err := os.OpenFile(instance.Config.PidFile, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
-		if err != nil {
-			fmt.Println("Error: " + err.Error())
-			os.Exit(1)
-		}
-
-		defer fd.Close()
-
-		fd.Write([]byte(strconv.Itoa(os.Getpid()) + "\n"))
-	}
+	instance := server.NewServer(flagConfig, flagDebug)
 
 	// Reload server configuration on SIGHUP
 	sigChan := make(chan os.Signal, 1)
@@ -66,16 +45,9 @@ func main() {
 	}()
 
 	// Run instance
-	if err = instance.Run(); err != nil {
+	if err := instance.Run(); err != nil {
 		fmt.Println("Error: " + err.Error())
 		os.Exit(1)
-	}
-
-	if instance.Config.PidFile != "" {
-		if err = os.Remove(instance.Config.PidFile); err != nil {
-			fmt.Println("Error: " + err.Error())
-			os.Exit(1)
-		}
 	}
 
 	os.Exit(0)

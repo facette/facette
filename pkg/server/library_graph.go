@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -9,70 +10,109 @@ import (
 	"strings"
 	"time"
 
+	"github.com/facette/facette/pkg/config"
+	"github.com/facette/facette/pkg/connector"
 	"github.com/facette/facette/pkg/library"
+	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
-	"github.com/facette/facette/thirdparty/github.com/gorilla/mux"
+	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
 
-func (server *Server) graphHandle(writer http.ResponseWriter, request *http.Request) {
-	graphID := mux.Vars(request)["id"]
+// PlotRequest represents a plot request structure in the server backend.
+type PlotRequest struct {
+	Time        string    `json:"time"`
+	Range       string    `json:"range"`
+	Sample      int       `json:"sample"`
+	Constants   []float64 `json:"constants"`
+	Percentiles []float64 `json:"percentiles"`
+	Graph       string    `json:"graph"`
+	Origin      string    `json:"origin"`
+	Source      string    `json:"source"`
+	Metric      string    `json:"metric"`
+	Template    string    `json:"template"`
+	Filter      string    `json:"filter"`
+}
+
+// PlotResponse represents a plot response structure in the server backend.
+type PlotResponse struct {
+	ID          string           `json:"id"`
+	Start       string           `json:"start"`
+	End         string           `json:"end"`
+	Step        float64          `json:"step"`
+	Name        string           `json:"name"`
+	Description string           `json:"description"`
+	Type        int              `json:"type"`
+	StackMode   int              `json:"stack_mode"`
+	Stacks      []*StackResponse `json:"stacks"`
+	Modified    time.Time        `json:"modified"`
+}
+
+// StackResponse represents a stack response structure in the server backend.
+type StackResponse struct {
+	Name   string           `json:"name"`
+	Series []*SerieResponse `json:"series"`
+}
+
+// SerieResponse represents a serie response structure in the server backend.
+type SerieResponse struct {
+	Name    string                     `json:"name"`
+	Plots   []types.PlotValue          `json:"plots"`
+	Info    map[string]types.PlotValue `json:"info"`
+	Options map[string]interface{}     `json:"options"`
+}
+
+func (server *Server) handleGraph(writer http.ResponseWriter, request *http.Request) {
+	graphID := strings.TrimPrefix(request.URL.Path, URLLibraryPath+"/graphs/")
 
 	switch request.Method {
 	case "DELETE":
 		if graphID == "" {
-			server.handleResponse(writer, http.StatusMethodNotAllowed)
+			server.handleResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
 			return
 		} else if !server.handleAuth(writer, request) {
-			server.handleResponse(writer, http.StatusUnauthorized)
+			server.handleResponse(writer, serverResponse{mesgAuthenticationRequired}, http.StatusUnauthorized)
 			return
 		}
 
-		// Remove graph from library
 		err := server.Library.DeleteItem(graphID, library.LibraryItemGraph)
 		if os.IsNotExist(err) {
-			server.handleResponse(writer, http.StatusNotFound)
+			server.handleResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 			return
 		} else if err != nil {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, http.StatusInternalServerError)
+			server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 			return
 		}
+
+		server.handleResponse(writer, nil, http.StatusOK)
 
 		break
 
 	case "GET", "HEAD":
 		if graphID == "" {
-			server.libraryList(writer, request)
+			server.handleGraphList(writer, request)
 			return
 		}
 
-		// Get graph from library
 		item, err := server.Library.GetItem(graphID, library.LibraryItemGraph)
 		if os.IsNotExist(err) {
-			server.handleResponse(writer, http.StatusNotFound)
+			server.handleResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 			return
 		} else if err != nil {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, http.StatusInternalServerError)
+			server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 			return
 		}
 
-		// Dump JSON response
-		server.handleJSON(writer, item)
+		server.handleResponse(writer, item, http.StatusOK)
 
 		break
 
 	case "POST", "PUT":
 		var graph *library.Graph
 
-		if request.Method == "POST" && graphID != "" || request.Method == "PUT" && graphID == "" {
-			server.handleResponse(writer, http.StatusMethodNotAllowed)
-			return
-		} else if utils.RequestGetContentType(request) != "application/json" {
-			server.handleResponse(writer, http.StatusUnsupportedMediaType)
-			return
-		} else if !server.handleAuth(writer, request) {
-			server.handleResponse(writer, http.StatusUnauthorized)
+		if response, status := server.parseStoreRequest(writer, request, graphID); status != http.StatusOK {
+			server.handleResponse(writer, response, status)
 			return
 		}
 
@@ -80,11 +120,11 @@ func (server *Server) graphHandle(writer http.ResponseWriter, request *http.Requ
 			// Get graph from library
 			item, err := server.Library.GetItem(request.FormValue("inherit"), library.LibraryItemGraph)
 			if os.IsNotExist(err) {
-				server.handleResponse(writer, http.StatusNotFound)
+				server.handleResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 				return
 			} else if err != nil {
 				log.Println("ERROR: " + err.Error())
-				server.handleResponse(writer, http.StatusInternalServerError)
+				server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 				return
 			}
 
@@ -93,6 +133,7 @@ func (server *Server) graphHandle(writer http.ResponseWriter, request *http.Requ
 
 			graph.ID = ""
 		} else {
+			// Create a new graph instance
 			graph = &library.Graph{Item: library.Item{ID: graphID}}
 		}
 
@@ -103,7 +144,7 @@ func (server *Server) graphHandle(writer http.ResponseWriter, request *http.Requ
 
 		if err := json.Unmarshal(body, graph); err != nil {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, http.StatusBadRequest)
+			server.handleResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 			return
 		}
 
@@ -115,29 +156,352 @@ func (server *Server) graphHandle(writer http.ResponseWriter, request *http.Requ
 		}
 
 		err := server.Library.StoreItem(graph, library.LibraryItemGraph)
-		if err == os.ErrInvalid {
-			server.handleResponse(writer, http.StatusBadRequest)
-			return
-		} else if os.IsExist(err) {
-			server.handleResponse(writer, http.StatusConflict)
-			return
-		} else if os.IsNotExist(err) {
-			server.handleResponse(writer, http.StatusNotFound)
-			return
-		} else if err != nil {
+		if response, status := server.parseError(writer, request, err); status != http.StatusOK {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, http.StatusInternalServerError)
+			server.handleResponse(writer, response, status)
 			return
 		}
 
 		if request.Method == "POST" {
 			writer.Header().Add("Location", strings.TrimRight(request.URL.Path, "/")+"/"+graph.ID)
-			server.handleResponse(writer, http.StatusCreated)
+			server.handleResponse(writer, nil, http.StatusCreated)
+		} else {
+			server.handleResponse(writer, nil, http.StatusOK)
 		}
 
 		break
 
 	default:
-		server.handleResponse(writer, http.StatusMethodNotAllowed)
+		server.handleResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
 	}
+}
+
+func (server *Server) handleGraphList(writer http.ResponseWriter, request *http.Request) {
+	var offset, limit int
+
+	if response, status := server.parseListRequest(writer, request, &offset, &limit); status != http.StatusOK {
+		server.handleResponse(writer, response, status)
+		return
+	}
+
+	response := make(ItemListResponse, 0)
+
+	graphSet := set.New()
+
+	// Filter on collection if any
+	if request.FormValue("collection") != "" {
+		item, err := server.Library.GetItem(request.FormValue("collection"), library.LibraryItemCollection)
+		if os.IsNotExist(err) {
+			server.handleResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
+			return
+		} else if err != nil {
+			log.Println("ERROR: " + err.Error())
+			server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
+			return
+		}
+
+		collection := item.(*library.Collection)
+
+		for _, graph := range collection.Entries {
+			graphSet.Add(graph.ID)
+		}
+	}
+
+	// Fill graphs list
+	for _, graph := range server.Library.Graphs {
+		if graph.Volatile || !graphSet.IsEmpty() && !graphSet.Has(graph.ID) {
+			continue
+		}
+
+		if request.FormValue("filter") != "" && !utils.FilterMatch(request.FormValue("filter"), graph.Name) {
+			continue
+		}
+
+		response = append(response, &ItemResponse{
+			ID:          graph.ID,
+			Name:        graph.Name,
+			Description: graph.Description,
+			Modified:    graph.Modified.Format(time.RFC3339),
+		})
+	}
+
+	server.applyItemListResponse(writer, request, response, offset, limit)
+
+	server.handleResponse(writer, response, http.StatusOK)
+}
+
+func (server *Server) handleGraphPlots(writer http.ResponseWriter, request *http.Request) {
+	var (
+		graph              *library.Graph
+		err                error
+		startTime, endTime time.Time
+	)
+
+	if request.Method != "POST" && request.Method != "HEAD" {
+		server.handleResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
+		return
+	} else if utils.RequestGetContentType(request) != "application/json" {
+		server.handleResponse(writer, serverResponse{mesgUnsupportedMediaType}, http.StatusUnsupportedMediaType)
+		return
+	}
+
+	// Parse input JSON for graph data
+	body, _ := ioutil.ReadAll(request.Body)
+
+	plotReq := &PlotRequest{}
+
+	if err := json.Unmarshal(body, plotReq); err != nil {
+		log.Println("ERROR: " + err.Error())
+		server.handleResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
+		return
+	}
+
+	if plotReq.Origin != "" && plotReq.Template != "" {
+		plotReq.Graph = plotReq.Origin + "\x30" + plotReq.Template
+	} else if plotReq.Origin != "" && plotReq.Metric != "" {
+		plotReq.Graph = plotReq.Origin + "\x30" + plotReq.Metric
+	}
+
+	if plotReq.Time == "" {
+		endTime = time.Now()
+	} else if strings.HasPrefix(strings.Trim(plotReq.Range, " "), "-") {
+		if endTime, err = time.Parse(time.RFC3339, plotReq.Time); err != nil {
+			log.Println("ERROR: " + err.Error())
+			server.handleResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
+			return
+		}
+	} else {
+		if startTime, err = time.Parse(time.RFC3339, plotReq.Time); err != nil {
+			log.Println("ERROR: " + err.Error())
+			server.handleResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
+			return
+		}
+	}
+
+	if startTime.IsZero() {
+		if startTime, err = utils.TimeApplyRange(endTime, plotReq.Range); err != nil {
+			log.Println("ERROR: " + err.Error())
+			server.handleResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
+			return
+		}
+	} else if endTime, err = utils.TimeApplyRange(startTime, plotReq.Range); err != nil {
+		log.Println("ERROR: " + err.Error())
+		server.handleResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
+		return
+	}
+
+	if plotReq.Sample == 0 {
+		plotReq.Sample = config.DefaultPlotSample
+	}
+
+	// Get graph from library
+	if plotReq.Template != "" {
+		graph, err = server.Library.GetGraphTemplate(
+			plotReq.Origin,
+			plotReq.Source,
+			plotReq.Template,
+			plotReq.Filter,
+		)
+	} else if plotReq.Metric != "" {
+		graph, err = server.Library.GetGraphMetric(
+			plotReq.Origin,
+			plotReq.Source,
+			plotReq.Metric,
+		)
+	} else if item, err := server.Library.GetItem(plotReq.Graph, library.LibraryItemGraph); err == nil {
+		graph = item.(*library.Graph)
+	}
+
+	if err != nil {
+		log.Println("ERROR: " + err.Error())
+
+		if os.IsNotExist(err) {
+			server.handleResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
+		} else {
+			server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
+		}
+
+		return
+	}
+
+	step := endTime.Sub(startTime) / time.Duration(plotReq.Sample)
+
+	// Get plots data
+	groupOptions := make(map[string]map[string]interface{})
+
+	data := []map[string]*connector.PlotResult{}
+
+	for _, stackItem := range graph.Stacks {
+		for _, groupItem := range stackItem.Groups {
+			query, originConnector, err := server.preparePlotQuery(plotReq, groupItem)
+			if err != nil {
+				log.Println("ERROR: " + err.Error())
+				server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
+				return
+			}
+
+			groupOptions[groupItem.Name] = groupItem.Options
+
+			plotResult, err := originConnector.GetPlots(query, startTime, endTime, step, plotReq.Percentiles)
+			if err != nil {
+				log.Println("ERROR: " + err.Error())
+				server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
+				return
+			}
+
+			data = append(data, plotResult)
+		}
+	}
+
+	response := &PlotResponse{
+		ID:          graph.ID,
+		Start:       startTime.Format(time.RFC3339),
+		End:         endTime.Format(time.RFC3339),
+		Step:        step.Seconds(),
+		Name:        graph.Name,
+		Description: graph.Description,
+		Type:        graph.Type,
+		StackMode:   graph.StackMode,
+		Modified:    graph.Modified,
+	}
+
+	if len(data) == 0 {
+		server.handleResponse(writer, serverResponse{mesgEmptyData}, http.StatusOK)
+		return
+	}
+
+	plotMax := 0
+
+	for _, stackItem := range graph.Stacks {
+		stack := &StackResponse{Name: stackItem.Name}
+
+		for _, groupItem := range stackItem.Groups {
+			var plotResult map[string]*connector.PlotResult
+
+			plotResult, data = data[0], data[1:]
+
+			for serieName, serieResult := range plotResult {
+				if len(serieResult.Plots) > plotMax {
+					plotMax = len(serieResult.Plots)
+				}
+
+				stack.Series = append(stack.Series, &SerieResponse{
+					Name:    serieName,
+					Plots:   serieResult.Plots,
+					Info:    serieResult.Info,
+					Options: groupOptions[groupItem.Name],
+				})
+			}
+		}
+
+		response.Stacks = append(response.Stacks, stack)
+	}
+
+	if plotMax > 0 {
+		response.Step = (endTime.Sub(startTime) / time.Duration(plotMax)).Seconds()
+	}
+
+	server.handleResponse(writer, response, http.StatusOK)
+}
+
+func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.OperGroup) (*connector.GroupQuery,
+	connector.Connector, error) {
+
+	var originConnector connector.Connector
+
+	query := &connector.GroupQuery{
+		Name:  groupItem.Name,
+		Type:  groupItem.Type,
+		Scale: groupItem.Scale,
+	}
+
+	originConnector = nil
+
+	for _, serieItem := range groupItem.Series {
+		// Check for connectors errors or conflicts
+		if _, ok := server.Catalog.Origins[serieItem.Origin]; !ok {
+			return nil, nil, fmt.Errorf("unknown `%s' serie origin", serieItem.Origin)
+		} else if originConnector == nil {
+			originConnector = server.Catalog.Origins[serieItem.Origin].Connector
+		} else if originConnector != server.Catalog.Origins[serieItem.Origin].Connector {
+			return nil, nil, fmt.Errorf("connectors differ between series")
+		}
+
+		serieSources := make([]string, 0)
+
+		if plotReq.Template != "" {
+			serieSources = []string{plotReq.Source}
+		} else if strings.HasPrefix(serieItem.Source, library.LibraryGroupPrefix) {
+			serieSources = server.Library.ExpandGroup(strings.TrimPrefix(serieItem.Source, library.LibraryGroupPrefix),
+				library.LibraryItemSourceGroup)
+		} else {
+			serieSources = []string{serieItem.Source}
+		}
+
+		index := 0
+
+		for _, serieSource := range serieSources {
+			if strings.HasPrefix(serieItem.Metric, library.LibraryGroupPrefix) {
+				for _, serieChunk := range server.Library.ExpandGroup(strings.TrimPrefix(serieItem.Metric,
+					library.LibraryGroupPrefix), library.LibraryItemMetricGroup) {
+					metric := server.Catalog.GetMetric(
+						serieItem.Origin,
+						serieSource,
+						serieChunk,
+					)
+
+					if metric == nil {
+						log.Printf("unknown `%s' metric for source `%s' (origin: %s)", serieChunk, serieSource,
+							serieItem.Origin)
+					}
+
+					query.Series = append(query.Series, &connector.SerieQuery{
+						Name: fmt.Sprintf("%s-%d", serieItem.Name, index),
+						Metric: &connector.MetricQuery{
+							Name:       metric.OriginalName,
+							SourceName: metric.Source.OriginalName,
+						},
+						Scale: serieItem.Scale,
+					})
+
+					index += 1
+				}
+			} else {
+				metric := server.Catalog.GetMetric(
+					serieItem.Origin,
+					serieSource,
+					serieItem.Metric,
+				)
+
+				if metric == nil {
+					log.Printf("unknown `%s' metric for source `%s' (origin: %s)", serieItem.Metric, serieSource,
+						serieItem.Origin)
+				}
+
+				serie := &connector.SerieQuery{
+					Metric: &connector.MetricQuery{
+						Name:       metric.OriginalName,
+						SourceName: metric.Source.OriginalName,
+					},
+					Scale: serieItem.Scale,
+				}
+
+				if len(serieSources) > 1 {
+					serie.Name = fmt.Sprintf("%s-%d", serieItem.Name, index)
+				} else {
+					serie.Name = serieItem.Name
+				}
+
+				query.Series = append(query.Series, serie)
+
+				index += 1
+			}
+		}
+	}
+
+	if len(query.Series) == 0 {
+		return nil, nil, fmt.Errorf("no serie defined")
+	}
+
+	return query, originConnector, nil
 }

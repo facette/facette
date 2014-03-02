@@ -26,7 +26,7 @@ func Test_originList(test *testing.T) {
 	result := make([]string, 0)
 
 	// Test GET on source list
-	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/origins", serverConfig.BindAddr),
+	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/origins/", serverConfig.BindAddr),
 		nil, false, &result)
 
 	if response.StatusCode != http.StatusOK {
@@ -73,7 +73,7 @@ func Test_sourceList(test *testing.T) {
 	result := make([]string, 0)
 
 	// Test GET on source list
-	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources", serverConfig.BindAddr), nil,
+	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/", serverConfig.BindAddr), nil,
 		false, &result)
 
 	if response.StatusCode != http.StatusOK {
@@ -120,7 +120,7 @@ func Test_metricList(test *testing.T) {
 	base := []string{"database1/test", "database2/test", "database3/test"}
 	result := make([]string, 0)
 
-	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/metrics", serverConfig.BindAddr), nil,
+	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/metrics/", serverConfig.BindAddr), nil,
 		false, &result)
 
 	if response.StatusCode != http.StatusOK {
@@ -136,7 +136,7 @@ func Test_metricList(test *testing.T) {
 	// Test #2 GET on metrics list
 	base = []string{"database1/test", "database2/test"}
 
-	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/metrics?source=source1",
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/metrics/?source=source1",
 		serverConfig.BindAddr), nil, false, &result)
 
 	if response.StatusCode != http.StatusOK {
@@ -211,7 +211,7 @@ func Test_metricGroupHandle(test *testing.T) {
 }
 
 func Test_graphHandle(test *testing.T) {
-	baseURL := fmt.Sprintf("http://%s/library/graphs", serverConfig.BindAddr)
+	baseURL := fmt.Sprintf("http://%s/library/graphs/", serverConfig.BindAddr)
 
 	// Define a sample graph
 	stack := &library.Stack{Name: "stack0"}
@@ -238,7 +238,7 @@ func Test_graphHandle(test *testing.T) {
 	listBase := &server.ItemListResponse{}
 	listResult := &server.ItemListResponse{}
 
-	response := execTestRequest(test, "GET", baseURL, nil, false, &listResult.Items)
+	response := execTestRequest(test, "GET", baseURL, nil, false, &listResult)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
@@ -285,7 +285,7 @@ func Test_graphHandle(test *testing.T) {
 	// Test #1 GET on graph item
 	graphResult := &library.Graph{}
 
-	response = execTestRequest(test, "GET", baseURL+"/"+graphBase.ID, nil, false, &graphResult)
+	response = execTestRequest(test, "GET", baseURL+graphBase.ID, nil, false, &graphResult)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
@@ -298,24 +298,22 @@ func Test_graphHandle(test *testing.T) {
 	}
 
 	// Test #2 GET on graphs list
-	listBase = &server.ItemListResponse{}
-
-	listBase.Items = append(listBase.Items, &server.ItemResponse{
+	listBase = &server.ItemListResponse{&server.ItemResponse{
 		ID:          graphBase.ID,
 		Name:        graphBase.Name,
 		Description: graphBase.Description,
-	})
+	}}
 
 	listResult = &server.ItemListResponse{}
 
-	response = execTestRequest(test, "GET", baseURL, nil, false, &listResult.Items)
+	response = execTestRequest(test, "GET", baseURL, nil, false, &listResult)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
 		test.Fail()
 	}
 
-	for _, listItem := range listResult.Items {
+	for _, listItem := range *listResult {
 		listItem.Modified = ""
 	}
 
@@ -329,14 +327,14 @@ func Test_graphHandle(test *testing.T) {
 
 	data, _ = json.Marshal(graphBase)
 
-	response = execTestRequest(test, "PUT", baseURL+"/"+graphBase.ID, strings.NewReader(string(data)), false, nil)
+	response = execTestRequest(test, "PUT", baseURL+graphBase.ID, strings.NewReader(string(data)), false, nil)
 
 	if response.StatusCode != http.StatusUnauthorized {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusUnauthorized, response.StatusCode)
 		test.Fail()
 	}
 
-	response = execTestRequest(test, "PUT", baseURL+"/"+graphBase.ID, strings.NewReader(string(data)), true, nil)
+	response = execTestRequest(test, "PUT", baseURL+graphBase.ID, strings.NewReader(string(data)), true, nil)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
@@ -346,7 +344,7 @@ func Test_graphHandle(test *testing.T) {
 	// Test #2 GET on graph item
 	graphResult = &library.Graph{}
 
-	response = execTestRequest(test, "GET", baseURL+"/"+graphBase.ID, nil, false, &graphResult)
+	response = execTestRequest(test, "GET", baseURL+graphBase.ID, nil, false, &graphResult)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
@@ -359,21 +357,21 @@ func Test_graphHandle(test *testing.T) {
 	}
 
 	// Test DELETE on graph item
-	response = execTestRequest(test, "DELETE", baseURL+"/"+graphBase.ID, nil, false, nil)
+	response = execTestRequest(test, "DELETE", baseURL+graphBase.ID, nil, false, nil)
 
 	if response.StatusCode != http.StatusUnauthorized {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusUnauthorized, response.StatusCode)
 		test.Fail()
 	}
 
-	response = execTestRequest(test, "DELETE", baseURL+"/"+graphBase.ID, nil, true, nil)
+	response = execTestRequest(test, "DELETE", baseURL+graphBase.ID, nil, true, nil)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
 		test.Fail()
 	}
 
-	response = execTestRequest(test, "DELETE", baseURL+"/"+graphBase.ID, nil, true, nil)
+	response = execTestRequest(test, "DELETE", baseURL+graphBase.ID, nil, true, nil)
 
 	if response.StatusCode != http.StatusNotFound {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusNotFound, response.StatusCode)
@@ -408,7 +406,7 @@ func Test_graphHandle(test *testing.T) {
 	// Test #1 GET on volatile graph item
 	graphResult = &library.Graph{}
 
-	response = execTestRequest(test, "GET", baseURL+"/"+graphBase.ID, nil, false, &graphResult)
+	response = execTestRequest(test, "GET", baseURL+graphBase.ID, nil, false, &graphResult)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
@@ -423,7 +421,7 @@ func Test_graphHandle(test *testing.T) {
 	// Test #2 GET on volatile graph item
 	graphResult = &library.Graph{}
 
-	response = execTestRequest(test, "GET", baseURL+"/"+graphBase.ID, nil, false, &graphResult)
+	response = execTestRequest(test, "GET", baseURL+graphBase.ID, nil, false, &graphResult)
 
 	if response.StatusCode != http.StatusNotFound {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusNotFound, response.StatusCode)
@@ -437,7 +435,7 @@ func Test_collectionHandle(test *testing.T) {
 		Parent string `json:"parent"`
 	}
 
-	baseURL := fmt.Sprintf("http://%s/library/collections", serverConfig.BindAddr)
+	baseURL := fmt.Sprintf("http://%s/library/collections/", serverConfig.BindAddr)
 
 	// Define a sample collection
 	collectionBase.Collection = &library.Collection{Item: library.Item{Name: "collection0",
@@ -457,7 +455,7 @@ func Test_collectionHandle(test *testing.T) {
 	listBase := &server.ItemListResponse{}
 	listResult := &server.ItemListResponse{}
 
-	response := execTestRequest(test, "GET", baseURL, nil, false, &listResult.Items)
+	response := execTestRequest(test, "GET", baseURL, nil, false, &listResult)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
@@ -504,7 +502,7 @@ func Test_collectionHandle(test *testing.T) {
 	// Test #1 GET on collection item
 	collectionResult := &library.Collection{}
 
-	response = execTestRequest(test, "GET", baseURL+"/"+collectionBase.ID, nil, false, &collectionResult)
+	response = execTestRequest(test, "GET", baseURL+collectionBase.ID, nil, false, &collectionResult)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
@@ -517,20 +515,22 @@ func Test_collectionHandle(test *testing.T) {
 	}
 
 	// Test #2 GET on collections list
-	listBase = &server.ItemListResponse{}
-	listBase.Items = append(listBase.Items, &server.ItemResponse{ID: collectionBase.ID, Name: collectionBase.Name,
-		Description: collectionBase.Description})
+	listBase = &server.ItemListResponse{&server.ItemResponse{
+		ID:          collectionBase.ID,
+		Name:        collectionBase.Name,
+		Description: collectionBase.Description,
+	}}
 
 	listResult = &server.ItemListResponse{}
 
-	response = execTestRequest(test, "GET", baseURL, nil, false, &listResult.Items)
+	response = execTestRequest(test, "GET", baseURL, nil, false, &listResult)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
 		test.Fail()
 	}
 
-	for _, listItem := range listResult.Items {
+	for _, listItem := range *listResult {
 		listItem.Modified = ""
 	}
 
@@ -544,14 +544,14 @@ func Test_collectionHandle(test *testing.T) {
 
 	data, _ = json.Marshal(collectionBase.Collection)
 
-	response = execTestRequest(test, "PUT", baseURL+"/"+collectionBase.ID, strings.NewReader(string(data)), false, nil)
+	response = execTestRequest(test, "PUT", baseURL+collectionBase.ID, strings.NewReader(string(data)), false, nil)
 
 	if response.StatusCode != http.StatusUnauthorized {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusUnauthorized, response.StatusCode)
 		test.Fail()
 	}
 
-	response = execTestRequest(test, "PUT", baseURL+"/"+collectionBase.ID, strings.NewReader(string(data)), true, nil)
+	response = execTestRequest(test, "PUT", baseURL+collectionBase.ID, strings.NewReader(string(data)), true, nil)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
@@ -561,7 +561,7 @@ func Test_collectionHandle(test *testing.T) {
 	// Test #2 GET on collection item
 	collectionResult = &library.Collection{}
 
-	response = execTestRequest(test, "GET", baseURL+"/"+collectionBase.ID, nil, false, &collectionResult)
+	response = execTestRequest(test, "GET", baseURL+collectionBase.ID, nil, false, &collectionResult)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
@@ -574,21 +574,21 @@ func Test_collectionHandle(test *testing.T) {
 	}
 
 	// Test DELETE on collection item
-	response = execTestRequest(test, "DELETE", baseURL+"/"+collectionBase.ID, nil, false, nil)
+	response = execTestRequest(test, "DELETE", baseURL+collectionBase.ID, nil, false, nil)
 
 	if response.StatusCode != http.StatusUnauthorized {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusUnauthorized, response.StatusCode)
 		test.Fail()
 	}
 
-	response = execTestRequest(test, "DELETE", baseURL+"/"+collectionBase.ID, nil, true, nil)
+	response = execTestRequest(test, "DELETE", baseURL+collectionBase.ID, nil, true, nil)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
 		test.Fail()
 	}
 
-	response = execTestRequest(test, "DELETE", baseURL+"/"+collectionBase.ID, nil, true, nil)
+	response = execTestRequest(test, "DELETE", baseURL+collectionBase.ID, nil, true, nil)
 
 	if response.StatusCode != http.StatusNotFound {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusNotFound, response.StatusCode)
@@ -599,13 +599,13 @@ func Test_collectionHandle(test *testing.T) {
 func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group, expandData,
 	expandBase server.ExpandRequest) {
 
-	baseURL := fmt.Sprintf("http://%s/library/%s", serverConfig.BindAddr, urlPrefix)
+	baseURL := fmt.Sprintf("http://%s/library/%s/", serverConfig.BindAddr, urlPrefix)
 
 	// Test #1 GET on groups list
 	listBase := &server.ItemListResponse{}
 	listResult := &server.ItemListResponse{}
 
-	response := execTestRequest(test, "GET", baseURL, nil, false, &listResult.Items)
+	response := execTestRequest(test, "GET", baseURL, nil, false, &listResult)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
@@ -652,7 +652,7 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 	// Test #1 GET on group item
 	groupResult := &library.Group{}
 
-	response = execTestRequest(test, "GET", baseURL+"/"+groupBase.ID, nil, false, &groupResult)
+	response = execTestRequest(test, "GET", baseURL+groupBase.ID, nil, false, &groupResult)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
@@ -665,20 +665,22 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 	}
 
 	// Test #2 GET on groups list
-	listBase = &server.ItemListResponse{}
-	listBase.Items = append(listBase.Items, &server.ItemResponse{ID: groupBase.ID, Name: groupBase.Name,
-		Description: groupBase.Description})
+	listBase = &server.ItemListResponse{&server.ItemResponse{
+		ID:          groupBase.ID,
+		Name:        groupBase.Name,
+		Description: groupBase.Description,
+	}}
 
 	listResult = &server.ItemListResponse{}
 
-	response = execTestRequest(test, "GET", baseURL, nil, false, &listResult.Items)
+	response = execTestRequest(test, "GET", baseURL, nil, false, &listResult)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
 		test.Fail()
 	}
 
-	for _, listItem := range listResult.Items {
+	for _, listItem := range *listResult {
 		listItem.Modified = ""
 	}
 
@@ -692,14 +694,14 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 
 	data, _ = json.Marshal(groupBase)
 
-	response = execTestRequest(test, "PUT", baseURL+"/"+groupBase.ID, strings.NewReader(string(data)), false, nil)
+	response = execTestRequest(test, "PUT", baseURL+groupBase.ID, strings.NewReader(string(data)), false, nil)
 
 	if response.StatusCode != http.StatusUnauthorized {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusUnauthorized, response.StatusCode)
 		test.Fail()
 	}
 
-	response = execTestRequest(test, "PUT", baseURL+"/"+groupBase.ID, strings.NewReader(string(data)), true, nil)
+	response = execTestRequest(test, "PUT", baseURL+groupBase.ID, strings.NewReader(string(data)), true, nil)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
@@ -709,7 +711,7 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 	// Test #2 GET on group item
 	groupResult = &library.Group{}
 
-	response = execTestRequest(test, "GET", baseURL+"/"+groupBase.ID, nil, false, &groupResult)
+	response = execTestRequest(test, "GET", baseURL+groupBase.ID, nil, false, &groupResult)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
@@ -734,27 +736,30 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 		test.Fail()
 	}
 
-	if !reflect.DeepEqual(expandBase, expandResult[0]) {
+	if len(expandResult) == 0 {
+		test.Logf("\nExpected %#v\nbut got  %#v", expandBase, expandResult)
+		test.Fail()
+	} else if !reflect.DeepEqual(expandBase, expandResult[0]) {
 		test.Logf("\nExpected %#v\nbut got  %#v", expandBase, expandResult[0])
 		test.Fail()
 	}
 
 	// Test DELETE on group item
-	response = execTestRequest(test, "DELETE", baseURL+"/"+groupBase.ID, nil, false, nil)
+	response = execTestRequest(test, "DELETE", baseURL+groupBase.ID, nil, false, nil)
 
 	if response.StatusCode != http.StatusUnauthorized {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusUnauthorized, response.StatusCode)
 		test.Fail()
 	}
 
-	response = execTestRequest(test, "DELETE", baseURL+"/"+groupBase.ID, nil, true, nil)
+	response = execTestRequest(test, "DELETE", baseURL+groupBase.ID, nil, true, nil)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
 		test.Fail()
 	}
 
-	response = execTestRequest(test, "DELETE", baseURL+"/"+groupBase.ID, nil, true, nil)
+	response = execTestRequest(test, "DELETE", baseURL+groupBase.ID, nil, true, nil)
 
 	if response.StatusCode != http.StatusNotFound {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusNotFound, response.StatusCode)

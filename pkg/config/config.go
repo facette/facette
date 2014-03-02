@@ -13,7 +13,9 @@ import (
 
 const (
 	// DefaultConfigFile represents the default configuration file location.
-	DefaultConfigFile = "/etc/facette/facette.json"
+	DefaultConfigFile string = "/etc/facette/facette.json"
+	// DefaultPlotSample represents the default plot sample for graph querying.
+	DefaultPlotSample int = 400
 )
 
 // Config represents the main of the service configuration system.
@@ -25,7 +27,6 @@ type Config struct {
 	OriginDir string                   `json:"origin_dir"`
 	PidFile   string                   `json:"pid_file"`
 	ServerLog string                   `json:"server_log"`
-	AccessLog string                   `json:"access_log"`
 	URLPrefix string                   `json:"url_prefix"`
 	Auth      map[string]string        `json:"auth"`
 	Scales    [][2]interface{}         `json:"scales"`

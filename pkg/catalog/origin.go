@@ -23,7 +23,7 @@ func (origin *Origin) Refresh(wait *sync.WaitGroup) error {
 		return fmt.Errorf("connector for `%s' origin is not initialized", origin.Name)
 	}
 
-	if origin.Catalog.debugLevel > 1 {
+	if origin.Catalog.debugLevel > 0 {
 		log.Printf("DEBUG: updating origin `%s'...\n", origin.Name)
 	}
 

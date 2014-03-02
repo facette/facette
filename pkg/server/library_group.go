@@ -12,139 +12,86 @@ import (
 
 	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/pkg/utils"
-	"github.com/facette/facette/thirdparty/github.com/gorilla/mux"
 )
 
-// ExpandRequest represents an expand request struct in the server library.
+// ExpandRequest represents an expand request structure in the server backend.
 type ExpandRequest [][3]string
 
-func (tuple ExpandRequest) Len() int {
-	return len(tuple)
+func (e ExpandRequest) Len() int {
+	return len(e)
 }
 
-func (tuple ExpandRequest) Less(i, j int) bool {
-	return tuple[i][0]+tuple[i][1]+tuple[i][2] < tuple[j][0]+tuple[j][1]+tuple[j][2]
+func (e ExpandRequest) Less(i, j int) bool {
+	return e[i][0]+e[i][1]+e[i][2] < e[j][0]+e[j][1]+e[j][2]
 }
 
-func (tuple ExpandRequest) Swap(i, j int) {
-	tuple[i], tuple[j] = tuple[j], tuple[i]
+func (e ExpandRequest) Swap(i, j int) {
+	e[i], e[j] = e[j], e[i]
 }
 
-func (server *Server) groupExpand(writer http.ResponseWriter, request *http.Request) {
-	if request.Method != "POST" {
-		server.handleResponse(writer, http.StatusMethodNotAllowed)
-		return
-	}
-
-	body, _ := ioutil.ReadAll(request.Body)
-	query := ExpandRequest{}
-
-	if err := json.Unmarshal(body, &query); err != nil {
-		log.Println("ERROR: " + err.Error())
-		server.handleResponse(writer, http.StatusBadRequest)
-		return
-	}
-
-	response := make([]ExpandRequest, 0)
-
-	for _, entry := range query {
-		item := ExpandRequest{}
-
-		if strings.HasPrefix(entry[1], library.LibraryGroupPrefix) {
-			for _, sourceName := range server.Library.ExpandGroup(strings.TrimPrefix(entry[1],
-				library.LibraryGroupPrefix), library.LibraryItemSourceGroup) {
-				if strings.HasPrefix(entry[2], library.LibraryGroupPrefix) {
-					for _, metricName := range server.Library.ExpandGroup(strings.TrimPrefix(entry[2],
-						library.LibraryGroupPrefix), library.LibraryItemMetricGroup) {
-						item = append(item, [3]string{entry[0], sourceName, metricName})
-					}
-				} else {
-					item = append(item, [3]string{entry[0], sourceName, entry[2]})
-				}
-			}
-		} else if strings.HasPrefix(entry[2], library.LibraryGroupPrefix) {
-			for _, metricName := range server.Library.ExpandGroup(strings.TrimPrefix(entry[2],
-				library.LibraryGroupPrefix), library.LibraryItemMetricGroup) {
-				item = append(item, [3]string{entry[0], entry[1], metricName})
-			}
-		} else {
-			item = append(item, entry)
-		}
-
-		sort.Sort(item)
-		response = append(response, item)
-	}
-
-	server.handleJSON(writer, response)
-}
-
-func (server *Server) groupHandle(writer http.ResponseWriter, request *http.Request) {
-	var groupType int
-
-	groupID := mux.Vars(request)["id"]
+func (server *Server) handleGroup(writer http.ResponseWriter, request *http.Request) {
+	var (
+		groupID   string
+		groupType int
+	)
 
 	if strings.HasPrefix(request.URL.Path, URLLibraryPath+"/sourcegroups") {
+		groupID = strings.TrimPrefix(request.URL.Path, URLLibraryPath+"/sourcegroups/")
 		groupType = library.LibraryItemSourceGroup
 	} else if strings.HasPrefix(request.URL.Path, URLLibraryPath+"/metricgroups") {
+		groupID = strings.TrimPrefix(request.URL.Path, URLLibraryPath+"/metricgroups/")
 		groupType = library.LibraryItemMetricGroup
 	}
 
 	switch request.Method {
 	case "DELETE":
 		if groupID == "" {
-			server.handleResponse(writer, http.StatusMethodNotAllowed)
+			server.handleResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
 			return
 		} else if !server.handleAuth(writer, request) {
-			server.handleResponse(writer, http.StatusUnauthorized)
+			server.handleResponse(writer, serverResponse{mesgAuthenticationRequired}, http.StatusUnauthorized)
 			return
 		}
 
-		// Remove group from library
 		err := server.Library.DeleteItem(groupID, groupType)
 		if os.IsNotExist(err) {
-			server.handleResponse(writer, http.StatusNotFound)
+			server.handleResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 			return
 		} else if err != nil {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, http.StatusInternalServerError)
+			server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 			return
 		}
+
+		server.handleResponse(writer, nil, http.StatusOK)
 
 		break
 
 	case "GET", "HEAD":
 		if groupID == "" {
-			server.libraryList(writer, request)
+			server.handleGroupList(writer, request)
 			return
 		}
 
-		// Get group from library
 		item, err := server.Library.GetItem(groupID, groupType)
 		if os.IsNotExist(err) {
-			server.handleResponse(writer, http.StatusNotFound)
+			server.handleResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 			return
 		} else if err != nil {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, http.StatusInternalServerError)
+			server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 			return
 		}
 
-		// Dump JSON response
-		server.handleJSON(writer, item)
+		server.handleResponse(writer, item, http.StatusOK)
 
 		break
 
 	case "POST", "PUT":
 		var group *library.Group
 
-		if request.Method == "POST" && groupID != "" || request.Method == "PUT" && groupID == "" {
-			server.handleResponse(writer, http.StatusMethodNotAllowed)
-			return
-		} else if utils.RequestGetContentType(request) != "application/json" {
-			server.handleResponse(writer, http.StatusUnsupportedMediaType)
-			return
-		} else if !server.handleAuth(writer, request) {
-			server.handleResponse(writer, http.StatusUnauthorized)
+		if response, status := server.parseStoreRequest(writer, request, groupID); status != http.StatusOK {
+			server.handleResponse(writer, response, status)
 			return
 		}
 
@@ -152,11 +99,11 @@ func (server *Server) groupHandle(writer http.ResponseWriter, request *http.Requ
 			// Get group from library
 			item, err := server.Library.GetItem(request.FormValue("inherit"), groupType)
 			if os.IsNotExist(err) {
-				server.handleResponse(writer, http.StatusNotFound)
+				server.handleResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 				return
 			} else if err != nil {
 				log.Println("ERROR: " + err.Error())
-				server.handleResponse(writer, http.StatusInternalServerError)
+				server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 				return
 			}
 
@@ -165,6 +112,7 @@ func (server *Server) groupHandle(writer http.ResponseWriter, request *http.Requ
 
 			group.ID = ""
 		} else {
+			// Create a new group instance
 			group = &library.Group{Item: library.Item{ID: groupID}, Type: groupType}
 		}
 
@@ -175,36 +123,119 @@ func (server *Server) groupHandle(writer http.ResponseWriter, request *http.Requ
 
 		if err := json.Unmarshal(body, group); err != nil {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, http.StatusBadRequest)
+			server.handleResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 			return
 		}
 
 		// Store group data
 		err := server.Library.StoreItem(group, groupType)
-		if err == os.ErrInvalid {
-			server.handleResponse(writer, http.StatusBadRequest)
-			return
-		} else if os.IsExist(err) {
-			server.handleResponse(writer, http.StatusConflict)
-			return
-		} else if os.IsNotExist(err) {
-			server.handleResponse(writer, http.StatusNotFound)
-			return
-		} else if err != nil {
+		if response, status := server.parseError(writer, request, err); status != http.StatusOK {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, http.StatusInternalServerError)
+			server.handleResponse(writer, response, status)
 			return
 		}
 
 		if request.Method == "POST" {
 			writer.Header().Add("Location", strings.TrimRight(request.URL.Path, "/")+"/"+group.ID)
-			server.handleResponse(writer, http.StatusCreated)
+			server.handleResponse(writer, nil, http.StatusCreated)
+		} else {
+			server.handleResponse(writer, nil, http.StatusOK)
 		}
 
 		break
 
 	default:
-		server.handleResponse(writer, http.StatusMethodNotAllowed)
+		server.handleResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
 		break
 	}
+}
+
+func (server *Server) handleGroupList(writer http.ResponseWriter, request *http.Request) {
+	var offset, limit int
+
+	if response, status := server.parseListRequest(writer, request, &offset, &limit); status != http.StatusOK {
+		server.handleResponse(writer, response, status)
+		return
+	}
+
+	response := make(ItemListResponse, 0)
+
+	// Fill groups list
+	isSource := strings.HasPrefix(request.URL.Path, URLLibraryPath+"/sourcegroups/")
+
+	for _, group := range server.Library.Groups {
+		if isSource && group.Type != library.LibraryItemSourceGroup ||
+			!isSource && group.Type != library.LibraryItemMetricGroup {
+			continue
+		}
+
+		if request.FormValue("filter") != "" && !utils.FilterMatch(request.FormValue("filter"), group.Name) {
+			continue
+		}
+
+		response = append(response, &ItemResponse{
+			ID:          group.ID,
+			Name:        group.Name,
+			Description: group.Description,
+			Modified:    group.Modified.Format(time.RFC3339),
+		})
+	}
+
+	server.applyItemListResponse(writer, request, response, offset, limit)
+
+	server.handleResponse(writer, response, http.StatusOK)
+}
+
+func (server *Server) handleGroupExpand(writer http.ResponseWriter, request *http.Request) {
+	if request.Method != "POST" {
+		server.handleResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
+		return
+	}
+
+	body, _ := ioutil.ReadAll(request.Body)
+
+	query := ExpandRequest{}
+	if err := json.Unmarshal(body, &query); err != nil {
+		log.Println("ERROR: " + err.Error())
+		server.handleResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
+		return
+	}
+
+	response := make([]ExpandRequest, 0)
+
+	for _, entry := range query {
+		item := ExpandRequest{}
+
+		if strings.HasPrefix(entry[1], library.LibraryGroupPrefix) {
+			for _, sourceName := range server.Library.ExpandGroup(
+				strings.TrimPrefix(entry[1], library.LibraryGroupPrefix),
+				library.LibraryItemSourceGroup,
+			) {
+				if strings.HasPrefix(entry[2], library.LibraryGroupPrefix) {
+					for _, metricName := range server.Library.ExpandGroup(
+						strings.TrimPrefix(entry[2], library.LibraryGroupPrefix),
+						library.LibraryItemMetricGroup,
+					) {
+						item = append(item, [3]string{entry[0], sourceName, metricName})
+					}
+				} else {
+					item = append(item, [3]string{entry[0], sourceName, entry[2]})
+				}
+			}
+		} else if strings.HasPrefix(entry[2], library.LibraryGroupPrefix) {
+			for _, metricName := range server.Library.ExpandGroup(
+				strings.TrimPrefix(entry[2], library.LibraryGroupPrefix),
+				library.LibraryItemMetricGroup,
+			) {
+				item = append(item, [3]string{entry[0], entry[1], metricName})
+			}
+		} else {
+			item = append(item, entry)
+		}
+
+		sort.Sort(item)
+		response = append(response, item)
+	}
+
+	server.handleResponse(writer, response, http.StatusOK)
 }

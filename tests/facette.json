@@ -4,7 +4,6 @@
 	"data_dir": "tmp/tests/data",
 	"pid_file": "tmp/tests/facette.pid",
 	"origin_dir": "tests/origins",
-	"access_log": "tmp/tests/access.log",
 	"server_log": "tmp/tests/facette.log",
 	"auth": {
 		"type": "simple",

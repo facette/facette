@@ -69,7 +69,7 @@ func (library *Library) Refresh() error {
 		return library.LoadItem(itemID, itemType)
 	}
 
-	log.Println("INFO: library update started")
+	log.Println("INFO: library refresh started")
 
 	for _, itemType = range []int{
 		LibraryItemSourceGroup,
@@ -103,7 +103,7 @@ func (library *Library) Refresh() error {
 		collection.Parent.Children = append(collection.Parent.Children, collection)
 	}
 
-	log.Println("INFO: library update completed")
+	log.Println("INFO: library refresh completed")
 
 	return nil
 }

@@ -1,0 +1,15 @@
+package server
+
+const (
+	mesgAuthenticationRequired string = "An authentication is required"
+	mesgEmptyData              string = "No data"
+	mesgFormLimitInvalid       string = "Request limit must be an integer"
+	mesgFormOffsetInvalid      string = "Request offset must be an integer"
+	mesgFormOffsetOutOfRange   string = "Request offset is out of range"
+	mesgMethodNotAllowed       string = "Request method is not allowed"
+	mesgResourceConflict       string = "A resource conflict has occured"
+	mesgResourceInvalid        string = "Resource is invalid"
+	mesgResourceNotFound       string = "Unable to find requested resource"
+	mesgUnhandledError         string = "An unhandled error has occured"
+	mesgUnsupportedMediaType   string = "Provided media type is not supported"
+)
