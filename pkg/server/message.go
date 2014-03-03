@@ -10,6 +10,7 @@ const (
 	mesgResourceConflict       string = "A resource conflict has occured"
 	mesgResourceInvalid        string = "Resource is invalid"
 	mesgResourceNotFound       string = "Unable to find requested resource"
+	mesgServiceLoading         string = "Service is loading"
 	mesgUnhandledError         string = "An unhandled error has occured"
 	mesgUnsupportedMediaType   string = "Provided media type is not supported"
 )

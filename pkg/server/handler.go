@@ -8,6 +8,7 @@ import (
 	"log"
 	"mime"
 	"net/http"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -156,6 +157,35 @@ func (server *Server) handleStats(writer http.ResponseWriter, request *http.Requ
 	}
 
 	server.handleResponse(writer, server.getStats(writer, request), http.StatusOK)
+}
+
+func (server *Server) handleWait(writer http.ResponseWriter, request *http.Request) {
+	var data struct {
+		URLPrefix string
+	}
+
+	// Set template data
+	data.URLPrefix = server.Config.URLPrefix
+
+	// Execute template
+	tmpl, err := template.New("layout.html").Funcs(template.FuncMap{
+		"asset": server.templateAsset,
+	}).ParseFiles(
+		path.Join(server.Config.BaseDir, "html", "layout.html"),
+		path.Join(server.Config.BaseDir, "html", "wait.html"),
+	)
+	if err == nil {
+		err = tmpl.Execute(writer, data)
+	}
+
+	if err != nil {
+		if os.IsNotExist(err) {
+			server.handleError(writer, http.StatusNotFound)
+		} else {
+			log.Println("ERROR: " + err.Error())
+			server.handleError(writer, http.StatusInternalServerError)
+		}
+	}
 }
 
 func (server *Server) getStats(writer http.ResponseWriter, request *http.Request) *statsResponse {

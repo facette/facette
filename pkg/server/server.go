@@ -36,11 +36,14 @@ type Server struct {
 	AuthHandler auth.Handler
 	Catalog     *catalog.Catalog
 	Library     *library.Library
+	Loading     bool
 	debugLevel  int
 }
 
 // Reload reloads the configuration and refreshes authentication handler, catalog and library.
 func (server *Server) Reload() error {
+	server.Loading = true
+
 	if err := server.Config.Reload(); err != nil {
 		log.Printf("ERROR: an error occued while reloading configuration: %s", err.Error())
 		return err
@@ -49,6 +52,8 @@ func (server *Server) Reload() error {
 	server.AuthHandler.Refresh()
 	server.Catalog.Refresh()
 	server.Library.Refresh()
+
+	server.Loading = false
 
 	return nil
 }
@@ -106,7 +111,7 @@ func (server *Server) Run() error {
 	go server.AuthHandler.Refresh()
 
 	// Prepare router
-	router := NewRouter(server.debugLevel)
+	router := NewRouter(server)
 
 	router.HandleFunc(urlStaticPath, server.handleStatic)
 

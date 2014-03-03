@@ -3,6 +3,8 @@ package server
 import (
 	"log"
 	"net/http"
+	"strings"
+	"time"
 )
 
 // ResponseWriter represents the structure of an HTTP response writer handling logged output.
@@ -24,18 +26,39 @@ func (writer ResponseWriter) WriteHeader(status int) {
 // Router represents the structure of an HTTP requests router.
 type Router struct {
 	*http.ServeMux
-	debugLevel int
+	server *Server
 }
 
 // ServerHTTP dispatches the requests to the router handlers.
 func (router *Router) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-	router.ServeMux.ServeHTTP(ResponseWriter{writer, request, router.debugLevel}, request)
+	if router.server.Loading {
+		if strings.HasPrefix(request.URL.Path, urlAdminPath) || strings.HasPrefix(request.URL.Path, urlBrowsePath) {
+			router.server.handleWait(writer, request)
+			return
+		} else if request.URL.Path == urlReloadPath {
+			for {
+				if !router.server.Loading {
+					break
+				}
+
+				time.Sleep(time.Second)
+			}
+
+			router.server.handleResponse(writer, nil, http.StatusOK)
+			return
+		} else if !strings.HasPrefix(request.URL.Path, urlStaticPath) {
+			router.server.handleResponse(writer, serverResponse{mesgServiceLoading}, http.StatusServiceUnavailable)
+			return
+		}
+	}
+
+	router.ServeMux.ServeHTTP(ResponseWriter{writer, request, router.server.debugLevel}, request)
 }
 
 // NewRouter creates a new instance of router.
-func NewRouter(debugLevel int) *Router {
+func NewRouter(server *Server) *Router {
 	return &Router{
-		ServeMux:   http.NewServeMux(),
-		debugLevel: debugLevel,
+		ServeMux: http.NewServeMux(),
+		server:   server,
 	}
 }
