@@ -42,7 +42,7 @@ func (handler *GraphiteConnector) GetPlots(query *GroupQuery, startTime, endTime
 
 	httpClient := http.Client{Transport: httpTransport}
 
-	queryURL, err := graphiteBuildQueryURL(query, startTime, endTime)
+	serieName, queryURL, err := graphiteBuildQueryURL(query, startTime, endTime)
 	if err != nil {
 		return nil, fmt.Errorf("unable to build Graphite query URL: %s", err.Error())
 	}
@@ -66,7 +66,7 @@ func (handler *GraphiteConnector) GetPlots(query *GroupQuery, startTime, endTime
 		return nil, fmt.Errorf("unable to unmarshal JSON data: %s", err)
 	}
 
-	if result[query.Name], err = graphiteExtractPlotResult(graphitePlots); err != nil {
+	if result[serieName], err = graphiteExtractPlotResult(graphitePlots); err != nil {
 		return nil, fmt.Errorf("unable to extract plot values from backend response: %s", err)
 	}
 
@@ -136,8 +136,11 @@ func graphiteCheckConnectorResponse(response *http.Response) error {
 	return nil
 }
 
-func graphiteBuildQueryURL(query *GroupQuery, startTime, endTime time.Time) (string, error) {
-	var target string
+func graphiteBuildQueryURL(query *GroupQuery, startTime, endTime time.Time) (string, string, error) {
+	var (
+		serieName string
+		target    string
+	)
 
 	now := time.Now()
 
@@ -146,8 +149,10 @@ func graphiteBuildQueryURL(query *GroupQuery, startTime, endTime time.Time) (str
 	queryURL := fmt.Sprintf("%s?format=json", graphiteURLRender)
 
 	if query.Type == OperGroupTypeNone {
+		serieName = query.Series[0].Name
 		target = fmt.Sprintf("%s.%s", query.Series[0].Metric.SourceName, query.Series[0].Metric.Name)
 	} else {
+		serieName = query.Name
 		targets := make([]string, 0)
 
 		for _, s := range query.Series {
@@ -164,6 +169,8 @@ func graphiteBuildQueryURL(query *GroupQuery, startTime, endTime time.Time) (str
 		}
 	}
 
+	target = fmt.Sprintf("legendValue(%s, 'min', 'max', 'avg', 'last')", target)
+
 	queryURL += fmt.Sprintf("&target=%s", target)
 
 	if startTime.Before(now) {
@@ -178,11 +185,11 @@ func graphiteBuildQueryURL(query *GroupQuery, startTime, endTime time.Time) (str
 		queryURL += fmt.Sprintf("&until=-%ds", untilTime)
 	}
 
-	return queryURL, nil
+	return serieName, queryURL, nil
 }
 
 func graphiteExtractPlotResult(plots []graphitePlot) (*PlotResult, error) {
-	var min, max, total float64
+	var min, max, avg, last float64
 
 	result := &PlotResult{Info: make(map[string]types.PlotValue)}
 
@@ -192,27 +199,18 @@ func graphiteExtractPlotResult(plots []graphitePlot) (*PlotResult, error) {
 	}
 
 	for _, plotPoint := range plots[0].Datapoints {
-		// Actual plot value
 		result.Plots = append(result.Plots, types.PlotValue(plotPoint[0]))
+	}
 
-		// Minimum value (exclude NaN values)
-		if plotPoint[0] < min {
-			min = plotPoint[0]
-		}
-
-		// Maximum value
-		if plotPoint[0] > max {
-			max = plotPoint[0]
-		}
-
-		// Total, to be used for average computation
-		total += plotPoint[0]
+	// Scan the target legend for plot min/max/avg/last info
+	if index := strings.Index(plots[0].Target, "(min"); index > 0 {
+		fmt.Sscanf(plots[0].Target[index:], "(min: %f) (max: %f) (avg: %f) (last: %f)", &min, &max, &avg, &last)
 	}
 
 	result.Info["min"] = types.PlotValue(min)
 	result.Info["max"] = types.PlotValue(max)
-	result.Info["avg"] = types.PlotValue(total / float64(len(result.Plots)))
-	result.Info["last"] = types.PlotValue(result.Plots[len(result.Plots)-1])
+	result.Info["avg"] = types.PlotValue(avg)
+	result.Info["last"] = types.PlotValue(last)
 
 	return result, nil
 }
