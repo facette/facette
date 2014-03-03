@@ -31,15 +31,15 @@ func (server *Server) handleAdmin(writer http.ResponseWriter, request *http.Requ
 		path.Join(server.Config.BaseDir, "html", "admin", "layout.html"),
 	)
 
-	if strings.HasPrefix(request.URL.Path, URLAdminPath+"sourcegroups/") ||
-		strings.HasPrefix(request.URL.Path, URLAdminPath+"metricgroups/") {
+	if strings.HasPrefix(request.URL.Path, urlAdminPath+"sourcegroups/") ||
+		strings.HasPrefix(request.URL.Path, urlAdminPath+"metricgroups/") {
 		err = server.handleAdminGroup(writer, request, tmpl)
-	} else if strings.HasPrefix(request.URL.Path, URLAdminPath+"graphs/") {
+	} else if strings.HasPrefix(request.URL.Path, urlAdminPath+"graphs/") {
 		err = server.handleAdminGraph(writer, request, tmpl)
-	} else if strings.HasPrefix(request.URL.Path, URLAdminPath+"collections/") {
+	} else if strings.HasPrefix(request.URL.Path, urlAdminPath+"collections/") {
 		err = server.handleAdminCollection(writer, request, tmpl)
-	} else if request.URL.Path == URLAdminPath+"origins/" || request.URL.Path == URLAdminPath+"sources/" ||
-		request.URL.Path == URLAdminPath+"metrics/" {
+	} else if request.URL.Path == urlAdminPath+"origins/" || request.URL.Path == urlAdminPath+"sources/" ||
+		request.URL.Path == urlAdminPath+"metrics/" {
 		err = server.handleAdminCatalog(writer, request, tmpl)
 	} else {
 		err = server.handleAdminIndex(writer, request, tmpl)
@@ -63,7 +63,7 @@ func (server *Server) handleAdminCatalog(writer http.ResponseWriter, request *ht
 
 	// Set template data
 	data.URLPrefix = server.Config.URLPrefix
-	data.Section = strings.TrimRight(strings.TrimPrefix(request.URL.Path, URLAdminPath), "/")
+	data.Section = strings.TrimRight(strings.TrimPrefix(request.URL.Path, urlAdminPath), "/")
 
 	// Execute template
 	tmpl, err := tmpl.ParseFiles(path.Join(server.Config.BaseDir, "html", "admin", "catalog_list.html"))
@@ -227,6 +227,6 @@ func (server *Server) handleAdminIndex(writer http.ResponseWriter, request *http
 }
 
 func splitAdminURLPath(path string) (string, string) {
-	chunks := strings.SplitN(strings.TrimPrefix(path, URLAdminPath), "/", 2)
+	chunks := strings.SplitN(strings.TrimPrefix(path, urlAdminPath), "/", 2)
 	return chunks[0], chunks[1]
 }

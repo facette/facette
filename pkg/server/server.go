@@ -18,16 +18,15 @@ import (
 )
 
 const (
-	// URLAdminPath represents the administration panel base URL path
-	URLAdminPath string = "/admin/"
-	// URLBrowsePath represents the browse pages base URL path
-	URLBrowsePath string = "/browse/"
-	// URLCatalogPath represents the catalog base URL path
-	URLCatalogPath string = "/catalog/"
-	// URLLibraryPath represents the library base URL path
-	URLLibraryPath string = "/library/"
-	// ServerStopWait represents the time to wait before force-closing connections when stopping server.
-	ServerStopWait int = 10
+	serverStopWait  int    = 10
+	urlAdminPath    string = "/admin/"
+	urlBrowsePath   string = "/browse/"
+	urlCatalogPath  string = "/catalog/"
+	urlLibraryPath  string = "/library/"
+	urlReloadPath   string = "/reload"
+	urlResourcePath string = "/resources"
+	urlStaticPath   string = "/static/"
+	urlStatsPath    string = "/stats"
 )
 
 // Server is the main structure of the server handler.
@@ -109,26 +108,26 @@ func (server *Server) Run() error {
 	// Prepare router
 	router := NewRouter(server.debugLevel)
 
-	router.HandleFunc("/static/", server.handleStatic)
+	router.HandleFunc(urlStaticPath, server.handleStatic)
 
-	router.HandleFunc(URLCatalogPath+"origins/", server.handleOrigin)
-	router.HandleFunc(URLCatalogPath+"sources/", server.handleSource)
-	router.HandleFunc(URLCatalogPath+"metrics/", server.handleMetric)
+	router.HandleFunc(urlCatalogPath+"origins/", server.handleOrigin)
+	router.HandleFunc(urlCatalogPath+"sources/", server.handleSource)
+	router.HandleFunc(urlCatalogPath+"metrics/", server.handleMetric)
 
-	router.HandleFunc(URLLibraryPath+"sourcegroups/", server.handleGroup)
-	router.HandleFunc(URLLibraryPath+"metricgroups/", server.handleGroup)
-	router.HandleFunc(URLLibraryPath+"expand", server.handleGroupExpand)
-	router.HandleFunc(URLLibraryPath+"graphs/plots", server.handleGraphPlots)
-	router.HandleFunc(URLLibraryPath+"graphs/", server.handleGraph)
-	router.HandleFunc(URLLibraryPath+"collections/", server.handleCollection)
+	router.HandleFunc(urlLibraryPath+"sourcegroups/", server.handleGroup)
+	router.HandleFunc(urlLibraryPath+"metricgroups/", server.handleGroup)
+	router.HandleFunc(urlLibraryPath+"expand", server.handleGroupExpand)
+	router.HandleFunc(urlLibraryPath+"graphs/plots", server.handleGraphPlots)
+	router.HandleFunc(urlLibraryPath+"graphs/", server.handleGraph)
+	router.HandleFunc(urlLibraryPath+"collections/", server.handleCollection)
 
-	router.HandleFunc(URLAdminPath, server.handleAdmin)
+	router.HandleFunc(urlAdminPath, server.handleAdmin)
 
-	router.HandleFunc(URLBrowsePath, server.handleBrowse)
+	router.HandleFunc(urlBrowsePath, server.handleBrowse)
 
-	router.HandleFunc("/reload", server.handleReload)
-	router.HandleFunc("/resources", server.handleResource)
-	router.HandleFunc("/stats", server.handleStats)
+	router.HandleFunc(urlReloadPath, server.handleReload)
+	router.HandleFunc(urlResourcePath, server.handleResource)
+	router.HandleFunc(urlStatsPath, server.handleStats)
 
 	router.HandleFunc("/", server.handleBrowse)
 
@@ -147,7 +146,7 @@ func (server *Server) Run() error {
 
 	if server.Listener.Stopped {
 		/* Wait for the clients to disconnect */
-		for i := 0; i < ServerStopWait; i++ {
+		for i := 0; i < serverStopWait; i++ {
 			if clientCount := server.Listener.ConnCount.Get(); clientCount == 0 {
 				break
 			}
@@ -158,7 +157,7 @@ func (server *Server) Run() error {
 		clientCount := server.Listener.ConnCount.Get()
 
 		if clientCount > 0 {
-			log.Printf("INFO: server stopped after %d seconds with %d client(s) still connected", ServerStopWait,
+			log.Printf("INFO: server stopped after %d seconds with %d client(s) still connected", serverStopWait,
 				clientCount)
 		} else {
 			log.Println("INFO: server stopped gracefully")

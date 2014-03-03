@@ -19,7 +19,7 @@ type OriginResponse struct {
 }
 
 func (server *Server) handleOrigin(writer http.ResponseWriter, request *http.Request) {
-	originName := strings.TrimPrefix(request.URL.Path, URLCatalogPath+"origins/")
+	originName := strings.TrimPrefix(request.URL.Path, urlCatalogPath+"origins/")
 
 	if originName == "" {
 		server.handleOriginList(writer, request)
@@ -76,7 +76,7 @@ type SourceResponse struct {
 }
 
 func (server *Server) handleSource(writer http.ResponseWriter, request *http.Request) {
-	sourceName := strings.TrimPrefix(request.URL.Path, URLCatalogPath+"sources/")
+	sourceName := strings.TrimPrefix(request.URL.Path, urlCatalogPath+"sources/")
 
 	if sourceName == "" {
 		server.handleSourceList(writer, request)
@@ -153,7 +153,7 @@ type MetricResponse struct {
 }
 
 func (server *Server) handleMetric(writer http.ResponseWriter, request *http.Request) {
-	metricName := strings.TrimPrefix(request.URL.Path, URLCatalogPath+"metrics/")
+	metricName := strings.TrimPrefix(request.URL.Path, urlCatalogPath+"metrics/")
 
 	if metricName == "" {
 		server.handleMetricList(writer, request)

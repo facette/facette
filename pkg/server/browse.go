@@ -22,7 +22,7 @@ func (server *Server) handleBrowse(writer http.ResponseWriter, request *http.Req
 
 	// Redirect to default location
 	if request.URL.Path == "/" {
-		http.Redirect(writer, request, server.Config.URLPrefix+URLBrowsePath, 301)
+		http.Redirect(writer, request, server.Config.URLPrefix+urlBrowsePath, 301)
 		return
 	}
 
@@ -34,10 +34,10 @@ func (server *Server) handleBrowse(writer http.ResponseWriter, request *http.Req
 		"hl":    templateHighlight,
 	})
 
-	if strings.HasPrefix(request.URL.Path, URLBrowsePath+"collections/") ||
-		strings.HasPrefix(request.URL.Path, URLBrowsePath+"sources/") {
+	if strings.HasPrefix(request.URL.Path, urlBrowsePath+"collections/") ||
+		strings.HasPrefix(request.URL.Path, urlBrowsePath+"sources/") {
 		err = server.handleBrowseCollection(writer, request, tmpl)
-	} else if request.URL.Path == URLBrowsePath+"search" {
+	} else if request.URL.Path == urlBrowsePath+"search" {
 		err = server.handleBrowseSearch(writer, request, tmpl)
 	} else {
 		err = server.handleBrowseIndex(writer, request, tmpl)
@@ -92,9 +92,9 @@ func (server *Server) handleBrowseCollection(writer http.ResponseWriter, request
 	// Set template data
 	data.URLPrefix = server.Config.URLPrefix
 
-	if strings.HasPrefix(request.URL.Path, URLBrowsePath+"collections/") {
+	if strings.HasPrefix(request.URL.Path, urlBrowsePath+"collections/") {
 		data.Collection = &collectionData{Collection: &library.Collection{}}
-		data.Collection.ID = strings.TrimPrefix(request.URL.Path, URLBrowsePath+"collections/")
+		data.Collection.ID = strings.TrimPrefix(request.URL.Path, urlBrowsePath+"collections/")
 
 		item, err := server.Library.GetItem(data.Collection.ID, library.LibraryItemCollection)
 		if err != nil {
@@ -104,7 +104,7 @@ func (server *Server) handleBrowseCollection(writer http.ResponseWriter, request
 		data.Collection.Collection = item.(*library.Collection)
 	} else {
 		collection, err := server.Library.GetCollectionTemplate(strings.TrimPrefix(request.URL.Path,
-			URLBrowsePath+"sources/"))
+			urlBrowsePath+"sources/"))
 		if err != nil {
 			return err
 		}
