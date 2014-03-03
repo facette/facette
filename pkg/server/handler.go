@@ -37,6 +37,12 @@ type resourceResponse struct {
 }
 
 func (server *Server) handleAuth(writer http.ResponseWriter, request *http.Request) bool {
+	// Skip authentication if not set
+	if server.AuthHandler == nil {
+		return true
+	}
+
+	// Check authentication data
 	authorization := request.Header.Get("Authorization")
 
 	if strings.HasPrefix(authorization, "Basic ") {

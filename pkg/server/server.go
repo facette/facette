@@ -49,7 +49,10 @@ func (server *Server) Reload() error {
 		return err
 	}
 
-	server.AuthHandler.Refresh()
+	if server.AuthHandler != nil {
+		server.AuthHandler.Refresh()
+	}
+
 	server.Catalog.Refresh()
 	server.Library.Refresh()
 
@@ -107,8 +110,10 @@ func (server *Server) Run() error {
 		return err
 	}
 
-	server.AuthHandler = authHandler
-	go server.AuthHandler.Refresh()
+	if authHandler != nil {
+		server.AuthHandler = authHandler
+		go server.AuthHandler.Refresh()
+	}
 
 	// Prepare router
 	router := NewRouter(server)

@@ -18,8 +18,8 @@ type Handler interface {
 
 // NewAuth creates a new authentication handler instance.
 func NewAuth(config map[string]string, debugLevel int) (Handler, error) {
-	if _, ok := config["type"]; !ok {
-		return nil, fmt.Errorf("missing authentication handler type")
+	if _, ok := config["type"]; !ok || config["type"] == "none" {
+		return nil, nil
 	} else if _, ok := Handlers[config["type"]]; !ok {
 		return nil, fmt.Errorf("unknown `%s' authentication handler", config["type"])
 	}
