@@ -329,7 +329,7 @@ func (server *Server) handleGraphPlots(writer http.ResponseWriter, request *http
 	// Get plots data
 	groupOptions := make(map[string]map[string]interface{})
 
-	data := []map[string]*connector.PlotResult{}
+	data := make([]map[string]*connector.PlotResult, 0)
 
 	for _, stackItem := range graph.Stacks {
 		for _, groupItem := range stackItem.Groups {

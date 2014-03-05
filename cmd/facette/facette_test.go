@@ -726,7 +726,7 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 	// Test group expansion
 	data, _ = json.Marshal(expandData)
 
-	expandResult := []server.ExpandRequest{}
+	expandResult := make([]server.ExpandRequest, 0)
 
 	response = execTestRequest(test, "POST", fmt.Sprintf("http://%s/library/expand", serverConfig.BindAddr),
 		strings.NewReader(string(data)), false, &expandResult)
