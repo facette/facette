@@ -62,7 +62,7 @@ func (server *Server) handleOriginList(writer http.ResponseWriter, request *http
 
 	server.applyResponseLimit(writer, request, response)
 
-	server.handleResponse(writer, response, http.StatusOK)
+	server.handleResponse(writer, response.list, http.StatusOK)
 }
 
 func (server *Server) handleSource(writer http.ResponseWriter, request *http.Request) {
@@ -135,7 +135,7 @@ func (server *Server) handleSourceList(writer http.ResponseWriter, request *http
 
 	server.applyResponseLimit(writer, request, response)
 
-	server.handleResponse(writer, response, http.StatusOK)
+	server.handleResponse(writer, response.list, http.StatusOK)
 }
 
 func (server *Server) handleMetric(writer http.ResponseWriter, request *http.Request) {
