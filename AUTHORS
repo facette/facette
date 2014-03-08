@@ -4,3 +4,12 @@ AUTHORS
 Vincent Batoufflet <vincent@batoufflet.info>
 
  * Initial author and project maintainer
+
+CONTRIBUTORS
+============
+
+Marc Falzon <marc@baha.mu>
+
+ * Graphite backend
+ * Backend code refactor
+ * Moral support
