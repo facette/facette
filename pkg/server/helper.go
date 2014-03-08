@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"sort"
@@ -75,7 +74,7 @@ func (server *Server) parseStoreRequest(writer http.ResponseWriter, request *htt
 		return &serverResponse{mesgAuthenticationRequired}, http.StatusUnauthorized
 	}
 
-	fmt.Println(server.handleAuth(writer, request))
+	server.handleAuth(writer, request)
 
 	return nil, http.StatusOK
 }

@@ -42,8 +42,6 @@ func (server *Server) handleGraph(writer http.ResponseWriter, request *http.Requ
 
 		server.handleResponse(writer, nil, http.StatusOK)
 
-		break
-
 	case "GET", "HEAD":
 		if graphID == "" {
 			server.handleGraphList(writer, request)
@@ -61,8 +59,6 @@ func (server *Server) handleGraph(writer http.ResponseWriter, request *http.Requ
 		}
 
 		server.handleResponse(writer, item, http.StatusOK)
-
-		break
 
 	case "POST", "PUT":
 		var graph *library.Graph
@@ -124,8 +120,6 @@ func (server *Server) handleGraph(writer http.ResponseWriter, request *http.Requ
 		} else {
 			server.handleResponse(writer, nil, http.StatusOK)
 		}
-
-		break
 
 	default:
 		server.handleResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)

@@ -51,15 +51,12 @@ func (library *Library) DeleteItem(id string, itemType int) error {
 	switch itemType {
 	case LibraryItemSourceGroup, LibraryItemMetricGroup:
 		delete(library.Groups, id)
-		break
 
 	case LibraryItemGraph:
 		delete(library.Graphs, id)
-		break
 
 	case LibraryItemCollection:
 		delete(library.Collections, id)
-		break
 	}
 
 	return nil
@@ -103,8 +100,6 @@ func (library *Library) GetItemByName(name string, itemType int) (interface{}, e
 			return item, nil
 		}
 
-		break
-
 	case LibraryItemGraph:
 		for _, item := range library.Graphs {
 			if item.Name != name {
@@ -114,8 +109,6 @@ func (library *Library) GetItemByName(name string, itemType int) (interface{}, e
 			return item, nil
 		}
 
-		break
-
 	case LibraryItemCollection:
 		for _, item := range library.Collections {
 			if item.Name != name {
@@ -124,8 +117,6 @@ func (library *Library) GetItemByName(name string, itemType int) (interface{}, e
 
 			return item, nil
 		}
-
-		break
 	}
 
 	return nil, os.ErrNotExist
@@ -140,19 +131,15 @@ func (library *Library) ItemExists(id string, itemType int) bool {
 		if _, ok := library.Groups[id]; ok && library.Groups[id].Type == itemType {
 			exists = true
 		}
-		break
 
 	case LibraryItemGraph:
 		_, exists = library.Graphs[id]
-		break
 
 	case LibraryItemGraphTemplate:
 		_, exists = library.TemplateGraphs[id]
-		break
 
 	case LibraryItemCollection:
 		_, exists = library.Collections[id]
-		break
 	}
 
 	return exists
@@ -175,7 +162,6 @@ func (library *Library) LoadItem(id string, itemType int) error {
 		library.Groups[id] = tmpGroup
 		library.Groups[id].Type = itemType
 		library.Groups[id].Modified = fileInfo.ModTime()
-		break
 
 	case LibraryItemGraph:
 		tmpGraph := &Graph{}
@@ -190,7 +176,6 @@ func (library *Library) LoadItem(id string, itemType int) error {
 		library.Graphs[id] = tmpGraph
 		library.Graphs[id].Volatile = false
 		library.Graphs[id].Modified = fileInfo.ModTime()
-		break
 
 	case LibraryItemCollection:
 		var tmpCollection *struct {
@@ -216,8 +201,6 @@ func (library *Library) LoadItem(id string, itemType int) error {
 		}
 
 		library.Collections[id].Modified = fileInfo.ModTime()
-
-		break
 	}
 
 	return nil
@@ -230,15 +213,12 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 	switch itemType {
 	case LibraryItemSourceGroup, LibraryItemMetricGroup:
 		itemStruct = item.(*Group).GetItem()
-		break
 
 	case LibraryItemGraph:
 		itemStruct = item.(*Graph).GetItem()
-		break
 
 	case LibraryItemCollection:
 		itemStruct = item.(*Collection).GetItem()
-		break
 	}
 
 	if itemStruct.ID == "" {
@@ -267,23 +247,17 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 				return os.ErrExist
 			}
 
-			break
-
 		case LibraryItemGraph:
 			if !item.(*Graph).Volatile && itemTemp.(*Graph).ID != itemStruct.ID {
 				log.Printf("ERROR: duplicate `%s' graph identifier", itemStruct.ID)
 				return os.ErrExist
 			}
 
-			break
-
 		case LibraryItemCollection:
 			if itemTemp.(*Collection).ID != itemStruct.ID {
 				log.Printf("ERROR: duplicate `%s' collection identifier", itemStruct.ID)
 				return os.ErrExist
 			}
-
-			break
 		}
 	}
 
@@ -292,7 +266,6 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 	case LibraryItemSourceGroup, LibraryItemMetricGroup:
 		library.Groups[itemStruct.ID] = item.(*Group)
 		library.Groups[itemStruct.ID].ID = itemStruct.ID
-		break
 
 	case LibraryItemGraph:
 		// Check for definition names duplicates
@@ -338,12 +311,10 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 
 		library.Graphs[itemStruct.ID] = item.(*Graph)
 		library.Graphs[itemStruct.ID].ID = itemStruct.ID
-		break
 
 	case LibraryItemCollection:
 		library.Collections[itemStruct.ID] = item.(*Collection)
 		library.Collections[itemStruct.ID].ID = itemStruct.ID
-		break
 	}
 
 	// Store JSON data
@@ -362,19 +333,15 @@ func (library *Library) getDirPath(itemType int) string {
 	switch itemType {
 	case LibraryItemSourceGroup:
 		dirName = "sourcegroups"
-		break
 
 	case LibraryItemMetricGroup:
 		dirName = "metricgroups"
-		break
 
 	case LibraryItemGraph:
 		dirName = "graphs"
-		break
 
 	case LibraryItemCollection:
 		dirName = "collections"
-		break
 	}
 
 	return path.Join(library.Config.DataDir, dirName)

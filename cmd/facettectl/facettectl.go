@@ -70,16 +70,9 @@ func main() {
 	}
 
 	err := handler(cfg, flag.Args())
-	switch err {
-	case nil:
-		break
-
-	case os.ErrInvalid:
+	if err == os.ErrInvalid {
 		utils.PrintUsage(os.Stderr, cmdUsage)
-		break
-
-	default:
+	} else if err != nil {
 		fmt.Fprintln(os.Stderr, "Error: "+err.Error())
-		break
 	}
 }

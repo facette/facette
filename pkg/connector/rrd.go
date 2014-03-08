@@ -206,8 +206,6 @@ func (handler *RRDConnector) rrdGetData(query *GroupQuery, startTime, endTime ti
 			series[serieTemp] = serieName
 		}
 
-		break
-
 	case OperGroupTypeAvg, OperGroupTypeSum:
 		serieName := fmt.Sprintf("serie%d", count)
 		count += 1
@@ -272,8 +270,6 @@ func (handler *RRDConnector) rrdGetData(query *GroupQuery, startTime, endTime ti
 
 		// Set serie matching
 		series[serieName] = query.Name
-
-		break
 
 	default:
 		return nil, fmt.Errorf("unknown `%d' operator type", query.Type)

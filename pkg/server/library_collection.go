@@ -45,8 +45,6 @@ func (server *Server) handleCollection(writer http.ResponseWriter, request *http
 
 		server.handleResponse(writer, nil, http.StatusOK)
 
-		break
-
 	case "GET", "HEAD":
 		if collectionID == "" {
 			server.handleCollectionList(writer, request)
@@ -64,8 +62,6 @@ func (server *Server) handleCollection(writer http.ResponseWriter, request *http
 		}
 
 		server.handleResponse(writer, item, http.StatusOK)
-
-		break
 
 	case "POST", "PUT":
 		if response, status := server.parseStoreRequest(writer, request, collectionID); status != http.StatusOK {
@@ -152,8 +148,6 @@ func (server *Server) handleCollection(writer http.ResponseWriter, request *http
 		} else {
 			server.handleResponse(writer, nil, http.StatusOK)
 		}
-
-		break
 
 	default:
 		server.handleResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)

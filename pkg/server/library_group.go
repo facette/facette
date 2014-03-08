@@ -50,8 +50,6 @@ func (server *Server) handleGroup(writer http.ResponseWriter, request *http.Requ
 
 		server.handleResponse(writer, nil, http.StatusOK)
 
-		break
-
 	case "GET", "HEAD":
 		if groupID == "" {
 			server.handleGroupList(writer, request)
@@ -69,8 +67,6 @@ func (server *Server) handleGroup(writer http.ResponseWriter, request *http.Requ
 		}
 
 		server.handleResponse(writer, item, http.StatusOK)
-
-		break
 
 	case "POST", "PUT":
 		var group *library.Group
@@ -127,11 +123,8 @@ func (server *Server) handleGroup(writer http.ResponseWriter, request *http.Requ
 			server.handleResponse(writer, nil, http.StatusOK)
 		}
 
-		break
-
 	default:
 		server.handleResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
-		break
 	}
 }
 
