@@ -17,25 +17,6 @@ import (
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
 
-type serverResponse struct {
-	Message string `json:"message"`
-}
-
-type statsResponse struct {
-	Origins        int    `json:"origins"`
-	Sources        int    `json:"sources"`
-	Metrics        int    `json:"metrics"`
-	CatalogUpdated string `json:"catalog_updated"`
-
-	Graphs      int `json:"graphs"`
-	Collections int `json:"collections"`
-	Groups      int `json:"groups"`
-}
-
-type resourceResponse struct {
-	Scales [][2]interface{} `json:"scales"`
-}
-
 func (server *Server) handleAuth(writer http.ResponseWriter, request *http.Request) bool {
 	// Skip authentication if not set
 	if server.AuthHandler == nil {

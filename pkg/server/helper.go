@@ -10,45 +10,15 @@ import (
 	"github.com/facette/facette/pkg/utils"
 )
 
-func (server *Server) applyCollectionListResponse(writer http.ResponseWriter, request *http.Request,
-	response CollectionListResponse, offset, limit int) {
+func (server *Server) applyResponseLimit(writer http.ResponseWriter, request *http.Request, response *listResponse) {
+	writer.Header().Add("X-Total-Records", strconv.Itoa(response.list.Len()))
 
-	writer.Header().Add("X-Total-Records", strconv.Itoa(len(response)))
+	sort.Sort(response.list)
 
-	sort.Sort(response)
-
-	if limit != 0 && len(response) > offset+limit {
-		response = response[offset : offset+limit]
-	} else if offset != 0 {
-		response = response[offset:]
-	}
-}
-
-func (server *Server) applyItemListResponse(writer http.ResponseWriter, request *http.Request,
-	response ItemListResponse, offset, limit int) {
-
-	writer.Header().Add("X-Total-Records", strconv.Itoa(len(response)))
-
-	sort.Sort(response)
-
-	if limit != 0 && len(response) > offset+limit {
-		response = response[offset : offset+limit]
-	} else if offset != 0 {
-		response = response[offset:]
-	}
-}
-
-func (server *Server) applyStringListResponse(writer http.ResponseWriter, request *http.Request, response []string,
-	offset, limit int) {
-
-	writer.Header().Add("X-Total-Records", strconv.Itoa(len(response)))
-
-	sort.Strings(response)
-
-	if limit != 0 && len(response) > offset+limit {
-		response = response[offset : offset+limit]
-	} else if offset != 0 {
-		response = response[offset:]
+	if response.limit != 0 && response.list.Len() > response.offset+response.limit {
+		response.list = response.list.slice(response.offset, response.limit).(sortableListResponse)
+	} else if response.offset != 0 {
+		response.list = response.list.slice(response.offset, response.list.Len()).(sortableListResponse)
 	}
 }
 

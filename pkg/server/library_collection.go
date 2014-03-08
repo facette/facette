@@ -15,28 +15,6 @@ import (
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
 
-// CollectionResponse represents a collection response structure in the server backend.
-type CollectionResponse struct {
-	ItemResponse
-	Parent      *string `json:"parent"`
-	HasChildren bool    `json:"has_children"`
-}
-
-// CollectionListResponse represents a list of collections response structure in the backend server.
-type CollectionListResponse []*CollectionResponse
-
-func (r CollectionListResponse) Len() int {
-	return len(r)
-}
-
-func (r CollectionListResponse) Less(i, j int) bool {
-	return r[i].Name < r[j].Name
-}
-
-func (r CollectionListResponse) Swap(i, j int) {
-	r[i], r[j] = r[j], r[i]
-}
-
 func (server *Server) handleCollection(writer http.ResponseWriter, request *http.Request) {
 	type tmpCollection struct {
 		*library.Collection
@@ -211,7 +189,7 @@ func (server *Server) handleCollectionList(writer http.ResponseWriter, request *
 	}
 
 	// Fill collections list
-	response := make(CollectionListResponse, 0)
+	items := make(CollectionListResponse, 0)
 
 	for _, collection := range server.Library.Collections {
 		if request.FormValue("parent") != "" && (request.FormValue("parent") == "" &&
@@ -240,10 +218,16 @@ func (server *Server) handleCollectionList(writer http.ResponseWriter, request *
 			collectionItem.Parent = &collection.Parent.ID
 		}
 
-		response = append(response, collectionItem)
+		items = append(items, collectionItem)
 	}
 
-	server.applyCollectionListResponse(writer, request, response, offset, limit)
+	response := &listResponse{
+		list:   items,
+		offset: offset,
+		limit:  limit,
+	}
 
-	server.handleResponse(writer, response, http.StatusOK)
+	server.applyResponseLimit(writer, request, response)
+
+	server.handleResponse(writer, response.list, http.StatusOK)
 }

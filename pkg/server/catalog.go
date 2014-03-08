@@ -11,13 +11,6 @@ import (
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
 
-// OriginResponse represents an origin response structure in the server backend.
-type OriginResponse struct {
-	Name      string `json:"name"`
-	Connector string `json:"connector"`
-	Updated   string `json:"updated"`
-}
-
 func (server *Server) handleOrigin(writer http.ResponseWriter, request *http.Request) {
 	originName := strings.TrimPrefix(request.URL.Path, urlCatalogPath+"origins/")
 
@@ -61,18 +54,15 @@ func (server *Server) handleOriginList(writer http.ResponseWriter, request *http
 		originSet.Add(origin.Name)
 	}
 
-	response := originSet.StringSlice()
+	response := &listResponse{
+		list:   StringListResponse(originSet.StringSlice()),
+		offset: offset,
+		limit:  limit,
+	}
 
-	server.applyStringListResponse(writer, request, response, offset, limit)
+	server.applyResponseLimit(writer, request, response)
 
 	server.handleResponse(writer, response, http.StatusOK)
-}
-
-// SourceResponse represents a source response structure in the server backend.
-type SourceResponse struct {
-	Name    string   `json:"name"`
-	Origins []string `json:"origins"`
-	Updated string   `json:"updated"`
 }
 
 func (server *Server) handleSource(writer http.ResponseWriter, request *http.Request) {
@@ -137,19 +127,15 @@ func (server *Server) handleSourceList(writer http.ResponseWriter, request *http
 		}
 	}
 
-	response := sourceSet.StringSlice()
+	response := &listResponse{
+		list:   StringListResponse(sourceSet.StringSlice()),
+		offset: offset,
+		limit:  limit,
+	}
 
-	server.applyStringListResponse(writer, request, response, offset, limit)
+	server.applyResponseLimit(writer, request, response)
 
 	server.handleResponse(writer, response, http.StatusOK)
-}
-
-// MetricResponse represents a metric response structure in the server backend.
-type MetricResponse struct {
-	Name    string   `json:"name"`
-	Origins []string `json:"origins"`
-	Sources []string `json:"sources"`
-	Updated string   `json:"updated"`
 }
 
 func (server *Server) handleMetric(writer http.ResponseWriter, request *http.Request) {
@@ -242,9 +228,13 @@ func (server *Server) handleMetricList(writer http.ResponseWriter, request *http
 		}
 	}
 
-	response := metricSet.StringSlice()
+	response := &listResponse{
+		list:   StringListResponse(metricSet.StringSlice()),
+		offset: offset,
+		limit:  limit,
+	}
 
-	server.applyStringListResponse(writer, request, response, offset, limit)
+	server.applyResponseLimit(writer, request, response)
 
-	server.handleResponse(writer, response, http.StatusOK)
+	server.handleResponse(writer, response.list, http.StatusOK)
 }

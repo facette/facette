@@ -14,21 +14,6 @@ import (
 	"github.com/facette/facette/pkg/utils"
 )
 
-// ExpandRequest represents an expand request structure in the server backend.
-type ExpandRequest [][3]string
-
-func (e ExpandRequest) Len() int {
-	return len(e)
-}
-
-func (e ExpandRequest) Less(i, j int) bool {
-	return e[i][0]+e[i][1]+e[i][2] < e[j][0]+e[j][1]+e[j][2]
-}
-
-func (e ExpandRequest) Swap(i, j int) {
-	e[i], e[j] = e[j], e[i]
-}
-
 func (server *Server) handleGroup(writer http.ResponseWriter, request *http.Request) {
 	var (
 		groupID   string
@@ -158,9 +143,9 @@ func (server *Server) handleGroupList(writer http.ResponseWriter, request *http.
 		return
 	}
 
-	response := make(ItemListResponse, 0)
-
 	// Fill groups list
+	items := make(ItemListResponse, 0)
+
 	isSource := strings.HasPrefix(request.URL.Path, urlLibraryPath+"sourcegroups/")
 
 	for _, group := range server.Library.Groups {
@@ -173,7 +158,7 @@ func (server *Server) handleGroupList(writer http.ResponseWriter, request *http.
 			continue
 		}
 
-		response = append(response, &ItemResponse{
+		items = append(items, &ItemResponse{
 			ID:          group.ID,
 			Name:        group.Name,
 			Description: group.Description,
@@ -181,9 +166,15 @@ func (server *Server) handleGroupList(writer http.ResponseWriter, request *http.
 		})
 	}
 
-	server.applyItemListResponse(writer, request, response, offset, limit)
+	response := &listResponse{
+		list:   items,
+		offset: offset,
+		limit:  limit,
+	}
 
-	server.handleResponse(writer, response, http.StatusOK)
+	server.applyResponseLimit(writer, request, response)
+
+	server.handleResponse(writer, response.list, http.StatusOK)
 }
 
 func (server *Server) handleGroupExpand(writer http.ResponseWriter, request *http.Request) {

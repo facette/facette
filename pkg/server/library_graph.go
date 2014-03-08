@@ -13,53 +13,9 @@ import (
 	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/connector"
 	"github.com/facette/facette/pkg/library"
-	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
-
-// PlotRequest represents a plot request structure in the server backend.
-type PlotRequest struct {
-	Time        string    `json:"time"`
-	Range       string    `json:"range"`
-	Sample      int       `json:"sample"`
-	Constants   []float64 `json:"constants"`
-	Percentiles []float64 `json:"percentiles"`
-	Graph       string    `json:"graph"`
-	Origin      string    `json:"origin"`
-	Source      string    `json:"source"`
-	Metric      string    `json:"metric"`
-	Template    string    `json:"template"`
-	Filter      string    `json:"filter"`
-}
-
-// PlotResponse represents a plot response structure in the server backend.
-type PlotResponse struct {
-	ID          string           `json:"id"`
-	Start       string           `json:"start"`
-	End         string           `json:"end"`
-	Step        float64          `json:"step"`
-	Name        string           `json:"name"`
-	Description string           `json:"description"`
-	Type        int              `json:"type"`
-	StackMode   int              `json:"stack_mode"`
-	Stacks      []*StackResponse `json:"stacks"`
-	Modified    time.Time        `json:"modified"`
-}
-
-// StackResponse represents a stack response structure in the server backend.
-type StackResponse struct {
-	Name   string           `json:"name"`
-	Series []*SerieResponse `json:"series"`
-}
-
-// SerieResponse represents a serie response structure in the server backend.
-type SerieResponse struct {
-	Name    string                     `json:"name"`
-	Plots   []types.PlotValue          `json:"plots"`
-	Info    map[string]types.PlotValue `json:"info"`
-	Options map[string]interface{}     `json:"options"`
-}
 
 func (server *Server) handleGraph(writer http.ResponseWriter, request *http.Request) {
 	graphID := strings.TrimPrefix(request.URL.Path, urlLibraryPath+"graphs/")
@@ -184,8 +140,6 @@ func (server *Server) handleGraphList(writer http.ResponseWriter, request *http.
 		return
 	}
 
-	response := make(ItemListResponse, 0)
-
 	graphSet := set.New()
 
 	// Filter on collection if any
@@ -208,6 +162,8 @@ func (server *Server) handleGraphList(writer http.ResponseWriter, request *http.
 	}
 
 	// Fill graphs list
+	items := make(ItemListResponse, 0)
+
 	for _, graph := range server.Library.Graphs {
 		if graph.Volatile || !graphSet.IsEmpty() && !graphSet.Has(graph.ID) {
 			continue
@@ -217,7 +173,7 @@ func (server *Server) handleGraphList(writer http.ResponseWriter, request *http.
 			continue
 		}
 
-		response = append(response, &ItemResponse{
+		items = append(items, &ItemResponse{
 			ID:          graph.ID,
 			Name:        graph.Name,
 			Description: graph.Description,
@@ -225,9 +181,15 @@ func (server *Server) handleGraphList(writer http.ResponseWriter, request *http.
 		})
 	}
 
-	server.applyItemListResponse(writer, request, response, offset, limit)
+	response := &listResponse{
+		list:   items,
+		offset: offset,
+		limit:  limit,
+	}
 
-	server.handleResponse(writer, response, http.StatusOK)
+	server.applyResponseLimit(writer, request, response)
+
+	server.handleResponse(writer, response.list, http.StatusOK)
 }
 
 func (server *Server) handleGraphPlots(writer http.ResponseWriter, request *http.Request) {
