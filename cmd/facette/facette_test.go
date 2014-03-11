@@ -15,14 +15,19 @@ import (
 	"github.com/facette/facette/pkg/connector"
 	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/pkg/server"
+	"github.com/facette/facette/pkg/utils"
 )
 
 var (
 	serverConfig *config.Config
 )
 
-func Test_originList(test *testing.T) {
-	base := []string{"test"}
+func Test_CatalogOriginList(test *testing.T) {
+	base := []string{
+		"test1",
+		"test2",
+	}
+
 	result := make([]string, 0)
 
 	// Test GET on source list
@@ -38,13 +43,44 @@ func Test_originList(test *testing.T) {
 		test.Logf("\nExpected %#v\nbut got  %#v", base, result)
 		test.Fail()
 	}
+
+	// Test GET on source list (offset and limit)
+	result = make([]string, 0)
+
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/origins/?limit=1", serverConfig.BindAddr),
+		nil, false, &result)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	if !reflect.DeepEqual(base[:1], result) {
+		test.Logf("\nExpected %#v\nbut got  %#v", base[:1], result)
+		test.Fail()
+	}
+
+	result = make([]string, 0)
+
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/origins/?offset=1&limit=1",
+		serverConfig.BindAddr), nil, false, &result)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	if !reflect.DeepEqual(base[1:2], result) {
+		test.Logf("\nExpected %#v\nbut got  %#v", base[1:2], result)
+		test.Fail()
+	}
 }
 
-func Test_originShow(test *testing.T) {
-	base := &server.SourceResponse{Name: "source1", Origins: []string{"test"}}
+func Test_CatalogOriginGet(test *testing.T) {
+	base := &server.SourceResponse{Name: "source1", Origins: []string{"test1", "test2"}}
 	result := &server.SourceResponse{}
 
-	// Test GET on source item
+	// Test GET on source1 item
 	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/source1", serverConfig.BindAddr),
 		nil, false, &result)
 	result.Updated = ""
@@ -59,7 +95,26 @@ func Test_originShow(test *testing.T) {
 		test.Fail()
 	}
 
-	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/unknown1", serverConfig.BindAddr),
+	// Test GET on source2 item (with filter settings)
+	base = &server.SourceResponse{Name: "source2", Origins: []string{"test1"}}
+	result = &server.SourceResponse{}
+
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/source2", serverConfig.BindAddr),
+		nil, false, &result)
+	result.Updated = ""
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	if !reflect.DeepEqual(base, result) {
+		test.Logf("\nExpected %#v\nbut got  %#v", base, result)
+		test.Fail()
+	}
+
+	// Test GET on unknown item
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/unknown", serverConfig.BindAddr),
 		nil, false, &result)
 
 	if response.StatusCode != http.StatusNotFound {
@@ -68,8 +123,12 @@ func Test_originShow(test *testing.T) {
 	}
 }
 
-func Test_sourceList(test *testing.T) {
-	base := []string{"source1", "source2"}
+func Test_CatalogSourceList(test *testing.T) {
+	base := []string{
+		"source1",
+		"source2",
+	}
+
 	result := make([]string, 0)
 
 	// Test GET on source list
@@ -85,13 +144,45 @@ func Test_sourceList(test *testing.T) {
 		test.Logf("\nExpected %#v\nbut got  %#v", base, result)
 		test.Fail()
 	}
+
+	// Test GET on source list (limit)
+	result = make([]string, 0)
+
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/?limit=1", serverConfig.BindAddr),
+		nil, false, &result)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	if !reflect.DeepEqual(base[:1], result) {
+		test.Logf("\nExpected %#v\nbut got  %#v", base[:1], result)
+		test.Fail()
+	}
+
+	// Test GET on source list (offset and limit)
+	result = make([]string, 0)
+
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/?offset=1&limit=1",
+		serverConfig.BindAddr), nil, false, &result)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	if !reflect.DeepEqual(base[1:2], result) {
+		test.Logf("\nExpected %#v\nbut got  %#v", base[1:2], result)
+		test.Fail()
+	}
 }
 
-func Test_sourceShow(test *testing.T) {
-	base := &server.SourceResponse{Name: "source1", Origins: []string{"test"}}
+func Test_CatalogSourceGet(test *testing.T) {
+	base := &server.SourceResponse{Name: "source1", Origins: []string{"test1", "test2"}}
 	result := &server.SourceResponse{}
 
-	// Test GET on source item
+	// Test GET on source1 item
 	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/source1", serverConfig.BindAddr),
 		nil, false, &result)
 	result.Updated = ""
@@ -106,7 +197,26 @@ func Test_sourceShow(test *testing.T) {
 		test.Fail()
 	}
 
-	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/unknown1", serverConfig.BindAddr),
+	// Test GET on source2 item
+	base = &server.SourceResponse{Name: "source2", Origins: []string{"test1"}}
+	result = &server.SourceResponse{}
+
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/source2", serverConfig.BindAddr),
+		nil, false, &result)
+	result.Updated = ""
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	if !reflect.DeepEqual(base, result) {
+		test.Logf("\nExpected %#v\nbut got  %#v", base, result)
+		test.Fail()
+	}
+
+	// Test GET on unknown item
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/unknown", serverConfig.BindAddr),
 		nil, false, &result)
 
 	if response.StatusCode != http.StatusNotFound {
@@ -115,9 +225,16 @@ func Test_sourceShow(test *testing.T) {
 	}
 }
 
-func Test_metricList(test *testing.T) {
-	// Test #1 GET on metrics list
-	base := []string{"database1/test", "database2/test", "database3/test"}
+func Test_CatalogMetricList(test *testing.T) {
+	// Test GET on metrics list
+	base := []string{
+		"database1.test",
+		"database1/test",
+		"database2.test",
+		"database2/test",
+		"database3/test",
+	}
+
 	result := make([]string, 0)
 
 	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/metrics/", serverConfig.BindAddr), nil,
@@ -133,9 +250,34 @@ func Test_metricList(test *testing.T) {
 		test.Fail()
 	}
 
-	// Test #2 GET on metrics list
-	base = []string{"database1/test", "database2/test"}
+	// Test GET on metrics list (offset and limit)
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/metrics/?limit=2", serverConfig.BindAddr),
+		nil, false, &result)
 
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	if !reflect.DeepEqual(base[:2], result) {
+		test.Logf("\nExpected %#v\nbut got  %#v", base[:2], result)
+		test.Fail()
+	}
+
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/metrics/?offset=2&limit=2",
+		serverConfig.BindAddr), nil, false, &result)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	if !reflect.DeepEqual(base[2:4], result) {
+		test.Logf("\nExpected %#v\nbut got  %#v", base[2:4], result)
+		test.Fail()
+	}
+
+	// Test GET on metrics list (source-specific)
 	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/metrics/?source=source1",
 		serverConfig.BindAddr), nil, false, &result)
 
@@ -144,15 +286,15 @@ func Test_metricList(test *testing.T) {
 		test.Fail()
 	}
 
-	if !reflect.DeepEqual(base, result) {
-		test.Logf("\nExpected %#v\nbut got  %#v", base, result)
+	if !reflect.DeepEqual(base[:4], result) {
+		test.Logf("\nExpected %#v\nbut got  %#v", base[:4], result)
 		test.Fail()
 	}
 }
 
-func Test_metricShow(test *testing.T) {
+func Test_CatalogMetricGet(test *testing.T) {
 	base := &server.MetricResponse{Name: "database2/test", Sources: []string{"source1", "source2"},
-		Origins: []string{"test"}}
+		Origins: []string{"test1"}}
 	result := &server.MetricResponse{}
 
 	// Test GET on metric item
@@ -171,7 +313,7 @@ func Test_metricShow(test *testing.T) {
 	}
 
 	// Test GET on unknown metric item
-	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/metrics/unknown1/test",
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/metrics/unknown/test",
 		serverConfig.BindAddr), nil, false, &result)
 
 	if response.StatusCode != http.StatusNotFound {
@@ -180,37 +322,37 @@ func Test_metricShow(test *testing.T) {
 	}
 }
 
-func Test_sourceGroupHandle(test *testing.T) {
+func Test_LibrarySourceGroupHandle(test *testing.T) {
 	// Define a sample source group
 	group := &library.Group{Item: library.Item{Name: "group1", Description: "A great group description."}}
-	group.Entries = append(group.Entries, &library.GroupEntry{Pattern: "glob:source*", Origin: "test"})
+	group.Entries = append(group.Entries, &library.GroupEntry{Pattern: "glob:source*", Origin: "test1"})
 
-	expandData := server.ExpandRequest{[3]string{"test", "group:group1-updated", "database1/test"}}
+	expandData := server.ExpandRequest{[3]string{"test1", "group:group1-updated", "database1/test"}}
 
 	expandBase := server.ExpandRequest{}
-	expandBase = append(expandBase, [3]string{"test", "source1", "database1/test"})
-	expandBase = append(expandBase, [3]string{"test", "source2", "database1/test"})
+	expandBase = append(expandBase, [3]string{"test1", "source1", "database1/test"})
+	expandBase = append(expandBase, [3]string{"test1", "source2", "database1/test"})
 
 	execGroupHandle(test, "sourcegroups", group, expandData, expandBase)
 }
 
-func Test_metricGroupHandle(test *testing.T) {
+func Test_LibraryMetricGroupHandle(test *testing.T) {
 	// Define a sample metric group
 	group := &library.Group{Item: library.Item{Name: "group1", Description: "A great group description."}}
-	group.Entries = append(group.Entries, &library.GroupEntry{Pattern: "database1/test", Origin: "test"})
-	group.Entries = append(group.Entries, &library.GroupEntry{Pattern: "regexp:database[23]/test", Origin: "test"})
+	group.Entries = append(group.Entries, &library.GroupEntry{Pattern: "database1/test", Origin: "test1"})
+	group.Entries = append(group.Entries, &library.GroupEntry{Pattern: "regexp:database[23]/test", Origin: "test1"})
 
-	expandData := server.ExpandRequest{[3]string{"test", "source1", "group:group1-updated"}}
+	expandData := server.ExpandRequest{[3]string{"test1", "source1", "group:group1-updated"}}
 
 	expandBase := server.ExpandRequest{}
-	expandBase = append(expandBase, [3]string{"test", "source1", "database1/test"})
-	expandBase = append(expandBase, [3]string{"test", "source1", "database2/test"})
-	expandBase = append(expandBase, [3]string{"test", "source1", "database3/test"})
+	expandBase = append(expandBase, [3]string{"test1", "source1", "database1/test"})
+	expandBase = append(expandBase, [3]string{"test1", "source1", "database2/test"})
+	expandBase = append(expandBase, [3]string{"test1", "source1", "database3/test"})
 
 	execGroupHandle(test, "metricgroups", group, expandData, expandBase)
 }
 
-func Test_graphHandle(test *testing.T) {
+func Test_LibraryGraphHandle(test *testing.T) {
 	baseURL := fmt.Sprintf("http://%s/library/graphs/", serverConfig.BindAddr)
 
 	// Define a sample graph
@@ -234,9 +376,9 @@ func Test_graphHandle(test *testing.T) {
 		StackMode: library.StackModeNormal}
 	graphBase.Stacks = append(graphBase.Stacks, stack)
 
-	// Test #1 GET on graphs list
-	listBase := &server.ItemListResponse{}
-	listResult := &server.ItemListResponse{}
+	// Test GET on graphs list
+	listBase := server.ItemListResponse{}
+	listResult := server.ItemListResponse{}
 
 	response := execTestRequest(test, "GET", baseURL, nil, false, &listResult)
 
@@ -282,7 +424,7 @@ func Test_graphHandle(test *testing.T) {
 
 	graphBase.ID = response.Header.Get("Location")[strings.LastIndex(response.Header.Get("Location"), "/")+1:]
 
-	// Test #1 GET on graph item
+	// Test GET on graph item
 	graphResult := &library.Graph{}
 
 	response = execTestRequest(test, "GET", baseURL+graphBase.ID, nil, false, &graphResult)
@@ -297,14 +439,14 @@ func Test_graphHandle(test *testing.T) {
 		test.Fail()
 	}
 
-	// Test #2 GET on graphs list
-	listBase = &server.ItemListResponse{&server.ItemResponse{
+	// Test GET on graphs list
+	listBase = server.ItemListResponse{&server.ItemResponse{
 		ID:          graphBase.ID,
 		Name:        graphBase.Name,
 		Description: graphBase.Description,
 	}}
 
-	listResult = &server.ItemListResponse{}
+	listResult = server.ItemListResponse{}
 
 	response = execTestRequest(test, "GET", baseURL, nil, false, &listResult)
 
@@ -313,7 +455,7 @@ func Test_graphHandle(test *testing.T) {
 		test.Fail()
 	}
 
-	for _, listItem := range *listResult {
+	for _, listItem := range listResult {
 		listItem.Modified = ""
 	}
 
@@ -341,7 +483,7 @@ func Test_graphHandle(test *testing.T) {
 		test.Fail()
 	}
 
-	// Test #2 GET on graph item
+	// Test GET on graph item
 	graphResult = &library.Graph{}
 
 	response = execTestRequest(test, "GET", baseURL+graphBase.ID, nil, false, &graphResult)
@@ -403,7 +545,7 @@ func Test_graphHandle(test *testing.T) {
 
 	graphBase.ID = response.Header.Get("Location")[strings.LastIndex(response.Header.Get("Location"), "/")+1:]
 
-	// Test #1 GET on volatile graph item
+	// Test GET on volatile graph item
 	graphResult = &library.Graph{}
 
 	response = execTestRequest(test, "GET", baseURL+graphBase.ID, nil, false, &graphResult)
@@ -418,7 +560,7 @@ func Test_graphHandle(test *testing.T) {
 		test.Fail()
 	}
 
-	// Test #2 GET on volatile graph item
+	// Test GET on volatile graph item
 	graphResult = &library.Graph{}
 
 	response = execTestRequest(test, "GET", baseURL+graphBase.ID, nil, false, &graphResult)
@@ -427,9 +569,98 @@ func Test_graphHandle(test *testing.T) {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusNotFound, response.StatusCode)
 		test.Fail()
 	}
+
+	// Test GET on graphs list (offset and limit)
+	listBase = server.ItemListResponse{}
+
+	for i := 0; i < 3; i += 1 {
+		graphTemp := &library.Graph{}
+		utils.Clone(graphBase, graphTemp)
+
+		graphTemp.ID = ""
+		graphTemp.Name = fmt.Sprintf("graph1-%d", i)
+
+		data, _ = json.Marshal(graphTemp)
+
+		response = execTestRequest(test, "POST", baseURL, strings.NewReader(string(data)), true, nil)
+
+		if response.StatusCode != http.StatusCreated {
+			test.Logf("\nExpected %d\nbut got  %d", http.StatusCreated, response.StatusCode)
+			test.Fail()
+		}
+
+		location := response.Header.Get("Location")
+
+		if location == "" {
+			test.Logf("\nExpected `Location' header")
+			test.Fail()
+		}
+
+		graphTemp.ID = location[strings.LastIndex(location, "/")+1:]
+
+		listBase = append(listBase, &server.ItemResponse{
+			ID:          graphTemp.ID,
+			Name:        graphTemp.Name,
+			Description: graphTemp.Description,
+		})
+	}
+
+	listResult = server.ItemListResponse{}
+
+	response = execTestRequest(test, "GET", baseURL, nil, false, &listResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	for _, listItem := range listResult {
+		listItem.Modified = ""
+	}
+
+	if !reflect.DeepEqual(listBase, listResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", listBase, listResult)
+		test.Fail()
+	}
+
+	listResult = server.ItemListResponse{}
+
+	response = execTestRequest(test, "GET", baseURL+"?limit=1", nil, false, &listResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	for _, listItem := range listResult {
+		listItem.Modified = ""
+	}
+
+	if !reflect.DeepEqual(listBase[:1], listResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", listBase[:1], listResult)
+		test.Fail()
+	}
+
+	listResult = server.ItemListResponse{}
+
+	response = execTestRequest(test, "GET", baseURL+"?offset=1&limit=2", nil, false, &listResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	for _, listItem := range listResult {
+		listItem.Modified = ""
+	}
+
+	if !reflect.DeepEqual(listBase[1:3], listResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", listBase[1:3], listResult)
+		test.Fail()
+	}
 }
 
-func Test_collectionHandle(test *testing.T) {
+func Test_LibraryCollectionHandle(test *testing.T) {
 	var collectionBase struct {
 		*library.Collection
 		Parent string `json:"parent"`
@@ -451,9 +682,9 @@ func Test_collectionHandle(test *testing.T) {
 		&library.CollectionEntry{ID: "00000000-0000-0000-0000-000000000000",
 			Options: map[string]string{"range": "-1w"}})
 
-	// Test #1 GET on collections list
-	listBase := &server.ItemListResponse{}
-	listResult := &server.ItemListResponse{}
+	// Test GET on collections list
+	listBase := server.ItemListResponse{}
+	listResult := server.ItemListResponse{}
 
 	response := execTestRequest(test, "GET", baseURL, nil, false, &listResult)
 
@@ -499,7 +730,7 @@ func Test_collectionHandle(test *testing.T) {
 
 	collectionBase.ID = response.Header.Get("Location")[strings.LastIndex(response.Header.Get("Location"), "/")+1:]
 
-	// Test #1 GET on collection item
+	// Test GET on collection item
 	collectionResult := &library.Collection{}
 
 	response = execTestRequest(test, "GET", baseURL+collectionBase.ID, nil, false, &collectionResult)
@@ -514,14 +745,14 @@ func Test_collectionHandle(test *testing.T) {
 		test.Fail()
 	}
 
-	// Test #2 GET on collections list
-	listBase = &server.ItemListResponse{&server.ItemResponse{
+	// Test GET on collections list
+	listBase = server.ItemListResponse{&server.ItemResponse{
 		ID:          collectionBase.ID,
 		Name:        collectionBase.Name,
 		Description: collectionBase.Description,
 	}}
 
-	listResult = &server.ItemListResponse{}
+	listResult = server.ItemListResponse{}
 
 	response = execTestRequest(test, "GET", baseURL, nil, false, &listResult)
 
@@ -530,7 +761,7 @@ func Test_collectionHandle(test *testing.T) {
 		test.Fail()
 	}
 
-	for _, listItem := range *listResult {
+	for _, listItem := range listResult {
 		listItem.Modified = ""
 	}
 
@@ -558,7 +789,7 @@ func Test_collectionHandle(test *testing.T) {
 		test.Fail()
 	}
 
-	// Test #2 GET on collection item
+	// Test GET on collection item
 	collectionResult = &library.Collection{}
 
 	response = execTestRequest(test, "GET", baseURL+collectionBase.ID, nil, false, &collectionResult)
@@ -594,6 +825,95 @@ func Test_collectionHandle(test *testing.T) {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusNotFound, response.StatusCode)
 		test.Fail()
 	}
+
+	// Test GET on collections list (offset and limit)
+	listBase = server.ItemListResponse{}
+
+	for i := 0; i < 3; i += 1 {
+		collectionTemp := &library.Collection{}
+		utils.Clone(collectionBase, collectionTemp)
+
+		collectionTemp.ID = ""
+		collectionTemp.Name = fmt.Sprintf("collection1-%d", i)
+
+		data, _ = json.Marshal(collectionTemp)
+
+		response = execTestRequest(test, "POST", baseURL, strings.NewReader(string(data)), true, nil)
+
+		if response.StatusCode != http.StatusCreated {
+			test.Logf("\nExpected %d\nbut got  %d", http.StatusCreated, response.StatusCode)
+			test.Fail()
+		}
+
+		location := response.Header.Get("Location")
+
+		if location == "" {
+			test.Logf("\nExpected `Location' header")
+			test.Fail()
+		}
+
+		collectionTemp.ID = location[strings.LastIndex(location, "/")+1:]
+
+		listBase = append(listBase, &server.ItemResponse{
+			ID:          collectionTemp.ID,
+			Name:        collectionTemp.Name,
+			Description: collectionTemp.Description,
+		})
+	}
+
+	listResult = server.ItemListResponse{}
+
+	response = execTestRequest(test, "GET", baseURL, nil, false, &listResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	for _, listItem := range listResult {
+		listItem.Modified = ""
+	}
+
+	if !reflect.DeepEqual(listBase, listResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", listBase, listResult)
+		test.Fail()
+	}
+
+	listResult = server.ItemListResponse{}
+
+	response = execTestRequest(test, "GET", baseURL+"?limit=1", nil, false, &listResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	for _, listItem := range listResult {
+		listItem.Modified = ""
+	}
+
+	if !reflect.DeepEqual(listBase[:1], listResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", listBase[:1], listResult)
+		test.Fail()
+	}
+
+	listResult = server.ItemListResponse{}
+
+	response = execTestRequest(test, "GET", baseURL+"?offset=1&limit=2", nil, false, &listResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	for _, listItem := range listResult {
+		listItem.Modified = ""
+	}
+
+	if !reflect.DeepEqual(listBase[1:3], listResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", listBase[1:3], listResult)
+		test.Fail()
+	}
 }
 
 func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group, expandData,
@@ -601,9 +921,9 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 
 	baseURL := fmt.Sprintf("http://%s/library/%s/", serverConfig.BindAddr, urlPrefix)
 
-	// Test #1 GET on groups list
-	listBase := &server.ItemListResponse{}
-	listResult := &server.ItemListResponse{}
+	// Test GET on groups list
+	listBase := server.ItemListResponse{}
+	listResult := server.ItemListResponse{}
 
 	response := execTestRequest(test, "GET", baseURL, nil, false, &listResult)
 
@@ -649,7 +969,7 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 
 	groupBase.ID = response.Header.Get("Location")[strings.LastIndex(response.Header.Get("Location"), "/")+1:]
 
-	// Test #1 GET on group item
+	// Test GET on group item
 	groupResult := &library.Group{}
 
 	response = execTestRequest(test, "GET", baseURL+groupBase.ID, nil, false, &groupResult)
@@ -664,14 +984,14 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 		test.Fail()
 	}
 
-	// Test #2 GET on groups list
-	listBase = &server.ItemListResponse{&server.ItemResponse{
+	// Test GET on groups list
+	listBase = server.ItemListResponse{&server.ItemResponse{
 		ID:          groupBase.ID,
 		Name:        groupBase.Name,
 		Description: groupBase.Description,
 	}}
 
-	listResult = &server.ItemListResponse{}
+	listResult = server.ItemListResponse{}
 
 	response = execTestRequest(test, "GET", baseURL, nil, false, &listResult)
 
@@ -680,7 +1000,7 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 		test.Fail()
 	}
 
-	for _, listItem := range *listResult {
+	for _, listItem := range listResult {
 		listItem.Modified = ""
 	}
 
@@ -708,7 +1028,7 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 		test.Fail()
 	}
 
-	// Test #2 GET on group item
+	// Test GET on group item
 	groupResult = &library.Group{}
 
 	response = execTestRequest(test, "GET", baseURL+groupBase.ID, nil, false, &groupResult)
@@ -763,6 +1083,95 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 
 	if response.StatusCode != http.StatusNotFound {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusNotFound, response.StatusCode)
+		test.Fail()
+	}
+
+	// Test GET on groups list (offset and limit)
+	listBase = server.ItemListResponse{}
+
+	for i := 0; i < 3; i += 1 {
+		groupTemp := &library.Group{}
+		utils.Clone(groupBase, groupTemp)
+
+		groupTemp.ID = ""
+		groupTemp.Name = fmt.Sprintf("group1-%d", i)
+
+		data, _ = json.Marshal(groupTemp)
+
+		response = execTestRequest(test, "POST", baseURL, strings.NewReader(string(data)), true, nil)
+
+		if response.StatusCode != http.StatusCreated {
+			test.Logf("\nExpected %d\nbut got  %d", http.StatusCreated, response.StatusCode)
+			test.Fail()
+		}
+
+		location := response.Header.Get("Location")
+
+		if location == "" {
+			test.Logf("\nExpected `Location' header")
+			test.Fail()
+		}
+
+		groupTemp.ID = location[strings.LastIndex(location, "/")+1:]
+
+		listBase = append(listBase, &server.ItemResponse{
+			ID:          groupTemp.ID,
+			Name:        groupTemp.Name,
+			Description: groupTemp.Description,
+		})
+	}
+
+	listResult = server.ItemListResponse{}
+
+	response = execTestRequest(test, "GET", baseURL, nil, false, &listResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	for _, listItem := range listResult {
+		listItem.Modified = ""
+	}
+
+	if !reflect.DeepEqual(listBase, listResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", listBase, listResult)
+		test.Fail()
+	}
+
+	listResult = server.ItemListResponse{}
+
+	response = execTestRequest(test, "GET", baseURL+"?limit=1", nil, false, &listResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	for _, listItem := range listResult {
+		listItem.Modified = ""
+	}
+
+	if !reflect.DeepEqual(listBase[:1], listResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", listBase[:1], listResult)
+		test.Fail()
+	}
+
+	listResult = server.ItemListResponse{}
+
+	response = execTestRequest(test, "GET", baseURL+"?offset=1&limit=2", nil, false, &listResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	for _, listItem := range listResult {
+		listItem.Modified = ""
+	}
+
+	if !reflect.DeepEqual(listBase[1:3], listResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", listBase[1:3], listResult)
 		test.Fail()
 	}
 }

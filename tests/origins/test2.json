@@ -1,0 +1,11 @@
+{
+	"connector": {
+		"type": "rrd",
+		"path": "tests/data",
+		"pattern": "(?P<source>[^/]+)/(?P<metric>.+).rrd"
+	},
+	"filters": [
+		{"pattern": "source2", "discard": true, "target": "source"},
+		{"pattern": "/", "rewrite": ".", "target": "metric"}
+	]
+}
