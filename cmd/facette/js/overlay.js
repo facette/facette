@@ -52,7 +52,7 @@ function overlayCreate(type, args) {
 
     if (args) {
         if (args.message)
-            $item.find('.message').text(args.message);
+            $item.find('.message').html(args.message);
 
         if (args.labels) {
             $.each(args.labels, function (name, info) {

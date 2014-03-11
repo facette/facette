@@ -40,7 +40,7 @@ function adminItemHandlePaneList(itemType) {
         var $item = $(e.target).closest('[data-itemid]');
 
         overlayCreate('confirm', {
-            message: $.t(itemType + '.mesg_delete'),
+            message: $.t(itemType + '.mesg_delete', {name: '<strong>' + $item.find('.name').text() + '</strong>'}),
             callbacks: {
                 validate: function () {
                     itemDelete($item.attr('data-itemid'), paneSection)
