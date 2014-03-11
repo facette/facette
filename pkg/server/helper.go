@@ -15,7 +15,7 @@ func (server *Server) applyResponseLimit(writer http.ResponseWriter, request *ht
 	sort.Sort(response.list)
 
 	if response.limit != 0 && response.list.Len() > response.offset+response.limit {
-		response.list = response.list.slice(response.offset, response.limit).(sortableListResponse)
+		response.list = response.list.slice(response.offset, response.offset+response.limit).(sortableListResponse)
 	} else if response.offset != 0 {
 		response.list = response.list.slice(response.offset, response.list.Len()).(sortableListResponse)
 	}

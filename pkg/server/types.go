@@ -73,8 +73,8 @@ func (r StringListResponse) Swap(i, j int) {
 	r[i], r[j] = r[j], r[i]
 }
 
-func (r StringListResponse) slice(offset, limit int) interface{} {
-	return r[offset : offset+limit]
+func (r StringListResponse) slice(i, j int) interface{} {
+	return r[i:j]
 }
 
 // ItemResponse represents an item response structure in the server backend.
@@ -100,8 +100,8 @@ func (r ItemListResponse) Swap(i, j int) {
 	r[i], r[j] = r[j], r[i]
 }
 
-func (r ItemListResponse) slice(offset, limit int) interface{} {
-	return r[offset : offset+limit]
+func (r ItemListResponse) slice(i, j int) interface{} {
+	return r[i:j]
 }
 
 // CollectionResponse represents a collection response structure in the server backend.
@@ -126,8 +126,8 @@ func (r CollectionListResponse) Swap(i, j int) {
 	r[i], r[j] = r[j], r[i]
 }
 
-func (r CollectionListResponse) slice(offset, limit int) interface{} {
-	return r[offset : offset+limit]
+func (r CollectionListResponse) slice(i, j int) interface{} {
+	return r[i:j]
 }
 
 // PlotResponse represents a plot response structure in the server backend.
