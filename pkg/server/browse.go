@@ -39,8 +39,10 @@ func (server *Server) handleBrowse(writer http.ResponseWriter, request *http.Req
 		err = server.handleBrowseCollection(writer, request, tmpl)
 	} else if request.URL.Path == urlBrowsePath+"search" {
 		err = server.handleBrowseSearch(writer, request, tmpl)
-	} else {
+	} else if request.URL.Path == urlBrowsePath {
 		err = server.handleBrowseIndex(writer, request, tmpl)
+	} else {
+		err = os.ErrNotExist
 	}
 
 	if os.IsNotExist(err) {

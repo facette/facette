@@ -119,22 +119,10 @@ func (server *Server) Run() error {
 	router := NewRouter(server)
 
 	router.HandleFunc(urlStaticPath, server.handleStatic)
-
-	router.HandleFunc(urlCatalogPath+"origins/", server.handleOrigin)
-	router.HandleFunc(urlCatalogPath+"sources/", server.handleSource)
-	router.HandleFunc(urlCatalogPath+"metrics/", server.handleMetric)
-
-	router.HandleFunc(urlLibraryPath+"sourcegroups/", server.handleGroup)
-	router.HandleFunc(urlLibraryPath+"metricgroups/", server.handleGroup)
-	router.HandleFunc(urlLibraryPath+"expand", server.handleGroupExpand)
-	router.HandleFunc(urlLibraryPath+"graphs/plots", server.handleGraphPlots)
-	router.HandleFunc(urlLibraryPath+"graphs/", server.handleGraph)
-	router.HandleFunc(urlLibraryPath+"collections/", server.handleCollection)
-
+	router.HandleFunc(urlCatalogPath, server.handleCatalog)
+	router.HandleFunc(urlLibraryPath, server.handleLibrary)
 	router.HandleFunc(urlAdminPath, server.handleAdmin)
-
 	router.HandleFunc(urlBrowsePath, server.handleBrowse)
-
 	router.HandleFunc(urlReloadPath, server.handleReload)
 	router.HandleFunc(urlResourcePath, server.handleResource)
 	router.HandleFunc(urlStatsPath, server.handleStats)

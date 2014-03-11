@@ -41,8 +41,10 @@ func (server *Server) handleAdmin(writer http.ResponseWriter, request *http.Requ
 	} else if request.URL.Path == urlAdminPath+"origins/" || request.URL.Path == urlAdminPath+"sources/" ||
 		request.URL.Path == urlAdminPath+"metrics/" {
 		err = server.handleAdminCatalog(writer, request, tmpl)
-	} else {
+	} else if request.URL.Path == urlAdminPath {
 		err = server.handleAdminIndex(writer, request, tmpl)
+	} else {
+		err = os.ErrNotExist
 	}
 
 	if os.IsNotExist(err) {

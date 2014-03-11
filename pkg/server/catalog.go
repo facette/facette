@@ -11,6 +11,18 @@ import (
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
 
+func (server *Server) handleCatalog(writer http.ResponseWriter, request *http.Request) {
+	if strings.HasPrefix(request.URL.Path, urlCatalogPath+"origins/") {
+		server.handleOrigin(writer, request)
+	} else if strings.HasPrefix(request.URL.Path, urlCatalogPath+"sources/") {
+		server.handleSource(writer, request)
+	} else if strings.HasPrefix(request.URL.Path, urlCatalogPath+"metrics/") {
+		server.handleMetric(writer, request)
+	} else {
+		server.handleResponse(writer, nil, http.StatusNotFound)
+	}
+}
+
 func (server *Server) handleOrigin(writer http.ResponseWriter, request *http.Request) {
 	originName := strings.TrimPrefix(request.URL.Path, urlCatalogPath+"origins/")
 
