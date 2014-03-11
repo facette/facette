@@ -96,7 +96,7 @@ func (library *Library) GetCollectionTemplate(name string) (*Collection, error) 
 					splitSet.Add(chunks[1])
 				}
 
-				splitItems := splitSet.StringSlice()
+				splitItems := set.StringSlice(splitSet)
 				sort.Strings(splitItems)
 
 				for _, itemName := range splitItems {
@@ -171,7 +171,7 @@ func (library *Library) GetCollectionTemplate(name string) (*Collection, error) 
 		}
 
 		// Handle non-template metrics
-		for _, metricName := range metricSet.StringSlice() {
+		for _, metricName := range set.StringSlice(metricSet) {
 			options := make(map[string]string)
 			options["origin"] = originName
 			options["source"] = name

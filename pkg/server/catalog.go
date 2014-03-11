@@ -67,7 +67,7 @@ func (server *Server) handleOriginList(writer http.ResponseWriter, request *http
 	}
 
 	response := &listResponse{
-		list:   StringListResponse(originSet.StringSlice()),
+		list:   StringListResponse(set.StringSlice(originSet)),
 		offset: offset,
 		limit:  limit,
 	}
@@ -101,7 +101,7 @@ func (server *Server) handleSource(writer http.ResponseWriter, request *http.Req
 		return
 	}
 
-	origins := originSet.StringSlice()
+	origins := set.StringSlice(originSet)
 	sort.Strings(origins)
 
 	response := SourceResponse{
@@ -140,7 +140,7 @@ func (server *Server) handleSourceList(writer http.ResponseWriter, request *http
 	}
 
 	response := &listResponse{
-		list:   StringListResponse(sourceSet.StringSlice()),
+		list:   StringListResponse(set.StringSlice(sourceSet)),
 		offset: offset,
 		limit:  limit,
 	}
@@ -178,10 +178,10 @@ func (server *Server) handleMetric(writer http.ResponseWriter, request *http.Req
 		return
 	}
 
-	origins := originSet.StringSlice()
+	origins := set.StringSlice(originSet)
 	sort.Strings(origins)
 
-	sources := sourceSet.StringSlice()
+	sources := set.StringSlice(sourceSet)
 	sort.Strings(sources)
 
 	response := MetricResponse{
@@ -241,7 +241,7 @@ func (server *Server) handleMetricList(writer http.ResponseWriter, request *http
 	}
 
 	response := &listResponse{
-		list:   StringListResponse(metricSet.StringSlice()),
+		list:   StringListResponse(set.StringSlice(metricSet)),
 		offset: offset,
 		limit:  limit,
 	}

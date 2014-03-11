@@ -95,5 +95,5 @@ func (library *Library) ExpandGroup(name string, groupType int) []string {
 		}
 	}
 
-	return result.StringSlice()
+	return set.StringSlice(result)
 }
