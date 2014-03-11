@@ -12,10 +12,38 @@
          url('./fonts/fontawesome-webfont.svg#fontawesomeregular?v=@{fa-version}') format('svg');
 }
 
+.icon() {
+    .no-select;
+    font-family: 'FontAwesome';
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    font-smoothing: antialiased;
+    font-style: normal;
+    font-weight: normal;
+    speak: none;
+    text-decoration: inherit;
+}
+
 .icon::before {
     .icon;
     display: inline-block;
     margin-right: 0.5em;
+}
+
+.icon-stack {
+    position: relative;
+
+    &::after {
+        .icon;
+        bottom: -0.35em;
+        font-size: 0.8em;
+        position: absolute;
+        left: 2.65em;
+        text-shadow: 1px 0 0 @NavBackgroundColor,
+                     0 1px 0 @NavBackgroundColor,
+                     -1px 0 0 @NavBackgroundColor,
+                     0 -1px 0 @NavBackgroundColor;
+    }
 }
 
 .icon-search::before       { content: '\f002'; }
@@ -46,12 +74,14 @@
 .icon-reframe::before      { content: '\f07d'; }
 .icon-graph::before        { content: '\f080'; }
 .icon-copy::before         { content: '\f0c5'; }
-.icon-scale::before        { content: '\f0e7'; }
+.icon-scale::before        { content: '\f125'; }
 .icon-reset::before        { content: '\f12d'; }
 .icon-prev::before         { content: '\f137'; }
 .icon-expand::before       { content: '\f150'; }
 .icon-collapse::before     { content: '\f151'; }
 .icon-origin::before       { content: '\f192'; }
+
+.icon-stack-folder::after  { content: '\f07b'; }
 
 .icon-next {
     &::before {
