@@ -245,6 +245,10 @@ devel-static: install-static
 	@$(call mesg_start,install,Installing static development files...)
 	@cp $(SCRIPT_OUTPUT:.js=.src.js) $(PREFIX)/share/static/$(notdir $(SCRIPT_OUTPUT)) && \
 		$(call mesg_ok) || $(call mesg_fail)
+	@$(call mesg_start,install,Installing static third-party development files...)
+	@(for ENTRY in $(SCRIPT_EXTRA:.js=.src.js); do \
+		cp $$ENTRY $(PREFIX)/share/static/`basename $$ENTRY | sed -e 's@\.src\.js$$@.js@'`; \
+	done) && $(call mesg_ok) || $(call mesg_fail)
 
 lint-static: $(SCRIPT_OUTPUT)
 	@$(call mesg_start,lint,Checking $(notdir $(SCRIPT_OUTPUT:.js=.src.js)) with JSHint...)
