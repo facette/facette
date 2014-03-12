@@ -264,16 +264,18 @@ func (server *Server) handleGraphPlots(writer http.ResponseWriter, request *http
 			plotReq.Source,
 			plotReq.Metric,
 		)
-	} else if item, err := server.Library.GetItem(plotReq.Graph, library.LibraryItemGraph); err == nil {
+	}
+
+	item, err := server.Library.GetItem(plotReq.Graph, library.LibraryItemGraph)
+	if err == nil {
 		graph = item.(*library.Graph)
 	}
 
 	if err != nil {
-		log.Println("ERROR: " + err.Error())
-
 		if os.IsNotExist(err) {
 			server.handleResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 		} else {
+			log.Println("ERROR: " + err.Error())
 			server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 		}
 
