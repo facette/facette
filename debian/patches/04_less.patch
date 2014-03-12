@@ -1,8 +1,8 @@
 Index: facette/Makefile
 ===================================================================
---- facette.orig/Makefile	2014-02-11 08:54:13.554965146 +0100
-+++ facette/Makefile	2014-02-11 08:54:53.555376381 +0100
-@@ -208,7 +208,7 @@
+--- facette.orig/Makefile	2014-03-12 08:42:26.643186268 +0100
++++ facette/Makefile	2014-03-12 08:42:26.651186343 +0100
+@@ -207,7 +207,7 @@
  	@install -d -m 0755 $(TEMP_DIR)/static && cat $(STYLE_SRC) >$(STYLE_OUTPUT:.css=.src.css) && \
  		$(call mesg_ok) || $(call mesg_fail)
  	@$(call mesg_start,static,Packing $(notdir $(STYLE_OUTPUT:.css=.src.css)) file...)
@@ -11,7 +11,7 @@ Index: facette/Makefile
  		$(call mesg_ok) || $(call mesg_fail)
  
  $(STYLE_PRINT_OUTPUT): $(STYLE_PRINT_SRC)
-@@ -216,7 +216,7 @@
+@@ -215,7 +215,7 @@
  	@install -d -m 0755 $(TEMP_DIR)/static && cat $(STYLE_PRINT_SRC) >$(STYLE_PRINT_OUTPUT:.css=.src.css) && \
  		$(call mesg_ok) || $(call mesg_fail)
  	@$(call mesg_start,static,Packing $(notdir $(STYLE_PRINT_OUTPUT:.css=.src.css)) file...)
