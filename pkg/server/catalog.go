@@ -12,6 +12,8 @@ import (
 )
 
 func (server *Server) handleCatalog(writer http.ResponseWriter, request *http.Request) {
+	setHTTPCacheHeaders(writer)
+
 	if strings.HasPrefix(request.URL.Path, urlCatalogPath+"origins/") {
 		server.handleOrigin(writer, request)
 	} else if strings.HasPrefix(request.URL.Path, urlCatalogPath+"sources/") {

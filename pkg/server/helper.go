@@ -5,6 +5,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"time"
 
 	"github.com/facette/facette/pkg/utils"
 )
@@ -77,4 +78,12 @@ func (server *Server) parseStoreRequest(writer http.ResponseWriter, request *htt
 	server.handleAuth(writer, request)
 
 	return nil, http.StatusOK
+}
+
+func setHTTPCacheHeaders(writer http.ResponseWriter) {
+	date := time.Now().UTC().Format(http.TimeFormat)
+
+	writer.Header().Set("Cache-Control", "private, max-age=0")
+	writer.Header().Set("Date", date)
+	writer.Header().Set("Expires", date)
 }

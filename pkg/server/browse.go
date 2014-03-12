@@ -34,6 +34,8 @@ func (server *Server) handleBrowse(writer http.ResponseWriter, request *http.Req
 		"hl":    templateHighlight,
 	})
 
+	setHTTPCacheHeaders(writer)
+
 	if strings.HasPrefix(request.URL.Path, urlBrowsePath+"collections/") ||
 		strings.HasPrefix(request.URL.Path, urlBrowsePath+"sources/") {
 		err = server.handleBrowseCollection(writer, request, tmpl)

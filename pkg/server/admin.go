@@ -31,6 +31,8 @@ func (server *Server) handleAdmin(writer http.ResponseWriter, request *http.Requ
 		path.Join(server.Config.BaseDir, "html", "admin", "layout.html"),
 	)
 
+	setHTTPCacheHeaders(writer)
+
 	if strings.HasPrefix(request.URL.Path, urlAdminPath+"sourcegroups/") ||
 		strings.HasPrefix(request.URL.Path, urlAdminPath+"metricgroups/") {
 		err = server.handleAdminGroup(writer, request, tmpl)

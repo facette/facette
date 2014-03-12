@@ -6,6 +6,8 @@ import (
 )
 
 func (server *Server) handleLibrary(writer http.ResponseWriter, request *http.Request) {
+	setHTTPCacheHeaders(writer)
+
 	if strings.HasPrefix(request.URL.Path, urlLibraryPath+"sourcegroups/") {
 		server.handleGroup(writer, request)
 	} else if strings.HasPrefix(request.URL.Path, urlLibraryPath+"metricgroups/") {
