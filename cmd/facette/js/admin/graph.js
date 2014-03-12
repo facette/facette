@@ -787,6 +787,10 @@ function adminGraphSetupTerminate() {
                 data,
                 i;
 
+            // Unselect active item before removal
+            if ($item.hasClass('active'))
+                $item.trigger('click');
+
             // Remove proxy items
             data = $item.data('proxies');
 
