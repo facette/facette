@@ -188,8 +188,9 @@ func (server *Server) handleGraphList(writer http.ResponseWriter, request *http.
 
 func (server *Server) handleGraphPlots(writer http.ResponseWriter, request *http.Request) {
 	var (
-		graph              *library.Graph
 		err                error
+		graph              *library.Graph
+		item               interface{}
 		startTime, endTime time.Time
 	)
 
@@ -264,10 +265,7 @@ func (server *Server) handleGraphPlots(writer http.ResponseWriter, request *http
 			plotReq.Source,
 			plotReq.Metric,
 		)
-	}
-
-	item, err := server.Library.GetItem(plotReq.Graph, library.LibraryItemGraph)
-	if err == nil {
+	} else if item, err = server.Library.GetItem(plotReq.Graph, library.LibraryItemGraph); err == nil {
 		graph = item.(*library.Graph)
 	}
 
