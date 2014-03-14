@@ -31,6 +31,10 @@ type Router struct {
 
 // ServerHTTP dispatches the requests to the router handlers.
 func (router *Router) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	if router.server.Config.URLPrefix != "" {
+		request.URL.Path = strings.TrimPrefix(request.URL.Path, router.server.Config.URLPrefix)
+	}
+
 	if router.server.Loading {
 		if strings.HasPrefix(request.URL.Path, urlAdminPath) || strings.HasPrefix(request.URL.Path, urlBrowsePath) {
 			router.server.handleWait(writer, request)
