@@ -295,6 +295,7 @@ function inputUpdate(input, data) {
             menuAppend($menu)
                 .attr('data-menuitem', name + count)
                 .attr('data-menusource', source)
+                .attr('title', entry.name)
                 .data('value', entry)
                 .text(entry.name);
 
