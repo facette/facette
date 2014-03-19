@@ -16,7 +16,7 @@
 		<nav>
 			<dl class="graphlist">
 				<dt>Graphs</dt>{{ if .Collection.Entries }}{{ if ne $q "" }}
-				<dd><a href="{{ .Request.URL.Path }}">..</a></dd>{{ end }}{{ range $index, $entry := .Collection.Entries }}
+				<dd><a href="{{ .URLPrefix }}{{ .Request.URL.Path }}">..</a></dd>{{ end }}{{ range $index, $entry := .Collection.Entries }}
 				<dd><a href="#graph-{{ $index }}">{{ $entry.Options.title }}</a></dd>{{ end }}{{ else }}
 				<dd class="placeholder icon icon-info">No graph</dd>{{ end }}
 			</dl>
