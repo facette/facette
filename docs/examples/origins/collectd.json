@@ -137,12 +137,12 @@
 			"stacks": [
 				{
 					"groups": {
-						"blocked":  {"type": 0, "pattern": "^proc\\.blocked$"},
-						"paging":   {"type": 0, "pattern": "^proc\\.paging$"},
-						"running":  {"type": 0, "pattern": "^proc\\.running$"},
-						"sleeping": {"type": 0, "pattern": "^proc\\.sleeping$"},
-						"stopped":  {"type": 0, "pattern": "^proc\\.stopped$"},
-						"zombies":  {"type": 0, "pattern": "^proc\\.zombies$"}
+						"blocked":  {"type": 0, "pattern": "^proc\\.state\\.blocked$"},
+						"paging":   {"type": 0, "pattern": "^proc\\.state\\.paging$"},
+						"running":  {"type": 0, "pattern": "^proc\\.state\\.running$"},
+						"sleeping": {"type": 0, "pattern": "^proc\\.state\\.sleeping$"},
+						"stopped":  {"type": 0, "pattern": "^proc\\.state\\.stopped$"},
+						"zombies":  {"type": 0, "pattern": "^proc\\.state\\.zombies$"}
 					}
 				}
 			],
