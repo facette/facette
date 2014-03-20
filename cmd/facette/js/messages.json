@@ -28,7 +28,7 @@
         "mesg_delete_fail": "Unable to delete the graph!",
         "mesg_exists": "A graph with the same name already exists!",
         "mesg_item_exists": "An item with the same name already exists!",
-        "mesg_load_failed": "Failed to load graph",
+        "mesg_load_failed": "Failed to load “__name__” graph",
         "mesg_load_nomatch": "Your search doesn’t match any graph",
         "mesg_loading": "Loading graphs, this may take a while…",
         "mesg_no_serie": "No more serie",

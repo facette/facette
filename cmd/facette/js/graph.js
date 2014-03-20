@@ -336,7 +336,8 @@ function graphDraw(graph, postpone, delay) {
 
                 graph.find('.placeholder')
                     .addClass('icon icon-warning')
-                    .text($.t('graph.mesg_load_failed'));
+                    .html($.t('graph.mesg_load_failed', {name: '<strong>' + (graphOpts.title ||
+                        graph.attr('data-graph')) + '</strong>'}));
 
                 $deferred.resolve();
             });
