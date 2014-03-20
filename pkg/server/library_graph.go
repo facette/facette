@@ -289,20 +289,21 @@ func (server *Server) handleGraphPlots(writer http.ResponseWriter, request *http
 
 	for _, stackItem := range graph.Stacks {
 		for _, groupItem := range stackItem.Groups {
+			groupOptions[groupItem.Name] = groupItem.Options
+
 			query, originConnector, err := server.preparePlotQuery(plotReq, groupItem)
 			if err != nil {
-				log.Println("ERROR: " + err.Error())
-				server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
-				return
-			}
+				if err != os.ErrInvalid {
+					log.Println("ERROR: " + err.Error())
+				}
 
-			groupOptions[groupItem.Name] = groupItem.Options
+				data = append(data, nil)
+				continue
+			}
 
 			plotResult, err := originConnector.GetPlots(query, startTime, endTime, step, plotReq.Percentiles)
 			if err != nil {
 				log.Println("ERROR: " + err.Error())
-				server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
-				return
 			}
 
 			data = append(data, plotResult)
@@ -407,8 +408,10 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 					)
 
 					if metric == nil {
-						log.Printf("unknown `%s' metric for source `%s' (origin: %s)", serieChunk, serieSource,
+						log.Printf("ERROR: unknown `%s' metric for source `%s' (origin: %s)", serieChunk, serieSource,
 							serieItem.Origin)
+
+						goto next
 					}
 
 					query.Series = append(query.Series, &connector.SerieQuery{
@@ -430,8 +433,10 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 				)
 
 				if metric == nil {
-					log.Printf("unknown `%s' metric for source `%s' (origin: %s)", serieItem.Metric, serieSource,
+					log.Printf("ERROR: unknown `%s' metric for source `%s' (origin: %s)", serieItem.Metric, serieSource,
 						serieItem.Origin)
+
+					goto next
 				}
 
 				serie := &connector.SerieQuery{
@@ -453,10 +458,11 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 				index += 1
 			}
 		}
+	next:
 	}
 
 	if len(query.Series) == 0 {
-		return nil, nil, fmt.Errorf("no serie defined")
+		return nil, nil, os.ErrInvalid
 	}
 
 	return query, originConnector, nil
