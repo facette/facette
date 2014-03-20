@@ -8,7 +8,7 @@ unset_perms() {
 }
 
 case "$1" in
-    purge|remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+    remove)
         unset_perms /etc/facette
         unset_perms /etc/facette/facette.json
         unset_perms /etc/facette/auth.json
@@ -16,12 +16,20 @@ case "$1" in
         unset_perms /var/log/facette
 
         deluser --quiet facette 1>/dev/null 2>&1 || true
-    ;;
+        ;;
+
+    purge)
+        rm -rf /var/lib/facette
+        rm -rf /etc/facette
+        ;;
+
+    upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+        ;;
 
     *)
         echo "postrm called with unknown argument \`$1'" >&2
         exit 1
-    ;;
+        ;;
 esac
 
 #DEBHELPER#
