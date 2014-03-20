@@ -331,7 +331,6 @@ func Test_LibrarySourceGroupHandle(test *testing.T) {
 
 	expandBase := server.ExpandRequest{}
 	expandBase = append(expandBase, [3]string{"test1", "source1", "database1/test"})
-	expandBase = append(expandBase, [3]string{"test1", "source2", "database1/test"})
 
 	execGroupHandle(test, "sourcegroups", group, expandData, expandBase)
 }
@@ -347,7 +346,6 @@ func Test_LibraryMetricGroupHandle(test *testing.T) {
 	expandBase := server.ExpandRequest{}
 	expandBase = append(expandBase, [3]string{"test1", "source1", "database1/test"})
 	expandBase = append(expandBase, [3]string{"test1", "source1", "database2/test"})
-	expandBase = append(expandBase, [3]string{"test1", "source1", "database3/test"})
 
 	execGroupHandle(test, "metricgroups", group, expandData, expandBase)
 }
