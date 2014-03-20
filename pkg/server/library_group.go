@@ -190,19 +190,35 @@ func (server *Server) handleGroupExpand(writer http.ResponseWriter, request *htt
 	for _, entry := range query {
 		item := ExpandRequest{}
 
+		if _, ok := server.Catalog.Origins[entry[0]]; !ok {
+			continue
+		}
+
 		if strings.HasPrefix(entry[1], library.LibraryGroupPrefix) {
 			for _, sourceName := range server.Library.ExpandGroup(
 				strings.TrimPrefix(entry[1], library.LibraryGroupPrefix),
 				library.LibraryItemSourceGroup,
 			) {
+				if _, ok := server.Catalog.Origins[entry[0]].Sources[sourceName]; !ok {
+					continue
+				}
+
 				if strings.HasPrefix(entry[2], library.LibraryGroupPrefix) {
 					for _, metricName := range server.Library.ExpandGroup(
 						strings.TrimPrefix(entry[2], library.LibraryGroupPrefix),
 						library.LibraryItemMetricGroup,
 					) {
+						if _, ok := server.Catalog.Origins[entry[0]].Sources[sourceName].Metrics[metricName]; !ok {
+							continue
+						}
+
 						item = append(item, [3]string{entry[0], sourceName, metricName})
 					}
 				} else {
+					if _, ok := server.Catalog.Origins[entry[0]].Sources[sourceName].Metrics[entry[2]]; !ok {
+						continue
+					}
+
 					item = append(item, [3]string{entry[0], sourceName, entry[2]})
 				}
 			}
@@ -211,6 +227,10 @@ func (server *Server) handleGroupExpand(writer http.ResponseWriter, request *htt
 				strings.TrimPrefix(entry[2], library.LibraryGroupPrefix),
 				library.LibraryItemMetricGroup,
 			) {
+				if _, ok := server.Catalog.Origins[entry[0]].Sources[entry[1]].Metrics[metricName]; !ok {
+					continue
+				}
+
 				item = append(item, [3]string{entry[0], entry[1], metricName})
 			}
 		} else {
