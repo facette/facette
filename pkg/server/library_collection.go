@@ -166,7 +166,7 @@ func (server *Server) handleCollectionList(writer http.ResponseWriter, request *
 	}
 
 	// Check for item exclusion
-	excludeSet := set.New()
+	excludeSet := set.New(set.ThreadSafe)
 
 	collectionStack := make([]*library.Collection, 0)
 

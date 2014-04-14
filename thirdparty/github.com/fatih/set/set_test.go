@@ -6,15 +6,17 @@ import (
 )
 
 func Test_Union(t *testing.T) {
-	s := New("1", "2", "3")
-	r := New("3", "4", "5")
-	x := NewNonTS("5", "6", "7")
+	s := newTS()
+	s.Add("1", "2", "3")
+	r := newTS()
+	r.Add("3", "4", "5")
+	x := newNonTS()
+	x.Add("5", "6", "7")
 
 	u := Union(s, r, x)
 	if settype := reflect.TypeOf(u).String(); settype != "*set.Set" {
 		t.Error("Union should derive its set type from the first passed set, got", settype)
 	}
-
 	if u.Size() != 7 {
 		t.Error("Union: the merged set doesn't have all items in it.")
 	}
@@ -23,17 +25,9 @@ func Test_Union(t *testing.T) {
 		t.Error("Union: merged items are not availabile in the set.")
 	}
 
-	y := Union()
-	if y.Size() != 0 {
-		t.Error("Union: should have zero items because nothing is passed")
-	}
-	if settype := reflect.TypeOf(y).String(); settype != "*set.Set" {
-		t.Error("Union with no parameters should return a threadsafe set, got", settype)
-	}
-
-	z := Union(x)
-	if z.Size() != 3 {
-		t.Error("Union: the merged set doesn't have all items in it.")
+	z := Union(x, r)
+	if z.Size() != 5 {
+		t.Error("Union: Union of 2 sets doesn't have the proper number of items.")
 	}
 	if settype := reflect.TypeOf(z).String(); settype != "*set.SetNonTS" {
 		t.Error("Union should derive its set type from the first passed set, got", settype)
@@ -42,9 +36,13 @@ func Test_Union(t *testing.T) {
 }
 
 func Test_Difference(t *testing.T) {
-	s := New("1", "2", "3")
-	r := New("3", "4", "5")
-	x := New("5", "6", "7")
+	s := newTS()
+	s.Add("1", "2", "3")
+	r := newTS()
+	r.Add("3", "4", "5")
+	x := newNonTS()
+	x.Add("5", "6", "7")
+
 	u := Difference(s, r, x)
 
 	if u.Size() != 2 {
@@ -55,34 +53,36 @@ func Test_Difference(t *testing.T) {
 		t.Error("Difference: items are not availabile in the set.")
 	}
 
-	y := Difference()
+	y := Difference(r, r)
 	if y.Size() != 0 {
 		t.Error("Difference: size should be zero")
 	}
 
-	z := Difference(s)
-	if z.Size() != 3 {
-		t.Error("Difference: size should be four")
-	}
 }
 
 func Test_Intersection(t *testing.T) {
-	s := New("1", "2", "3")
-	r := New("3", "5")
-	u := Intersection(s, r)
+	s1 := newTS()
+	s1.Add("1", "3", "4", "5")
+	s2 := newTS()
+	s2.Add("3", "5", "6")
+	s3 := newTS()
+	s3.Add("4", "5", "6", "7")
+	u := Intersection(s1, s2, s3)
 
 	if u.Size() != 1 {
 		t.Error("Intersection: the set doesn't have all items in it.")
 	}
 
-	if !u.Has("3") {
+	if !u.Has("5") {
 		t.Error("Intersection: items after intersection are not availabile in the set.")
 	}
 }
 
 func Test_SymmetricDifference(t *testing.T) {
-	s := New("1", "2", "3")
-	r := New("3", "4", "5")
+	s := newTS()
+	s.Add("1", "2", "3")
+	r := newTS()
+	r.Add("3", "4", "5")
 	u := SymmetricDifference(s, r)
 
 	if u.Size() != 4 {
@@ -95,7 +95,8 @@ func Test_SymmetricDifference(t *testing.T) {
 }
 
 func Test_StringSlice(t *testing.T) {
-	s := New("san francisco", "istanbul", 3.14, 1321, "ankara")
+	s := newTS()
+	s.Add("san francisco", "istanbul", 3.14, 1321, "ankara")
 	u := StringSlice(s)
 
 	if len(u) != 3 {
@@ -111,7 +112,8 @@ func Test_StringSlice(t *testing.T) {
 }
 
 func Test_IntSlice(t *testing.T) {
-	s := New("san francisco", "istanbul", 3.14, 1321, "ankara", 8876)
+	s := newTS()
+	s.Add("san francisco", "istanbul", 3.14, 1321, "ankara", 8876)
 	u := IntSlice(s)
 
 	if len(u) != 2 {
@@ -127,8 +129,8 @@ func Test_IntSlice(t *testing.T) {
 }
 
 func BenchmarkSetEquality(b *testing.B) {
-	s := New()
-	u := New()
+	s := newTS()
+	u := newTS()
 
 	for i := 0; i < b.N; i++ {
 		s.Add(i)
@@ -143,8 +145,8 @@ func BenchmarkSetEquality(b *testing.B) {
 }
 
 func BenchmarkSubset(b *testing.B) {
-	s := New()
-	u := New()
+	s := newTS()
+	u := newTS()
 
 	for i := 0; i < b.N; i++ {
 		s.Add(i)
@@ -159,19 +161,19 @@ func BenchmarkSubset(b *testing.B) {
 }
 
 func benchmarkIntersection(b *testing.B, numberOfItems int) {
-	s := New()
-	u := New()
+	s1 := newTS()
+	s2 := newTS()
 
 	for i := 0; i < numberOfItems/2; i++ {
-		s.Add(i)
+		s1.Add(i)
 	}
 	for i := 0; i < numberOfItems; i++ {
-		u.Add(i)
+		s2.Add(i)
 	}
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		Intersection(s, u)
+		Intersection(s1, s2)
 	}
 }
 

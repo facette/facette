@@ -176,8 +176,8 @@ func (server *Server) handleWait(writer http.ResponseWriter, request *http.Reque
 }
 
 func (server *Server) getStats(writer http.ResponseWriter, request *http.Request) *statsResponse {
-	sourceSet := set.New()
-	metricSet := set.New()
+	sourceSet := set.New(set.ThreadSafe)
+	metricSet := set.New(set.ThreadSafe)
 
 	for _, origin := range server.Catalog.Origins {
 		for key, source := range origin.Sources {

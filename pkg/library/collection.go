@@ -73,7 +73,7 @@ func (library *Library) GetCollectionTemplate(name string) (*Collection, error) 
 		sort.Strings(templates)
 
 		// Prepare metrics
-		metricSet := set.New()
+		metricSet := set.New(set.ThreadSafe)
 
 		for metricName := range library.Catalog.Origins[originName].Sources[name].Metrics {
 			metricSet.Add(metricName)
@@ -84,7 +84,7 @@ func (library *Library) GetCollectionTemplate(name string) (*Collection, error) 
 			template := library.Config.Origins[originName].Templates[templateName]
 
 			if template.SplitPattern != "" {
-				splitSet := set.New()
+				splitSet := set.New(set.ThreadSafe)
 
 				for metricName := range library.Catalog.Origins[originName].Sources[name].Metrics {
 					chunks := template.SplitRegexp.FindStringSubmatch(metricName)

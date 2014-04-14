@@ -42,7 +42,7 @@ func (library *Library) ExpandGroup(name string, groupType int) []string {
 
 	group := item.(*Group)
 
-	result := set.New()
+	result := set.New(set.ThreadSafe)
 
 	for _, entry := range group.Entries {
 		var re *regexp.Regexp

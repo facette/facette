@@ -58,7 +58,7 @@ func (server *Server) handleOriginList(writer http.ResponseWriter, request *http
 		return
 	}
 
-	originSet := set.New()
+	originSet := set.New(set.ThreadSafe)
 
 	for _, origin := range server.Catalog.Origins {
 		if request.FormValue("filter") != "" && !utils.FilterMatch(request.FormValue("filter"), origin.Name) {
@@ -90,7 +90,7 @@ func (server *Server) handleSource(writer http.ResponseWriter, request *http.Req
 		return
 	}
 
-	originSet := set.New()
+	originSet := set.New(set.ThreadSafe)
 
 	for _, origin := range server.Catalog.Origins {
 		if _, ok := origin.Sources[sourceName]; ok {
@@ -125,7 +125,7 @@ func (server *Server) handleSourceList(writer http.ResponseWriter, request *http
 
 	originName := request.FormValue("origin")
 
-	sourceSet := set.New()
+	sourceSet := set.New(set.ThreadSafe)
 
 	for _, origin := range server.Catalog.Origins {
 		if originName != "" && origin.Name != originName {
@@ -163,8 +163,8 @@ func (server *Server) handleMetric(writer http.ResponseWriter, request *http.Req
 		return
 	}
 
-	originSet := set.New()
-	sourceSet := set.New()
+	originSet := set.New(set.ThreadSafe)
+	sourceSet := set.New(set.ThreadSafe)
 
 	for _, origin := range server.Catalog.Origins {
 		for _, source := range origin.Sources {
@@ -207,7 +207,7 @@ func (server *Server) handleMetricList(writer http.ResponseWriter, request *http
 	originName := request.FormValue("origin")
 	sourceName := request.FormValue("source")
 
-	sourceSet := set.New()
+	sourceSet := set.New(set.ThreadSafe)
 
 	if strings.HasPrefix(sourceName, library.LibraryGroupPrefix) {
 		for _, entryName := range server.Library.ExpandGroup(
@@ -220,7 +220,7 @@ func (server *Server) handleMetricList(writer http.ResponseWriter, request *http
 		sourceSet.Add(sourceName)
 	}
 
-	metricSet := set.New()
+	metricSet := set.New(set.ThreadSafe)
 
 	for _, origin := range server.Catalog.Origins {
 		if originName != "" && origin.Name != originName {

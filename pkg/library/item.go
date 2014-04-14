@@ -269,9 +269,9 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 
 	case LibraryItemGraph:
 		// Check for definition names duplicates
-		stackSet := set.New()
-		groupSet := set.New()
-		serieSet := set.New()
+		stackSet := set.New(set.ThreadSafe)
+		groupSet := set.New(set.ThreadSafe)
+		serieSet := set.New(set.ThreadSafe)
 
 		for _, stack := range item.(*Graph).Stacks {
 			if stack == nil {

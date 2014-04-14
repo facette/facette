@@ -134,7 +134,7 @@ func (server *Server) handleGraphList(writer http.ResponseWriter, request *http.
 		return
 	}
 
-	graphSet := set.New()
+	graphSet := set.New(set.ThreadSafe)
 
 	// Filter on collection if any
 	if request.FormValue("collection") != "" {
