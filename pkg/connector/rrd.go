@@ -228,19 +228,23 @@ func (handler *RRDConnector) rrdGetData(query *GroupQuery, startTime, endTime ti
 			serieTemp := serieName + fmt.Sprintf("-tmp%d", index)
 
 			graph.Def(
-				serieTemp,
+				serieTemp+"-ori",
 				handler.metrics[serie.Metric.SourceName][serie.Metric.Name].FilePath,
 				handler.metrics[serie.Metric.SourceName][serie.Metric.Name].Dataset,
 				"AVERAGE",
 			)
 
+			graph.CDef(serieTemp, fmt.Sprintf("%s-ori,UN,0,%s-ori,IF", serieTemp, serieTemp))
+
 			if !infoOnly {
 				xport.Def(
-					serieTemp,
+					serieTemp+"-ori",
 					handler.metrics[serie.Metric.SourceName][serie.Metric.Name].FilePath,
 					handler.metrics[serie.Metric.SourceName][serie.Metric.Name].Dataset,
 					"AVERAGE",
 				)
+
+				xport.CDef(serieTemp, fmt.Sprintf("%s-ori,UN,0,%s-ori,IF", serieTemp, serieTemp))
 			}
 
 			if len(stack) == 0 {
