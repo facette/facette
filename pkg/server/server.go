@@ -45,7 +45,7 @@ func (server *Server) Reload() error {
 	server.Loading = true
 
 	if err := server.Config.Reload(); err != nil {
-		log.Printf("ERROR: an error occued while reloading configuration: %s", err.Error())
+		log.Printf("ERROR: an error occured while reloading configuration: %s", err.Error())
 		return err
 	}
 

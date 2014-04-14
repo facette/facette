@@ -411,7 +411,7 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 						log.Printf("ERROR: unknown `%s' metric for source `%s' (origin: %s)", serieChunk, serieSource,
 							serieItem.Origin)
 
-						goto next
+						continue
 					}
 
 					query.Series = append(query.Series, &connector.SerieQuery{
@@ -436,7 +436,7 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 					log.Printf("ERROR: unknown `%s' metric for source `%s' (origin: %s)", serieItem.Metric, serieSource,
 						serieItem.Origin)
 
-					goto next
+					continue
 				}
 
 				serie := &connector.SerieQuery{
@@ -458,7 +458,6 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 				index += 1
 			}
 		}
-	next:
 	}
 
 	if len(query.Series) == 0 {
