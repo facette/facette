@@ -24,6 +24,7 @@ type rrdMetric struct {
 type RRDConnector struct {
 	Path      string
 	Pattern   string
+	Daemon    string
 	inputChan *chan [2]string
 	metrics   map[string]map[string]*rrdMetric
 }
@@ -136,10 +137,19 @@ func (handler *RRDConnector) rrdGetData(query *GroupQuery, startTime, endTime ti
 	series := make(map[string]string)
 
 	stack := make([]string, 0)
+
 	graph := rrd.NewGrapher()
+
+	if handler.Daemon != "" {
+		graph.SetDaemon(handler.Daemon)
+	}
 
 	if !infoOnly {
 		xport = rrd.NewExporter()
+
+		if handler.Daemon != "" {
+			xport.SetDaemon(handler.Daemon)
+		}
 	}
 
 	count := 0
@@ -364,6 +374,7 @@ func init() {
 		return &RRDConnector{
 			Path:      config["path"],
 			Pattern:   config["pattern"],
+			Daemon:    config["daemon"],
 			inputChan: inputChan,
 			metrics:   make(map[string]map[string]*rrdMetric),
 		}, nil
