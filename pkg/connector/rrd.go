@@ -96,7 +96,8 @@ func (handler *RRDConnector) Refresh() error {
 		// Extract metric information from .rrd file
 		info, err := rrd.Info(filePath)
 		if err != nil {
-			return err
+			log.Println("WARNING:", err.Error())
+			return nil
 		}
 
 		if _, ok := info["ds.index"]; ok {
@@ -108,18 +109,15 @@ func (handler *RRDConnector) Refresh() error {
 			}
 		}
 
-		return err
+		return nil
 	}
 
 	err := utils.WalkDir(handler.Path, walkFunc)
-	if err != nil {
-		return err
-	}
 
 	// Close channel once updated
 	close(*handler.inputChan)
 
-	return nil
+	return err
 }
 
 func (handler *RRDConnector) rrdGetData(query *GroupQuery, startTime, endTime time.Time, step time.Duration,

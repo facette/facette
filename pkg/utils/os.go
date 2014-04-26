@@ -11,7 +11,7 @@ func walkDir(dirPath string, linkPath string, walkFunc filepath.WalkFunc) error 
 	}
 
 	// Search for files recursively
-	internalFunc := func(filePath string, fileInfo os.FileInfo, err error) error {
+	return filepath.Walk(dirPath, func(filePath string, fileInfo os.FileInfo, err error) error {
 		mode := fileInfo.Mode() & os.ModeType
 
 		if mode == os.ModeSymlink {
@@ -26,9 +26,7 @@ func walkDir(dirPath string, linkPath string, walkFunc filepath.WalkFunc) error 
 		} else {
 			return walkFunc(filePath, fileInfo, err)
 		}
-	}
-
-	return filepath.Walk(dirPath, internalFunc)
+	})
 }
 
 // WalkDir browses a directory on the filesystem executing a callback function for each found files.
