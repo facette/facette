@@ -4,14 +4,13 @@ Facette [![](https://api.travis-ci.org/facette/facette.png)](https://travis-ci.o
 What is Facette?
 ----------------
 
-[Facette][0] is a graphing web front-end.
+[Facette][0] is a software to display time series data from several various sources — such as [collectd][1] or
+[Graphite][2] — on graphs in a web application, designed to be easy to setup and to use. To learn more on its architecture, read [this page](/docs/architecture/).
 
-At its current development state, Facette only supports RRD files as back-end and has originally been developed as a
-Collectd front-end. But it is planned to have more back-end support in the future (e.g. Whisper or Graphite).
+The source code is available at [Github][3], licensed under the terms of the [BSD license][4].
 
-Its code is available at [Github][1], and is licensed under the terms of the [BSD license][2].
-
-/!\ Important: Facette is currently under development and is **not ready** for a production environment.
+:warning: Facette is currently under development and is **not ready** for
+a production environment.
 
 Installation
 ------------
@@ -20,5 +19,7 @@ Please see [docs/Installation.md](docs/Installation.md) file for build instructi
 
 
 [0]: http://facette.io/
-[1]: https://github.com/facette/facette
-[2]: http://opensource.org/licenses/BSD-3-Clause
+[1]: http://collectd.org/
+[2]: http://graphite.readthedocs.org/
+[3]: https://github.com/facette/facette
+[4]: http://opensource.org/licenses/BSD-3-Clause
