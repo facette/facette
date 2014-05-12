@@ -1,0 +1,7 @@
+{
+	"dependencies": {
+		"uglify-js": ">= 2.4.13",
+		"less":	">= 1.7.0",
+		"jshint": ">=2.5.0"
+	}
+}

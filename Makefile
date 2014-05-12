@@ -11,6 +11,13 @@ mesg_step = echo "$(1)"
 mesg_ok = echo "result: $(shell tput setaf 2)ok$(shell tput sgr0)"
 mesg_fail = (echo "result: $(shell tput setaf 1)fail$(shell tput sgr0)" && false)
 
+# Npm
+NPM_DIR = $(realpath node_modules)
+NPM_BIN_DIR = $(realpath $(NPM_DIR)/.bin)
+NPM ?= npm
+NPM_ARGS=
+
+
 # Go
 GOPATH = $(realpath $(TEMP_DIR))
 export GOPATH
@@ -24,20 +31,28 @@ GOLINT_ARGS =
 PANDOC ?= pandoc
 PANDOC_ARGS = --standalone --to man
 
-UGLIFYJS ?= uglifyjs
+UGLIFYJS ?= $(realpath $(NPM_BIN_DIR)/uglifyjs)
 UGLIFYSCRIPT_ARGS = --comments --compress --mangle --screw-ie8
 
-JSHINT ?= jshint
+JSHINT ?= $(realpath $(NPM_BIN_DIR)/jshint)
 JSHINT_ARGS = --show-non-errors
 
-LESSC ?= lessc
+LESSC ?= $(realpath $(NPM_BIN_DIR)/lessc)
 LESSC_ARGS = --no-color
 
-all: build lint
+all: dep build lint
 
 clean:
 	@$(call mesg_start,main,Cleaning temporary files...)
-	@rm -rf $(TEMP_DIR) && \
+	@rm -rf $(NPM_DIR) $(TEMP_DIR) && \
+		$(call mesg_ok) || $(call mesg_fail)
+
+.PHONY: dep
+dep: dep-npm
+
+dep-npm:
+	@$(call mesg_start,main,Installing dependencies...)
+	@$(NPM) install && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 .PHONY: build
