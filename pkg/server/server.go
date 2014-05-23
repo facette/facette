@@ -40,6 +40,14 @@ type Server struct {
 	debugLevel  int
 }
 
+// NewServer creates a new instance of server.
+func NewServer(configPath string, debugLevel int) *Server {
+	return &Server{
+		Config:     &config.Config{Path: configPath},
+		debugLevel: debugLevel,
+	}
+}
+
 // Reload reloads the configuration and refreshes authentication handler, catalog and library.
 func (server *Server) Reload() error {
 	server.Loading = true
@@ -175,12 +183,4 @@ func (server *Server) Run() error {
 // Stop stops the server.
 func (server *Server) Stop() {
 	server.Listener.Stop <- true
-}
-
-// NewServer creates a new instance of server.
-func NewServer(configPath string, debugLevel int) *Server {
-	return &Server{
-		Config:     &config.Config{Path: configPath},
-		debugLevel: debugLevel,
-	}
 }

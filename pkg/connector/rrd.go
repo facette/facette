@@ -29,6 +29,24 @@ type RRDConnector struct {
 	metrics   map[string]map[string]*rrdMetric
 }
 
+func init() {
+	Connectors["rrd"] = func(inputChan *chan [2]string, config map[string]string) (interface{}, error) {
+		if _, ok := config["path"]; !ok {
+			return nil, fmt.Errorf("missing `path' mandatory connector setting")
+		} else if _, ok := config["pattern"]; !ok {
+			return nil, fmt.Errorf("missing `pattern' mandatory connector setting")
+		}
+
+		return &RRDConnector{
+			Path:      config["path"],
+			Pattern:   config["pattern"],
+			Daemon:    config["daemon"],
+			inputChan: inputChan,
+			metrics:   make(map[string]map[string]*rrdMetric),
+		}, nil
+	}
+}
+
 // GetPlots calculates and returns plots data based on a time interval.
 func (handler *RRDConnector) GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
 	percentiles []float64) (map[string]*PlotResult, error) {
@@ -362,23 +380,5 @@ func rrdSetGraph(graph *rrd.Grapher, serieName, itemName string, percentiles []f
 			graph.Print(fmt.Sprintf("%s-vdef%d", serieName, index),
 				fmt.Sprintf("%s,%.0fth,%%lf", itemName, percentile))
 		}
-	}
-}
-
-func init() {
-	Connectors["rrd"] = func(inputChan *chan [2]string, config map[string]string) (interface{}, error) {
-		if _, ok := config["path"]; !ok {
-			return nil, fmt.Errorf("missing `path' mandatory connector setting")
-		} else if _, ok := config["pattern"]; !ok {
-			return nil, fmt.Errorf("missing `pattern' mandatory connector setting")
-		}
-
-		return &RRDConnector{
-			Path:      config["path"],
-			Pattern:   config["pattern"],
-			Daemon:    config["daemon"],
-			inputChan: inputChan,
-			metrics:   make(map[string]map[string]*rrdMetric),
-		}, nil
 	}
 }

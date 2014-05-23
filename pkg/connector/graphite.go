@@ -29,6 +29,25 @@ type GraphiteConnector struct {
 	inputChan   *chan [2]string
 }
 
+func init() {
+	Connectors["graphite"] = func(inputChan *chan [2]string, config map[string]string) (interface{}, error) {
+		if _, ok := config["url"]; !ok {
+			return nil, fmt.Errorf("missing `url' mandatory connector setting")
+		}
+
+		connector := &GraphiteConnector{
+			URL:       config["url"],
+			inputChan: inputChan,
+		}
+
+		if config["allow_insecure_tls"] == "yes" {
+			connector.InsecureTLS = true
+		}
+
+		return connector, nil
+	}
+}
+
 // GetPlots calculates and returns plots data based on a time interval.
 func (handler *GraphiteConnector) GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
 	percentiles []float64) (map[string]*PlotResult, error) {
@@ -213,23 +232,4 @@ func graphiteExtractPlotResult(plots []graphitePlot) (*PlotResult, error) {
 	result.Info["last"] = types.PlotValue(last)
 
 	return result, nil
-}
-
-func init() {
-	Connectors["graphite"] = func(inputChan *chan [2]string, config map[string]string) (interface{}, error) {
-		if _, ok := config["url"]; !ok {
-			return nil, fmt.Errorf("missing `url' mandatory connector setting")
-		}
-
-		connector := &GraphiteConnector{
-			URL:       config["url"],
-			inputChan: inputChan,
-		}
-
-		if config["allow_insecure_tls"] == "yes" {
-			connector.InsecureTLS = true
-		}
-
-		return connector, nil
-	}
 }
