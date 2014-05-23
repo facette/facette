@@ -77,7 +77,7 @@ func (server *Server) Run() error {
 	}
 
 	// Set server logging ouput
-	if server.Config.ServerLog != "" {
+	if server.Config.ServerLog != "" && server.Config.ServerLog != "-" {
 		dirPath, _ := path.Split(server.Config.ServerLog)
 		os.MkdirAll(dirPath, 0755)
 
