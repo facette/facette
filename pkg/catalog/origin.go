@@ -3,18 +3,19 @@ package catalog
 import (
 	"fmt"
 	"log"
-	"sync"
+	"time"
 
 	"github.com/facette/facette/pkg/connector"
 )
 
 // Origin represents an origin of source sets (e.g. a Collectd or Graphite instance).
 type Origin struct {
-	Name      string
-	Connector connector.Connector
-	Sources   map[string]*Source
-	Catalog   *Catalog
-	inputChan chan [2]string
+	Name        string
+	Connector   connector.Connector
+	Sources     map[string]*Source
+	LastRefresh time.Time
+	Catalog     *Catalog
+	inputChan   chan [2]string
 }
 
 // NewOrigin creates a new origin instance.
@@ -44,26 +45,37 @@ func NewOrigin(name string, config map[string]string, catalog *Catalog) (*Origin
 }
 
 // Refresh updates the current origin by querying its connector for sources and metrics.
-func (origin *Origin) Refresh(wait *sync.WaitGroup) error {
+func (origin *Origin) Refresh() error {
 	if origin.Connector == nil {
 		return fmt.Errorf("connector for `%s' origin is not initialized", origin.Name)
 	}
 
 	if origin.Catalog.debugLevel > 0 {
-		log.Printf("DEBUG: updating origin `%s'...\n", origin.Name)
+		log.Printf("DEBUG: refreshing origin `%s'...\n", origin.Name)
 	}
 
 	origin.Sources = make(map[string]*Source)
 
-	// Create update channel
+	// Origin input channel
 	origin.inputChan = make(chan [2]string)
 
-	wait.Add(1)
+	// Channel to be notified in case of connector refresh error
+	connectorErrChan := make(chan error)
 
-	go func() {
-		defer wait.Done()
+	go origin.Connector.Refresh(connectorErrChan)
 
-		for entry := range origin.inputChan {
+	for {
+		select {
+		case err := <-connectorErrChan:
+			// An error occurred while connector refreshed orgin
+			return err
+
+		case entry, ok := <-origin.inputChan:
+			// Channel is closed: connector is done refreshing origin
+			if !ok {
+				goto done
+			}
+
 			originalSource, originalMetric := entry[0], entry[1]
 
 			for _, filter := range origin.Catalog.Config.Origins[origin.Name].Filters {
@@ -98,10 +110,13 @@ func (origin *Origin) Refresh(wait *sync.WaitGroup) error {
 			}
 
 			origin.Sources[entry[0]].Metrics[entry[1]] = NewMetric(entry[1], originalMetric, origin.Sources[entry[0]])
-
-		nextEntry:
 		}
-	}()
 
-	return origin.Connector.Refresh()
+	nextEntry:
+	}
+
+done:
+	origin.LastRefresh = time.Now()
+
+	return nil
 }

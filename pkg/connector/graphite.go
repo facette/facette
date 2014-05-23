@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -49,13 +50,13 @@ func init() {
 }
 
 // GetPlots calculates and returns plots data based on a time interval.
-func (handler *GraphiteConnector) GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
+func (connector *GraphiteConnector) GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
 	percentiles []float64) (map[string]*PlotResult, error) {
 
 	result := make(map[string]*PlotResult)
 
 	httpTransport := &http.Transport{}
-	if handler.InsecureTLS {
+	if connector.InsecureTLS {
 		httpTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 
@@ -66,7 +67,7 @@ func (handler *GraphiteConnector) GetPlots(query *GroupQuery, startTime, endTime
 		return nil, fmt.Errorf("unable to build Graphite query URL: %s", err.Error())
 	}
 
-	response, err := httpClient.Get(strings.TrimSuffix(handler.URL, "/") + queryURL)
+	response, err := httpClient.Get(strings.TrimSuffix(connector.URL, "/") + queryURL)
 	if err != nil {
 		return nil, err
 	}
@@ -93,31 +94,46 @@ func (handler *GraphiteConnector) GetPlots(query *GroupQuery, startTime, endTime
 }
 
 // Refresh triggers a full connector data update.
-func (handler *GraphiteConnector) Refresh() error {
-	httpTransport := &http.Transport{}
-	if handler.InsecureTLS {
+func (connector *GraphiteConnector) Refresh(errChan chan error) {
+	defer close(*connector.inputChan)
+	defer close(errChan)
+
+	httpTransport := &http.Transport{
+		Dial: (&net.Dialer{
+			// Enable dual IPv4/IPv6 stack connectivity:
+			DualStack: true,
+			// Enforce HTTP connection timeout:
+			Timeout: 10 * time.Second, // TODO: parametrize this into configuration setting
+		}).Dial,
+	}
+
+	if connector.InsecureTLS {
 		httpTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 
 	httpClient := http.Client{Transport: httpTransport}
 
-	response, err := httpClient.Get(strings.TrimSuffix(handler.URL, "/") + graphiteURLMetrics)
+	response, err := httpClient.Get(strings.TrimSuffix(connector.URL, "/") + graphiteURLMetrics)
 	if err != nil {
-		return err
+		errChan <- err
+		return
 	}
 
 	if err = graphiteCheckConnectorResponse(response); err != nil {
-		return fmt.Errorf("invalid HTTP backend response: %s", err)
+		errChan <- fmt.Errorf("invalid HTTP backend response: %s", err)
+		return
 	}
 
 	data, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return fmt.Errorf("unable to read HTTP response body: %s", err)
+		errChan <- fmt.Errorf("unable to read HTTP response body: %s", err)
+		return
 	}
 
 	metrics := make([]string, 0)
 	if err = json.Unmarshal(data, &metrics); err != nil {
-		return fmt.Errorf("unable to unmarshal JSON data: %s", err)
+		errChan <- fmt.Errorf("unable to unmarshal JSON data: %s", err)
+		return
 	}
 
 	for _, metric := range metrics {
@@ -134,13 +150,8 @@ func (handler *GraphiteConnector) Refresh() error {
 			metricName = metric[index+1:]
 		}
 
-		*handler.inputChan <- [2]string{sourceName, metricName}
+		*connector.inputChan <- [2]string{sourceName, metricName}
 	}
-
-	// Close channel once updated
-	close(*handler.inputChan)
-
-	return nil
 }
 
 func graphiteCheckConnectorResponse(response *http.Response) error {

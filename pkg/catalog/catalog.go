@@ -58,16 +58,23 @@ func (catalog *Catalog) Refresh() error {
 		catalog.Origins[originName] = origin
 	}
 
-	// Update catalog origins
 	wait := &sync.WaitGroup{}
 
+	// Update catalog origins
 	for _, origin := range catalog.Origins {
-		if err := origin.Refresh(wait); err != nil {
-			log.Println("ERROR: " + err.Error())
-			success = false
-		}
+		wait.Add(1)
+
+		go func(wg *sync.WaitGroup, o *Origin) {
+			defer wg.Done()
+
+			if err := o.Refresh(); err != nil {
+				log.Println("ERROR: " + err.Error())
+				success = false
+			}
+		}(wait, origin)
 	}
 
+	// Wait for all origins to be refreshed
 	wait.Wait()
 
 	// Handle output information

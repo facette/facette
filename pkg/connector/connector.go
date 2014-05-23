@@ -25,7 +25,7 @@ var (
 type Connector interface {
 	GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
 		percentiles []float64) (map[string]*PlotResult, error)
-	Refresh() error
+	Refresh(chan error)
 }
 
 // MetricQuery represents a metric entry in a SerieQuery.
