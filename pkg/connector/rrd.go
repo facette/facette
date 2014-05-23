@@ -48,16 +48,19 @@ func init() {
 }
 
 // GetPlots calculates and returns plots data based on a time interval.
-func (handler *RRDConnector) GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
+func (connector *RRDConnector) GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
 	percentiles []float64) (map[string]*PlotResult, error) {
 
-	return handler.rrdGetData(query, startTime, endTime, step, percentiles, false)
+	return connector.rrdGetData(query, startTime, endTime, step, percentiles, false)
 }
 
 // Refresh triggers a full connector data update.
-func (handler *RRDConnector) Refresh() error {
+func (connector *RRDConnector) Refresh(errChan chan error) {
+	defer close(*connector.inputChan)
+	defer close(errChan)
+
 	// Compile pattern
-	re := regexp.MustCompile(handler.Pattern)
+	re := regexp.MustCompile(connector.Pattern)
 
 	// Validate pattern keywords
 	groups := make(map[string]bool)
@@ -68,14 +71,17 @@ func (handler *RRDConnector) Refresh() error {
 		} else if key == "source" || key == "metric" {
 			groups[key] = true
 		} else {
-			return fmt.Errorf("invalid pattern keyword `%s'", key)
+			errChan <- fmt.Errorf("invalid pattern keyword `%s'", key)
+			return
 		}
 	}
 
 	if !groups["source"] {
-		return fmt.Errorf("missing pattern keyword `source'")
+		errChan <- fmt.Errorf("missing pattern keyword `source'")
+		return
 	} else if !groups["metric"] {
-		return fmt.Errorf("missing pattern keyword `metric'")
+		errChan <- fmt.Errorf("missing pattern keyword `metric'")
+		return
 	}
 
 	// Search for files and parse their path for source/metric pairs
@@ -93,7 +99,7 @@ func (handler *RRDConnector) Refresh() error {
 			return nil
 		}
 
-		submatch := re.FindStringSubmatch(filePath[len(handler.Path)+1:])
+		submatch := re.FindStringSubmatch(filePath[len(connector.Path)+1:])
 		if len(submatch) == 0 {
 			log.Printf("WARNING: file `%s' does not match pattern", filePath)
 			return nil
@@ -107,8 +113,8 @@ func (handler *RRDConnector) Refresh() error {
 			metricName = submatch[1]
 		}
 
-		if _, ok := handler.metrics[sourceName]; !ok {
-			handler.metrics[sourceName] = make(map[string]*rrdMetric)
+		if _, ok := connector.metrics[sourceName]; !ok {
+			connector.metrics[sourceName] = make(map[string]*rrdMetric)
 		}
 
 		// Extract metric information from .rrd file
@@ -122,23 +128,21 @@ func (handler *RRDConnector) Refresh() error {
 			for dsName := range info["ds.index"].(map[string]interface{}) {
 				metricFullName := metricName + "/" + dsName
 
-				*handler.inputChan <- [2]string{sourceName, metricFullName}
-				handler.metrics[sourceName][metricFullName] = &rrdMetric{Dataset: dsName, FilePath: filePath}
+				*connector.inputChan <- [2]string{sourceName, metricFullName}
+				connector.metrics[sourceName][metricFullName] = &rrdMetric{Dataset: dsName, FilePath: filePath}
 			}
 		}
 
 		return nil
 	}
 
-	err := utils.WalkDir(handler.Path, walkFunc)
-
-	// Close channel once updated
-	close(*handler.inputChan)
-
-	return err
+	if err := utils.WalkDir(connector.Path, walkFunc); err != nil {
+		errChan <- err
+		return
+	}
 }
 
-func (handler *RRDConnector) rrdGetData(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
+func (connector *RRDConnector) rrdGetData(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
 	percentiles []float64, infoOnly bool) (map[string]*PlotResult, error) {
 
 	var xport *rrd.Exporter
@@ -156,15 +160,15 @@ func (handler *RRDConnector) rrdGetData(query *GroupQuery, startTime, endTime ti
 
 	graph := rrd.NewGrapher()
 
-	if handler.Daemon != "" {
-		graph.SetDaemon(handler.Daemon)
+	if connector.Daemon != "" {
+		graph.SetDaemon(connector.Daemon)
 	}
 
 	if !infoOnly {
 		xport = rrd.NewExporter()
 
-		if handler.Daemon != "" {
-			xport.SetDaemon(handler.Daemon)
+		if connector.Daemon != "" {
+			xport.SetDaemon(connector.Daemon)
 		}
 	}
 
@@ -184,8 +188,8 @@ func (handler *RRDConnector) rrdGetData(query *GroupQuery, startTime, endTime ti
 
 			graph.Def(
 				serieTemp+"-orig0",
-				handler.metrics[serie.Metric.SourceName][serie.Metric.Name].FilePath,
-				handler.metrics[serie.Metric.SourceName][serie.Metric.Name].Dataset,
+				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].FilePath,
+				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].Dataset,
 				"AVERAGE",
 			)
 
@@ -208,8 +212,8 @@ func (handler *RRDConnector) rrdGetData(query *GroupQuery, startTime, endTime ti
 			if !infoOnly {
 				xport.Def(
 					serieTemp+"-orig0",
-					handler.metrics[serie.Metric.SourceName][serie.Metric.Name].FilePath,
-					handler.metrics[serie.Metric.SourceName][serie.Metric.Name].Dataset,
+					connector.metrics[serie.Metric.SourceName][serie.Metric.Name].FilePath,
+					connector.metrics[serie.Metric.SourceName][serie.Metric.Name].Dataset,
 					"AVERAGE",
 				)
 
@@ -245,8 +249,8 @@ func (handler *RRDConnector) rrdGetData(query *GroupQuery, startTime, endTime ti
 
 			graph.Def(
 				serieTemp+"-ori",
-				handler.metrics[serie.Metric.SourceName][serie.Metric.Name].FilePath,
-				handler.metrics[serie.Metric.SourceName][serie.Metric.Name].Dataset,
+				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].FilePath,
+				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].Dataset,
 				"AVERAGE",
 			)
 
@@ -255,8 +259,8 @@ func (handler *RRDConnector) rrdGetData(query *GroupQuery, startTime, endTime ti
 			if !infoOnly {
 				xport.Def(
 					serieTemp+"-ori",
-					handler.metrics[serie.Metric.SourceName][serie.Metric.Name].FilePath,
-					handler.metrics[serie.Metric.SourceName][serie.Metric.Name].Dataset,
+					connector.metrics[serie.Metric.SourceName][serie.Metric.Name].FilePath,
+					connector.metrics[serie.Metric.SourceName][serie.Metric.Name].Dataset,
 					"AVERAGE",
 				)
 
