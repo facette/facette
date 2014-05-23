@@ -18,7 +18,7 @@ const (
 	DefaultPlotSample int = 400
 )
 
-// Config represents the main of the service configuration system.
+// Config represents the global configuration of the instance.
 type Config struct {
 	Path      string                   `json:"-"`
 	BindAddr  string                   `json:"bind"`
