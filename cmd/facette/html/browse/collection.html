@@ -45,7 +45,7 @@
 				<ul>{{ range $index, $value := .Collection.Children }}
 					<li><a href="{{ $prefix }}/browse/collections/{{ $value.ID }}">{{ $value.Name }}</a></li>{{ end }}
 				</ul>{{ else if eq $q "" }}
-				<div class="mesgitem info">The collection is emty</div>{{ else }}
+				<div class="mesgitem info">The collection is empty</div>{{ else }}
 				<div class="mesgitem warning">Your search doesn’t match any graph <a href="{{ .Request.URL.Path }}">Reset</a></div>{{ end }}
 			</section>
 		</article>
