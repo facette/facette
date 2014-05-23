@@ -22,6 +22,21 @@ var (
 	flagHelp   bool
 )
 
+func init() {
+	flag.StringVar(&flagConfig, "c", config.DefaultConfigFile, "configuration file path")
+	flag.IntVar(&flagDebug, "d", 0, "debugging level")
+	flag.BoolVar(&flagHelp, "h", false, "display this help and exit")
+	flag.Usage = func() { utils.PrintUsage(os.Stderr, cmdUsage) }
+	flag.Parse()
+
+	if flagHelp {
+		utils.PrintUsage(os.Stdout, cmdUsage)
+	} else if flagConfig == "" {
+		fmt.Fprintf(os.Stderr, "Error: configuration file path is mandatory\n")
+		utils.PrintUsage(os.Stderr, cmdUsage)
+	}
+}
+
 func main() {
 	// Create new server instance and load configuration
 	instance := server.NewServer(flagConfig, flagDebug)
@@ -51,19 +66,4 @@ func main() {
 	}
 
 	os.Exit(0)
-}
-
-func init() {
-	flag.StringVar(&flagConfig, "c", config.DefaultConfigFile, "configuration file path")
-	flag.IntVar(&flagDebug, "d", 0, "debugging level")
-	flag.BoolVar(&flagHelp, "h", false, "display this help and exit")
-	flag.Usage = func() { utils.PrintUsage(os.Stderr, cmdUsage) }
-	flag.Parse()
-
-	if flagHelp {
-		utils.PrintUsage(os.Stdout, cmdUsage)
-	} else if flagConfig == "" {
-		fmt.Fprintf(os.Stderr, "Error: configuration file path is mandatory\n")
-		utils.PrintUsage(os.Stderr, cmdUsage)
-	}
 }
