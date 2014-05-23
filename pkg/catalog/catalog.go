@@ -18,6 +18,15 @@ type Catalog struct {
 	debugLevel int
 }
 
+// NewCatalog creates a new instance of catalog.
+func NewCatalog(config *config.Config, debugLevel int) *Catalog {
+	return &Catalog{
+		Config:     config,
+		Origins:    make(map[string]*Origin),
+		debugLevel: debugLevel,
+	}
+}
+
 // GetMetric returns an existing metric entry based on its origin, source and name.
 func (catalog *Catalog) GetMetric(origin, source, name string) *Metric {
 	if _, ok := catalog.Origins[origin]; !ok {
@@ -72,13 +81,4 @@ func (catalog *Catalog) Refresh() error {
 	log.Println("INFO: catalog refresh completed")
 
 	return nil
-}
-
-// NewCatalog creates a new instance of catalog.
-func NewCatalog(config *config.Config, debugLevel int) *Catalog {
-	return &Catalog{
-		Config:     config,
-		Origins:    make(map[string]*Origin),
-		debugLevel: debugLevel,
-	}
 }

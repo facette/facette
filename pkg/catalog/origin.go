@@ -17,6 +17,32 @@ type Origin struct {
 	inputChan chan [2]string
 }
 
+// NewOrigin creates a new origin instance.
+func NewOrigin(name string, config map[string]string, catalog *Catalog) (*Origin, error) {
+	if _, ok := config["type"]; !ok {
+		return nil, fmt.Errorf("missing connector type")
+	} else if _, ok := connector.Connectors[config["type"]]; !ok {
+		return nil, fmt.Errorf("unknown `%s' connector type", config["type"])
+	}
+
+	origin := &Origin{
+		Name:    name,
+		Sources: make(map[string]*Source),
+		Catalog: catalog,
+	}
+
+	handler, err := connector.Connectors[config["type"]](&origin.inputChan, config)
+	if err != nil {
+		return nil, err
+	}
+
+	origin.Connector = handler.(connector.Connector)
+
+	catalog.Origins[name] = origin
+
+	return origin, nil
+}
+
 // Refresh updates the current origin by querying its connector for sources and metrics.
 func (origin *Origin) Refresh(wait *sync.WaitGroup) error {
 	if origin.Connector == nil {
@@ -78,30 +104,4 @@ func (origin *Origin) Refresh(wait *sync.WaitGroup) error {
 	}()
 
 	return origin.Connector.Refresh()
-}
-
-// NewOrigin creates a new origin instance.
-func NewOrigin(name string, config map[string]string, catalog *Catalog) (*Origin, error) {
-	if _, ok := config["type"]; !ok {
-		return nil, fmt.Errorf("missing connector type")
-	} else if _, ok := connector.Connectors[config["type"]]; !ok {
-		return nil, fmt.Errorf("unknown `%s' connector type", config["type"])
-	}
-
-	origin := &Origin{
-		Name:    name,
-		Sources: make(map[string]*Source),
-		Catalog: catalog,
-	}
-
-	handler, err := connector.Connectors[config["type"]](&origin.inputChan, config)
-	if err != nil {
-		return nil, err
-	}
-
-	origin.Connector = handler.(connector.Connector)
-
-	catalog.Origins[name] = origin
-
-	return origin, nil
 }
