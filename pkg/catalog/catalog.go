@@ -97,3 +97,28 @@ func (catalog *Catalog) Refresh() error {
 
 	return nil
 }
+
+// Close terminates all origin workers and performs catalog clean-up
+func (catalog *Catalog) Close() error {
+	wait := &sync.WaitGroup{}
+
+	log.Println("INFO: closing catalog")
+
+	// Shutdown catalog origin workers concurrently
+	for _, origin := range catalog.Origins {
+		wait.Add(1)
+
+		go func(wg *sync.WaitGroup, o *Origin) {
+			defer wg.Done()
+
+			o.controlChan <- OriginCmdShutdown
+		}(wait, origin)
+	}
+
+	// Wait for all origins to be refreshed
+	wait.Wait()
+
+	log.Println("INFO: catalog closed successfully")
+
+	return nil
+}
