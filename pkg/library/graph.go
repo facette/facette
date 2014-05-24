@@ -4,20 +4,20 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-
-	"github.com/facette/facette/thirdparty/github.com/nu7hatch/gouuid"
 )
 
 const (
+	_ = iota
 	// GraphTypeArea represents an area graph type.
-	GraphTypeArea = iota
+	GraphTypeArea
 	// GraphTypeLine represents a line graph type.
 	GraphTypeLine
 )
 
 const (
+	_ = iota
 	// StackModeNone represents a null stack mode.
-	StackModeNone = iota
+	StackModeNone
 	// StackModeNormal represents a normal stack mode.
 	StackModeNormal
 	// StackModePercent represents a percentage stack mode.
