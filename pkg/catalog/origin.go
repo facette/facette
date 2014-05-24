@@ -17,8 +17,14 @@ type Origin struct {
 	RefreshInterval int
 	LastRefresh     time.Time
 	Catalog         *Catalog
-	controlChan     chan int
+	controlChan     chan OriginWorkerCmd
 	connectorChan   chan [2]string
+}
+
+// OriginWorkerCmd represents a command to an origin worker
+type OriginWorkerCmd struct {
+	Command int
+	Err     chan error
 }
 
 // NewOrigin creates a new origin instance.
@@ -35,7 +41,7 @@ func NewOrigin(name string, config *config.OriginConfig) (*Origin, error) {
 		Name:            name,
 		Sources:         make(map[string]*Source),
 		RefreshInterval: config.RefreshInterval,
-		controlChan:     make(chan int),
+		controlChan:     make(chan OriginWorkerCmd),
 	}
 
 	originConnector, err := connector.Connectors[connectorType](
@@ -130,7 +136,7 @@ done:
 	return nil
 }
 
-// Origin worker goroutine
+// originWorker starts a new origin worker goroutine
 func originWorker(origin *Origin) {
 	var (
 		selfRefreshTimeticker *time.Ticker
@@ -161,14 +167,16 @@ func originWorker(origin *Origin) {
 
 		case cmd := <-origin.controlChan:
 			// Control command received
-			switch cmd {
+			switch cmd.Command {
 			case OriginCmdRefresh:
 				// Explicit origin refresh triggered
 				if err := origin.Refresh(); err != nil {
-					log.Printf("ERROR: cannot refresh origin `%s': %s", origin.Name, err)
+					cmd.Err <- fmt.Errorf("ERROR: cannot refresh origin `%s': %s", origin.Name, err)
+					return
 				}
 
 				origin.LastRefresh = time.Now()
+				cmd.Err <- nil
 
 			case OriginCmdShutdown:
 				// Global shutdown triggered
@@ -177,6 +185,7 @@ func originWorker(origin *Origin) {
 					selfRefreshTimeticker.Stop()
 				}
 
+				cmd.Err <- nil
 				return
 
 			default:
@@ -185,4 +194,16 @@ func originWorker(origin *Origin) {
 			}
 		}
 	}
+}
+
+// SendOriginWorkerCmd sends a command to an origin worker goroutine
+func SendOriginWorkerCmd(origin *Origin, cmd int) error {
+	errChan := make(chan error)
+
+	origin.controlChan <- OriginWorkerCmd{
+		Command: cmd,
+		Err:     errChan,
+	}
+
+	return <-errChan
 }
