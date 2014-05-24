@@ -49,7 +49,7 @@ func NewServer(configPath string, debugLevel int) *Server {
 
 // Reload reloads the configuration and refreshes both catalog and library.
 func (server *Server) Reload() error {
-	log.Printf("NOTICE: reload signal received")
+	log.Printf("NOTICE: reloading server")
 
 	server.Loading = true
 
@@ -175,7 +175,7 @@ func (server *Server) Run() error {
 
 // Stop stops the server.
 func (server *Server) Stop() {
-	log.Printf("NOTICE: shutdown signal received")
+	log.Printf("NOTICE: shutting down server")
 
 	server.Listener.Stop <- true
 }
