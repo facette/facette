@@ -11,14 +11,14 @@ import (
 
 // Origin represents an origin of source sets (e.g. a Collectd or Graphite instance).
 type Origin struct {
-	Name          string
-	Connector     connector.Connector
-	Sources       map[string]*Source
-	SelfRefresh   int
-	LastRefresh   time.Time
-	Catalog       *Catalog
-	controlChan   chan int
-	connectorChan chan [2]string
+	Name            string
+	Connector       connector.Connector
+	Sources         map[string]*Source
+	RefreshInterval int
+	LastRefresh     time.Time
+	Catalog         *Catalog
+	controlChan     chan int
+	connectorChan   chan [2]string
 }
 
 // NewOrigin creates a new origin instance.
@@ -32,10 +32,10 @@ func NewOrigin(name string, config *config.OriginConfig) (*Origin, error) {
 	}
 
 	origin := &Origin{
-		Name:        name,
-		Sources:     make(map[string]*Source),
-		SelfRefresh: config.SelfRefresh,
-		controlChan: make(chan int),
+		Name:            name,
+		Sources:         make(map[string]*Source),
+		RefreshInterval: config.RefreshInterval,
+		controlChan:     make(chan int),
 	}
 
 	originConnector, err := connector.Connectors[connectorType](
@@ -140,8 +140,8 @@ func originWorker(origin *Origin) {
 	defer close(origin.controlChan)
 
 	// If origin "self refresh" has been configured, set up a time ticker
-	if origin.SelfRefresh > 0 {
-		selfRefreshTimeticker = time.NewTicker(time.Duration(origin.SelfRefresh) * time.Second)
+	if origin.RefreshInterval > 0 {
+		selfRefreshTimeticker = time.NewTicker(time.Duration(origin.RefreshInterval) * time.Second)
 		selfRefreshTimerChan = selfRefreshTimeticker.C
 	}
 
