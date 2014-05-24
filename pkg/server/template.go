@@ -2,19 +2,13 @@ package server
 
 import (
 	"html/template"
-	"os"
-	"path"
 	"reflect"
 	"strconv"
 	"strings"
 )
 
 func (server *Server) templateAsset(x string) string {
-	if fileInfo, err := os.Stat(path.Join(server.Config.BaseDir, x)); err == nil {
-		return x + "?" + strconv.FormatInt(fileInfo.ModTime().Unix(), 10)
-	}
-
-	return x
+	return x + "?" + strconv.FormatInt(server.StartTime.Unix(), 10)
 }
 
 func templateEqual(x, y interface{}) bool {
