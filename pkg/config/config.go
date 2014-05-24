@@ -28,7 +28,6 @@ type Config struct {
 	PidFile   string                   `json:"pid_file"`
 	ServerLog string                   `json:"server_log"`
 	URLPrefix string                   `json:"url_prefix"`
-	Auth      map[string]string        `json:"auth"`
 	Scales    [][2]interface{}         `json:"scales"`
 	Origins   map[string]*OriginConfig `json:"-"`
 }

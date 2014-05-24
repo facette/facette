@@ -15,9 +15,6 @@ func (server *Server) handleAdmin(writer http.ResponseWriter, request *http.Requ
 	if request.Method != "GET" && request.Method != "HEAD" {
 		server.handleResponse(writer, nil, http.StatusMethodNotAllowed)
 		return
-	} else if !server.handleAuth(writer, request) {
-		server.handleError(writer, http.StatusUnauthorized)
-		return
 	}
 
 	tmpl, err := template.New("layout.html").Funcs(template.FuncMap{

@@ -28,9 +28,6 @@ func (server *Server) handleCollection(writer http.ResponseWriter, request *http
 		if collectionID == "" {
 			server.handleResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
 			return
-		} else if !server.handleAuth(writer, request) {
-			server.handleResponse(writer, serverResponse{mesgAuthenticationRequired}, http.StatusUnauthorized)
-			return
 		}
 
 		err := server.Library.DeleteItem(collectionID, library.LibraryItemCollection)

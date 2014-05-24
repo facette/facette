@@ -25,9 +25,6 @@ func (server *Server) handleGraph(writer http.ResponseWriter, request *http.Requ
 		if graphID == "" {
 			server.handleResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
 			return
-		} else if !server.handleAuth(writer, request) {
-			server.handleResponse(writer, serverResponse{mesgAuthenticationRequired}, http.StatusUnauthorized)
-			return
 		}
 
 		err := server.Library.DeleteItem(graphID, library.LibraryItemGraph)

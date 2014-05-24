@@ -1,6 +1,6 @@
 % FACETTECTL(8) facette
 % Vincent Batoufflet <vincent@batoufflet.info>
-% December 22, 2013
+% May 24, 2014
 
 # NAME
 
@@ -16,17 +16,8 @@ Facette is a graphing web front-end for RRD files. This utility administrates th
 
 # COMMANDS
 
-useradd *name*
-:   Create a new user into the authentication backend.
-
-userdel *name*
-:   Remove an existing user from the authentication backend.
-
-userlist
-:   List all the existing user entries.
-
-usermod *name*
-:   Modify an existing user.
+reload
+:   Reload configuration and refresh both catalog and library.
 
 # OPTIONS
 

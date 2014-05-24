@@ -71,11 +71,7 @@ func (server *Server) parseStoreRequest(writer http.ResponseWriter, request *htt
 		return &serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed
 	} else if utils.RequestGetContentType(request) != "application/json" {
 		return &serverResponse{mesgUnsupportedMediaType}, http.StatusUnsupportedMediaType
-	} else if !server.handleAuth(writer, request) {
-		return &serverResponse{mesgAuthenticationRequired}, http.StatusUnauthorized
 	}
-
-	server.handleAuth(writer, request)
 
 	return nil, http.StatusOK
 }

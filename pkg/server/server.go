@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/facette/facette/pkg/auth"
 	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/library"
@@ -31,13 +30,12 @@ const (
 
 // Server is the main structure of the server handler.
 type Server struct {
-	Config      *config.Config
-	Listener    *stoppableListener.StoppableListener
-	AuthHandler auth.Handler
-	Catalog     *catalog.Catalog
-	Library     *library.Library
-	Loading     bool
-	debugLevel  int
+	Config     *config.Config
+	Listener   *stoppableListener.StoppableListener
+	Catalog    *catalog.Catalog
+	Library    *library.Library
+	Loading    bool
+	debugLevel int
 }
 
 // NewServer creates a new instance of server.
@@ -48,7 +46,7 @@ func NewServer(configPath string, debugLevel int) *Server {
 	}
 }
 
-// Reload reloads the configuration and refreshes authentication handler, catalog and library.
+// Reload reloads the configuration and refreshes both catalog and library.
 func (server *Server) Reload() error {
 	log.Printf("NOTICE: reload signal received")
 
@@ -57,10 +55,6 @@ func (server *Server) Reload() error {
 	if err := server.Config.Reload(); err != nil {
 		log.Printf("ERROR: an error occured while reloading configuration: %s", err.Error())
 		return err
-	}
-
-	if server.AuthHandler != nil {
-		server.AuthHandler.Refresh()
 	}
 
 	server.Catalog.Refresh()
@@ -113,17 +107,6 @@ func (server *Server) Run() error {
 
 	server.Library = library.NewLibrary(server.Config, server.Catalog, server.debugLevel)
 	go server.Library.Refresh()
-
-	// Create authentication handler
-	authHandler, err := auth.NewAuth(server.Config.Auth, server.debugLevel)
-	if err != nil {
-		return err
-	}
-
-	if authHandler != nil {
-		server.AuthHandler = authHandler
-		go server.AuthHandler.Refresh()
-	}
 
 	// Prepare router
 	router := NewRouter(server)
