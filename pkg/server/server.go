@@ -182,5 +182,7 @@ func (server *Server) Run() error {
 
 // Stop stops the server.
 func (server *Server) Stop() {
+	server.Catalog.Close()
+
 	server.Listener.Stop <- true
 }
