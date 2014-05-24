@@ -20,7 +20,9 @@ type Catalog struct {
 
 const (
 	_ = iota
+	// OriginCmdRefresh represents an origin refresh command
 	OriginCmdRefresh
+	// OriginCmdShutdown represents an origin shutdown command
 	OriginCmdShutdown
 )
 

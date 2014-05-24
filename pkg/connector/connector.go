@@ -8,8 +8,9 @@ import (
 )
 
 const (
+	_ = iota
 	// OperGroupTypeNone represents a null operation group mode.
-	OperGroupTypeNone = iota
+	OperGroupTypeNone
 	// OperGroupTypeAvg represents a AVG operation group mode.
 	OperGroupTypeAvg
 	// OperGroupTypeSum represents a SUM operation group mode.

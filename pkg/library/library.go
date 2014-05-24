@@ -15,8 +15,9 @@ import (
 )
 
 const (
+	_ = iota
 	// LibraryItemSourceGroup represents a source group item.
-	LibraryItemSourceGroup = iota
+	LibraryItemSourceGroup
 	// LibraryItemMetricGroup represents a metric group item.
 	LibraryItemMetricGroup
 	// LibraryItemGraph represents a graph item.
