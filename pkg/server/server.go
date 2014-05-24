@@ -35,6 +35,7 @@ type Server struct {
 	Catalog    *catalog.Catalog
 	Library    *library.Library
 	Loading    bool
+	StartTime  time.Time
 	debugLevel int
 }
 
@@ -67,6 +68,8 @@ func (server *Server) Reload() error {
 
 // Run starts the server serving the HTTP responses.
 func (server *Server) Run() error {
+	server.StartTime = time.Now()
+
 	// Load server configuration
 	if err := server.Config.Reload(); err != nil {
 		return err
