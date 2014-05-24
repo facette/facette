@@ -23,9 +23,9 @@ type Origin struct {
 
 // NewOrigin creates a new origin instance.
 func NewOrigin(name string, config *config.OriginConfig) (*Origin, error) {
-	connectorType := config.ConnectorSettings["type"]
+	connectorType := config.Connector["type"]
 
-	if _, ok := config.ConnectorSettings["type"]; !ok {
+	if _, ok := config.Connector["type"]; !ok {
 		return nil, fmt.Errorf("missing connector type")
 	} else if _, ok := connector.Connectors[connectorType]; !ok {
 		return nil, fmt.Errorf("unknown connector type `%s'", connectorType)
@@ -40,7 +40,7 @@ func NewOrigin(name string, config *config.OriginConfig) (*Origin, error) {
 
 	originConnector, err := connector.Connectors[connectorType](
 		&origin.connectorChan,
-		config.ConnectorSettings)
+		config.Connector)
 	if err != nil {
 		return nil, err
 	}
