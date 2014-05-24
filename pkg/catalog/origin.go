@@ -14,6 +14,7 @@ type Origin struct {
 	Name        string
 	Connector   connector.Connector
 	Sources     map[string]*Source
+	SelfRefresh int
 	LastRefresh time.Time
 	Catalog     *Catalog
 	inputChan   chan [2]string
@@ -28,8 +29,9 @@ func NewOrigin(name string, config *config.OriginConfig) (*Origin, error) {
 	}
 
 	origin := &Origin{
-		Name:    name,
-		Sources: make(map[string]*Source),
+		Name:        name,
+		Sources:     make(map[string]*Source),
+		SelfRefresh: config.SelfRefresh,
 	}
 
 	originConnector, err := connector.Connectors[config.ConnectorSettings["type"]](
