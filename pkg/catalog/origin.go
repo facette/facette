@@ -11,13 +11,13 @@ import (
 
 // Origin represents an origin of source sets (e.g. a Collectd or Graphite instance).
 type Origin struct {
-	Name        string
-	Connector   connector.Connector
-	Sources     map[string]*Source
-	SelfRefresh int
-	LastRefresh time.Time
-	Catalog     *Catalog
-	inputChan   chan [2]string
+	Name          string
+	Connector     connector.Connector
+	Sources       map[string]*Source
+	SelfRefresh   int
+	LastRefresh   time.Time
+	Catalog       *Catalog
+	connectorChan chan [2]string
 }
 
 // NewOrigin creates a new origin instance.
@@ -37,7 +37,7 @@ func NewOrigin(name string, config *config.OriginConfig) (*Origin, error) {
 	}
 
 	originConnector, err := connector.Connectors[connectorType](
-		&origin.inputChan,
+		&origin.connectorChan,
 		config.ConnectorSettings)
 	if err != nil {
 		return nil, err
@@ -61,7 +61,7 @@ func (origin *Origin) Refresh() error {
 	origin.Sources = make(map[string]*Source)
 
 	// Origin input channel
-	origin.inputChan = make(chan [2]string)
+	origin.connectorChan = make(chan [2]string)
 
 	// Channel to be notified in case of connector refresh error
 	connectorErrChan := make(chan error)
@@ -74,7 +74,7 @@ func (origin *Origin) Refresh() error {
 			// An error occurred while connector refreshed orgin
 			return err
 
-		case entry, ok := <-origin.inputChan:
+		case entry, ok := <-origin.connectorChan:
 			// Channel is closed: connector is done refreshing origin
 			if !ok {
 				goto done
