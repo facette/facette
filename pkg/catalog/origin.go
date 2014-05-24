@@ -172,10 +172,8 @@ func originWorker(origin *Origin) {
 
 			case OriginCmdShutdown:
 				// Global shutdown triggered
-				log.Printf("INFO: explicit shutdown of origin `%s' worker triggered", origin.Name)
-
-				// Stop "self refresh" time ticker
 				if selfRefreshTimerChan != nil {
+					// Stop "self refresh" time ticker
 					selfRefreshTimeticker.Stop()
 				}
 

@@ -50,6 +50,8 @@ func NewServer(configPath string, debugLevel int) *Server {
 
 // Reload reloads the configuration and refreshes authentication handler, catalog and library.
 func (server *Server) Reload() error {
+	log.Printf("NOTICE: reload signal received")
+
 	server.Loading = true
 
 	if err := server.Config.Reload(); err != nil {
@@ -150,7 +152,11 @@ func (server *Server) Run() error {
 	server.Listener = stoppableListener.Handle(listener)
 	err = http.Serve(server.Listener, nil)
 
+	// Server shutdown triggered
 	if server.Listener.Stopped {
+		// Close catalog
+		server.Catalog.Close()
+
 		/* Wait for the clients to disconnect */
 		for i := 0; i < serverStopWait; i++ {
 			if clientCount := server.Listener.ConnCount.Get(); clientCount == 0 {
@@ -163,7 +169,8 @@ func (server *Server) Run() error {
 		clientCount := server.Listener.ConnCount.Get()
 
 		if clientCount > 0 {
-			log.Printf("INFO: server stopped after %d seconds with %d client(s) still connected", serverStopWait,
+			log.Printf("INFO: server stopped after %d seconds with %d client(s) still connected",
+				serverStopWait,
 				clientCount)
 		} else {
 			log.Println("INFO: server stopped gracefully")
@@ -182,7 +189,7 @@ func (server *Server) Run() error {
 
 // Stop stops the server.
 func (server *Server) Stop() {
-	server.Catalog.Close()
+	log.Printf("NOTICE: shutdown signal received")
 
 	server.Listener.Stop <- true
 }
