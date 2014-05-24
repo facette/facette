@@ -17,6 +17,7 @@ type Origin struct {
 	SelfRefresh   int
 	LastRefresh   time.Time
 	Catalog       *Catalog
+	controlChan   chan int
 	connectorChan chan [2]string
 }
 
@@ -34,6 +35,7 @@ func NewOrigin(name string, config *config.OriginConfig) (*Origin, error) {
 		Name:        name,
 		Sources:     make(map[string]*Source),
 		SelfRefresh: config.SelfRefresh,
+		controlChan: make(chan int),
 	}
 
 	originConnector, err := connector.Connectors[connectorType](
@@ -44,6 +46,9 @@ func NewOrigin(name string, config *config.OriginConfig) (*Origin, error) {
 	}
 
 	origin.Connector = originConnector.(connector.Connector)
+
+	// Start origin worker goroutine in background
+	go originWorker(origin)
 
 	return origin, nil
 }
@@ -110,7 +115,7 @@ func (origin *Origin) Refresh() error {
 			}
 
 			if origin.Catalog.debugLevel > 3 {
-				log.Printf("DEBUG: appending `%s' metric for `%s' source...\n", entry[1], entry[0])
+				log.Printf("DEBUG: appending metric `%s' metric to source `%s'\n", entry[1], entry[0])
 			}
 
 			origin.Sources[entry[0]].Metrics[entry[1]] = NewMetric(entry[1], originalMetric, origin.Sources[entry[0]])
@@ -123,4 +128,63 @@ done:
 	origin.LastRefresh = time.Now()
 
 	return nil
+}
+
+// Origin worker goroutine
+func originWorker(origin *Origin) {
+	var (
+		selfRefreshTimeticker *time.Ticker
+		selfRefreshTimerChan  <-chan time.Time
+	)
+
+	defer close(origin.controlChan)
+
+	// If origin "self refresh" has been configured, set up a time ticker
+	if origin.SelfRefresh > 0 {
+		selfRefreshTimeticker = time.NewTicker(time.Duration(origin.SelfRefresh) * time.Second)
+		selfRefreshTimerChan = selfRefreshTimeticker.C
+	}
+
+	for {
+		select {
+		case _ = <-selfRefreshTimerChan:
+			// Periodic origin refresh triggered
+			if origin.Catalog.debugLevel > 1 {
+				log.Printf("DEBUG: periodic refresh of origin `%s' triggered", origin.Name)
+			}
+
+			if err := origin.Refresh(); err != nil {
+				log.Printf("ERROR: cannot refresh origin `%s': %s", origin.Name, err)
+			}
+
+			origin.LastRefresh = time.Now()
+
+		case cmd := <-origin.controlChan:
+			// Control command received
+			switch cmd {
+			case OriginCmdRefresh:
+				// Explicit origin refresh triggered
+				if err := origin.Refresh(); err != nil {
+					log.Printf("ERROR: cannot refresh origin `%s': %s", origin.Name, err)
+				}
+
+				origin.LastRefresh = time.Now()
+
+			case OriginCmdShutdown:
+				// Global shutdown triggered
+				log.Printf("INFO: explicit shutdown of origin `%s' worker triggered", origin.Name)
+
+				// Stop "self refresh" time ticker
+				if selfRefreshTimerChan != nil {
+					selfRefreshTimeticker.Stop()
+				}
+
+				return
+
+			default:
+				// Unknown command
+				log.Printf("ERROR: unsupported origin control command received")
+			}
+		}
+	}
 }
