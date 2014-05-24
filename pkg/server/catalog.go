@@ -43,7 +43,7 @@ func (server *Server) handleOrigin(writer http.ResponseWriter, request *http.Req
 
 	response := OriginResponse{
 		Name:      originName,
-		Connector: server.Config.Origins[originName].Connector["type"],
+		Connector: server.Config.Origins[originName].ConnectorSettings["type"],
 		Updated:   server.Catalog.Updated.Format(time.RFC3339),
 	}
 

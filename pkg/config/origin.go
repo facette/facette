@@ -7,10 +7,10 @@ import (
 
 // OriginConfig represents an origin entry in the configuration system.
 type OriginConfig struct {
-	Connector map[string]string          `json:"connector"`
-	Filters   []*OriginFilterConfig      `json:"filters"`
-	Templates map[string]*TemplateConfig `json:"templates"`
-	Modified  time.Time                  `json:"-"`
+	ConnectorSettings map[string]string          `json:"connector"`
+	Filters           []*OriginFilterConfig      `json:"filters"`
+	Templates         map[string]*TemplateConfig `json:"templates"`
+	Modified          time.Time                  `json:"-"`
 }
 
 // OriginFilterConfig represents a filter entry in an OriginConfig instance.
