@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	uuid "github.com/facette/facette/thirdparty/github.com/nu7hatch/gouuid"
 )
 
 const (
