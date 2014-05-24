@@ -22,10 +22,12 @@ type Origin struct {
 
 // NewOrigin creates a new origin instance.
 func NewOrigin(name string, config *config.OriginConfig) (*Origin, error) {
+	connectorType := config.ConnectorSettings["type"]
+
 	if _, ok := config.ConnectorSettings["type"]; !ok {
 		return nil, fmt.Errorf("missing connector type")
-	} else if _, ok := connector.Connectors[config.ConnectorSettings["type"]]; !ok {
-		return nil, fmt.Errorf("unknown `%s' connector type", config.ConnectorSettings["type"])
+	} else if _, ok := connector.Connectors[connectorType]; !ok {
+		return nil, fmt.Errorf("unknown connector type `%s'", connectorType)
 	}
 
 	origin := &Origin{
@@ -34,7 +36,7 @@ func NewOrigin(name string, config *config.OriginConfig) (*Origin, error) {
 		SelfRefresh: config.SelfRefresh,
 	}
 
-	originConnector, err := connector.Connectors[config.ConnectorSettings["type"]](
+	originConnector, err := connector.Connectors[connectorType](
 		&origin.inputChan,
 		config.ConnectorSettings)
 	if err != nil {
@@ -49,7 +51,7 @@ func NewOrigin(name string, config *config.OriginConfig) (*Origin, error) {
 // Refresh updates the current origin by querying its connector for sources and metrics.
 func (origin *Origin) Refresh() error {
 	if origin.Connector == nil {
-		return fmt.Errorf("connector for `%s' origin is not initialized", origin.Name)
+		return fmt.Errorf("connector for origin `%s' is not initialized", origin.Name)
 	}
 
 	if origin.Catalog.debugLevel > 0 {
