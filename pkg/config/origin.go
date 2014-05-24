@@ -10,6 +10,7 @@ type OriginConfig struct {
 	ConnectorSettings map[string]string          `json:"connector"`
 	Filters           []*OriginFilterConfig      `json:"filters"`
 	Templates         map[string]*TemplateConfig `json:"templates"`
+	SelfRefresh       int                        `json:"self_refresh"`
 	Modified          time.Time                  `json:"-"`
 }
 
