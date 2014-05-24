@@ -22,15 +22,15 @@ type rrdMetric struct {
 
 // RRDConnector represents the main structure of the RRD connector.
 type RRDConnector struct {
-	Path      string
-	Pattern   string
-	Daemon    string
-	inputChan *chan [2]string
-	metrics   map[string]map[string]*rrdMetric
+	Path       string
+	Pattern    string
+	Daemon     string
+	outputChan *chan [2]string
+	metrics    map[string]map[string]*rrdMetric
 }
 
 func init() {
-	Connectors["rrd"] = func(inputChan *chan [2]string, config map[string]string) (interface{}, error) {
+	Connectors["rrd"] = func(outputChan *chan [2]string, config map[string]string) (interface{}, error) {
 		if _, ok := config["path"]; !ok {
 			return nil, fmt.Errorf("missing `path' mandatory connector setting")
 		} else if _, ok := config["pattern"]; !ok {
@@ -38,11 +38,11 @@ func init() {
 		}
 
 		return &RRDConnector{
-			Path:      config["path"],
-			Pattern:   config["pattern"],
-			Daemon:    config["daemon"],
-			inputChan: inputChan,
-			metrics:   make(map[string]map[string]*rrdMetric),
+			Path:       config["path"],
+			Pattern:    config["pattern"],
+			Daemon:     config["daemon"],
+			outputChan: outputChan,
+			metrics:    make(map[string]map[string]*rrdMetric),
 		}, nil
 	}
 }
@@ -56,7 +56,7 @@ func (connector *RRDConnector) GetPlots(query *GroupQuery, startTime, endTime ti
 
 // Refresh triggers a full connector data update.
 func (connector *RRDConnector) Refresh(errChan chan error) {
-	defer close(*connector.inputChan)
+	defer close(*connector.outputChan)
 	defer close(errChan)
 
 	// Compile pattern
@@ -128,7 +128,7 @@ func (connector *RRDConnector) Refresh(errChan chan error) {
 			for dsName := range info["ds.index"].(map[string]interface{}) {
 				metricFullName := metricName + "/" + dsName
 
-				*connector.inputChan <- [2]string{sourceName, metricFullName}
+				*connector.outputChan <- [2]string{sourceName, metricFullName}
 				connector.metrics[sourceName][metricFullName] = &rrdMetric{Dataset: dsName, FilePath: filePath}
 			}
 		}

@@ -27,18 +27,18 @@ type graphitePlot struct {
 type GraphiteConnector struct {
 	URL         string
 	InsecureTLS bool
-	inputChan   *chan [2]string
+	outputChan  *chan [2]string
 }
 
 func init() {
-	Connectors["graphite"] = func(inputChan *chan [2]string, config map[string]string) (interface{}, error) {
+	Connectors["graphite"] = func(outputChan *chan [2]string, config map[string]string) (interface{}, error) {
 		if _, ok := config["url"]; !ok {
 			return nil, fmt.Errorf("missing `url' mandatory connector setting")
 		}
 
 		connector := &GraphiteConnector{
-			URL:       config["url"],
-			inputChan: inputChan,
+			URL:        config["url"],
+			outputChan: outputChan,
 		}
 
 		if config["allow_insecure_tls"] == "yes" {
@@ -95,7 +95,7 @@ func (connector *GraphiteConnector) GetPlots(query *GroupQuery, startTime, endTi
 
 // Refresh triggers a full connector data update.
 func (connector *GraphiteConnector) Refresh(errChan chan error) {
-	defer close(*connector.inputChan)
+	defer close(*connector.outputChan)
 	defer close(errChan)
 
 	httpTransport := &http.Transport{
@@ -150,7 +150,7 @@ func (connector *GraphiteConnector) Refresh(errChan chan error) {
 			metricName = metric[index+1:]
 		}
 
-		*connector.inputChan <- [2]string{sourceName, metricName}
+		*connector.outputChan <- [2]string{sourceName, metricName}
 	}
 }
 
