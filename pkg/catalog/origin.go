@@ -20,7 +20,7 @@ type Origin struct {
 }
 
 // NewOrigin creates a new origin instance.
-func NewOrigin(name string, config *config.OriginConfig, catalog *Catalog) (*Origin, error) {
+func NewOrigin(name string, config *config.OriginConfig) (*Origin, error) {
 	if _, ok := config.ConnectorSettings["type"]; !ok {
 		return nil, fmt.Errorf("missing connector type")
 	} else if _, ok := connector.Connectors[config.ConnectorSettings["type"]]; !ok {
@@ -30,7 +30,6 @@ func NewOrigin(name string, config *config.OriginConfig, catalog *Catalog) (*Ori
 	origin := &Origin{
 		Name:    name,
 		Sources: make(map[string]*Source),
-		Catalog: catalog,
 	}
 
 	originConnector, err := connector.Connectors[config.ConnectorSettings["type"]](

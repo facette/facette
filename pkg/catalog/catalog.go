@@ -50,17 +50,19 @@ func (catalog *Catalog) Refresh() error {
 	catalog.Origins = make(map[string]*Origin)
 
 	for originName, originConfig := range catalog.Config.Origins {
-		origin, err := NewOrigin(originName, originConfig, catalog)
+		origin, err := NewOrigin(originName, originConfig)
 		if err != nil {
 			log.Printf("ERROR: %s\n", err.Error())
 		}
+
+		origin.Catalog = catalog
 
 		catalog.Origins[originName] = origin
 	}
 
 	wait := &sync.WaitGroup{}
 
-	// Update catalog origins
+	// Update catalog origins concurrently
 	for _, origin := range catalog.Origins {
 		wait.Add(1)
 
