@@ -2,7 +2,6 @@ package server
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"html/template"
 	"log"
@@ -11,41 +10,10 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
-
-func (server *Server) handleAuth(writer http.ResponseWriter, request *http.Request) bool {
-	// Skip authentication if not set
-	if server.AuthHandler == nil {
-		return true
-	}
-
-	// Check authentication data
-	authorization := request.Header.Get("Authorization")
-
-	if strings.HasPrefix(authorization, "Basic ") {
-		data, err := base64.StdEncoding.DecodeString(authorization[6:])
-		if err != nil {
-			return false
-		}
-
-		chunks := strings.Split(string(data), ":")
-		if len(chunks) != 2 {
-			return false
-		}
-
-		if server.AuthHandler.Authenticate(chunks[0], chunks[1]) {
-			return true
-		}
-	}
-
-	writer.Header().Add("WWW-Authenticate", "Basic realm=\"Authorization Required\"")
-
-	return false
-}
 
 func (server *Server) handleError(writer http.ResponseWriter, status int) {
 	var data struct {
@@ -85,9 +53,6 @@ func (server *Server) handleError(writer http.ResponseWriter, status int) {
 func (server *Server) handleReload(writer http.ResponseWriter, request *http.Request) {
 	if request.Method != "GET" && request.Method != "HEAD" {
 		server.handleResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
-		return
-	} else if !server.handleAuth(writer, request) {
-		server.handleResponse(writer, serverResponse{mesgAuthenticationRequired}, http.StatusUnauthorized)
 		return
 	}
 

@@ -11,17 +11,9 @@ import (
 
 const (
 	cmdUsage = `Usage: %s [OPTIONS] reload
-       %[1]s [OPTIONS] useradd NAME
-       %[1]s [OPTIONS] userdel NAME
-       %[1]s [OPTIONS] userlist
-       %[1]s [OPTIONS] usermod NAME
 
 Commands:
-   reload    send reload signal to server
-   useradd   add a new user
-   userdel   remove an existing user
-   userlist  list existing users
-   usermod   modify an existing user`
+   reload    send reload signal to server`
 )
 
 var (
@@ -60,8 +52,6 @@ func main() {
 	}
 
 	switch flag.Args()[0] {
-	case "userlist", "useradd", "userdel", "usermod":
-		handler = handleUser
 	case "reload":
 		handler = handleServer
 	default:
