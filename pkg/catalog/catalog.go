@@ -102,8 +102,6 @@ func (catalog *Catalog) Refresh() error {
 func (catalog *Catalog) Close() error {
 	wait := &sync.WaitGroup{}
 
-	log.Println("INFO: closing catalog")
-
 	// Shutdown catalog origin workers concurrently
 	for _, origin := range catalog.Origins {
 		wait.Add(1)
