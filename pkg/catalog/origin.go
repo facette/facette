@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/connector"
 )
 
@@ -19,11 +20,11 @@ type Origin struct {
 }
 
 // NewOrigin creates a new origin instance.
-func NewOrigin(name string, config map[string]string, catalog *Catalog) (*Origin, error) {
-	if _, ok := config["type"]; !ok {
+func NewOrigin(name string, config *config.OriginConfig, catalog *Catalog) (*Origin, error) {
+	if _, ok := config.ConnectorSettings["type"]; !ok {
 		return nil, fmt.Errorf("missing connector type")
-	} else if _, ok := connector.Connectors[config["type"]]; !ok {
-		return nil, fmt.Errorf("unknown `%s' connector type", config["type"])
+	} else if _, ok := connector.Connectors[config.ConnectorSettings["type"]]; !ok {
+		return nil, fmt.Errorf("unknown `%s' connector type", config.ConnectorSettings["type"])
 	}
 
 	origin := &Origin{
@@ -32,14 +33,14 @@ func NewOrigin(name string, config map[string]string, catalog *Catalog) (*Origin
 		Catalog: catalog,
 	}
 
-	handler, err := connector.Connectors[config["type"]](&origin.inputChan, config)
+	originConnector, err := connector.Connectors[config.ConnectorSettings["type"]](
+		&origin.inputChan,
+		config.ConnectorSettings)
 	if err != nil {
 		return nil, err
 	}
 
-	origin.Connector = handler.(connector.Connector)
-
-	catalog.Origins[name] = origin
+	origin.Connector = originConnector.(connector.Connector)
 
 	return origin, nil
 }

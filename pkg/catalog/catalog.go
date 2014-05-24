@@ -50,7 +50,7 @@ func (catalog *Catalog) Refresh() error {
 	catalog.Origins = make(map[string]*Origin)
 
 	for originName, originConfig := range catalog.Config.Origins {
-		origin, err := NewOrigin(originName, originConfig.Connector, catalog)
+		origin, err := NewOrigin(originName, originConfig, catalog)
 		if err != nil {
 			log.Printf("ERROR: %s\n", err.Error())
 		}
