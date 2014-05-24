@@ -18,6 +18,12 @@ type Catalog struct {
 	debugLevel int
 }
 
+const (
+	_ = iota
+	OriginCmdRefresh
+	OriginCmdShutdown
+)
+
 // NewCatalog creates a new instance of catalog.
 func NewCatalog(config *config.Config, debugLevel int) *Catalog {
 	return &Catalog{
