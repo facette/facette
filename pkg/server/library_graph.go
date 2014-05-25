@@ -17,51 +17,51 @@ import (
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
 
-func (server *Server) handleGraph(writer http.ResponseWriter, request *http.Request) {
+func (server *Server) serveGraph(writer http.ResponseWriter, request *http.Request) {
 	graphID := strings.TrimPrefix(request.URL.Path, urlLibraryPath+"graphs/")
 
 	switch request.Method {
 	case "DELETE":
 		if graphID == "" {
-			server.handleResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
+			server.serveResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
 			return
 		}
 
 		err := server.Library.DeleteItem(graphID, library.LibraryItemGraph)
 		if os.IsNotExist(err) {
-			server.handleResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
+			server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 			return
 		} else if err != nil {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
+			server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 			return
 		}
 
-		server.handleResponse(writer, nil, http.StatusOK)
+		server.serveResponse(writer, nil, http.StatusOK)
 
 	case "GET", "HEAD":
 		if graphID == "" {
-			server.handleGraphList(writer, request)
+			server.serveGraphList(writer, request)
 			return
 		}
 
 		item, err := server.Library.GetItem(graphID, library.LibraryItemGraph)
 		if os.IsNotExist(err) {
-			server.handleResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
+			server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 			return
 		} else if err != nil {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
+			server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 			return
 		}
 
-		server.handleResponse(writer, item, http.StatusOK)
+		server.serveResponse(writer, item, http.StatusOK)
 
 	case "POST", "PUT":
 		var graph *library.Graph
 
 		if response, status := server.parseStoreRequest(writer, request, graphID); status != http.StatusOK {
-			server.handleResponse(writer, response, status)
+			server.serveResponse(writer, response, status)
 			return
 		}
 
@@ -69,11 +69,11 @@ func (server *Server) handleGraph(writer http.ResponseWriter, request *http.Requ
 			// Get graph from library
 			item, err := server.Library.GetItem(request.FormValue("inherit"), library.LibraryItemGraph)
 			if os.IsNotExist(err) {
-				server.handleResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
+				server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 				return
 			} else if err != nil {
 				log.Println("ERROR: " + err.Error())
-				server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
+				server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 				return
 			}
 
@@ -93,7 +93,7 @@ func (server *Server) handleGraph(writer http.ResponseWriter, request *http.Requ
 
 		if err := json.Unmarshal(body, graph); err != nil {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
+			server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 			return
 		}
 
@@ -107,27 +107,27 @@ func (server *Server) handleGraph(writer http.ResponseWriter, request *http.Requ
 		err := server.Library.StoreItem(graph, library.LibraryItemGraph)
 		if response, status := server.parseError(writer, request, err); status != http.StatusOK {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, response, status)
+			server.serveResponse(writer, response, status)
 			return
 		}
 
 		if request.Method == "POST" {
 			writer.Header().Add("Location", strings.TrimRight(request.URL.Path, "/")+"/"+graph.ID)
-			server.handleResponse(writer, nil, http.StatusCreated)
+			server.serveResponse(writer, nil, http.StatusCreated)
 		} else {
-			server.handleResponse(writer, nil, http.StatusOK)
+			server.serveResponse(writer, nil, http.StatusOK)
 		}
 
 	default:
-		server.handleResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
+		server.serveResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
 	}
 }
 
-func (server *Server) handleGraphList(writer http.ResponseWriter, request *http.Request) {
+func (server *Server) serveGraphList(writer http.ResponseWriter, request *http.Request) {
 	var offset, limit int
 
 	if response, status := server.parseListRequest(writer, request, &offset, &limit); status != http.StatusOK {
-		server.handleResponse(writer, response, status)
+		server.serveResponse(writer, response, status)
 		return
 	}
 
@@ -137,11 +137,11 @@ func (server *Server) handleGraphList(writer http.ResponseWriter, request *http.
 	if request.FormValue("collection") != "" {
 		item, err := server.Library.GetItem(request.FormValue("collection"), library.LibraryItemCollection)
 		if os.IsNotExist(err) {
-			server.handleResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
+			server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 			return
 		} else if err != nil {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
+			server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 			return
 		}
 
@@ -180,10 +180,10 @@ func (server *Server) handleGraphList(writer http.ResponseWriter, request *http.
 
 	server.applyResponseLimit(writer, request, response)
 
-	server.handleResponse(writer, response.list, http.StatusOK)
+	server.serveResponse(writer, response.list, http.StatusOK)
 }
 
-func (server *Server) handleGraphPlots(writer http.ResponseWriter, request *http.Request) {
+func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.Request) {
 	var (
 		err                error
 		graph              *library.Graph
@@ -192,10 +192,10 @@ func (server *Server) handleGraphPlots(writer http.ResponseWriter, request *http
 	)
 
 	if request.Method != "POST" && request.Method != "HEAD" {
-		server.handleResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
+		server.serveResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
 		return
 	} else if utils.RequestGetContentType(request) != "application/json" {
-		server.handleResponse(writer, serverResponse{mesgUnsupportedMediaType}, http.StatusUnsupportedMediaType)
+		server.serveResponse(writer, serverResponse{mesgUnsupportedMediaType}, http.StatusUnsupportedMediaType)
 		return
 	}
 
@@ -206,7 +206,7 @@ func (server *Server) handleGraphPlots(writer http.ResponseWriter, request *http
 
 	if err := json.Unmarshal(body, plotReq); err != nil {
 		log.Println("ERROR: " + err.Error())
-		server.handleResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
+		server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 		return
 	}
 
@@ -221,13 +221,13 @@ func (server *Server) handleGraphPlots(writer http.ResponseWriter, request *http
 	} else if strings.HasPrefix(strings.Trim(plotReq.Range, " "), "-") {
 		if endTime, err = time.Parse(time.RFC3339, plotReq.Time); err != nil {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
+			server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 			return
 		}
 	} else {
 		if startTime, err = time.Parse(time.RFC3339, plotReq.Time); err != nil {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
+			server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 			return
 		}
 	}
@@ -235,12 +235,12 @@ func (server *Server) handleGraphPlots(writer http.ResponseWriter, request *http
 	if startTime.IsZero() {
 		if startTime, err = utils.TimeApplyRange(endTime, plotReq.Range); err != nil {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
+			server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 			return
 		}
 	} else if endTime, err = utils.TimeApplyRange(startTime, plotReq.Range); err != nil {
 		log.Println("ERROR: " + err.Error())
-		server.handleResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
+		server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 		return
 	}
 
@@ -268,10 +268,10 @@ func (server *Server) handleGraphPlots(writer http.ResponseWriter, request *http
 
 	if err != nil {
 		if os.IsNotExist(err) {
-			server.handleResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
+			server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 		} else {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
+			server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 		}
 
 		return
@@ -320,7 +320,7 @@ func (server *Server) handleGraphPlots(writer http.ResponseWriter, request *http
 	}
 
 	if len(data) == 0 {
-		server.handleResponse(writer, serverResponse{mesgEmptyData}, http.StatusOK)
+		server.serveResponse(writer, serverResponse{mesgEmptyData}, http.StatusOK)
 		return
 	}
 
@@ -355,7 +355,7 @@ func (server *Server) handleGraphPlots(writer http.ResponseWriter, request *http
 		response.Step = (endTime.Sub(startTime) / time.Duration(plotMax)).Seconds()
 	}
 
-	server.handleResponse(writer, response, http.StatusOK)
+	server.serveResponse(writer, response, http.StatusOK)
 }
 
 func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.OperGroup) (*connector.GroupQuery,
