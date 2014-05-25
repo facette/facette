@@ -12,11 +12,11 @@ import (
 	"github.com/facette/facette/pkg/library"
 )
 
-func (server *Server) handleBrowse(writer http.ResponseWriter, request *http.Request) {
+func (server *Server) serveBrowse(writer http.ResponseWriter, request *http.Request) {
 	var err error
 
 	if request.Method != "GET" && request.Method != "HEAD" {
-		server.handleResponse(writer, nil, http.StatusMethodNotAllowed)
+		server.serveResponse(writer, nil, http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -38,24 +38,24 @@ func (server *Server) handleBrowse(writer http.ResponseWriter, request *http.Req
 
 	if strings.HasPrefix(request.URL.Path, urlBrowsePath+"collections/") ||
 		strings.HasPrefix(request.URL.Path, urlBrowsePath+"sources/") {
-		err = server.handleBrowseCollection(writer, request, tmpl)
+		err = server.serveBrowseCollection(writer, request, tmpl)
 	} else if request.URL.Path == urlBrowsePath+"search" {
-		err = server.handleBrowseSearch(writer, request, tmpl)
+		err = server.serveBrowseSearch(writer, request, tmpl)
 	} else if request.URL.Path == urlBrowsePath {
-		err = server.handleBrowseIndex(writer, request, tmpl)
+		err = server.serveBrowseIndex(writer, request, tmpl)
 	} else {
 		err = os.ErrNotExist
 	}
 
 	if os.IsNotExist(err) {
-		server.handleError(writer, http.StatusNotFound)
+		server.serveError(writer, http.StatusNotFound)
 	} else if err != nil {
 		log.Println("ERROR: " + err.Error())
-		server.handleError(writer, http.StatusInternalServerError)
+		server.serveError(writer, http.StatusInternalServerError)
 	}
 }
 
-func (server *Server) handleBrowseIndex(writer http.ResponseWriter, request *http.Request,
+func (server *Server) serveBrowseIndex(writer http.ResponseWriter, request *http.Request,
 	tmpl *template.Template) error {
 
 	var data struct {
@@ -79,7 +79,7 @@ func (server *Server) handleBrowseIndex(writer http.ResponseWriter, request *htt
 	return tmpl.Execute(writer, data)
 }
 
-func (server *Server) handleBrowseCollection(writer http.ResponseWriter, request *http.Request,
+func (server *Server) serveBrowseCollection(writer http.ResponseWriter, request *http.Request,
 	tmpl *template.Template) error {
 
 	type collectionData struct {
@@ -143,7 +143,7 @@ func (server *Server) handleBrowseCollection(writer http.ResponseWriter, request
 	return tmpl.Execute(writer, data)
 }
 
-func (server *Server) handleBrowseSearch(writer http.ResponseWriter, request *http.Request,
+func (server *Server) serveBrowseSearch(writer http.ResponseWriter, request *http.Request,
 	tmpl *template.Template) error {
 
 	var data struct {

@@ -15,7 +15,7 @@ import (
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
 
-func (server *Server) handleCollection(writer http.ResponseWriter, request *http.Request) {
+func (server *Server) serveCollection(writer http.ResponseWriter, request *http.Request) {
 	type tmpCollection struct {
 		*library.Collection
 		Parent string `json:"parent"`
@@ -26,43 +26,43 @@ func (server *Server) handleCollection(writer http.ResponseWriter, request *http
 	switch request.Method {
 	case "DELETE":
 		if collectionID == "" {
-			server.handleResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
+			server.serveResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
 			return
 		}
 
 		err := server.Library.DeleteItem(collectionID, library.LibraryItemCollection)
 		if os.IsNotExist(err) {
-			server.handleResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
+			server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 			return
 		} else if err != nil {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
+			server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 			return
 		}
 
-		server.handleResponse(writer, nil, http.StatusOK)
+		server.serveResponse(writer, nil, http.StatusOK)
 
 	case "GET", "HEAD":
 		if collectionID == "" {
-			server.handleCollectionList(writer, request)
+			server.serveCollectionList(writer, request)
 			return
 		}
 
 		item, err := server.Library.GetItem(collectionID, library.LibraryItemCollection)
 		if os.IsNotExist(err) {
-			server.handleResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
+			server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 			return
 		} else if err != nil {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
+			server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 			return
 		}
 
-		server.handleResponse(writer, item, http.StatusOK)
+		server.serveResponse(writer, item, http.StatusOK)
 
 	case "POST", "PUT":
 		if response, status := server.parseStoreRequest(writer, request, collectionID); status != http.StatusOK {
-			server.handleResponse(writer, response, status)
+			server.serveResponse(writer, response, status)
 			return
 		}
 
@@ -76,11 +76,11 @@ func (server *Server) handleCollection(writer http.ResponseWriter, request *http
 			// Get collection from library
 			item, err := server.Library.GetItem(request.FormValue("inherit"), library.LibraryItemCollection)
 			if os.IsNotExist(err) {
-				server.handleResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
+				server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 				return
 			} else if err != nil {
 				log.Println("ERROR: " + err.Error())
-				server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
+				server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 				return
 			}
 
@@ -96,7 +96,7 @@ func (server *Server) handleCollection(writer http.ResponseWriter, request *http
 
 		if err := json.Unmarshal(body, &collectionTemp); err != nil {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
+			server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 			return
 		}
 
@@ -135,30 +135,30 @@ func (server *Server) handleCollection(writer http.ResponseWriter, request *http
 		err := server.Library.StoreItem(collectionTemp.Collection, library.LibraryItemCollection)
 		if response, status := server.parseError(writer, request, err); status != http.StatusOK {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, response, status)
+			server.serveResponse(writer, response, status)
 			return
 		}
 
 		if request.Method == "POST" {
 			writer.Header().Add("Location", strings.TrimRight(request.URL.Path, "/")+"/"+collectionTemp.Collection.ID)
-			server.handleResponse(writer, nil, http.StatusCreated)
+			server.serveResponse(writer, nil, http.StatusCreated)
 		} else {
-			server.handleResponse(writer, nil, http.StatusOK)
+			server.serveResponse(writer, nil, http.StatusOK)
 		}
 
 	default:
-		server.handleResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
+		server.serveResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
 	}
 }
 
-func (server *Server) handleCollectionList(writer http.ResponseWriter, request *http.Request) {
+func (server *Server) serveCollectionList(writer http.ResponseWriter, request *http.Request) {
 	var (
 		collection    *library.Collection
 		offset, limit int
 	)
 
 	if response, status := server.parseListRequest(writer, request, &offset, &limit); status != http.StatusOK {
-		server.handleResponse(writer, response, status)
+		server.serveResponse(writer, response, status)
 		return
 	}
 
@@ -220,5 +220,5 @@ func (server *Server) handleCollectionList(writer http.ResponseWriter, request *
 
 	server.applyResponseLimit(writer, request, response)
 
-	server.handleResponse(writer, response.list, http.StatusOK)
+	server.serveResponse(writer, response.list, http.StatusOK)
 }

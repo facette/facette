@@ -14,7 +14,7 @@ import (
 	"github.com/facette/facette/pkg/utils"
 )
 
-func (server *Server) handleGroup(writer http.ResponseWriter, request *http.Request) {
+func (server *Server) serveGroup(writer http.ResponseWriter, request *http.Request) {
 	var (
 		groupID   string
 		groupType int
@@ -31,45 +31,45 @@ func (server *Server) handleGroup(writer http.ResponseWriter, request *http.Requ
 	switch request.Method {
 	case "DELETE":
 		if groupID == "" {
-			server.handleResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
+			server.serveResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
 			return
 		}
 
 		err := server.Library.DeleteItem(groupID, groupType)
 		if os.IsNotExist(err) {
-			server.handleResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
+			server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 			return
 		} else if err != nil {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
+			server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 			return
 		}
 
-		server.handleResponse(writer, nil, http.StatusOK)
+		server.serveResponse(writer, nil, http.StatusOK)
 
 	case "GET", "HEAD":
 		if groupID == "" {
-			server.handleGroupList(writer, request)
+			server.serveGroupList(writer, request)
 			return
 		}
 
 		item, err := server.Library.GetItem(groupID, groupType)
 		if os.IsNotExist(err) {
-			server.handleResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
+			server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 			return
 		} else if err != nil {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
+			server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 			return
 		}
 
-		server.handleResponse(writer, item, http.StatusOK)
+		server.serveResponse(writer, item, http.StatusOK)
 
 	case "POST", "PUT":
 		var group *library.Group
 
 		if response, status := server.parseStoreRequest(writer, request, groupID); status != http.StatusOK {
-			server.handleResponse(writer, response, status)
+			server.serveResponse(writer, response, status)
 			return
 		}
 
@@ -77,11 +77,11 @@ func (server *Server) handleGroup(writer http.ResponseWriter, request *http.Requ
 			// Get group from library
 			item, err := server.Library.GetItem(request.FormValue("inherit"), groupType)
 			if os.IsNotExist(err) {
-				server.handleResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
+				server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 				return
 			} else if err != nil {
 				log.Println("ERROR: " + err.Error())
-				server.handleResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
+				server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 				return
 			}
 
@@ -101,7 +101,7 @@ func (server *Server) handleGroup(writer http.ResponseWriter, request *http.Requ
 
 		if err := json.Unmarshal(body, group); err != nil {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
+			server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 			return
 		}
 
@@ -109,27 +109,27 @@ func (server *Server) handleGroup(writer http.ResponseWriter, request *http.Requ
 		err := server.Library.StoreItem(group, groupType)
 		if response, status := server.parseError(writer, request, err); status != http.StatusOK {
 			log.Println("ERROR: " + err.Error())
-			server.handleResponse(writer, response, status)
+			server.serveResponse(writer, response, status)
 			return
 		}
 
 		if request.Method == "POST" {
 			writer.Header().Add("Location", strings.TrimRight(request.URL.Path, "/")+"/"+group.ID)
-			server.handleResponse(writer, nil, http.StatusCreated)
+			server.serveResponse(writer, nil, http.StatusCreated)
 		} else {
-			server.handleResponse(writer, nil, http.StatusOK)
+			server.serveResponse(writer, nil, http.StatusOK)
 		}
 
 	default:
-		server.handleResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
+		server.serveResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
 	}
 }
 
-func (server *Server) handleGroupList(writer http.ResponseWriter, request *http.Request) {
+func (server *Server) serveGroupList(writer http.ResponseWriter, request *http.Request) {
 	var offset, limit int
 
 	if response, status := server.parseListRequest(writer, request, &offset, &limit); status != http.StatusOK {
-		server.handleResponse(writer, response, status)
+		server.serveResponse(writer, response, status)
 		return
 	}
 
@@ -164,12 +164,12 @@ func (server *Server) handleGroupList(writer http.ResponseWriter, request *http.
 
 	server.applyResponseLimit(writer, request, response)
 
-	server.handleResponse(writer, response.list, http.StatusOK)
+	server.serveResponse(writer, response.list, http.StatusOK)
 }
 
-func (server *Server) handleGroupExpand(writer http.ResponseWriter, request *http.Request) {
+func (server *Server) serveGroupExpand(writer http.ResponseWriter, request *http.Request) {
 	if request.Method != "POST" {
-		server.handleResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
+		server.serveResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -178,7 +178,7 @@ func (server *Server) handleGroupExpand(writer http.ResponseWriter, request *htt
 	query := ExpandRequest{}
 	if err := json.Unmarshal(body, &query); err != nil {
 		log.Println("ERROR: " + err.Error())
-		server.handleResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
+		server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 		return
 	}
 
@@ -238,5 +238,5 @@ func (server *Server) handleGroupExpand(writer http.ResponseWriter, request *htt
 		response = append(response, item)
 	}
 
-	server.handleResponse(writer, response, http.StatusOK)
+	server.serveResponse(writer, response, http.StatusOK)
 }

@@ -37,7 +37,7 @@ func (router *Router) ServeHTTP(writer http.ResponseWriter, request *http.Reques
 
 	if router.server.Loading {
 		if strings.HasPrefix(request.URL.Path, urlAdminPath) || strings.HasPrefix(request.URL.Path, urlBrowsePath) {
-			router.server.handleWait(writer, request)
+			router.server.serveWait(writer, request)
 			return
 		} else if request.URL.Path == urlReloadPath {
 			for {
@@ -48,10 +48,10 @@ func (router *Router) ServeHTTP(writer http.ResponseWriter, request *http.Reques
 				time.Sleep(time.Second)
 			}
 
-			router.server.handleResponse(writer, nil, http.StatusOK)
+			router.server.serveResponse(writer, nil, http.StatusOK)
 			return
 		} else if !strings.HasPrefix(request.URL.Path, urlStaticPath) {
-			router.server.handleResponse(writer, serverResponse{mesgServiceLoading}, http.StatusServiceUnavailable)
+			router.server.serveResponse(writer, serverResponse{mesgServiceLoading}, http.StatusServiceUnavailable)
 			return
 		}
 	}

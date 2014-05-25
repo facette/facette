@@ -114,16 +114,16 @@ func (server *Server) Run() error {
 	// Prepare router
 	router := NewRouter(server)
 
-	router.HandleFunc(urlStaticPath, server.handleStatic)
-	router.HandleFunc(urlCatalogPath, server.handleCatalog)
-	router.HandleFunc(urlLibraryPath, server.handleLibrary)
-	router.HandleFunc(urlAdminPath, server.handleAdmin)
-	router.HandleFunc(urlBrowsePath, server.handleBrowse)
-	router.HandleFunc(urlReloadPath, server.handleReload)
-	router.HandleFunc(urlResourcePath, server.handleResource)
-	router.HandleFunc(urlStatsPath, server.handleStats)
+	router.HandleFunc(urlStaticPath, server.serveStatic)
+	router.HandleFunc(urlCatalogPath, server.serveCatalog)
+	router.HandleFunc(urlLibraryPath, server.serveLibrary)
+	router.HandleFunc(urlAdminPath, server.serveAdmin)
+	router.HandleFunc(urlBrowsePath, server.serveBrowse)
+	router.HandleFunc(urlReloadPath, server.serveReload)
+	router.HandleFunc(urlResourcePath, server.serveResource)
+	router.HandleFunc(urlStatsPath, server.serveStats)
 
-	router.HandleFunc("/", server.handleBrowse)
+	router.HandleFunc("/", server.serveBrowse)
 
 	http.Handle("/", router)
 

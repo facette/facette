@@ -15,7 +15,7 @@ import (
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
 
-func (server *Server) handleError(writer http.ResponseWriter, status int) {
+func (server *Server) serveError(writer http.ResponseWriter, status int) {
 	var data struct {
 		URLPrefix string
 		Status    int
@@ -42,7 +42,7 @@ func (server *Server) handleError(writer http.ResponseWriter, status int) {
 
 	if err != nil {
 		log.Println("ERROR: " + err.Error())
-		server.handleResponse(writer, nil, status)
+		server.serveResponse(writer, nil, status)
 	}
 
 	// Handle HTTP response with status code
@@ -50,24 +50,24 @@ func (server *Server) handleError(writer http.ResponseWriter, status int) {
 	writer.Write(tmplData.Bytes())
 }
 
-func (server *Server) handleReload(writer http.ResponseWriter, request *http.Request) {
+func (server *Server) serveReload(writer http.ResponseWriter, request *http.Request) {
 	if request.Method != "GET" && request.Method != "HEAD" {
-		server.handleResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
+		server.serveResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
 		return
 	}
 
 	server.Reload()
 
-	server.handleResponse(writer, nil, http.StatusOK)
+	server.serveResponse(writer, nil, http.StatusOK)
 }
 
-func (server *Server) handleResource(writer http.ResponseWriter, request *http.Request) {
-	server.handleResponse(writer, &resourceResponse{
+func (server *Server) serveResource(writer http.ResponseWriter, request *http.Request) {
+	server.serveResponse(writer, &resourceResponse{
 		Scales: server.Config.Scales,
 	}, http.StatusOK)
 }
 
-func (server *Server) handleResponse(writer http.ResponseWriter, data interface{}, status int) {
+func (server *Server) serveResponse(writer http.ResponseWriter, data interface{}, status int) {
 	var err error
 
 	output := make([]byte, 0)
@@ -75,7 +75,7 @@ func (server *Server) handleResponse(writer http.ResponseWriter, data interface{
 	if data != nil {
 		output, err = json.Marshal(data)
 		if err != nil {
-			server.handleResponse(writer, nil, http.StatusInternalServerError)
+			server.serveResponse(writer, nil, http.StatusInternalServerError)
 			return
 		}
 
@@ -90,7 +90,7 @@ func (server *Server) handleResponse(writer http.ResponseWriter, data interface{
 	}
 }
 
-func (server *Server) handleStatic(writer http.ResponseWriter, request *http.Request) {
+func (server *Server) serveStatic(writer http.ResponseWriter, request *http.Request) {
 	mimeType := mime.TypeByExtension(filepath.Ext(request.URL.Path))
 	if mimeType == "" {
 		mimeType = "application/octet-stream"
@@ -102,16 +102,16 @@ func (server *Server) handleStatic(writer http.ResponseWriter, request *http.Req
 	http.ServeFile(writer, request, path.Join(server.Config.BaseDir, request.URL.Path))
 }
 
-func (server *Server) handleStats(writer http.ResponseWriter, request *http.Request) {
+func (server *Server) serveStats(writer http.ResponseWriter, request *http.Request) {
 	if request.Method != "GET" && request.Method != "HEAD" {
-		server.handleResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
+		server.serveResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
 		return
 	}
 
-	server.handleResponse(writer, server.getStats(writer, request), http.StatusOK)
+	server.serveResponse(writer, server.getStats(writer, request), http.StatusOK)
 }
 
-func (server *Server) handleWait(writer http.ResponseWriter, request *http.Request) {
+func (server *Server) serveWait(writer http.ResponseWriter, request *http.Request) {
 	var data struct {
 		URLPrefix string
 	}
@@ -132,10 +132,10 @@ func (server *Server) handleWait(writer http.ResponseWriter, request *http.Reque
 
 	if err != nil {
 		if os.IsNotExist(err) {
-			server.handleError(writer, http.StatusNotFound)
+			server.serveError(writer, http.StatusNotFound)
 		} else {
 			log.Println("ERROR: " + err.Error())
-			server.handleError(writer, http.StatusInternalServerError)
+			server.serveError(writer, http.StatusInternalServerError)
 		}
 	}
 }

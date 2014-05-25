@@ -11,33 +11,33 @@ import (
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
 
-func (server *Server) handleCatalog(writer http.ResponseWriter, request *http.Request) {
+func (server *Server) serveCatalog(writer http.ResponseWriter, request *http.Request) {
 	setHTTPCacheHeaders(writer)
 
 	if strings.HasPrefix(request.URL.Path, urlCatalogPath+"origins/") {
-		server.handleOrigin(writer, request)
+		server.serveOrigin(writer, request)
 	} else if strings.HasPrefix(request.URL.Path, urlCatalogPath+"sources/") {
-		server.handleSource(writer, request)
+		server.serveSource(writer, request)
 	} else if strings.HasPrefix(request.URL.Path, urlCatalogPath+"metrics/") {
-		server.handleMetric(writer, request)
+		server.serveMetric(writer, request)
 	} else {
-		server.handleResponse(writer, nil, http.StatusNotFound)
+		server.serveResponse(writer, nil, http.StatusNotFound)
 	}
 }
 
-func (server *Server) handleOrigin(writer http.ResponseWriter, request *http.Request) {
+func (server *Server) serveOrigin(writer http.ResponseWriter, request *http.Request) {
 	originName := strings.TrimPrefix(request.URL.Path, urlCatalogPath+"origins/")
 
 	if originName == "" {
-		server.handleOriginList(writer, request)
+		server.serveOriginList(writer, request)
 		return
 	}
 
 	if response, status := server.parseShowRequest(writer, request); status != http.StatusOK {
-		server.handleResponse(writer, response, status)
+		server.serveResponse(writer, response, status)
 		return
 	} else if _, ok := server.Catalog.Origins[originName]; !ok {
-		server.handleResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
+		server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 		return
 	}
 
@@ -47,14 +47,14 @@ func (server *Server) handleOrigin(writer http.ResponseWriter, request *http.Req
 		Updated:   server.Catalog.Updated.Format(time.RFC3339),
 	}
 
-	server.handleResponse(writer, response, http.StatusOK)
+	server.serveResponse(writer, response, http.StatusOK)
 }
 
-func (server *Server) handleOriginList(writer http.ResponseWriter, request *http.Request) {
+func (server *Server) serveOriginList(writer http.ResponseWriter, request *http.Request) {
 	var offset, limit int
 
 	if response, status := server.parseListRequest(writer, request, &offset, &limit); status != http.StatusOK {
-		server.handleResponse(writer, response, status)
+		server.serveResponse(writer, response, status)
 		return
 	}
 
@@ -76,17 +76,17 @@ func (server *Server) handleOriginList(writer http.ResponseWriter, request *http
 
 	server.applyResponseLimit(writer, request, response)
 
-	server.handleResponse(writer, response.list, http.StatusOK)
+	server.serveResponse(writer, response.list, http.StatusOK)
 }
 
-func (server *Server) handleSource(writer http.ResponseWriter, request *http.Request) {
+func (server *Server) serveSource(writer http.ResponseWriter, request *http.Request) {
 	sourceName := strings.TrimPrefix(request.URL.Path, urlCatalogPath+"sources/")
 
 	if sourceName == "" {
-		server.handleSourceList(writer, request)
+		server.serveSourceList(writer, request)
 		return
 	} else if response, status := server.parseShowRequest(writer, request); status != http.StatusOK {
-		server.handleResponse(writer, response, status)
+		server.serveResponse(writer, response, status)
 		return
 	}
 
@@ -99,7 +99,7 @@ func (server *Server) handleSource(writer http.ResponseWriter, request *http.Req
 	}
 
 	if originSet.Size() == 0 {
-		server.handleResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
+		server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 		return
 	}
 
@@ -112,14 +112,14 @@ func (server *Server) handleSource(writer http.ResponseWriter, request *http.Req
 		Updated: server.Catalog.Updated.Format(time.RFC3339),
 	}
 
-	server.handleResponse(writer, response, http.StatusOK)
+	server.serveResponse(writer, response, http.StatusOK)
 }
 
-func (server *Server) handleSourceList(writer http.ResponseWriter, request *http.Request) {
+func (server *Server) serveSourceList(writer http.ResponseWriter, request *http.Request) {
 	var offset, limit int
 
 	if response, status := server.parseListRequest(writer, request, &offset, &limit); status != http.StatusOK {
-		server.handleResponse(writer, response, status)
+		server.serveResponse(writer, response, status)
 		return
 	}
 
@@ -149,17 +149,17 @@ func (server *Server) handleSourceList(writer http.ResponseWriter, request *http
 
 	server.applyResponseLimit(writer, request, response)
 
-	server.handleResponse(writer, response.list, http.StatusOK)
+	server.serveResponse(writer, response.list, http.StatusOK)
 }
 
-func (server *Server) handleMetric(writer http.ResponseWriter, request *http.Request) {
+func (server *Server) serveMetric(writer http.ResponseWriter, request *http.Request) {
 	metricName := strings.TrimPrefix(request.URL.Path, urlCatalogPath+"metrics/")
 
 	if metricName == "" {
-		server.handleMetricList(writer, request)
+		server.serveMetricList(writer, request)
 		return
 	} else if response, status := server.parseShowRequest(writer, request); status != http.StatusOK {
-		server.handleResponse(writer, response, status)
+		server.serveResponse(writer, response, status)
 		return
 	}
 
@@ -176,7 +176,7 @@ func (server *Server) handleMetric(writer http.ResponseWriter, request *http.Req
 	}
 
 	if originSet.Size() == 0 {
-		server.handleResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
+		server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 		return
 	}
 
@@ -193,14 +193,14 @@ func (server *Server) handleMetric(writer http.ResponseWriter, request *http.Req
 		Updated: server.Catalog.Updated.Format(time.RFC3339),
 	}
 
-	server.handleResponse(writer, response, http.StatusOK)
+	server.serveResponse(writer, response, http.StatusOK)
 }
 
-func (server *Server) handleMetricList(writer http.ResponseWriter, request *http.Request) {
+func (server *Server) serveMetricList(writer http.ResponseWriter, request *http.Request) {
 	var offset, limit int
 
 	if response, status := server.parseListRequest(writer, request, &offset, &limit); status != http.StatusOK {
-		server.handleResponse(writer, response, status)
+		server.serveResponse(writer, response, status)
 		return
 	}
 
@@ -250,5 +250,5 @@ func (server *Server) handleMetricList(writer http.ResponseWriter, request *http
 
 	server.applyResponseLimit(writer, request, response)
 
-	server.handleResponse(writer, response.list, http.StatusOK)
+	server.serveResponse(writer, response.list, http.StatusOK)
 }

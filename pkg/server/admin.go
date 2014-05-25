@@ -11,9 +11,9 @@ import (
 	"github.com/facette/facette/pkg/library"
 )
 
-func (server *Server) handleAdmin(writer http.ResponseWriter, request *http.Request) {
+func (server *Server) serveAdmin(writer http.ResponseWriter, request *http.Request) {
 	if request.Method != "GET" && request.Method != "HEAD" {
-		server.handleResponse(writer, nil, http.StatusMethodNotAllowed)
+		server.serveResponse(writer, nil, http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -32,29 +32,29 @@ func (server *Server) handleAdmin(writer http.ResponseWriter, request *http.Requ
 
 	if strings.HasPrefix(request.URL.Path, urlAdminPath+"sourcegroups/") ||
 		strings.HasPrefix(request.URL.Path, urlAdminPath+"metricgroups/") {
-		err = server.handleAdminGroup(writer, request, tmpl)
+		err = server.serveAdminGroup(writer, request, tmpl)
 	} else if strings.HasPrefix(request.URL.Path, urlAdminPath+"graphs/") {
-		err = server.handleAdminGraph(writer, request, tmpl)
+		err = server.serveAdminGraph(writer, request, tmpl)
 	} else if strings.HasPrefix(request.URL.Path, urlAdminPath+"collections/") {
-		err = server.handleAdminCollection(writer, request, tmpl)
+		err = server.serveAdminCollection(writer, request, tmpl)
 	} else if request.URL.Path == urlAdminPath+"origins/" || request.URL.Path == urlAdminPath+"sources/" ||
 		request.URL.Path == urlAdminPath+"metrics/" {
-		err = server.handleAdminCatalog(writer, request, tmpl)
+		err = server.serveAdminCatalog(writer, request, tmpl)
 	} else if request.URL.Path == urlAdminPath {
-		err = server.handleAdminIndex(writer, request, tmpl)
+		err = server.serveAdminIndex(writer, request, tmpl)
 	} else {
 		err = os.ErrNotExist
 	}
 
 	if os.IsNotExist(err) {
-		server.handleError(writer, http.StatusNotFound)
+		server.serveError(writer, http.StatusNotFound)
 	} else if err != nil {
 		log.Println("ERROR: " + err.Error())
-		server.handleError(writer, http.StatusInternalServerError)
+		server.serveError(writer, http.StatusInternalServerError)
 	}
 }
 
-func (server *Server) handleAdminCatalog(writer http.ResponseWriter, request *http.Request,
+func (server *Server) serveAdminCatalog(writer http.ResponseWriter, request *http.Request,
 	tmpl *template.Template) error {
 
 	var data struct {
@@ -75,7 +75,7 @@ func (server *Server) handleAdminCatalog(writer http.ResponseWriter, request *ht
 	return tmpl.Execute(writer, data)
 }
 
-func (server *Server) handleAdminCollection(writer http.ResponseWriter, request *http.Request,
+func (server *Server) serveAdminCollection(writer http.ResponseWriter, request *http.Request,
 	tmpl *template.Template) error {
 
 	var (
@@ -110,7 +110,7 @@ func (server *Server) handleAdminCollection(writer http.ResponseWriter, request 
 	return tmpl.Execute(writer, data)
 }
 
-func (server *Server) handleAdminGraph(writer http.ResponseWriter, request *http.Request,
+func (server *Server) serveAdminGraph(writer http.ResponseWriter, request *http.Request,
 	tmpl *template.Template) error {
 
 	var (
@@ -157,7 +157,7 @@ func (server *Server) handleAdminGraph(writer http.ResponseWriter, request *http
 	return tmpl.Execute(writer, data)
 }
 
-func (server *Server) handleAdminGroup(writer http.ResponseWriter, request *http.Request,
+func (server *Server) serveAdminGroup(writer http.ResponseWriter, request *http.Request,
 	tmpl *template.Template) error {
 
 	var (
@@ -204,7 +204,7 @@ func (server *Server) handleAdminGroup(writer http.ResponseWriter, request *http
 	return tmpl.Execute(writer, data)
 }
 
-func (server *Server) handleAdminIndex(writer http.ResponseWriter, request *http.Request,
+func (server *Server) serveAdminIndex(writer http.ResponseWriter, request *http.Request,
 	tmpl *template.Template) error {
 
 	var data struct {
