@@ -10,7 +10,7 @@ import (
 
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
-	"github.com/facette/facette/thirdparty/github.com/nu7hatch/gouuid"
+	uuid "github.com/facette/facette/thirdparty/github.com/nu7hatch/gouuid"
 )
 
 // Item represents the base structure of a library item.
@@ -52,6 +52,9 @@ func (library *Library) DeleteItem(id string, itemType int) error {
 	case LibraryItemSourceGroup, LibraryItemMetricGroup:
 		delete(library.Groups, id)
 
+	case LibraryItemScale:
+		delete(library.Scales, id)
+
 	case LibraryItemGraph:
 		delete(library.Graphs, id)
 
@@ -71,6 +74,9 @@ func (library *Library) GetItem(id string, itemType int) (interface{}, error) {
 	switch itemType {
 	case LibraryItemSourceGroup, LibraryItemMetricGroup:
 		return library.Groups[id], nil
+
+	case LibraryItemScale:
+		return library.Scales[id], nil
 
 	case LibraryItemGraph:
 		item := library.Graphs[id]
@@ -94,6 +100,15 @@ func (library *Library) GetItemByName(name string, itemType int) (interface{}, e
 	case LibraryItemSourceGroup, LibraryItemMetricGroup:
 		for _, item := range library.Groups {
 			if item.Type != itemType || item.Name != name {
+				continue
+			}
+
+			return item, nil
+		}
+
+	case LibraryItemScale:
+		for _, item := range library.Scales {
+			if item.Name != name {
 				continue
 			}
 
@@ -132,6 +147,9 @@ func (library *Library) ItemExists(id string, itemType int) bool {
 			exists = true
 		}
 
+	case LibraryItemScale:
+		_, exists = library.Scales[id]
+
 	case LibraryItemGraph:
 		_, exists = library.Graphs[id]
 
@@ -162,6 +180,19 @@ func (library *Library) LoadItem(id string, itemType int) error {
 		library.Groups[id] = tmpGroup
 		library.Groups[id].Type = itemType
 		library.Groups[id].Modified = fileInfo.ModTime()
+
+	case LibraryItemScale:
+		tmpScale := &Scale{}
+
+		filePath := library.getFilePath(id, itemType)
+
+		fileInfo, err := utils.JSONLoad(filePath, &tmpScale)
+		if err != nil {
+			return fmt.Errorf("in %s, %s", filePath, err.Error())
+		}
+
+		library.Scales[id] = tmpScale
+		library.Scales[id].Modified = fileInfo.ModTime()
 
 	case LibraryItemGraph:
 		tmpGraph := &Graph{}
@@ -214,6 +245,9 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 	case LibraryItemSourceGroup, LibraryItemMetricGroup:
 		itemStruct = item.(*Group).GetItem()
 
+	case LibraryItemScale:
+		itemStruct = item.(*Scale).GetItem()
+
 	case LibraryItemGraph:
 		itemStruct = item.(*Graph).GetItem()
 
@@ -247,6 +281,12 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 				return os.ErrExist
 			}
 
+		case LibraryItemScale:
+			if itemTemp.(*Scale).ID != itemStruct.ID {
+				log.Printf("ERROR: duplicate `%s' scale identifier", itemStruct.ID)
+				return os.ErrExist
+			}
+
 		case LibraryItemGraph:
 			if !item.(*Graph).Volatile && itemTemp.(*Graph).ID != itemStruct.ID {
 				log.Printf("ERROR: duplicate `%s' graph identifier", itemStruct.ID)
@@ -266,6 +306,10 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 	case LibraryItemSourceGroup, LibraryItemMetricGroup:
 		library.Groups[itemStruct.ID] = item.(*Group)
 		library.Groups[itemStruct.ID].ID = itemStruct.ID
+
+	case LibraryItemScale:
+		library.Scales[itemStruct.ID] = item.(*Scale)
+		library.Scales[itemStruct.ID].ID = itemStruct.ID
 
 	case LibraryItemGraph:
 		// Check for definition names duplicates
@@ -336,6 +380,9 @@ func (library *Library) getDirPath(itemType int) string {
 
 	case LibraryItemMetricGroup:
 		dirName = "metricgroups"
+
+	case LibraryItemScale:
+		dirName = "scales"
 
 	case LibraryItemGraph:
 		dirName = "graphs"
