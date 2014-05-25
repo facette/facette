@@ -544,10 +544,10 @@ func Test_LibraryScaleHandle(test *testing.T) {
 
 func Test_LibrarySourceGroupHandle(test *testing.T) {
 	// Define a sample source group
-	group := &library.Group{Item: library.Item{Name: "group1", Description: "A great group description."}}
+	group := &library.Group{Item: library.Item{Name: "group0", Description: "A great group description."}}
 	group.Entries = append(group.Entries, &library.GroupEntry{Pattern: "glob:source*", Origin: "test1"})
 
-	expandData := server.ExpandRequest{[3]string{"test1", "group:group1-updated", "database1/test"}}
+	expandData := server.ExpandRequest{[3]string{"test1", "group:group0-updated", "database1/test"}}
 
 	expandBase := server.ExpandRequest{}
 	expandBase = append(expandBase, [3]string{"test1", "source1", "database1/test"})
@@ -557,11 +557,11 @@ func Test_LibrarySourceGroupHandle(test *testing.T) {
 
 func Test_LibraryMetricGroupHandle(test *testing.T) {
 	// Define a sample metric group
-	group := &library.Group{Item: library.Item{Name: "group1", Description: "A great group description."}}
+	group := &library.Group{Item: library.Item{Name: "group0", Description: "A great group description."}}
 	group.Entries = append(group.Entries, &library.GroupEntry{Pattern: "database1/test", Origin: "test1"})
 	group.Entries = append(group.Entries, &library.GroupEntry{Pattern: "regexp:database[23]/test", Origin: "test1"})
 
-	expandData := server.ExpandRequest{[3]string{"test1", "source1", "group:group1-updated"}}
+	expandData := server.ExpandRequest{[3]string{"test1", "source1", "group:group0-updated"}}
 
 	expandBase := server.ExpandRequest{}
 	expandBase = append(expandBase, [3]string{"test1", "source1", "database1/test"})
@@ -580,17 +580,17 @@ func Test_LibraryGraphHandle(test *testing.T) {
 	group.Series = append(group.Series, &library.Serie{Name: "serie0", Origin: "test", Source: "source1",
 		Metric: "database1/test"})
 	group.Series = append(group.Series, &library.Serie{Name: "serie1", Origin: "test", Source: "source2",
-		Metric: "group:group1"})
+		Metric: "group:group0"})
 
 	stack.Groups = append(stack.Groups, group)
 
 	group = &library.OperGroup{Name: "serie2", Type: connector.OperGroupTypeNone}
-	group.Series = append(group.Series, &library.Serie{Name: "serie2", Origin: "test", Source: "group:group1",
+	group.Series = append(group.Series, &library.Serie{Name: "serie2", Origin: "test", Source: "group:group0",
 		Metric: "database2/test"})
 
 	stack.Groups = append(stack.Groups, group)
 
-	graphBase := &library.Graph{Item: library.Item{Name: "graph1", Description: "A great graph description."},
+	graphBase := &library.Graph{Item: library.Item{Name: "graph0", Description: "A great graph description."},
 		StackMode: library.StackModeNormal}
 	graphBase.Stacks = append(graphBase.Stacks, stack)
 
@@ -676,7 +676,7 @@ func Test_LibraryGraphHandle(test *testing.T) {
 	}
 
 	// Test PUT on graph item
-	graphBase.Name = "graph1-updated"
+	graphBase.Name = "graph0-updated"
 
 	data, _ = json.Marshal(graphBase)
 
@@ -768,7 +768,7 @@ func Test_LibraryGraphHandle(test *testing.T) {
 		utils.Clone(graphBase, graphTemp)
 
 		graphTemp.ID = ""
-		graphTemp.Name = fmt.Sprintf("graph1-%d", i)
+		graphTemp.Name = fmt.Sprintf("graph0-%d", i)
 
 		data, _ = json.Marshal(graphTemp)
 
@@ -954,7 +954,7 @@ func Test_LibraryCollectionHandle(test *testing.T) {
 	}
 
 	// Test PUT on collection item
-	collectionBase.Name = "collection1-updated"
+	collectionBase.Name = "collection0-updated"
 
 	data, _ = json.Marshal(collectionBase.Collection)
 
@@ -1003,7 +1003,7 @@ func Test_LibraryCollectionHandle(test *testing.T) {
 		utils.Clone(collectionBase, collectionTemp)
 
 		collectionTemp.ID = ""
-		collectionTemp.Name = fmt.Sprintf("collection1-%d", i)
+		collectionTemp.Name = fmt.Sprintf("collection0-%d", i)
 
 		data, _ = json.Marshal(collectionTemp)
 
@@ -1172,7 +1172,7 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 	}
 
 	// Test PUT on group item
-	groupBase.Name = "group1-updated"
+	groupBase.Name = "group0-updated"
 
 	data, _ = json.Marshal(groupBase)
 
@@ -1242,7 +1242,7 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 		utils.Clone(groupBase, groupTemp)
 
 		groupTemp.ID = ""
-		groupTemp.Name = fmt.Sprintf("group1-%d", i)
+		groupTemp.Name = fmt.Sprintf("group0-%d", i)
 
 		data, _ = json.Marshal(groupTemp)
 
