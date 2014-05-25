@@ -20,6 +20,8 @@ const (
 	LibraryItemSourceGroup
 	// LibraryItemMetricGroup represents a metric group item.
 	LibraryItemMetricGroup
+	// LibraryItemScale represents a scale item.
+	LibraryItemScale
 	// LibraryItemGraph represents a graph item.
 	LibraryItemGraph
 	// LibraryItemGraphTemplate represents a graph template item.
@@ -38,6 +40,7 @@ type Library struct {
 	Config         *config.Config
 	Catalog        *catalog.Catalog
 	Groups         map[string]*Group
+	Scales         map[string]*Scale
 	Graphs         map[string]*Graph
 	TemplateGraphs map[string]*Graph
 	Collections    map[string]*Collection
@@ -51,6 +54,7 @@ func (library *Library) Refresh() error {
 
 	// Empty library maps
 	library.Groups = make(map[string]*Group)
+	library.Scales = make(map[string]*Scale)
 	library.Graphs = make(map[string]*Graph)
 	library.TemplateGraphs = make(map[string]*Graph)
 	library.Collections = make(map[string]*Collection)
@@ -75,6 +79,7 @@ func (library *Library) Refresh() error {
 	for _, itemType = range []int{
 		LibraryItemSourceGroup,
 		LibraryItemMetricGroup,
+		LibraryItemScale,
 		LibraryItemGraph,
 		LibraryItemCollection,
 	} {

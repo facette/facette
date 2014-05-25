@@ -12,6 +12,8 @@ func (server *Server) handleLibrary(writer http.ResponseWriter, request *http.Re
 		server.handleGroup(writer, request)
 	} else if strings.HasPrefix(request.URL.Path, urlLibraryPath+"metricgroups/") {
 		server.handleGroup(writer, request)
+	} else if strings.HasPrefix(request.URL.Path, urlLibraryPath+"scales/") {
+		server.handleScale(writer, request)
 	} else if request.URL.Path == urlLibraryPath+"expand" {
 		server.handleGroupExpand(writer, request)
 	} else if request.URL.Path == urlLibraryPath+"graphs/plots" {
