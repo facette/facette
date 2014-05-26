@@ -239,7 +239,7 @@ function listUpdate(list, listFilter, offset) {
     url = list.opts('list').url;
 
     query = {
-        url: urlPrefix + '/' + url,
+        url: urlPrefix + '/api/v1/' + url,
         type: 'GET',
         data: {
             offset: offset,

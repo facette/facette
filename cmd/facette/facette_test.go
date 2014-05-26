@@ -31,7 +31,7 @@ func Test_CatalogOriginList(test *testing.T) {
 	result := make([]string, 0)
 
 	// Test GET on source list
-	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/origins/", serverConfig.BindAddr),
+	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/origins/", serverConfig.BindAddr),
 		nil, &result)
 
 	if response.StatusCode != http.StatusOK {
@@ -47,7 +47,7 @@ func Test_CatalogOriginList(test *testing.T) {
 	// Test GET on source list (offset and limit)
 	result = make([]string, 0)
 
-	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/origins/?limit=1", serverConfig.BindAddr),
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/origins/?limit=1", serverConfig.BindAddr),
 		nil, &result)
 
 	if response.StatusCode != http.StatusOK {
@@ -62,7 +62,7 @@ func Test_CatalogOriginList(test *testing.T) {
 
 	result = make([]string, 0)
 
-	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/origins/?offset=1&limit=1",
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/origins/?offset=1&limit=1",
 		serverConfig.BindAddr), nil, &result)
 
 	if response.StatusCode != http.StatusOK {
@@ -81,7 +81,7 @@ func Test_CatalogOriginGet(test *testing.T) {
 	result := &server.SourceResponse{}
 
 	// Test GET on source1 item
-	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/source1", serverConfig.BindAddr),
+	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/sources/source1", serverConfig.BindAddr),
 		nil, &result)
 	result.Updated = ""
 
@@ -99,7 +99,7 @@ func Test_CatalogOriginGet(test *testing.T) {
 	base = &server.SourceResponse{Name: "source2", Origins: []string{"test1"}}
 	result = &server.SourceResponse{}
 
-	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/source2", serverConfig.BindAddr),
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/sources/source2", serverConfig.BindAddr),
 		nil, &result)
 	result.Updated = ""
 
@@ -114,7 +114,7 @@ func Test_CatalogOriginGet(test *testing.T) {
 	}
 
 	// Test GET on unknown item
-	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/unknown", serverConfig.BindAddr),
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/sources/unknown", serverConfig.BindAddr),
 		nil, &result)
 
 	if response.StatusCode != http.StatusNotFound {
@@ -132,7 +132,7 @@ func Test_CatalogSourceList(test *testing.T) {
 	result := make([]string, 0)
 
 	// Test GET on source list
-	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/", serverConfig.BindAddr), nil,
+	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/sources/", serverConfig.BindAddr), nil,
 		&result)
 
 	if response.StatusCode != http.StatusOK {
@@ -148,7 +148,7 @@ func Test_CatalogSourceList(test *testing.T) {
 	// Test GET on source list (limit)
 	result = make([]string, 0)
 
-	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/?limit=1", serverConfig.BindAddr),
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/sources/?limit=1", serverConfig.BindAddr),
 		nil, &result)
 
 	if response.StatusCode != http.StatusOK {
@@ -164,7 +164,7 @@ func Test_CatalogSourceList(test *testing.T) {
 	// Test GET on source list (offset and limit)
 	result = make([]string, 0)
 
-	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/?offset=1&limit=1",
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/sources/?offset=1&limit=1",
 		serverConfig.BindAddr), nil, &result)
 
 	if response.StatusCode != http.StatusOK {
@@ -183,7 +183,7 @@ func Test_CatalogSourceGet(test *testing.T) {
 	result := &server.SourceResponse{}
 
 	// Test GET on source1 item
-	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/source1", serverConfig.BindAddr),
+	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/sources/source1", serverConfig.BindAddr),
 		nil, &result)
 	result.Updated = ""
 
@@ -201,7 +201,7 @@ func Test_CatalogSourceGet(test *testing.T) {
 	base = &server.SourceResponse{Name: "source2", Origins: []string{"test1"}}
 	result = &server.SourceResponse{}
 
-	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/source2", serverConfig.BindAddr),
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/sources/source2", serverConfig.BindAddr),
 		nil, &result)
 	result.Updated = ""
 
@@ -216,7 +216,7 @@ func Test_CatalogSourceGet(test *testing.T) {
 	}
 
 	// Test GET on unknown item
-	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/sources/unknown", serverConfig.BindAddr),
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/sources/unknown", serverConfig.BindAddr),
 		nil, &result)
 
 	if response.StatusCode != http.StatusNotFound {
@@ -237,7 +237,7 @@ func Test_CatalogMetricList(test *testing.T) {
 
 	result := make([]string, 0)
 
-	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/metrics/", serverConfig.BindAddr), nil,
+	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/metrics/", serverConfig.BindAddr), nil,
 		&result)
 
 	if response.StatusCode != http.StatusOK {
@@ -251,7 +251,7 @@ func Test_CatalogMetricList(test *testing.T) {
 	}
 
 	// Test GET on metrics list (offset and limit)
-	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/metrics/?limit=2", serverConfig.BindAddr),
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/metrics/?limit=2", serverConfig.BindAddr),
 		nil, &result)
 
 	if response.StatusCode != http.StatusOK {
@@ -264,7 +264,7 @@ func Test_CatalogMetricList(test *testing.T) {
 		test.Fail()
 	}
 
-	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/metrics/?offset=2&limit=2",
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/metrics/?offset=2&limit=2",
 		serverConfig.BindAddr), nil, &result)
 
 	if response.StatusCode != http.StatusOK {
@@ -278,7 +278,7 @@ func Test_CatalogMetricList(test *testing.T) {
 	}
 
 	// Test GET on metrics list (source-specific)
-	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/metrics/?source=source1",
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/metrics/?source=source1",
 		serverConfig.BindAddr), nil, &result)
 
 	if response.StatusCode != http.StatusOK {
@@ -298,7 +298,7 @@ func Test_CatalogMetricGet(test *testing.T) {
 	result := &server.MetricResponse{}
 
 	// Test GET on metric item
-	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/metrics/database2/test",
+	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/metrics/database2/test",
 		serverConfig.BindAddr), nil, &result)
 	result.Updated = ""
 
@@ -313,7 +313,7 @@ func Test_CatalogMetricGet(test *testing.T) {
 	}
 
 	// Test GET on unknown metric item
-	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/catalog/metrics/unknown/test",
+	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/metrics/unknown/test",
 		serverConfig.BindAddr), nil, &result)
 
 	if response.StatusCode != http.StatusNotFound {
@@ -323,7 +323,7 @@ func Test_CatalogMetricGet(test *testing.T) {
 }
 
 func Test_LibraryScaleHandle(test *testing.T) {
-	baseURL := fmt.Sprintf("http://%s/library/scales/", serverConfig.BindAddr)
+	baseURL := fmt.Sprintf("http://%s/api/v1/library/scales/", serverConfig.BindAddr)
 
 	// Define a sample scale
 	scaleBase := &library.Scale{Item: library.Item{Name: "scale0", Description: "A great scale description."},
@@ -571,7 +571,7 @@ func Test_LibraryMetricGroupHandle(test *testing.T) {
 }
 
 func Test_LibraryGraphHandle(test *testing.T) {
-	baseURL := fmt.Sprintf("http://%s/library/graphs/", serverConfig.BindAddr)
+	baseURL := fmt.Sprintf("http://%s/api/v1/library/graphs/", serverConfig.BindAddr)
 
 	// Define a sample graph
 	stack := &library.Stack{Name: "stack0"}
@@ -856,7 +856,7 @@ func Test_LibraryCollectionHandle(test *testing.T) {
 		Parent string `json:"parent"`
 	}
 
-	baseURL := fmt.Sprintf("http://%s/library/collections/", serverConfig.BindAddr)
+	baseURL := fmt.Sprintf("http://%s/api/v1/library/collections/", serverConfig.BindAddr)
 
 	// Define a sample collection
 	collectionBase.Collection = &library.Collection{Item: library.Item{Name: "collection0",
@@ -1088,7 +1088,7 @@ func Test_LibraryCollectionHandle(test *testing.T) {
 func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group, expandData,
 	expandBase server.ExpandRequest) {
 
-	baseURL := fmt.Sprintf("http://%s/library/%s/", serverConfig.BindAddr, urlPrefix)
+	baseURL := fmt.Sprintf("http://%s/api/v1/library/%s/", serverConfig.BindAddr, urlPrefix)
 
 	// Test GET on groups list
 	listBase := server.ItemListResponse{}
@@ -1203,7 +1203,7 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 
 	expandResult := make([]server.ExpandRequest, 0)
 
-	response = execTestRequest(test, "POST", fmt.Sprintf("http://%s/library/expand", serverConfig.BindAddr),
+	response = execTestRequest(test, "POST", fmt.Sprintf("http://%s/api/v1/library/expand", serverConfig.BindAddr),
 		strings.NewReader(string(data)), &expandResult)
 
 	if response.StatusCode != http.StatusOK {

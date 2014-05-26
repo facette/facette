@@ -499,7 +499,7 @@ function adminGraphSetupTerminate() {
             // Retrieve expanding information
             if (expand) {
                 $.ajax({
-                    url: urlPrefix + '/library/expand',
+                    url: urlPrefix + '/api/v1/library/expand',
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(expandQuery)
