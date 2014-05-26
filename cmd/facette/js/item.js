@@ -3,14 +3,14 @@
 
 function itemDelete(id, itemType) {
     return $.ajax({
-        url: urlPrefix + '/library/' + itemType + '/' + id,
+        url: urlPrefix + '/api/v1/library/' + itemType + '/' + id,
         type: 'DELETE'
     });
 }
 
 function itemList(query, itemType) {
     return $.ajax({
-        url: urlPrefix + '/library/' + itemType + '/',
+        url: urlPrefix + '/api/v1/library/' + itemType + '/',
         type: 'GET',
         data: query,
         dataType: 'json'
@@ -19,14 +19,14 @@ function itemList(query, itemType) {
 
 function itemLoad(id, itemType) {
     return $.ajax({
-        url: urlPrefix + '/library/' + itemType + '/' + id,
+        url: urlPrefix + '/api/v1/library/' + itemType + '/' + id,
         type: 'GET',
         dataType: 'json'
     });
 }
 
 function itemSave(id, itemType, query, mode) {
-    var url = '/library/' + itemType + '/',
+    var url = '/api/v1/library/' + itemType + '/',
         method = 'POST';
 
     if (mode === SAVE_MODE_CLONE) {

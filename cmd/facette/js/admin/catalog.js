@@ -10,7 +10,7 @@ function adminCatalogSetupTerminate() {
                 name = $item.attr('data-itemname');
 
             $.ajax({
-                url: urlPrefix + '/catalog/' + type + '/' + name,
+                url: urlPrefix + '/api/v1/catalog/' + type + '/' + name,
                 type: 'GET'
             }).pipe(function (data) {
                 var $tooltip = tooltipCreate('info', function (state) {

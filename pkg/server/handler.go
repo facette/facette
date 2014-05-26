@@ -61,12 +61,6 @@ func (server *Server) serveReload(writer http.ResponseWriter, request *http.Requ
 	server.serveResponse(writer, nil, http.StatusOK)
 }
 
-func (server *Server) serveResource(writer http.ResponseWriter, request *http.Request) {
-	server.serveResponse(writer, &resourceResponse{
-		Scales: server.Config.Scales,
-	}, http.StatusOK)
-}
-
 func (server *Server) serveResponse(writer http.ResponseWriter, data interface{}, status int) {
 	var err error
 

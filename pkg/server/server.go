@@ -17,15 +17,14 @@ import (
 )
 
 const (
-	serverStopWait  int    = 10
-	urlAdminPath    string = "/admin/"
-	urlBrowsePath   string = "/browse/"
-	urlCatalogPath  string = "/catalog/"
-	urlLibraryPath  string = "/library/"
-	urlReloadPath   string = "/reload"
-	urlResourcePath string = "/resources"
-	urlStaticPath   string = "/static/"
-	urlStatsPath    string = "/stats"
+	serverStopWait int    = 10
+	urlStaticPath  string = "/static/"
+	urlAdminPath   string = "/admin/"
+	urlBrowsePath  string = "/browse/"
+	urlReloadPath  string = "/reload"
+	urlCatalogPath string = "/api/v1/catalog/"
+	urlLibraryPath string = "/api/v1/library/"
+	urlStatsPath   string = "/api/v1/stats"
 )
 
 // Server is the main structure of the server handler.
@@ -120,7 +119,6 @@ func (server *Server) Run() error {
 	router.HandleFunc(urlAdminPath, server.serveAdmin)
 	router.HandleFunc(urlBrowsePath, server.serveBrowse)
 	router.HandleFunc(urlReloadPath, server.serveReload)
-	router.HandleFunc(urlResourcePath, server.serveResource)
 	router.HandleFunc(urlStatsPath, server.serveStats)
 
 	router.HandleFunc("/", server.serveBrowse)
