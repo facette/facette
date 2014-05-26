@@ -2,7 +2,6 @@
 package catalog
 
 import (
-	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -50,7 +49,10 @@ func (catalog *Catalog) GetMetric(origin, source, name string) *Metric {
 
 // Refresh updates the current catalog by refreshing its origins.
 func (catalog *Catalog) Refresh() error {
-	success := true
+	var (
+		origin *Origin
+		err    error
+	)
 
 	log.Println("INFO: catalog refresh started")
 
@@ -58,7 +60,7 @@ func (catalog *Catalog) Refresh() error {
 	catalog.Origins = make(map[string]*Origin)
 
 	for originName, originConfig := range catalog.Config.Origins {
-		origin, err := NewOrigin(originName, originConfig)
+		origin, err = NewOrigin(originName, originConfig)
 		if err != nil {
 			log.Printf("ERROR: %s\n", err.Error())
 		}
@@ -71,27 +73,20 @@ func (catalog *Catalog) Refresh() error {
 	wait := &sync.WaitGroup{}
 
 	// Update catalog origins concurrently
-	for _, origin := range catalog.Origins {
+	for _, origin = range catalog.Origins {
 		wait.Add(1)
 
-		go func(wg *sync.WaitGroup, o *Origin) {
+		go func(wg *sync.WaitGroup, origin *Origin) {
 			defer wg.Done()
 
-			if err := o.Refresh(); err != nil {
+			if err = SendOriginWorkerCmd(origin, OriginCmdRefresh); err != nil {
 				log.Println("ERROR: " + err.Error())
-				success = false
 			}
 		}(wait, origin)
 	}
 
 	// Wait for all origins to be refreshed
 	wait.Wait()
-
-	// Handle output information
-	if !success {
-		log.Println("INFO: catalog refresh failed")
-		return fmt.Errorf("unable to refresh catalog")
-	}
 
 	catalog.Updated = time.Now()
 
@@ -104,16 +99,14 @@ func (catalog *Catalog) Refresh() error {
 func (catalog *Catalog) Close() error {
 	var err error
 
-	// Shutdown catalog origin workers concurrently
+	// Shutdown catalog origin workers
 	for _, origin := range catalog.Origins {
 		if err = SendOriginWorkerCmd(origin, OriginCmdShutdown); err != nil {
 			log.Printf("ERROR: unable to shut down origin `%s' worker: %s", origin.Name, err)
 		}
 	}
 
-	if err == nil {
-		log.Println("INFO: catalog closed successfully")
-	}
+	log.Println("INFO: catalog closed")
 
 	return nil
 }
