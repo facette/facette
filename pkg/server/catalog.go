@@ -14,7 +14,9 @@ import (
 func (server *Server) serveCatalog(writer http.ResponseWriter, request *http.Request) {
 	setHTTPCacheHeaders(writer)
 
-	if strings.HasPrefix(request.URL.Path, urlCatalogPath+"origins/") {
+	if request.URL.Path == urlCatalogPath {
+		server.serveFullCatalog(writer, request)
+	} else if strings.HasPrefix(request.URL.Path, urlCatalogPath+"origins/") {
 		server.serveOrigin(writer, request)
 	} else if strings.HasPrefix(request.URL.Path, urlCatalogPath+"sources/") {
 		server.serveSource(writer, request)
@@ -23,6 +25,26 @@ func (server *Server) serveCatalog(writer http.ResponseWriter, request *http.Req
 	} else {
 		server.serveResponse(writer, nil, http.StatusNotFound)
 	}
+}
+
+func (server *Server) serveFullCatalog(writer http.ResponseWriter, request *http.Request) {
+	catalog := make(map[string]map[string][]string)
+
+	for originName, origin := range server.Catalog.Origins {
+		catalog[originName] = make(map[string][]string)
+
+		for sourceName, sources := range origin.Sources {
+			catalog[originName][sourceName] = make([]string, 0)
+
+			for metricName, _ := range sources.Metrics {
+				catalog[originName][sourceName] = append(catalog[originName][sourceName], metricName)
+			}
+
+			sort.Strings(catalog[originName][sourceName])
+		}
+	}
+
+	server.serveResponse(writer, catalog, http.StatusOK)
 }
 
 func (server *Server) serveOrigin(writer http.ResponseWriter, request *http.Request) {
