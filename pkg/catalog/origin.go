@@ -45,9 +45,7 @@ func NewOrigin(name string, config *config.OriginConfig) (*Origin, error) {
 		controlChan:     make(chan OriginWorkerCmd),
 	}
 
-	originConnector, err := connector.Connectors[connectorType](
-		&origin.connectorChan,
-		config.Connector)
+	originConnector, err := connector.Connectors[connectorType](&origin.connectorChan, config.Connector)
 	if err != nil {
 		return nil, err
 	}

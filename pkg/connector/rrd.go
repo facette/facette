@@ -31,25 +31,31 @@ type RRDConnector struct {
 
 func init() {
 	Connectors["rrd"] = func(outputChan *chan [2]string, config map[string]interface{}) (interface{}, error) {
+		var (
+			configPath    string
+			configPattern string
+			configDaemon  string
+			ok            bool
+		)
+
 		if _, ok := config["path"]; !ok {
 			return nil, fmt.Errorf("missing `path' mandatory connector setting")
 		} else if _, ok := config["pattern"]; !ok {
 			return nil, fmt.Errorf("missing `pattern' mandatory connector setting")
 		}
 
-		configPath, ok := config["path"].(string)
-		if !ok {
+		if configPath, ok = config["path"].(string); !ok {
 			return nil, fmt.Errorf("connector setting `path' should be a string")
 		}
 
-		configPattern, ok := config["pattern"].(string)
-		if !ok {
+		if configPattern, ok = config["pattern"].(string); !ok {
 			return nil, fmt.Errorf("connector setting `pattern' should be a string")
 		}
 
-		configDaemon, ok := config["daemon"].(string)
-		if !ok {
-			return nil, fmt.Errorf("connector setting `daemon' should be a string")
+		if _, ok = config["daemon"]; ok {
+			if configDaemon, ok = config["daemon"].(string); !ok {
+				return nil, fmt.Errorf("connector setting `daemon' should be a string")
+			}
 		}
 
 		return &RRDConnector{

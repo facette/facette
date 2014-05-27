@@ -63,9 +63,15 @@ func (server *Server) serveOrigin(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
+	connectorType, ok := server.Config.Origins[originName].Connector["type"].(string)
+	if !ok {
+		server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
+		return
+	}
+
 	response := OriginResponse{
 		Name:      originName,
-		Connector: server.Config.Origins[originName].Connector["type"].(string),
+		Connector: connectorType,
 		Updated:   server.Catalog.Updated.Format(time.RFC3339),
 	}
 

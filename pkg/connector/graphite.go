@@ -32,18 +32,24 @@ type GraphiteConnector struct {
 
 func init() {
 	Connectors["graphite"] = func(outputChan *chan [2]string, config map[string]interface{}) (interface{}, error) {
+		var (
+			configURL           string
+			configAllowInsecure string
+			ok                  bool
+		)
+
 		if _, ok := config["url"]; !ok {
 			return nil, fmt.Errorf("missing `url' mandatory connector setting")
 		}
 
-		configURL, ok := config["url"].(string)
-		if !ok {
+		if configURL, ok = config["url"].(string); !ok {
 			return nil, fmt.Errorf("connector setting `url' should be a string")
 		}
 
-		configAllowInsecure, ok := config["allow_insecure_tls"].(string)
-		if !ok {
-			return nil, fmt.Errorf("connector setting `allow_insecure_tls' should be a string")
+		if _, ok = config["allow_insecure_tls"]; ok {
+			if configAllowInsecure, ok = config["allow_insecure_tls"].(string); !ok {
+				return nil, fmt.Errorf("connector setting `allow_insecure_tls' should be a string")
+			}
 		}
 
 		connector := &GraphiteConnector{
