@@ -30,17 +30,32 @@ type RRDConnector struct {
 }
 
 func init() {
-	Connectors["rrd"] = func(outputChan *chan [2]string, config map[string]string) (interface{}, error) {
+	Connectors["rrd"] = func(outputChan *chan [2]string, config map[string]interface{}) (interface{}, error) {
 		if _, ok := config["path"]; !ok {
 			return nil, fmt.Errorf("missing `path' mandatory connector setting")
 		} else if _, ok := config["pattern"]; !ok {
 			return nil, fmt.Errorf("missing `pattern' mandatory connector setting")
 		}
 
+		configPath, ok := config["path"].(string)
+		if !ok {
+			return nil, fmt.Errorf("connector setting `path' should be a string")
+		}
+
+		configPattern, ok := config["pattern"].(string)
+		if !ok {
+			return nil, fmt.Errorf("connector setting `pattern' should be a string")
+		}
+
+		configDaemon, ok := config["daemon"].(string)
+		if !ok {
+			return nil, fmt.Errorf("connector setting `daemon' should be a string")
+		}
+
 		return &RRDConnector{
-			Path:       config["path"],
-			Pattern:    config["pattern"],
-			Daemon:     config["daemon"],
+			Path:       configPath,
+			Pattern:    configPattern,
+			Daemon:     configDaemon,
 			outputChan: outputChan,
 			metrics:    make(map[string]map[string]*rrdMetric),
 		}, nil
