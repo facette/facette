@@ -7,7 +7,7 @@ import (
 
 // OriginConfig represents an origin entry in the configuration system.
 type OriginConfig struct {
-	Connector       map[string]string          `json:"connector"`
+	Connector       map[string]interface{}     `json:"connector"`
 	Filters         []*OriginFilterConfig      `json:"filters"`
 	Templates       map[string]*TemplateConfig `json:"templates"`
 	RefreshInterval int                        `json:"refresh_interval"`

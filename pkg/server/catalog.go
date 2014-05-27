@@ -36,7 +36,7 @@ func (server *Server) serveFullCatalog(writer http.ResponseWriter, request *http
 		for sourceName, sources := range origin.Sources {
 			catalog[originName][sourceName] = make([]string, 0)
 
-			for metricName, _ := range sources.Metrics {
+			for metricName := range sources.Metrics {
 				catalog[originName][sourceName] = append(catalog[originName][sourceName], metricName)
 			}
 
@@ -65,7 +65,7 @@ func (server *Server) serveOrigin(writer http.ResponseWriter, request *http.Requ
 
 	response := OriginResponse{
 		Name:      originName,
-		Connector: server.Config.Origins[originName].Connector["type"],
+		Connector: server.Config.Origins[originName].Connector["type"].(string),
 		Updated:   server.Catalog.Updated.Format(time.RFC3339),
 	}
 

@@ -29,9 +29,10 @@ type OriginWorkerCmd struct {
 
 // NewOrigin creates a new origin instance.
 func NewOrigin(name string, config *config.OriginConfig) (*Origin, error) {
-	connectorType := config.Connector["type"]
-
-	if _, ok := config.Connector["type"]; !ok {
+	connectorType, ok := config.Connector["type"].(string)
+	if !ok {
+		return nil, fmt.Errorf("connector type should be a string")
+	} else if connectorType == "" {
 		return nil, fmt.Errorf("missing connector type")
 	} else if _, ok := connector.Connectors[connectorType]; !ok {
 		return nil, fmt.Errorf("unknown connector type `%s'", connectorType)
