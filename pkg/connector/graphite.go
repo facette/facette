@@ -49,7 +49,7 @@ func init() {
 	}
 }
 
-// GetPlots calculates and returns plots data based on a time interval.
+// GetPlots retrieves time series data from origin based on a query and a time interval.
 func (connector *GraphiteConnector) GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
 	percentiles []float64) (map[string]*PlotResult, error) {
 
