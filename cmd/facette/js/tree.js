@@ -67,7 +67,7 @@ function treeUpdate(tree) {
         query.parent = opts.base;
 
     return $.ajax({
-        url: urlPrefix + '/' + opts.url,
+        url: urlPrefix + '/api/v1/' + opts.url,
         type: 'GET',
         data: query
     }).pipe(function (data) {
