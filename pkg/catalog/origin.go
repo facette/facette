@@ -171,7 +171,7 @@ func originWorker(origin *Origin) {
 				// Explicit origin refresh triggered
 				if err := origin.Refresh(); err != nil {
 					cmd.Err <- fmt.Errorf("ERROR: cannot refresh origin `%s': %s", origin.Name, err)
-					return
+					continue
 				}
 
 				origin.LastRefresh = time.Now()
