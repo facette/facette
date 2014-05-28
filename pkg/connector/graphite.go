@@ -172,7 +172,8 @@ func graphiteCheckConnectorResponse(response *http.Response) error {
 		return fmt.Errorf("got HTTP status code %d, expected 200", response.StatusCode)
 	}
 
-	if response.Header.Get("Content-Type") != "application/json" {
+	if !strings.Contains(response.Header.Get("Content-Type"), "application/json") {
+
 		return fmt.Errorf("got HTTP content type `%s', expected `application/json'", response.Header["Content-Type"])
 	}
 
