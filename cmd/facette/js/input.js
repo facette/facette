@@ -29,7 +29,7 @@ function inputGetSources(input, args) {
 
     $.each(items, function (i, item) { /*jshint unused: true */
         sources[item] = {
-            url: urlPrefix + '/' + item,
+            url: urlPrefix + '/api/v1/' + item,
             type: 'GET',
             data: args
         };
