@@ -68,7 +68,7 @@ func (library *Library) Refresh() error {
 		_, itemID := path.Split(filePath[:len(filePath)-5])
 
 		if library.debugLevel > 1 {
-			log.Printf("DEBUG: loading `%s' item from `%s' file...", itemID, filePath)
+			log.Printf("DEBUG: loading item `%s' from file `%s'", itemID, filePath)
 		}
 
 		return library.LoadItem(itemID, itemType)
