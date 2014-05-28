@@ -53,7 +53,7 @@ func (server *Server) Reload() error {
 	server.Loading = true
 
 	if err := server.Config.Reload(); err != nil {
-		log.Printf("ERROR: an error occured while reloading configuration: %s", err.Error())
+		log.Printf("ERROR: an error occurred while reloading configuration: %s", err.Error())
 		return err
 	}
 
@@ -81,7 +81,7 @@ func (server *Server) Run() error {
 
 		serverOutput, err := os.OpenFile(server.Config.ServerLog, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
-			log.Printf("ERROR: unable to open `%s' log file", server.Config.ServerLog)
+			log.Printf("ERROR: unable to open log file `%s'", server.Config.ServerLog)
 			return err
 		}
 
@@ -94,7 +94,7 @@ func (server *Server) Run() error {
 	if server.Config.PidFile != "" {
 		fd, err := os.OpenFile(server.Config.PidFile, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 		if err != nil {
-			log.Println("ERROR: unable to create pid file")
+			log.Println("ERROR: unable to create pid file `%s'", server.Config.PidFile)
 			return err
 		}
 
@@ -153,7 +153,7 @@ func (server *Server) Run() error {
 		clientCount := server.Listener.ConnCount.Get()
 
 		if clientCount > 0 {
-			log.Printf("INFO: server stopped after %d seconds with %d client(s) still connected",
+			log.Printf("INFO: server stopped after %d second(s) with %d client(s) still connected",
 				serverStopWait,
 				clientCount)
 		} else {

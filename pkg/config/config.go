@@ -68,7 +68,7 @@ func (config *Config) Load(filePath string) error {
 	}
 
 	if err := utils.WalkDir(config.OriginDir, walkFunc); err != nil {
-		return fmt.Errorf("cannot load origin definitions: %s", err)
+		return fmt.Errorf("unable to load origin definitions: %s", err)
 	}
 
 	if errOutput != nil {

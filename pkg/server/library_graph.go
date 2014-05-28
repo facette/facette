@@ -374,7 +374,7 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 	for _, serieItem := range groupItem.Series {
 		// Check for connectors errors or conflicts
 		if _, ok := server.Catalog.Origins[serieItem.Origin]; !ok {
-			return nil, nil, fmt.Errorf("unknown `%s' serie origin", serieItem.Origin)
+			return nil, nil, fmt.Errorf("unknown serie origin `%s'", serieItem.Origin)
 		} else if originConnector == nil {
 			originConnector = server.Catalog.Origins[serieItem.Origin].Connector
 		} else if originConnector != server.Catalog.Origins[serieItem.Origin].Connector {
@@ -405,7 +405,7 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 					)
 
 					if metric == nil {
-						log.Printf("ERROR: unknown `%s' metric for source `%s' (origin: %s)", serieChunk, serieSource,
+						log.Printf("ERROR: unknown metric `%s' for source `%s' (origin: %s)", serieChunk, serieSource,
 							serieItem.Origin)
 
 						continue
@@ -430,7 +430,7 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 				)
 
 				if metric == nil {
-					log.Printf("ERROR: unknown `%s' metric for source `%s' (origin: %s)", serieItem.Metric, serieSource,
+					log.Printf("ERROR: unknown metric `%s' for source `%s' (origin: %s)", serieItem.Metric, serieSource,
 						serieItem.Origin)
 
 					continue

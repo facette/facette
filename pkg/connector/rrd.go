@@ -45,16 +45,16 @@ func init() {
 		}
 
 		if configPath, ok = config["path"].(string); !ok {
-			return nil, fmt.Errorf("connector setting `path' should be a string")
+			return nil, fmt.Errorf("connector setting `path' value should be a string")
 		}
 
 		if configPattern, ok = config["pattern"].(string); !ok {
-			return nil, fmt.Errorf("connector setting `pattern' should be a string")
+			return nil, fmt.Errorf("connector setting `pattern' value should be a string")
 		}
 
 		if _, ok = config["daemon"]; ok {
 			if configDaemon, ok = config["daemon"].(string); !ok {
-				return nil, fmt.Errorf("connector setting `daemon' should be a string")
+				return nil, fmt.Errorf("connector setting `daemon' value should be a string")
 			}
 		}
 
@@ -327,7 +327,7 @@ func (connector *RRDConnector) rrdGetData(query *GroupQuery, startTime, endTime 
 		series[serieName] = query.Name
 
 	default:
-		return nil, fmt.Errorf("unknown `%d' operator type", query.Type)
+		return nil, fmt.Errorf("unknown operator type %d", query.Type)
 	}
 
 	// Get plots

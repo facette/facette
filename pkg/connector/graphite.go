@@ -43,12 +43,12 @@ func init() {
 		}
 
 		if configURL, ok = config["url"].(string); !ok {
-			return nil, fmt.Errorf("connector setting `url' should be a string")
+			return nil, fmt.Errorf("connector setting `url' value should be a string")
 		}
 
 		if _, ok = config["allow_insecure_tls"]; ok {
 			if configAllowInsecure, ok = config["allow_insecure_tls"].(string); !ok {
-				return nil, fmt.Errorf("connector setting `allow_insecure_tls' should be a string")
+				return nil, fmt.Errorf("connector setting `allow_insecure_tls' value should be a string")
 			}
 		}
 
