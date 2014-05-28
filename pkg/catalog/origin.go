@@ -65,7 +65,7 @@ func (origin *Origin) Refresh() error {
 	}
 
 	if origin.Catalog.debugLevel > 0 {
-		log.Printf("DEBUG: refreshing origin `%s'...\n", origin.Name)
+		log.Printf("DEBUG: refreshing origin `%s'", origin.Name)
 	}
 
 	origin.Sources = make(map[string]*Source)
@@ -120,7 +120,7 @@ func (origin *Origin) Refresh() error {
 			}
 
 			if origin.Catalog.debugLevel > 3 {
-				log.Printf("DEBUG: appending metric `%s' to source `%s'\n", entry[1], entry[0])
+				log.Printf("DEBUG: appending metric `%s' to source `%s'", entry[1], entry[0])
 			}
 
 			origin.Sources[entry[0]].Metrics[entry[1]] = NewMetric(entry[1], originalMetric, origin.Sources[entry[0]])
