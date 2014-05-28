@@ -101,7 +101,7 @@ func (library *Library) Refresh() error {
 		}
 
 		if _, ok := library.Collections[collection.ParentID]; !ok {
-			log.Println("ERROR: unknown `%s' parent identifier", collection.ParentID)
+			log.Println("ERROR: unknown parent identifier `%s'", collection.ParentID)
 			continue
 		}
 

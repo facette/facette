@@ -159,7 +159,7 @@ func originWorker(origin *Origin) {
 			}
 
 			if err := origin.Refresh(); err != nil {
-				log.Printf("ERROR: cannot refresh origin `%s': %s", origin.Name, err)
+				log.Printf("ERROR: unable to refresh origin `%s': %s", origin.Name, err)
 			}
 
 			origin.LastRefresh = time.Now()
@@ -170,7 +170,7 @@ func originWorker(origin *Origin) {
 			case OriginCmdRefresh:
 				// Explicit origin refresh triggered
 				if err := origin.Refresh(); err != nil {
-					cmd.Err <- fmt.Errorf("ERROR: cannot refresh origin `%s': %s", origin.Name, err)
+					cmd.Err <- fmt.Errorf("unable to refresh origin `%s': %s", origin.Name, err)
 					continue
 				}
 
@@ -188,8 +188,9 @@ func originWorker(origin *Origin) {
 				return
 
 			default:
-				// Unknown command
-				log.Printf("ERROR: unsupported origin control command received")
+				// Unsupported command
+				cmd.Err <- fmt.Errorf("unsupported command received")
+				continue
 			}
 		}
 	}

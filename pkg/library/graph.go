@@ -62,11 +62,11 @@ type Serie struct {
 // GetGraphMetric gets a graph metric item.
 func (library *Library) GetGraphMetric(origin, source, metric string) (*Graph, error) {
 	if _, ok := library.Catalog.Origins[origin]; !ok {
-		return nil, fmt.Errorf("unknown `%s' origin", origin)
+		return nil, fmt.Errorf("unknown origin `%s'", origin)
 	} else if _, ok := library.Catalog.Origins[origin].Sources[source]; !ok {
-		return nil, fmt.Errorf("unknown `%s' source for `%s' origin", source, origin)
+		return nil, fmt.Errorf("unknown source `%s' for origin `%s'", source, origin)
 	} else if _, ok := library.Catalog.Origins[origin].Sources[source].Metrics[metric]; !ok {
-		return nil, fmt.Errorf("unknown `%s' metric for `%s' source", metric, source)
+		return nil, fmt.Errorf("unknown metric `%s' for source `%s'", metric, source)
 	}
 
 	return &Graph{
@@ -91,9 +91,9 @@ func (library *Library) GetGraphTemplate(origin, source, template, filter string
 	id := origin + "\x30" + template + "\x30" + filter
 
 	if _, ok := library.Config.Origins[origin]; !ok {
-		return nil, fmt.Errorf("unknown `%s' origin", origin)
+		return nil, fmt.Errorf("unknown origin `%s'", origin)
 	} else if _, ok := library.Config.Origins[origin].Templates[template]; !ok {
-		return nil, fmt.Errorf("unknown `%s' template for `%s' origin", template, origin)
+		return nil, fmt.Errorf("unknown template `%s' for origin `%s'", template, origin)
 	}
 
 	// Load template from filesystem if needed

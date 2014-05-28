@@ -52,7 +52,7 @@ func (library *Library) ExpandGroup(name string, groupType int) []string {
 		}
 
 		if _, ok := library.Catalog.Origins[entry.Origin]; !ok {
-			log.Printf("ERROR: unknown `%s' group entry origin", entry.Origin)
+			log.Printf("ERROR: unknown group entry `%s'", entry.Origin)
 			continue
 		}
 

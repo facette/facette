@@ -277,25 +277,25 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 		switch itemType {
 		case LibraryItemSourceGroup, LibraryItemMetricGroup:
 			if itemTemp.(*Group).ID != itemStruct.ID {
-				log.Printf("ERROR: duplicate `%s' group identifier", itemStruct.ID)
+				log.Printf("ERROR: duplicate group identifier `%s'", itemStruct.ID)
 				return os.ErrExist
 			}
 
 		case LibraryItemScale:
 			if itemTemp.(*Scale).ID != itemStruct.ID {
-				log.Printf("ERROR: duplicate `%s' scale identifier", itemStruct.ID)
+				log.Printf("ERROR: duplicate scale identifier `%s'", itemStruct.ID)
 				return os.ErrExist
 			}
 
 		case LibraryItemGraph:
 			if !item.(*Graph).Volatile && itemTemp.(*Graph).ID != itemStruct.ID {
-				log.Printf("ERROR: duplicate `%s' graph identifier", itemStruct.ID)
+				log.Printf("ERROR: duplicate graph identifier `%s'", itemStruct.ID)
 				return os.ErrExist
 			}
 
 		case LibraryItemCollection:
 			if itemTemp.(*Collection).ID != itemStruct.ID {
-				log.Printf("ERROR: duplicate `%s' collection identifier", itemStruct.ID)
+				log.Printf("ERROR: duplicate collection identifier `%s'", itemStruct.ID)
 				return os.ErrExist
 			}
 		}
@@ -322,7 +322,7 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 				log.Println("ERROR: stack is null")
 				return os.ErrInvalid
 			} else if stackSet.Has(stack.Name) {
-				log.Printf("ERROR: duplicate `%s' stack name", stack.Name)
+				log.Printf("ERROR: duplicate stack name `%s'", stack.Name)
 				return os.ErrExist
 			}
 
@@ -330,10 +330,10 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 
 			for _, group := range stack.Groups {
 				if group == nil {
-					log.Printf("ERROR: found null group in `%s' stack", stack.Name)
+					log.Printf("ERROR: found null group in stack `%s'", stack.Name)
 					return os.ErrInvalid
 				} else if groupSet.Has(group.Name) {
-					log.Printf("ERROR: duplicate `%s' group name", group.Name)
+					log.Printf("ERROR: duplicate group name `%s'", group.Name)
 					return os.ErrExist
 				}
 
@@ -341,10 +341,10 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 
 				for _, serie := range group.Series {
 					if serie == nil {
-						log.Printf("ERROR: found null serie in `%s' group", group.Name)
+						log.Printf("ERROR: found null serie in group `%s'", group.Name)
 						return os.ErrInvalid
 					} else if serieSet.Has(serie.Name) {
-						log.Printf("ERROR: duplicate `%s' serie name", serie.Name)
+						log.Printf("ERROR: duplicate serie name `%s'", serie.Name)
 						return os.ErrExist
 					}
 
