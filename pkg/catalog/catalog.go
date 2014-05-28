@@ -62,7 +62,8 @@ func (catalog *Catalog) Refresh() error {
 	for originName, originConfig := range catalog.Config.Origins {
 		origin, err = NewOrigin(originName, originConfig)
 		if err != nil {
-			log.Printf("ERROR: %s, discarding origin\n", err.Error())
+			log.Printf("ERROR: in origin `%s', %s", originName, err.Error())
+			log.Printf("WARNING: discarding origin `%s'", originName)
 			continue
 		}
 
