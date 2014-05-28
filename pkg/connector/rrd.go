@@ -122,7 +122,7 @@ func (connector *RRDConnector) Refresh(errChan chan error) {
 
 		submatch := re.FindStringSubmatch(filePath[len(connector.Path)+1:])
 		if len(submatch) == 0 {
-			log.Printf("WARNING: file `%s' does not match pattern", filePath)
+			log.Printf("INFO: file `%s' does not match pattern, ignoring", filePath)
 			return nil
 		}
 
