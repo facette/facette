@@ -69,7 +69,7 @@ func (server *Server) parseStoreRequest(writer http.ResponseWriter, request *htt
 
 	if request.Method == "POST" && id != "" || request.Method == "PUT" && id == "" {
 		return &serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed
-	} else if utils.RequestGetContentType(request) != "application/json" {
+	} else if utils.HTTPGetContentType(request) != "application/json" {
 		return &serverResponse{mesgUnsupportedMediaType}, http.StatusUnsupportedMediaType
 	}
 

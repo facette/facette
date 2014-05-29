@@ -194,7 +194,7 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 	if request.Method != "POST" && request.Method != "HEAD" {
 		server.serveResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
 		return
-	} else if utils.RequestGetContentType(request) != "application/json" {
+	} else if utils.HTTPGetContentType(request) != "application/json" {
 		server.serveResponse(writer, serverResponse{mesgUnsupportedMediaType}, http.StatusUnsupportedMediaType)
 		return
 	}

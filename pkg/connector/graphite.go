@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/facette/facette/pkg/types"
+	"github.com/facette/facette/pkg/utils"
 )
 
 const (
@@ -170,8 +171,7 @@ func graphiteCheckConnectorResponse(response *http.Response) error {
 		return fmt.Errorf("got HTTP status code %d, expected 200", response.StatusCode)
 	}
 
-	if !strings.Contains(response.Header.Get("Content-Type"), "application/json") {
-
+	if utils.HTTPGetContentType(response) != "application/json" {
 		return fmt.Errorf("got HTTP content type `%s', expected `application/json'", response.Header["Content-Type"])
 	}
 
