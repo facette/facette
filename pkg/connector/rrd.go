@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/ziutek/rrd"
@@ -29,41 +30,27 @@ type RRDConnector struct {
 }
 
 func init() {
-	Connectors["rrd"] = func(outputChan *chan [2]string, config map[string]interface{}) (interface{}, error) {
-		var (
-			configPath    string
-			configPattern string
-			configDaemon  string
-			ok            bool
-		)
+	Connectors["rrd"] = func(outputChan *chan [2]string, settings map[string]interface{}) (interface{}, error) {
+		var err error
 
-		if _, ok := config["path"]; !ok {
-			return nil, fmt.Errorf("missing `path' mandatory connector setting")
-		} else if _, ok := config["pattern"]; !ok {
-			return nil, fmt.Errorf("missing `pattern' mandatory connector setting")
-		}
-
-		if configPath, ok = config["path"].(string); !ok {
-			return nil, fmt.Errorf("connector setting `path' value should be a string")
-		}
-
-		if configPattern, ok = config["pattern"].(string); !ok {
-			return nil, fmt.Errorf("connector setting `pattern' value should be a string")
-		}
-
-		if _, ok = config["daemon"]; ok {
-			if configDaemon, ok = config["daemon"].(string); !ok {
-				return nil, fmt.Errorf("connector setting `daemon' value should be a string")
-			}
-		}
-
-		return &RRDConnector{
-			Path:       configPath,
-			Pattern:    configPattern,
-			Daemon:     configDaemon,
-			outputChan: outputChan,
+		connector := &RRDConnector{
 			metrics:    make(map[string]map[string]*rrdMetric),
-		}, nil
+			outputChan: outputChan,
+		}
+
+		if connector.Path, err = config.GetString(settings, "path", true); err != nil {
+			return nil, err
+		}
+
+		if connector.Pattern, err = config.GetString(settings, "pattern", false); err != nil {
+			return nil, err
+		}
+
+		if connector.Daemon, err = config.GetString(settings, "daemon", false); err != nil {
+			return nil, err
+		}
+
+		return connector, nil
 	}
 }
 
