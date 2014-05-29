@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"reflect"
 	"regexp"
 	"strings"
 
@@ -90,4 +91,37 @@ func (config *Config) Load(filePath string) error {
 // Reload reloads the configuration.
 func (config *Config) Reload() error {
 	return config.Load(config.Path)
+}
+
+func getSetting(config map[string]interface{}, setting string, kind reflect.Kind,
+	mandatory bool, fallbackValue interface{}) (interface{}, error) {
+	if _, ok := config[setting]; !ok && mandatory {
+		return fallbackValue, fmt.Errorf("missing `%s' mandatory setting", setting)
+	}
+
+	if reflect.ValueOf(config[setting]).Kind() != kind {
+		return fallbackValue, fmt.Errorf("setting `%s' value should be a %s", setting, kind.String())
+	}
+
+	return config[setting], nil
+}
+
+func GetString(config map[string]interface{}, setting string, mandatory bool) (string, error) {
+	value, err := getSetting(config, setting, reflect.String, mandatory, "")
+	return value.(string), err
+}
+
+func GetInt(config map[string]interface{}, setting string, mandatory bool) (int, error) {
+	value, err := getSetting(config, setting, reflect.Int, mandatory, 0)
+	return value.(int), err
+}
+
+func GetFloat(config map[string]interface{}, setting string, mandatory bool) (float64, error) {
+	value, err := getSetting(config, setting, reflect.Float64, mandatory, 0.0)
+	return value.(float64), err
+}
+
+func GetBool(config map[string]interface{}, setting string, mandatory bool) (bool, error) {
+	value, err := getSetting(config, setting, reflect.Bool, mandatory, false)
+	return value.(bool), err
 }
