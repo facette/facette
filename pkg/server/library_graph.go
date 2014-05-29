@@ -279,7 +279,8 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 				continue
 			}
 
-			plotResult, err := originConnector.GetPlots(query, startTime, endTime, step, plotReq.Percentiles)
+			plotResult, err := originConnector.GetPlots(&connector.PlotQuery{query, startTime, endTime, step,
+				plotReq.Percentiles})
 			if err != nil {
 				log.Println("ERROR: " + err.Error())
 			}

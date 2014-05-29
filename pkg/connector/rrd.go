@@ -8,7 +8,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
@@ -69,10 +68,191 @@ func init() {
 }
 
 // GetPlots retrieves time series data from origin based on a query and a time interval.
-func (connector *RRDConnector) GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
-	percentiles []float64) (map[string]*PlotResult, error) {
+func (connector *RRDConnector) GetPlots(query *PlotQuery) (map[string]*PlotResult, error) {
+	var xport *rrd.Exporter
 
-	return connector.rrdGetData(query, startTime, endTime, step, percentiles, false)
+	if len(query.Group.Series) == 0 {
+		return nil, fmt.Errorf("group has no series")
+	} else if query.Group.Type != OperGroupTypeNone && len(query.Group.Series) == 1 {
+		query.Group.Type = OperGroupTypeNone
+	}
+
+	result := make(map[string]*PlotResult)
+	series := make(map[string]string)
+
+	stack := make([]string, 0)
+
+	graph := rrd.NewGrapher()
+
+	if connector.Daemon != "" {
+		graph.SetDaemon(connector.Daemon)
+	}
+
+	xport = rrd.NewExporter()
+
+	if connector.Daemon != "" {
+		xport.SetDaemon(connector.Daemon)
+	}
+
+	count := 0
+
+	switch query.Group.Type {
+	case OperGroupTypeNone:
+		for _, serie := range query.Group.Series {
+			if serie.Metric == nil {
+				continue
+			}
+
+			serieTemp := fmt.Sprintf("serie%d", count)
+			serieName := serie.Name
+
+			count += 1
+
+			graph.Def(
+				serieTemp+"-orig0",
+				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].FilePath,
+				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].Dataset,
+				"AVERAGE",
+			)
+
+			if serie.Scale != 0 {
+				graph.CDef(serieTemp+"-orig1", fmt.Sprintf("%s-orig0,%f,*", serieTemp, serie.Scale))
+			} else {
+				graph.CDef(serieTemp+"-orig1", serieTemp+"-orig0")
+			}
+
+			if query.Group.Scale != 0 {
+				graph.CDef(serieTemp, fmt.Sprintf("%s-orig1,%f,*", serieTemp, query.Group.Scale))
+			} else {
+				graph.CDef(serieTemp, serieTemp+"-orig1")
+			}
+
+			// Set graph information request
+			rrdSetGraph(graph, serieTemp, serieName, query.Percentiles)
+
+			// Set plots request
+			xport.Def(
+				serieTemp+"-orig0",
+				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].FilePath,
+				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].Dataset,
+				"AVERAGE",
+			)
+
+			if serie.Scale != 0 {
+				xport.CDef(serieTemp+"-orig1", fmt.Sprintf("%s-orig0,%f,*", serieTemp, serie.Scale))
+			} else {
+				xport.CDef(serieTemp+"-orig1", serieTemp+"-orig0")
+			}
+
+			if query.Group.Scale != 0 {
+				xport.CDef(serieTemp, fmt.Sprintf("%s-orig1,%f,*", serieTemp, query.Group.Scale))
+			} else {
+				xport.CDef(serieTemp, serieTemp+"-orig1")
+			}
+
+			xport.XportDef(serieTemp, serieTemp)
+
+			// Set serie matching
+			series[serieTemp] = serieName
+		}
+
+	case OperGroupTypeAvg, OperGroupTypeSum:
+		serieName := fmt.Sprintf("serie%d", count)
+		count += 1
+
+		for index, serie := range query.Group.Series {
+			if serie.Metric == nil {
+				continue
+			}
+
+			serieTemp := serieName + fmt.Sprintf("-tmp%d", index)
+
+			graph.Def(
+				serieTemp+"-ori",
+				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].FilePath,
+				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].Dataset,
+				"AVERAGE",
+			)
+
+			graph.CDef(serieTemp, fmt.Sprintf("%s-ori,UN,0,%s-ori,IF", serieTemp, serieTemp))
+
+			xport.Def(
+				serieTemp+"-ori",
+				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].FilePath,
+				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].Dataset,
+				"AVERAGE",
+			)
+
+			xport.CDef(serieTemp, fmt.Sprintf("%s-ori,UN,0,%s-ori,IF", serieTemp, serieTemp))
+
+			if len(stack) == 0 {
+				stack = append(stack, serieTemp)
+			} else {
+				stack = append(stack, serieTemp, "+")
+			}
+		}
+
+		if query.Group.Type == OperGroupTypeAvg {
+			stack = append(stack, strconv.Itoa(len(query.Group.Series)), "/")
+		}
+
+		graph.CDef(serieName+"-orig", strings.Join(stack, ","))
+
+		if query.Group.Scale != 0 {
+			graph.CDef(serieName, fmt.Sprintf("%s-orig,%f,*", serieName, query.Group.Scale))
+		} else {
+			graph.CDef(serieName, serieName+"-orig")
+		}
+
+		// Set graph information request
+		rrdSetGraph(graph, serieName, query.Group.Name, query.Percentiles)
+
+		// Set plots request
+		xport.CDef(serieName+"-orig", strings.Join(stack, ","))
+
+		if query.Group.Scale != 0 {
+			xport.CDef(serieName, fmt.Sprintf("%s-orig,%f,*", serieName, query.Group.Scale))
+		} else {
+			xport.CDef(serieName, serieName+"-orig")
+		}
+
+		xport.XportDef(serieName, serieName)
+
+		// Set serie matching
+		series[serieName] = query.Group.Name
+
+	default:
+		return nil, fmt.Errorf("unknown operator type %d", query.Group.Type)
+	}
+
+	// Get plots
+	data := rrd.XportResult{}
+
+	data, err := xport.Xport(query.StartTime, query.EndTime, query.Step)
+	if err != nil {
+		return nil, err
+	}
+
+	for index, serieName := range data.Legends {
+		result[series[serieName]] = &PlotResult{Info: make(map[string]types.PlotValue)}
+
+		for i := 0; i < data.RowCnt; i++ {
+			result[series[serieName]].Plots = append(result[series[serieName]].Plots,
+				types.PlotValue(data.ValueAt(index, i)))
+		}
+	}
+
+	// Parse graph information
+	graphInfo, _, err := graph.Graph(query.StartTime, query.EndTime)
+	if err != nil {
+		return nil, err
+	}
+
+	rrdParseInfo(graphInfo, result)
+
+	data.FreeValues()
+
+	return result, nil
 }
 
 // Refresh triggers a full connector data update.
@@ -161,205 +341,6 @@ func (connector *RRDConnector) Refresh(errChan chan error) {
 		errChan <- err
 		return
 	}
-}
-
-func (connector *RRDConnector) rrdGetData(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
-	percentiles []float64, infoOnly bool) (map[string]*PlotResult, error) {
-
-	var xport *rrd.Exporter
-
-	if len(query.Series) == 0 {
-		return nil, fmt.Errorf("group has no series")
-	} else if query.Type != OperGroupTypeNone && len(query.Series) == 1 {
-		query.Type = OperGroupTypeNone
-	}
-
-	result := make(map[string]*PlotResult)
-	series := make(map[string]string)
-
-	stack := make([]string, 0)
-
-	graph := rrd.NewGrapher()
-
-	if connector.Daemon != "" {
-		graph.SetDaemon(connector.Daemon)
-	}
-
-	if !infoOnly {
-		xport = rrd.NewExporter()
-
-		if connector.Daemon != "" {
-			xport.SetDaemon(connector.Daemon)
-		}
-	}
-
-	count := 0
-
-	switch query.Type {
-	case OperGroupTypeNone:
-		for _, serie := range query.Series {
-			if serie.Metric == nil {
-				continue
-			}
-
-			serieTemp := fmt.Sprintf("serie%d", count)
-			serieName := serie.Name
-
-			count += 1
-
-			graph.Def(
-				serieTemp+"-orig0",
-				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].FilePath,
-				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].Dataset,
-				"AVERAGE",
-			)
-
-			if serie.Scale != 0 {
-				graph.CDef(serieTemp+"-orig1", fmt.Sprintf("%s-orig0,%f,*", serieTemp, serie.Scale))
-			} else {
-				graph.CDef(serieTemp+"-orig1", serieTemp+"-orig0")
-			}
-
-			if query.Scale != 0 {
-				graph.CDef(serieTemp, fmt.Sprintf("%s-orig1,%f,*", serieTemp, query.Scale))
-			} else {
-				graph.CDef(serieTemp, serieTemp+"-orig1")
-			}
-
-			// Set graph information request
-			rrdSetGraph(graph, serieTemp, serieName, percentiles)
-
-			// Set plots request
-			if !infoOnly {
-				xport.Def(
-					serieTemp+"-orig0",
-					connector.metrics[serie.Metric.SourceName][serie.Metric.Name].FilePath,
-					connector.metrics[serie.Metric.SourceName][serie.Metric.Name].Dataset,
-					"AVERAGE",
-				)
-
-				if serie.Scale != 0 {
-					xport.CDef(serieTemp+"-orig1", fmt.Sprintf("%s-orig0,%f,*", serieTemp, serie.Scale))
-				} else {
-					xport.CDef(serieTemp+"-orig1", serieTemp+"-orig0")
-				}
-
-				if query.Scale != 0 {
-					xport.CDef(serieTemp, fmt.Sprintf("%s-orig1,%f,*", serieTemp, query.Scale))
-				} else {
-					xport.CDef(serieTemp, serieTemp+"-orig1")
-				}
-
-				xport.XportDef(serieTemp, serieTemp)
-			}
-
-			// Set serie matching
-			series[serieTemp] = serieName
-		}
-
-	case OperGroupTypeAvg, OperGroupTypeSum:
-		serieName := fmt.Sprintf("serie%d", count)
-		count += 1
-
-		for index, serie := range query.Series {
-			if serie.Metric == nil {
-				continue
-			}
-
-			serieTemp := serieName + fmt.Sprintf("-tmp%d", index)
-
-			graph.Def(
-				serieTemp+"-ori",
-				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].FilePath,
-				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].Dataset,
-				"AVERAGE",
-			)
-
-			graph.CDef(serieTemp, fmt.Sprintf("%s-ori,UN,0,%s-ori,IF", serieTemp, serieTemp))
-
-			if !infoOnly {
-				xport.Def(
-					serieTemp+"-ori",
-					connector.metrics[serie.Metric.SourceName][serie.Metric.Name].FilePath,
-					connector.metrics[serie.Metric.SourceName][serie.Metric.Name].Dataset,
-					"AVERAGE",
-				)
-
-				xport.CDef(serieTemp, fmt.Sprintf("%s-ori,UN,0,%s-ori,IF", serieTemp, serieTemp))
-			}
-
-			if len(stack) == 0 {
-				stack = append(stack, serieTemp)
-			} else {
-				stack = append(stack, serieTemp, "+")
-			}
-		}
-
-		if query.Type == OperGroupTypeAvg {
-			stack = append(stack, strconv.Itoa(len(query.Series)), "/")
-		}
-
-		graph.CDef(serieName+"-orig", strings.Join(stack, ","))
-
-		if query.Scale != 0 {
-			graph.CDef(serieName, fmt.Sprintf("%s-orig,%f,*", serieName, query.Scale))
-		} else {
-			graph.CDef(serieName, serieName+"-orig")
-		}
-
-		// Set graph information request
-		rrdSetGraph(graph, serieName, query.Name, percentiles)
-
-		// Set plots request
-		if !infoOnly {
-			xport.CDef(serieName+"-orig", strings.Join(stack, ","))
-
-			if query.Scale != 0 {
-				xport.CDef(serieName, fmt.Sprintf("%s-orig,%f,*", serieName, query.Scale))
-			} else {
-				xport.CDef(serieName, serieName+"-orig")
-			}
-
-			xport.XportDef(serieName, serieName)
-		}
-
-		// Set serie matching
-		series[serieName] = query.Name
-
-	default:
-		return nil, fmt.Errorf("unknown operator type %d", query.Type)
-	}
-
-	// Get plots
-	data := rrd.XportResult{}
-
-	if !infoOnly {
-		data, err := xport.Xport(startTime, endTime, step)
-		if err != nil {
-			return nil, err
-		}
-
-		for index, serieName := range data.Legends {
-			result[series[serieName]] = &PlotResult{Info: make(map[string]types.PlotValue)}
-
-			for i := 0; i < data.RowCnt; i++ {
-				result[series[serieName]].Plots = append(result[series[serieName]].Plots,
-					types.PlotValue(data.ValueAt(index, i)))
-			}
-		}
-	}
-
-	// Parse graph information
-	graphInfo, _, err := graph.Graph(startTime, endTime)
-	if err != nil {
-		return nil, err
-	}
-
-	rrdParseInfo(graphInfo, result)
-
-	data.FreeValues()
-
-	return result, nil
 }
 
 func rrdParseInfo(info rrd.GraphInfo, data map[string]*PlotResult) {

@@ -63,9 +63,7 @@ func init() {
 }
 
 // GetPlots retrieves time series data from origin based on a query and a time interval.
-func (connector *GraphiteConnector) GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
-	percentiles []float64) (map[string]*PlotResult, error) {
-
+func (connector *GraphiteConnector) GetPlots(query *PlotQuery) (map[string]*PlotResult, error) {
 	result := make(map[string]*PlotResult)
 
 	httpTransport := &http.Transport{}
@@ -75,7 +73,7 @@ func (connector *GraphiteConnector) GetPlots(query *GroupQuery, startTime, endTi
 
 	httpClient := http.Client{Transport: httpTransport}
 
-	serieName, queryURL, err := graphiteBuildQueryURL(query, startTime, endTime)
+	serieName, queryURL, err := graphiteBuildQueryURL(query.Group, query.StartTime, query.EndTime)
 	if err != nil {
 		return nil, fmt.Errorf("unable to build Graphite query URL: %s", err.Error())
 	}
