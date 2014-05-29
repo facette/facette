@@ -9,9 +9,17 @@ import (
 
 // Connector represents the main interface of a connector handler.
 type Connector interface {
-	GetPlots(query *GroupQuery, startTime, endTime time.Time, step time.Duration,
-		percentiles []float64) (map[string]*PlotResult, error)
+	GetPlots(query *PlotQuery) (map[string]*PlotResult, error)
 	Refresh(chan error)
+}
+
+// PlotQuery represents a connector plot query.
+type PlotQuery struct {
+	Group       *GroupQuery
+	StartTime   time.Time
+	EndTime     time.Time
+	Step        time.Duration
+	Percentiles []float64
 }
 
 // MetricQuery represents a metric entry in a SerieQuery.
