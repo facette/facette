@@ -28,7 +28,7 @@ type graphitePlot struct {
 // GraphiteConnector represents the main structure of the Graphite connector.
 type GraphiteConnector struct {
 	URL         string
-	InsecureTLS bool
+	insecureTLS bool
 	outputChan  *chan [2]string
 }
 
@@ -37,7 +37,7 @@ func init() {
 		var err error
 
 		connector := &GraphiteConnector{
-			InsecureTLS: false,
+			insecureTLS: false,
 			outputChan:  outputChan,
 		}
 
@@ -45,7 +45,7 @@ func init() {
 			return nil, err
 		}
 
-		if connector.InsecureTLS, err = config.GetBool(settings, "allow_insecure_tls", false); err != nil {
+		if connector.insecureTLS, err = config.GetBool(settings, "allow_insecure_tls", false); err != nil {
 			return nil, err
 		}
 
@@ -58,7 +58,7 @@ func (connector *GraphiteConnector) GetPlots(query *PlotQuery) (map[string]*Plot
 	result := make(map[string]*PlotResult)
 
 	httpTransport := &http.Transport{}
-	if connector.InsecureTLS {
+	if connector.insecureTLS {
 		httpTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 
@@ -109,7 +109,7 @@ func (connector *GraphiteConnector) Refresh(errChan chan error) {
 		}).Dial,
 	}
 
-	if connector.InsecureTLS {
+	if connector.insecureTLS {
 		httpTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 

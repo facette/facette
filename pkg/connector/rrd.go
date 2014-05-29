@@ -22,11 +22,11 @@ type rrdMetric struct {
 
 // RRDConnector represents the main structure of the RRD connector.
 type RRDConnector struct {
-	Path       string
-	Pattern    string
-	Daemon     string
-	outputChan *chan [2]string
+	path       string
+	pattern    string
+	daemon     string
 	metrics    map[string]map[string]*rrdMetric
+	outputChan *chan [2]string
 }
 
 func init() {
@@ -38,15 +38,15 @@ func init() {
 			outputChan: outputChan,
 		}
 
-		if connector.Path, err = config.GetString(settings, "path", true); err != nil {
+		if connector.path, err = config.GetString(settings, "path", true); err != nil {
 			return nil, err
 		}
 
-		if connector.Pattern, err = config.GetString(settings, "pattern", false); err != nil {
+		if connector.pattern, err = config.GetString(settings, "pattern", false); err != nil {
 			return nil, err
 		}
 
-		if connector.Daemon, err = config.GetString(settings, "daemon", false); err != nil {
+		if connector.daemon, err = config.GetString(settings, "daemon", false); err != nil {
 			return nil, err
 		}
 
@@ -71,14 +71,14 @@ func (connector *RRDConnector) GetPlots(query *PlotQuery) (map[string]*PlotResul
 
 	graph := rrd.NewGrapher()
 
-	if connector.Daemon != "" {
-		graph.SetDaemon(connector.Daemon)
+	if connector.daemon != "" {
+		graph.SetDaemon(connector.daemon)
 	}
 
 	xport = rrd.NewExporter()
 
-	if connector.Daemon != "" {
-		xport.SetDaemon(connector.Daemon)
+	if connector.daemon != "" {
+		xport.SetDaemon(connector.daemon)
 	}
 
 	count := 0
@@ -248,7 +248,7 @@ func (connector *RRDConnector) Refresh(errChan chan error) {
 	defer close(errChan)
 
 	// Compile pattern
-	re := regexp.MustCompile(connector.Pattern)
+	re := regexp.MustCompile(connector.pattern)
 
 	// Validate pattern keywords
 	groups := make(map[string]bool)
@@ -287,7 +287,7 @@ func (connector *RRDConnector) Refresh(errChan chan error) {
 			return nil
 		}
 
-		submatch := re.FindStringSubmatch(filePath[len(connector.Path)+1:])
+		submatch := re.FindStringSubmatch(filePath[len(connector.path)+1:])
 		if len(submatch) == 0 {
 			log.Printf("INFO: file `%s' does not match pattern, ignoring", filePath)
 			return nil
@@ -324,7 +324,7 @@ func (connector *RRDConnector) Refresh(errChan chan error) {
 		return nil
 	}
 
-	if err := utils.WalkDir(connector.Path, walkFunc); err != nil {
+	if err := utils.WalkDir(connector.path, walkFunc); err != nil {
 		errChan <- err
 		return
 	}
