@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
 )
@@ -32,31 +33,20 @@ type GraphiteConnector struct {
 }
 
 func init() {
-	Connectors["graphite"] = func(outputChan *chan [2]string, config map[string]interface{}) (interface{}, error) {
-		var (
-			configURL           string
-			configAllowInsecure string
-			ok                  bool
-		)
-
-		if _, ok := config["url"]; !ok {
-			return nil, fmt.Errorf("missing `url' mandatory connector setting")
-		}
-
-		if configURL, ok = config["url"].(string); !ok {
-			return nil, fmt.Errorf("connector setting `url' value should be a string")
-		}
-
-		if _, ok = config["allow_insecure_tls"]; ok {
-			if configAllowInsecure, ok = config["allow_insecure_tls"].(string); !ok {
-				return nil, fmt.Errorf("connector setting `allow_insecure_tls' value should be a string")
-			}
-		}
+	Connectors["graphite"] = func(outputChan *chan [2]string, settings map[string]interface{}) (interface{}, error) {
+		var err error
 
 		connector := &GraphiteConnector{
-			URL:         configURL,
-			InsecureTLS: configAllowInsecure == "yes",
+			InsecureTLS: false,
 			outputChan:  outputChan,
+		}
+
+		if connector.URL, err = config.GetString(settings, "url", true); err != nil {
+			return nil, err
+		}
+
+		if connector.InsecureTLS, err = config.GetBool(settings, "allow_insecure_tls", false); err != nil {
+			return nil, err
 		}
 
 		return connector, nil
