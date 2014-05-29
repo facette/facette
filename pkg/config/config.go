@@ -95,8 +95,12 @@ func (config *Config) Reload() error {
 
 func getSetting(config map[string]interface{}, setting string, kind reflect.Kind,
 	mandatory bool, fallbackValue interface{}) (interface{}, error) {
-	if _, ok := config[setting]; !ok && mandatory {
-		return fallbackValue, fmt.Errorf("missing `%s' mandatory setting", setting)
+	if _, ok := config[setting]; !ok {
+		if mandatory {
+			return fallbackValue, fmt.Errorf("missing `%s' mandatory setting", setting)
+		}
+
+		return fallbackValue, nil
 	}
 
 	if reflect.ValueOf(config[setting]).Kind() != kind {
