@@ -42,7 +42,7 @@ func init() {
 			return nil, err
 		}
 
-		if connector.pattern, err = config.GetString(settings, "pattern", false); err != nil {
+		if connector.pattern, err = config.GetString(settings, "pattern", true); err != nil {
 			return nil, err
 		}
 
