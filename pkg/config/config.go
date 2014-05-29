@@ -80,10 +80,6 @@ func (config *Config) Load(filePath string) error {
 		for _, filter := range origin.Filters {
 			filter.PatternRegexp = regexp.MustCompile(filter.Pattern)
 		}
-
-		for _, template := range origin.Templates {
-			template.SplitRegexp = regexp.MustCompile(template.SplitPattern)
-		}
 	}
 
 	config.Path = filePath

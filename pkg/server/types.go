@@ -29,11 +29,6 @@ type PlotRequest struct {
 	Constants   []float64 `json:"constants"`
 	Percentiles []float64 `json:"percentiles"`
 	Graph       string    `json:"graph"`
-	Origin      string    `json:"origin"`
-	Source      string    `json:"source"`
-	Metric      string    `json:"metric"`
-	Template    string    `json:"template"`
-	Filter      string    `json:"filter"`
 }
 
 // OriginResponse represents an origin response structure in the server backend.

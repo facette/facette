@@ -36,8 +36,7 @@ func (server *Server) serveBrowse(writer http.ResponseWriter, request *http.Requ
 
 	setHTTPCacheHeaders(writer)
 
-	if strings.HasPrefix(request.URL.Path, urlBrowsePath+"collections/") ||
-		strings.HasPrefix(request.URL.Path, urlBrowsePath+"sources/") {
+	if strings.HasPrefix(request.URL.Path, urlBrowsePath+"collections/") {
 		err = server.serveBrowseCollection(writer, request, tmpl)
 	} else if request.URL.Path == urlBrowsePath+"search" {
 		err = server.serveBrowseSearch(writer, request, tmpl)
@@ -82,6 +81,10 @@ func (server *Server) serveBrowseIndex(writer http.ResponseWriter, request *http
 func (server *Server) serveBrowseCollection(writer http.ResponseWriter, request *http.Request,
 	tmpl *template.Template) error {
 
+	var (
+		err error
+	)
+
 	type collectionData struct {
 		*library.Collection
 		Parent string
@@ -93,28 +96,17 @@ func (server *Server) serveBrowseCollection(writer http.ResponseWriter, request 
 		Request    *http.Request
 	}
 
-	// Set template data
 	data.URLPrefix = server.Config.URLPrefix
 
-	if strings.HasPrefix(request.URL.Path, urlBrowsePath+"collections/") {
-		data.Collection = &collectionData{Collection: &library.Collection{}}
-		data.Collection.ID = strings.TrimPrefix(request.URL.Path, urlBrowsePath+"collections/")
+	data.Collection = &collectionData{Collection: &library.Collection{}}
+	data.Collection.ID = strings.TrimPrefix(request.URL.Path, urlBrowsePath+"collections/")
 
-		item, err := server.Library.GetItem(data.Collection.ID, library.LibraryItemCollection)
-		if err != nil {
-			return err
-		}
-
-		data.Collection.Collection = item.(*library.Collection)
-	} else {
-		collection, err := server.Library.GetCollectionTemplate(strings.TrimPrefix(request.URL.Path,
-			urlBrowsePath+"sources/"))
-		if err != nil {
-			return err
-		}
-
-		data.Collection = &collectionData{Collection: collection}
+	item, err := server.Library.GetItem(data.Collection.ID, library.LibraryItemCollection)
+	if err != nil {
+		return err
 	}
+
+	data.Collection.Collection = item.(*library.Collection)
 
 	if request.FormValue("q") != "" {
 		data.Collection.Collection = server.Library.FilterCollection(data.Collection.Collection, request.FormValue("q"))
@@ -127,7 +119,7 @@ func (server *Server) serveBrowseCollection(writer http.ResponseWriter, request 
 	}
 
 	// Execute template
-	tmpl, err := tmpl.ParseFiles(
+	tmpl, err = tmpl.ParseFiles(
 		path.Join(server.Config.BaseDir, "html", "layout.html"),
 		path.Join(server.Config.BaseDir, "html", "common", "element.html"),
 		path.Join(server.Config.BaseDir, "html", "common", "graph.html"),
