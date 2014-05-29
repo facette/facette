@@ -24,7 +24,6 @@ type Graph struct {
 	Type      int      `json:"type"`
 	StackMode int      `json:"stack_mode"`
 	Stacks    []*Stack `json:"stacks"`
-	Volatile  bool     `json:"-"`
 }
 
 // Stack represents a set of operation group entries.

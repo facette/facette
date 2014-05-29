@@ -21,7 +21,7 @@ function adminItemHandlePaneList(itemType) {
 
                     itemSave($item.attr('data-itemid'), paneSection, {
                         name: data
-                    }, SAVE_MODE_CLONE).then(function () {
+                    }, true).then(function () {
                         listUpdate($item.closest('[data-list]'),
                             $item.closest('[data-pane]')
                                 .find('[data-listfilter=' + paneSection + ']').val());

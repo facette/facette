@@ -717,49 +717,6 @@ func Test_LibraryGraphHandle(test *testing.T) {
 		test.Fail()
 	}
 
-	// Test volatile POST into graph
-	graphBase.ID = ""
-	data, _ = json.Marshal(graphBase)
-
-	response = execTestRequest(test, "POST", baseURL+"?volatile=1", strings.NewReader(string(data)), nil)
-
-	if response.StatusCode != http.StatusCreated {
-		test.Logf("\nExpected %d\nbut got  %d", http.StatusCreated, response.StatusCode)
-		test.Fail()
-	}
-
-	if response.Header.Get("Location") == "" {
-		test.Logf("\nExpected `Location' header")
-		test.Fail()
-	}
-
-	graphBase.ID = response.Header.Get("Location")[strings.LastIndex(response.Header.Get("Location"), "/")+1:]
-
-	// Test GET on volatile graph item
-	graphResult = &library.Graph{}
-
-	response = execTestRequest(test, "GET", baseURL+graphBase.ID, nil, &graphResult)
-
-	if response.StatusCode != http.StatusOK {
-		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
-		test.Fail()
-	}
-
-	if !reflect.DeepEqual(graphBase, graphResult) {
-		test.Logf("\nExpected %#v\nbut got  %#v", graphBase, graphResult)
-		test.Fail()
-	}
-
-	// Test GET on volatile graph item
-	graphResult = &library.Graph{}
-
-	response = execTestRequest(test, "GET", baseURL+graphBase.ID, nil, &graphResult)
-
-	if response.StatusCode != http.StatusNotFound {
-		test.Logf("\nExpected %d\nbut got  %d", http.StatusNotFound, response.StatusCode)
-		test.Fail()
-	}
-
 	// Test GET on graphs list (offset and limit)
 	listBase = server.ItemListResponse{}
 

@@ -10,11 +10,12 @@ var GRAPH_DRAW_PARENTS  = [],
 
     $graphTemplate;
 
-function graphDraw(graph, postpone, delay) {
+function graphDraw(graph, postpone, delay, preview) {
     var graphNew;
 
     postpone = typeof postpone == 'boolean' ? postpone : false;
     delay    = delay || 0;
+    preview  = preview || null;
 
     if (graph.length > 1) {
         console.error("Can't draw multiple graph.");
@@ -60,10 +61,6 @@ function graphDraw(graph, postpone, delay) {
             // Parse graph options
             graphOpts = graph.data('options') || graph.opts('graph');
 
-            if (typeof graphOpts.preview != 'boolean')
-                graphOpts.preview = graphOpts.preview &&
-                    graphOpts.preview.trim().toLowerCase() == 'true' ? true : false;
-
             if (typeof graphOpts.zoom != 'boolean')
                 graphOpts.zoom = graphOpts.zoom && graphOpts.zoom.trim().toLowerCase() == 'false' ? false : true;
 
@@ -88,17 +85,10 @@ function graphDraw(graph, postpone, delay) {
                 }) : undefined
             };
 
-            if (graphOpts.origin && (graphOpts.template || graphOpts.metric)) {
-                query.origin = graphOpts.origin;
-                query.source = graphOpts.source;
-                query.filter = graphOpts.filter;
-
-                if (graphOpts.template)
-                    query.template = graphOpts.template;
-                else
-                    query.metric = graphOpts.metric;
+            if (preview) {
+                query.graph = preview;
             } else {
-                query.graph = graph.attr('data-graph');
+                query.id = graph.attr('data-graph');
             }
 
             return $.ajax({
@@ -144,7 +134,7 @@ function graphDraw(graph, postpone, delay) {
                         borderRadius: 0,
                         events: {
                             load: function () {
-                                if (!graphOpts.preview)
+                                if (!preview)
                                     Highcharts.drawTable.apply(this, [info]);
                             },
 
@@ -255,7 +245,7 @@ function graphDraw(graph, postpone, delay) {
                 };
 
                 // Enable full features when not in preview
-                if (graphOpts.preview) {
+                if (preview) {
                     highchartOpts.plotOptions[highchartOpts.chart.type].enableMouseTracking = false;
 
                     graph.children('.graphctrl').remove();
@@ -317,13 +307,13 @@ function graphDraw(graph, postpone, delay) {
                 }
 
                 // Prepare legend spacing
-                if (!graphOpts.preview)
+                if (!preview)
                     highchartOpts.chart.spacingBottom = highchartOpts.series.length * GRAPH_LEGEND_ROW_HEIGHT +
                         highchartOpts.chart.spacingBottom * 2;
 
                 $container = graph.children('.graphcntr');
 
-                if (!graphOpts.preview && !$container.highcharts())
+                if (!preview && !$container.highcharts())
                     $container.height($container.height() + highchartOpts.chart.spacingBottom);
 
                 $container.highcharts(highchartOpts);

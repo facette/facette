@@ -41,10 +41,8 @@ func (library *Library) DeleteItem(id string, itemType int) error {
 	}
 
 	// Remove stored JSON
-	if itemType != LibraryItemGraph || itemType == LibraryItemGraph && !library.Graphs[id].Volatile {
-		if err := syscall.Unlink(library.getFilePath(id, itemType)); err != nil {
-			return err
-		}
+	if err := syscall.Unlink(library.getFilePath(id, itemType)); err != nil {
+		return err
 	}
 
 	// Delete item from library
@@ -79,13 +77,7 @@ func (library *Library) GetItem(id string, itemType int) (interface{}, error) {
 		return library.Scales[id], nil
 
 	case LibraryItemGraph:
-		item := library.Graphs[id]
-
-		if library.Graphs[id].Volatile {
-			delete(library.Graphs, id)
-		}
-
-		return item, nil
+		return library.Graphs[id], nil
 
 	case LibraryItemCollection:
 		return library.Collections[id], nil
@@ -202,7 +194,6 @@ func (library *Library) LoadItem(id string, itemType int) error {
 		}
 
 		library.Graphs[id] = tmpGraph
-		library.Graphs[id].Volatile = false
 		library.Graphs[id].Modified = fileInfo.ModTime()
 
 	case LibraryItemCollection:
@@ -264,8 +255,7 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 	}
 
 	// Check for name field presence/duplicates
-	if itemStruct.Name == "" && (itemType != LibraryItemGraph ||
-		itemType == LibraryItemGraph && !item.(*Graph).Volatile) {
+	if itemStruct.Name == "" {
 		return os.ErrInvalid
 	}
 
@@ -285,7 +275,7 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 			}
 
 		case LibraryItemGraph:
-			if !item.(*Graph).Volatile && itemTemp.(*Graph).ID != itemStruct.ID {
+			if itemTemp.(*Graph).ID != itemStruct.ID {
 				log.Printf("ERROR: duplicate graph identifier `%s'", itemStruct.ID)
 				return os.ErrExist
 			}
@@ -359,10 +349,8 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 	}
 
 	// Store JSON data
-	if itemType != LibraryItemGraph || itemType == LibraryItemGraph && !item.(*Graph).Volatile {
-		if err := utils.JSONDump(library.getFilePath(itemStruct.ID, itemType), item, itemStruct.Modified); err != nil {
-			return err
-		}
+	if err := utils.JSONDump(library.getFilePath(itemStruct.ID, itemType), item, itemStruct.Modified); err != nil {
+		return err
 	}
 
 	return nil
