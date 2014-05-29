@@ -13,6 +13,10 @@ import (
 func (server *Server) applyResponseLimit(writer http.ResponseWriter, request *http.Request, response *listResponse) {
 	writer.Header().Add("X-Total-Records", strconv.Itoa(response.list.Len()))
 
+	if response.list.Len() == 0 {
+		return
+	}
+
 	sort.Sort(response.list)
 
 	if response.limit != 0 && response.list.Len() > response.offset+response.limit {
