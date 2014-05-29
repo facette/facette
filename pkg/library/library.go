@@ -24,8 +24,6 @@ const (
 	LibraryItemScale
 	// LibraryItemGraph represents a graph item.
 	LibraryItemGraph
-	// LibraryItemGraphTemplate represents a graph template item.
-	LibraryItemGraphTemplate
 	// LibraryItemCollection represents a collection item.
 	LibraryItemCollection
 )
@@ -37,15 +35,14 @@ const (
 
 // Library represents the main structure of library instance.
 type Library struct {
-	Config         *config.Config
-	Catalog        *catalog.Catalog
-	Groups         map[string]*Group
-	Scales         map[string]*Scale
-	Graphs         map[string]*Graph
-	TemplateGraphs map[string]*Graph
-	Collections    map[string]*Collection
-	debugLevel     int
-	idRegexp       *regexp.Regexp
+	Config      *config.Config
+	Catalog     *catalog.Catalog
+	Groups      map[string]*Group
+	Scales      map[string]*Scale
+	Graphs      map[string]*Graph
+	Collections map[string]*Collection
+	debugLevel  int
+	idRegexp    *regexp.Regexp
 }
 
 // Refresh updates the current library by browsing the filesystem for stored data.
@@ -56,7 +53,6 @@ func (library *Library) Refresh() error {
 	library.Groups = make(map[string]*Group)
 	library.Scales = make(map[string]*Scale)
 	library.Graphs = make(map[string]*Graph)
-	library.TemplateGraphs = make(map[string]*Graph)
 	library.Collections = make(map[string]*Collection)
 
 	walkFunc := func(filePath string, fileInfo os.FileInfo, fileError error) error {

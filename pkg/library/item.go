@@ -153,9 +153,6 @@ func (library *Library) ItemExists(id string, itemType int) bool {
 	case LibraryItemGraph:
 		_, exists = library.Graphs[id]
 
-	case LibraryItemGraphTemplate:
-		_, exists = library.TemplateGraphs[id]
-
 	case LibraryItemCollection:
 		_, exists = library.Collections[id]
 	}

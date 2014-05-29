@@ -210,12 +210,6 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 		return
 	}
 
-	if plotReq.Origin != "" && plotReq.Template != "" {
-		plotReq.Graph = plotReq.Origin + "\x30" + plotReq.Template
-	} else if plotReq.Origin != "" && plotReq.Metric != "" {
-		plotReq.Graph = plotReq.Origin + "\x30" + plotReq.Metric
-	}
-
 	if plotReq.Time == "" {
 		endTime = time.Now()
 	} else if strings.HasPrefix(strings.Trim(plotReq.Range, " "), "-") {
@@ -249,20 +243,7 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 	}
 
 	// Get graph from library
-	if plotReq.Template != "" {
-		graph, err = server.Library.GetGraphTemplate(
-			plotReq.Origin,
-			plotReq.Source,
-			plotReq.Template,
-			plotReq.Filter,
-		)
-	} else if plotReq.Metric != "" {
-		graph, err = server.Library.GetGraphMetric(
-			plotReq.Origin,
-			plotReq.Source,
-			plotReq.Metric,
-		)
-	} else if item, err = server.Library.GetItem(plotReq.Graph, library.LibraryItemGraph); err == nil {
+	if item, err = server.Library.GetItem(plotReq.Graph, library.LibraryItemGraph); err == nil {
 		graph = item.(*library.Graph)
 	}
 
@@ -383,9 +364,7 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 
 		serieSources := make([]string, 0)
 
-		if plotReq.Template != "" {
-			serieSources = []string{plotReq.Source}
-		} else if strings.HasPrefix(serieItem.Source, library.LibraryGroupPrefix) {
+		if strings.HasPrefix(serieItem.Source, library.LibraryGroupPrefix) {
 			serieSources = server.Library.ExpandGroup(strings.TrimPrefix(serieItem.Source, library.LibraryGroupPrefix),
 				library.LibraryItemSourceGroup)
 		} else {
