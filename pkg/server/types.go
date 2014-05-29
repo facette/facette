@@ -3,6 +3,7 @@ package server
 import (
 	"time"
 
+	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/pkg/types"
 )
 
@@ -23,12 +24,13 @@ func (e ExpandRequest) Swap(i, j int) {
 
 // PlotRequest represents a plot request structure in the server backend.
 type PlotRequest struct {
-	Time        string    `json:"time"`
-	Range       string    `json:"range"`
-	Sample      int       `json:"sample"`
-	Constants   []float64 `json:"constants"`
-	Percentiles []float64 `json:"percentiles"`
-	Graph       string    `json:"graph"`
+	Time        string         `json:"time"`
+	Range       string         `json:"range"`
+	Sample      int            `json:"sample"`
+	Constants   []float64      `json:"constants"`
+	Percentiles []float64      `json:"percentiles"`
+	ID          string         `json:"id"`
+	Graph       *library.Graph `json:"graph"`
 }
 
 // OriginResponse represents an origin response structure in the server backend.

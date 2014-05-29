@@ -25,14 +25,14 @@ function itemLoad(id, itemType) {
     });
 }
 
-function itemSave(id, itemType, query, mode) {
+function itemSave(id, itemType, query, clone) {
     var url = '/api/v1/library/' + itemType + '/',
         method = 'POST';
 
-    if (mode === SAVE_MODE_CLONE) {
+    clone = typeof clone == 'boolean' ? clone : false;
+
+    if (clone) {
         url += '?inherit=' + id;
-    } else if (mode === SAVE_MODE_VOLATILE) {
-        url += '?volatile=1';
     } else if (id !== null) {
         url += '/' + id;
         method = 'PUT';

@@ -97,13 +97,6 @@ func (server *Server) serveGraph(writer http.ResponseWriter, request *http.Reque
 			return
 		}
 
-		// Store graph data
-		if request.FormValue("volatile") != "" {
-			graph.Volatile = true
-		} else {
-			graph.Volatile = false
-		}
-
 		err := server.Library.StoreItem(graph, library.LibraryItemGraph)
 		if response, status := server.parseError(writer, request, err); status != http.StatusOK {
 			log.Println("ERROR: " + err.Error())
@@ -156,7 +149,7 @@ func (server *Server) serveGraphList(writer http.ResponseWriter, request *http.R
 	items := make(ItemListResponse, 0)
 
 	for _, graph := range server.Library.Graphs {
-		if graph.Volatile || !graphSet.IsEmpty() && !graphSet.Has(graph.ID) {
+		if !graphSet.IsEmpty() && !graphSet.Has(graph.ID) {
 			continue
 		}
 
@@ -243,8 +236,16 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 	}
 
 	// Get graph from library
-	if item, err = server.Library.GetItem(plotReq.Graph, library.LibraryItemGraph); err == nil {
-		graph = item.(*library.Graph)
+	graph = plotReq.Graph
+
+	if plotReq.ID != "" {
+		if item, err = server.Library.GetItem(plotReq.ID, library.LibraryItemGraph); err == nil {
+			graph = item.(*library.Graph)
+		}
+	}
+
+	if graph == nil {
+		err = os.ErrNotExist
 	}
 
 	if err != nil {
