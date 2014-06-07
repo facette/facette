@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
@@ -22,31 +23,29 @@ type rrdMetric struct {
 
 // RRDConnector represents the main structure of the RRD connector.
 type RRDConnector struct {
-	path       string
-	pattern    string
-	daemon     string
-	metrics    map[string]map[string]*rrdMetric
-	outputChan *chan [2]string
+	path    string
+	pattern string
+	daemon  string
+	metrics map[string]map[string]*rrdMetric
 }
 
 func init() {
-	Connectors["rrd"] = func(outputChan *chan [2]string, settings map[string]interface{}) (interface{}, error) {
+	Connectors["rrd"] = func(origin *catalog.Origin) (interface{}, error) {
 		var err error
 
 		connector := &RRDConnector{
-			metrics:    make(map[string]map[string]*rrdMetric),
-			outputChan: outputChan,
+			metrics: make(map[string]map[string]*rrdMetric),
 		}
 
-		if connector.path, err = config.GetString(settings, "path", true); err != nil {
+		if connector.path, err = config.GetString(origin.Config.Connector, "path", true); err != nil {
 			return nil, err
 		}
 
-		if connector.pattern, err = config.GetString(settings, "pattern", true); err != nil {
+		if connector.pattern, err = config.GetString(origin.Config.Connector, "pattern", true); err != nil {
 			return nil, err
 		}
 
-		if connector.daemon, err = config.GetString(settings, "daemon", false); err != nil {
+		if connector.daemon, err = config.GetString(origin.Config.Connector, "daemon", false); err != nil {
 			return nil, err
 		}
 
@@ -243,10 +242,7 @@ func (connector *RRDConnector) GetPlots(query *PlotQuery) (map[string]*PlotResul
 }
 
 // Refresh triggers a full connector data update.
-func (connector *RRDConnector) Refresh(errChan chan error) {
-	defer close(*connector.outputChan)
-	defer close(errChan)
-
+func (connector *RRDConnector) Refresh(origin *catalog.Origin) error {
 	// Compile pattern
 	re := regexp.MustCompile(connector.pattern)
 
@@ -259,17 +255,14 @@ func (connector *RRDConnector) Refresh(errChan chan error) {
 		} else if key == "source" || key == "metric" {
 			groups[key] = true
 		} else {
-			errChan <- fmt.Errorf("invalid pattern keyword `%s'", key)
-			return
+			return fmt.Errorf("invalid pattern keyword `%s'", key)
 		}
 	}
 
 	if !groups["source"] {
-		errChan <- fmt.Errorf("missing pattern keyword `source'")
-		return
+		return fmt.Errorf("missing pattern keyword `source'")
 	} else if !groups["metric"] {
-		errChan <- fmt.Errorf("missing pattern keyword `metric'")
-		return
+		return fmt.Errorf("missing pattern keyword `metric'")
 	}
 
 	// Search for files and parse their path for source/metric pairs
@@ -316,8 +309,8 @@ func (connector *RRDConnector) Refresh(errChan chan error) {
 			for dsName := range info["ds.index"].(map[string]interface{}) {
 				metricFullName := metricName + "/" + dsName
 
-				*connector.outputChan <- [2]string{sourceName, metricFullName}
 				connector.metrics[sourceName][metricFullName] = &rrdMetric{Dataset: dsName, FilePath: filePath}
+				origin.Catalog.RecordChan <- catalog.CatalogRecord{origin.Name, sourceName, metricName, connector}
 			}
 		}
 
@@ -325,9 +318,10 @@ func (connector *RRDConnector) Refresh(errChan chan error) {
 	}
 
 	if err := utils.WalkDir(connector.path, walkFunc); err != nil {
-		errChan <- err
-		return
+		return err
 	}
+
+	return nil
 }
 
 func rrdParseInfo(info rrd.GraphInfo, data map[string]*PlotResult) {
