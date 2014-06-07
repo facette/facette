@@ -25,7 +25,7 @@ type Config struct {
 	BindAddr  string                   `json:"bind"`
 	BaseDir   string                   `json:"base_dir"`
 	DataDir   string                   `json:"data_dir"`
-	OriginDir string                   `json:"origin_dir"`
+	OriginDir string                   `json:"origins_dir"`
 	PidFile   string                   `json:"pid_file"`
 	ServerLog string                   `json:"server_log"`
 	URLPrefix string                   `json:"url_prefix"`

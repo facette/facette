@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
@@ -29,23 +30,25 @@ type graphitePlot struct {
 type GraphiteConnector struct {
 	URL         string
 	insecureTLS bool
-	outputChan  *chan [2]string
 }
 
 func init() {
-	Connectors["graphite"] = func(outputChan *chan [2]string, settings map[string]interface{}) (interface{}, error) {
+	Connectors["graphite"] = func(origin *catalog.Origin) (interface{}, error) {
 		var err error
 
 		connector := &GraphiteConnector{
 			insecureTLS: false,
-			outputChan:  outputChan,
 		}
 
-		if connector.URL, err = config.GetString(settings, "url", true); err != nil {
+		if connector.URL, err = config.GetString(origin.Config.Connector, "url", true); err != nil {
 			return nil, err
 		}
 
-		if connector.insecureTLS, err = config.GetBool(settings, "allow_insecure_tls", false); err != nil {
+		if connector.insecureTLS, err = config.GetBool(
+			origin.Config.Connector,
+			"allow_insecure_tls",
+			false,
+		); err != nil {
 			return nil, err
 		}
 
@@ -96,10 +99,7 @@ func (connector *GraphiteConnector) GetPlots(query *PlotQuery) (map[string]*Plot
 }
 
 // Refresh triggers a full connector data update.
-func (connector *GraphiteConnector) Refresh(errChan chan error) {
-	defer close(*connector.outputChan)
-	defer close(errChan)
-
+func (connector *GraphiteConnector) Refresh(origin *catalog.Origin) error {
 	httpTransport := &http.Transport{
 		Dial: (&net.Dialer{
 			// Enable dual IPv4/IPv6 stack connectivity:
@@ -117,25 +117,21 @@ func (connector *GraphiteConnector) Refresh(errChan chan error) {
 
 	response, err := httpClient.Get(strings.TrimSuffix(connector.URL, "/") + graphiteURLMetrics)
 	if err != nil {
-		errChan <- err
-		return
+		return err
 	}
 
 	if err = graphiteCheckConnectorResponse(response); err != nil {
-		errChan <- fmt.Errorf("invalid HTTP backend response: %s", err)
-		return
+		return fmt.Errorf("invalid HTTP backend response: %s", err)
 	}
 
 	data, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		errChan <- fmt.Errorf("unable to read HTTP response body: %s", err)
-		return
+		return fmt.Errorf("unable to read HTTP response body: %s", err)
 	}
 
 	metrics := make([]string, 0)
 	if err = json.Unmarshal(data, &metrics); err != nil {
-		errChan <- fmt.Errorf("unable to unmarshal JSON data: %s", err)
-		return
+		return fmt.Errorf("unable to unmarshal JSON data: %s", err)
 	}
 
 	for _, metric := range metrics {
@@ -152,8 +148,10 @@ func (connector *GraphiteConnector) Refresh(errChan chan error) {
 			metricName = metric[index+1:]
 		}
 
-		*connector.outputChan <- [2]string{sourceName, metricName}
+		origin.Catalog.RecordChan <- catalog.CatalogRecord{origin.Name, sourceName, metricName, connector}
 	}
+
+	return nil
 }
 
 func graphiteCheckConnectorResponse(response *http.Response) error {

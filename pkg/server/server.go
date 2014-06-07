@@ -13,6 +13,7 @@ import (
 	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/library"
+	"github.com/facette/facette/pkg/worker"
 	"github.com/facette/facette/thirdparty/github.com/etix/stoppableListener"
 )
 
@@ -29,13 +30,15 @@ const (
 
 // Server is the main structure of the server handler.
 type Server struct {
-	Config     *config.Config
-	Listener   *stoppableListener.StoppableListener
-	Catalog    *catalog.Catalog
-	Library    *library.Library
-	Loading    bool
-	StartTime  time.Time
-	debugLevel int
+	Config        *config.Config
+	Listener      *stoppableListener.StoppableListener
+	Catalog       *catalog.Catalog
+	Library       *library.Library
+	originWorkers worker.WorkerPool
+	catalogWorker *worker.Worker
+	Loading       bool
+	StartTime     time.Time
+	debugLevel    int
 }
 
 // NewServer creates a new instance of server.
@@ -57,7 +60,7 @@ func (server *Server) Reload() error {
 		return err
 	}
 
-	server.Catalog.Refresh()
+	server.originWorkers.Broadcast(eventCatalogRefresh, nil)
 	server.Library.Refresh()
 
 	server.Loading = false
@@ -103,10 +106,32 @@ func (server *Server) Run() error {
 		fd.Write([]byte(strconv.Itoa(os.Getpid()) + "\n"))
 	}
 
-	// Create catalog and library instances
+	// Create new catalog instance
 	server.Catalog = catalog.NewCatalog(server.Config, server.debugLevel)
-	go server.Catalog.Refresh()
 
+	// Set up origins from configuration
+	for originName, originConfig := range server.Config.Origins {
+		server.Catalog.Origins[originName] = catalog.NewOrigin(originName, originConfig, server.Catalog)
+	}
+
+	// Instanciate catalog worker
+	server.catalogWorker = worker.NewWorker()
+	server.catalogWorker.RegisterEvent(eventInit, workerCatalogInit)
+	server.catalogWorker.RegisterEvent(eventShutdown, workerCatalogShutdown)
+	server.catalogWorker.RegisterEvent(eventRun, workerCatalogRun)
+
+	server.catalogWorker.SendEvent(eventInit, true, server.Catalog)
+	server.catalogWorker.SendEvent(eventRun, true, nil)
+
+	// Instanciate origin workers
+	if err := server.startOriginWorkers(); err != nil {
+		return err
+	}
+
+	// Send initial catalog refresh event to origin workers
+	server.originWorkers.Broadcast(eventCatalogRefresh, nil)
+
+	// Create library instance
 	server.Library = library.NewLibrary(server.Config, server.Catalog, server.debugLevel)
 	go server.Library.Refresh()
 
@@ -138,6 +163,14 @@ func (server *Server) Run() error {
 
 	// Server shutdown triggered
 	if server.Listener.Stopped {
+		// Shutdown running origin workers
+		server.StopOriginWorkers()
+
+		// Shutdown catalog worker
+		if err := server.catalogWorker.SendEvent(eventShutdown, false, nil); err != nil {
+			log.Printf("WARNING: catalog worker did not shut down successfully: %s", err)
+		}
+
 		// Close catalog
 		server.Catalog.Close()
 
@@ -147,7 +180,7 @@ func (server *Server) Run() error {
 				break
 			}
 
-			time.Sleep(time.Second)
+			time.Sleep(time.Second) // TODO: WTF? Use a waitgroup or proper timeout system
 		}
 
 		clientCount := server.Listener.ConnCount.Get()
