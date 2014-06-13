@@ -43,6 +43,7 @@
         "mesg_delete": "You are about to delete “__name__” group. This action can’t be undone.",
         "mesg_delete_fail": "Unable to delete the group!",
         "mesg_exists": "A group with the same name already exists!",
+        "mesg_none": "No group found",
         "mesg_save_fail": "Unable to save group!"
     },
     "item": {
@@ -78,6 +79,16 @@
     },
     "origin": {
         "mesg_none": "No origin found"
+    },
+    "scale": {
+        "labl_clone": "Clone Scale",
+        "labl_delete": "Delete Scale",
+        "labl_group_name": "Scale Name:",
+        "mesg_delete": "You are about to delete “__name__” scale. This action can’t be undone.",
+        "mesg_delete_fail": "Unable to delete the scale!",
+        "mesg_exists": "A scale with the same name already exists!",
+        "mesg_none": "No scale found",
+        "mesg_save_fail": "Unable to save scale!"
     },
     "source": {
         "mesg_none": "No source found"

@@ -127,6 +127,31 @@ func (r CollectionListResponse) slice(i, j int) interface{} {
 	return r[i:j]
 }
 
+// ScaleValueResponse represents a scale value response structure in the server backend.
+type ScaleValueResponse struct {
+	Name  string  `json:"name"`
+	Value float64 `json:"value"`
+}
+
+// ScaleValueListResponse represents a list of scale values structure in the backend server.
+type ScaleValueListResponse []*ScaleValueResponse
+
+func (r ScaleValueListResponse) Len() int {
+	return len(r)
+}
+
+func (r ScaleValueListResponse) Less(i, j int) bool {
+	return r[i].Name < r[j].Name
+}
+
+func (r ScaleValueListResponse) Swap(i, j int) {
+	r[i], r[j] = r[j], r[i]
+}
+
+func (r ScaleValueListResponse) slice(i, j int) interface{} {
+	return r[i:j]
+}
+
 // PlotResponse represents a plot response structure in the server backend.
 type PlotResponse struct {
 	ID          string           `json:"id"`
@@ -182,8 +207,4 @@ type statsResponse struct {
 	Graphs      int `json:"graphs"`
 	Collections int `json:"collections"`
 	Groups      int `json:"groups"`
-}
-
-type resourceResponse struct {
-	Scales [][2]interface{} `json:"scales"`
 }

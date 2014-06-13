@@ -147,3 +147,32 @@ func (server *Server) serveScaleList(writer http.ResponseWriter, request *http.R
 
 	server.serveResponse(writer, response.list, http.StatusOK)
 }
+
+func (server *Server) serveScaleValues(writer http.ResponseWriter, request *http.Request) {
+	var offset, limit int
+
+	if response, status := server.parseListRequest(writer, request, &offset, &limit); status != http.StatusOK {
+		server.serveResponse(writer, response, status)
+		return
+	}
+
+	// Fill scales values list
+	items := make(ScaleValueListResponse, 0)
+
+	for _, scale := range server.Library.Scales {
+		items = append(items, &ScaleValueResponse{
+			Name:  scale.Name,
+			Value: scale.Value,
+		})
+	}
+
+	response := &listResponse{
+		list:   items,
+		offset: offset,
+		limit:  limit,
+	}
+
+	server.applyResponseLimit(writer, request, response)
+
+	server.serveResponse(writer, response.list, http.StatusOK)
+}
