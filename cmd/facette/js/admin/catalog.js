@@ -35,9 +35,7 @@ function adminCatalogSetupTerminate() {
                     case 'sources':
                         $tooltip.html(
                             '<span class="label">' + $.t('main.labl_origins') + '</span> ' +
-                                data.origins.join(', ') + '<br>' +
-                            '<span class="label">' + $.t('main.labl_updated') + '</span> ' +
-                                moment(data.updated).format('LLL')
+                                data.origins.join(', ')
                         );
 
                         break;
@@ -47,9 +45,7 @@ function adminCatalogSetupTerminate() {
                             '<span class="label">' + $.t('main.labl_origins') + '</span> ' +
                                 data.origins.join(', ') + '<br>' +
                             '<span class="label">' + $.t('main.labl_sources') + '</span> ' +
-                                data.sources.join(', ') + '<br>' +
-                            '<span class="label">' + $.t('main.labl_updated') + '</span> ' +
-                                moment(data.updated).format('LLL')
+                                data.sources.join(', ')
                         );
 
                         break;

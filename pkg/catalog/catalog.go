@@ -4,7 +4,6 @@ package catalog
 import (
 	"fmt"
 	"log"
-	"time"
 
 	"github.com/facette/facette/pkg/config"
 )
@@ -14,7 +13,6 @@ type Catalog struct {
 	Config     *config.Config
 	Origins    map[string]*Origin
 	RecordChan chan CatalogRecord
-	Updated    time.Time
 	debugLevel int // TODO: remove this
 }
 

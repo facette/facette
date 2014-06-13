@@ -72,7 +72,7 @@ func (server *Server) serveOrigin(writer http.ResponseWriter, request *http.Requ
 	response := OriginResponse{
 		Name:      originName,
 		Connector: connectorType,
-		Updated:   server.Catalog.Updated.Format(time.RFC3339),
+		Updated:   server.Catalog.Origins[originName].LastRefresh.Format(time.RFC3339),
 	}
 
 	server.serveResponse(writer, response, http.StatusOK)
@@ -137,7 +137,6 @@ func (server *Server) serveSource(writer http.ResponseWriter, request *http.Requ
 	response := SourceResponse{
 		Name:    sourceName,
 		Origins: origins,
-		Updated: server.Catalog.Updated.Format(time.RFC3339),
 	}
 
 	server.serveResponse(writer, response, http.StatusOK)
@@ -218,7 +217,6 @@ func (server *Server) serveMetric(writer http.ResponseWriter, request *http.Requ
 		Name:    metricName,
 		Origins: origins,
 		Sources: sources,
-		Updated: server.Catalog.Updated.Format(time.RFC3339),
 	}
 
 	server.serveResponse(writer, response, http.StatusOK)
