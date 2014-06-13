@@ -120,6 +120,7 @@ SCRIPT_SRC = cmd/facette/js/intro.js \
 	cmd/facette/js/admin/graph.js \
 	cmd/facette/js/admin/collection.js \
 	cmd/facette/js/admin/group.js \
+	cmd/facette/js/admin/scale.js \
 	cmd/facette/js/admin/catalog.js \
 	cmd/facette/js/admin/outro.js \
 	cmd/facette/js/browse/intro.js \

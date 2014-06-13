@@ -953,11 +953,16 @@ function adminGraphSetupTerminate() {
                 value = adminGraphGetValue($item);
 
             $.ajax({
-                    url: urlPrefix + '/resources',
+                    url: urlPrefix + '/api/v1/library/scales/values',
                     type: 'GET'
                 }).pipe(function (data) {
                     var $input,
-                        $overlay;
+                        $overlay,
+                        options = [];
+
+                    $.each(data, function (i, entry) { /*jshint unused: true */
+                        options.push([entry.name, entry.value]);
+                    });
 
                     $overlay = overlayCreate('select', {
                         message: $.t('graph.labl_scale'),
@@ -975,7 +980,7 @@ function adminGraphSetupTerminate() {
                             }
                         },
                         reset: 0,
-                        options: data.scales
+                        options: options
                     });
 
                     $input = $overlay.find('input[name=value]');

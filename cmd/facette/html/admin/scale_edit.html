@@ -1,0 +1,44 @@
+{{ define "title" }}Administration Panel: Scales — Facette{{ end }}
+
+{{ define "script" }}
+		<script src="{{ .URLPrefix }}{{ asset "/static/jquery.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/i18next.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/facette.js" }}"></script>
+{{ end }}
+
+{{ define "content" }}
+		<article data-pane="scale-edit" data-paneopts="section: {{ .Section }}{{ if ne .Path "add" }}; id: {{ .Path }}{{ end }}">
+			<header>
+				<h1>Administration Panel — {{ if eq .Path "add" }}New{{ else }}Edit{{ end }} Scale</h1>
+			</header>
+
+			<footer>
+				<button class="danger" name="step-cancel">Cancel</button>
+				<button name="step-ok">OK</button>
+				<button name="step-save">Save Scale</button>
+			</footer>
+
+			<section>
+				<h1>Scale Definition</h1>
+
+				<div class="scrollarea">
+					<div class="block">
+						<h2>General Information</h2>
+
+						<label for="scale-name">Name:</label>
+						<input class="full input" data-input="scale-name" data-inputopts="check: true" id="scale-name" name="scale-name" type="text">
+
+						<label for="scale-desc">Description:</label>
+						<textarea id="scale-desc" name="scale-desc"></textarea>
+					</div>
+
+					<div class="block">
+						<h2>Scale Parameters</h2>
+
+						<label for="scale-value">Value: <span class="note">e.g. 0.125, 8, 1e+3 or 1e-6</span></label>
+						<input class="input" data-input="scale-value" id="scale-value" name="scale-value" type="text">
+					</div>
+				</div>
+			</section>
+		</article>
+{{ end }}

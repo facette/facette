@@ -12,6 +12,8 @@ func (server *Server) serveLibrary(writer http.ResponseWriter, request *http.Req
 		server.serveGroup(writer, request)
 	} else if strings.HasPrefix(request.URL.Path, urlLibraryPath+"metricgroups/") {
 		server.serveGroup(writer, request)
+	} else if request.URL.Path == urlLibraryPath+"scales/values" {
+		server.serveScaleValues(writer, request)
 	} else if strings.HasPrefix(request.URL.Path, urlLibraryPath+"scales/") {
 		server.serveScale(writer, request)
 	} else if request.URL.Path == urlLibraryPath+"expand" {

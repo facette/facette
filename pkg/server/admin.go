@@ -40,6 +40,8 @@ func (server *Server) serveAdmin(writer http.ResponseWriter, request *http.Reque
 	} else if request.URL.Path == urlAdminPath+"origins/" || request.URL.Path == urlAdminPath+"sources/" ||
 		request.URL.Path == urlAdminPath+"metrics/" {
 		err = server.serveAdminCatalog(writer, request, tmpl)
+	} else if strings.HasPrefix(request.URL.Path, urlAdminPath+"scales/") {
+		err = server.serveAdminScale(writer, request, tmpl)
 	} else if request.URL.Path == urlAdminPath {
 		err = server.serveAdminIndex(writer, request, tmpl)
 	} else {
@@ -189,6 +191,41 @@ func (server *Server) serveAdminGroup(writer http.ResponseWriter, request *http.
 		}
 	} else if data.Path == "" {
 		tmplFile = "group_list.html"
+	}
+
+	if tmplFile == "" {
+		return os.ErrNotExist
+	}
+
+	// Execute template
+	tmpl, err := tmpl.ParseFiles(path.Join(server.Config.BaseDir, "html", "admin", tmplFile))
+	if err != nil {
+		return err
+	}
+
+	return tmpl.Execute(writer, data)
+}
+
+func (server *Server) serveAdminScale(writer http.ResponseWriter, request *http.Request,
+	tmpl *template.Template) error {
+
+	var (
+		data struct {
+			URLPrefix string
+			Section   string
+			Path      string
+		}
+		tmplFile string
+	)
+
+	// Set template data
+	data.URLPrefix = server.Config.URLPrefix
+	data.Section, data.Path = splitAdminURLPath(request.URL.Path)
+
+	if data.Path != "" && (data.Path == "add" || server.Library.ItemExists(data.Path, library.LibraryItemScale)) {
+		tmplFile = "scale_edit.html"
+	} else if data.Path == "" {
+		tmplFile = "scale_list.html"
 	}
 
 	if tmplFile == "" {
