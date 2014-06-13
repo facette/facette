@@ -4,17 +4,5 @@
 	"data_dir": "/var/lib/facette",
 	"pid_file": "/var/run/facette/facette.pid",
 	"origin_dir": "/etc/facette/origins",
-	"server_log": "/var/log/facette/server.log",
-	"scales": [
-		["Bits → Bytes", 0.125],
-		["Bytes → Bits", 8],
-		["× 10³", 1e+3],
-		["× 10⁶", 1e+6],
-		["× 10⁹", 1e+9],
-		["× 10¹²", 1e+12],
-		["÷ 10³", 1e-3],
-		["÷ 10⁶", 1e-6],
-		["÷ 10⁹", 1e-9],
-		["÷ 10¹²", 1e-12]
-	]
+	"server_log": "/var/log/facette/server.log"
 }

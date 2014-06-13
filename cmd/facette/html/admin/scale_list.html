@@ -1,4 +1,4 @@
-{{ define "title" }}Administration Panel: {{ if eq .Section "sourcegroups" }}Source{{ else }}Metric{{ end }} Groups — Facette{{ end }}
+{{ define "title" }}Administration Panel: Scales — Facette{{ end }}
 
 {{ define "script" }}
 		<script src="{{ .URLPrefix }}{{ asset "/static/jquery.js" }}"></script>
@@ -8,37 +8,37 @@
 {{ end }}
 
 {{ define "content" }}
-		<article data-pane="group-list" data-paneopts="section: {{ .Section }}">
+		<article data-pane="scale-list" data-paneopts="section: {{ .Section }}">
 			<header>
-				<h1>Administration Panel — {{ if eq .Section "sourcegroups" }}Source{{ else }}Metric{{ end }} Groups</h1>
+				<h1>Administration Panel — Scales</h1>
 
 				<nav>
 					<ul>
-						<li><a class="icon icon-add" href="{{ .URLPrefix }}/admin/{{ .Section }}/add" title="Add Group"></a></li>
+						<li><a class="icon icon-add" href="{{ .URLPrefix }}/admin/{{ .Section }}/add" title="Add Scale"></a></li>
 					</ul>
 				</nav>
 
 				<div class="filter icon icon-search">
-					<input data-listfilter="{{ .Section }}" placeholder="Search for Group" type="text">
+					<input data-listfilter="{{ .Section }}" placeholder="Search for Scale" type="text">
 				</div>
 			</header>
 
 			<section class="scrollarea full">
-				<div class="list" data-list="{{ .Section }}" data-listopts="init: true; url: library/{{ .Section }}/; messages: group">
-					<h1>Groups List <span class="count"></span></h1>
+				<div class="list" data-list="{{ .Section }}" data-listopts="init: true; url: library/{{ .Section }}/; messages: scale">
+					<h1>Scales List <span class="count"></span></h1>
 
 					<div class="listmesg" data-listmesg="{{ .Section }}"></div>
 
 					<div class="listitem" data-listtmpl="{{ .Section }}">
 						<div class="actions">
-							<a class="icon icon-remove" href="#remove-group" title="Remove Group"></a>
+							<a class="icon icon-remove" href="#remove-scale" title="Remove Scale"></a>
 						</div>
 						<div class="date">Last updated on <span></span></div>
 						<div>
 							<span class="name"></span>
 							<span class="actions">
-								<a class="icon icon-edit" href="#edit-group" title="Edit Group"></a>
-								<a class="icon icon-copy" href="#clone-group" title="Clone Group"></a>
+								<a class="icon icon-edit" href="#edit-scale" title="Edit Scale"></a>
+								<a class="icon icon-copy" href="#clone-scale" title="Clone Scale"></a>
 							</span>
 						</div>
 						<div class="desc"></div>
