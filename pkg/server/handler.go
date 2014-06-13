@@ -10,7 +10,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"time"
 
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
@@ -149,11 +148,9 @@ func (server *Server) getStats(writer http.ResponseWriter, request *http.Request
 	}
 
 	return &statsResponse{
-		Origins:        len(server.Catalog.Origins),
-		Sources:        sourceSet.Size(),
-		Metrics:        metricSet.Size(),
-		CatalogUpdated: server.Catalog.Updated.Format(time.RFC3339),
-
+		Origins:     len(server.Catalog.Origins),
+		Sources:     sourceSet.Size(),
+		Metrics:     metricSet.Size(),
 		Graphs:      len(server.Library.Graphs),
 		Collections: len(server.Library.Collections),
 		Groups:      len(server.Library.Groups),
