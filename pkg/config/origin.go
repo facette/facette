@@ -13,7 +13,7 @@ type OriginConfig struct {
 	Modified        time.Time              `json:"-"`
 }
 
-// OriginFilterConfig represents a filter entry in an OriginConfig instance.
+// OriginFilterConfig represents a filtering rule in an OriginConfig instance.
 type OriginFilterConfig struct {
 	Pattern       string         `json:"pattern"`
 	Rewrite       string         `json:"rewrite"`

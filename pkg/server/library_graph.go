@@ -358,10 +358,10 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 		// Check for connectors errors or conflicts
 		if _, ok := server.Catalog.Origins[serieItem.Origin]; !ok {
 			return nil, nil, fmt.Errorf("unknown serie origin `%s'", serieItem.Origin)
-		} else if originConnector == nil {
-			originConnector = server.Catalog.Origins[serieItem.Origin].Connector
-		} else if originConnector != server.Catalog.Origins[serieItem.Origin].Connector {
-			return nil, nil, fmt.Errorf("connectors differ between series")
+			// } else if originConnector == nil {
+			// 	originConnector = server.Catalog.Origins[serieItem.Origin].Connector
+			// } else if originConnector != server.Catalog.Origins[serieItem.Origin].Connector {
+			// 	return nil, nil, fmt.Errorf("connectors differ between series")
 		}
 
 		serieSources := make([]string, 0)

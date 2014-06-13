@@ -4,13 +4,14 @@ package connector
 import (
 	"time"
 
+	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/types"
 )
 
 // Connector represents the main interface of a connector handler.
 type Connector interface {
 	GetPlots(query *PlotQuery) (map[string]*PlotResult, error)
-	Refresh(chan error)
+	Refresh(*catalog.Origin) error
 }
 
 // PlotQuery represents a connector plot query.
@@ -61,5 +62,5 @@ const (
 
 var (
 	// Connectors represents the list of all available connector handlers.
-	Connectors = make(map[string]func(*chan [2]string, map[string]interface{}) (interface{}, error))
+	Connectors = make(map[string]func(*catalog.Origin) (interface{}, error))
 )
