@@ -2,6 +2,7 @@
 package catalog
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -23,6 +24,10 @@ type CatalogRecord struct {
 	Source    string
 	Metric    string
 	Connector interface{}
+}
+
+func (r CatalogRecord) String() string {
+	return fmt.Sprintf("{Origin: \"%s\", Source: \"%s\", Metric: \"%s\"}", r.Origin, r.Source, r.Metric)
 }
 
 const (

@@ -310,7 +310,7 @@ func (connector *RRDConnector) Refresh(origin *catalog.Origin) error {
 				metricFullName := metricName + "/" + dsName
 
 				connector.metrics[sourceName][metricFullName] = &rrdMetric{Dataset: dsName, FilePath: filePath}
-				origin.Catalog.RecordChan <- catalog.CatalogRecord{origin.Name, sourceName, metricName, connector}
+				origin.Filters.Input <- catalog.CatalogRecord{origin.Name, sourceName, metricFullName, connector}
 			}
 		}
 

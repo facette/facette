@@ -11,6 +11,7 @@ type Origin struct {
 	Name        string
 	Config      *config.OriginConfig
 	Sources     map[string]*Source
+	Filters     filterChain
 	Catalog     *Catalog
 	LastRefresh time.Time
 }
@@ -21,6 +22,7 @@ func NewOrigin(name string, config *config.OriginConfig, catalog *Catalog) *Orig
 		Name:    name,
 		Config:  config,
 		Sources: make(map[string]*Source),
+		Filters: newFilterChain(config.Filters, catalog.RecordChan),
 		Catalog: catalog,
 	}
 }
