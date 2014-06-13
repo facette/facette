@@ -2,6 +2,7 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -84,7 +85,7 @@ func (server *Server) Run() error {
 
 		serverOutput, err := os.OpenFile(server.Config.ServerLog, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
-			log.Printf("ERROR: unable to open log file `%s'", server.Config.ServerLog)
+			fmt.Errorf("unable to open log file `%s'", server.Config.ServerLog)
 			return err
 		}
 
@@ -97,8 +98,7 @@ func (server *Server) Run() error {
 	if server.Config.PidFile != "" {
 		fd, err := os.OpenFile(server.Config.PidFile, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 		if err != nil {
-			log.Println("ERROR: unable to create pid file `%s'", server.Config.PidFile)
-			return err
+			return fmt.Errorf("unable to create pid file `%s'", server.Config.PidFile)
 		}
 
 		defer fd.Close()
@@ -120,7 +120,10 @@ func (server *Server) Run() error {
 	server.catalogWorker.RegisterEvent(eventShutdown, workerCatalogShutdown)
 	server.catalogWorker.RegisterEvent(eventRun, workerCatalogRun)
 
-	server.catalogWorker.SendEvent(eventInit, true, server.Catalog)
+	if err := server.catalogWorker.SendEvent(eventInit, false, server.Catalog); err != nil {
+		return err
+	}
+
 	server.catalogWorker.SendEvent(eventRun, true, nil)
 
 	// Instanciate origin workers
