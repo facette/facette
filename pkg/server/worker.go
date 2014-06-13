@@ -170,6 +170,8 @@ func workerCatalogInit(w *worker.Worker, args ...interface{}) {
 	// Worker properties:
 	// 0: catalog instance (*catalog.Catalog)
 	w.Props = append(w.Props, catalog)
+
+	w.ErrorChan <- nil
 }
 
 func workerCatalogShutdown(w *worker.Worker, args ...interface{}) {
