@@ -140,15 +140,14 @@ func (connector *GraphiteConnector) Refresh(origin *catalog.Origin) error {
 		index := strings.Index(metric, ".")
 
 		if index == -1 {
-			// TODO: fix?
-			sourceName = "<unknown>"
+			sourceName = "unknown"
 			metricName = metric
 		} else {
 			sourceName = metric[0:index]
 			metricName = metric[index+1:]
 		}
 
-		origin.Catalog.RecordChan <- catalog.CatalogRecord{origin.Name, sourceName, metricName, connector}
+		origin.Filters.Input <- catalog.CatalogRecord{origin.Name, sourceName, metricName, connector}
 	}
 
 	return nil
