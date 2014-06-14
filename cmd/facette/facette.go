@@ -20,12 +20,14 @@ var (
 	flagConfig string
 	flagDebug  int
 	flagHelp   bool
+	flagLog    string
 )
 
 func init() {
 	flag.StringVar(&flagConfig, "c", config.DefaultConfigFile, "configuration file path")
 	flag.IntVar(&flagDebug, "d", 0, "debugging level")
 	flag.BoolVar(&flagHelp, "h", false, "display this help and exit")
+	flag.StringVar(&flagLog, "l", config.DefaultLogFile, "log file path")
 	flag.Usage = func() { utils.PrintUsage(os.Stderr, cmdUsage) }
 	flag.Parse()
 
@@ -39,7 +41,7 @@ func init() {
 
 func main() {
 	// Create new server instance and load configuration
-	instance := server.NewServer(flagConfig, flagDebug)
+	instance := server.NewServer(flagConfig, flagLog, flagDebug)
 
 	// Reload server configuration on SIGHUP
 	sigChan := make(chan os.Signal, 1)
