@@ -134,6 +134,6 @@ func (workerPool *WorkerPool) Add(worker *Worker) {
 // Broadcast sends an event to all workers of the worker pool.
 func (workerPool WorkerPool) Broadcast(event int, args ...interface{}) {
 	for _, worker := range workerPool.Workers {
-		worker.SendEvent(event, false, args...)
+		worker.SendEvent(event, true, args...)
 	}
 }
