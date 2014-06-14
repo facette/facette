@@ -120,22 +120,23 @@ func workerOriginRun(w *worker.Worker, args ...interface{}) {
 		select {
 		case _ = <-timeChan:
 			if err := connector.Refresh(origin); err != nil {
-				w.ErrorChan <- fmt.Errorf("unable to refresh origin `%s': %s", origin.Name, err)
+				log.Printf("ERROR: unable to refresh origin `%s': %s", origin.Name, err)
+				continue
 			}
 
 			origin.LastRefresh = time.Now()
-			w.ErrorChan <- nil
 
 		case cmd := <-w.ReceiveJobSignals():
 			switch cmd {
 			case jobSignalRefresh:
 				log.Printf("INFO: originWorker[%s]: received refresh command", origin.Name)
+
 				if err := connector.Refresh(origin); err != nil {
-					w.ErrorChan <- fmt.Errorf("unable to refresh origin `%s': %s", origin.Name, err)
+					log.Printf("ERROR: unable to refresh origin `%s': %s", origin.Name, err)
+					continue
 				}
 
 				origin.LastRefresh = time.Now()
-				w.ErrorChan <- nil
 
 			case jobSignalShutdown:
 				log.Printf("INFO: originWorker[%s]: received shutdown command, stopping job", origin.Name)
@@ -157,9 +158,11 @@ func workerOriginRun(w *worker.Worker, args ...interface{}) {
 }
 
 func workerOriginRefresh(w *worker.Worker, args ...interface{}) {
-	w.SendJobSignal(jobSignalRefresh)
+	var origin = w.Props[0].(*catalog.Origin)
 
-	w.ErrorChan <- nil
+	log.Printf("DEBUG: originWorker[%s]: refresh", origin.Name)
+
+	w.SendJobSignal(jobSignalRefresh)
 }
 
 func workerCatalogInit(w *worker.Worker, args ...interface{}) {
