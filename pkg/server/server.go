@@ -43,9 +43,9 @@ type Server struct {
 }
 
 // NewServer creates a new instance of server.
-func NewServer(configPath string, debugLevel int) *Server {
+func NewServer(configPath, logPath string, debugLevel int) *Server {
 	return &Server{
-		Config:     &config.Config{Path: configPath},
+		Config:     &config.Config{Path: configPath, LogFile: logPath},
 		debugLevel: debugLevel,
 	}
 }
@@ -79,13 +79,13 @@ func (server *Server) Run() error {
 	}
 
 	// Set server logging ouput
-	if server.Config.ServerLog != "" && server.Config.ServerLog != "-" {
-		dirPath, _ := path.Split(server.Config.ServerLog)
+	if server.Config.LogFile != "" && server.Config.LogFile != "-" {
+		dirPath, _ := path.Split(server.Config.LogFile)
 		os.MkdirAll(dirPath, 0755)
 
-		serverOutput, err := os.OpenFile(server.Config.ServerLog, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		serverOutput, err := os.OpenFile(server.Config.LogFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
-			fmt.Errorf("unable to open log file `%s'", server.Config.ServerLog)
+			fmt.Errorf("unable to open log file `%s'", server.Config.LogFile)
 			return err
 		}
 
