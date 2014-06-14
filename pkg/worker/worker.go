@@ -20,10 +20,10 @@ type workerJob func(*Worker, ...interface{})
 type Worker struct {
 	Props     []interface{}
 	State     int
-	ErrorChan chan error
 	events    map[int]workerJob
 	eventChan chan workerEvent
 	jobChan   chan int
+	errorChan chan error
 	wg        *sync.WaitGroup
 }
 
@@ -44,10 +44,10 @@ func NewWorker() *Worker {
 	worker := &Worker{
 		State:     JobStopped,
 		Props:     make([]interface{}, 0),
-		ErrorChan: make(chan error),
 		events:    make(map[int]workerJob),
 		eventChan: make(chan workerEvent),
 		jobChan:   make(chan int),
+		errorChan: make(chan error),
 	}
 
 	go func(worker *Worker) {
@@ -86,7 +86,7 @@ func (worker *Worker) SendEvent(event int, async bool, args ...interface{}) erro
 		return nil
 	}
 
-	return <-worker.ErrorChan
+	return <-worker.errorChan
 }
 
 // SendJobSignal sends a signal to a worker job.
@@ -99,11 +99,16 @@ func (worker *Worker) ReceiveJobSignals() chan int {
 	return worker.jobChan
 }
 
+// ReturnErr returns an error to the sender of a synchronous event.
+func (worker *Worker) ReturnErr(err error) {
+	worker.errorChan <- err
+}
+
 // Shutdown shuts down the worker.
 func (worker *Worker) Shutdown() {
 	close(worker.eventChan)
 	close(worker.jobChan)
-	close(worker.ErrorChan)
+	close(worker.errorChan)
 
 	if worker.wg != nil {
 		worker.wg.Done()

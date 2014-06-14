@@ -78,7 +78,7 @@ func workerOriginInit(w *worker.Worker, args ...interface{}) {
 	// Instanciate the connector according to its type
 	connector, err := connector.Connectors[connectorType](origin)
 	if err != nil {
-		w.ErrorChan <- err
+		w.ReturnErr(err)
 	}
 
 	// Worker properties:
@@ -86,7 +86,7 @@ func workerOriginInit(w *worker.Worker, args ...interface{}) {
 	// 1: connector instance (*connector.Connector)
 	w.Props = append(w.Props, origin, connector)
 
-	w.ErrorChan <- nil
+	w.ReturnErr(nil)
 }
 
 func workerOriginShutdown(w *worker.Worker, args ...interface{}) {
@@ -171,7 +171,7 @@ func workerCatalogInit(w *worker.Worker, args ...interface{}) {
 	// 0: catalog instance (*catalog.Catalog)
 	w.Props = append(w.Props, catalog)
 
-	w.ErrorChan <- nil
+	w.ReturnErr(nil)
 }
 
 func workerCatalogShutdown(w *worker.Worker, args ...interface{}) {
@@ -179,7 +179,7 @@ func workerCatalogShutdown(w *worker.Worker, args ...interface{}) {
 
 	w.SendJobSignal(jobSignalShutdown)
 
-	w.ErrorChan <- nil
+	w.ReturnErr(nil)
 }
 
 func workerCatalogRun(w *worker.Worker, args ...interface{}) {
@@ -200,7 +200,7 @@ func workerCatalogRun(w *worker.Worker, args ...interface{}) {
 
 				w.State = worker.JobStopped
 
-				w.ErrorChan <- nil
+				w.ReturnErr(nil)
 
 				return
 
