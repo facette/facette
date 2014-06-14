@@ -1,8 +1,7 @@
 {
 	"bind": ":12003",
 	"base_dir": "/usr/share/facette",
+	"origins_dir": "/etc/facette/origins",
 	"data_dir": "/var/lib/facette",
-	"pid_file": "/var/run/facette/facette.pid",
-	"origin_dir": "/etc/facette/origins",
-	"server_log": "/var/log/facette/server.log"
+	"pid_file": "/var/run/facette/facette.pid"
 }
