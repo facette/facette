@@ -25,7 +25,7 @@ const (
 	jobSignalShutdown
 )
 
-func (server *Server) startOriginWorkers() error {
+func (server *Server) startProviderWorkers() error {
 	server.providerWorkers = worker.NewWorkerPool()
 
 	log.Println("DEBUG: declaring providers")
@@ -60,8 +60,8 @@ func (server *Server) startOriginWorkers() error {
 	return nil
 }
 
-// StopOriginWorkers stop all running providers.
-func (server *Server) StopOriginWorkers() {
+// StopProviderWorkers stop all running providers.
+func (server *Server) StopProviderWorkers() {
 	server.providerWorkers.Broadcast(eventShutdown, nil)
 
 	// Wait for all workers to shut down

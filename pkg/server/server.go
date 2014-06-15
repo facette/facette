@@ -132,7 +132,7 @@ func (server *Server) Run() error {
 		server.providers[providerName] = provider.NewProvider(providerName, providerConfig, server.Catalog)
 	}
 
-	if err := server.startOriginWorkers(); err != nil {
+	if err := server.startProviderWorkers(); err != nil {
 		return err
 	}
 
@@ -172,7 +172,7 @@ func (server *Server) Run() error {
 	// Server shutdown triggered
 	if server.Listener.Stopped {
 		// Shutdown running origin workers
-		server.StopOriginWorkers()
+		server.StopProviderWorkers()
 
 		// Shutdown catalog worker
 		if err := server.catalogWorker.SendEvent(eventShutdown, false, nil); err != nil {
