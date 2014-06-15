@@ -212,7 +212,7 @@ func workerCatalogRun(w *worker.Worker, args ...interface{}) {
 			}
 
 		case record := <-serverCatalog.RecordChan:
-			serverCatalog.Insert(record.Origin, record.Source, record.Metric)
+			serverCatalog.Insert(record)
 		}
 	}
 }

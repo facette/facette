@@ -9,14 +9,14 @@ import (
 )
 
 type filterChain struct {
-	Input  chan CatalogRecord
-	output chan CatalogRecord
+	Input  chan *CatalogRecord
+	output chan *CatalogRecord
 	rules  []*config.OriginFilterConfig
 }
 
-func newFilterChain(filters []*config.OriginFilterConfig, output chan CatalogRecord) filterChain {
+func newFilterChain(filters []*config.OriginFilterConfig, output chan *CatalogRecord) filterChain {
 	chain := filterChain{
-		Input:  make(chan CatalogRecord),
+		Input:  make(chan *CatalogRecord),
 		output: output,
 		rules:  make([]*config.OriginFilterConfig, 0),
 	}
