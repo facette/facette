@@ -280,6 +280,11 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 				continue
 			}
 
+			if originConnector == nil {
+				log.Println("ERROR: origin connector should not be null")
+				continue
+			}
+
 			plotResult, err := originConnector.GetPlots(&connector.PlotQuery{query, startTime, endTime, step,
 				plotReq.Percentiles})
 			if err != nil {
@@ -352,16 +357,10 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 		Scale: groupItem.Scale,
 	}
 
-	originConnector = nil
-
 	for _, serieItem := range groupItem.Series {
 		// Check for connectors errors or conflicts
 		if _, ok := server.Catalog.Origins[serieItem.Origin]; !ok {
 			return nil, nil, fmt.Errorf("unknown serie origin `%s'", serieItem.Origin)
-			// } else if originConnector == nil {
-			// 	originConnector = server.Catalog.Origins[serieItem.Origin].Connector
-			// } else if originConnector != server.Catalog.Origins[serieItem.Origin].Connector {
-			// 	return nil, nil, fmt.Errorf("connectors differ between series")
 		}
 
 		serieSources := make([]string, 0)
@@ -377,19 +376,23 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 
 		for _, serieSource := range serieSources {
 			if strings.HasPrefix(serieItem.Metric, library.LibraryGroupPrefix) {
-				for _, serieChunk := range server.Library.ExpandGroup(strings.TrimPrefix(serieItem.Metric,
-					library.LibraryGroupPrefix), library.LibraryItemMetricGroup) {
-					metric := server.Catalog.GetMetric(
-						serieItem.Origin,
-						serieSource,
-						serieChunk,
-					)
+				for _, serieChunk := range server.Library.ExpandGroup(
+					strings.TrimPrefix(serieItem.Metric, library.LibraryGroupPrefix),
+					library.LibraryItemMetricGroup,
+				) {
+					metric := server.Catalog.GetMetric(serieItem.Origin, serieSource, serieChunk)
 
 					if metric == nil {
 						log.Printf("ERROR: unknown metric `%s' for source `%s' (origin: %s)", serieChunk, serieSource,
 							serieItem.Origin)
 
 						continue
+					}
+
+					if originConnector == nil {
+						originConnector = metric.Connector.(connector.Connector)
+					} else if originConnector != metric.Connector.(connector.Connector) {
+						return nil, nil, fmt.Errorf("connectors differ between series")
 					}
 
 					query.Series = append(query.Series, &connector.SerieQuery{
@@ -405,17 +408,19 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 					index += 1
 				}
 			} else {
-				metric := server.Catalog.GetMetric(
-					serieItem.Origin,
-					serieSource,
-					serieItem.Metric,
-				)
+				metric := server.Catalog.GetMetric(serieItem.Origin, serieSource, serieItem.Metric)
 
 				if metric == nil {
 					log.Printf("ERROR: unknown metric `%s' for source `%s' (origin: %s)", serieItem.Metric, serieSource,
 						serieItem.Origin)
 
 					continue
+				}
+
+				if originConnector == nil {
+					originConnector = metric.Connector.(connector.Connector)
+				} else if originConnector != metric.Connector.(connector.Connector) {
+					return nil, nil, fmt.Errorf("connectors differ between series")
 				}
 
 				serie := &connector.SerieQuery{

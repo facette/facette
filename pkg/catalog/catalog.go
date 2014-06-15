@@ -12,7 +12,7 @@ import (
 type Catalog struct {
 	Config     *config.Config
 	Origins    map[string]*Origin
-	RecordChan chan CatalogRecord
+	RecordChan chan *CatalogRecord
 	debugLevel int // TODO: remove this
 }
 
@@ -41,37 +41,38 @@ func NewCatalog(config *config.Config, debugLevel int) *Catalog {
 	return &Catalog{
 		Config:     config,
 		Origins:    make(map[string]*Origin),
-		RecordChan: make(chan CatalogRecord),
+		RecordChan: make(chan *CatalogRecord),
 		debugLevel: debugLevel,
 	}
 }
 
 // Insert inserts a new record in the catalog.
-// TODO: add *connector.Connector argument
-func (catalog *Catalog) Insert(origin, source, metric string) {
+func (catalog *Catalog) Insert(record *CatalogRecord) {
 	if catalog.debugLevel > 3 {
-		log.Printf("DEBUG: appending metric `%s' to source `%s' via origin `%s'", metric, source, origin)
+		log.Printf("DEBUG: appending metric `%s' to source `%s' via origin `%s'", record.Metric, record.Source,
+			record.Origin)
 	}
 
-	if _, ok := catalog.Origins[origin]; !ok {
-		catalog.Origins[origin] = NewOrigin(
-			origin,
+	if _, ok := catalog.Origins[record.Origin]; !ok {
+		catalog.Origins[record.Origin] = NewOrigin(
+			record.Origin,
 			nil,
 			catalog,
 		)
 	}
 
-	if _, ok := catalog.Origins[origin].Sources[source]; !ok {
-		catalog.Origins[origin].Sources[source] = NewSource(
-			source,
-			catalog.Origins[origin],
+	if _, ok := catalog.Origins[record.Origin].Sources[record.Source]; !ok {
+		catalog.Origins[record.Origin].Sources[record.Source] = NewSource(
+			record.Source,
+			catalog.Origins[record.Origin],
 		)
 	}
 
-	if _, ok := catalog.Origins[origin].Sources[source].Metrics[metric]; !ok {
-		catalog.Origins[origin].Sources[source].Metrics[metric] = NewMetric(
-			metric,
-			catalog.Origins[origin].Sources[source],
+	if _, ok := catalog.Origins[record.Origin].Sources[record.Source].Metrics[record.Metric]; !ok {
+		catalog.Origins[record.Origin].Sources[record.Source].Metrics[record.Metric] = NewMetric(
+			record.Metric,
+			catalog.Origins[record.Origin].Sources[record.Source],
+			record.Connector,
 		)
 	}
 }

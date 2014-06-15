@@ -147,7 +147,7 @@ func (connector *GraphiteConnector) Refresh(origin *catalog.Origin) error {
 			metricName = metric[index+1:]
 		}
 
-		origin.Filters.Input <- catalog.CatalogRecord{origin.Name, sourceName, metricName, connector}
+		origin.Filters.Input <- &catalog.CatalogRecord{origin.Name, sourceName, metricName, connector}
 	}
 
 	return nil
