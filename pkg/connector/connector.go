@@ -24,5 +24,5 @@ const (
 
 var (
 	// Connectors represents the list of all available connector handlers.
-	Connectors = make(map[string]func(map[string]interface{}) (interface{}, error))
+	Connectors = make(map[string]func(map[string]interface{}) (Connector, error))
 )

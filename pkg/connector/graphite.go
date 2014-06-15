@@ -33,7 +33,7 @@ type GraphiteConnector struct {
 }
 
 func init() {
-	Connectors["graphite"] = func(settings map[string]interface{}) (interface{}, error) {
+	Connectors["graphite"] = func(settings map[string]interface{}) (Connector, error) {
 		var err error
 
 		connector := &GraphiteConnector{

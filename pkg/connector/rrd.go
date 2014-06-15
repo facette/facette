@@ -30,7 +30,7 @@ type RRDConnector struct {
 }
 
 func init() {
-	Connectors["rrd"] = func(settings map[string]interface{}) (interface{}, error) {
+	Connectors["rrd"] = func(settings map[string]interface{}) (Connector, error) {
 		var err error
 
 		connector := &RRDConnector{
