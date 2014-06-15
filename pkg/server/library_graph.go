@@ -395,8 +395,9 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 					query.Series = append(query.Series, &connector.SerieQuery{
 						Name: fmt.Sprintf("%s-%d", serieItem.Name, index),
 						Metric: &connector.MetricQuery{
-							Name:       metric.OriginalName,
-							SourceName: metric.Source.OriginalName,
+							Name:   metric.Name,
+							Origin: metric.Source.Origin.Name,
+							Source: metric.Source.Name,
 						},
 						Scale: serieItem.Scale,
 					})
@@ -419,8 +420,9 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 
 				serie := &connector.SerieQuery{
 					Metric: &connector.MetricQuery{
-						Name:       metric.OriginalName,
-						SourceName: metric.Source.OriginalName,
+						Name:   metric.Name,
+						Origin: metric.Source.Origin.Name,
+						Source: metric.Source.Name,
 					},
 					Scale: serieItem.Scale,
 				}

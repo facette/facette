@@ -96,8 +96,8 @@ func (connector *RRDConnector) GetPlots(query *PlotQuery) (map[string]*PlotResul
 
 			graph.Def(
 				serieTemp+"-orig0",
-				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].FilePath,
-				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].Dataset,
+				connector.metrics[serie.Metric.Source][serie.Metric.Name].FilePath,
+				connector.metrics[serie.Metric.Source][serie.Metric.Name].Dataset,
 				"AVERAGE",
 			)
 
@@ -119,8 +119,8 @@ func (connector *RRDConnector) GetPlots(query *PlotQuery) (map[string]*PlotResul
 			// Set plots request
 			xport.Def(
 				serieTemp+"-orig0",
-				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].FilePath,
-				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].Dataset,
+				connector.metrics[serie.Metric.Source][serie.Metric.Name].FilePath,
+				connector.metrics[serie.Metric.Source][serie.Metric.Name].Dataset,
 				"AVERAGE",
 			)
 
@@ -155,8 +155,8 @@ func (connector *RRDConnector) GetPlots(query *PlotQuery) (map[string]*PlotResul
 
 			graph.Def(
 				serieTemp+"-ori",
-				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].FilePath,
-				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].Dataset,
+				connector.metrics[serie.Metric.Source][serie.Metric.Name].FilePath,
+				connector.metrics[serie.Metric.Source][serie.Metric.Name].Dataset,
 				"AVERAGE",
 			)
 
@@ -164,8 +164,8 @@ func (connector *RRDConnector) GetPlots(query *PlotQuery) (map[string]*PlotResul
 
 			xport.Def(
 				serieTemp+"-ori",
-				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].FilePath,
-				connector.metrics[serie.Metric.SourceName][serie.Metric.Name].Dataset,
+				connector.metrics[serie.Metric.Source][serie.Metric.Name].FilePath,
+				connector.metrics[serie.Metric.Source][serie.Metric.Name].Dataset,
 				"AVERAGE",
 			)
 
