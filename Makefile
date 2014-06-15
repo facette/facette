@@ -269,7 +269,8 @@ test-pkg: $(TEMP_DIR)/src/github.com/facette/facette
 
 test-server: build-bin
 	@$(call mesg_start,test,Starting facette server...)
-	@install -d -m 0755 $(TEMP_DIR)/tests && ($(TEMP_DIR)/bin/facette -c tests/facette.json >/dev/null &) && \
+	@install -d -m 0755 $(TEMP_DIR)/tests && ($(TEMP_DIR)/bin/facette -c tests/facette.json \
+	    	-l tmp/tests/facette.log >/dev/null &) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 	@$(call mesg_start,test,Running server tests...)
