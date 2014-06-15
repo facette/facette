@@ -172,7 +172,7 @@ func (server *Server) Run() error {
 	// Server shutdown triggered
 	if server.Listener.Stopped {
 		// Shutdown running origin workers
-		server.StopProviderWorkers()
+		server.stopProviderWorkers()
 
 		// Shutdown catalog worker
 		if err := server.catalogWorker.SendEvent(eventShutdown, false, nil); err != nil {

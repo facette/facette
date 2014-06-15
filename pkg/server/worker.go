@@ -60,8 +60,7 @@ func (server *Server) startProviderWorkers() error {
 	return nil
 }
 
-// StopProviderWorkers stop all running providers.
-func (server *Server) StopProviderWorkers() {
+func (server *Server) stopProviderWorkers() {
 	server.providerWorkers.Broadcast(eventShutdown, nil)
 
 	// Wait for all workers to shut down
