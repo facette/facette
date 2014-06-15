@@ -33,22 +33,18 @@ type GraphiteConnector struct {
 }
 
 func init() {
-	Connectors["graphite"] = func(origin *catalog.Origin) (interface{}, error) {
+	Connectors["graphite"] = func(settings map[string]interface{}) (interface{}, error) {
 		var err error
 
 		connector := &GraphiteConnector{
 			insecureTLS: false,
 		}
 
-		if connector.URL, err = config.GetString(origin.Config.Connector, "url", true); err != nil {
+		if connector.URL, err = config.GetString(settings, "url", true); err != nil {
 			return nil, err
 		}
 
-		if connector.insecureTLS, err = config.GetBool(
-			origin.Config.Connector,
-			"allow_insecure_tls",
-			false,
-		); err != nil {
+		if connector.insecureTLS, err = config.GetBool(settings, "allow_insecure_tls", false); err != nil {
 			return nil, err
 		}
 
@@ -56,9 +52,9 @@ func init() {
 	}
 }
 
-// GetPlots retrieves time series data from origin based on a query and a time interval.
-func (connector *GraphiteConnector) GetPlots(query *PlotQuery) (map[string]*PlotResult, error) {
-	result := make(map[string]*PlotResult)
+// GetPlots retrieves time series data from provider based on a query and a time interval.
+func (connector *GraphiteConnector) GetPlots(query *types.PlotQuery) (map[string]*types.PlotResult, error) {
+	result := make(map[string]*types.PlotResult)
 
 	httpTransport := &http.Transport{}
 	if connector.insecureTLS {
@@ -99,7 +95,7 @@ func (connector *GraphiteConnector) GetPlots(query *PlotQuery) (map[string]*Plot
 }
 
 // Refresh triggers a full connector data update.
-func (connector *GraphiteConnector) Refresh(origin *catalog.Origin) error {
+func (connector *GraphiteConnector) Refresh(originName string, outputChan chan *catalog.CatalogRecord) error {
 	httpTransport := &http.Transport{
 		Dial: (&net.Dialer{
 			// Enable dual IPv4/IPv6 stack connectivity:
@@ -147,7 +143,7 @@ func (connector *GraphiteConnector) Refresh(origin *catalog.Origin) error {
 			metricName = metric[index+1:]
 		}
 
-		origin.Filters.Input <- &catalog.CatalogRecord{origin.Name, sourceName, metricName, connector}
+		outputChan <- &catalog.CatalogRecord{originName, sourceName, metricName, connector}
 	}
 
 	return nil
@@ -165,7 +161,7 @@ func graphiteCheckConnectorResponse(response *http.Response) error {
 	return nil
 }
 
-func graphiteBuildQueryURL(query *GroupQuery, startTime, endTime time.Time) (string, string, error) {
+func graphiteBuildQueryURL(query *types.GroupQuery, startTime, endTime time.Time) (string, string, error) {
 	var (
 		serieName string
 		target    string
@@ -217,10 +213,10 @@ func graphiteBuildQueryURL(query *GroupQuery, startTime, endTime time.Time) (str
 	return serieName, queryURL, nil
 }
 
-func graphiteExtractPlotResult(plots []graphitePlot) (*PlotResult, error) {
+func graphiteExtractPlotResult(plots []graphitePlot) (*types.PlotResult, error) {
 	var min, max, avg, last float64
 
-	result := &PlotResult{Info: make(map[string]types.PlotValue)}
+	result := &types.PlotResult{Info: make(map[string]types.PlotValue)}
 
 	// Return an empty plotResult if Graphite API didn't return any datapoint matching the query
 	if len(plots) == 0 || len(plots[0].Datapoints) == 0 {

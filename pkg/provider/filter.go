@@ -1,24 +1,25 @@
-package catalog
+package provider
 
 import (
 	"log"
 	"regexp"
 
+	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
 
 type filterChain struct {
-	Input  chan *CatalogRecord
-	output chan *CatalogRecord
-	rules  []*config.OriginFilterConfig
+	Input  chan *catalog.CatalogRecord
+	output chan *catalog.CatalogRecord
+	rules  []*config.ProviderFilterConfig
 }
 
-func newFilterChain(filters []*config.OriginFilterConfig, output chan *CatalogRecord) filterChain {
+func newFilterChain(filters []*config.ProviderFilterConfig, output chan *catalog.CatalogRecord) filterChain {
 	chain := filterChain{
-		Input:  make(chan *CatalogRecord),
+		Input:  make(chan *catalog.CatalogRecord),
 		output: output,
-		rules:  make([]*config.OriginFilterConfig, 0),
+		rules:  make([]*config.ProviderFilterConfig, 0),
 	}
 
 	targetSet := set.New(set.NonThreadSafe)
@@ -53,7 +54,8 @@ func newFilterChain(filters []*config.OriginFilterConfig, output chan *CatalogRe
 			}
 
 			for _, rule := range chain.rules {
-				if (rule.Target == "origin" || rule.Target == "any") && rule.PatternRegexp.MatchString(record.Origin) {
+				if (rule.Target == "origin" || rule.Target == "any") &&
+					rule.PatternRegexp.MatchString(record.Origin) {
 					if rule.Discard {
 						log.Printf("DEBUG: discard record %v, as origin matches `%s' pattern", record, rule.Pattern)
 						goto nextRecord

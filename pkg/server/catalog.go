@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/pkg/utils"
@@ -63,7 +62,7 @@ func (server *Server) serveOrigin(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	connectorType, ok := server.Config.Origins[originName].Connector["type"].(string)
+	connectorType, ok := server.Config.Providers[originName].Connector["type"].(string)
 	if !ok {
 		server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 		return
@@ -72,7 +71,7 @@ func (server *Server) serveOrigin(writer http.ResponseWriter, request *http.Requ
 	response := OriginResponse{
 		Name:      originName,
 		Connector: connectorType,
-		Updated:   server.Catalog.Origins[originName].LastRefresh.Format(time.RFC3339),
+		// Updated:   server.Catalog.Origins[originName].LastRefresh.Format(time.RFC3339), // TODO: useful?
 	}
 
 	server.serveResponse(writer, response, http.StatusOK)

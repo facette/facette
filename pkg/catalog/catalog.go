@@ -4,13 +4,10 @@ package catalog
 import (
 	"fmt"
 	"log"
-
-	"github.com/facette/facette/pkg/config"
 )
 
 // Catalog represents the main structure of a catalog instance.
 type Catalog struct {
-	Config     *config.Config
 	Origins    map[string]*Origin
 	RecordChan chan *CatalogRecord
 	debugLevel int // TODO: remove this
@@ -37,9 +34,8 @@ const (
 )
 
 // NewCatalog creates a new instance of catalog.
-func NewCatalog(config *config.Config, debugLevel int) *Catalog {
+func NewCatalog(debugLevel int) *Catalog {
 	return &Catalog{
-		Config:     config,
 		Origins:    make(map[string]*Origin),
 		RecordChan: make(chan *CatalogRecord),
 		debugLevel: debugLevel,
@@ -56,7 +52,6 @@ func (catalog *Catalog) Insert(record *CatalogRecord) {
 	if _, ok := catalog.Origins[record.Origin]; !ok {
 		catalog.Origins[record.Origin] = NewOrigin(
 			record.Origin,
-			nil,
 			catalog,
 		)
 	}
