@@ -54,12 +54,15 @@ func (catalog *Catalog) Insert(origin, source, metric string) {
 	}
 
 	if _, ok := catalog.Origins[origin]; !ok {
-		catalog.Origins[origin] = NewOrigin(origin, nil, catalog)
+		catalog.Origins[origin] = NewOrigin(
+			origin,
+			nil,
+			catalog,
+		)
 	}
 
 	if _, ok := catalog.Origins[origin].Sources[source]; !ok {
 		catalog.Origins[origin].Sources[source] = NewSource(
-			source,
 			source,
 			catalog.Origins[origin],
 		)
@@ -67,7 +70,6 @@ func (catalog *Catalog) Insert(origin, source, metric string) {
 
 	if _, ok := catalog.Origins[origin].Sources[source].Metrics[metric]; !ok {
 		catalog.Origins[origin].Sources[source].Metrics[metric] = NewMetric(
-			metric,
 			metric,
 			catalog.Origins[origin].Sources[source],
 		)

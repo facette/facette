@@ -25,8 +25,9 @@ type PlotQuery struct {
 
 // MetricQuery represents a metric entry in a SerieQuery.
 type MetricQuery struct {
-	Name       string
-	SourceName string
+	Name   string
+	Origin string
+	Source string
 }
 
 // SerieQuery represents a serie entry in a GroupQuery.

@@ -179,13 +179,13 @@ func graphiteBuildQueryURL(query *GroupQuery, startTime, endTime time.Time) (str
 
 	if query.Type == OperGroupTypeNone {
 		serieName = query.Series[0].Name
-		target = fmt.Sprintf("%s.%s", query.Series[0].Metric.SourceName, query.Series[0].Metric.Name)
+		target = fmt.Sprintf("%s.%s", query.Series[0].Metric.Source, query.Series[0].Metric.Name)
 	} else {
 		serieName = query.Name
 		targets := make([]string, 0)
 
-		for _, s := range query.Series {
-			targets = append(targets, fmt.Sprintf("%s.%s", s.Metric.SourceName, s.Metric.Name))
+		for _, serie := range query.Series {
+			targets = append(targets, fmt.Sprintf("%s.%s", serie.Metric.Source, serie.Metric.Name))
 		}
 
 		target = fmt.Sprintf("group(%s)", strings.Join(targets, ","))
