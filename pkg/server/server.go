@@ -73,11 +73,6 @@ func (server *Server) Reload() error {
 func (server *Server) Run() error {
 	server.StartTime = time.Now()
 
-	// Load server configuration
-	if err := server.Config.Reload(); err != nil {
-		return err
-	}
-
 	// Set server logging ouput
 	if server.Config.LogFile != "" && server.Config.LogFile != "-" {
 		dirPath, _ := path.Split(server.Config.LogFile)
@@ -85,13 +80,19 @@ func (server *Server) Run() error {
 
 		serverOutput, err := os.OpenFile(server.Config.LogFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
-			fmt.Errorf("unable to open log file `%s'", server.Config.LogFile)
+			log.Printf("ERROR: unable to open log file: %s", err)
 			return err
 		}
 
 		defer serverOutput.Close()
 
 		log.SetOutput(serverOutput)
+	}
+
+	// Load server configuration
+	if err := server.Config.Reload(); err != nil {
+		log.Printf("ERROR: unable to load configuration: %s", err)
+		return err
 	}
 
 	// Handle pid file creation if set
