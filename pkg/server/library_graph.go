@@ -341,7 +341,6 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 
 func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.OperGroup) (*types.GroupQuery,
 	connector.Connector, error) {
-
 	var providerConnector connector.Connector
 
 	query := &types.GroupQuery{
