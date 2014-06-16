@@ -11,6 +11,17 @@ mesg_step = echo "$(1)"
 mesg_ok = echo "result: $(shell tput setaf 2)ok$(shell tput sgr0)"
 mesg_fail = (echo "result: $(shell tput setaf 1)fail$(shell tput sgr0)" && false)
 
+path_search = $(firstword $(wildcard $(addsuffix /$(1),$(subst :, ,$(PATH)))))
+
+npm_install = \
+	$(call mesg_start,main,Installing $(1) via npm ...); \
+	$(NPM) install $(1) >/dev/null 2>&1 && \
+		$(call mesg_ok) || $(call mesg_fail)
+
+# npm
+NPM ?= npm
+PATH := $(PATH):$(shell $(NPM) bin)
+
 # Go
 GOPATH = $(realpath $(TEMP_DIR))
 export GOPATH
@@ -26,19 +37,38 @@ PANDOC_ARGS = --standalone --to man
 
 UGLIFYJS ?= uglifyjs
 UGLIFYSCRIPT_ARGS = --comments --compress --mangle --screw-ie8
+NPM_UGLIFYJS = uglify-js
 
 JSHINT ?= jshint
 JSHINT_ARGS = --show-non-errors
+NPM_JSHINT = jshint
 
 LESSC ?= lessc
 LESSC_ARGS = --no-color
+NPM_LESSC = less
 
 all: build lint
 
 clean:
 	@$(call mesg_start,main,Cleaning temporary files...)
-	@rm -rf $(TEMP_DIR) && \
+	@rm -rf node_modules $(TEMP_DIR) && \
 		$(call mesg_ok) || $(call mesg_fail)
+
+# npm scripts
+lessc:
+	@if [ -z "$(call path_search,$(LESSC))" ]; then \
+		$(call npm_install,$(NPM_LESSC)); \
+	fi
+
+uglifyjs:
+	@if [ -z "$(call path_search,$(UGLIFYJS))" ]; then \
+		$(call npm_install,$(NPM_UGLIFYJS)); \
+	fi
+
+jshint:
+	@if [ -z "$(call path_search,$(JSHINT))" ]; then \
+		$(call npm_install,$(NPM_JSHINT)); \
+	fi
 
 .PHONY: build
 build: build-bin build-man build-static
@@ -184,7 +214,7 @@ HTML_SRC = $(wildcard cmd/facette/html/*/*.html) \
 
 HTML_OUTPUT = $(TEMP_DIR)/html
 
-$(SCRIPT_OUTPUT): $(SCRIPT_SRC)
+$(SCRIPT_OUTPUT): uglifyjs $(SCRIPT_SRC)
 	@$(call mesg_start,static,Merging script files into $(notdir $(SCRIPT_OUTPUT:.js=.src.js))...)
 	@install -d -m 0755 $(TEMP_DIR)/static && cat $(SCRIPT_SRC) >$(SCRIPT_OUTPUT:.js=.src.js) && \
 		$(call mesg_ok) || $(call mesg_fail)
@@ -203,7 +233,7 @@ $(MESG_OUTPUT): $(MESG_SRC)
 		sed -e 's/^\s\+//g;s/\s\+$$//g' $(MESG_SRC) | sed -e ':a;N;s/\n//;ta' >$(MESG_OUTPUT) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
-$(STYLE_OUTPUT): $(STYLE_SRC)
+$(STYLE_OUTPUT): lessc $(STYLE_SRC)
 	@$(call mesg_start,static,Merging style files into $(notdir $(STYLE_OUTPUT:.css=.src.css))...)
 	@install -d -m 0755 $(TEMP_DIR)/static && cat $(STYLE_SRC) >$(STYLE_OUTPUT:.css=.src.css) && \
 		$(call mesg_ok) || $(call mesg_fail)
@@ -211,7 +241,7 @@ $(STYLE_OUTPUT): $(STYLE_SRC)
 	@$(LESSC) $(LESSC_ARGS) --yui-compress $(STYLE_OUTPUT:.css=.src.css) >$(STYLE_OUTPUT) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
-$(STYLE_PRINT_OUTPUT): $(STYLE_PRINT_SRC)
+$(STYLE_PRINT_OUTPUT): lessc $(STYLE_PRINT_SRC)
 	@$(call mesg_start,static,Merging style files into $(notdir $(STYLE_PRINT_OUTPUT:.css=.src.css))...)
 	@install -d -m 0755 $(TEMP_DIR)/static && cat $(STYLE_PRINT_SRC) >$(STYLE_PRINT_OUTPUT:.css=.src.css) && \
 		$(call mesg_ok) || $(call mesg_fail)
@@ -251,7 +281,7 @@ devel-static: install-static
 		cp $$ENTRY $(PREFIX)/share/static/`basename $$ENTRY | sed -e 's@\.src\.js$$@.js@'`; \
 	done) && $(call mesg_ok) || $(call mesg_fail)
 
-lint-static: $(SCRIPT_OUTPUT)
+lint-static: jshint $(SCRIPT_OUTPUT)
 	@$(call mesg_start,lint,Checking $(notdir $(SCRIPT_OUTPUT:.js=.src.js)) with JSHint...)
 	-@$(JSHINT) $(JSHINT_ARGS) $(SCRIPT_OUTPUT:.js=.src.js) && \
 		$(call mesg_ok) || $(call mesg_fail)
