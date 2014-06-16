@@ -162,19 +162,14 @@ type PlotResponse struct {
 	Description string           `json:"description"`
 	Type        int              `json:"type"`
 	StackMode   int              `json:"stack_mode"`
-	Stacks      []*StackResponse `json:"stacks"`
+	Series      []*SerieResponse `json:"series"`
 	Modified    time.Time        `json:"modified"`
-}
-
-// StackResponse represents a stack response structure in the server backend.
-type StackResponse struct {
-	Name   string           `json:"name"`
-	Series []*SerieResponse `json:"series"`
 }
 
 // SerieResponse represents a serie response structure in the server backend.
 type SerieResponse struct {
 	Name    string                     `json:"name"`
+	StackID int                        `json:"stack_id"`
 	Plots   []types.PlotValue          `json:"plots"`
 	Info    map[string]types.PlotValue `json:"info"`
 	Options map[string]interface{}     `json:"options"`

@@ -300,43 +300,30 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 
 	case LibraryItemGraph:
 		// Check for definition names duplicates
-		stackSet := set.New(set.ThreadSafe)
 		groupSet := set.New(set.ThreadSafe)
 		serieSet := set.New(set.ThreadSafe)
 
-		for _, stack := range item.(*Graph).Stacks {
-			if stack == nil {
-				log.Println("ERROR: stack is null")
+		for _, group := range item.(*Graph).Groups {
+			if group == nil {
+				log.Printf("ERROR: found null group")
 				return os.ErrInvalid
-			} else if stackSet.Has(stack.Name) {
-				log.Printf("ERROR: duplicate stack name `%s'", stack.Name)
+			} else if groupSet.Has(group.Name) {
+				log.Printf("ERROR: duplicate group name `%s'", group.Name)
 				return os.ErrExist
 			}
 
-			stackSet.Add(stack.Name)
+			groupSet.Add(group.Name)
 
-			for _, group := range stack.Groups {
-				if group == nil {
-					log.Printf("ERROR: found null group in stack `%s'", stack.Name)
+			for _, serie := range group.Series {
+				if serie == nil {
+					log.Printf("ERROR: found null serie in group `%s'", group.Name)
 					return os.ErrInvalid
-				} else if groupSet.Has(group.Name) {
-					log.Printf("ERROR: duplicate group name `%s'", group.Name)
+				} else if serieSet.Has(serie.Name) {
+					log.Printf("ERROR: duplicate serie name `%s'", serie.Name)
 					return os.ErrExist
 				}
 
-				groupSet.Add(group.Name)
-
-				for _, serie := range group.Series {
-					if serie == nil {
-						log.Printf("ERROR: found null serie in group `%s'", group.Name)
-						return os.ErrInvalid
-					} else if serieSet.Has(serie.Name) {
-						log.Printf("ERROR: duplicate serie name `%s'", serie.Name)
-						return os.ErrExist
-					}
-
-					serieSet.Add(serie.Name)
-				}
+				serieSet.Add(serie.Name)
 			}
 		}
 

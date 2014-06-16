@@ -574,7 +574,8 @@ func Test_LibraryGraphHandle(test *testing.T) {
 	baseURL := fmt.Sprintf("http://%s/api/v1/library/graphs/", serverConfig.BindAddr)
 
 	// Define a sample graph
-	stack := &library.Stack{Name: "stack0"}
+	graphBase := &library.Graph{Item: library.Item{Name: "graph0", Description: "A great graph description."},
+		StackMode: library.StackModeNormal}
 
 	group := &library.OperGroup{Name: "group0", Type: connector.OperGroupTypeAvg}
 	group.Series = append(group.Series, &library.Serie{Name: "serie0", Origin: "test", Source: "source1",
@@ -582,17 +583,13 @@ func Test_LibraryGraphHandle(test *testing.T) {
 	group.Series = append(group.Series, &library.Serie{Name: "serie1", Origin: "test", Source: "source2",
 		Metric: "group:group0"})
 
-	stack.Groups = append(stack.Groups, group)
+	graphBase.Groups = append(graphBase.Groups, group)
 
 	group = &library.OperGroup{Name: "serie2", Type: connector.OperGroupTypeNone}
 	group.Series = append(group.Series, &library.Serie{Name: "serie2", Origin: "test", Source: "group:group0",
 		Metric: "database2/test"})
 
-	stack.Groups = append(stack.Groups, group)
-
-	graphBase := &library.Graph{Item: library.Item{Name: "graph0", Description: "A great graph description."},
-		StackMode: library.StackModeNormal}
-	graphBase.Stacks = append(graphBase.Stacks, stack)
+	graphBase.Groups = append(graphBase.Groups, group)
 
 	// Test GET on graphs list
 	listBase := server.ItemListResponse{}

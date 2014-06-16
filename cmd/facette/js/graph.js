@@ -103,8 +103,7 @@ function graphDraw(graph, postpone, delay, preview) {
                     startTime,
                     endTime,
                     info = {},
-                    i,
-                    j;
+                    i;
 
                 if (data.message) {
                     graph.children('.graphctrl')
@@ -292,18 +291,16 @@ function graphDraw(graph, postpone, delay, preview) {
                     break;
                 }
 
-                for (i in data.stacks) {
-                    for (j in data.stacks[i].series) {
-                        highchartOpts.series.push({
-                            id: data.stacks[i].series[j].name,
-                            name: data.stacks[i].series[j].name,
-                            stack: data.stacks[i].name,
-                            data: data.stacks[i].series[j].plots,
-                            color: data.stacks[i].series[j].options ? data.stacks[i].series[j].options.color : null
-                        });
+                for (i in data.series) {
+                    highchartOpts.series.push({
+                        id: data.series[i].name,
+                        name: data.series[i].name,
+                        stack: 'stack' + data.series[i].stack_id,
+                        data: data.series[i].plots,
+                        color: data.series[i].options ? data.series[i].options.color : null
+                    });
 
-                        info[data.stacks[i].series[j].name] = data.stacks[i].series[j].info;
-                    }
+                    info[data.series[i].name] = data.series[i].info;
                 }
 
                 // Prepare legend spacing

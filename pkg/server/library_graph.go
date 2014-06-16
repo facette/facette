@@ -267,33 +267,31 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 
 	data := make([]map[string]*types.PlotResult, 0)
 
-	for _, stackItem := range graph.Stacks {
-		for _, groupItem := range stackItem.Groups {
-			groupOptions[groupItem.Name] = groupItem.Options
+	for _, groupItem := range graph.Groups {
+		groupOptions[groupItem.Name] = groupItem.Options
 
-			query, providerConnector, err := server.preparePlotQuery(plotReq, groupItem)
-			if err != nil {
-				if err != os.ErrInvalid {
-					log.Println("ERROR: " + err.Error())
-				}
-
-				data = append(data, nil)
-				continue
-			}
-
-			if providerConnector == nil {
-				log.Println("ERROR: origin connector should not be null")
-				continue
-			}
-
-			plotResult, err := providerConnector.GetPlots(&types.PlotQuery{query, startTime, endTime, step,
-				plotReq.Percentiles})
-			if err != nil {
+		query, providerConnector, err := server.preparePlotQuery(plotReq, groupItem)
+		if err != nil {
+			if err != os.ErrInvalid {
 				log.Println("ERROR: " + err.Error())
 			}
 
-			data = append(data, plotResult)
+			data = append(data, nil)
+			continue
 		}
+
+		if providerConnector == nil {
+			log.Println("ERROR: origin connector should not be null")
+			continue
+		}
+
+		plotResult, err := providerConnector.GetPlots(&types.PlotQuery{query, startTime, endTime, step,
+			plotReq.Percentiles})
+		if err != nil {
+			log.Println("ERROR: " + err.Error())
+		}
+
+		data = append(data, plotResult)
 	}
 
 	response := &PlotResponse{
@@ -315,29 +313,23 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 
 	plotMax := 0
 
-	for _, stackItem := range graph.Stacks {
-		stack := &StackResponse{Name: stackItem.Name}
+	for _, groupItem := range graph.Groups {
+		var plotResult map[string]*types.PlotResult
 
-		for _, groupItem := range stackItem.Groups {
-			var plotResult map[string]*types.PlotResult
+		plotResult, data = data[0], data[1:]
 
-			plotResult, data = data[0], data[1:]
-
-			for serieName, serieResult := range plotResult {
-				if len(serieResult.Plots) > plotMax {
-					plotMax = len(serieResult.Plots)
-				}
-
-				stack.Series = append(stack.Series, &SerieResponse{
-					Name:    serieName,
-					Plots:   serieResult.Plots,
-					Info:    serieResult.Info,
-					Options: groupOptions[groupItem.Name],
-				})
+		for serieName, serieResult := range plotResult {
+			if len(serieResult.Plots) > plotMax {
+				plotMax = len(serieResult.Plots)
 			}
-		}
 
-		response.Stacks = append(response.Stacks, stack)
+			response.Series = append(response.Series, &SerieResponse{
+				Name:    serieName,
+				Plots:   serieResult.Plots,
+				Info:    serieResult.Info,
+				Options: groupOptions[groupItem.Name],
+			})
+		}
 	}
 
 	if plotMax > 0 {

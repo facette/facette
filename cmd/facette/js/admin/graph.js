@@ -6,7 +6,7 @@ function adminGraphGetData() {
             description: $pane.find('textarea[name=graph-desc]').val(),
             type: parseInt($pane.find('select[name=graph-type]').val(), 10),
             stack_mode: parseInt($pane.find('select[name=stack-mode]').val(), 10),
-            stacks: adminGraphGetStacks()
+            groups: adminGraphGetGroups()
         };
 
     return data;
@@ -42,46 +42,29 @@ function adminGraphGetGroup(entry) {
     return group;
 }
 
-function adminGraphGetStacks() {
+function adminGraphGetGroups() {
     var $listSeries = listMatch('step-stack-series'),
         $listStacks = listMatch('step-stack-groups'),
-        groups = [],
-        stacks = [];
+        count = 0,
+        groups = [];
 
     // Retrieve defined stacks
     listGetItems($listStacks).each(function () {
         var $item = $(this);
 
-        groups = [];
-
         $item.find('.groupentry').each(function () {
-            groups.push(adminGraphGetGroup($(this)));
+            groups.push($.extend(adminGraphGetGroup($(this)), {stack_id: count}));
         });
 
-        if (groups.length === 0)
-            return;
-
-        stacks.push({
-            name: $item.attr('data-stack'),
-            groups: groups
-        });
+        count++;
     });
 
     // Create new stack with remaining items
-    groups = [];
-
     listGetItems($listSeries, ':not(.linked)').each(function () {
-        groups.push(adminGraphGetGroup($(this)));
+        groups.push($.extend(adminGraphGetGroup($(this)), {stack_id: count}));
     });
 
-    if (groups.length > 0) {
-        stacks.push({
-            name: listNextName($listStacks, 'data-stack'),
-            groups: groups
-        });
-    }
-
-    return stacks;
+    return groups;
 }
 
 function adminGraphGetValue(item) {
@@ -1209,46 +1192,45 @@ function adminGraphSetupTerminate() {
         itemLoad(graphId, 'graphs').pipe(function (data) {
             var $itemOper,
                 $itemSerie,
-                $itemStack,
                 $listMetrics,
                 $listOpers,
                 $listSeries,
                 $pane,
+                stacks = {},
                 i,
-                j,
-                k;
+                j;
 
             $listMetrics = listMatch('step-1-metrics');
             $listOpers   = listMatch('step-2-groups');
             $listSeries  = listMatch('step-stack-series');
 
-            for (i in data.stacks) {
-                $itemStack = data.stacks[i].mode !== STACK_MODE_NONE ? adminGraphCreateStack({
-                    name: data.stacks[i].name
+            for (i in data.groups) {
+                if (!stacks[data.groups[i].stack_id]) {
+                    stacks[data.groups[i].stack_id] = data.stack_mode !== STACK_MODE_NONE ? adminGraphCreateStack({
+                        name: 'stack' + data.groups[i].stack_id
+                    }) : null;
+                }
+
+                $itemOper = data.groups[i].type !== OPER_GROUP_TYPE_NONE ? adminGraphCreateGroup(null, {
+                    name: data.groups[i].name,
+                    type: data.groups[i].type,
+                    options: data.groups[i].options
                 }) : null;
 
-                for (j in data.stacks[i].groups) {
-                    $itemOper = data.stacks[i].groups[j].type !== OPER_GROUP_TYPE_NONE ? adminGraphCreateGroup(null, {
-                        name: data.stacks[i].groups[j].name,
-                        type: data.stacks[i].groups[j].type,
-                        options: data.stacks[i].groups[j].options
-                    }) : null;
+                for (j in data.groups[i].series) {
+                    $itemSerie = adminGraphCreateSerie(null, $.extend(data.groups[i].series[j], {
+                        options: data.groups[i].type === OPER_GROUP_TYPE_NONE ?
+                            data.groups[i].options : null
+                    }));
 
-                    for (k in data.stacks[i].groups[j].series) {
-                        $itemSerie = adminGraphCreateSerie(null, $.extend(data.stacks[i].groups[j].series[k], {
-                            options: data.stacks[i].groups[j].type === OPER_GROUP_TYPE_NONE ?
-                                data.stacks[i].groups[j].options : null
-                        }));
-
-                        if ($itemOper)
-                            adminGraphCreateProxy(PROXY_TYPE_SERIE, $itemSerie, $itemOper);
-                        else if ($itemStack)
-                            adminGraphCreateProxy(PROXY_TYPE_SERIE, $itemSerie, $itemStack);
-                    }
-
-                    if ($itemOper && $itemStack)
-                        adminGraphCreateProxy(PROXY_TYPE_GROUP, $itemOper, $itemStack);
+                    if ($itemOper)
+                        adminGraphCreateProxy(PROXY_TYPE_SERIE, $itemSerie, $itemOper);
+                    else if (stacks[data.groups[i].stack_id])
+                        adminGraphCreateProxy(PROXY_TYPE_SERIE, $itemSerie, stacks[data.groups[i].stack_id]);
                 }
+
+                if ($itemOper && stacks[data.groups[i].stack_id])
+                    adminGraphCreateProxy(PROXY_TYPE_GROUP, $itemOper, stacks[data.groups[i].stack_id]);
             }
 
             $pane = paneMatch('graph-edit');

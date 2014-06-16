@@ -21,21 +21,16 @@ const (
 // Graph represents a graph containing list of series.
 type Graph struct {
 	Item
-	Type      int      `json:"type"`
-	StackMode int      `json:"stack_mode"`
-	Stacks    []*Stack `json:"stacks"`
-}
-
-// Stack represents a set of operation group entries.
-type Stack struct {
-	Name   string       `json:"name"`
-	Groups []*OperGroup `json:"groups"`
+	Type      int          `json:"type"`
+	StackMode int          `json:"stack_mode"`
+	Groups    []*OperGroup `json:"groups"`
 }
 
 // OperGroup represents an operation group entry.
 type OperGroup struct {
 	Name    string                 `json:"name"`
 	Type    int                    `json:"type"`
+	StackID int                    `json:"stack_id"`
 	Series  []*Serie               `json:"series"`
 	Scale   float64                `json:"scale"`
 	Options map[string]interface{} `json:"options"`
