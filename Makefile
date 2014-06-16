@@ -11,14 +11,14 @@ mesg_step = echo "$(1)"
 mesg_ok = echo "result: $(shell tput setaf 2)ok$(shell tput sgr0)"
 mesg_fail = (echo "result: $(shell tput setaf 1)fail$(shell tput sgr0)" && false)
 
-pathsearch = $(firstword $(wildcard $(addsuffix /$(1),$(subst :, ,$(PATH)))))
+path_search = $(firstword $(wildcard $(addsuffix /$(1),$(subst :, ,$(PATH)))))
 
 npm_install = \
 	$(call mesg_start,main,Installing $(1) via npm ...); \
 	$(NPM) install $(1) >/dev/null 2>&1 && \
 		$(call mesg_ok) || $(call mesg_fail)
 
-# Npm
+# npm
 NPM ?= npm
 PATH := $(PATH):$(shell $(NPM) bin)
 
@@ -47,7 +47,6 @@ LESSC ?= lessc
 LESSC_ARGS = --no-color
 NPM_LESSC = less
 
-
 all: build lint
 
 clean:
@@ -55,20 +54,19 @@ clean:
 	@rm -rf node_modules $(TEMP_DIR) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
-
-# JS
+# npm scripts
 lessc:
-	@if [ -z "$(call pathsearch,$(LESSC))" ]; then \
+	@if [ -z "$(call path_search,$(LESSC))" ]; then \
 		$(call npm_install,$(NPM_LESSC)); \
 	fi
 
 uglifyjs:
-	@if [ -z "$(call pathsearch,$(UGLIFYJS))" ]; then \
+	@if [ -z "$(call path_search,$(UGLIFYJS))" ]; then \
 		$(call npm_install,$(NPM_UGLIFYJS)); \
 	fi
 
 jshint:
-	@if [ -z "$(call pathsearch,$(JSHINT))" ]; then \
+	@if [ -z "$(call path_search,$(JSHINT))" ]; then \
 		$(call npm_install,$(NPM_JSHINT)); \
 	fi
 
