@@ -12,8 +12,8 @@
 				<dt>Library</dt>
 				<dd><a class="icon icon-collection{{ if eq .Section "collections" }} current{{ end }}" href="{{ .URLPrefix }}/admin/collections/">Collections</a></dd>
 				<dd><a class="icon icon-graph{{ if eq .Section "graphs" }} current{{ end }}" href="{{ .URLPrefix }}/admin/graphs/">Graphs</a></dd>
-				<dd><a class="icon icon-source icon-stack icon-stack-folder{{ if eq .Section "sourcegroups" }} current{{ end }}" href="{{ .URLPrefix }}/admin/sourcegroups/">Source Groups</a></dd>
-				<dd><a class="icon icon-metric icon-stack icon-stack-folder{{ if eq .Section "metricgroups" }} current{{ end }}" href="{{ .URLPrefix }}/admin/metricgroups/">Metric Groups</a></dd>
+				<dd><a class="icon icon-folder icon-stack icon-stack-source{{ if eq .Section "sourcegroups" }} current{{ end }}" href="{{ .URLPrefix }}/admin/sourcegroups/">Source Groups</a></dd>
+				<dd><a class="icon icon-folder icon-stack icon-stack-metric{{ if eq .Section "metricgroups" }} current{{ end }}" href="{{ .URLPrefix }}/admin/metricgroups/">Metric Groups</a></dd>
 				<dd><a class="icon icon-scale{{ if eq .Section "scales" }} current{{ end }}" href="{{ .URLPrefix }}/admin/scales/">Scales</a></dd>
 				<dt>Catalog</dt>
 				<dd><a class="icon icon-square icon-origin{{ if eq .Section "origins" }} current{{ end }}" href="{{ .URLPrefix }}/admin/origins/">Origins</a></dd>
