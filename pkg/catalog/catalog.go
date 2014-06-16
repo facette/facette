@@ -15,10 +15,13 @@ type Catalog struct {
 
 // CatalogRecord represents a catalog record.
 type CatalogRecord struct {
-	Origin    string
-	Source    string
-	Metric    string
-	Connector interface{}
+	Origin         string
+	Source         string
+	Metric         string
+	OriginalOrigin string
+	OriginalSource string
+	OriginalMetric string
+	Connector      interface{}
 }
 
 func (r CatalogRecord) String() string {
@@ -52,6 +55,7 @@ func (catalog *Catalog) Insert(record *CatalogRecord) {
 	if _, ok := catalog.Origins[record.Origin]; !ok {
 		catalog.Origins[record.Origin] = NewOrigin(
 			record.Origin,
+			record.OriginalOrigin,
 			catalog,
 		)
 	}
@@ -59,6 +63,7 @@ func (catalog *Catalog) Insert(record *CatalogRecord) {
 	if _, ok := catalog.Origins[record.Origin].Sources[record.Source]; !ok {
 		catalog.Origins[record.Origin].Sources[record.Source] = NewSource(
 			record.Source,
+			record.OriginalSource,
 			catalog.Origins[record.Origin],
 		)
 	}
@@ -66,6 +71,7 @@ func (catalog *Catalog) Insert(record *CatalogRecord) {
 	if _, ok := catalog.Origins[record.Origin].Sources[record.Source].Metrics[record.Metric]; !ok {
 		catalog.Origins[record.Origin].Sources[record.Source].Metrics[record.Metric] = NewMetric(
 			record.Metric,
+			record.OriginalMetric,
 			catalog.Origins[record.Origin].Sources[record.Source],
 			record.Connector,
 		)

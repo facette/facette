@@ -311,7 +311,12 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan *catal
 
 				connector.metrics[sourceName][metricFullName] = &rrdMetric{Dataset: dsName, FilePath: filePath}
 
-				outputChan <- &catalog.CatalogRecord{originName, sourceName, metricFullName, connector}
+				outputChan <- &catalog.CatalogRecord{
+					Origin:    originName,
+					Source:    sourceName,
+					Metric:    metricFullName,
+					Connector: connector,
+				}
 			}
 		}
 

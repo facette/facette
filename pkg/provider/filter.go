@@ -53,6 +53,11 @@ func newFilterChain(filters []*config.ProviderFilterConfig, output chan *catalog
 				chain.output <- record
 			}
 
+			// Keep a copy of original names
+			record.OriginalOrigin = record.Origin
+			record.OriginalSource = record.Source
+			record.OriginalMetric = record.Metric
+
 			for _, rule := range chain.rules {
 				if (rule.Target == "origin" || rule.Target == "any") &&
 					rule.PatternRegexp.MatchString(record.Origin) {

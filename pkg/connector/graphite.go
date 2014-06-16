@@ -143,7 +143,12 @@ func (connector *GraphiteConnector) Refresh(originName string, outputChan chan *
 			metricName = metric[index+1:]
 		}
 
-		outputChan <- &catalog.CatalogRecord{originName, sourceName, metricName, connector}
+		outputChan <- &catalog.CatalogRecord{
+			Origin:    originName,
+			Source:    sourceName,
+			Metric:    metricName,
+			Connector: connector,
+		}
 	}
 
 	return nil
