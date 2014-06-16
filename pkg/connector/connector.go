@@ -2,53 +2,14 @@
 package connector
 
 import (
-	"time"
-
 	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/types"
 )
 
 // Connector represents the main interface of a connector handler.
 type Connector interface {
-	GetPlots(query *PlotQuery) (map[string]*PlotResult, error)
-	Refresh(*catalog.Origin) error
-}
-
-// PlotQuery represents a connector plot query.
-type PlotQuery struct {
-	Group       *GroupQuery
-	StartTime   time.Time
-	EndTime     time.Time
-	Step        time.Duration
-	Percentiles []float64
-}
-
-// MetricQuery represents a metric entry in a SerieQuery.
-type MetricQuery struct {
-	Name   string
-	Origin string
-	Source string
-}
-
-// SerieQuery represents a serie entry in a GroupQuery.
-type SerieQuery struct {
-	Name   string
-	Metric *MetricQuery
-	Scale  float64
-}
-
-// GroupQuery represents a plot group query.
-type GroupQuery struct {
-	Name   string
-	Type   int
-	Series []*SerieQuery
-	Scale  float64
-}
-
-// PlotResult represents a plot request result.
-type PlotResult struct {
-	Plots []types.PlotValue
-	Info  map[string]types.PlotValue
+	GetPlots(query *types.PlotQuery) (map[string]*types.PlotResult, error)
+	Refresh(string, chan *catalog.CatalogRecord) error
 }
 
 const (
@@ -63,5 +24,5 @@ const (
 
 var (
 	// Connectors represents the list of all available connector handlers.
-	Connectors = make(map[string]func(*catalog.Origin) (interface{}, error))
+	Connectors = make(map[string]func(map[string]interface{}) (Connector, error))
 )

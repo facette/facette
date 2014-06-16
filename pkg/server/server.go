@@ -14,6 +14,7 @@ import (
 	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/library"
+	"github.com/facette/facette/pkg/provider"
 	"github.com/facette/facette/pkg/worker"
 	"github.com/facette/facette/thirdparty/github.com/etix/stoppableListener"
 )
@@ -31,21 +32,23 @@ const (
 
 // Server is the main structure of the server handler.
 type Server struct {
-	Config        *config.Config
-	Listener      *stoppableListener.StoppableListener
-	Catalog       *catalog.Catalog
-	Library       *library.Library
-	originWorkers worker.WorkerPool
-	catalogWorker *worker.Worker
-	Loading       bool
-	StartTime     time.Time
-	debugLevel    int
+	Config          *config.Config
+	Listener        *stoppableListener.StoppableListener
+	Catalog         *catalog.Catalog
+	Library         *library.Library
+	Loading         bool
+	StartTime       time.Time
+	providers       map[string]*provider.Provider
+	providerWorkers worker.WorkerPool
+	catalogWorker   *worker.Worker
+	debugLevel      int
 }
 
 // NewServer creates a new instance of server.
 func NewServer(configPath, logPath string, debugLevel int) *Server {
 	return &Server{
 		Config:     &config.Config{Path: configPath, LogFile: logPath},
+		providers:  make(map[string]*provider.Provider),
 		debugLevel: debugLevel,
 	}
 }
@@ -63,7 +66,7 @@ func (server *Server) Reload(config bool) error {
 		}
 	}
 
-	server.originWorkers.Broadcast(eventCatalogRefresh, nil)
+	server.providerWorkers.Broadcast(eventCatalogRefresh, nil)
 	server.Library.Refresh()
 
 	server.Loading = false
@@ -110,12 +113,7 @@ func (server *Server) Run() error {
 	}
 
 	// Create new catalog instance
-	server.Catalog = catalog.NewCatalog(server.Config, server.debugLevel)
-
-	// Set up origins from configuration
-	for originName, originConfig := range server.Config.Origins {
-		server.Catalog.Origins[originName] = catalog.NewOrigin(originName, originConfig, server.Catalog)
-	}
+	server.Catalog = catalog.NewCatalog(server.debugLevel)
 
 	// Instanciate catalog worker
 	server.catalogWorker = worker.NewWorker()
@@ -129,13 +127,17 @@ func (server *Server) Run() error {
 
 	server.catalogWorker.SendEvent(eventRun, true, nil)
 
-	// Instanciate origin workers
-	if err := server.startOriginWorkers(); err != nil {
+	// Instanciate providers
+	for providerName, providerConfig := range server.Config.Providers {
+		server.providers[providerName] = provider.NewProvider(providerName, providerConfig, server.Catalog)
+	}
+
+	if err := server.startProviderWorkers(); err != nil {
 		return err
 	}
 
-	// Send initial catalog refresh event to origin workers
-	server.originWorkers.Broadcast(eventCatalogRefresh, nil)
+	// Send initial catalog refresh event to provider workers
+	server.providerWorkers.Broadcast(eventCatalogRefresh, nil)
 
 	// Create library instance
 	server.Library = library.NewLibrary(server.Config, server.Catalog, server.debugLevel)
@@ -169,8 +171,8 @@ func (server *Server) Run() error {
 
 	// Server shutdown triggered
 	if server.Listener.Stopped {
-		// Shutdown running origin workers
-		server.StopOriginWorkers()
+		// Shutdown running provider workers
+		server.stopProviderWorkers()
 
 		// Shutdown catalog worker
 		if err := server.catalogWorker.SendEvent(eventShutdown, false, nil); err != nil {

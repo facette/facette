@@ -22,15 +22,15 @@ const (
 
 // Config represents the global configuration of the instance.
 type Config struct {
-	Path      string                   `json:"-"`
-	LogFile   string                   `json:"-"`
-	BindAddr  string                   `json:"bind"`
-	BaseDir   string                   `json:"base_dir"`
-	DataDir   string                   `json:"data_dir"`
-	OriginDir string                   `json:"origins_dir"`
-	PidFile   string                   `json:"pid_file"`
-	URLPrefix string                   `json:"url_prefix"`
-	Origins   map[string]*OriginConfig `json:"-"`
+	Path         string                     `json:"-"`
+	LogFile      string                     `json:"-"`
+	BindAddr     string                     `json:"bind"`
+	BaseDir      string                     `json:"base_dir"`
+	DataDir      string                     `json:"data_dir"`
+	ProvidersDir string                     `json:"providers_dir"`
+	PidFile      string                     `json:"pid_file"`
+	URLPrefix    string                     `json:"url_prefix"`
+	Providers    map[string]*ProviderConfig `json:"-"`
 }
 
 // Load loads the configuration from the filesystem.
@@ -42,19 +42,19 @@ func (config *Config) Load(filePath string) error {
 		return err
 	}
 
-	// Load origin definitions
-	config.Origins = make(map[string]*OriginConfig)
+	// Load provider definitions
+	config.Providers = make(map[string]*ProviderConfig)
 
 	walkFunc := func(filePath string, fileInfo os.FileInfo, err error) error {
 		if fileInfo.IsDir() || !strings.HasSuffix(filePath, ".json") {
 			return nil
 		}
 
-		_, originName := path.Split(strings.TrimSuffix(filePath, ".json"))
+		_, providerName := path.Split(strings.TrimSuffix(filePath, ".json"))
 
-		config.Origins[originName] = &OriginConfig{}
+		config.Providers[providerName] = &ProviderConfig{}
 
-		if fileInfo, err = utils.JSONLoad(filePath, config.Origins[originName]); err != nil {
+		if fileInfo, err = utils.JSONLoad(filePath, config.Providers[providerName]); err != nil {
 			err = fmt.Errorf("in %s, %s", filePath, err.Error())
 			if errOutput == nil {
 				errOutput = err
@@ -63,13 +63,11 @@ func (config *Config) Load(filePath string) error {
 			return err
 		}
 
-		config.Origins[originName].Modified = fileInfo.ModTime()
-
 		return nil
 	}
 
-	if err := utils.WalkDir(config.OriginDir, walkFunc); err != nil {
-		return fmt.Errorf("unable to load origin definitions: %s", err)
+	if err := utils.WalkDir(config.ProvidersDir, walkFunc); err != nil {
+		return fmt.Errorf("unable to load provider definitions: %s", err)
 	}
 
 	if errOutput != nil {

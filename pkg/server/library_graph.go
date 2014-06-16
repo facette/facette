@@ -13,6 +13,7 @@ import (
 	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/connector"
 	"github.com/facette/facette/pkg/library"
+	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
@@ -264,13 +265,13 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 	// Get plots data
 	groupOptions := make(map[string]map[string]interface{})
 
-	data := make([]map[string]*connector.PlotResult, 0)
+	data := make([]map[string]*types.PlotResult, 0)
 
 	for _, stackItem := range graph.Stacks {
 		for _, groupItem := range stackItem.Groups {
 			groupOptions[groupItem.Name] = groupItem.Options
 
-			query, originConnector, err := server.preparePlotQuery(plotReq, groupItem)
+			query, providerConnector, err := server.preparePlotQuery(plotReq, groupItem)
 			if err != nil {
 				if err != os.ErrInvalid {
 					log.Println("ERROR: " + err.Error())
@@ -280,12 +281,12 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 				continue
 			}
 
-			if originConnector == nil {
+			if providerConnector == nil {
 				log.Println("ERROR: origin connector should not be null")
 				continue
 			}
 
-			plotResult, err := originConnector.GetPlots(&connector.PlotQuery{query, startTime, endTime, step,
+			plotResult, err := providerConnector.GetPlots(&types.PlotQuery{query, startTime, endTime, step,
 				plotReq.Percentiles})
 			if err != nil {
 				log.Println("ERROR: " + err.Error())
@@ -318,7 +319,7 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 		stack := &StackResponse{Name: stackItem.Name}
 
 		for _, groupItem := range stackItem.Groups {
-			var plotResult map[string]*connector.PlotResult
+			var plotResult map[string]*types.PlotResult
 
 			plotResult, data = data[0], data[1:]
 
@@ -346,12 +347,12 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 	server.serveResponse(writer, response, http.StatusOK)
 }
 
-func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.OperGroup) (*connector.GroupQuery,
+func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.OperGroup) (*types.GroupQuery,
 	connector.Connector, error) {
 
-	var originConnector connector.Connector
+	var providerConnector connector.Connector
 
-	query := &connector.GroupQuery{
+	query := &types.GroupQuery{
 		Name:  groupItem.Name,
 		Type:  groupItem.Type,
 		Scale: groupItem.Scale,
@@ -389,18 +390,18 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 						continue
 					}
 
-					if originConnector == nil {
-						originConnector = metric.Connector.(connector.Connector)
-					} else if originConnector != metric.Connector.(connector.Connector) {
+					if providerConnector == nil {
+						providerConnector = metric.Connector.(connector.Connector)
+					} else if providerConnector != metric.Connector.(connector.Connector) {
 						return nil, nil, fmt.Errorf("connectors differ between series")
 					}
 
-					query.Series = append(query.Series, &connector.SerieQuery{
+					query.Series = append(query.Series, &types.SerieQuery{
 						Name: fmt.Sprintf("%s-%d", serieItem.Name, index),
-						Metric: &connector.MetricQuery{
-							Name:   metric.Name,
-							Origin: metric.Source.Origin.Name,
-							Source: metric.Source.Name,
+						Metric: &types.MetricQuery{
+							Name:   metric.OriginalName,
+							Origin: metric.Source.Origin.OriginalName,
+							Source: metric.Source.OriginalName,
 						},
 						Scale: serieItem.Scale,
 					})
@@ -417,17 +418,17 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 					continue
 				}
 
-				if originConnector == nil {
-					originConnector = metric.Connector.(connector.Connector)
-				} else if originConnector != metric.Connector.(connector.Connector) {
+				if providerConnector == nil {
+					providerConnector = metric.Connector.(connector.Connector)
+				} else if providerConnector != metric.Connector.(connector.Connector) {
 					return nil, nil, fmt.Errorf("connectors differ between series")
 				}
 
-				serie := &connector.SerieQuery{
-					Metric: &connector.MetricQuery{
-						Name:   metric.Name,
-						Origin: metric.Source.Origin.Name,
-						Source: metric.Source.Name,
+				serie := &types.SerieQuery{
+					Metric: &types.MetricQuery{
+						Name:   metric.OriginalName,
+						Origin: metric.Source.Origin.OriginalName,
+						Source: metric.Source.OriginalName,
 					},
 					Scale: serieItem.Scale,
 				}
@@ -449,5 +450,5 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 		return nil, nil, os.ErrInvalid
 	}
 
-	return query, originConnector, nil
+	return query, providerConnector, nil
 }

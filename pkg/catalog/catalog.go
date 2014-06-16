@@ -4,13 +4,10 @@ package catalog
 import (
 	"fmt"
 	"log"
-
-	"github.com/facette/facette/pkg/config"
 )
 
 // Catalog represents the main structure of a catalog instance.
 type Catalog struct {
-	Config     *config.Config
 	Origins    map[string]*Origin
 	RecordChan chan *CatalogRecord
 	debugLevel int // TODO: remove this
@@ -18,10 +15,13 @@ type Catalog struct {
 
 // CatalogRecord represents a catalog record.
 type CatalogRecord struct {
-	Origin    string
-	Source    string
-	Metric    string
-	Connector interface{}
+	Origin         string
+	Source         string
+	Metric         string
+	OriginalOrigin string
+	OriginalSource string
+	OriginalMetric string
+	Connector      interface{}
 }
 
 func (r CatalogRecord) String() string {
@@ -37,9 +37,8 @@ const (
 )
 
 // NewCatalog creates a new instance of catalog.
-func NewCatalog(config *config.Config, debugLevel int) *Catalog {
+func NewCatalog(debugLevel int) *Catalog {
 	return &Catalog{
-		Config:     config,
 		Origins:    make(map[string]*Origin),
 		RecordChan: make(chan *CatalogRecord),
 		debugLevel: debugLevel,
@@ -56,7 +55,7 @@ func (catalog *Catalog) Insert(record *CatalogRecord) {
 	if _, ok := catalog.Origins[record.Origin]; !ok {
 		catalog.Origins[record.Origin] = NewOrigin(
 			record.Origin,
-			nil,
+			record.OriginalOrigin,
 			catalog,
 		)
 	}
@@ -64,6 +63,7 @@ func (catalog *Catalog) Insert(record *CatalogRecord) {
 	if _, ok := catalog.Origins[record.Origin].Sources[record.Source]; !ok {
 		catalog.Origins[record.Origin].Sources[record.Source] = NewSource(
 			record.Source,
+			record.OriginalSource,
 			catalog.Origins[record.Origin],
 		)
 	}
@@ -71,6 +71,7 @@ func (catalog *Catalog) Insert(record *CatalogRecord) {
 	if _, ok := catalog.Origins[record.Origin].Sources[record.Source].Metrics[record.Metric]; !ok {
 		catalog.Origins[record.Origin].Sources[record.Source].Metrics[record.Metric] = NewMetric(
 			record.Metric,
+			record.OriginalMetric,
 			catalog.Origins[record.Origin].Sources[record.Source],
 			record.Connector,
 		)
@@ -90,7 +91,7 @@ func (catalog *Catalog) GetMetric(origin, source, name string) *Metric {
 	return catalog.Origins[origin].Sources[source].Metrics[name]
 }
 
-// Close terminates all origin workers and performs catalog clean-up
+// Close closes a catalog instance.
 func (catalog *Catalog) Close() error {
 	close(catalog.RecordChan)
 

@@ -30,22 +30,22 @@ type RRDConnector struct {
 }
 
 func init() {
-	Connectors["rrd"] = func(origin *catalog.Origin) (interface{}, error) {
+	Connectors["rrd"] = func(settings map[string]interface{}) (Connector, error) {
 		var err error
 
 		connector := &RRDConnector{
 			metrics: make(map[string]map[string]*rrdMetric),
 		}
 
-		if connector.path, err = config.GetString(origin.Config.Connector, "path", true); err != nil {
+		if connector.path, err = config.GetString(settings, "path", true); err != nil {
 			return nil, err
 		}
 
-		if connector.pattern, err = config.GetString(origin.Config.Connector, "pattern", true); err != nil {
+		if connector.pattern, err = config.GetString(settings, "pattern", true); err != nil {
 			return nil, err
 		}
 
-		if connector.daemon, err = config.GetString(origin.Config.Connector, "daemon", false); err != nil {
+		if connector.daemon, err = config.GetString(settings, "daemon", false); err != nil {
 			return nil, err
 		}
 
@@ -54,7 +54,7 @@ func init() {
 }
 
 // GetPlots retrieves time series data from origin based on a query and a time interval.
-func (connector *RRDConnector) GetPlots(query *PlotQuery) (map[string]*PlotResult, error) {
+func (connector *RRDConnector) GetPlots(query *types.PlotQuery) (map[string]*types.PlotResult, error) {
 	var xport *rrd.Exporter
 
 	if len(query.Group.Series) == 0 {
@@ -63,7 +63,7 @@ func (connector *RRDConnector) GetPlots(query *PlotQuery) (map[string]*PlotResul
 		query.Group.Type = OperGroupTypeNone
 	}
 
-	result := make(map[string]*PlotResult)
+	result := make(map[string]*types.PlotResult)
 	series := make(map[string]string)
 
 	stack := make([]string, 0)
@@ -220,7 +220,7 @@ func (connector *RRDConnector) GetPlots(query *PlotQuery) (map[string]*PlotResul
 	}
 
 	for index, serieName := range data.Legends {
-		result[series[serieName]] = &PlotResult{Info: make(map[string]types.PlotValue)}
+		result[series[serieName]] = &types.PlotResult{Info: make(map[string]types.PlotValue)}
 
 		for i := 0; i < data.RowCnt; i++ {
 			result[series[serieName]].Plots = append(result[series[serieName]].Plots,
@@ -242,7 +242,7 @@ func (connector *RRDConnector) GetPlots(query *PlotQuery) (map[string]*PlotResul
 }
 
 // Refresh triggers a full connector data update.
-func (connector *RRDConnector) Refresh(origin *catalog.Origin) error {
+func (connector *RRDConnector) Refresh(originName string, outputChan chan *catalog.CatalogRecord) error {
 	// Compile pattern
 	re := regexp.MustCompile(connector.pattern)
 
@@ -310,7 +310,13 @@ func (connector *RRDConnector) Refresh(origin *catalog.Origin) error {
 				metricFullName := metricName + "/" + dsName
 
 				connector.metrics[sourceName][metricFullName] = &rrdMetric{Dataset: dsName, FilePath: filePath}
-				origin.Filters.Input <- &catalog.CatalogRecord{origin.Name, sourceName, metricFullName, connector}
+
+				outputChan <- &catalog.CatalogRecord{
+					Origin:    originName,
+					Source:    sourceName,
+					Metric:    metricFullName,
+					Connector: connector,
+				}
 			}
 		}
 
@@ -324,7 +330,7 @@ func (connector *RRDConnector) Refresh(origin *catalog.Origin) error {
 	return nil
 }
 
-func rrdParseInfo(info rrd.GraphInfo, data map[string]*PlotResult) {
+func rrdParseInfo(info rrd.GraphInfo, data map[string]*types.PlotResult) {
 	for _, value := range info.Print {
 		chunks := strings.SplitN(value, ",", 3)
 
@@ -334,7 +340,7 @@ func rrdParseInfo(info rrd.GraphInfo, data map[string]*PlotResult) {
 		}
 
 		if data[chunks[0]] == nil {
-			data[chunks[0]] = &PlotResult{Info: make(map[string]types.PlotValue)}
+			data[chunks[0]] = &types.PlotResult{Info: make(map[string]types.PlotValue)}
 		}
 
 		data[chunks[0]].Info[chunks[1]] = types.PlotValue(chunkFloat)

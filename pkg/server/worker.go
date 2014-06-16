@@ -9,6 +9,7 @@ import (
 	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/connector"
+	"github.com/facette/facette/pkg/provider"
 	"github.com/facette/facette/pkg/worker"
 )
 
@@ -24,83 +25,82 @@ const (
 	jobSignalShutdown
 )
 
-func (server *Server) startOriginWorkers() error {
-	server.originWorkers = worker.NewWorkerPool()
+func (server *Server) startProviderWorkers() error {
+	server.providerWorkers = worker.NewWorkerPool()
 
-	log.Println("DEBUG: declaring origin workers")
+	log.Println("DEBUG: declaring providers")
 
-	for _, origin := range server.Catalog.Origins {
-		connectorType, err := config.GetString(origin.Config.Connector, "type", true)
+	for _, prov := range server.providers {
+		connectorType, err := config.GetString(prov.Config.Connector, "type", true)
 		if err != nil {
-			return fmt.Errorf("origin `%s' connector: %s", origin.Name, err)
+			return fmt.Errorf("provider `%s' connector: %s", prov.Name, err)
 		} else if _, ok := connector.Connectors[connectorType]; !ok {
-			return fmt.Errorf("origin `%s' uses unknown connector type `%s'", origin.Name, connectorType)
+			return fmt.Errorf("provider `%s' uses unknown connector type `%s'", prov.Name, connectorType)
 		}
 
-		originWorker := worker.NewWorker()
-		originWorker.RegisterEvent(eventInit, workerOriginInit)
-		originWorker.RegisterEvent(eventShutdown, workerOriginShutdown)
-		originWorker.RegisterEvent(eventRun, workerOriginRun)
-		originWorker.RegisterEvent(eventCatalogRefresh, workerOriginRefresh)
+		providerWorker := worker.NewWorker()
+		providerWorker.RegisterEvent(eventInit, workerProviderInit)
+		providerWorker.RegisterEvent(eventShutdown, workerProviderShutdown)
+		providerWorker.RegisterEvent(eventRun, workerProviderRun)
+		providerWorker.RegisterEvent(eventCatalogRefresh, workerProviderRefresh)
 
-		server.originWorkers.Add(originWorker)
+		server.providerWorkers.Add(providerWorker)
 
-		if err := originWorker.SendEvent(eventInit, false, origin, connectorType); err != nil {
-			log.Printf("ERROR: in origin `%s', %s", origin.Name, err.Error())
-			log.Printf("WARNING: discarding origin `%s'", origin.Name)
+		if err := providerWorker.SendEvent(eventInit, false, prov, connectorType); err != nil {
+			log.Printf("ERROR: in provider `%s', %s", prov.Name, err.Error())
+			log.Printf("WARNING: discarding provider `%s'", prov.Name)
 			continue
 		}
 
-		originWorker.SendEvent(eventRun, true, nil)
+		providerWorker.SendEvent(eventRun, true, nil)
 
-		log.Printf("DEBUG: declared origin worker `%s'", origin.Name)
+		log.Printf("DEBUG: declared provider `%s'", prov.Name)
 	}
 
 	return nil
 }
 
-// StopOriginWorkers stop all running origin workers.
-func (server *Server) StopOriginWorkers() {
-	server.originWorkers.Broadcast(eventShutdown, nil)
+func (server *Server) stopProviderWorkers() {
+	server.providerWorkers.Broadcast(eventShutdown, nil)
 
 	// Wait for all workers to shut down
-	server.originWorkers.Wg.Wait()
+	server.providerWorkers.Wg.Wait()
 }
 
-func workerOriginInit(w *worker.Worker, args ...interface{}) {
+func workerProviderInit(w *worker.Worker, args ...interface{}) {
 	var (
-		origin        = args[0].(*catalog.Origin)
+		prov          = args[0].(*provider.Provider)
 		connectorType = args[1].(string)
 	)
 
-	log.Printf("DEBUG: originWorker[%s]: init", origin.Name)
+	log.Printf("DEBUG: providerWorker[%s]: init", prov.Name)
 
 	// Instanciate the connector according to its type
-	connector, err := connector.Connectors[connectorType](origin)
+	conn, err := connector.Connectors[connectorType](prov.Config.Connector)
 	if err != nil {
 		w.ReturnErr(err)
 	}
 
+	prov.Connector = conn.(connector.Connector)
+
 	// Worker properties:
-	// 0: origin instance (catalog.Origin)
-	// 1: connector instance (*connector.Connector)
-	w.Props = append(w.Props, origin, connector)
+	// 0: provider instance (*provider.Provider)
+	w.Props = append(w.Props, prov)
 
 	w.ReturnErr(nil)
 }
 
-func workerOriginShutdown(w *worker.Worker, args ...interface{}) {
-	var origin = w.Props[0].(*catalog.Origin)
+func workerProviderShutdown(w *worker.Worker, args ...interface{}) {
+	var prov = w.Props[0].(*provider.Provider)
 
-	log.Printf("DEBUG: originWorker[%s]: shutdown", origin.Name)
+	log.Printf("DEBUG: providerWorker[%s]: shutdown", prov.Name)
 
 	w.SendJobSignal(jobSignalShutdown)
 }
 
-func workerOriginRun(w *worker.Worker, args ...interface{}) {
+func workerProviderRun(w *worker.Worker, args ...interface{}) {
 	var (
-		origin     = w.Props[0].(*catalog.Origin)
-		connector  = w.Props[1].(connector.Connector)
+		prov       = w.Props[0].(*provider.Provider)
 		timeTicker *time.Ticker
 		timeChan   <-chan time.Time
 	)
@@ -108,38 +108,38 @@ func workerOriginRun(w *worker.Worker, args ...interface{}) {
 	defer func() { w.State = worker.JobStopped }()
 	defer w.Shutdown()
 
-	log.Printf("DEBUG: originWorker[%s]: starting", origin.Name)
+	log.Printf("DEBUG: providerWorker[%s]: starting", prov.Name)
 
-	// If origin `refresh_interval` has been configured, set up a time ticker
-	if origin.Config.RefreshInterval > 0 {
-		timeTicker = time.NewTicker(time.Duration(origin.Config.RefreshInterval) * time.Second)
+	// If provider `refresh_interval` has been configured, set up a time ticker
+	if prov.Config.RefreshInterval > 0 {
+		timeTicker = time.NewTicker(time.Duration(prov.Config.RefreshInterval) * time.Second)
 		timeChan = timeTicker.C
 	}
 
 	for {
 		select {
 		case _ = <-timeChan:
-			if err := connector.Refresh(origin); err != nil {
-				log.Printf("ERROR: unable to refresh origin `%s': %s", origin.Name, err)
+			if err := prov.Connector.Refresh(prov.Name, prov.Filters.Input); err != nil {
+				log.Printf("ERROR: unable to refresh provider `%s': %s", prov.Name, err)
 				continue
 			}
 
-			origin.LastRefresh = time.Now()
+			prov.LastRefresh = time.Now()
 
 		case cmd := <-w.ReceiveJobSignals():
 			switch cmd {
 			case jobSignalRefresh:
-				log.Printf("INFO: originWorker[%s]: received refresh command", origin.Name)
+				log.Printf("INFO: providerWorker[%s]: received refresh command", prov.Name)
 
-				if err := connector.Refresh(origin); err != nil {
-					log.Printf("ERROR: unable to refresh origin `%s': %s", origin.Name, err)
+				if err := prov.Connector.Refresh(prov.Name, prov.Filters.Input); err != nil {
+					log.Printf("ERROR: unable to refresh provider `%s': %s", prov.Name, err)
 					continue
 				}
 
-				origin.LastRefresh = time.Now()
+				prov.LastRefresh = time.Now()
 
 			case jobSignalShutdown:
-				log.Printf("INFO: originWorker[%s]: received shutdown command, stopping job", origin.Name)
+				log.Printf("INFO: providerWorker[%s]: received shutdown command, stopping job", prov.Name)
 
 				w.State = worker.JobStopped
 
@@ -151,16 +151,16 @@ func workerOriginRun(w *worker.Worker, args ...interface{}) {
 				return
 
 			default:
-				log.Println("NOTICE: originWorker[%s]: received unknown command, ignoring", origin.Name)
+				log.Println("NOTICE: providerWorker[%s]: received unknown command, ignoring", prov.Name)
 			}
 		}
 	}
 }
 
-func workerOriginRefresh(w *worker.Worker, args ...interface{}) {
-	var origin = w.Props[0].(*catalog.Origin)
+func workerProviderRefresh(w *worker.Worker, args ...interface{}) {
+	var prov = w.Props[0].(*provider.Provider)
 
-	log.Printf("DEBUG: originWorker[%s]: refresh", origin.Name)
+	log.Printf("DEBUG: providerWorker[%s]: refresh", prov.Name)
 
 	w.SendJobSignal(jobSignalRefresh)
 }

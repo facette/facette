@@ -3,5 +3,5 @@
 	"base_dir": "tmp",
 	"data_dir": "tmp/tests/data",
 	"pid_file": "tmp/tests/facette.pid",
-	"origins_dir": "tests/origins"
+	"providers_dir": "tests/providers"
 }
