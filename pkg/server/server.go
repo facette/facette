@@ -136,7 +136,7 @@ func (server *Server) Run() error {
 		return err
 	}
 
-	// Send initial catalog refresh event to origin workers
+	// Send initial catalog refresh event to provider workers
 	server.providerWorkers.Broadcast(eventCatalogRefresh, nil)
 
 	// Create library instance
@@ -171,7 +171,7 @@ func (server *Server) Run() error {
 
 	// Server shutdown triggered
 	if server.Listener.Stopped {
-		// Shutdown running origin workers
+		// Shutdown running provider workers
 		server.stopProviderWorkers()
 
 		// Shutdown catalog worker

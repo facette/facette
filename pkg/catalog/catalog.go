@@ -85,7 +85,7 @@ func (catalog *Catalog) GetMetric(origin, source, name string) *Metric {
 	return catalog.Origins[origin].Sources[source].Metrics[name]
 }
 
-// Close terminates all origin workers and performs catalog clean-up
+// Close closes a catalog instance.
 func (catalog *Catalog) Close() error {
 	close(catalog.RecordChan)
 
