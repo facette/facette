@@ -55,7 +55,8 @@ func (server *Server) serveReload(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	server.Reload()
+	// Reload resources without reloading configuration
+	server.Reload(false)
 
 	server.serveResponse(writer, nil, http.StatusOK)
 }

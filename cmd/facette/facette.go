@@ -51,7 +51,7 @@ func main() {
 		for sig := range sigChan {
 			switch sig {
 			case syscall.SIGHUP:
-				instance.Reload()
+				instance.Reload(true)
 				break
 
 			case syscall.SIGINT, syscall.SIGTERM:

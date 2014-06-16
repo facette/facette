@@ -51,14 +51,16 @@ func NewServer(configPath, logPath string, debugLevel int) *Server {
 }
 
 // Reload reloads the configuration and refreshes both catalog and library.
-func (server *Server) Reload() error {
+func (server *Server) Reload(config bool) error {
 	log.Printf("NOTICE: reloading server")
 
 	server.Loading = true
 
-	if err := server.Config.Reload(); err != nil {
-		log.Printf("ERROR: an error occurred while reloading configuration: %s", err.Error())
-		return err
+	if config {
+		if err := server.Config.Reload(); err != nil {
+			log.Printf("ERROR: an error occurred while reloading configuration: %s", err.Error())
+			return err
+		}
 	}
 
 	server.originWorkers.Broadcast(eventCatalogRefresh, nil)
