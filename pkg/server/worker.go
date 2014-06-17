@@ -44,13 +44,14 @@ func (server *Server) startProviderWorkers() error {
 		providerWorker.RegisterEvent(eventRun, workerProviderRun)
 		providerWorker.RegisterEvent(eventCatalogRefresh, workerProviderRefresh)
 
-		server.providerWorkers.Add(providerWorker)
-
 		if err := providerWorker.SendEvent(eventInit, false, prov, connectorType); err != nil {
 			log.Printf("ERROR: in provider `%s', %s", prov.Name, err.Error())
 			log.Printf("WARNING: discarding provider `%s'", prov.Name)
 			continue
 		}
+
+		// Add worker into pool if initialization went fine
+		server.providerWorkers.Add(providerWorker)
 
 		providerWorker.SendEvent(eventRun, true, nil)
 
@@ -79,6 +80,7 @@ func workerProviderInit(w *worker.Worker, args ...interface{}) {
 	conn, err := connector.Connectors[connectorType](prov.Config.Connector)
 	if err != nil {
 		w.ReturnErr(err)
+		return
 	}
 
 	prov.Connector = conn.(connector.Connector)
