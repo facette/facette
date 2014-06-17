@@ -15,6 +15,7 @@ import (
 	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/pkg/types"
+	"github.com/facette/facette/pkg/utils"
 )
 
 const (
@@ -47,16 +48,21 @@ func (connector *FacetteConnector) GetPlots(query *types.PlotQuery) (map[string]
 
 	// Convert plotQuery into plotRequest to forward query to upstream Facette API
 	plotRequest := struct {
-		Time  time.Time     `json:"time"`
-		Graph library.Graph `json:"graph"`
+		Time        time.Time     `json:"time"`
+		Range       string        `json:"range"`
+		Sample      int           `json:"sample"`
+		Percentiles []float64     `json:"percentiles"`
+		Graph       library.Graph `json:"graph"`
 	}{
-		Time: query.StartTime,
+		Time:  query.StartTime,
+		Range: utils.DurationToRange(query.EndTime.Sub(query.StartTime)),
 		Graph: library.Graph{
 			Item: library.Item{
 				Name: "facette",
 			},
 			Groups: []*library.OperGroup{
 				&library.OperGroup{
+					Name: query.Group.Name,
 					Type: query.Group.Type,
 					Series: func(series []*types.SerieQuery) []*library.Serie {
 						requestSeries := make([]*library.Serie, len(series))
@@ -73,9 +79,14 @@ func (connector *FacetteConnector) GetPlots(query *types.PlotQuery) (map[string]
 
 						return requestSeries
 					}(query.Group.Series),
+					Scale: query.Group.Scale,
 				},
 			},
 		},
+	}
+
+	if query.Step != 0 {
+		plotRequest.Sample = int((query.EndTime.Sub(query.StartTime) / query.Step).Seconds())
 	}
 
 	requestBody, err := json.Marshal(plotRequest)
