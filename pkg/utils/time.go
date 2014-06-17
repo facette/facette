@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"math"
 	"regexp"
 	"strconv"
 	"strings"
@@ -18,6 +19,36 @@ const (
 		"(?:(\\d+)\\s*s(?:econds?)?)?" +
 		"$"
 )
+
+// DurationToRange converts a duration into a string-defined time range.
+func DurationToRange(duration time.Duration) string {
+	ranges := map[int]string{
+		86400: "d",
+		3600:  "h",
+		60:    "m",
+		1:     "s",
+	}
+
+	chunks := make([]string, 0)
+	seconds := int(math.Abs(duration.Seconds()))
+
+	for value, unit := range ranges {
+		count := int(math.Floor(float64(seconds / value)))
+
+		if count > 0 {
+			chunks = append(chunks, fmt.Sprintf("%d%s", count, unit))
+			seconds %= value
+		}
+	}
+
+	result := strings.Join(chunks, " ")
+
+	if duration < 0 {
+		result = "-" + result
+	}
+
+	return result
+}
 
 // TimeApplyRange applies a string-defined time range to a specific date.
 func TimeApplyRange(refTime time.Time, input string) (time.Time, error) {
