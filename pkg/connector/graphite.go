@@ -54,7 +54,13 @@ func init() {
 
 // GetPlots retrieves time series data from provider based on a query and a time interval.
 func (connector *GraphiteConnector) GetPlots(query *types.PlotQuery) (map[string]*types.PlotResult, error) {
-	result := make(map[string]*types.PlotResult)
+	var result map[string]*types.PlotResult
+
+	if len(query.Group.Series) == 0 {
+		return nil, fmt.Errorf("group has no series")
+	} else if query.Group.Type != OperGroupTypeNone && len(query.Group.Series) == 1 {
+		query.Group.Type = OperGroupTypeNone
+	}
 
 	httpTransport := &http.Transport{}
 	if connector.insecureTLS {
@@ -63,7 +69,7 @@ func (connector *GraphiteConnector) GetPlots(query *types.PlotQuery) (map[string
 
 	httpClient := http.Client{Transport: httpTransport}
 
-	serieName, queryURL, err := graphiteBuildQueryURL(query.Group, query.StartTime, query.EndTime)
+	queryURL, err := graphiteBuildQueryURL(query.Group, query.StartTime, query.EndTime)
 	if err != nil {
 		return nil, fmt.Errorf("unable to build Graphite query URL: %s", err.Error())
 	}
@@ -73,7 +79,7 @@ func (connector *GraphiteConnector) GetPlots(query *types.PlotQuery) (map[string
 		return nil, err
 	}
 
-	if err = graphiteCheckConnectorResponse(response); err != nil {
+	if err = graphiteCheckBackendResponse(response); err != nil {
 		return nil, fmt.Errorf("invalid HTTP backend response: %s", err)
 	}
 
@@ -87,7 +93,7 @@ func (connector *GraphiteConnector) GetPlots(query *types.PlotQuery) (map[string
 		return nil, fmt.Errorf("unable to unmarshal JSON data: %s", err)
 	}
 
-	if result[serieName], err = graphiteExtractPlotResult(graphitePlots); err != nil {
+	if result, err = graphiteExtractPlotResult(graphitePlots); err != nil {
 		return nil, fmt.Errorf("unable to extract plot values from backend response: %s", err)
 	}
 
@@ -116,7 +122,7 @@ func (connector *GraphiteConnector) Refresh(originName string, outputChan chan *
 		return err
 	}
 
-	if err = graphiteCheckConnectorResponse(response); err != nil {
+	if err = graphiteCheckBackendResponse(response); err != nil {
 		return fmt.Errorf("invalid HTTP backend response: %s", err)
 	}
 
@@ -154,7 +160,7 @@ func (connector *GraphiteConnector) Refresh(originName string, outputChan chan *
 	return nil
 }
 
-func graphiteCheckConnectorResponse(response *http.Response) error {
+func graphiteCheckBackendResponse(response *http.Response) error {
 	if response.StatusCode != 200 {
 		return fmt.Errorf("got HTTP status code %d, expected 200", response.StatusCode)
 	}
@@ -166,7 +172,7 @@ func graphiteCheckConnectorResponse(response *http.Response) error {
 	return nil
 }
 
-func graphiteBuildQueryURL(query *types.GroupQuery, startTime, endTime time.Time) (string, string, error) {
+func graphiteBuildQueryURL(query *types.GroupQuery, startTime, endTime time.Time) (string, error) {
 	var (
 		serieName string
 		target    string
@@ -179,8 +185,14 @@ func graphiteBuildQueryURL(query *types.GroupQuery, startTime, endTime time.Time
 	queryURL := fmt.Sprintf("%s?format=json", graphiteURLRender)
 
 	if query.Type == OperGroupTypeNone {
-		serieName = query.Series[0].Name
-		target = fmt.Sprintf("%s.%s", query.Series[0].Metric.Source, query.Series[0].Metric.Name)
+		for _, serie := range query.Series {
+			queryURL += fmt.Sprintf(
+				"&target=legendValue(alias(%s.%s, '%s'), 'min', 'max', 'avg', 'last')",
+				serie.Metric.Source,
+				serie.Metric.Name,
+				serie.Name,
+			)
+		}
 	} else {
 		serieName = query.Name
 		targets := make([]string, 0)
@@ -197,11 +209,14 @@ func graphiteBuildQueryURL(query *types.GroupQuery, startTime, endTime time.Time
 		case OperGroupTypeSum:
 			target = fmt.Sprintf("sumSeries(%s)", target)
 		}
+
+		target = fmt.Sprintf(
+			"legendValue(alias(%s, '%s'), 'min', 'max', 'avg', 'last')",
+			target,
+			serieName,
+		)
+		queryURL += fmt.Sprintf("&target=%s", target)
 	}
-
-	target = fmt.Sprintf("legendValue(%s, 'min', 'max', 'avg', 'last')", target)
-
-	queryURL += fmt.Sprintf("&target=%s", target)
 
 	if startTime.Before(now) {
 		fromTime = int(now.Sub(startTime).Seconds())
@@ -215,32 +230,37 @@ func graphiteBuildQueryURL(query *types.GroupQuery, startTime, endTime time.Time
 		queryURL += fmt.Sprintf("&until=-%ds", untilTime)
 	}
 
-	return serieName, queryURL, nil
+	return queryURL, nil
 }
 
-func graphiteExtractPlotResult(plots []graphitePlot) (*types.PlotResult, error) {
-	var min, max, avg, last float64
+func graphiteExtractPlotResult(plots []graphitePlot) (map[string]*types.PlotResult, error) {
+	var (
+		serieName           string
+		min, max, avg, last float64
+	)
 
-	result := &types.PlotResult{Info: make(map[string]types.PlotValue)}
+	results := make(map[string]*types.PlotResult)
 
-	// Return an empty plotResult if Graphite API didn't return any datapoint matching the query
-	if len(plots) == 0 || len(plots[0].Datapoints) == 0 {
-		return result, nil
+	for _, plot := range plots {
+		result := &types.PlotResult{Info: make(map[string]types.PlotValue)}
+
+		for _, plotPoint := range plot.Datapoints {
+			result.Plots = append(result.Plots, types.PlotValue(plotPoint[0]))
+		}
+
+		// Scan the target legend for serie name and plot min/max/avg/last info
+		if index := strings.Index(plots[0].Target, "(min"); index > 0 {
+			fmt.Sscanf(plot.Target[0:index], "%s ", &serieName)
+			fmt.Sscanf(plot.Target[index:], "(min: %f) (max: %f) (avg: %f) (last: %f)", &min, &max, &avg, &last)
+		}
+
+		result.Info["min"] = types.PlotValue(min)
+		result.Info["max"] = types.PlotValue(max)
+		result.Info["avg"] = types.PlotValue(avg)
+		result.Info["last"] = types.PlotValue(last)
+
+		results[serieName] = result
 	}
 
-	for _, plotPoint := range plots[0].Datapoints {
-		result.Plots = append(result.Plots, types.PlotValue(plotPoint[0]))
-	}
-
-	// Scan the target legend for plot min/max/avg/last info
-	if index := strings.Index(plots[0].Target, "(min"); index > 0 {
-		fmt.Sscanf(plots[0].Target[index:], "(min: %f) (max: %f) (avg: %f) (last: %f)", &min, &max, &avg, &last)
-	}
-
-	result.Info["min"] = types.PlotValue(min)
-	result.Info["max"] = types.PlotValue(max)
-	result.Info["avg"] = types.PlotValue(avg)
-	result.Info["last"] = types.PlotValue(last)
-
-	return result, nil
+	return results, nil
 }
