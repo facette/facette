@@ -186,13 +186,19 @@ func graphiteBuildQueryURL(query *types.GroupQuery, startTime, endTime time.Time
 
 	if query.Type == OperGroupTypeNone {
 		for _, serie := range query.Series {
+			target := fmt.Sprintf("%s.%s", serie.Metric.Source, serie.Metric.Name)
+
+			if serie.Scale != 0 {
+				target = fmt.Sprintf("scale(%s, %f)", target, serie.Scale)
+			}
+
 			queryURL += fmt.Sprintf(
-				"&target=legendValue(alias(%s.%s, '%s'), 'min', 'max', 'avg', 'last')",
-				serie.Metric.Source,
-				serie.Metric.Name,
+				"&target=legendValue(alias(%s, '%s'), 'min', 'max', 'avg', 'last')",
+				target,
 				serie.Name,
 			)
 		}
+
 	} else {
 		serieName = query.Name
 		targets := make([]string, 0)
@@ -202,6 +208,10 @@ func graphiteBuildQueryURL(query *types.GroupQuery, startTime, endTime time.Time
 		}
 
 		target = fmt.Sprintf("group(%s)", strings.Join(targets, ","))
+
+		if query.Series[0].Scale != 0 {
+			target = fmt.Sprintf("scale(%s, %f)", target, query.Series[0].Scale)
+		}
 
 		switch query.Type {
 		case OperGroupTypeAvg:
@@ -215,6 +225,7 @@ func graphiteBuildQueryURL(query *types.GroupQuery, startTime, endTime time.Time
 			target,
 			serieName,
 		)
+
 		queryURL += fmt.Sprintf("&target=%s", target)
 	}
 
