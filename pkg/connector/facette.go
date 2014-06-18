@@ -18,15 +18,44 @@ import (
 	"github.com/facette/facette/pkg/utils"
 )
 
-const (
-	facetteURLCatalog            string = "/api/v1/catalog/"
-	facetteURLLibraryGraphsPlots string = "/api/v1/library/graphs/plots"
-)
+type facettePlotRequest struct {
+	Time        time.Time     `json:"time"`
+	Range       string        `json:"range"`
+	Sample      int           `json:"sample"`
+	Percentiles []float64     `json:"percentiles"`
+	Graph       library.Graph `json:"graph"`
+}
+
+type facettePlotResponse struct {
+	ID          string          `json:"id"`
+	Start       string          `json:"start"`
+	End         string          `json:"end"`
+	Step        float64         `json:"step"`
+	Name        string          `json:"name"`
+	Description string          `json:"description"`
+	Type        int             `json:"type"`
+	StackMode   int             `json:"stack_mode"`
+	Series      []*facetteSerie `json:"series"`
+	Modified    time.Time       `json:"modified"`
+}
+
+type facetteSerie struct {
+	Name    string                     `json:"name"`
+	StackID int                        `json:"stack_id"`
+	Plots   []types.PlotValue          `json:"plots"`
+	Info    map[string]types.PlotValue `json:"info"`
+	Options map[string]interface{}     `json:"options"`
+}
 
 // FacetteConnector represents the main structure of the Facette connector.
 type FacetteConnector struct {
 	upstream string
 }
+
+const (
+	facetteURLCatalog            string = "/api/v1/catalog/"
+	facetteURLLibraryGraphsPlots string = "/api/v1/library/graphs/plots"
+)
 
 func init() {
 	Connectors["facette"] = func(settings map[string]interface{}) (Connector, error) {
@@ -44,16 +73,8 @@ func init() {
 
 // GetPlots retrieves time series data from origin based on a query and a time interval.
 func (connector *FacetteConnector) GetPlots(query *types.PlotQuery) (map[string]*types.PlotResult, error) {
-	result := make(map[string]*types.PlotResult)
-
-	// Convert plotQuery into plotRequest to forward query to upstream Facette API
-	plotRequest := struct {
-		Time        time.Time     `json:"time"`
-		Range       string        `json:"range"`
-		Sample      int           `json:"sample"`
-		Percentiles []float64     `json:"percentiles"`
-		Graph       library.Graph `json:"graph"`
-	}{
+	// Convert plotQuery into plotRequest-like to forward query to upstream Facette API
+	plotRequest := facettePlotRequest{
 		Time:  query.StartTime,
 		Range: utils.DurationToRange(query.EndTime.Sub(query.StartTime)),
 		Graph: library.Graph{
@@ -126,9 +147,20 @@ func (connector *FacetteConnector) GetPlots(query *types.PlotQuery) (map[string]
 
 	log.Printf("DEBUG: facetteConnector: <<< %s", data)
 
-	// result["blah"] = &types.PlotResult{
-	// 	Plots: []types.PlotValue{42.0},
-	// }
+	plotResponse := facettePlotResponse{}
+
+	if err := json.Unmarshal(data, &plotResponse); err != nil {
+		return nil, fmt.Errorf("unable to unmarshal upstream response: %s", err)
+	}
+
+	result := make(map[string]*types.PlotResult)
+
+	for _, serie := range plotResponse.Series {
+		result[serie.Name] = &types.PlotResult{
+			Plots: serie.Plots,
+			Info:  serie.Info,
+		}
+	}
 
 	return result, nil
 }
