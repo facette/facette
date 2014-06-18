@@ -114,7 +114,14 @@ func (connector *FacetteConnector) GetPlots(query *types.PlotQuery) (map[string]
 		return nil, fmt.Errorf("unable to marshal plot request: %s", err)
 	}
 
-	httpClient := http.Client{}
+	httpTransport := &http.Transport{
+		Dial: (&net.Dialer{
+			// Enable dual IPv4/IPv6 stack connectivity:
+			DualStack: true,
+		}).Dial,
+	}
+
+	httpClient := http.Client{Transport: httpTransport}
 
 	request, err := http.NewRequest(
 		"POST",
@@ -171,7 +178,15 @@ func (connector *FacetteConnector) Refresh(originName string, outputChan chan *c
 
 	httpClient := http.Client{Transport: httpTransport}
 
-	response, err := httpClient.Get(strings.TrimSuffix(connector.upstream, "/") + facetteURLCatalog)
+	request, err := http.NewRequest("GET", strings.TrimSuffix(connector.upstream, "/")+facetteURLCatalog, nil)
+	if err != nil {
+		return fmt.Errorf("unable to set up HTTP request: %s", err)
+	}
+
+	request.Header.Add("User-Agent", "Facette")
+	request.Header.Add("X-Requested-With", "FacetteConnector")
+
+	response, err := httpClient.Do(request)
 	if err != nil {
 		return fmt.Errorf("unable to perform HTTP request: %s", err)
 	}
