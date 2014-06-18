@@ -62,21 +62,37 @@ func (connector *GraphiteConnector) GetPlots(query *types.PlotQuery) (map[string
 		query.Group.Type = OperGroupTypeNone
 	}
 
-	httpTransport := &http.Transport{}
+	queryURL, err := graphiteBuildQueryURL(query.Group, query.StartTime, query.EndTime)
+	if err != nil {
+		return nil, fmt.Errorf("unable to build Graphite query URL: %s", err.Error())
+	}
+
+	httpTransport := &http.Transport{
+		Dial: (&net.Dialer{
+			// Enable dual IPv4/IPv6 stack connectivity:
+			DualStack: true,
+			// Enforce HTTP connection timeout:
+			Timeout: 10 * time.Second, // TODO: parametrize this into configuration setting
+		}).Dial,
+	}
+
 	if connector.insecureTLS {
 		httpTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 
 	httpClient := http.Client{Transport: httpTransport}
 
-	queryURL, err := graphiteBuildQueryURL(query.Group, query.StartTime, query.EndTime)
+	request, err := http.NewRequest("GET", strings.TrimSuffix(connector.URL, "/")+queryURL, nil)
 	if err != nil {
-		return nil, fmt.Errorf("unable to build Graphite query URL: %s", err.Error())
+		return nil, fmt.Errorf("unable to set up HTTP request: %s", err)
 	}
 
-	response, err := httpClient.Get(strings.TrimSuffix(connector.URL, "/") + queryURL)
+	request.Header.Add("User-Agent", "Facette")
+	request.Header.Add("X-Requested-With", "GraphiteConnector")
+
+	response, err := httpClient.Do(request)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to perform HTTP request: %s", err)
 	}
 
 	if err = graphiteCheckBackendResponse(response); err != nil {
@@ -117,9 +133,17 @@ func (connector *GraphiteConnector) Refresh(originName string, outputChan chan *
 
 	httpClient := http.Client{Transport: httpTransport}
 
-	response, err := httpClient.Get(strings.TrimSuffix(connector.URL, "/") + graphiteURLMetrics)
+	request, err := http.NewRequest("GET", strings.TrimSuffix(connector.URL, "/")+graphiteURLMetrics, nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to set up HTTP request: %s", err)
+	}
+
+	request.Header.Add("User-Agent", "Facette")
+	request.Header.Add("X-Requested-With", "GraphiteConnector")
+
+	response, err := httpClient.Do(request)
+	if err != nil {
+		return fmt.Errorf("unable to perform HTTP request: %s", err)
 	}
 
 	if err = graphiteCheckBackendResponse(response); err != nil {
