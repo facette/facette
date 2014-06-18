@@ -15,9 +15,9 @@ function humanReadable(number) {
         index;
 
     if (number === 0)
-        return 0;
+        return '0';
 
-    index = parseInt(Math.log(number) / Math.log(1000), 10);
+    index = parseInt(Math.log(Math.abs(number)) / Math.log(1000), 10);
     return (Math.round((number / Math.pow(1000, index) * 100)) / 100) + units[index];
 }
 
