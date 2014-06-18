@@ -1032,6 +1032,9 @@ function adminGraphSetupTerminate() {
                         .trigger('change')
                         .focus();
 
+                    $fieldset.find('button[name=metric-add]').show();
+                    $fieldset.find('button[name=metric-update], button[name=metric-cancel]').hide();
+
                     PANE_UNLOAD_LOCK = true;
 
                     break;
@@ -1097,18 +1100,18 @@ function adminGraphSetupTerminate() {
                     .val(active ? value.origin : '');
 
                 if (value.source.startsWith('group:'))
-                    fieldValue = {name: value.source.substr(6), source: 'library/sourcegroups'};
+                    fieldValue = {name: value.source.substr(6), source: 'library/sourcegroups/'};
                 else
-                    fieldValue = {name: value.source, source: 'catalog/sources'};
+                    fieldValue = {name: value.source, source: 'catalog/sources/'};
 
                 $fieldset.find('input[name=source]')
                     .data('value', fieldValue)
                     .val(active ? fieldValue.name : '');
 
                 if (value.metric.startsWith('group:'))
-                    fieldValue = {name: value.metric.substr(6), metric: 'library/metricgroups'};
+                    fieldValue = {name: value.metric.substr(6), source: 'library/metricgroups/'};
                 else
-                    fieldValue = {name: value.metric, metric: 'catalog/metrics'};
+                    fieldValue = {name: value.metric, source: 'catalog/metrics/'};
 
                 $fieldset.find('input[name=metric]')
                     .data('value', fieldValue)

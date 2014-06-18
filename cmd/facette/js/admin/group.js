@@ -202,6 +202,9 @@ function adminGroupSetupTerminate() {
                         .trigger('change')
                         .focus();
 
+                    $fieldset.find('button[name=item-add]').show();
+                    $fieldset.find('button[name=item-update], button[name=item-cancel]').hide();
+
                     PANE_UNLOAD_LOCK = true;
 
                     break;
@@ -262,14 +265,15 @@ function adminGroupSetupTerminate() {
                 $fieldset.find('button[name=item-update], button[name=item-cancel]').toggle(active);
 
                 $fieldset.find('select[name=origin]')
-                    .val(active ? value.origin : '');
-
-                $fieldset.find('input[name=item]')
-                    .val(active ? value.item : '');
+                    .val(active ? value.origin : '')
+                    .trigger('change');
 
                 $fieldset.find('select[name=type]')
                     .val(active ? value.type : 0)
                     .trigger('change');
+
+                $fieldset.find('input[name=item]')
+                    .val(active ? value.item : '');
             })
             .on('change', '[data-step=1] fieldset input', function (e) {
                 var $target = $(e.target),
