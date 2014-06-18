@@ -697,7 +697,7 @@ function adminGraphSetupTerminate() {
                 $itemNext;
 
             if (e.target.href.endsWith('#move-up')) {
-                $itemNext = $item.prevAll('.listitem, .groupitem, .groupentry').filter(':not(.linked):last');
+                $itemNext = $item.prevAll('.listitem, .groupitem, .groupentry').filter(':not(.linked):first');
 
                 if ($itemNext.length === 0)
                     return;
