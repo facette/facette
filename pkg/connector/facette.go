@@ -130,7 +130,7 @@ func (connector *FacetteConnector) GetPlots(query *types.PlotQuery) (map[string]
 
 	response, err := httpClient.Do(request)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to perform HTTP request: %s", err)
 	}
 
 	if err := facetteCheckConnectorResponse(response); err != nil {
@@ -173,7 +173,7 @@ func (connector *FacetteConnector) Refresh(originName string, outputChan chan *c
 
 	response, err := httpClient.Get(strings.TrimSuffix(connector.upstream, "/") + facetteURLCatalog)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to perform HTTP request: %s", err)
 	}
 
 	if err = facetteCheckConnectorResponse(response); err != nil {
