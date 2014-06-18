@@ -34,7 +34,7 @@ function itemSave(id, itemType, query, clone) {
     if (clone) {
         url += '?inherit=' + id;
     } else if (id !== null) {
-        url += '/' + id;
+        url += id;
         method = 'PUT';
     }
 
