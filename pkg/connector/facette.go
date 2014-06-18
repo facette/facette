@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net"
 	"net/http"
 	"strings"
@@ -115,8 +114,6 @@ func (connector *FacetteConnector) GetPlots(query *types.PlotQuery) (map[string]
 		return nil, fmt.Errorf("unable to marshal plot request: %s", err)
 	}
 
-	log.Printf("DEBUG: facetteConnector: >>> %s", requestBody)
-
 	httpClient := http.Client{}
 
 	request, err := http.NewRequest(
@@ -144,8 +141,6 @@ func (connector *FacetteConnector) GetPlots(query *types.PlotQuery) (map[string]
 	if err != nil {
 		return nil, fmt.Errorf("unable to read HTTP response body: %s", err)
 	}
-
-	log.Printf("DEBUG: facetteConnector: <<< %s", data)
 
 	plotResponse := facettePlotResponse{}
 
