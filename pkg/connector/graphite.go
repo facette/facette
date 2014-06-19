@@ -16,12 +16,6 @@ import (
 	"github.com/facette/facette/pkg/utils"
 )
 
-const (
-	graphiteURLMetrics     string  = "/metrics/index.json"
-	graphiteURLRender      string  = "/render"
-	graphiteDefaultTimeout float64 = 10
-)
-
 type graphitePlot struct {
 	Target     string
 	Datapoints [][2]float64
@@ -33,6 +27,12 @@ type GraphiteConnector struct {
 	insecureTLS bool
 	timeout     float64
 }
+
+const (
+	graphiteURLMetrics     string  = "/metrics/index.json"
+	graphiteURLRender      string  = "/render"
+	graphiteDefaultTimeout float64 = 10
+)
 
 func init() {
 	Connectors["graphite"] = func(settings map[string]interface{}) (Connector, error) {

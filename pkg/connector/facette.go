@@ -49,11 +49,13 @@ type facetteSerie struct {
 // FacetteConnector represents the main structure of the Facette connector.
 type FacetteConnector struct {
 	upstream string
+	timeout  float64
 }
 
 const (
-	facetteURLCatalog            string = "/api/v1/catalog/"
-	facetteURLLibraryGraphsPlots string = "/api/v1/library/graphs/plots"
+	facetteURLCatalog            string  = "/api/v1/catalog/"
+	facetteURLLibraryGraphsPlots string  = "/api/v1/library/graphs/plots"
+	facetteDefaultTimeout        float64 = 10
 )
 
 func init() {
@@ -64,6 +66,14 @@ func init() {
 
 		if connector.upstream, err = config.GetString(settings, "upstream", true); err != nil {
 			return nil, err
+		}
+
+		if connector.timeout, err = config.GetFloat(settings, "timeout", false); err != nil {
+			return nil, err
+		}
+
+		if connector.timeout <= 0 {
+			connector.timeout = facetteDefaultTimeout
 		}
 
 		return connector, nil
@@ -118,6 +128,8 @@ func (connector *FacetteConnector) GetPlots(query *types.PlotQuery) (map[string]
 		Dial: (&net.Dialer{
 			// Enable dual IPv4/IPv6 stack connectivity:
 			DualStack: true,
+			// Enforce HTTP connection timeout:
+			Timeout: time.Duration(connector.timeout) * time.Second,
 		}).Dial,
 	}
 
@@ -173,6 +185,8 @@ func (connector *FacetteConnector) Refresh(originName string, outputChan chan *c
 		Dial: (&net.Dialer{
 			// Enable dual IPv4/IPv6 stack connectivity:
 			DualStack: true,
+			// Enforce HTTP connection timeout:
+			Timeout: time.Duration(connector.timeout) * time.Second,
 		}).Dial,
 	}
 
