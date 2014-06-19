@@ -17,8 +17,9 @@ import (
 )
 
 const (
-	graphiteURLMetrics string = "/metrics/index.json"
-	graphiteURLRender  string = "/render"
+	graphiteURLMetrics     string  = "/metrics/index.json"
+	graphiteURLRender      string  = "/render"
+	graphiteDefaultTimeout float64 = 10
 )
 
 type graphitePlot struct {
@@ -30,6 +31,7 @@ type graphitePlot struct {
 type GraphiteConnector struct {
 	URL         string
 	insecureTLS bool
+	timeout     float64
 }
 
 func init() {
@@ -46,6 +48,14 @@ func init() {
 
 		if connector.insecureTLS, err = config.GetBool(settings, "allow_insecure_tls", false); err != nil {
 			return nil, err
+		}
+
+		if connector.timeout, err = config.GetFloat(settings, "timeout", false); err != nil {
+			return nil, err
+		}
+
+		if connector.timeout <= 0 {
+			connector.timeout = graphiteDefaultTimeout
 		}
 
 		return connector, nil
@@ -72,7 +82,7 @@ func (connector *GraphiteConnector) GetPlots(query *types.PlotQuery) (map[string
 			// Enable dual IPv4/IPv6 stack connectivity:
 			DualStack: true,
 			// Enforce HTTP connection timeout:
-			Timeout: 10 * time.Second, // TODO: parametrize this into configuration setting
+			Timeout: time.Duration(connector.timeout) * time.Second,
 		}).Dial,
 	}
 
@@ -123,7 +133,7 @@ func (connector *GraphiteConnector) Refresh(originName string, outputChan chan *
 			// Enable dual IPv4/IPv6 stack connectivity:
 			DualStack: true,
 			// Enforce HTTP connection timeout:
-			Timeout: 10 * time.Second, // TODO: parametrize this into configuration setting
+			Timeout: time.Duration(connector.timeout) * time.Second,
 		}).Dial,
 	}
 
