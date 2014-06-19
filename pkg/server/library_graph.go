@@ -358,8 +358,10 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 		serieSources := make([]string, 0)
 
 		if strings.HasPrefix(serieItem.Source, library.LibraryGroupPrefix) {
-			serieSources = server.Library.ExpandGroup(strings.TrimPrefix(serieItem.Source, library.LibraryGroupPrefix),
-				library.LibraryItemSourceGroup)
+			serieSources = server.Library.ExpandGroup(
+				strings.TrimPrefix(serieItem.Source, library.LibraryGroupPrefix),
+				library.LibraryItemSourceGroup,
+			)
 		} else {
 			serieSources = []string{serieItem.Source}
 		}
@@ -375,8 +377,12 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 					metric := server.Catalog.GetMetric(serieItem.Origin, serieSource, serieChunk)
 
 					if metric == nil {
-						log.Printf("ERROR: unknown metric `%s' for source `%s' (origin: %s)", serieChunk, serieSource,
-							serieItem.Origin)
+						log.Printf(
+							"ERROR: unknown metric `%s' for source `%s' (origin: %s)",
+							serieChunk,
+							serieSource,
+							serieItem.Origin,
+						)
 
 						continue
 					}
@@ -403,8 +409,12 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 				metric := server.Catalog.GetMetric(serieItem.Origin, serieSource, serieItem.Metric)
 
 				if metric == nil {
-					log.Printf("ERROR: unknown metric `%s' for source `%s' (origin: %s)", serieItem.Metric, serieSource,
-						serieItem.Origin)
+					log.Printf(
+						"ERROR: unknown metric `%s' for source `%s' (origin: %s)",
+						serieItem.Metric,
+						serieSource,
+						serieItem.Origin,
+					)
 
 					continue
 				}
