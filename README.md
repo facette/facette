@@ -5,7 +5,7 @@ What is Facette?
 ----------------
 
 [Facette][0] is a software to display time series data from several various sources — such as [collectd][1] or
-[Graphite][2] — on graphs in a web application, designed to be easy to setup and to use. To learn more on its architecture, read [this page](/docs/architecture/).
+[Graphite][2] — on graphs in a web application, designed to be easy to setup and to use. To learn more on its architecture, read [this page](http://facette.io/docs/architecture/).
 
 The source code is available at [Github][3], licensed under the terms of the [BSD license][4].
 
