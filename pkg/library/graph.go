@@ -1,5 +1,10 @@
 package library
 
+import (
+	"fmt"
+	"strings"
+)
+
 const (
 	_ = iota
 	// GraphTypeArea represents an area graph type.
@@ -43,4 +48,51 @@ type Serie struct {
 	Source string  `json:"source"`
 	Metric string  `json:"metric"`
 	Scale  float64 `json:"scale"`
+}
+
+func (graph *Graph) String() string {
+	return fmt.Sprintf(
+		"Graph{ID:\"%s\" Name:\"%s\" Type:%d Groups:[%s]}",
+		graph.Name,
+		graph.ID,
+		graph.Type,
+		func(groups []*OperGroup) string {
+			groupStrings := make([]string, len(groups))
+
+			for i, group := range groups {
+				groupStrings[i] = fmt.Sprintf("%s", group)
+			}
+
+			return strings.Join(groupStrings, ", ")
+		}(graph.Groups),
+	)
+}
+
+func (group *OperGroup) String() string {
+	return fmt.Sprintf(
+		"OperGroup{Name:\"%s\" Type:%d Scale:%f Series:[%s]}",
+		group.Name,
+		group.Type,
+		group.Scale,
+		func(series []*Serie) string {
+			serieStrings := make([]string, len(series))
+
+			for i, serie := range series {
+				serieStrings[i] = fmt.Sprintf("%s", serie)
+			}
+
+			return strings.Join(serieStrings, ", ")
+		}(group.Series),
+	)
+}
+
+func (serie *Serie) String() string {
+	return fmt.Sprintf(
+		"Serie{Name:\"%s\" Origin:\"%s\" Source:\"%s\" Metric:\"%s\" Scale:%f}",
+		serie.Name,
+		serie.Origin,
+		serie.Source,
+		serie.Metric,
+		serie.Scale,
+	)
 }
