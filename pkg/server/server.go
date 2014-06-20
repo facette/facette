@@ -20,7 +20,6 @@ import (
 )
 
 const (
-	serverStopWait int    = 10
 	urlStaticPath  string = "/static/"
 	urlAdminPath   string = "/admin/"
 	urlBrowsePath  string = "/browse/"
@@ -182,24 +181,7 @@ func (server *Server) Run() error {
 		// Close catalog
 		server.Catalog.Close()
 
-		/* Wait for the clients to disconnect */
-		for i := 0; i < serverStopWait; i++ {
-			if clientCount := server.Listener.ConnCount.Get(); clientCount == 0 {
-				break
-			}
-
-			time.Sleep(time.Second) // TODO: WTF? Use a waitgroup or proper timeout system
-		}
-
-		clientCount := server.Listener.ConnCount.Get()
-
-		if clientCount > 0 {
-			log.Printf("INFO: server stopped after %d second(s) with %d client(s) still connected",
-				serverStopWait,
-				clientCount)
-		} else {
-			log.Println("INFO: server stopped gracefully")
-		}
+		log.Println("INFO: server stopped")
 
 		// Remove pid file
 		if server.Config.PidFile != "" {
