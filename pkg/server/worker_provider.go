@@ -50,6 +50,11 @@ func (server *Server) startProviderWorkers() error {
 func (server *Server) stopProviderWorkers() {
 	server.providerWorkers.Broadcast(eventShutdown, nil)
 
+	// Shut down providers filtering goroutine
+	for _, prov := range server.providers {
+		close(prov.Filters.Input)
+	}
+
 	// Wait for all workers to shut down
 	server.providerWorkers.Wg.Wait()
 }
