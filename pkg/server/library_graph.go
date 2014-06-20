@@ -79,7 +79,7 @@ func (server *Server) serveGraph(writer http.ResponseWriter, request *http.Reque
 			}
 
 			graph = &library.Graph{}
-			*graph = *item.(*library.Graph)
+			utils.Clone(item.(*library.Graph), graph)
 
 			graph.ID = ""
 		} else {
@@ -196,9 +196,9 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 	// Parse input JSON for graph data
 	body, _ := ioutil.ReadAll(request.Body)
 
-	plotReq := &PlotRequest{}
+	plotReq := PlotRequest{}
 
-	if err := json.Unmarshal(body, plotReq); err != nil {
+	if err := json.Unmarshal(body, &plotReq); err != nil {
 		log.Println("ERROR: " + err.Error())
 		server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 		return
@@ -270,7 +270,7 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 	for _, groupItem := range graph.Groups {
 		groupOptions[groupItem.Name] = groupItem.Options
 
-		query, providerConnector, err := server.preparePlotQuery(plotReq, groupItem)
+		query, providerConnector, err := server.preparePlotQuery(&plotReq, groupItem)
 		if err != nil {
 			if err != os.ErrInvalid {
 				log.Println("ERROR: " + err.Error())

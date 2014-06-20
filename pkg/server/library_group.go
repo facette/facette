@@ -86,7 +86,7 @@ func (server *Server) serveGroup(writer http.ResponseWriter, request *http.Reque
 			}
 
 			group = &library.Group{}
-			*group = *item.(*library.Group)
+			utils.Clone(item.(*library.Group), group)
 
 			group.ID = ""
 		} else {

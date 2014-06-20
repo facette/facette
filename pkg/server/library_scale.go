@@ -74,7 +74,7 @@ func (server *Server) serveScale(writer http.ResponseWriter, request *http.Reque
 			}
 
 			scale = &library.Scale{}
-			*scale = *item.(*library.Scale)
+			utils.Clone(item.(*library.Scale), scale)
 
 			scale.ID = ""
 		} else {

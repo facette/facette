@@ -84,7 +84,8 @@ func (server *Server) serveCollection(writer http.ResponseWriter, request *http.
 				return
 			}
 
-			*collectionTemp.Collection = *item.(*library.Collection)
+			utils.Clone(item.(*library.Collection), collectionTemp.Collection)
+
 			collectionTemp.Collection.ID = ""
 			collectionTemp.Collection.Children = nil
 		}
