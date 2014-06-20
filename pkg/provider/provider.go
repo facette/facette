@@ -1,3 +1,4 @@
+// Package provider implements the providers of external data to feed the catalog (origins, sources, metrics).
 package provider
 
 import (
