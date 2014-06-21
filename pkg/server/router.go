@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/facette/facette/pkg/logger"
 )
 
 // ResponseWriter represents the structure of an HTTP response writer handling logged output.
@@ -15,6 +17,9 @@ type ResponseWriter struct {
 // WriteHeader sends an HTTP response header with along with its status code.
 func (writer ResponseWriter) WriteHeader(status int) {
 	writer.ResponseWriter.WriteHeader(status)
+
+	logger.Log(logger.LevelDebug, "serveWorker", "\"%s %s %s\" %d", writer.request.Method, writer.request.URL,
+		writer.request.Proto, status)
 }
 
 // Router represents the structure of an HTTP requests router.
