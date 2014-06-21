@@ -1,7 +1,6 @@
 package server
 
 import (
-	"html/template"
 	"net/http"
 	"os"
 	"path"
@@ -20,28 +19,14 @@ func (server *Server) serveBrowse(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	// Redirect to default location
-	if request.URL.Path == "/" {
-		http.Redirect(writer, request, server.Config.URLPrefix+urlBrowsePath, 301)
-		return
-	}
-
-	tmpl := template.New("layout.html").Funcs(template.FuncMap{
-		"asset": server.templateAsset,
-		"eq":    templateEqual,
-		"ne":    templateNotEqual,
-		"dump":  templateDumpMap,
-		"hl":    templateHighlight,
-	})
-
 	setHTTPCacheHeaders(writer)
 
 	if strings.HasPrefix(request.URL.Path, urlBrowsePath+"collections/") {
-		err = server.serveBrowseCollection(writer, request, tmpl)
+		err = server.serveBrowseCollection(writer, request)
 	} else if request.URL.Path == urlBrowsePath+"search" {
-		err = server.serveBrowseSearch(writer, request, tmpl)
+		err = server.serveBrowseSearch(writer, request)
 	} else if request.URL.Path == urlBrowsePath {
-		err = server.serveBrowseIndex(writer, request, tmpl)
+		err = server.serveBrowseIndex(writer, request)
 	} else {
 		err = os.ErrNotExist
 	}
@@ -54,51 +39,43 @@ func (server *Server) serveBrowse(writer http.ResponseWriter, request *http.Requ
 	}
 }
 
-func (server *Server) serveBrowseIndex(writer http.ResponseWriter, request *http.Request,
-	tmpl *template.Template) error {
-
-	var data struct {
-		URLPrefix string
+func (server *Server) serveBrowseIndex(writer http.ResponseWriter, request *http.Request) error {
+	// Redirect to default location
+	if request.URL.Path == "/" {
+		http.Redirect(writer, request, server.Config.URLPrefix+urlBrowsePath, 301)
+		return nil
 	}
 
-	// Set template data
-	data.URLPrefix = server.Config.URLPrefix
-
-	// Execute template
-	tmpl, err := tmpl.ParseFiles(
+	return server.execTemplate(
+		writer,
+		struct {
+			URLPrefix string
+		}{
+			URLPrefix: server.Config.URLPrefix,
+		},
 		path.Join(server.Config.BaseDir, "html", "layout.html"),
 		path.Join(server.Config.BaseDir, "html", "common", "element.html"),
 		path.Join(server.Config.BaseDir, "html", "browse", "layout.html"),
 		path.Join(server.Config.BaseDir, "html", "browse", "index.html"),
 	)
-	if err != nil {
-		return err
-	}
-
-	return tmpl.Execute(writer, data)
 }
 
-func (server *Server) serveBrowseCollection(writer http.ResponseWriter, request *http.Request,
-	tmpl *template.Template) error {
-
-	var (
-		err error
-	)
-
+func (server *Server) serveBrowseCollection(writer http.ResponseWriter, request *http.Request) error {
 	type collectionData struct {
 		*library.Collection
 		Parent string
 	}
 
-	var data struct {
+	data := struct {
 		URLPrefix  string
 		Collection *collectionData
 		Request    *http.Request
+	}{
+		URLPrefix:  server.Config.URLPrefix,
+		Collection: &collectionData{Collection: &library.Collection{}},
+		Request:    request,
 	}
 
-	data.URLPrefix = server.Config.URLPrefix
-
-	data.Collection = &collectionData{Collection: &library.Collection{}}
 	data.Collection.ID = strings.TrimPrefix(request.URL.Path, urlBrowsePath+"collections/")
 
 	item, err := server.Library.GetItem(data.Collection.ID, library.LibraryItemCollection)
@@ -118,37 +95,28 @@ func (server *Server) serveBrowseCollection(writer http.ResponseWriter, request 
 		data.Collection.Parent = "null"
 	}
 
-	// Execute template
-	tmpl, err = tmpl.ParseFiles(
+	return server.execTemplate(
+		writer,
+		data,
 		path.Join(server.Config.BaseDir, "html", "layout.html"),
 		path.Join(server.Config.BaseDir, "html", "common", "element.html"),
 		path.Join(server.Config.BaseDir, "html", "common", "graph.html"),
 		path.Join(server.Config.BaseDir, "html", "browse", "layout.html"),
 		path.Join(server.Config.BaseDir, "html", "browse", "collection.html"),
 	)
-	if err != nil {
-		return err
-	}
-
-	data.Request = request
-
-	return tmpl.Execute(writer, data)
 }
 
-func (server *Server) serveBrowseSearch(writer http.ResponseWriter, request *http.Request,
-	tmpl *template.Template) error {
-
-	var data struct {
+func (server *Server) serveBrowseSearch(writer http.ResponseWriter, request *http.Request) error {
+	data := struct {
 		URLPrefix   string
 		Count       int
 		Request     *http.Request
 		Sources     []*catalog.Source
 		Collections []*library.Collection
+	}{
+		URLPrefix: server.Config.URLPrefix,
+		Request:   request,
 	}
-
-	// Set template data
-	data.URLPrefix = server.Config.URLPrefix
-	data.Request = request
 
 	// Perform search filtering
 	if request.FormValue("q") != "" {
@@ -185,16 +153,12 @@ func (server *Server) serveBrowseSearch(writer http.ResponseWriter, request *htt
 
 	data.Count = len(data.Sources) + len(data.Collections)
 
-	// Execute template
-	tmpl, err := tmpl.ParseFiles(
+	return server.execTemplate(
+		writer,
+		data,
 		path.Join(server.Config.BaseDir, "html", "layout.html"),
 		path.Join(server.Config.BaseDir, "html", "common", "element.html"),
 		path.Join(server.Config.BaseDir, "html", "browse", "layout.html"),
 		path.Join(server.Config.BaseDir, "html", "browse", "search.html"),
 	)
-	if err != nil {
-		return err
-	}
-
-	return tmpl.Execute(writer, data)
 }

@@ -3,11 +3,10 @@ package server
 
 import (
 	"fmt"
-	"net"
-	"net/http"
 	"os"
 	"path"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/facette/facette/pkg/catalog"
@@ -16,31 +15,22 @@ import (
 	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/provider"
 	"github.com/facette/facette/pkg/worker"
-	"github.com/facette/facette/thirdparty/github.com/etix/stoppableListener"
-)
-
-const (
-	urlStaticPath  string = "/static/"
-	urlAdminPath   string = "/admin/"
-	urlBrowsePath  string = "/browse/"
-	urlReloadPath  string = "/reload"
-	urlCatalogPath string = "/api/v1/catalog/"
-	urlLibraryPath string = "/api/v1/library/"
-	urlStatsPath   string = "/api/v1/stats"
 )
 
 // Server is the main structure of the server handler.
 type Server struct {
 	Config          *config.Config
-	Listener        *stoppableListener.StoppableListener
 	Catalog         *catalog.Catalog
 	Library         *library.Library
 	providers       map[string]*provider.Provider
 	providerWorkers worker.WorkerPool
 	catalogWorker   *worker.Worker
+	serveWorker     *worker.Worker
 	startTime       time.Time
 	logLevel        int
 	loading         bool
+	stopping        bool
+	wg              *sync.WaitGroup
 }
 
 // NewServer creates a new instance of server.
@@ -48,6 +38,7 @@ func NewServer(configPath, logPath string, logLevel int) *Server {
 	return &Server{
 		Config:    &config.Config{Path: configPath, LogFile: logPath},
 		providers: make(map[string]*provider.Provider),
+		wg:        &sync.WaitGroup{},
 		logLevel:  logLevel,
 	}
 }
@@ -113,6 +104,8 @@ func (server *Server) Run() error {
 		fd.Write([]byte(strconv.Itoa(os.Getpid()) + "\n"))
 	}
 
+	server.wg.Add(1)
+
 	// Create new catalog instance
 	server.Catalog = catalog.NewCatalog()
 
@@ -144,61 +137,54 @@ func (server *Server) Run() error {
 	server.Library = library.NewLibrary(server.Config, server.Catalog)
 	go server.Library.Refresh()
 
-	// Prepare router
-	router := NewRouter(server)
+	// Instanciate serve worker
+	server.serveWorker = worker.NewWorker()
+	server.serveWorker.RegisterEvent(eventInit, workerServeInit)
+	server.serveWorker.RegisterEvent(eventShutdown, workerServeShutdown)
+	server.serveWorker.RegisterEvent(eventRun, workerServeRun)
 
-	router.HandleFunc(urlStaticPath, server.serveStatic)
-	router.HandleFunc(urlCatalogPath, server.serveCatalog)
-	router.HandleFunc(urlLibraryPath, server.serveLibrary)
-	router.HandleFunc(urlAdminPath, server.serveAdmin)
-	router.HandleFunc(urlBrowsePath, server.serveBrowse)
-	router.HandleFunc(urlReloadPath, server.serveReload)
-	router.HandleFunc(urlStatsPath, server.serveStats)
-
-	router.HandleFunc("/", server.serveBrowse)
-
-	http.Handle("/", router)
-
-	// Start serving HTTP requests
-	listener, err := net.Listen("tcp", server.Config.BindAddr)
-	if err != nil {
+	if err := server.serveWorker.SendEvent(eventInit, false, server); err != nil {
+		return err
+	} else if err := server.serveWorker.SendEvent(eventRun, false, nil); err != nil {
 		return err
 	}
 
-	logger.Log(logger.LevelInfo, "server", "listening on %s", server.Config.BindAddr)
-
-	server.Listener = stoppableListener.Handle(listener)
-	err = http.Serve(server.Listener, nil)
-
-	// Server shutdown triggered
-	if server.Listener.Stopped {
-		// Shutdown running provider workers
-		server.stopProviderWorkers()
-
-		// Shutdown catalog worker
-		if err := server.catalogWorker.SendEvent(eventShutdown, false, nil); err != nil {
-			logger.Log(logger.LevelWarning, "server", "catalog worker did not shut down successfully: %s", err)
-		}
-
-		// Close catalog
-		server.Catalog.Close()
-
-		logger.Log(logger.LevelInfo, "server", "server stopped")
-
-		// Remove pid file
-		if server.Config.PidFile != "" {
-			os.Remove(server.Config.PidFile)
-		}
-	} else if err != nil {
-		return err
-	}
+	server.wg.Wait()
 
 	return nil
 }
 
 // Stop stops the server.
 func (server *Server) Stop() {
-	logger.Log(logger.LevelNotice, "server", "shutting down")
+	if server.stopping {
+		return
+	}
 
-	server.Listener.Stop <- true
+	logger.Log(logger.LevelNotice, "server", "shutting down server")
+
+	server.stopping = true
+
+	// Shutdown serve worker
+	if err := server.serveWorker.SendEvent(eventShutdown, false, nil); err != nil {
+		logger.Log(logger.LevelWarning, "server", "serve worker did not shut down successfully: %s", err)
+	}
+
+	// Shutdown running provider workers
+	server.stopProviderWorkers()
+
+	// Shutdown catalog worker
+	if err := server.catalogWorker.SendEvent(eventShutdown, false, nil); err != nil {
+		logger.Log(logger.LevelWarning, "server", "catalog worker did not shut down successfully: %s", err)
+	}
+
+	server.Catalog.Close()
+
+	// Remove pid file
+	if server.Config.PidFile != "" {
+		logger.Log(logger.LevelDebug, "server", "removing `%s' pid file", server.Config.PidFile)
+
+		os.Remove(server.Config.PidFile)
+	}
+
+	server.wg.Done()
 }

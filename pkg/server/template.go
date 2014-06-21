@@ -2,10 +2,32 @@ package server
 
 import (
 	"html/template"
+	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
 )
+
+func (server *Server) execTemplate(writer http.ResponseWriter, data interface{}, files ...string) error {
+	var err error
+
+	tmpl := template.New("layout.html").Funcs(template.FuncMap{
+		"asset":  server.templateAsset,
+		"dump":   templateDumpMap,
+		"eq":     templateEqual,
+		"hl":     templateHighlight,
+		"ne":     templateNotEqual,
+		"substr": templateSubstr,
+	})
+
+	// Execute template
+	tmpl, err = tmpl.ParseFiles(files...)
+	if err == nil {
+		err = tmpl.Execute(writer, data)
+	}
+
+	return err
+}
 
 func (server *Server) templateAsset(x string) string {
 	return x + "?" + strconv.FormatInt(server.startTime.Unix(), 10)

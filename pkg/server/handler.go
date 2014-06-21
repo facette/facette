@@ -3,7 +3,6 @@ package server
 import (
 	"bytes"
 	"encoding/json"
-	"html/template"
 	"mime"
 	"net/http"
 	"os"
@@ -15,29 +14,20 @@ import (
 )
 
 func (server *Server) serveError(writer http.ResponseWriter, status int) {
-	var data struct {
-		URLPrefix string
-		Status    int
-	}
-
-	// Set template data
-	data.URLPrefix = server.Config.URLPrefix
-	data.Status = status
-
-	// Execute template
 	tmplData := bytes.NewBuffer(nil)
 
-	tmpl, err := template.New("layout.html").Funcs(template.FuncMap{
-		"asset": server.templateAsset,
-		"eq":    templateEqual,
-		"ne":    templateNotEqual,
-	}).ParseFiles(
+	err := server.execTemplate(
+		writer,
+		struct {
+			URLPrefix string
+			Status    int
+		}{
+			URLPrefix: server.Config.URLPrefix,
+			Status:    status,
+		},
 		path.Join(server.Config.BaseDir, "html", "layout.html"),
 		path.Join(server.Config.BaseDir, "html", "error.html"),
 	)
-	if err == nil {
-		err = tmpl.Execute(tmplData, data)
-	}
 
 	if err != nil {
 		logger.Log(logger.LevelError, "server", "%s", err)
@@ -106,23 +96,16 @@ func (server *Server) serveStats(writer http.ResponseWriter, request *http.Reque
 }
 
 func (server *Server) serveWait(writer http.ResponseWriter, request *http.Request) {
-	var data struct {
-		URLPrefix string
-	}
-
-	// Set template data
-	data.URLPrefix = server.Config.URLPrefix
-
-	// Execute template
-	tmpl, err := template.New("layout.html").Funcs(template.FuncMap{
-		"asset": server.templateAsset,
-	}).ParseFiles(
+	err := server.execTemplate(
+		writer,
+		struct {
+			URLPrefix string
+		}{
+			URLPrefix: server.Config.URLPrefix,
+		},
 		path.Join(server.Config.BaseDir, "html", "layout.html"),
 		path.Join(server.Config.BaseDir, "html", "wait.html"),
 	)
-	if err == nil {
-		err = tmpl.Execute(writer, data)
-	}
 
 	if err != nil {
 		if os.IsNotExist(err) {

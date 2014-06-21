@@ -151,6 +151,11 @@ func (server *Server) serveScaleList(writer http.ResponseWriter, request *http.R
 func (server *Server) serveScaleValues(writer http.ResponseWriter, request *http.Request) {
 	var offset, limit int
 
+	if request.Method != "GET" && request.Method != "HEAD" {
+		server.serveResponse(writer, nil, http.StatusMethodNotAllowed)
+		return
+	}
+
 	if response, status := server.parseListRequest(writer, request, &offset, &limit); status != http.StatusOK {
 		server.serveResponse(writer, response, status)
 		return

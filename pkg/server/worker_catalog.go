@@ -44,8 +44,6 @@ func workerCatalogRun(w *worker.Worker, args ...interface{}) {
 
 				w.State = worker.JobStopped
 
-				w.ReturnErr(nil)
-
 				return
 
 			default:
