@@ -20,24 +20,29 @@ const (
 		"$"
 )
 
+type durationUnit struct {
+	value int
+	text  string
+}
+
 // DurationToRange converts a duration into a string-defined time range.
 func DurationToRange(duration time.Duration) string {
-	ranges := map[int]string{
-		86400: "d",
-		3600:  "h",
-		60:    "m",
-		1:     "s",
+	ranges := []durationUnit{
+		durationUnit{86400, "d"},
+		durationUnit{3600, "h"},
+		durationUnit{60, "m"},
+		durationUnit{1, "s"},
 	}
 
 	chunks := make([]string, 0)
 	seconds := int(math.Abs(duration.Seconds()))
 
-	for value, unit := range ranges {
-		count := int(math.Floor(float64(seconds / value)))
+	for _, unit := range ranges {
+		count := int(math.Floor(float64(seconds / unit.value)))
 
 		if count > 0 {
-			chunks = append(chunks, fmt.Sprintf("%d%s", count, unit))
-			seconds %= value
+			chunks = append(chunks, fmt.Sprintf("%d%s", count, unit.text))
+			seconds %= unit.value
 		}
 	}
 
