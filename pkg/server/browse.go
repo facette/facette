@@ -19,6 +19,12 @@ func (server *Server) serveBrowse(writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
+	// Redirect to default location
+	if request.URL.Path == "/" {
+		http.Redirect(writer, request, server.Config.URLPrefix+urlBrowsePath, 301)
+		return
+	}
+
 	setHTTPCacheHeaders(writer)
 
 	if strings.HasPrefix(request.URL.Path, urlBrowsePath+"collections/") {
@@ -40,12 +46,6 @@ func (server *Server) serveBrowse(writer http.ResponseWriter, request *http.Requ
 }
 
 func (server *Server) serveBrowseIndex(writer http.ResponseWriter, request *http.Request) error {
-	// Redirect to default location
-	if request.URL.Path == "/" {
-		http.Redirect(writer, request, server.Config.URLPrefix+urlBrowsePath, 301)
-		return nil
-	}
-
 	return server.execTemplate(
 		writer,
 		struct {
