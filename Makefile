@@ -287,19 +287,24 @@ lint-static: jshint $(SCRIPT_OUTPUT)
 		$(call mesg_ok) || $(call mesg_fail)
 
 # Test
-PKG_SRC = $(wildcard pkg/*)
+TEST_DIR = $(TEMP_DIR)/tests
 
-test-pkg: $(TEMP_DIR)/src/github.com/facette/facette
-	@install -d -m 0755 $(TEMP_DIR)/tests && (cd $(TEMP_DIR)/tests; for ENTRY in $(PKG_SRC); do \
-		$(call mesg_start,test,Testing $$ENTRY package...); \
-		$(GO) test -c -i ../../$$ENTRY && \
-			(test ! -f ./`basename $$ENTRY`.test || ./`basename $$ENTRY`.test -test.v=true) && \
-			$(call mesg_ok) || $(call mesg_fail); \
-	done)
+TEST_PKG = $(wildcard pkg/*)
 
-test-server: build-bin
+$(TEST_DIR):
+	@install -d -m 0755 $(TEST_DIR)
+
+$(TEST_PKG): $(TEST_DIR) $(TEMP_DIR)/src/github.com/facette/facette
+	@$(call mesg_start,test,Testing $@ package...)
+	@(cd $(TEST_DIR) && $(GO) test -c -i ../../$@ && \
+		(test ! -f ./$(@:pkg/%=%).test || ./$(@:pkg/%=%).test -test.v=true) && \
+		$(call mesg_ok) || $(call mesg_fail))
+
+test-pkg: $(TEST_PKG)
+
+test-server: $(TEST_DIR) build-bin
 	@$(call mesg_start,test,Starting facette server...)
-	@install -d -m 0755 $(TEMP_DIR)/tests && ($(TEMP_DIR)/bin/facette -c tests/facette.json \
+	@($(TEMP_DIR)/bin/facette -c tests/facette.json \
 	    	-l tmp/tests/facette.log >/dev/null &) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
