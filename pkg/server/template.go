@@ -8,7 +8,7 @@ import (
 )
 
 func (server *Server) templateAsset(x string) string {
-	return x + "?" + strconv.FormatInt(server.StartTime.Unix(), 10)
+	return x + "?" + strconv.FormatInt(server.startTime.Unix(), 10)
 }
 
 func templateEqual(x, y interface{}) bool {

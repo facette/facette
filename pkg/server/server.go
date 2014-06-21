@@ -36,7 +36,7 @@ type Server struct {
 	Catalog         *catalog.Catalog
 	Library         *library.Library
 	Loading         bool
-	StartTime       time.Time
+	startTime       time.Time
 	providers       map[string]*provider.Provider
 	providerWorkers worker.WorkerPool
 	catalogWorker   *worker.Worker
@@ -75,7 +75,7 @@ func (server *Server) Reload(config bool) error {
 
 // Run starts the server serving the HTTP responses.
 func (server *Server) Run() error {
-	server.StartTime = time.Now()
+	server.startTime = time.Now()
 
 	// Set server logging ouput
 	if server.Config.LogFile != "" && server.Config.LogFile != "-" {
