@@ -23,6 +23,7 @@ func (server *Server) execTemplate(writer http.ResponseWriter, data interface{},
 	// Execute template
 	tmpl, err = tmpl.ParseFiles(files...)
 	if err == nil {
+		writer.WriteHeader(http.StatusOK)
 		err = tmpl.Execute(writer, data)
 	}
 
