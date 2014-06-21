@@ -2,13 +2,13 @@ package server
 
 import (
 	"html/template"
-	"log"
 	"net/http"
 	"os"
 	"path"
 	"strings"
 
 	"github.com/facette/facette/pkg/library"
+	"github.com/facette/facette/pkg/logger"
 )
 
 func (server *Server) serveAdmin(writer http.ResponseWriter, request *http.Request) {
@@ -51,7 +51,7 @@ func (server *Server) serveAdmin(writer http.ResponseWriter, request *http.Reque
 	if os.IsNotExist(err) {
 		server.serveError(writer, http.StatusNotFound)
 	} else if err != nil {
-		log.Println("ERROR: " + err.Error())
+		logger.Log(logger.LevelError, "server", "%s", err)
 		server.serveError(writer, http.StatusInternalServerError)
 	}
 }

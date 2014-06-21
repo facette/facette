@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/facette/facette/pkg/config"
+	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/server"
 	"github.com/facette/facette/pkg/utils"
 )
@@ -17,17 +18,19 @@ const (
 )
 
 var (
-	flagConfig string
-	flagDebug  int
-	flagHelp   bool
-	flagLog    string
+	flagConfig   string
+	flagHelp     bool
+	flagLog      string
+	flagLogLevel string
+	logLevel     int
+	err          error
 )
 
 func init() {
 	flag.StringVar(&flagConfig, "c", config.DefaultConfigFile, "configuration file path")
-	flag.IntVar(&flagDebug, "d", 0, "debugging level")
 	flag.BoolVar(&flagHelp, "h", false, "display this help and exit")
 	flag.StringVar(&flagLog, "l", config.DefaultLogFile, "log file path")
+	flag.StringVar(&flagLogLevel, "L", config.DefaultLogLevel, "logging level")
 	flag.Usage = func() { utils.PrintUsage(os.Stderr, cmdUsage) }
 	flag.Parse()
 
@@ -37,11 +40,16 @@ func init() {
 		fmt.Fprintf(os.Stderr, "Error: configuration file path is mandatory\n")
 		utils.PrintUsage(os.Stderr, cmdUsage)
 	}
+
+	if logLevel, err = logger.GetLevelByName(flagLogLevel); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: invalid log level `%s'\n", flagLogLevel)
+		os.Exit(1)
+	}
 }
 
 func main() {
 	// Create new server instance and load configuration
-	instance := server.NewServer(flagConfig, flagLog, flagDebug)
+	instance := server.NewServer(flagConfig, flagLog, logLevel)
 
 	// Reload server configuration on SIGHUP
 	sigChan := make(chan os.Signal, 1)

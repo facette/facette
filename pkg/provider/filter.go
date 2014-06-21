@@ -1,11 +1,11 @@
 package provider
 
 import (
-	"log"
 	"regexp"
 
 	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/config"
+	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
 
@@ -31,13 +31,13 @@ func newFilterChain(filters []*config.ProviderFilterConfig, output chan *catalog
 		}
 
 		if !targetSet.Has(filter.Target) {
-			log.Printf("ERROR: unknown `%s' filter target", filter.Target)
+			logger.Log(logger.LevelWarning, "provider", "unknown `%s' filter target", filter.Target)
 			continue
 		}
 
 		re, err := regexp.Compile(filter.Pattern)
 		if err != nil {
-			log.Printf("WARNING: unable to compile filter pattern: %s, discarding", err.Error())
+			logger.Log(logger.LevelWarning, "server", "unable to compile filter pattern: %s, discarding", err)
 			continue
 		}
 
@@ -62,7 +62,13 @@ func newFilterChain(filters []*config.ProviderFilterConfig, output chan *catalog
 				if (rule.Target == "origin" || rule.Target == "any") &&
 					rule.PatternRegexp.MatchString(record.Origin) {
 					if rule.Discard {
-						log.Printf("DEBUG: discard record %v, as origin matches `%s' pattern", record, rule.Pattern)
+						logger.Log(
+							logger.LevelDebug,
+							"server",
+							"discard record %v, as origin matches `%s' pattern",
+							record,
+							rule.Pattern,
+						)
 						goto nextRecord
 					}
 
@@ -71,7 +77,13 @@ func newFilterChain(filters []*config.ProviderFilterConfig, output chan *catalog
 
 				if (rule.Target == "source" || rule.Target == "any") && rule.PatternRegexp.MatchString(record.Source) {
 					if rule.Discard {
-						log.Printf("DEBUG: discard record %v, as source matches `%s' pattern", record, rule.Pattern)
+						logger.Log(
+							logger.LevelDebug,
+							"server",
+							"discard record %v, as source matches `%s' pattern",
+							record,
+							rule.Pattern,
+						)
 						goto nextRecord
 					}
 
@@ -80,7 +92,13 @@ func newFilterChain(filters []*config.ProviderFilterConfig, output chan *catalog
 
 				if (rule.Target == "metric" || rule.Target == "any") && rule.PatternRegexp.MatchString(record.Metric) {
 					if rule.Discard {
-						log.Printf("DEBUG: discard record %s, as metric matches `%s' pattern", record, rule.Pattern)
+						logger.Log(
+							logger.LevelDebug,
+							"server",
+							"discard record %s, as metric matches `%s' pattern",
+							record,
+							rule.Pattern,
+						)
 						goto nextRecord
 					}
 

@@ -2,7 +2,6 @@ package connector
 
 import (
 	"fmt"
-	"log"
 	"math"
 	"os"
 	"regexp"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/config"
+	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/ziutek/rrd"
@@ -282,7 +282,7 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan *catal
 
 		submatch := re.FindStringSubmatch(filePath[len(connector.path)+1:])
 		if len(submatch) == 0 {
-			log.Printf("INFO: file `%s' does not match pattern, ignoring", filePath)
+			logger.Log(logger.LevelInfo, "connector: rrd", "file `%s' does not match pattern, ignoring", filePath)
 			return nil
 		}
 
@@ -301,7 +301,7 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan *catal
 		// Extract metric information from .rrd file
 		info, err := rrd.Info(filePath)
 		if err != nil {
-			log.Println("WARNING:", err.Error())
+			logger.Log(logger.LevelWarning, "connector: rrd", "%s", err)
 			return nil
 		}
 

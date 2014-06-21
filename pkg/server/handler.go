@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"html/template"
-	"log"
 	"mime"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
 
+	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
 
@@ -40,7 +40,7 @@ func (server *Server) serveError(writer http.ResponseWriter, status int) {
 	}
 
 	if err != nil {
-		log.Println("ERROR: " + err.Error())
+		logger.Log(logger.LevelError, "server", "%s", err)
 		server.serveResponse(writer, nil, status)
 	}
 
@@ -128,7 +128,7 @@ func (server *Server) serveWait(writer http.ResponseWriter, request *http.Reques
 		if os.IsNotExist(err) {
 			server.serveError(writer, http.StatusNotFound)
 		} else {
-			log.Println("ERROR: " + err.Error())
+			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveError(writer, http.StatusInternalServerError)
 		}
 	}

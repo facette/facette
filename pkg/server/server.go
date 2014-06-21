@@ -3,7 +3,6 @@ package server
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -14,6 +13,7 @@ import (
 	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/library"
+	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/provider"
 	"github.com/facette/facette/pkg/worker"
 	"github.com/facette/facette/thirdparty/github.com/etix/stoppableListener"
@@ -36,31 +36,31 @@ type Server struct {
 	Catalog         *catalog.Catalog
 	Library         *library.Library
 	Loading         bool
-	startTime       time.Time
 	providers       map[string]*provider.Provider
 	providerWorkers worker.WorkerPool
 	catalogWorker   *worker.Worker
-	debugLevel      int
+	startTime       time.Time
+	logLevel        int
 }
 
 // NewServer creates a new instance of server.
-func NewServer(configPath, logPath string, debugLevel int) *Server {
+func NewServer(configPath, logPath string, logLevel int) *Server {
 	return &Server{
-		Config:     &config.Config{Path: configPath, LogFile: logPath},
-		providers:  make(map[string]*provider.Provider),
-		debugLevel: debugLevel,
+		Config:    &config.Config{Path: configPath, LogFile: logPath},
+		providers: make(map[string]*provider.Provider),
+		logLevel:  logLevel,
 	}
 }
 
 // Reload reloads the configuration and refreshes both catalog and library.
 func (server *Server) Reload(config bool) error {
-	log.Printf("NOTICE: reloading server")
+	logger.Log(logger.LevelNotice, "server", "reloading")
 
 	server.Loading = true
 
 	if config {
 		if err := server.Config.Reload(); err != nil {
-			log.Printf("ERROR: an error occurred while reloading configuration: %s", err.Error())
+			logger.Log(logger.LevelError, "server", "unable to reload configuration: %s", err)
 			return err
 		}
 	}
@@ -77,25 +77,27 @@ func (server *Server) Reload(config bool) error {
 func (server *Server) Run() error {
 	server.startTime = time.Now()
 
-	// Set server logging ouput
+	// Set up server logging
 	if server.Config.LogFile != "" && server.Config.LogFile != "-" {
 		dirPath, _ := path.Split(server.Config.LogFile)
 		os.MkdirAll(dirPath, 0755)
 
 		serverOutput, err := os.OpenFile(server.Config.LogFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
-			log.Printf("ERROR: unable to open log file: %s", err)
+			logger.Log(logger.LevelError, "server", "unable to open log file: %s", err)
 			return err
 		}
 
 		defer serverOutput.Close()
 
-		log.SetOutput(serverOutput)
+		logger.SetOutput(serverOutput)
 	}
+
+	logger.SetLevel(server.logLevel)
 
 	// Load server configuration
 	if err := server.Config.Reload(); err != nil {
-		log.Printf("ERROR: unable to load configuration: %s", err)
+		logger.Log(logger.LevelError, "server", "unable to load configuration: %s", err)
 		return err
 	}
 
@@ -112,7 +114,7 @@ func (server *Server) Run() error {
 	}
 
 	// Create new catalog instance
-	server.Catalog = catalog.NewCatalog(server.debugLevel)
+	server.Catalog = catalog.NewCatalog()
 
 	// Instanciate catalog worker
 	server.catalogWorker = worker.NewWorker()
@@ -139,7 +141,7 @@ func (server *Server) Run() error {
 	server.providerWorkers.Broadcast(eventCatalogRefresh, nil)
 
 	// Create library instance
-	server.Library = library.NewLibrary(server.Config, server.Catalog, server.debugLevel)
+	server.Library = library.NewLibrary(server.Config, server.Catalog)
 	go server.Library.Refresh()
 
 	// Prepare router
@@ -163,7 +165,7 @@ func (server *Server) Run() error {
 		return err
 	}
 
-	log.Printf("INFO: server listening on %s", server.Config.BindAddr)
+	logger.Log(logger.LevelInfo, "server", "listening on %s", server.Config.BindAddr)
 
 	server.Listener = stoppableListener.Handle(listener)
 	err = http.Serve(server.Listener, nil)
@@ -175,13 +177,13 @@ func (server *Server) Run() error {
 
 		// Shutdown catalog worker
 		if err := server.catalogWorker.SendEvent(eventShutdown, false, nil); err != nil {
-			log.Printf("WARNING: catalog worker did not shut down successfully: %s", err)
+			logger.Log(logger.LevelWarning, "server", "catalog worker did not shut down successfully: %s", err)
 		}
 
 		// Close catalog
 		server.Catalog.Close()
 
-		log.Println("INFO: server stopped")
+		logger.Log(logger.LevelInfo, "server", "server stopped")
 
 		// Remove pid file
 		if server.Config.PidFile != "" {
@@ -196,7 +198,7 @@ func (server *Server) Run() error {
 
 // Stop stops the server.
 func (server *Server) Stop() {
-	log.Printf("NOTICE: shutting down server")
+	logger.Log(logger.LevelNotice, "server", "shutting down")
 
 	server.Listener.Stop <- true
 }

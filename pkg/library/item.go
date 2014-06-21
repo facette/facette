@@ -2,12 +2,12 @@ package library
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path"
 	"syscall"
 	"time"
 
+	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 	uuid "github.com/facette/facette/thirdparty/github.com/nu7hatch/gouuid"
@@ -264,25 +264,25 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 		switch itemType {
 		case LibraryItemSourceGroup, LibraryItemMetricGroup:
 			if itemTemp.(*Group).ID != itemStruct.ID {
-				log.Printf("ERROR: duplicate group identifier `%s'", itemStruct.ID)
+				logger.Log(logger.LevelError, "library", "duplicate group identifier `%s'", itemStruct.ID)
 				return os.ErrExist
 			}
 
 		case LibraryItemScale:
 			if itemTemp.(*Scale).ID != itemStruct.ID {
-				log.Printf("ERROR: duplicate scale identifier `%s'", itemStruct.ID)
+				logger.Log(logger.LevelError, "library", "duplicate scale identifier `%s'", itemStruct.ID)
 				return os.ErrExist
 			}
 
 		case LibraryItemGraph:
 			if itemTemp.(*Graph).ID != itemStruct.ID {
-				log.Printf("ERROR: duplicate graph identifier `%s'", itemStruct.ID)
+				logger.Log(logger.LevelError, "library", "duplicate graph identifier `%s'", itemStruct.ID)
 				return os.ErrExist
 			}
 
 		case LibraryItemCollection:
 			if itemTemp.(*Collection).ID != itemStruct.ID {
-				log.Printf("ERROR: duplicate collection identifier `%s'", itemStruct.ID)
+				logger.Log(logger.LevelError, "library", "duplicate collection identifier `%s'", itemStruct.ID)
 				return os.ErrExist
 			}
 		}
@@ -305,10 +305,10 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 
 		for _, group := range item.(*Graph).Groups {
 			if group == nil {
-				log.Printf("ERROR: found null group")
+				logger.Log(logger.LevelError, "library", "found null group")
 				return os.ErrInvalid
 			} else if groupSet.Has(group.Name) {
-				log.Printf("ERROR: duplicate group name `%s'", group.Name)
+				logger.Log(logger.LevelError, "library", "duplicate group name `%s'", group.Name)
 				return os.ErrExist
 			}
 
@@ -316,10 +316,10 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 
 			for _, serie := range group.Series {
 				if serie == nil {
-					log.Printf("ERROR: found null serie in group `%s'", group.Name)
+					logger.Log(logger.LevelError, "library", "found null serie in group `%s'", group.Name)
 					return os.ErrInvalid
 				} else if serieSet.Has(serie.Name) {
-					log.Printf("ERROR: duplicate serie name `%s'", serie.Name)
+					logger.Log(logger.LevelError, "library", "duplicate serie name `%s'", serie.Name)
 					return os.ErrExist
 				}
 

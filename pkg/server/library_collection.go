@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"reflect"
@@ -11,6 +10,7 @@ import (
 	"time"
 
 	"github.com/facette/facette/pkg/library"
+	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
@@ -35,7 +35,7 @@ func (server *Server) serveCollection(writer http.ResponseWriter, request *http.
 			server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 			return
 		} else if err != nil {
-			log.Println("ERROR: " + err.Error())
+			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 			return
 		}
@@ -53,7 +53,7 @@ func (server *Server) serveCollection(writer http.ResponseWriter, request *http.
 			server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 			return
 		} else if err != nil {
-			log.Println("ERROR: " + err.Error())
+			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 			return
 		}
@@ -79,7 +79,7 @@ func (server *Server) serveCollection(writer http.ResponseWriter, request *http.
 				server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 				return
 			} else if err != nil {
-				log.Println("ERROR: " + err.Error())
+				logger.Log(logger.LevelError, "server", "%s", err)
 				server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 				return
 			}
@@ -96,7 +96,7 @@ func (server *Server) serveCollection(writer http.ResponseWriter, request *http.
 		body, _ := ioutil.ReadAll(request.Body)
 
 		if err := json.Unmarshal(body, &collectionTemp); err != nil {
-			log.Println("ERROR: " + err.Error())
+			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 			return
 		}
@@ -135,7 +135,7 @@ func (server *Server) serveCollection(writer http.ResponseWriter, request *http.
 		// Store collection data
 		err := server.Library.StoreItem(collectionTemp.Collection, library.LibraryItemCollection)
 		if response, status := server.parseError(writer, request, err); status != http.StatusOK {
-			log.Println("ERROR: " + err.Error())
+			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, response, status)
 			return
 		}

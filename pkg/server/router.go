@@ -1,7 +1,6 @@
 package server
 
 import (
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -10,17 +9,12 @@ import (
 // ResponseWriter represents the structure of an HTTP response writer handling logged output.
 type ResponseWriter struct {
 	http.ResponseWriter
-	request    *http.Request
-	debugLevel int
+	request *http.Request
 }
 
 // WriteHeader sends an HTTP response header with along with its status code.
 func (writer ResponseWriter) WriteHeader(status int) {
 	writer.ResponseWriter.WriteHeader(status)
-
-	if writer.debugLevel > 2 {
-		log.Printf("DEBUG: \"%s %s %s\" %d", writer.request.Method, writer.request.URL, writer.request.Proto, status)
-	}
 }
 
 // Router represents the structure of an HTTP requests router.
@@ -56,7 +50,7 @@ func (router *Router) ServeHTTP(writer http.ResponseWriter, request *http.Reques
 		}
 	}
 
-	router.ServeMux.ServeHTTP(ResponseWriter{writer, request, router.server.debugLevel}, request)
+	router.ServeMux.ServeHTTP(ResponseWriter{writer, request}, request)
 }
 
 // NewRouter creates a new instance of router.

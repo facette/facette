@@ -305,7 +305,7 @@ test-pkg: $(TEST_PKG)
 test-server: $(TEST_DIR) build-bin
 	@$(call mesg_start,test,Starting facette server...)
 	@($(TEMP_DIR)/bin/facette -c tests/facette.json \
-	    	-l tmp/tests/facette.log >/dev/null &) && \
+		-l tmp/tests/facette.log -L debug >/dev/null &) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 	@$(call mesg_start,test,Running server tests...)

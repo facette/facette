@@ -3,14 +3,14 @@ package catalog
 
 import (
 	"fmt"
-	"log"
+
+	"github.com/facette/facette/pkg/logger"
 )
 
 // Catalog represents the main structure of a catalog instance.
 type Catalog struct {
 	Origins    map[string]*Origin
 	RecordChan chan *CatalogRecord
-	debugLevel int // TODO: remove this
 }
 
 // CatalogRecord represents a catalog record.
@@ -37,20 +37,23 @@ const (
 )
 
 // NewCatalog creates a new instance of catalog.
-func NewCatalog(debugLevel int) *Catalog {
+func NewCatalog() *Catalog {
 	return &Catalog{
 		Origins:    make(map[string]*Origin),
 		RecordChan: make(chan *CatalogRecord),
-		debugLevel: debugLevel,
 	}
 }
 
 // Insert inserts a new record in the catalog.
 func (catalog *Catalog) Insert(record *CatalogRecord) {
-	if catalog.debugLevel > 3 {
-		log.Printf("DEBUG: appending metric `%s' to source `%s' via origin `%s'", record.Metric, record.Source,
-			record.Origin)
-	}
+	logger.Log(
+		logger.LevelDebug,
+		"catalog",
+		"appending metric `%s' to source `%s' via origin `%s'",
+		record.Metric,
+		record.Source,
+		record.Origin,
+	)
 
 	if _, ok := catalog.Origins[record.Origin]; !ok {
 		catalog.Origins[record.Origin] = NewOrigin(

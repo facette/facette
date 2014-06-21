@@ -1,16 +1,15 @@
 package server
 
 import (
-	"log"
-
 	"github.com/facette/facette/pkg/catalog"
+	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/worker"
 )
 
 func workerCatalogInit(w *worker.Worker, args ...interface{}) {
 	var catalog = args[0].(*catalog.Catalog)
 
-	log.Println("DEBUG: catalogWorker: init")
+	logger.Log(logger.LevelDebug, "catalogWorker", "init")
 
 	// Worker properties:
 	// 0: catalog instance (*catalog.Catalog)
@@ -20,7 +19,7 @@ func workerCatalogInit(w *worker.Worker, args ...interface{}) {
 }
 
 func workerCatalogShutdown(w *worker.Worker, args ...interface{}) {
-	log.Println("DEBUG: catalogWorker: shutdown")
+	logger.Log(logger.LevelDebug, "catalogWorker", "shutdown")
 
 	w.SendJobSignal(jobSignalShutdown)
 
@@ -32,7 +31,7 @@ func workerCatalogRun(w *worker.Worker, args ...interface{}) {
 
 	defer w.Shutdown()
 
-	log.Println("DEBUG: catalogWorker: starting")
+	logger.Log(logger.LevelDebug, "catalogWorker", "starting")
 
 	w.State = worker.JobStarted
 
@@ -41,7 +40,7 @@ func workerCatalogRun(w *worker.Worker, args ...interface{}) {
 		case cmd := <-w.ReceiveJobSignals():
 			switch cmd {
 			case jobSignalShutdown:
-				log.Println("INFO: catalogWorker: received shutdown command, stopping job")
+				logger.Log(logger.LevelInfo, "catalogWorker", "received shutdown command, stopping job")
 
 				w.State = worker.JobStopped
 
@@ -50,7 +49,7 @@ func workerCatalogRun(w *worker.Worker, args ...interface{}) {
 				return
 
 			default:
-				log.Println("NOTICE: catalogWorker: received unknown command, ignoring")
+				logger.Log(logger.LevelNotice, "catalogWorker", "received unknown command, ignoring")
 			}
 
 		case record := <-serverCatalog.RecordChan:

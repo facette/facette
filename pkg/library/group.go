@@ -1,11 +1,11 @@
 package library
 
 import (
-	"log"
 	"path"
 	"regexp"
 	"strings"
 
+	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
 
@@ -36,7 +36,7 @@ func (library *Library) ExpandGroup(name string, groupType int) []string {
 
 	item, err := library.GetItemByName(name, groupType)
 	if err != nil {
-		log.Printf("ERROR: " + err.Error())
+		logger.Log(logger.LevelError, "library", "unknown item `%s': %s", name, err)
 		return make([]string, 0)
 	}
 
@@ -52,7 +52,7 @@ func (library *Library) ExpandGroup(name string, groupType int) []string {
 		}
 
 		if _, ok := library.Catalog.Origins[entry.Origin]; !ok {
-			log.Printf("ERROR: unknown group entry `%s'", entry.Origin)
+			logger.Log(logger.LevelError, "library", "unknown group entry `%s'", entry.Origin)
 			continue
 		}
 

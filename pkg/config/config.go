@@ -16,6 +16,8 @@ const (
 	DefaultConfigFile string = "/etc/facette/facette.json"
 	// DefaultLogFile represents the default log file location.
 	DefaultLogFile string = ""
+	// DefaultLogLevel represents the default log level.
+	DefaultLogLevel string = "warning"
 	// DefaultPlotSample represents the default plot sample for graph querying.
 	DefaultPlotSample int = 400
 )

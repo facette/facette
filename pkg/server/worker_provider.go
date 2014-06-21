@@ -2,11 +2,11 @@ package server
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/connector"
+	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/provider"
 	"github.com/facette/facette/pkg/worker"
 )
@@ -14,7 +14,7 @@ import (
 func (server *Server) startProviderWorkers() error {
 	server.providerWorkers = worker.NewWorkerPool()
 
-	log.Println("DEBUG: declaring providers")
+	logger.Log(logger.LevelDebug, "server", "declaring providers")
 
 	for _, prov := range server.providers {
 		connectorType, err := config.GetString(prov.Config.Connector, "type", true)
@@ -31,8 +31,8 @@ func (server *Server) startProviderWorkers() error {
 		providerWorker.RegisterEvent(eventCatalogRefresh, workerProviderRefresh)
 
 		if err := providerWorker.SendEvent(eventInit, false, prov, connectorType); err != nil {
-			log.Printf("ERROR: in provider `%s', %s", prov.Name, err.Error())
-			log.Printf("WARNING: discarding provider `%s'", prov.Name)
+			logger.Log(logger.LevelWarning, "server", "in provider `%s', %s", prov.Name, err)
+			logger.Log(logger.LevelWarning, "server", "discarding provider `%s'", prov.Name)
 			continue
 		}
 
@@ -41,7 +41,7 @@ func (server *Server) startProviderWorkers() error {
 
 		providerWorker.SendEvent(eventRun, true, nil)
 
-		log.Printf("DEBUG: declared provider `%s'", prov.Name)
+		logger.Log(logger.LevelDebug, "server", "declared provider `%s'", prov.Name)
 	}
 
 	return nil
@@ -65,7 +65,7 @@ func workerProviderInit(w *worker.Worker, args ...interface{}) {
 		connectorType = args[1].(string)
 	)
 
-	log.Printf("DEBUG: providerWorker[%s]: init", prov.Name)
+	logger.Log(logger.LevelDebug, "provider", "%s: init", prov.Name)
 
 	// Instanciate the connector according to its type
 	conn, err := connector.Connectors[connectorType](prov.Config.Connector)
@@ -86,7 +86,7 @@ func workerProviderInit(w *worker.Worker, args ...interface{}) {
 func workerProviderShutdown(w *worker.Worker, args ...interface{}) {
 	var prov = w.Props[0].(*provider.Provider)
 
-	log.Printf("DEBUG: providerWorker[%s]: shutdown", prov.Name)
+	logger.Log(logger.LevelDebug, "provider", "%s: shutdown", prov.Name)
 
 	w.SendJobSignal(jobSignalShutdown)
 }
@@ -101,7 +101,7 @@ func workerProviderRun(w *worker.Worker, args ...interface{}) {
 	defer func() { w.State = worker.JobStopped }()
 	defer w.Shutdown()
 
-	log.Printf("DEBUG: providerWorker[%s]: starting", prov.Name)
+	logger.Log(logger.LevelDebug, "provider", "%s: starting", prov.Name)
 
 	// If provider `refresh_interval` has been configured, set up a time ticker
 	if prov.Config.RefreshInterval > 0 {
@@ -113,7 +113,7 @@ func workerProviderRun(w *worker.Worker, args ...interface{}) {
 		select {
 		case _ = <-timeChan:
 			if err := prov.Connector.Refresh(prov.Name, prov.Filters.Input); err != nil {
-				log.Printf("ERROR: unable to refresh provider `%s': %s", prov.Name, err)
+				logger.Log(logger.LevelError, "provider", "%s: unable to refresh: %s", prov.Name, err)
 				continue
 			}
 
@@ -122,17 +122,17 @@ func workerProviderRun(w *worker.Worker, args ...interface{}) {
 		case cmd := <-w.ReceiveJobSignals():
 			switch cmd {
 			case jobSignalRefresh:
-				log.Printf("INFO: providerWorker[%s]: received refresh command", prov.Name)
+				logger.Log(logger.LevelInfo, "provider", "%s: received refresh command", prov.Name)
 
 				if err := prov.Connector.Refresh(prov.Name, prov.Filters.Input); err != nil {
-					log.Printf("ERROR: unable to refresh provider `%s': %s", prov.Name, err)
+					logger.Log(logger.LevelError, "provider", "%s: unable to refresh: %s", prov.Name, err)
 					continue
 				}
 
 				prov.LastRefresh = time.Now()
 
 			case jobSignalShutdown:
-				log.Printf("INFO: providerWorker[%s]: received shutdown command, stopping job", prov.Name)
+				logger.Log(logger.LevelInfo, "provider", "%s: received shutdown command, stopping job", prov.Name)
 
 				w.State = worker.JobStopped
 
@@ -144,7 +144,7 @@ func workerProviderRun(w *worker.Worker, args ...interface{}) {
 				return
 
 			default:
-				log.Println("NOTICE: providerWorker[%s]: received unknown command, ignoring", prov.Name)
+				logger.Log(logger.LevelNotice, "provider", "%s: received unknown command, ignoring", prov.Name)
 			}
 		}
 	}
@@ -153,7 +153,7 @@ func workerProviderRun(w *worker.Worker, args ...interface{}) {
 func workerProviderRefresh(w *worker.Worker, args ...interface{}) {
 	var prov = w.Props[0].(*provider.Provider)
 
-	log.Printf("DEBUG: providerWorker[%s]: refresh", prov.Name)
+	logger.Log(logger.LevelDebug, "provider", "%s: refresh", prov.Name)
 
 	w.SendJobSignal(jobSignalRefresh)
 }

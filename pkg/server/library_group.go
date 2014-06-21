@@ -3,7 +3,6 @@ package server
 import (
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"sort"
@@ -11,6 +10,7 @@ import (
 	"time"
 
 	"github.com/facette/facette/pkg/library"
+	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/utils"
 )
 
@@ -40,7 +40,7 @@ func (server *Server) serveGroup(writer http.ResponseWriter, request *http.Reque
 			server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 			return
 		} else if err != nil {
-			log.Println("ERROR: " + err.Error())
+			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 			return
 		}
@@ -58,7 +58,7 @@ func (server *Server) serveGroup(writer http.ResponseWriter, request *http.Reque
 			server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 			return
 		} else if err != nil {
-			log.Println("ERROR: " + err.Error())
+			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 			return
 		}
@@ -80,7 +80,7 @@ func (server *Server) serveGroup(writer http.ResponseWriter, request *http.Reque
 				server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 				return
 			} else if err != nil {
-				log.Println("ERROR: " + err.Error())
+				logger.Log(logger.LevelError, "server", "%s", err)
 				server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 				return
 			}
@@ -100,7 +100,7 @@ func (server *Server) serveGroup(writer http.ResponseWriter, request *http.Reque
 		body, _ := ioutil.ReadAll(request.Body)
 
 		if err := json.Unmarshal(body, group); err != nil {
-			log.Println("ERROR: " + err.Error())
+			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 			return
 		}
@@ -108,7 +108,7 @@ func (server *Server) serveGroup(writer http.ResponseWriter, request *http.Reque
 		// Store group data
 		err := server.Library.StoreItem(group, groupType)
 		if response, status := server.parseError(writer, request, err); status != http.StatusOK {
-			log.Println("ERROR: " + err.Error())
+			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, response, status)
 			return
 		}
@@ -177,7 +177,7 @@ func (server *Server) serveGroupExpand(writer http.ResponseWriter, request *http
 
 	query := ExpandRequest{}
 	if err := json.Unmarshal(body, &query); err != nil {
-		log.Println("ERROR: " + err.Error())
+		logger.Log(logger.LevelError, "server", "%s", err)
 		server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 		return
 	}

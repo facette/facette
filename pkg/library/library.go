@@ -3,7 +3,6 @@
 package library
 
 import (
-	"log"
 	"os"
 	"path"
 	"regexp"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/config"
+	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/utils"
 )
 
@@ -41,7 +41,6 @@ type Library struct {
 	Scales      map[string]*Scale
 	Graphs      map[string]*Graph
 	Collections map[string]*Collection
-	debugLevel  int
 	idRegexp    *regexp.Regexp
 }
 
@@ -63,14 +62,12 @@ func (library *Library) Refresh() error {
 
 		_, itemID := path.Split(filePath[:len(filePath)-5])
 
-		if library.debugLevel > 1 {
-			log.Printf("DEBUG: loading item `%s' from file `%s'", itemID, filePath)
-		}
+		logger.Log(logger.LevelDebug, "library", "loading item `%s' from file `%s'", itemID, filePath)
 
 		return library.LoadItem(itemID, itemType)
 	}
 
-	log.Println("INFO: library refresh started")
+	logger.Log(logger.LevelInfo, "library", "refresh started")
 
 	for _, itemType = range []int{
 		LibraryItemSourceGroup,
@@ -86,7 +83,7 @@ func (library *Library) Refresh() error {
 		}
 
 		if err := utils.WalkDir(dirPath, walkFunc); err != nil {
-			log.Println("ERROR: " + err.Error())
+			logger.Log(logger.LevelError, "library", "%s", err)
 		}
 	}
 
@@ -97,7 +94,7 @@ func (library *Library) Refresh() error {
 		}
 
 		if _, ok := library.Collections[collection.ParentID]; !ok {
-			log.Println("ERROR: unknown parent identifier `%s'", collection.ParentID)
+			logger.Log(logger.LevelError, "library", "unknown parent identifier `%s'", collection.ParentID)
 			continue
 		}
 
@@ -105,17 +102,16 @@ func (library *Library) Refresh() error {
 		collection.Parent.Children = append(collection.Parent.Children, collection)
 	}
 
-	log.Println("INFO: library refresh completed")
+	logger.Log(logger.LevelInfo, "library", "refresh completed")
 
 	return nil
 }
 
 // NewLibrary creates a new instance of library.
-func NewLibrary(config *config.Config, catalog *catalog.Catalog, debugLevel int) *Library {
+func NewLibrary(config *config.Config, catalog *catalog.Catalog) *Library {
 	return &Library{
-		Config:     config,
-		Catalog:    catalog,
-		debugLevel: debugLevel,
-		idRegexp:   regexp.MustCompile(UUIDPattern),
+		Config:   config,
+		Catalog:  catalog,
+		idRegexp: regexp.MustCompile(UUIDPattern),
 	}
 }

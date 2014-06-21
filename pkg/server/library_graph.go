@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -13,6 +12,7 @@ import (
 	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/connector"
 	"github.com/facette/facette/pkg/library"
+	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/types"
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
@@ -33,7 +33,7 @@ func (server *Server) serveGraph(writer http.ResponseWriter, request *http.Reque
 			server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 			return
 		} else if err != nil {
-			log.Println("ERROR: " + err.Error())
+			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 			return
 		}
@@ -51,7 +51,7 @@ func (server *Server) serveGraph(writer http.ResponseWriter, request *http.Reque
 			server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 			return
 		} else if err != nil {
-			log.Println("ERROR: " + err.Error())
+			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 			return
 		}
@@ -73,7 +73,7 @@ func (server *Server) serveGraph(writer http.ResponseWriter, request *http.Reque
 				server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 				return
 			} else if err != nil {
-				log.Println("ERROR: " + err.Error())
+				logger.Log(logger.LevelError, "server", "%s", err)
 				server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 				return
 			}
@@ -93,14 +93,14 @@ func (server *Server) serveGraph(writer http.ResponseWriter, request *http.Reque
 		body, _ := ioutil.ReadAll(request.Body)
 
 		if err := json.Unmarshal(body, graph); err != nil {
-			log.Println("ERROR: " + err.Error())
+			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 			return
 		}
 
 		err := server.Library.StoreItem(graph, library.LibraryItemGraph)
 		if response, status := server.parseError(writer, request, err); status != http.StatusOK {
-			log.Println("ERROR: " + err.Error())
+			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, response, status)
 			return
 		}
@@ -134,7 +134,7 @@ func (server *Server) serveGraphList(writer http.ResponseWriter, request *http.R
 			server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 			return
 		} else if err != nil {
-			log.Println("ERROR: " + err.Error())
+			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 			return
 		}
@@ -199,7 +199,7 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 	plotReq := PlotRequest{}
 
 	if err := json.Unmarshal(body, &plotReq); err != nil {
-		log.Println("ERROR: " + err.Error())
+		logger.Log(logger.LevelError, "server", "%s", err)
 		server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 		return
 	}
@@ -208,13 +208,13 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 		endTime = time.Now()
 	} else if strings.HasPrefix(strings.Trim(plotReq.Range, " "), "-") {
 		if endTime, err = time.Parse(time.RFC3339, plotReq.Time); err != nil {
-			log.Println("ERROR: " + err.Error())
+			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 			return
 		}
 	} else {
 		if startTime, err = time.Parse(time.RFC3339, plotReq.Time); err != nil {
-			log.Println("ERROR: " + err.Error())
+			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 			return
 		}
@@ -222,12 +222,12 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 
 	if startTime.IsZero() {
 		if startTime, err = utils.TimeApplyRange(endTime, plotReq.Range); err != nil {
-			log.Println("ERROR: " + err.Error())
+			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 			return
 		}
 	} else if endTime, err = utils.TimeApplyRange(startTime, plotReq.Range); err != nil {
-		log.Println("ERROR: " + err.Error())
+		logger.Log(logger.LevelError, "server", "%s", err)
 		server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 		return
 	}
@@ -253,7 +253,7 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 		if os.IsNotExist(err) {
 			server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 		} else {
-			log.Println("ERROR: " + err.Error())
+			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 		}
 
@@ -273,22 +273,17 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 		query, providerConnector, err := server.preparePlotQuery(&plotReq, groupItem)
 		if err != nil {
 			if err != os.ErrInvalid {
-				log.Println("ERROR: " + err.Error())
+				logger.Log(logger.LevelError, "server", "%s", err)
 			}
 
 			data = append(data, nil)
 			continue
 		}
 
-		if providerConnector == nil {
-			log.Println("ERROR: origin connector should not be null")
-			continue
-		}
-
 		plotResult, err := providerConnector.GetPlots(&types.PlotQuery{query, startTime, endTime, step,
 			plotReq.Percentiles})
 		if err != nil {
-			log.Println("ERROR: " + err.Error())
+			logger.Log(logger.LevelError, "server", "%s", err)
 		}
 
 		data = append(data, plotResult)
@@ -377,8 +372,10 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 					metric := server.Catalog.GetMetric(serieItem.Origin, serieSource, serieChunk)
 
 					if metric == nil {
-						log.Printf(
-							"ERROR: unknown metric `%s' for source `%s' (origin: %s)",
+						logger.Log(
+							logger.LevelError,
+							"server",
+							"unknown metric `%s' for source `%s' (origin: %s)",
 							serieChunk,
 							serieSource,
 							serieItem.Origin,
@@ -409,8 +406,10 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 				metric := server.Catalog.GetMetric(serieItem.Origin, serieSource, serieItem.Metric)
 
 				if metric == nil {
-					log.Printf(
-						"ERROR: unknown metric `%s' for source `%s' (origin: %s)",
+					logger.Log(
+						logger.LevelError,
+						"server",
+						"unknown metric `%s' for source `%s' (origin: %s)",
 						serieItem.Metric,
 						serieSource,
 						serieItem.Origin,
