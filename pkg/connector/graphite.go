@@ -74,7 +74,7 @@ func (connector *GraphiteConnector) GetPlots(query *types.PlotQuery) (map[string
 
 	queryURL, err := graphiteBuildQueryURL(query.Group, query.StartTime, query.EndTime)
 	if err != nil {
-		return nil, fmt.Errorf("unable to build Graphite query URL: %s", err.Error())
+		return nil, fmt.Errorf("unable to build Graphite query URL: %s", err)
 	}
 
 	httpTransport := &http.Transport{

@@ -163,7 +163,7 @@ func (library *Library) LoadItem(id string, itemType int) error {
 
 		fileInfo, err := utils.JSONLoad(filePath, &tmpGroup)
 		if err != nil {
-			return fmt.Errorf("in %s, %s", filePath, err.Error())
+			return fmt.Errorf("in %s, %s", filePath, err)
 		}
 
 		library.Groups[id] = tmpGroup
@@ -177,7 +177,7 @@ func (library *Library) LoadItem(id string, itemType int) error {
 
 		fileInfo, err := utils.JSONLoad(filePath, &tmpScale)
 		if err != nil {
-			return fmt.Errorf("in %s, %s", filePath, err.Error())
+			return fmt.Errorf("in %s, %s", filePath, err)
 		}
 
 		library.Scales[id] = tmpScale
@@ -190,7 +190,7 @@ func (library *Library) LoadItem(id string, itemType int) error {
 
 		fileInfo, err := utils.JSONLoad(filePath, &tmpGraph)
 		if err != nil {
-			return fmt.Errorf("in %s, %s", filePath, err.Error())
+			return fmt.Errorf("in %s, %s", filePath, err)
 		}
 
 		library.Graphs[id] = tmpGraph
@@ -206,7 +206,7 @@ func (library *Library) LoadItem(id string, itemType int) error {
 
 		fileInfo, err := utils.JSONLoad(filePath, &tmpCollection)
 		if err != nil {
-			return fmt.Errorf("in %s, %s", filePath, err.Error())
+			return fmt.Errorf("in %s, %s", filePath, err)
 		}
 
 		if !library.ItemExists(id, LibraryItemCollection) {

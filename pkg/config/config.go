@@ -57,7 +57,7 @@ func (config *Config) Load(filePath string) error {
 		config.Providers[providerName] = &ProviderConfig{}
 
 		if fileInfo, err = utils.JSONLoad(filePath, config.Providers[providerName]); err != nil {
-			err = fmt.Errorf("in %s, %s", filePath, err.Error())
+			err = fmt.Errorf("in %s, %s", filePath, err)
 			if errOutput == nil {
 				errOutput = err
 			}

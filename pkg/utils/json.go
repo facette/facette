@@ -67,5 +67,5 @@ func jsonError(data string, err error) error {
 	lineStart := strings.LastIndex(data[:syntax.Offset], "\n")
 	line, position := strings.Count(data[:syntax.Offset], "\n")+1, int(syntax.Offset)-lineStart-1
 
-	return fmt.Errorf("%s (line: %d, pos: %d)", err.Error(), line, position)
+	return fmt.Errorf("%s (line: %d, pos: %d)", err, line, position)
 }

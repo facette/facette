@@ -8,7 +8,7 @@ import (
 func Test_HTTPGetContentType(test *testing.T) {
 	request, err := http.NewRequest("GET", "/", nil)
 	if err != nil {
-		test.Fatal(err.Error())
+		test.Fatal(err)
 	}
 
 	if result := HTTPGetContentType(request); result != "" {
