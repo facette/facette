@@ -35,12 +35,12 @@ type Server struct {
 	Listener        *stoppableListener.StoppableListener
 	Catalog         *catalog.Catalog
 	Library         *library.Library
-	Loading         bool
 	providers       map[string]*provider.Provider
 	providerWorkers worker.WorkerPool
 	catalogWorker   *worker.Worker
 	startTime       time.Time
 	logLevel        int
+	loading         bool
 }
 
 // NewServer creates a new instance of server.
@@ -56,7 +56,7 @@ func NewServer(configPath, logPath string, logLevel int) *Server {
 func (server *Server) Reload(config bool) error {
 	logger.Log(logger.LevelNotice, "server", "reloading")
 
-	server.Loading = true
+	server.loading = true
 
 	if config {
 		if err := server.Config.Reload(); err != nil {
@@ -68,7 +68,7 @@ func (server *Server) Reload(config bool) error {
 	server.providerWorkers.Broadcast(eventCatalogRefresh, nil)
 	server.Library.Refresh()
 
-	server.Loading = false
+	server.loading = false
 
 	return nil
 }

@@ -29,13 +29,13 @@ func (router *Router) ServeHTTP(writer http.ResponseWriter, request *http.Reques
 		request.URL.Path = strings.TrimPrefix(request.URL.Path, router.server.Config.URLPrefix)
 	}
 
-	if router.server.Loading {
+	if router.server.loading {
 		if strings.HasPrefix(request.URL.Path, urlAdminPath) || strings.HasPrefix(request.URL.Path, urlBrowsePath) {
 			router.server.serveWait(writer, request)
 			return
 		} else if request.URL.Path == urlReloadPath {
 			for {
-				if !router.server.Loading {
+				if !router.server.loading {
 					break
 				}
 
