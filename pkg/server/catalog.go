@@ -71,7 +71,6 @@ func (server *Server) serveOrigin(writer http.ResponseWriter, request *http.Requ
 	response := OriginResponse{
 		Name:      originName,
 		Connector: connectorType,
-		// Updated:   server.Catalog.Origins[originName].LastRefresh.Format(time.RFC3339), // TODO: useful?
 	}
 
 	server.serveResponse(writer, response, http.StatusOK)

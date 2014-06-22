@@ -37,14 +37,12 @@ type PlotRequest struct {
 type OriginResponse struct {
 	Name      string `json:"name"`
 	Connector string `json:"connector"`
-	Updated   string `json:"updated"`
 }
 
 // SourceResponse represents a source response structure in the server backend.
 type SourceResponse struct {
 	Name    string   `json:"name"`
 	Origins []string `json:"origins"`
-	Updated string   `json:"updated"`
 }
 
 // MetricResponse represents a metric response structure in the server backend.
@@ -52,7 +50,6 @@ type MetricResponse struct {
 	Name    string   `json:"name"`
 	Origins []string `json:"origins"`
 	Sources []string `json:"sources"`
-	Updated string   `json:"updated"`
 }
 
 // StringListResponse represents a list of strings response structure in the server backend.

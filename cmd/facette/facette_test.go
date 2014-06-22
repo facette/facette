@@ -83,7 +83,6 @@ func Test_CatalogOriginGet(test *testing.T) {
 	// Test GET on source1 item
 	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/sources/source1", serverConfig.BindAddr),
 		nil, &result)
-	result.Updated = ""
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
@@ -101,7 +100,6 @@ func Test_CatalogOriginGet(test *testing.T) {
 
 	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/sources/source2", serverConfig.BindAddr),
 		nil, &result)
-	result.Updated = ""
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
@@ -185,7 +183,6 @@ func Test_CatalogSourceGet(test *testing.T) {
 	// Test GET on source1 item
 	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/sources/source1", serverConfig.BindAddr),
 		nil, &result)
-	result.Updated = ""
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
@@ -203,7 +200,6 @@ func Test_CatalogSourceGet(test *testing.T) {
 
 	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/sources/source2", serverConfig.BindAddr),
 		nil, &result)
-	result.Updated = ""
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
@@ -300,7 +296,6 @@ func Test_CatalogMetricGet(test *testing.T) {
 	// Test GET on metric item
 	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/metrics/database2/test",
 		serverConfig.BindAddr), nil, &result)
-	result.Updated = ""
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)

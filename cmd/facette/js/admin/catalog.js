@@ -25,9 +25,7 @@ function adminCatalogSetupTerminate() {
                     case 'origins':
                         $tooltip.html(
                             '<span class="label">' + $.t('main.labl_connector') + '</span> ' +
-                                data.connector + '<br>' +
-                            '<span class="label">' + $.t('main.labl_updated') + '</span> ' +
-                                moment(data.updated).format('LLL')
+                                data.connector
                         );
 
                         break;
