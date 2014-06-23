@@ -155,7 +155,7 @@ if (window.Highcharts) {
                             element: e.target,
                             name: key,
                             serie: serie,
-                            value: parseFloat($(e.target).parent().attr('data-value')) || null
+                            value: parseFloat($(e.target).attr('data-value')) || null
                         });
                 });
 

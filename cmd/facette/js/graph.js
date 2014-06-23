@@ -138,7 +138,7 @@ function graphDraw(graph, postpone, delay, preview) {
                             },
 
                             togglePlotLine: function () {
-                                var $parent,
+                                var $element,
                                     re = new RegExp('(^| +)active( +|$)');
 
                                 $(this.chart.container).find('.highcharts-table-value.active').css({
@@ -146,23 +146,26 @@ function graphDraw(graph, postpone, delay, preview) {
                                     fill: 'inherit'
                                 });
 
-                                $parent = $(this.element).parent();
+                                $element = $(this.element);
 
                                 // Remove existing plot line
                                 this.chart.yAxis[0].removePlotLine('plotline0');
 
-                                if ($parent.attr('class').match(re)) {
-                                    $parent.attr('class', $parent.attr('class').replace(re, ''));
+                                if ($element.attr('class') && $element.attr('class').match(re)) {
+                                    $element
+                                        .removeAttr('css')
+                                        .attr('class', $element.attr('class').replace(re, ''));
+
                                     return;
                                 }
 
                                 // Set element active
-                                $parent
+                                $element
                                     .css({
                                         color: '#e30',
                                         fill: '#e30'
                                     })
-                                    .attr('class', $parent.attr('class') + ' active');
+                                    .attr('class', $element.attr('class') + ' active');
 
                                 // Draw new plot line
                                 this.chart.yAxis[0].addPlotLine({
