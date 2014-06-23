@@ -56,10 +56,10 @@ func (server *Server) serveAdminCatalog(writer http.ResponseWriter, request *htt
 			URLPrefix: server.Config.URLPrefix,
 			Section:   strings.TrimRight(strings.TrimPrefix(request.URL.Path, urlAdminPath), "/"),
 		},
-		path.Join(server.Config.BaseDir, "html", "layout.html"),
-		path.Join(server.Config.BaseDir, "html", "common", "element.html"),
-		path.Join(server.Config.BaseDir, "html", "admin", "layout.html"),
-		path.Join(server.Config.BaseDir, "html", "admin", "catalog_list.html"),
+		path.Join(server.Config.BaseDir, "template", "layout.html"),
+		path.Join(server.Config.BaseDir, "template", "common", "element.html"),
+		path.Join(server.Config.BaseDir, "template", "admin", "layout.html"),
+		path.Join(server.Config.BaseDir, "template", "admin", "catalog_list.html"),
 	)
 }
 
@@ -89,10 +89,10 @@ func (server *Server) serveAdminCollection(writer http.ResponseWriter, request *
 	return server.execTemplate(
 		writer,
 		data,
-		path.Join(server.Config.BaseDir, "html", "layout.html"),
-		path.Join(server.Config.BaseDir, "html", "common", "element.html"),
-		path.Join(server.Config.BaseDir, "html", "admin", "layout.html"),
-		path.Join(server.Config.BaseDir, "html", "admin", tmplFile),
+		path.Join(server.Config.BaseDir, "template", "layout.html"),
+		path.Join(server.Config.BaseDir, "template", "common", "element.html"),
+		path.Join(server.Config.BaseDir, "template", "admin", "layout.html"),
+		path.Join(server.Config.BaseDir, "template", "admin", tmplFile),
 	)
 }
 
@@ -134,10 +134,10 @@ func (server *Server) serveAdminGraph(writer http.ResponseWriter, request *http.
 	return server.execTemplate(
 		writer,
 		data,
-		path.Join(server.Config.BaseDir, "html", "layout.html"),
-		path.Join(server.Config.BaseDir, "html", "common", "element.html"),
-		path.Join(server.Config.BaseDir, "html", "admin", "layout.html"),
-		path.Join(server.Config.BaseDir, "html", "admin", tmplFile),
+		path.Join(server.Config.BaseDir, "template", "layout.html"),
+		path.Join(server.Config.BaseDir, "template", "common", "element.html"),
+		path.Join(server.Config.BaseDir, "template", "admin", "layout.html"),
+		path.Join(server.Config.BaseDir, "template", "admin", tmplFile),
 	)
 }
 
@@ -181,10 +181,10 @@ func (server *Server) serveAdminGroup(writer http.ResponseWriter, request *http.
 	return server.execTemplate(
 		writer,
 		data,
-		path.Join(server.Config.BaseDir, "html", "layout.html"),
-		path.Join(server.Config.BaseDir, "html", "common", "element.html"),
-		path.Join(server.Config.BaseDir, "html", "admin", "layout.html"),
-		path.Join(server.Config.BaseDir, "html", "admin", tmplFile),
+		path.Join(server.Config.BaseDir, "template", "layout.html"),
+		path.Join(server.Config.BaseDir, "template", "common", "element.html"),
+		path.Join(server.Config.BaseDir, "template", "admin", "layout.html"),
+		path.Join(server.Config.BaseDir, "template", "admin", tmplFile),
 	)
 }
 
@@ -214,10 +214,10 @@ func (server *Server) serveAdminScale(writer http.ResponseWriter, request *http.
 	return server.execTemplate(
 		writer,
 		data,
-		path.Join(server.Config.BaseDir, "html", "layout.html"),
-		path.Join(server.Config.BaseDir, "html", "common", "element.html"),
-		path.Join(server.Config.BaseDir, "html", "admin", "layout.html"),
-		path.Join(server.Config.BaseDir, "html", "admin", tmplFile),
+		path.Join(server.Config.BaseDir, "template", "layout.html"),
+		path.Join(server.Config.BaseDir, "template", "common", "element.html"),
+		path.Join(server.Config.BaseDir, "template", "admin", "layout.html"),
+		path.Join(server.Config.BaseDir, "template", "admin", tmplFile),
 	)
 }
 
@@ -233,10 +233,10 @@ func (server *Server) serveAdminIndex(writer http.ResponseWriter, request *http.
 			Section:   "",
 			Stats:     server.getStats(writer, request),
 		},
-		path.Join(server.Config.BaseDir, "html", "layout.html"),
-		path.Join(server.Config.BaseDir, "html", "common", "element.html"),
-		path.Join(server.Config.BaseDir, "html", "admin", "layout.html"),
-		path.Join(server.Config.BaseDir, "html", "admin", "index.html"),
+		path.Join(server.Config.BaseDir, "template", "layout.html"),
+		path.Join(server.Config.BaseDir, "template", "common", "element.html"),
+		path.Join(server.Config.BaseDir, "template", "admin", "layout.html"),
+		path.Join(server.Config.BaseDir, "template", "admin", "index.html"),
 	)
 }
 

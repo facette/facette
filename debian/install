@@ -1,5 +1,5 @@
 usr/bin/facettectl          usr/sbin
 usr/bin/facette             usr/sbin
-usr/share/html              usr/share/facette
+usr/share/template          usr/share/facette
 usr/share/static            usr/share/facette
 docs/examples/facette.json  etc/facette

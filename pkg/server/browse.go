@@ -53,10 +53,10 @@ func (server *Server) serveBrowseIndex(writer http.ResponseWriter, request *http
 		}{
 			URLPrefix: server.Config.URLPrefix,
 		},
-		path.Join(server.Config.BaseDir, "html", "layout.html"),
-		path.Join(server.Config.BaseDir, "html", "common", "element.html"),
-		path.Join(server.Config.BaseDir, "html", "browse", "layout.html"),
-		path.Join(server.Config.BaseDir, "html", "browse", "index.html"),
+		path.Join(server.Config.BaseDir, "template", "layout.html"),
+		path.Join(server.Config.BaseDir, "template", "common", "element.html"),
+		path.Join(server.Config.BaseDir, "template", "browse", "layout.html"),
+		path.Join(server.Config.BaseDir, "template", "browse", "index.html"),
 	)
 }
 
@@ -98,11 +98,11 @@ func (server *Server) serveBrowseCollection(writer http.ResponseWriter, request 
 	return server.execTemplate(
 		writer,
 		data,
-		path.Join(server.Config.BaseDir, "html", "layout.html"),
-		path.Join(server.Config.BaseDir, "html", "common", "element.html"),
-		path.Join(server.Config.BaseDir, "html", "common", "graph.html"),
-		path.Join(server.Config.BaseDir, "html", "browse", "layout.html"),
-		path.Join(server.Config.BaseDir, "html", "browse", "collection.html"),
+		path.Join(server.Config.BaseDir, "template", "layout.html"),
+		path.Join(server.Config.BaseDir, "template", "common", "element.html"),
+		path.Join(server.Config.BaseDir, "template", "common", "graph.html"),
+		path.Join(server.Config.BaseDir, "template", "browse", "layout.html"),
+		path.Join(server.Config.BaseDir, "template", "browse", "collection.html"),
 	)
 }
 
@@ -156,9 +156,9 @@ func (server *Server) serveBrowseSearch(writer http.ResponseWriter, request *htt
 	return server.execTemplate(
 		writer,
 		data,
-		path.Join(server.Config.BaseDir, "html", "layout.html"),
-		path.Join(server.Config.BaseDir, "html", "common", "element.html"),
-		path.Join(server.Config.BaseDir, "html", "browse", "layout.html"),
-		path.Join(server.Config.BaseDir, "html", "browse", "search.html"),
+		path.Join(server.Config.BaseDir, "template", "layout.html"),
+		path.Join(server.Config.BaseDir, "template", "common", "element.html"),
+		path.Join(server.Config.BaseDir, "template", "browse", "layout.html"),
+		path.Join(server.Config.BaseDir, "template", "browse", "search.html"),
 	)
 }

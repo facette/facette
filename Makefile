@@ -209,10 +209,11 @@ STYLE_EXTRA = cmd/facette/style/extra/favicon.png \
 
 STYLE_EXTRA_OUTPUT = $(addprefix $(TEMP_DIR)/static/, $(notdir $(STYLE_EXTRA)))
 
-HTML_SRC = $(wildcard cmd/facette/html/*/*.html) \
-	$(wildcard cmd/facette/html/*.html)
+TMPL_SRC = $(wildcard cmd/facette/template/*/*.html) \
+	$(wildcard cmd/facette/template/*.html) \
+	$(wildcard cmd/facette/template/*.xml)
 
-HTML_OUTPUT = $(TEMP_DIR)/html
+TMPL_OUTPUT = $(TEMP_DIR)/template
 
 $(SCRIPT_OUTPUT): uglifyjs $(SCRIPT_SRC)
 	@$(call mesg_start,static,Merging script files into $(notdir $(SCRIPT_OUTPUT:.js=.src.js))...)
@@ -254,22 +255,22 @@ $(STYLE_EXTRA_OUTPUT): $(STYLE_EXTRA)
 	@cp -r $(STYLE_EXTRA) $(TEMP_DIR)/static/ && \
 		$(call mesg_ok) || $(call mesg_fail)
 
-$(HTML_OUTPUT): $(HTML_SRC)
-	@$(call mesg_start,static,Copying HTML files...)
-	@install -d -m 0755 $(HTML_OUTPUT) && \
-		(cd cmd/facette/html; cp -r --parents $(HTML_SRC:cmd/facette/html/%=%) ../../../$(HTML_OUTPUT)/) && \
+$(TMPL_OUTPUT): $(TMPL_SRC)
+	@$(call mesg_start,static,Copying template files...)
+	@install -d -m 0755 $(TMPL_OUTPUT) && \
+		(cd cmd/facette/template; cp -r --parents $(TMPL_SRC:cmd/facette/template/%=%) ../../../$(TMPL_OUTPUT)/) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 build-static: $(SCRIPT_OUTPUT) $(SCRIPT_EXTRA_OUTPUT) $(MESG_OUTPUT) $(STYLE_OUTPUT) $(STYLE_PRINT_OUTPUT) \
-	$(STYLE_EXTRA_OUTPUT) $(HTML_OUTPUT)
+	$(STYLE_EXTRA_OUTPUT) $(TMPL_OUTPUT)
 
 install-static: build-static
 	@$(call mesg_start,install,Installing static files...)
 	@install -d -m 0755 $(PREFIX)/share/static && cp -Rp $(SCRIPT_OUTPUT) $(SCRIPT_EXTRA_OUTPUT) $(MESG_OUTPUT) \
 		$(STYLE_OUTPUT) $(STYLE_PRINT_OUTPUT) $(STYLE_EXTRA_OUTPUT) $(PREFIX)/share/static && \
 		$(call mesg_ok) || $(call mesg_fail)
-	@$(call mesg_start,install,Installing HTML files...)
-	@cp -Rp $(HTML_OUTPUT) $(PREFIX)/share && \
+	@$(call mesg_start,install,Installing template files...)
+	@cp -Rp $(TMPL_OUTPUT) $(PREFIX)/share && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 devel-static: install-static

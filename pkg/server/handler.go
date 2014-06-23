@@ -25,8 +25,8 @@ func (server *Server) serveError(writer http.ResponseWriter, status int) {
 			URLPrefix: server.Config.URLPrefix,
 			Status:    status,
 		},
-		path.Join(server.Config.BaseDir, "html", "layout.html"),
-		path.Join(server.Config.BaseDir, "html", "error.html"),
+		path.Join(server.Config.BaseDir, "template", "layout.html"),
+		path.Join(server.Config.BaseDir, "template", "error.html"),
 	)
 
 	if err != nil {
@@ -103,8 +103,8 @@ func (server *Server) serveWait(writer http.ResponseWriter, request *http.Reques
 		}{
 			URLPrefix: server.Config.URLPrefix,
 		},
-		path.Join(server.Config.BaseDir, "html", "layout.html"),
-		path.Join(server.Config.BaseDir, "html", "wait.html"),
+		path.Join(server.Config.BaseDir, "template", "layout.html"),
+		path.Join(server.Config.BaseDir, "template", "wait.html"),
 	)
 
 	if err != nil {
