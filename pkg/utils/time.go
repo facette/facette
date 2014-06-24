@@ -27,7 +27,7 @@ type durationUnit struct {
 
 // DurationToRange converts a duration into a string-defined time range.
 func DurationToRange(duration time.Duration) string {
-	ranges := []durationUnit{
+	units := []durationUnit{
 		durationUnit{86400, "d"},
 		durationUnit{3600, "h"},
 		durationUnit{60, "m"},
@@ -37,7 +37,7 @@ func DurationToRange(duration time.Duration) string {
 	chunks := make([]string, 0)
 	seconds := int(math.Abs(duration.Seconds()))
 
-	for _, unit := range ranges {
+	for _, unit := range units {
 		count := int(math.Floor(float64(seconds / unit.value)))
 
 		if count > 0 {
