@@ -1,7 +1,6 @@
 #!/bin/bash
 
 read -d '' DEPENDS <<EOF
-git  https://github.com/etix/stoppableListener  master
 git  https://github.com/fatih/set               master
 git  https://github.com/nu7hatch/gouuid         master
 git  https://github.com/ziutek/rrd              master
