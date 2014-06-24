@@ -48,6 +48,7 @@ func (server *Server) serveBrowse(writer http.ResponseWriter, request *http.Requ
 func (server *Server) serveBrowseIndex(writer http.ResponseWriter, request *http.Request) error {
 	return server.execTemplate(
 		writer,
+		http.StatusOK,
 		struct {
 			URLPrefix string
 		}{
@@ -97,6 +98,7 @@ func (server *Server) serveBrowseCollection(writer http.ResponseWriter, request 
 
 	return server.execTemplate(
 		writer,
+		http.StatusOK,
 		data,
 		path.Join(server.Config.BaseDir, "template", "layout.html"),
 		path.Join(server.Config.BaseDir, "template", "common", "element.html"),
@@ -155,6 +157,7 @@ func (server *Server) serveBrowseSearch(writer http.ResponseWriter, request *htt
 
 	return server.execTemplate(
 		writer,
+		http.StatusOK,
 		data,
 		path.Join(server.Config.BaseDir, "template", "layout.html"),
 		path.Join(server.Config.BaseDir, "template", "common", "element.html"),

@@ -1,7 +1,6 @@
 package server
 
 import (
-	"bytes"
 	"encoding/json"
 	"mime"
 	"net/http"
@@ -14,10 +13,9 @@ import (
 )
 
 func (server *Server) serveError(writer http.ResponseWriter, status int) {
-	tmplData := bytes.NewBuffer(nil)
-
 	err := server.execTemplate(
 		writer,
+		status,
 		struct {
 			URLPrefix string
 			Status    int
@@ -33,10 +31,6 @@ func (server *Server) serveError(writer http.ResponseWriter, status int) {
 		logger.Log(logger.LevelError, "server", "%s", err)
 		server.serveResponse(writer, nil, status)
 	}
-
-	// Handle HTTP response with status code
-	writer.WriteHeader(status)
-	writer.Write(tmplData.Bytes())
 }
 
 func (server *Server) serveReload(writer http.ResponseWriter, request *http.Request) {
@@ -98,6 +92,7 @@ func (server *Server) serveStats(writer http.ResponseWriter, request *http.Reque
 func (server *Server) serveWait(writer http.ResponseWriter, request *http.Request) {
 	err := server.execTemplate(
 		writer,
+		http.StatusServiceUnavailable,
 		struct {
 			URLPrefix string
 		}{

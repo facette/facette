@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"html/template"
 	"net/http"
 	"reflect"
@@ -8,7 +9,7 @@ import (
 	"strings"
 )
 
-func (server *Server) execTemplate(writer http.ResponseWriter, data interface{}, files ...string) error {
+func (server *Server) execTemplate(writer http.ResponseWriter, status int, data interface{}, files ...string) error {
 	var err error
 
 	tmpl := template.New("layout.html").Funcs(template.FuncMap{
@@ -22,10 +23,19 @@ func (server *Server) execTemplate(writer http.ResponseWriter, data interface{},
 
 	// Execute template
 	tmpl, err = tmpl.ParseFiles(files...)
-	if err == nil {
-		writer.WriteHeader(http.StatusOK)
-		err = tmpl.Execute(writer, data)
+	if err != nil {
+		return err
 	}
+
+	tmplData := bytes.NewBuffer(nil)
+
+	err = tmpl.Execute(tmplData, data)
+	if err != nil {
+		return err
+	}
+
+	writer.WriteHeader(status)
+	writer.Write(tmplData.Bytes())
 
 	return err
 }

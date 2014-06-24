@@ -49,6 +49,7 @@ func (server *Server) serveAdmin(writer http.ResponseWriter, request *http.Reque
 func (server *Server) serveAdminCatalog(writer http.ResponseWriter, request *http.Request) error {
 	return server.execTemplate(
 		writer,
+		http.StatusOK,
 		struct {
 			URLPrefix string
 			Section   string
@@ -88,6 +89,7 @@ func (server *Server) serveAdminCollection(writer http.ResponseWriter, request *
 
 	return server.execTemplate(
 		writer,
+		http.StatusOK,
 		data,
 		path.Join(server.Config.BaseDir, "template", "layout.html"),
 		path.Join(server.Config.BaseDir, "template", "common", "element.html"),
@@ -133,6 +135,7 @@ func (server *Server) serveAdminGraph(writer http.ResponseWriter, request *http.
 
 	return server.execTemplate(
 		writer,
+		http.StatusOK,
 		data,
 		path.Join(server.Config.BaseDir, "template", "layout.html"),
 		path.Join(server.Config.BaseDir, "template", "common", "element.html"),
@@ -180,6 +183,7 @@ func (server *Server) serveAdminGroup(writer http.ResponseWriter, request *http.
 
 	return server.execTemplate(
 		writer,
+		http.StatusOK,
 		data,
 		path.Join(server.Config.BaseDir, "template", "layout.html"),
 		path.Join(server.Config.BaseDir, "template", "common", "element.html"),
@@ -213,6 +217,7 @@ func (server *Server) serveAdminScale(writer http.ResponseWriter, request *http.
 
 	return server.execTemplate(
 		writer,
+		http.StatusOK,
 		data,
 		path.Join(server.Config.BaseDir, "template", "layout.html"),
 		path.Join(server.Config.BaseDir, "template", "common", "element.html"),
@@ -224,6 +229,7 @@ func (server *Server) serveAdminScale(writer http.ResponseWriter, request *http.
 func (server *Server) serveAdminIndex(writer http.ResponseWriter, request *http.Request) error {
 	return server.execTemplate(
 		writer,
+		http.StatusOK,
 		struct {
 			URLPrefix string
 			Section   string
