@@ -29,6 +29,8 @@ func (server *Server) serveBrowse(writer http.ResponseWriter, request *http.Requ
 
 	if strings.HasPrefix(request.URL.Path, urlBrowsePath+"collections/") {
 		err = server.serveBrowseCollection(writer, request)
+	} else if strings.HasPrefix(request.URL.Path, urlBrowsePath+"graphs/") {
+		err = server.serveBrowseGraph(writer, request)
 	} else if request.URL.Path == urlBrowsePath+"search" {
 		err = server.serveBrowseSearch(writer, request)
 	} else if request.URL.Path == urlBrowsePath {
@@ -105,6 +107,38 @@ func (server *Server) serveBrowseCollection(writer http.ResponseWriter, request 
 		path.Join(server.Config.BaseDir, "template", "common", "graph.html"),
 		path.Join(server.Config.BaseDir, "template", "browse", "layout.html"),
 		path.Join(server.Config.BaseDir, "template", "browse", "collection.html"),
+	)
+}
+
+func (server *Server) serveBrowseGraph(writer http.ResponseWriter, request *http.Request) error {
+	data := struct {
+		URLPrefix string
+		Graph     *library.Graph
+		Request   *http.Request
+	}{
+		URLPrefix: server.Config.URLPrefix,
+		Request:   request,
+	}
+
+	item, err := server.Library.GetItem(
+		strings.TrimPrefix(request.URL.Path, urlBrowsePath+"graphs/"),
+		library.LibraryItemGraph,
+	)
+	if err != nil {
+		return err
+	}
+
+	data.Graph = item.(*library.Graph)
+
+	return server.execTemplate(
+		writer,
+		http.StatusOK,
+		data,
+		path.Join(server.Config.BaseDir, "template", "layout.html"),
+		path.Join(server.Config.BaseDir, "template", "common", "element.html"),
+		path.Join(server.Config.BaseDir, "template", "common", "graph.html"),
+		path.Join(server.Config.BaseDir, "template", "browse", "layout.html"),
+		path.Join(server.Config.BaseDir, "template", "browse", "graph.html"),
 	)
 }
 

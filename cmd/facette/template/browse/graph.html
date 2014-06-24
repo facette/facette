@@ -1,0 +1,39 @@
+{{ define "title" }}{{ .Graph.Name }} — Facette{{ end }}
+
+{{ define "script" }}
+		<script src="{{ .URLPrefix }}{{ asset "/static/jquery.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/jquery.datepicker.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/i18next.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/highcharts.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/highcharts.exporting.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/rgbcolor.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/canvg.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/moment.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/facette.js" }}"></script>
+{{ end }}
+
+{{ define "content" }}
+		<nav>
+			<dl class="graphlist">
+				<dt>Graphs</dt>
+				<dd><a href="{{ .URLPrefix }}/browse/"><span class="icon icon-arrow-left"></span> Back to Collections</a></dd>
+				<dd><a href="#graph-0" title="{{ .Graph.Name }}">{{ .Graph.Name }}</a></dd>
+			</dl>
+		</nav>
+
+		<article data-pane="graph-show" data-paneopts="id: {{ .Graph.ID }}">
+			<header>
+				<h1>{{ .Graph.Name }}</h1>
+
+				<nav>
+					<ul>
+						<li><a class="icon icon-print" href="#print" title="Print Page"></a></li>
+					</ul>
+				</nav>
+			</header>
+
+			<section class="scrollarea full">{{ template "template_graph" }}
+				<div data-graph="{{ .Graph.ID }}" data-graphopts="title: {{ .Graph.Name }}" id="graph-0"></div>
+			</section>
+		</article>
+{{ end }}
