@@ -36,7 +36,11 @@ type Server struct {
 // NewServer creates a new instance of server.
 func NewServer(configPath, logPath string, logLevel int) *Server {
 	return &Server{
-		Config:    &config.Config{Path: configPath, LogFile: logPath},
+		Config: &config.Config{
+			Path:         configPath,
+			ProvidersDir: config.DefaultProvidersDir,
+			LogFile:      logPath,
+		},
 		providers: make(map[string]*provider.Provider),
 		wg:        &sync.WaitGroup{},
 		logLevel:  logLevel,

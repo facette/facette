@@ -14,6 +14,8 @@ import (
 const (
 	// DefaultConfigFile represents the default configuration file location.
 	DefaultConfigFile string = "/etc/facette/facette.json"
+	// DefaultProvidersDir represents the default providers definition files directory location.
+	DefaultProvidersDir string = "/etc/facette/providers"
 	// DefaultLogFile represents the default log file location.
 	DefaultLogFile string = ""
 	// DefaultLogLevel represents the default log level.
