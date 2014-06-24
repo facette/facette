@@ -7,7 +7,7 @@ function domFillItem(item, data, formatters) {
     formatters = formatters || {};
 
     for (key in data) {
-        if (typeof data[key] == "array" || typeof data[key] == "object")
+        if (typeof data[key] == "object")
             continue;
 
         item.find('.' + key).text(formatters[key] ? formatters[key](data[key]) : data[key]);
