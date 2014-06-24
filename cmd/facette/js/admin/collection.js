@@ -6,6 +6,9 @@ function adminCollectionCreateGraph(value) {
 
     domFillItem($item, value);
 
+    $item.find('.toggle a[href=#hide-options]').hide();
+    $item.find('.options').hide();
+
     return $item;
 }
 
@@ -114,6 +117,13 @@ function adminCollectionSetupTerminate() {
                 listSay($list, $.t('graph.mesg_none'), 'info');
 
             PANE_UNLOAD_LOCK = true;
+        });
+
+        linkRegister('show-options hide-options', function (e) {
+            var $item = $(e.target).closest('[data-listitem]');
+
+            $item.find('.toggle a').toggle();
+            $item.find('.options').toggle();
         });
 
         // Attach events
