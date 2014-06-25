@@ -17,6 +17,12 @@ import (
 	"github.com/facette/facette/pkg/utils"
 )
 
+const (
+	facetteURLCatalog            string  = "/api/v1/catalog/"
+	facetteURLLibraryGraphsPlots string  = "/api/v1/library/graphs/plots"
+	facetteDefaultTimeout        float64 = 10
+)
+
 type facettePlotRequest struct {
 	Time        time.Time     `json:"time"`
 	Range       string        `json:"range"`
@@ -51,12 +57,6 @@ type FacetteConnector struct {
 	upstream string
 	timeout  float64
 }
-
-const (
-	facetteURLCatalog            string  = "/api/v1/catalog/"
-	facetteURLLibraryGraphsPlots string  = "/api/v1/library/graphs/plots"
-	facetteDefaultTimeout        float64 = 10
-)
 
 func init() {
 	Connectors["facette"] = func(settings map[string]interface{}) (Connector, error) {

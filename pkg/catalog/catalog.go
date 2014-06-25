@@ -7,6 +7,14 @@ import (
 	"github.com/facette/facette/pkg/logger"
 )
 
+const (
+	_ = iota
+	// OriginCmdRefresh represents an origin refresh command
+	OriginCmdRefresh
+	// OriginCmdShutdown represents an origin shutdown command
+	OriginCmdShutdown
+)
+
 // Catalog represents the main structure of a catalog instance.
 type Catalog struct {
 	Origins    map[string]*Origin
@@ -27,14 +35,6 @@ type CatalogRecord struct {
 func (r CatalogRecord) String() string {
 	return fmt.Sprintf("{Origin: \"%s\", Source: \"%s\", Metric: \"%s\"}", r.Origin, r.Source, r.Metric)
 }
-
-const (
-	_ = iota
-	// OriginCmdRefresh represents an origin refresh command
-	OriginCmdRefresh
-	// OriginCmdShutdown represents an origin shutdown command
-	OriginCmdShutdown
-)
 
 // NewCatalog creates a new instance of catalog.
 func NewCatalog() *Catalog {
