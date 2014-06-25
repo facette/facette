@@ -23,10 +23,19 @@ const (
 	StackModePercent
 )
 
+const (
+	_ = iota
+	// UnitTypeAbsolute represents an absolute unit value type.
+	UnitTypeAbsolute
+	// UnitTypeDuration represents a duration unit value type.
+	UnitTypeDuration
+)
+
 // Graph represents a graph containing list of series.
 type Graph struct {
 	Item
 	Type      int          `json:"type"`
+	UnitType  int          `json:"unit_type"`
 	StackMode int          `json:"stack_mode"`
 	Groups    []*OperGroup `json:"groups"`
 }
