@@ -6,7 +6,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/pkg/logger"
 )
@@ -147,8 +146,8 @@ func (server *Server) serveBrowseSearch(writer http.ResponseWriter, request *htt
 		URLPrefix   string
 		Count       int
 		Request     *http.Request
-		Sources     []*catalog.Source
 		Collections []*library.Collection
+		Graphs      []*library.Graph
 	}{
 		URLPrefix: server.Config.URLPrefix,
 		Request:   request,
@@ -162,19 +161,6 @@ func (server *Server) serveBrowseSearch(writer http.ResponseWriter, request *htt
 			chunks = append(chunks, strings.Trim(chunk, " \t"))
 		}
 
-		for _, origin := range server.Catalog.Origins {
-			for _, source := range origin.Sources {
-				for _, chunk := range chunks {
-					if strings.Index(strings.ToLower(source.Name), chunk) == -1 {
-						goto nextOrigin
-					}
-				}
-
-				data.Sources = append(data.Sources, source)
-			nextOrigin:
-			}
-		}
-
 		for _, collection := range server.Library.Collections {
 			for _, chunk := range chunks {
 				if strings.Index(strings.ToLower(collection.Name), chunk) == -1 {
@@ -185,9 +171,20 @@ func (server *Server) serveBrowseSearch(writer http.ResponseWriter, request *htt
 			data.Collections = append(data.Collections, collection)
 		nextCollection:
 		}
+
+		for _, graph := range server.Library.Graphs {
+			for _, chunk := range chunks {
+				if strings.Index(strings.ToLower(graph.Name), chunk) == -1 {
+					goto nextGraph
+				}
+			}
+
+			data.Graphs = append(data.Graphs, graph)
+		nextGraph:
+		}
 	}
 
-	data.Count = len(data.Sources) + len(data.Collections)
+	data.Count = len(data.Collections) + len(data.Graphs)
 
 	return server.execTemplate(
 		writer,

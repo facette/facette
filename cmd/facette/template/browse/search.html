@@ -29,14 +29,14 @@
 					<h1>Result <span class="count">{{ .Count }}</span></h1>
 					{{ if eq .Count 0 }}
 					<p class="mesgitem warning">Couldn’t find any item matching “{{ $q }}”</p>{{ else }}
-					<div class="list">{{ range .Sources }}
-						<div class="listitem">
-							<div class="name"><a href="{{ $prefix }}/browse/sources/{{ .Name }}">{{ hl .Name $q }}</a></div>
-							<div class="desc">Source</div>
-						</div>{{ end }}{{ range .Collections }}
+					<div class="list">{{ range .Collections }}
 						<div class="listitem">
 							<div class="name"><a href="{{ $prefix }}/browse/collections/{{ .ID }}">{{ hl .Name $q }}</a></div>
 							<div class="desc">Collection</div>
+						</div>{{ end }}{{ range .Graphs }}
+						<div class="listitem">
+							<div class="name"><a href="{{ $prefix }}/browse/graphs/{{ .ID }}">{{ hl .Name $q }}</a></div>
+							<div class="desc">Graph</div>
 						</div>{{ end }}
 					</div>{{ end }}
 				</div>

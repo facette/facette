@@ -260,6 +260,10 @@ function inputSetupInit() {
 
     // Initialize input items
     $('[data-input]').each(function () { inputInit(this); });
+
+    // Focus on first autofocus field
+    if (!('autofocus' in document.createElement('input')))
+        $('[autofocus]:first').select();
 }
 
 function inputUpdate(input, data) {
