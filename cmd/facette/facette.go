@@ -15,6 +15,7 @@ import (
 
 const (
 	cmdUsage = "Usage: %s [OPTIONS]"
+	version  = "0.0.0"
 )
 
 var (
@@ -22,6 +23,7 @@ var (
 	flagHelp     bool
 	flagLog      string
 	flagLogLevel string
+	flagVersion  bool
 	logLevel     int
 	err          error
 )
@@ -31,11 +33,15 @@ func init() {
 	flag.BoolVar(&flagHelp, "h", false, "display this help and exit")
 	flag.StringVar(&flagLog, "l", config.DefaultLogFile, "log file path")
 	flag.StringVar(&flagLogLevel, "L", config.DefaultLogLevel, "logging level")
+	flag.BoolVar(&flagVersion, "V", false, "display software version and exit")
 	flag.Usage = func() { utils.PrintUsage(os.Stderr, cmdUsage) }
 	flag.Parse()
 
 	if flagHelp {
 		utils.PrintUsage(os.Stdout, cmdUsage)
+	} else if flagVersion {
+		fmt.Printf("facette version %s\n", version)
+		os.Exit(0)
 	} else if flagConfig == "" {
 		fmt.Fprintf(os.Stderr, "Error: configuration file path is mandatory\n")
 		utils.PrintUsage(os.Stderr, cmdUsage)
