@@ -1,10 +1,15 @@
 # -*- Makefile -*-
 
-BUILD_DIR = build
-
 TEMP_DIR = tmp
 
-PREFIX ?= $(BUILD_DIR)/facette
+GOPATH = $(realpath $(TEMP_DIR))
+export GOPATH
+
+GO ?= go
+
+BUILD_DIR = build
+
+PREFIX ?= $(BUILD_DIR)/facette-$(shell $(GO) env GOOS)-$(shell $(GO) env GOARCH)
 
 mesg_start = echo "$(shell tput setaf 4)$(1):$(shell tput sgr0) $(2)"
 mesg_step = echo "$(1)"
@@ -18,17 +23,9 @@ npm_install = \
 	$(NPM) install $(1) >/dev/null 2>&1 && \
 		$(call mesg_ok) || $(call mesg_fail)
 
-# npm
 NPM ?= npm
 PATH := $(PATH):$(shell $(NPM) bin)
 
-# Go
-GOPATH = $(realpath $(TEMP_DIR))
-export GOPATH
-
-GO ?= go
-
-# Utilities
 GOLINT ?= golint
 GOLINT_ARGS =
 
