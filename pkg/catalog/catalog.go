@@ -7,14 +7,6 @@ import (
 	"github.com/facette/facette/pkg/logger"
 )
 
-const (
-	_ = iota
-	// OriginCmdRefresh represents an origin refresh command
-	OriginCmdRefresh
-	// OriginCmdShutdown represents an origin shutdown command
-	OriginCmdShutdown
-)
-
 // Catalog represents the main structure of a catalog instance.
 type Catalog struct {
 	Origins    map[string]*Origin
