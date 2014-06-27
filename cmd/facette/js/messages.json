@@ -91,5 +91,15 @@
     },
     "source": {
         "mesg_none": "No source found"
+    },
+    "unit": {
+        "labl_clone": "Clone Unit",
+        "labl_delete": "Delete Unit",
+        "labl_group_name": "Unit Name:",
+        "mesg_delete": "You are about to delete “__name__” unit. This action can’t be undone.",
+        "mesg_delete_fail": "Unable to delete the unit!",
+        "mesg_exists": "A unit with the same name already exists!",
+        "mesg_none": "No unit found",
+        "mesg_save_fail": "Unable to save unit!"
     }
 }

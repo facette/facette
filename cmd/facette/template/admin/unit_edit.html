@@ -35,14 +35,14 @@
 						<h2>Unit Parameters</h2>
 
 						<label for="unit-label">Label: <span class="note">e.g. bytes/s, req/sec, µs</span></label>
-						<input class="input" data-input="unit-value" id="unit-value" name="unit-value" type="text">
+						<input class="input" data-input="unit-label" id="unit-label" name="unit-label" type="text">
 
-						<label for="unit-type">Type: <span class="note">"absolute" indicates an absolute value over time, "duration" a time duration</span></label>
+						<label for="unit-type">Type: <span class="note">“absolute” indicates an absolute value over time, “duration” a time duration</span></label>
 						<fieldset>
-							<label for="unit-type-absolute">absolute</label>
-							<input class="input" type="radio" name="unit-type" id="unit-type-absolute" checked="checked">
-							<label for="unit-type-duration">duration</label>
-							<input class="input" type="radio" name="unit-type" id="unit-type-duration">
+							<input id="unit-type-absolute" name="unit-type" type="radio" value="{{ .UnitTypeAbsolute }}" checked="checked">
+							<label for="unit-type-absolute">Absolute</label>
+							<input id="unit-type-duration" name="unit-type" type="radio" value="{{ .UnitTypeDuration }}">
+							<label for="unit-type-duration">Duration</label>
 						</fieldset>
 					</div>
 				</div>

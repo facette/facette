@@ -232,9 +232,11 @@ func (server *Server) serveAdminUnit(writer http.ResponseWriter, request *http.R
 	var tmplFile string
 
 	data := struct {
-		URLPrefix string
-		Section   string
-		Path      string
+		URLPrefix        string
+		Section          string
+		Path             string
+		UnitTypeAbsolute int
+		UnitTypeDuration int
 	}{
 		URLPrefix: server.Config.URLPrefix,
 	}
@@ -243,6 +245,9 @@ func (server *Server) serveAdminUnit(writer http.ResponseWriter, request *http.R
 
 	if data.Path != "" && (data.Path == "add" || server.Library.ItemExists(data.Path, library.LibraryItemUnit)) {
 		tmplFile = "unit_edit.html"
+
+		data.UnitTypeAbsolute = library.UnitTypeAbsolute
+		data.UnitTypeDuration = library.UnitTypeDuration
 	} else if data.Path == "" {
 		tmplFile = "unit_list.html"
 	}
