@@ -28,6 +28,14 @@ type Router struct {
 	server *Server
 }
 
+// NewRouter creates a new instance of router.
+func NewRouter(server *Server) *Router {
+	return &Router{
+		ServeMux: http.NewServeMux(),
+		server:   server,
+	}
+}
+
 // ServerHTTP dispatches the requests to the router handlers.
 func (router *Router) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	if router.server.Config.URLPrefix != "" {
@@ -56,12 +64,4 @@ func (router *Router) ServeHTTP(writer http.ResponseWriter, request *http.Reques
 	}
 
 	router.ServeMux.ServeHTTP(ResponseWriter{writer, request}, request)
-}
-
-// NewRouter creates a new instance of router.
-func NewRouter(server *Server) *Router {
-	return &Router{
-		ServeMux: http.NewServeMux(),
-		server:   server,
-	}
 }
