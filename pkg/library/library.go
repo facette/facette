@@ -44,6 +44,15 @@ type Library struct {
 	idRegexp    *regexp.Regexp
 }
 
+// NewLibrary creates a new instance of library.
+func NewLibrary(config *config.Config, catalog *catalog.Catalog) *Library {
+	return &Library{
+		Config:   config,
+		Catalog:  catalog,
+		idRegexp: regexp.MustCompile(UUIDPattern),
+	}
+}
+
 // Refresh updates the current library by browsing the filesystem for stored data.
 func (library *Library) Refresh() error {
 	var itemType int
@@ -105,13 +114,4 @@ func (library *Library) Refresh() error {
 	logger.Log(logger.LevelInfo, "library", "refresh completed")
 
 	return nil
-}
-
-// NewLibrary creates a new instance of library.
-func NewLibrary(config *config.Config, catalog *catalog.Catalog) *Library {
-	return &Library{
-		Config:   config,
-		Catalog:  catalog,
-		idRegexp: regexp.MustCompile(UUIDPattern),
-	}
 }
