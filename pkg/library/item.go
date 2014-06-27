@@ -346,7 +346,6 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 	case LibraryItemUnit:
 		library.Units[itemStruct.ID] = item.(*Unit)
 		library.Units[itemStruct.ID].ID = itemStruct.ID
-		fmt.Printf("library.Units => %#v\n", library.Units)
 
 	case LibraryItemGraph:
 		// Check for definition names duplicates
