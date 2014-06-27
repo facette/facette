@@ -23,14 +23,6 @@ const (
 	StackModePercent
 )
 
-const (
-	_ = iota
-	// UnitTypeAbsolute represents an absolute unit value type.
-	UnitTypeAbsolute
-	// UnitTypeDuration represents a duration unit value type.
-	UnitTypeDuration
-)
-
 // Graph represents a graph containing list of series.
 type Graph struct {
 	Item
