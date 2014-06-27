@@ -40,7 +40,7 @@ func init() {
 	if flagHelp {
 		utils.PrintUsage(os.Stdout, cmdUsage)
 	} else if flagVersion {
-		fmt.Printf("facette version %s\n", version)
+		fmt.Printf("Facette version %s\n", version)
 		os.Exit(0)
 	} else if flagConfig == "" {
 		fmt.Fprintf(os.Stderr, "Error: configuration file path is mandatory\n")
