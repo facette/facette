@@ -12,16 +12,16 @@
 		<script src="{{ .URLPrefix }}{{ asset "/static/facette.js" }}"></script>
 {{ end }}
 
-{{ define "content" }}
+{{ define "content" }}{{ if not .Frame }}
 		<nav>
 			<dl class="graphlist">
 				<dt>Graphs</dt>
 				<dd><a href="{{ .URLPrefix }}/browse/"><span class="icon icon-arrow-left"></span> Back to Collections</a></dd>
 				<dd><a href="#graph-0" title="{{ .Graph.Name }}">{{ .Graph.Name }}</a></dd>
 			</dl>
-		</nav>
+		</nav>{{ end }}
 
-		<article data-pane="graph-show" data-paneopts="id: {{ .Graph.ID }}">
+		<article{{ if .Frame }} class="frame"{{ end }} data-pane="graph-show" data-paneopts="id: {{ .Graph.ID }}">{{ if not .Frame }}
 			<header>
 				<h1>{{ .Graph.Name }}</h1>
 
@@ -30,10 +30,10 @@
 						<li><a class="icon icon-print" href="#print" title="Print Page"></a></li>
 					</ul>
 				</nav>
-			</header>
+			</header>{{ end }}
 
 			<section class="scrollarea full">{{ template "template_graph" }}
-				<div data-graph="{{ .Graph.ID }}" data-graphopts="title: {{ .Graph.Name }}" id="graph-0"></div>
+				<div data-graph="{{ .Graph.ID }}" data-graphopts="title: {{ .Graph.Name }}{{ if ne .Range "" }}; range: {{ .Range }}{{ end }}{{ if .Frame }}; expand: false{{ end }}" id="graph-0"></div>
 			</section>
 		</article>
 {{ end }}

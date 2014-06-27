@@ -64,6 +64,9 @@ function graphDraw(graph, postpone, delay, preview) {
             if (typeof graphOpts.zoom != 'boolean')
                 graphOpts.zoom = graphOpts.zoom && graphOpts.zoom.trim().toLowerCase() == 'false' ? false : true;
 
+            if (typeof graphOpts.expand != 'boolean')
+                graphOpts.expand = graphOpts.expand && graphOpts.expand.trim().toLowerCase() == 'false' ? false : true;
+
             if (graphOpts.sample)
                 graphOpts.sample = parseInt(graphOpts.sample, 10);
             else
@@ -316,10 +319,11 @@ function graphDraw(graph, postpone, delay, preview) {
 
                 $container = graph.children('.graphcntr');
 
-                if (!preview && !$container.highcharts())
+                if (!preview && !$container.highcharts() && graphOpts.expand)
                     $container.height($container.height() + highchartOpts.chart.spacingBottom);
 
                 $container.highcharts(highchartOpts);
+
                 $deferred.resolve();
             }).fail(function () {
                 graph.children('.graphctrl')

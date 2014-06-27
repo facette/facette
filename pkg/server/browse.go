@@ -52,6 +52,7 @@ func (server *Server) serveBrowseIndex(writer http.ResponseWriter, request *http
 		http.StatusOK,
 		struct {
 			URLPrefix string
+			Frame     bool
 		}{
 			URLPrefix: server.Config.URLPrefix,
 		},
@@ -72,6 +73,7 @@ func (server *Server) serveBrowseCollection(writer http.ResponseWriter, request 
 		URLPrefix  string
 		Collection *collectionData
 		Request    *http.Request
+		Frame      bool
 	}{
 		URLPrefix:  server.Config.URLPrefix,
 		Collection: &collectionData{Collection: &library.Collection{}},
@@ -114,9 +116,16 @@ func (server *Server) serveBrowseGraph(writer http.ResponseWriter, request *http
 		URLPrefix string
 		Graph     *library.Graph
 		Request   *http.Request
+		Range     string
+		Frame     bool
 	}{
 		URLPrefix: server.Config.URLPrefix,
+		Range:     request.FormValue("range"),
 		Request:   request,
+	}
+
+	if request.FormValue("frame") != "" {
+		data.Frame = true
 	}
 
 	item, err := server.Library.GetItem(
@@ -148,6 +157,7 @@ func (server *Server) serveBrowseSearch(writer http.ResponseWriter, request *htt
 		Request     *http.Request
 		Collections []*library.Collection
 		Graphs      []*library.Graph
+		Frame       bool
 	}{
 		URLPrefix: server.Config.URLPrefix,
 		Request:   request,

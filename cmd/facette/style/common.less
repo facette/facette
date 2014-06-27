@@ -26,6 +26,7 @@ a {
 body {
 	background-color: @BackgroundColor;
 	color: @TextColorA;
+	height: 100%;
 
 	& > .console {
 		background-color: @FormButtonDangerBackgroundColor;
@@ -231,6 +232,20 @@ article {
 	position: absolute;
 	right: 0;
 	top: 0;
+
+	&.frame {
+		left: 0;
+
+		& > section {
+			top: 0;
+
+			.graphitem,
+			.graphcntr {
+				height: 100%;
+				margin: 0;
+			}
+		}
+	}
 
 	& > header,
 	& > footer,
