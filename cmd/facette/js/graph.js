@@ -99,6 +99,7 @@ function graphDraw(graph, postpone, delay, preview) {
                 dataType: 'json'
             }).pipe(function (data) {
                 var $container,
+                    graphTableUpdate,
                     highchartOpts,
                     startTime,
                     endTime,
@@ -128,15 +129,17 @@ function graphDraw(graph, postpone, delay, preview) {
                 startTime = moment(data.start);
                 endTime   = moment(data.end);
 
+                graphTableUpdate = function () {
+                    if (!preview)
+                        Highcharts.drawTable.apply(this, [info]);
+                };
+
                 highchartOpts = {
                     chart: {
                         borderRadius: 0,
                         events: {
-                            load: function () {
-                                if (!preview)
-                                    Highcharts.drawTable.apply(this, [info]);
-                            },
-
+                            load: graphTableUpdate,
+                            redraw: graphTableUpdate,
                             togglePlotLine: function () {
                                 var $element,
                                     re = new RegExp('(^| +)active( +|$)');

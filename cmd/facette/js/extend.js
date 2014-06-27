@@ -56,13 +56,20 @@ if (window.Highcharts) {
 
         cellLeft = tableLeft;
 
+        // Clean up previous table
+        $(chart.container).find('.highcharts-table-group').remove();
+
         // Render custom legend
         $.each(chart.series, function (i, serie) {
             var box,
                 element,
                 keys;
 
-            groups[serie.name] = chart.renderer.g().add();
+            groups[serie.name] = chart.renderer.g()
+                .attr({
+                    'class': 'highcharts-table-group'
+                })
+                .add();
 
             chart.renderer.rect(tableLeft, tableTop + i * GRAPH_LEGEND_ROW_HEIGHT, GRAPH_LEGEND_ROW_HEIGHT * 0.75,
                     GRAPH_LEGEND_ROW_HEIGHT * 0.65, 2)
