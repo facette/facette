@@ -1,4 +1,4 @@
-{{ define "body" }}{{ if not .Frame }}{{ template "template_element" }}
+{{ define "body" }}{{ template "template_element" }}
 		<div class="console" id="console">
 			<span class="message icon icon-error"></span>
 			<a class="close" href="#console-close">Close</a>
@@ -11,4 +11,4 @@
 				<li><a class="icon icon-configure" href="{{ .URLPrefix }}/admin/" title="Administration Panel"></a></li>
 			</ul>
 		</header>
-{{ end }}{{ template "content" . }}{{ end }}
+{{ template "content" . }}{{ end }}
