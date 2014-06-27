@@ -241,6 +241,9 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 
 	case LibraryItemCollection:
 		itemStruct = item.(*Collection).GetItem()
+
+	default:
+		return os.ErrInvalid
 	}
 
 	if itemStruct.ID == "" {
