@@ -1,0 +1,51 @@
+{{ define "title" }}Administration Panel: Units — Facette{{ end }}
+
+{{ define "script" }}
+		<script src="{{ .URLPrefix }}{{ asset "/static/jquery.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/i18next.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/facette.js" }}"></script>
+{{ end }}
+
+{{ define "content" }}
+		<article data-pane="unit-edit" data-paneopts="section: {{ .Section }}{{ if ne .Path "add" }}; id: {{ .Path }}{{ end }}">
+			<header>
+				<h1>Administration Panel — {{ if eq .Path "add" }}New{{ else }}Edit{{ end }} Unit</h1>
+			</header>
+
+			<footer>
+				<button class="danger" name="step-cancel">Cancel</button>
+				<button name="step-save">Save Unit</button>
+			</footer>
+
+			<section>
+				<h1>Unit Definition</h1>
+
+				<div class="scrollarea">
+					<div class="block">
+						<h2>General Information</h2>
+
+						<label for="unit-name">Name:</label>
+						<input class="full input" data-input="unit-name" data-inputopts="check: true" id="unit-name" name="unit-name" type="text">
+
+						<label for="unit-desc">Description:</label>
+						<textarea id="unit-desc" name="unit-desc"></textarea>
+					</div>
+
+					<div class="block">
+						<h2>Unit Parameters</h2>
+
+						<label for="unit-label">Label: <span class="note">e.g. bytes/s, req/sec, µs</span></label>
+						<input class="input" data-input="unit-value" id="unit-value" name="unit-value" type="text">
+
+						<label for="unit-type">Type: <span class="note">"absolute" indicates an absolute value over time, "duration" a time duration</span></label>
+						<fieldset>
+							<label for="unit-type-absolute">absolute</label>
+							<input class="input" type="radio" name="unit-type" id="unit-type-absolute" checked="checked">
+							<label for="unit-type-duration">duration</label>
+							<input class="input" type="radio" name="unit-type" id="unit-type-duration">
+						</fieldset>
+					</div>
+				</div>
+			</section>
+		</article>
+{{ end }}

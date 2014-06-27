@@ -53,6 +53,9 @@ func (library *Library) DeleteItem(id string, itemType int) error {
 	case LibraryItemScale:
 		delete(library.Scales, id)
 
+	case LibraryItemUnit:
+		delete(library.Units, id)
+
 	case LibraryItemGraph:
 		delete(library.Graphs, id)
 
@@ -75,6 +78,9 @@ func (library *Library) GetItem(id string, itemType int) (interface{}, error) {
 
 	case LibraryItemScale:
 		return library.Scales[id], nil
+
+	case LibraryItemUnit:
+		return library.Units[id], nil
 
 	case LibraryItemGraph:
 		return library.Graphs[id], nil
@@ -100,6 +106,15 @@ func (library *Library) GetItemByName(name string, itemType int) (interface{}, e
 
 	case LibraryItemScale:
 		for _, item := range library.Scales {
+			if item.Name != name {
+				continue
+			}
+
+			return item, nil
+		}
+
+	case LibraryItemUnit:
+		for _, item := range library.Units {
 			if item.Name != name {
 				continue
 			}
@@ -142,6 +157,9 @@ func (library *Library) ItemExists(id string, itemType int) bool {
 	case LibraryItemScale:
 		_, exists = library.Scales[id]
 
+	case LibraryItemUnit:
+		_, exists = library.Units[id]
+
 	case LibraryItemGraph:
 		_, exists = library.Graphs[id]
 
@@ -182,6 +200,19 @@ func (library *Library) LoadItem(id string, itemType int) error {
 
 		library.Scales[id] = tmpScale
 		library.Scales[id].Modified = fileInfo.ModTime()
+
+	case LibraryItemUnit:
+		tmpUnit := &Unit{}
+
+		filePath := library.getFilePath(id, itemType)
+
+		fileInfo, err := utils.JSONLoad(filePath, &tmpUnit)
+		if err != nil {
+			return fmt.Errorf("in %s, %s", filePath, err)
+		}
+
+		library.Units[id] = tmpUnit
+		library.Units[id].Modified = fileInfo.ModTime()
 
 	case LibraryItemGraph:
 		tmpGraph := &Graph{}
@@ -236,6 +267,9 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 	case LibraryItemScale:
 		itemStruct = item.(*Scale).GetItem()
 
+	case LibraryItemUnit:
+		itemStruct = item.(*Unit).GetItem()
+
 	case LibraryItemGraph:
 		itemStruct = item.(*Graph).GetItem()
 
@@ -263,6 +297,8 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 	}
 
 	itemTemp, err := library.GetItemByName(itemStruct.Name, itemType)
+
+	// Item exists, check for duplicates
 	if err == nil {
 		switch itemType {
 		case LibraryItemSourceGroup, LibraryItemMetricGroup:
@@ -274,6 +310,12 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 		case LibraryItemScale:
 			if itemTemp.(*Scale).ID != itemStruct.ID {
 				logger.Log(logger.LevelError, "library", "duplicate scale identifier `%s'", itemStruct.ID)
+				return os.ErrExist
+			}
+
+		case LibraryItemUnit:
+			if itemTemp.(*Unit).ID != itemStruct.ID {
+				logger.Log(logger.LevelError, "library", "duplicate unit identifier `%s'", itemStruct.ID)
 				return os.ErrExist
 			}
 
@@ -291,7 +333,7 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 		}
 	}
 
-	// Store item into library
+	// Item does not exist, store it into library
 	switch itemType {
 	case LibraryItemSourceGroup, LibraryItemMetricGroup:
 		library.Groups[itemStruct.ID] = item.(*Group)
@@ -300,6 +342,11 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 	case LibraryItemScale:
 		library.Scales[itemStruct.ID] = item.(*Scale)
 		library.Scales[itemStruct.ID].ID = itemStruct.ID
+
+	case LibraryItemUnit:
+		library.Units[itemStruct.ID] = item.(*Unit)
+		library.Units[itemStruct.ID].ID = itemStruct.ID
+		fmt.Printf("library.Units => %#v\n", library.Units)
 
 	case LibraryItemGraph:
 		// Check for definition names duplicates
@@ -358,6 +405,9 @@ func (library *Library) getDirPath(itemType int) string {
 
 	case LibraryItemScale:
 		dirName = "scales"
+
+	case LibraryItemUnit:
+		dirName = "units"
 
 	case LibraryItemGraph:
 		dirName = "graphs"

@@ -149,6 +149,32 @@ func (r ScaleValueListResponse) slice(i, j int) interface{} {
 	return r[i:j]
 }
 
+// UnitValueResponse represents an unit value response structure in the server backend.
+type UnitValueResponse struct {
+	Name  string `json:"name"`
+	Type  int    `json:"type"`
+	Label string `json:"label"`
+}
+
+// UnitValueListResponse represents a list of unit values structure in the backend server.
+type UnitValueListResponse []*UnitValueResponse
+
+func (r UnitValueListResponse) Len() int {
+	return len(r)
+}
+
+func (r UnitValueListResponse) Less(i, j int) bool {
+	return r[i].Name < r[j].Name
+}
+
+func (r UnitValueListResponse) Swap(i, j int) {
+	r[i], r[j] = r[j], r[i]
+}
+
+func (r UnitValueListResponse) slice(i, j int) interface{} {
+	return r[i:j]
+}
+
 // PlotResponse represents a plot response structure in the server backend.
 type PlotResponse struct {
 	ID          string           `json:"id"`
