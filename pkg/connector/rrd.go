@@ -1,3 +1,5 @@
+// +build rrd
+
 package connector
 
 import (

@@ -2,6 +2,9 @@
 
 VERSION = 0.1.0dev
 
+TAGS ?= graphite \
+	rrd
+
 UNAME := $(shell uname -s)
 
 TEMP_DIR = tmp
@@ -101,7 +104,10 @@ PKG_SRC = $(wildcard pkg/*/*.go)
 
 $(BIN_OUTPUT): $(PKG_SRC) $(BIN_SRC) $(TEMP_DIR)/src/github.com/facette/facette
 	@$(call mesg_start,$(notdir $@),Building $(notdir $@)...)
-	@install -d -m 0755 $(dir $@) && $(GO) build -ldflags "-X main.version $(VERSION)" -o $@ cmd/$(notdir $@)/*.go && \
+	@install -d -m 0755 $(dir $@) && $(GO) build \
+			-ldflags "-X main.version $(VERSION)" \
+			-tags "$(TAGS)" \
+			-o $@ cmd/$(notdir $@)/*.go && \
 		$(call mesg_ok) || $(call mesg_fail)
 	@test ! -f cmd/$(notdir $@)/Makefile || make --no-print-directory -C cmd/$(notdir $@) build
 
