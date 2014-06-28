@@ -5,7 +5,7 @@ Requirements
 ------------
 
  * Go language environment (>= 1.2)
- * `librrd` library and development files
+ * `librrd` library and development files (>= 1.4.0)
  * pkg-config helper tool
  * npm package manager
  * Pandoc document converter
