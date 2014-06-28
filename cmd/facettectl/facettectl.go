@@ -13,7 +13,8 @@ const (
 	cmdUsage = `Usage: %s [OPTIONS] reload
 
 Commands:
-   reload    send reload signal to server`
+   reload    send reload signal to server
+   support   list supported features`
 )
 
 var (
@@ -58,8 +59,8 @@ func main() {
 	}
 
 	switch flag.Args()[0] {
-	case "reload":
-		handler = handleServer
+	case "reload", "support":
+		handler = handleService
 	default:
 		utils.PrintUsage(os.Stderr, cmdUsage)
 		os.Exit(1)
