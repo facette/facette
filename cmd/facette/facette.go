@@ -14,11 +14,11 @@ import (
 )
 
 const (
-	cmdUsage = "Usage: %s [OPTIONS]"
-	version  = "0.0.0"
+	cmdUsage string = "Usage: %s [OPTIONS]"
 )
 
 var (
+	version      string
 	flagConfig   string
 	flagHelp     bool
 	flagLog      string
@@ -40,7 +40,7 @@ func init() {
 	if flagHelp {
 		utils.PrintUsage(os.Stdout, cmdUsage)
 	} else if flagVersion {
-		fmt.Printf("Facette version %s\n", version)
+		utils.PrintVersion(version)
 		os.Exit(0)
 	} else if flagConfig == "" {
 		fmt.Fprintf(os.Stderr, "Error: configuration file path is mandatory\n")

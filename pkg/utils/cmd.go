@@ -19,3 +19,8 @@ func PrintUsage(output io.Writer, usage string) {
 
 	os.Exit(2)
 }
+
+// PrintVersion prettifies the output of command-line usage.
+func PrintVersion(version string) {
+	fmt.Printf("%s version %s\n", path.Base(os.Args[0]), version)
+}

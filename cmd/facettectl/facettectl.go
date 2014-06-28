@@ -17,20 +17,26 @@ Commands:
 )
 
 var (
-	flagConfig string
-	flagDebug  int
-	flagHelp   bool
+	version     string
+	flagConfig  string
+	flagDebug   int
+	flagHelp    bool
+	flagVersion bool
 )
 
 func init() {
 	flag.StringVar(&flagConfig, "c", config.DefaultConfigFile, "configuration file path")
 	flag.IntVar(&flagDebug, "d", 0, "debugging level")
 	flag.BoolVar(&flagHelp, "h", false, "display this help and exit")
+	flag.BoolVar(&flagVersion, "V", false, "display software version and exit")
 	flag.Usage = func() { utils.PrintUsage(os.Stderr, cmdUsage) }
 	flag.Parse()
 
 	if flagHelp {
 		utils.PrintUsage(os.Stdout, cmdUsage)
+	} else if flagVersion {
+		utils.PrintVersion(version)
+		os.Exit(0)
 	} else if flagConfig == "" {
 		fmt.Fprintf(os.Stderr, "Error: configuration file path is mandatory\n")
 		utils.PrintUsage(os.Stderr, cmdUsage)

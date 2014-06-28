@@ -1,6 +1,8 @@
 # -*- Makefile -*-
 
-OS := $(shell uname -s)
+VERSION = 0.1.0dev
+
+UNAME := $(shell uname -s)
 
 TEMP_DIR = tmp
 
@@ -11,7 +13,9 @@ GO ?= go
 
 BUILD_DIR = build
 
-PREFIX ?= $(BUILD_DIR)/facette-$(shell $(GO) env GOOS)-$(shell $(GO) env GOARCH)
+BUILD_NAME = facette-$(shell $(GO) env GOOS)-$(shell $(GO) env GOARCH)
+
+PREFIX ?= $(BUILD_DIR)/$(BUILD_NAME)
 
 mesg_start = echo "$(shell tput setaf 4)$(1):$(shell tput sgr0) $(2)"
 mesg_step = echo "$(1)"
@@ -25,11 +29,13 @@ npm_install = \
 	$(NPM) install $(1) >/dev/null 2>&1 && \
 		$(call mesg_ok) || $(call mesg_fail)
 
-NPM ?= npm
-PATH := $(PATH):$(shell $(NPM) bin)
+TAR ?= tar
 
 GOLINT ?= golint
 GOLINT_ARGS =
+
+NPM ?= npm
+PATH := $(PATH):$(shell $(NPM) bin)
 
 PANDOC ?= pandoc
 PANDOC_ARGS = --standalone --to man
@@ -70,9 +76,9 @@ jshint:
 	fi
 
 .PHONY: build
-build: build-bin build-man build-static
+build: build-bin build-doc build-static
 
-install: install-bin install-man install-static
+install: install-bin install-doc install-static
 
 devel: install devel-static
 
@@ -95,7 +101,7 @@ PKG_SRC = $(wildcard pkg/*/*.go)
 
 $(BIN_OUTPUT): $(PKG_SRC) $(BIN_SRC) $(TEMP_DIR)/src/github.com/facette/facette
 	@$(call mesg_start,$(notdir $@),Building $(notdir $@)...)
-	@install -d -m 0755 $(dir $@) && $(GO) build -o $@ cmd/$(notdir $@)/*.go && \
+	@install -d -m 0755 $(dir $@) && $(GO) build -ldflags "-X main.version $(VERSION)" -o $@ cmd/$(notdir $@)/*.go && \
 		$(call mesg_ok) || $(call mesg_fail)
 	@test ! -f cmd/$(notdir $@)/Makefile || make --no-print-directory -C cmd/$(notdir $@) build
 
@@ -110,7 +116,7 @@ lint-bin: build-bin
 	@$(call mesg_start,lint,Checking sources with Golint...)
 	@$(GOLINT) $(GOLINT_ARGS) cmd pkg && $(call mesg_ok) || $(call mesg_fail)
 
-# Manuals
+# Documentation
 MAN_SRC = $(wildcard docs/man/*.[0-9].md)
 
 MAN_OUTPUT = $(addprefix $(TEMP_DIR)/man/, $(notdir $(MAN_SRC:.md=)))
@@ -120,11 +126,14 @@ $(MAN_OUTPUT): $(MAN_SRC)
 	@install -d -m 0755 $(dir $@) && $(PANDOC) $(PANDOC_ARGS) docs/man/$(notdir $@).md >$@ && \
 		$(call mesg_ok) || $(call mesg_fail)
 
-build-man: $(MAN_OUTPUT)
+build-doc: $(MAN_OUTPUT)
 
-install-man: build-man
+install-doc: build-doc
 	@$(call mesg_start,install,Installing manuals files...)
 	@install -d -m 0755 $(PREFIX)/share && cp -Rp $(TEMP_DIR)/man $(PREFIX)/share && \
+		$(call mesg_ok) || $(call mesg_fail)
+	@$(call mesg_start,install,Installing examples files...)
+	@install -d -m 0755 $(PREFIX)/share/facette/examples && cp -Rp docs/examples $(PREFIX)/share/facette && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 # Static
@@ -256,7 +265,7 @@ $(STYLE_EXTRA_OUTPUT): $(STYLE_EXTRA)
 		$(call mesg_ok) || $(call mesg_fail)
 
 $(TMPL_OUTPUT): $(TMPL_SRC)
-ifeq ($(OS), Darwin)
+ifeq ($(UNAME), Darwin)
 	$(eval COPY_CMD = rsync -rR)
 else
 	$(eval COPY_CMD = cp -r --parents)
@@ -271,11 +280,11 @@ build-static: $(SCRIPT_OUTPUT) $(SCRIPT_EXTRA_OUTPUT) $(MESG_OUTPUT) $(STYLE_OUT
 
 install-static: build-static
 	@$(call mesg_start,install,Installing static files...)
-	@install -d -m 0755 $(PREFIX)/share/static && cp -Rp $(SCRIPT_OUTPUT) $(SCRIPT_EXTRA_OUTPUT) $(MESG_OUTPUT) \
-		$(STYLE_OUTPUT) $(STYLE_PRINT_OUTPUT) $(STYLE_EXTRA_OUTPUT) $(PREFIX)/share/static && \
+	@install -d -m 0755 $(PREFIX)/share/facette/static && cp -Rp $(SCRIPT_OUTPUT) $(SCRIPT_EXTRA_OUTPUT) \
+		$(MESG_OUTPUT) $(STYLE_OUTPUT) $(STYLE_PRINT_OUTPUT) $(STYLE_EXTRA_OUTPUT) $(PREFIX)/share/facette/static && \
 		$(call mesg_ok) || $(call mesg_fail)
 	@$(call mesg_start,install,Installing template files...)
-	@cp -Rp $(TMPL_OUTPUT) $(PREFIX)/share && \
+	@cp -Rp $(TMPL_OUTPUT) $(PREFIX)/share/facette && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 devel-static: install-static
@@ -321,4 +330,14 @@ test-server: $(TEST_DIR) build-bin
 
 	@$(call mesg_start,test,Stopping facette server...)
 	@kill -2 `cat $(TEMP_DIR)/tests/facette.pid` && \
+		$(call mesg_ok) || $(call mesg_fail)
+
+# Distribution
+DIST_DIR = dist
+
+dist: install
+	@$(call mesg_start,dist,Build distribution tarball...)
+	@install -d -m 0755 $(DIST_DIR) && \
+		$(TAR) -C $(dir $(PREFIX)) -czf $(DIST_DIR)/$(BUILD_NAME:facette-%=facette-$(VERSION)-%).tar.gz \
+			$(notdir $(PREFIX)) && \
 		$(call mesg_ok) || $(call mesg_fail)
