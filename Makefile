@@ -1,5 +1,7 @@
 # -*- Makefile -*-
 
+OS := $(shell uname -s)
+
 TEMP_DIR = tmp
 
 GOPATH = $(realpath $(TEMP_DIR))
@@ -19,7 +21,7 @@ mesg_fail = (echo "result: $(shell tput setaf 1)fail$(shell tput sgr0)" && false
 path_search = $(firstword $(wildcard $(addsuffix /$(1),$(subst :, ,$(PATH)))))
 
 npm_install = \
-	$(call mesg_start,main,Installing $(1) via npm ...); \
+	$(call mesg_start,main,Installing $(1) via npm...); \
 	$(NPM) install $(1) >/dev/null 2>&1 && \
 		$(call mesg_ok) || $(call mesg_fail)
 
@@ -254,9 +256,14 @@ $(STYLE_EXTRA_OUTPUT): $(STYLE_EXTRA)
 		$(call mesg_ok) || $(call mesg_fail)
 
 $(TMPL_OUTPUT): $(TMPL_SRC)
+ifeq ($(OS), Darwin)
+	$(eval COPY_CMD = rsync -rR)
+else
+	$(eval COPY_CMD = cp -r --parents)
+endif
 	@$(call mesg_start,static,Copying template files...)
 	@install -d -m 0755 $(TMPL_OUTPUT) && \
-		(cd cmd/facette/template; cp -r --parents $(TMPL_SRC:cmd/facette/template/%=%) ../../../$(TMPL_OUTPUT)/) && \
+		(cd cmd/facette/template; $(COPY_CMD) $(TMPL_SRC:cmd/facette/template/%=%) ../../../$(TMPL_OUTPUT)/) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 build-static: $(SCRIPT_OUTPUT) $(SCRIPT_EXTRA_OUTPUT) $(MESG_OUTPUT) $(STYLE_OUTPUT) $(STYLE_PRINT_OUTPUT) \
