@@ -1,61 +1,44 @@
-# Installation — Facette
+Installation
+============
 
-## From binaries
+Requirements
+------------
 
-Not available yet
+ * Go language environment (>= 1.2)
+ * `librrd` library and development files
+ * pkg-config helper tool
+ * npm package manager
+ * Pandoc document converter
 
-## From sources
+Debian:
 
-### Requirements
+   apt-get install golang-go librrd-dev pkg-config npm pandoc
 
- * RRD library Go binding: [rrd][0] (along with librrd library and development files)
- * Set package: [set][1]
- * UUID Go package: [gouuid][2]
- * Gopass package: [gopass][3]
- * Stoppable net/http listener package: [stoppableListener][4]
+Darwin:
 
-### Build instructions
+   brew install rrdtool pkg-config npm pandoc
 
-Retrieve the source code:
-
-```
-git clone https://github.com/facette/facette
-```
+Build Instructions
+------------------
 
 Run the building command:
 
-```
-cd facette
-make
-./build/facette/bin/facette -c path/to/config.json
-```
+   cd facette
+   make
+   make install
 
-By default Facette will be built and installed in the `build` folder. To change its location use the `PREFIX` variable:
+By default Facette will be built in the `tmp` folder and installed in the `build` one. To change its final location use
+the `PREFIX` variable:
 
-```
-PREFIX=/path/to/folder make
-/path/to/folder/bin/facette -c path/to/config.json
-```
+   PREFIX=/path/to/folder make install
 
-### Additional targets
+Additional Targets
+------------------
 
 Run the various test suites:
 
-```
-make test
-```
+   make test
 
 Clean the building environment:
 
-```
-make clean
-```
-
-Note: the `PREFIX` variable must be prepended to each command if passed during the building process.
-
-
-[0]: https://github.com/ziutek/rrd
-[1]: https://github.com/fatih/set
-[2]: https://github.com/nu7hatch/gouuid
-[3]: https://github.com/howeyc/gopass
-[4]: https://github.com/etix/stoppableListener
+   make clean
