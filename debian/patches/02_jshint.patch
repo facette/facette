@@ -1,15 +1,26 @@
 Index: facette/Makefile
 ===================================================================
---- facette.orig/Makefile	2014-03-12 08:42:49.347425084 +0100
-+++ facette/Makefile	2014-03-12 08:43:09.175633651 +0100
-@@ -251,9 +251,7 @@
+--- facette.orig/Makefile	2014-06-30 15:11:32.196078386 +0200
++++ facette/Makefile	2014-06-30 15:29:37.920488198 +0200
+@@ -74,9 +74,7 @@
+ 	fi
+ 
+ jshint:
+-	@if [ -z "$(call path_search,$(JSHINT))" ]; then \
+-		$(call npm_install,$(NPM_JSHINT)); \
+-	fi
++	@#PATCH: “Evil” JSHint removal
+ 
+ .PHONY: build
+ build: build-bin build-doc build-static
+@@ -303,9 +301,7 @@
  	done) && $(call mesg_ok) || $(call mesg_fail)
  
- lint-static: $(SCRIPT_OUTPUT)
+ lint-static: jshint $(SCRIPT_OUTPUT)
 -	@$(call mesg_start,lint,Checking $(notdir $(SCRIPT_OUTPUT:.js=.src.js)) with JSHint...)
 -	-@$(JSHINT) $(JSHINT_ARGS) $(SCRIPT_OUTPUT:.js=.src.js) && \
 -		$(call mesg_ok) || $(call mesg_fail)
 +	@#PATCH: “Evil” JSHint removal
  
  # Test
- PKG_SRC = $(wildcard pkg/*)
+ TEST_DIR = $(TEMP_DIR)/tests
