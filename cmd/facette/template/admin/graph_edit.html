@@ -158,6 +158,13 @@
 								<option value="{{ .GraphTypeLine }}">Line</option>
 							</select>
 
+							<label for="graph-unit">Graph Unit:</label>
+							<select data-select="graph-unit" id="graph-unit" name="graph-unit">
+								<option class="protected" value="">Custom</option>
+							</select>
+							<input class="input" data-input="unit-label" id="unit-label" name="unit-label" type="text">
+							<input name="unit-type" type="hidden">
+
 							<label for="stack-mode">Stack Mode:</label>
 							<select data-select="stack-mode" id="stack-mode" name="stack-mode">
 								<option value="{{ .StackModeNone }}">None</option>

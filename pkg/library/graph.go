@@ -27,28 +27,10 @@ const (
 type Graph struct {
 	Item
 	Type      int          `json:"type"`
-	UnitType  int          `json:"unit_type"`
 	StackMode int          `json:"stack_mode"`
+	UnitLabel string       `json:"unit_label"`
+	UnitType  int          `json:"unit_type"`
 	Groups    []*OperGroup `json:"groups"`
-}
-
-// OperGroup represents an operation group entry.
-type OperGroup struct {
-	Name    string                 `json:"name"`
-	Type    int                    `json:"type"`
-	StackID int                    `json:"stack_id"`
-	Series  []*Serie               `json:"series"`
-	Scale   float64                `json:"scale"`
-	Options map[string]interface{} `json:"options"`
-}
-
-// Serie represents a serie entry.
-type Serie struct {
-	Name   string  `json:"name"`
-	Origin string  `json:"origin"`
-	Source string  `json:"source"`
-	Metric string  `json:"metric"`
-	Scale  float64 `json:"scale"`
 }
 
 func (graph *Graph) String() string {
@@ -69,6 +51,16 @@ func (graph *Graph) String() string {
 	)
 }
 
+// OperGroup represents an operation group entry.
+type OperGroup struct {
+	Name    string                 `json:"name"`
+	Type    int                    `json:"type"`
+	StackID int                    `json:"stack_id"`
+	Series  []*Serie               `json:"series"`
+	Scale   float64                `json:"scale"`
+	Options map[string]interface{} `json:"options"`
+}
+
 func (group *OperGroup) String() string {
 	return fmt.Sprintf(
 		"OperGroup{Name:\"%s\" Type:%d Scale:%f Series:[%s]}",
@@ -85,6 +77,15 @@ func (group *OperGroup) String() string {
 			return strings.Join(serieStrings, ", ")
 		}(group.Series),
 	)
+}
+
+// Serie represents a serie entry.
+type Serie struct {
+	Name   string  `json:"name"`
+	Origin string  `json:"origin"`
+	Source string  `json:"source"`
+	Metric string  `json:"metric"`
+	Scale  float64 `json:"scale"`
 }
 
 func (serie *Serie) String() string {

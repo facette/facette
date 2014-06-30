@@ -185,6 +185,8 @@ type PlotResponse struct {
 	Description string           `json:"description"`
 	Type        int              `json:"type"`
 	StackMode   int              `json:"stack_mode"`
+	UnitLabel   string           `json:"unit_label"`
+	UnitType    int              `json:"unit_type"`
 	Series      []*SerieResponse `json:"series"`
 	Modified    time.Time        `json:"modified"`
 }

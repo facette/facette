@@ -6,6 +6,8 @@ function adminGraphGetData() {
             description: $pane.find('textarea[name=graph-desc]').val(),
             type: parseInt($pane.find('select[name=graph-type]').val(), 10),
             stack_mode: parseInt($pane.find('select[name=stack-mode]').val(), 10),
+            unit_label: $pane.find('input[name=unit-label]').val(),
+            unit_type: parseInt($pane.find('input[name=unit-type]').val(), 10),
             groups: adminGraphGetGroups()
         };
 
@@ -374,7 +376,8 @@ function adminGraphSetupTerminate() {
     });
 
     paneRegister('graph-edit', function () {
-        var graphId = paneMatch('graph-edit').opts('pane').id || null;
+        var $pane = paneMatch('graph-edit'),
+            graphId = $pane.opts('pane').id || null;
 
         // Register completes and checks
         if ($('[data-input=source]').length > 0) {
@@ -518,7 +521,11 @@ function adminGraphSetupTerminate() {
             var $step = $('[data-step=3]');
 
             $step.find('select:last').trigger('change');
-            setTimeout(function () { $step.find(':input:first').select(); });
+
+            setTimeout(function () {
+                selectUpdate($step.find('select[name=graph-unit]').get(0));
+                $step.find(':input:first').select();
+            });
         });
 
         paneStepRegister('graph-edit', 'stack', function () {
@@ -936,49 +943,49 @@ function adminGraphSetupTerminate() {
                 value = adminGraphGetValue($item);
 
             $.ajax({
-                    url: urlPrefix + '/api/v1/library/scales/values',
-                    type: 'GET'
-                }).pipe(function (data) {
-                    var $input,
-                        $overlay,
-                        options = [];
+                url: urlPrefix + '/api/v1/library/scales/values',
+                type: 'GET'
+            }).pipe(function (data) {
+                var $input,
+                    $overlay,
+                    options = [];
 
-                    $.each(data, function (i, entry) { /*jshint unused: true */
-                        options.push([entry.name, entry.value]);
-                    });
-
-                    $overlay = overlayCreate('select', {
-                        message: $.t('graph.labl_scale'),
-                        value: value.scale,
-                        callbacks: {
-                            validate: function (data) {
-                                data = parseFloat(data);
-                                value.scale = data;
-                                $scale.text(data ? data.toPrecision(3) : '');
-                            }
-                        },
-                        labels: {
-                            validate: {
-                                text: $.t('graph.labl_scale_set')
-                            }
-                        },
-                        reset: 0,
-                        options: options
-                    });
-
-                    $input = $overlay.find('input[name=value]');
-
-                    $overlay.find('select')
-                        .on('change', function (e) {
-                            if (e.target.value)
-                                $input.val(e.target.value);
-                        })
-                        .val(value.scale)
-                        .trigger({
-                            type: 'change',
-                            _init: true
-                        });
+                $.each(data, function (i, entry) { /*jshint unused: true */
+                    options.push([entry.name, entry.value]);
                 });
+
+                $overlay = overlayCreate('select', {
+                    message: $.t('graph.labl_scale'),
+                    value: value.scale,
+                    callbacks: {
+                        validate: function (data) {
+                            data = parseFloat(data);
+                            value.scale = data;
+                            $scale.text(data ? data.toPrecision(3) : '');
+                        }
+                    },
+                    labels: {
+                        validate: {
+                            text: $.t('graph.labl_scale_set')
+                        }
+                    },
+                    reset: 0,
+                    options: options
+                });
+
+                $input = $overlay.find('input[name=value]');
+
+                $overlay.find('select')
+                    .on('change', function (e) {
+                        if (e.target.value)
+                            $input.val(e.target.value);
+                    })
+                    .val(value.scale)
+                    .trigger({
+                        type: 'change',
+                        _init: true
+                    });
+            });
         });
 
         // Attach events
@@ -1188,6 +1195,38 @@ function adminGraphSetupTerminate() {
             .on('keyup', '[data-step=1] fieldset input', adminHandleFieldType)
             .on('dragstart dragend dragover dragleave drop', '.dragarea', adminGraphHandleSerieDrag);
 
+        // Load graph units
+        var $graphUnit = $pane.find('select[name=graph-unit]'),
+            $unitLabel = $pane.find('input[name=unit-label]'),
+            $unitType = $pane.find('input[name=unit-type]');
+
+        $.ajax({
+            url: urlPrefix + '/api/v1/library/units/labels',
+            type: 'GET'
+        }).pipe(function (data) {
+            $graphUnit.children('option:not(.protected)').remove();
+
+            $.each(data, function (i, entry) { /*jshint unused: true */
+                $(document.createElement('option')).appendTo($graphUnit)
+                    .attr('value', entry.label)
+                    .data('value', entry)
+                    .text(entry.name);
+            });
+        });
+
+        $graphUnit.on('change', function (e) {
+            var $target = $(e.target),
+                value = $target.find('option:selected').data('value');
+
+            $unitLabel.val(value ? value.label : '');
+            $unitType.val(value ? value.type : '');
+
+            if ($target.val())
+                $unitLabel.attr('disabled', 'disabled');
+            else
+                $unitLabel.removeAttr('disabled');
+        });
+
         // Load graph data
         if (graphId === null)
             return;
@@ -1198,7 +1237,6 @@ function adminGraphSetupTerminate() {
                 $listMetrics,
                 $listOpers,
                 $listSeries,
-                $pane,
                 stacks = {},
                 i,
                 j;
@@ -1236,12 +1274,15 @@ function adminGraphSetupTerminate() {
                     adminGraphCreateProxy(PROXY_TYPE_GROUP, $itemOper, stacks[data.groups[i].stack_id]);
             }
 
-            $pane = paneMatch('graph-edit');
-
             $pane.find('input[name=graph-name]').val(data.name);
             $pane.find('textarea[name=graph-desc]').val(data.description);
 
             $pane.find('select[name=graph-type]').val(data.type).trigger({
+                type: 'change',
+                _init: true
+            });
+
+            $pane.find('select[name=graph-unit]').val(data.unit_label).trigger({
                 type: 'change',
                 _init: true
             });

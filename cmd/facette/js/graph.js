@@ -268,6 +268,9 @@ function graphDraw(graph, postpone, delay, preview) {
                         text: startTime.format('LLL') + ' — ' + endTime.format('LLL')
                     };
 
+                    if (data.unit_label)
+                        highchartOpts.yAxis.title.text = data.unit_label;
+
                     if (graphOpts.zoom) {
                         highchartOpts.chart.events.selection = function (e) {
                             if (e.xAxis) {

@@ -87,13 +87,6 @@ function selectInit(element) {
     $menu = menuCreate(element.getAttribute('data-select')).appendTo($select)
         .attr('data-menu', $select.attr('data-select'));
 
-    $element.children('option').each(function () {
-        menuAppend($menu)
-            .attr('data-menuitem', this.value)
-            .data('value', this.value)
-            .text($(this).text());
-    });
-
     $element.detach().appendTo($select)
         .removeAttr('data-select')
         .hide();
@@ -102,7 +95,27 @@ function selectInit(element) {
     $select.find('[data-selectlabel]')
         .attr('tabindex', 0);
 
-    $element.trigger('change');
+    selectUpdate(element);
+}
+
+function selectUpdate(element) {
+    var $element = $(element),
+        $select = $element.closest('[data-select]'),
+        $menu = $select.find('[data-menu]');
+
+    menuEmpty($menu);
+
+    $element.children('option').each(function () {
+        menuAppend($menu)
+            .attr('data-menuitem', this.value)
+            .data('value', this.value)
+            .text($(this).text());
+    });
+
+    $element.trigger({
+        type: 'change',
+        _init: true
+    });
 
     // Make width consistent
     if ($menu.width() > $select.width())

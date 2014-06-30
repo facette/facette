@@ -298,6 +298,8 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 		Description: graph.Description,
 		Type:        graph.Type,
 		StackMode:   graph.StackMode,
+		UnitLabel:   graph.UnitLabel,
+		UnitType:    graph.UnitType,
 		Modified:    graph.Modified,
 	}
 
