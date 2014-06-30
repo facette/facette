@@ -75,7 +75,7 @@ function treeUpdate(tree) {
             i;
 
         treeEmpty(tree);
-        tree.children('.placeholder').toggle(!data);
+        tree.children('.placeholder').toggle(data.length === 0);
 
         if (!data)
             return;
