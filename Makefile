@@ -1,6 +1,6 @@
 # -*- Makefile -*-
 
-VERSION = 0.1.0dev
+VERSION = 0.1.0
 
 TAGS ?= graphite \
 	rrd
