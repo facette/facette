@@ -22,8 +22,6 @@ const (
 	LibraryItemMetricGroup
 	// LibraryItemScale represents a scale item.
 	LibraryItemScale
-	// LibraryItemUnit represents an unit item.
-	LibraryItemUnit
 	// LibraryItemGraph represents a graph item.
 	LibraryItemGraph
 	// LibraryItemCollection represents a collection item.
@@ -41,7 +39,6 @@ type Library struct {
 	Catalog     *catalog.Catalog
 	Groups      map[string]*Group
 	Scales      map[string]*Scale
-	Units       map[string]*Unit
 	Graphs      map[string]*Graph
 	Collections map[string]*Collection
 	idRegexp    *regexp.Regexp
@@ -63,7 +60,6 @@ func (library *Library) Refresh() error {
 	// Empty library maps
 	library.Groups = make(map[string]*Group)
 	library.Scales = make(map[string]*Scale)
-	library.Units = make(map[string]*Unit)
 	library.Graphs = make(map[string]*Graph)
 	library.Collections = make(map[string]*Collection)
 
@@ -86,7 +82,6 @@ func (library *Library) Refresh() error {
 		LibraryItemSourceGroup,
 		LibraryItemMetricGroup,
 		LibraryItemScale,
-		LibraryItemUnit,
 		LibraryItemGraph,
 		LibraryItemCollection,
 	} {

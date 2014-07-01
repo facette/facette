@@ -27,6 +27,5 @@ if (String(window.location.pathname).startsWith(urlPrefix + '/admin/')) {
     setupRegister(SETUP_CALLBACK_TERM, adminCollectionSetupTerminate);
     setupRegister(SETUP_CALLBACK_TERM, adminGroupSetupTerminate);
     setupRegister(SETUP_CALLBACK_TERM, adminScaleSetupTerminate);
-    setupRegister(SETUP_CALLBACK_TERM, adminUnitSetupTerminate);
     setupRegister(SETUP_CALLBACK_TERM, adminCatalogSetupTerminate);
 }

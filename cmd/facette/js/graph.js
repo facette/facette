@@ -159,8 +159,8 @@ function graphDraw(graph, postpone, delay, preview) {
 
                                 if ($element.attr('class') && $element.attr('class').match(re)) {
                                     $element
-                                        .removeAttr('css')
-                                        .attr('class', $element.attr('class').replace(re, ''));
+                                        .removeAttr('class')
+                                        .removeAttr('style');
 
                                     return;
                                 }
@@ -171,7 +171,7 @@ function graphDraw(graph, postpone, delay, preview) {
                                         color: '#e30',
                                         fill: '#e30'
                                     })
-                                    .attr('class', $element.attr('class') + ' active');
+                                    .attr('class', 'active');
 
                                 // Draw new plot line
                                 this.chart.yAxis[0].addPlotLine({
@@ -184,7 +184,7 @@ function graphDraw(graph, postpone, delay, preview) {
                             }
                         },
                         spacingBottom: 16,
-                        spacingLeft: 48,
+                        spacingLeft: 16,
                         spacingRight: 16,
                         spacingTop: 16,
                     },
@@ -218,8 +218,7 @@ function graphDraw(graph, postpone, delay, preview) {
                     yAxis: {
                         labels: {
                             formatter: function () {
-                                return formatValue(this.value, data.unit_type) +
-                                    (data.unit_label ? ' ' + data.unit_label : '');
+                                return formatValue(this.value, data.unit_type);
                             }
                         },
                         plotLines: [],

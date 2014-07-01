@@ -150,20 +150,13 @@
 						</div>
 
 						<div class="block">
-							<h2>Additional Settings</h2>
+							<h2>Graph Parameters</h2>
 
 							<label for="graph-type">Graph Type:</label>
 							<select data-select="graph-type" id="graph-type" name="graph-type">
 								<option value="{{ .GraphTypeArea }}">Area</option>
 								<option value="{{ .GraphTypeLine }}">Line</option>
 							</select>
-
-							<label for="graph-unit">Graph Unit:</label>
-							<select data-select="graph-unit" id="graph-unit" name="graph-unit">
-								<option class="protected" value="">Custom</option>
-							</select>
-							<input class="input" data-input="unit-label" id="unit-label" name="unit-label" type="text">
-							<input name="unit-type" type="hidden">
 
 							<label for="stack-mode">Stack Mode:</label>
 							<select data-select="stack-mode" id="stack-mode" name="stack-mode">
@@ -172,6 +165,21 @@
 								<option value="{{ .StackModePercent }}">Percent</option>
 							</select>
 							<button class="icon icon-configure" name="stack-config">Configure Stacks</button>
+						</div>
+
+						<div class="block">
+							<h2>Unit Parameters</h2>
+
+							<label for="unit-label">Label: <span class="note">e.g. bytes/s, req/sec, %, µs</span></label>
+							<input class="input" data-input="unit-label" id="unit-label" name="unit-label" type="text">
+
+							<label for="unit-type">Type: <span class="note">“fixed” indicates an absolute value, “metric” a value based on the metric system</span></label>
+							<fieldset>
+								<input id="unit-type-fixed" name="unit-type" type="radio" value="{{ .GraphUnitTypeFixed }}" checked="checked">
+								<label for="unit-type-fixed">Fixed</label>
+								<input id="unit-type-metric" name="unit-type" type="radio" value="{{ .GraphUnitTypeMetric }}">
+								<label for="unit-type-metric">Metric System</label>
+							</fieldset>
 						</div>
 					</div>
 				</div>

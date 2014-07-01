@@ -32,8 +32,6 @@ func (server *Server) serveAdmin(writer http.ResponseWriter, request *http.Reque
 		err = server.serveAdminCatalog(writer, request)
 	} else if strings.HasPrefix(request.URL.Path, urlAdminPath+"scales/") {
 		err = server.serveAdminScale(writer, request)
-	} else if strings.HasPrefix(request.URL.Path, urlAdminPath+"units/") {
-		err = server.serveAdminUnit(writer, request)
 	} else if request.URL.Path == urlAdminPath {
 		err = server.serveAdminIndex(writer, request)
 	} else {
@@ -104,14 +102,16 @@ func (server *Server) serveAdminGraph(writer http.ResponseWriter, request *http.
 	var tmplFile string
 
 	data := struct {
-		URLPrefix        string
-		Section          string
-		Path             string
-		GraphTypeArea    int
-		GraphTypeLine    int
-		StackModeNone    int
-		StackModeNormal  int
-		StackModePercent int
+		URLPrefix           string
+		Section             string
+		Path                string
+		GraphTypeArea       int
+		GraphTypeLine       int
+		StackModeNone       int
+		StackModeNormal     int
+		StackModePercent    int
+		GraphUnitTypeFixed  int
+		GraphUnitTypeMetric int
 	}{
 		URLPrefix: server.Config.URLPrefix,
 	}
@@ -127,6 +127,9 @@ func (server *Server) serveAdminGraph(writer http.ResponseWriter, request *http.
 		data.StackModeNone = library.StackModeNone
 		data.StackModeNormal = library.StackModeNormal
 		data.StackModePercent = library.StackModePercent
+
+		data.GraphUnitTypeFixed = library.GraphUnitTypeFixed
+		data.GraphUnitTypeMetric = library.GraphUnitTypeMetric
 	} else if data.Path == "" {
 		tmplFile = "graph_list.html"
 	}
@@ -211,45 +214,6 @@ func (server *Server) serveAdminScale(writer http.ResponseWriter, request *http.
 		tmplFile = "scale_edit.html"
 	} else if data.Path == "" {
 		tmplFile = "scale_list.html"
-	}
-
-	if tmplFile == "" {
-		return os.ErrNotExist
-	}
-
-	return server.execTemplate(
-		writer,
-		http.StatusOK,
-		data,
-		path.Join(server.Config.BaseDir, "template", "layout.html"),
-		path.Join(server.Config.BaseDir, "template", "common", "element.html"),
-		path.Join(server.Config.BaseDir, "template", "admin", "layout.html"),
-		path.Join(server.Config.BaseDir, "template", "admin", tmplFile),
-	)
-}
-
-func (server *Server) serveAdminUnit(writer http.ResponseWriter, request *http.Request) error {
-	var tmplFile string
-
-	data := struct {
-		URLPrefix        string
-		Section          string
-		Path             string
-		UnitTypeAbsolute int
-		UnitTypeDuration int
-	}{
-		URLPrefix: server.Config.URLPrefix,
-	}
-
-	data.Section, data.Path = splitAdminURLPath(request.URL.Path)
-
-	if data.Path != "" && (data.Path == "add" || server.Library.ItemExists(data.Path, library.LibraryItemUnit)) {
-		tmplFile = "unit_edit.html"
-
-		data.UnitTypeAbsolute = library.UnitTypeAbsolute
-		data.UnitTypeDuration = library.UnitTypeDuration
-	} else if data.Path == "" {
-		tmplFile = "unit_list.html"
 	}
 
 	if tmplFile == "" {

@@ -15,6 +15,14 @@ const (
 
 const (
 	_ = iota
+	// GraphUnitTypeFixed represents a fixed unit value type.
+	GraphUnitTypeFixed
+	// GraphUnitTypeMetric represents a metric system unit value type.
+	GraphUnitTypeMetric
+)
+
+const (
+	_ = iota
 	// StackModeNone represents a null stack mode.
 	StackModeNone
 	// StackModeNormal represents a normal stack mode.

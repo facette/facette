@@ -7,7 +7,7 @@ function adminGraphGetData() {
             type: parseInt($pane.find('select[name=graph-type]').val(), 10),
             stack_mode: parseInt($pane.find('select[name=stack-mode]').val(), 10),
             unit_label: $pane.find('input[name=unit-label]').val(),
-            unit_type: parseInt($pane.find('input[name=unit-type]').val(), 10),
+            unit_type: parseInt($pane.find('input[name=unit-type]:checked').val(), 10),
             groups: adminGraphGetGroups()
         };
 
@@ -1286,6 +1286,9 @@ function adminGraphSetupTerminate() {
                 type: 'change',
                 _init: true
             });
+
+            $pane.find('input[name=unit-label]').val(data.unit_label);
+            $pane.find('input[name=unit-type][value=' + data.unit_type + ']').prop('checked', true);
 
             $pane.find('select[name=stack-mode]').val(data.stack_mode).trigger({
                 type: 'change',

@@ -59,7 +59,7 @@ all: build lint
 
 clean:
 	@$(call mesg_start,main,Cleaning temporary files...)
-	@rm -rf node_modules $(TEMP_DIR) && \
+	@rm -rf node_modules $(TEMP_DIR) $(BUILD_DIR)/$(BUILD_NAME) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 # npm scripts
@@ -165,7 +165,6 @@ SCRIPT_SRC = cmd/facette/js/intro.js \
 	cmd/facette/js/admin/collection.js \
 	cmd/facette/js/admin/group.js \
 	cmd/facette/js/admin/scale.js \
-	cmd/facette/js/admin/unit.js \
 	cmd/facette/js/admin/catalog.js \
 	cmd/facette/js/admin/outro.js \
 	cmd/facette/js/browse/intro.js \

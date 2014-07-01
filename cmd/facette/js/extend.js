@@ -143,9 +143,8 @@ if (window.Highcharts) {
 
                 value = data[serie.name] && data[serie.name][key] !== undefined ? data[serie.name][key] : null;
 
-                element = chart.renderer.text(value !== null ? formatValue(value, options._opts.unit_type) +
-                        (options._opts.unit_label ? ' ' + options._opts.unit_label : '') : 'null', valueLeft,
-                        tableTop + i * GRAPH_LEGEND_ROW_HEIGHT + GRAPH_LEGEND_ROW_HEIGHT / 2)
+                element = chart.renderer.text(value !== null ? formatValue(value, options._opts.unit_type) : 'null',
+                        valueLeft, tableTop + i * GRAPH_LEGEND_ROW_HEIGHT + GRAPH_LEGEND_ROW_HEIGHT / 2)
                     .attr({
                         'class': 'highcharts-table-value',
                         'data-value': value

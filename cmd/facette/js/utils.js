@@ -16,10 +16,10 @@ function domFillItem(item, data, formatters) {
 
 function formatValue(value, type) {
     switch (type) {
-    case UNIT_TYPE_ABSOLUTE:
-        return humanReadable(value);
-    case UNIT_TYPE_DURATION:
+    case UNIT_TYPE_FIXED:
         return Math.round(value * 100) / 100;
+    case UNIT_TYPE_METRIC:
+        return humanReadable(value);
     default:
         return value;
     }
