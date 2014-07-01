@@ -24,6 +24,8 @@ function treeInit(element) {
         $item.data('template', $template);
         $template.detach();
 
+        $item.children('.placeholder').hide();
+
         // Initialize tree content
         treeUpdate($item).then(function () { $deferred.resolve(); });
     }).promise();
