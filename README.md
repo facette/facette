@@ -15,7 +15,7 @@ a production environment.
 Installation
 ------------
 
-Please see [docs/Installation.md](docs/Installation.md) file for build instructions and installation procedures.
+Please see [INSTALL](INSTALL) file for build instructions and installation procedures.
 
 
 [0]: http://facette.io/
