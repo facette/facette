@@ -206,7 +206,7 @@ function graphDraw(graph, postpone, delay, preview) {
                     tooltip: {
                         formatter: function () {
                             return moment(this.x).format('LLL') + '<br>' + this.series.name + ': <strong>' +
-                                humanReadable(this.y) + '</strong>';
+                                (this.y !== null ? formatValue(this.y, data.unit_type) : 'null') + '</strong>';
                         },
                         useHTML: true
                     },
@@ -216,11 +216,18 @@ function graphDraw(graph, postpone, delay, preview) {
                         type: 'datetime'
                     },
                     yAxis: {
+                        labels: {
+                            formatter: function () {
+                                return formatValue(this.value, data.unit_type) +
+                                    (data.unit_label ? ' ' + data.unit_label : '');
+                            }
+                        },
                         plotLines: [],
                         title: {
                             text: null
                         }
-                    }
+                    },
+                    _opts: data
                 };
 
                 // Set type-specific options

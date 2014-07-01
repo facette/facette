@@ -14,6 +14,17 @@ function domFillItem(item, data, formatters) {
     }
 }
 
+function formatValue(value, type) {
+    switch (type) {
+    case UNIT_TYPE_ABSOLUTE:
+        return humanReadable(value);
+    case UNIT_TYPE_DURATION:
+        return Math.round(value * 100) / 100;
+    default:
+        return value;
+    }
+}
+
 function humanReadable(number) {
     var units = ['', 'k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'],
         index;
@@ -59,7 +70,7 @@ function splitAttributeValue(attrValue) {
 }
 
 function timeToRange(duration) {
-    var ranges = {
+    var units = {
             d: 86400000,
             h: 3600000,
             m: 60000,
@@ -67,16 +78,25 @@ function timeToRange(duration) {
         },
         chunks = [],
         count,
-        unit;
+        unit,
+        seconds,
+        result;
 
-    for (unit in ranges) {
-        count = Math.floor(duration / ranges[unit]);
+    seconds = Math.abs(duration);
+
+    for (unit in units) {
+        count = Math.floor(seconds / units[unit]);
 
         if (count > 0) {
             chunks.push(count + unit);
-            duration %= ranges[unit];
+            seconds %= units[unit];
         }
     }
 
-    return chunks.join(' ');
+    result = chunks.join(' ');
+
+    if (duration < 0)
+        result = '-' + result;
+
+    return result;
 }
