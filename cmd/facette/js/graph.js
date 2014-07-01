@@ -401,7 +401,10 @@ function graphHandleActions(e) {
         return;
     }
 
-    if (e.target.href.endsWith('#reframe-all')) {
+    if (e.target.href.endsWith('#edit')) {
+        // Go to Administration Panel
+        window.location = urlPrefix + '/admin/graphs/' + $(e.target).closest('[data-graph]').attr('data-graph');
+    } else if (e.target.href.endsWith('#reframe-all')) {
         // Apply current options to siblings
         $graph.siblings('[data-graph]').each(function () {
             var $item = $(this),
