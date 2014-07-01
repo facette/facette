@@ -219,7 +219,8 @@ STYLE_PRINT_OUTPUT = $(TEMP_DIR)/static/style.print.css
 STYLE_EXTRA = cmd/facette/style/extra/favicon.png \
 	cmd/facette/style/extra/fonts \
 	cmd/facette/style/extra/loader.gif \
-	cmd/facette/style/extra/logo.png
+	cmd/facette/style/extra/logo-text.png \
+	cmd/facette/style/extra/logo-text-light.png
 
 STYLE_EXTRA_OUTPUT = $(addprefix $(TEMP_DIR)/static/, $(notdir $(STYLE_EXTRA)))
 
