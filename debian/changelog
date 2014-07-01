@@ -1,5 +1,5 @@
-facette (0.1~git20131226-1) unstable; urgency=low
+facette (0.1.0~git0) unstable; urgency=low
 
   * Initial release
 
- -- Vincent Batoufflet <vincent@batoufflet.info>  Thu, 26 Dec 2013 11:20:00 +0100
+ -- Vincent Batoufflet <vincent@batoufflet.info>  Tue, 01 Jul 2014 17:47:15 +0200
