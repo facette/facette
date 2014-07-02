@@ -375,7 +375,7 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 
 					if metric == nil {
 						logger.Log(
-							logger.LevelError,
+							logger.LevelWarning,
 							"server",
 							"unknown metric `%s' for source `%s' (origin: %s)",
 							serieChunk,
@@ -409,7 +409,7 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 
 				if metric == nil {
 					logger.Log(
-						logger.LevelError,
+						logger.LevelWarning,
 						"server",
 						"unknown metric `%s' for source `%s' (origin: %s)",
 						serieItem.Metric,
