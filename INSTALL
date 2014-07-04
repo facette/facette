@@ -30,7 +30,7 @@ Run the building command:
 By default Facette will be built in the `tmp` folder and installed in the `build` folder. To change its final location
 set the `PREFIX` variable:
 
-   sudo make make PREFIX=/path/to/folder install
+   sudo make PREFIX=/path/to/folder install
 
 Additional Targets
 ------------------
