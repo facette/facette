@@ -5,7 +5,7 @@
 		</div>
 
 		<header>
-			<a href="{{ .URLPrefix }}/"><img src="{{ asset "/static/logo-text-light.png" }}" alt="facette"></a>
+			<a href="{{ .URLPrefix }}/"><img src="{{ .URLPrefix }}{{ asset "/static/logo-text-light.png" }}" alt="facette"></a>
 
 			<ul>
 				<li><a class="icon icon-configure" href="{{ .URLPrefix }}/admin/" title="Administration Panel"></a></li>

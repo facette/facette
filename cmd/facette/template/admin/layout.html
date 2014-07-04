@@ -1,6 +1,6 @@
 {{ define "body" }}{{ template "template_element" }}
 		<header>
-			<a href="{{ .URLPrefix }}/admin/"><img src="{{ asset "/static/logo-text-light.png" }}" alt="facette"></a>
+			<a href="{{ .URLPrefix }}/admin/"><img src="{{ .URLPrefix }}{{ asset "/static/logo-text-light.png" }}" alt="facette"></a>
 
 			<ul>
 				<li><a class="icon icon-arrow-left" href="{{ .URLPrefix }}/" title="Back to Home Page"></a></li>
