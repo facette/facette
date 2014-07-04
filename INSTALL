@@ -5,7 +5,7 @@ Requirements
 ------------
 
  * Go language environment (>= 1.2)
- * `librrd` library and development files (>= 1.4.0)
+ * RRDtool library and development files (>= 1.4.0)
  * pkg-config helper tool
  * npm package manager
  * Pandoc document converter
@@ -14,7 +14,7 @@ Debian:
 
    apt-get install golang-go librrd-dev pkg-config npm pandoc
 
-Darwin:
+Mac OS X (with brew):
 
    brew install rrdtool pkg-config npm pandoc
 
@@ -27,10 +27,10 @@ Run the building command:
    make
    make install
 
-By default Facette will be built in the `tmp` folder and installed in the `build` one. To change its final location use
-the `PREFIX` variable:
+By default Facette will be built in the `tmp` folder and installed in the `build` folder. To change its final location
+set the `PREFIX` variable:
 
-   PREFIX=/path/to/folder make install
+   sudo make make PREFIX=/path/to/folder install
 
 Additional Targets
 ------------------
