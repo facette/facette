@@ -55,7 +55,7 @@ LESSC ?= lessc
 LESSC_ARGS = --no-color
 NPM_LESSC = less
 
-all: build lint
+all: build
 
 clean:
 	@$(call mesg_start,main,Cleaning temporary files...)
