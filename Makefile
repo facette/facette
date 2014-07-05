@@ -20,10 +20,10 @@ BUILD_NAME = facette-$(shell $(GO) env GOOS)-$(shell $(GO) env GOARCH)
 
 PREFIX ?= $(BUILD_DIR)/$(BUILD_NAME)
 
-mesg_start = echo "$(shell tput setaf 4)$(1):$(shell tput sgr0) $(2)"
+mesg_start = echo "$(shell tty -s && tput setaf 4)$(1):$(shell tty -s && tput sgr0) $(2)"
 mesg_step = echo "$(1)"
-mesg_ok = echo "result: $(shell tput setaf 2)ok$(shell tput sgr0)"
-mesg_fail = (echo "result: $(shell tput setaf 1)fail$(shell tput sgr0)" && false)
+mesg_ok = echo "result: $(shell tty -s && tput setaf 2)ok$(shell tty -s && tput sgr0)"
+mesg_fail = (echo "result: $(shell tty -s && tput setaf 1)fail$(shell tty -s && tput sgr0)" && false)
 
 path_search = $(firstword $(wildcard $(addsuffix /$(1),$(subst :, ,$(PATH)))))
 
