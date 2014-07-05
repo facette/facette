@@ -1,0 +1,19 @@
+server {
+	listen 80;
+
+	server_name facette.example.net;
+
+	access_log /var/log/nginx/facette.example.net-access.log;
+	error_log /var/log/nginx/facette.example.net-error.log;
+
+	root /usr/share/facette;
+	index index.html index.htm;
+
+	location / {
+		try_files $uri @proxy;
+	}
+
+	location @proxy {
+		proxy_pass http://localhost:12003;
+	}
+}
