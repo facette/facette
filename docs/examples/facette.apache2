@@ -1,0 +1,12 @@
+# Note: mod_proxy and mod_proxy_http modules must be enabled
+
+<VirtualHost *:80>
+	ServerName facette.example.net
+
+	CustomLog /var/log/apache2/facette.example.net-access.log combined
+	ErrorLog /var/log/apache2/facette.example.net-error.log
+
+        ProxyRequests Off
+	ProxyPass / http://localhost:12003/
+	ProxyPassReverse / http://localhost:12003/
+</VirtualHost>
