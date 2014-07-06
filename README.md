@@ -9,11 +9,14 @@ What is Facette?
 
 The source code is available at [Github][3], licensed under the terms of the [BSD license][4].
 
-:warning: Facette is currently under development and is **not ready** for
-a production environment.
+![facette_sshot2](https://cloud.githubusercontent.com/assets/1122379/3489453/3a61f74e-052e-11e4-884e-ea781b93efdd.png)
+![facette_sshot1](https://cloud.githubusercontent.com/assets/1122379/3489442/74b3b000-052d-11e4-812e-e462b8048ebd.png)
 
 Installation
 ------------
+
+:warning: Facette is currently under development and is **not ready** for
+a production environment.
 
 Please see [INSTALL](INSTALL) file for build instructions and installation procedures.
 
