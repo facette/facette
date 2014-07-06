@@ -10,10 +10,6 @@ server {
 	index index.html index.htm;
 
 	location / {
-		try_files $uri @proxy;
-	}
-
-	location @proxy {
 		proxy_pass http://localhost:12003;
 	}
 }
