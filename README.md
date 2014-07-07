@@ -1,6 +1,8 @@
 Facette [![](https://api.travis-ci.org/facette/facette.png)](https://travis-ci.org/facette/facette)
 =======
 
+![logo](https://cloud.githubusercontent.com/assets/1122379/3501756/07726d40-061a-11e4-8ffa-bbaa6cf3adfb.png)
+
 What is Facette?
 ----------------
 
