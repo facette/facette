@@ -1,0 +1,10 @@
+{
+	"connector": {
+		"type": "graphite",
+		"url": "http://graphite.example.net/"
+	},
+
+		"filters": [
+			{ "pattern": "_", "rewrite": ".", "target": "source" }
+	]
+}

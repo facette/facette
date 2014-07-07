@@ -4,6 +4,7 @@
 		"path": "/var/lib/collectd/rrd",
 		"pattern": "(?P<source>[^/]+)/(?P<metric>.+).rrd"
 	},
+
 	"filters": [
 		{"pattern": "/", "rewrite": ".", "target": "metric"},
 		{"pattern": "^cpu-(\\d+)\\.cpu-(.+)\\.value$", "rewrite": "cpu.$1.$2", "target": "metric"},
