@@ -73,10 +73,12 @@
         "mesg_unsaved_changes": "All unsaved changes will be lost!"
     },
     "metric": {
+        "mesg_load_nomatch": "Your search doesn’t match any metric",
         "mesg_missing": "You must at least add one metric!",
         "mesg_none": "No metric found"
     },
     "origin": {
+        "mesg_load_nomatch": "Your search doesn’t match any origin",
         "mesg_none": "No origin found"
     },
     "scale": {
@@ -86,10 +88,12 @@
         "mesg_delete": "You are about to delete “__name__” scale. This action can’t be undone.",
         "mesg_delete_fail": "Unable to delete the scale!",
         "mesg_exists": "A scale with the same name already exists!",
+        "mesg_load_nomatch": "Your search doesn’t match any scale",
         "mesg_none": "No scale found",
         "mesg_save_fail": "Unable to save scale!"
     },
     "source": {
+        "mesg_load_nomatch": "Your search doesn’t match any source",
         "mesg_none": "No source found"
     }
 }
