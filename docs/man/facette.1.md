@@ -35,4 +35,4 @@ SIGHUP\
 # SEE ALSO
 
 facettectl(8),
-<http://facette.io/>
+<https://facette.io/>
