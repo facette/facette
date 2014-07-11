@@ -1195,38 +1195,6 @@ function adminGraphSetupTerminate() {
             .on('keyup', '[data-step=1] fieldset input', adminHandleFieldType)
             .on('dragstart dragend dragover dragleave drop', '.dragarea', adminGraphHandleSerieDrag);
 
-        // Load graph units
-        var $graphUnit = $pane.find('select[name=graph-unit]'),
-            $unitLabel = $pane.find('input[name=unit-label]'),
-            $unitType = $pane.find('input[name=unit-type]');
-
-        $.ajax({
-            url: urlPrefix + '/api/v1/library/units/labels',
-            type: 'GET'
-        }).pipe(function (data) {
-            $graphUnit.children('option:not(.protected)').remove();
-
-            $.each(data, function (i, entry) { /*jshint unused: true */
-                $(document.createElement('option')).appendTo($graphUnit)
-                    .attr('value', entry.label)
-                    .data('value', entry)
-                    .text(entry.name);
-            });
-        });
-
-        $graphUnit.on('change', function (e) {
-            var $target = $(e.target),
-                value = $target.find('option:selected').data('value');
-
-            $unitLabel.val(value ? value.label : '');
-            $unitType.val(value ? value.type : '');
-
-            if ($target.val())
-                $unitLabel.attr('disabled', 'disabled');
-            else
-                $unitLabel.removeAttr('disabled');
-        });
-
         // Load graph data
         if (graphId === null)
             return;
