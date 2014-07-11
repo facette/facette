@@ -64,7 +64,7 @@ function adminGroupSetupTerminate() {
                 itemList({
                     filter: value
                 }, groupType).pipe(function (data) {
-                    if (data !== null && data[0].id != groupId) {
+                    if (data.length > 0 && data[0].id != groupId) {
                         input
                             .attr('title', $.t('group.mesg_exists'))
                             .addClass('error');
