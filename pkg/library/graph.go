@@ -44,8 +44,8 @@ type Graph struct {
 func (graph *Graph) String() string {
 	return fmt.Sprintf(
 		"Graph{ID:\"%s\" Name:\"%s\" Type:%d Groups:[%s]}",
-		graph.Name,
 		graph.ID,
+		graph.Name,
 		graph.Type,
 		func(groups []*OperGroup) string {
 			groupStrings := make([]string, len(groups))
