@@ -104,13 +104,13 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) (map[string]*typ
 			)
 
 			if serie.Scale != 0 {
-				graph.CDef(serieTemp+"-orig1", fmt.Sprintf("%s-orig0,%f,*", serieTemp, serie.Scale))
+				graph.CDef(serieTemp+"-orig1", fmt.Sprintf("%s-orig0,%g,*", serieTemp, serie.Scale))
 			} else {
 				graph.CDef(serieTemp+"-orig1", serieTemp+"-orig0")
 			}
 
 			if query.Group.Scale != 0 {
-				graph.CDef(serieTemp, fmt.Sprintf("%s-orig1,%f,*", serieTemp, query.Group.Scale))
+				graph.CDef(serieTemp, fmt.Sprintf("%s-orig1,%g,*", serieTemp, query.Group.Scale))
 			} else {
 				graph.CDef(serieTemp, serieTemp+"-orig1")
 			}
@@ -127,13 +127,13 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) (map[string]*typ
 			)
 
 			if serie.Scale != 0 {
-				xport.CDef(serieTemp+"-orig1", fmt.Sprintf("%s-orig0,%f,*", serieTemp, serie.Scale))
+				xport.CDef(serieTemp+"-orig1", fmt.Sprintf("%s-orig0,%g,*", serieTemp, serie.Scale))
 			} else {
 				xport.CDef(serieTemp+"-orig1", serieTemp+"-orig0")
 			}
 
 			if query.Group.Scale != 0 {
-				xport.CDef(serieTemp, fmt.Sprintf("%s-orig1,%f,*", serieTemp, query.Group.Scale))
+				xport.CDef(serieTemp, fmt.Sprintf("%s-orig1,%g,*", serieTemp, query.Group.Scale))
 			} else {
 				xport.CDef(serieTemp, serieTemp+"-orig1")
 			}
@@ -187,7 +187,7 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) (map[string]*typ
 		graph.CDef(serieName+"-orig", strings.Join(stack, ","))
 
 		if query.Group.Scale != 0 {
-			graph.CDef(serieName, fmt.Sprintf("%s-orig,%f,*", serieName, query.Group.Scale))
+			graph.CDef(serieName, fmt.Sprintf("%s-orig,%g,*", serieName, query.Group.Scale))
 		} else {
 			graph.CDef(serieName, serieName+"-orig")
 		}
@@ -199,7 +199,7 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) (map[string]*typ
 		xport.CDef(serieName+"-orig", strings.Join(stack, ","))
 
 		if query.Group.Scale != 0 {
-			xport.CDef(serieName, fmt.Sprintf("%s-orig,%f,*", serieName, query.Group.Scale))
+			xport.CDef(serieName, fmt.Sprintf("%s-orig,%g,*", serieName, query.Group.Scale))
 		} else {
 			xport.CDef(serieName, serieName+"-orig")
 		}

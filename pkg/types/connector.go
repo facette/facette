@@ -64,7 +64,7 @@ func (plotQuery *PlotQuery) String() string {
 
 func (groupQuery *GroupQuery) String() string {
 	return fmt.Sprintf(
-		"GroupQuery{Name:\"%s\" Type:%d Scale:%f Series:[%s]}",
+		"GroupQuery{Name:\"%s\" Type:%d Scale:%g Series:[%s]}",
 		groupQuery.Name,
 		groupQuery.Type,
 		groupQuery.Scale,
@@ -82,7 +82,7 @@ func (groupQuery *GroupQuery) String() string {
 
 func (serieQuery *SerieQuery) String() string {
 	return fmt.Sprintf(
-		"SerieQuery{Name:\"%s\" Scale:%f Metric:%s}",
+		"SerieQuery{Name:\"%s\" Scale:%g Metric:%s}",
 		serieQuery.Name,
 		serieQuery.Scale,
 		serieQuery.Metric,

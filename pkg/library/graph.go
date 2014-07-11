@@ -71,7 +71,7 @@ type OperGroup struct {
 
 func (group *OperGroup) String() string {
 	return fmt.Sprintf(
-		"OperGroup{Name:\"%s\" Type:%d Scale:%f Series:[%s]}",
+		"OperGroup{Name:\"%s\" Type:%d Scale:%g Series:[%s]}",
 		group.Name,
 		group.Type,
 		group.Scale,
@@ -98,7 +98,7 @@ type Serie struct {
 
 func (serie *Serie) String() string {
 	return fmt.Sprintf(
-		"Serie{Name:\"%s\" Origin:\"%s\" Source:\"%s\" Metric:\"%s\" Scale:%f}",
+		"Serie{Name:\"%s\" Origin:\"%s\" Source:\"%s\" Metric:\"%s\" Scale:%g}",
 		serie.Name,
 		serie.Origin,
 		serie.Source,

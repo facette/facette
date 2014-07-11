@@ -225,7 +225,7 @@ func graphiteBuildQueryURL(query *types.GroupQuery, startTime, endTime time.Time
 			target := fmt.Sprintf("%s.%s", serie.Metric.Source, serie.Metric.Name)
 
 			if serie.Scale != 0 {
-				target = fmt.Sprintf("scale(%s, %f)", target, serie.Scale)
+				target = fmt.Sprintf("scale(%s, %g)", target, serie.Scale)
 			}
 
 			queryURL += fmt.Sprintf(
@@ -246,7 +246,7 @@ func graphiteBuildQueryURL(query *types.GroupQuery, startTime, endTime time.Time
 		target = fmt.Sprintf("group(%s)", strings.Join(targets, ","))
 
 		if query.Series[0].Scale != 0 {
-			target = fmt.Sprintf("scale(%s, %f)", target, query.Series[0].Scale)
+			target = fmt.Sprintf("scale(%s, %g)", target, query.Series[0].Scale)
 		}
 
 		switch query.Type {
