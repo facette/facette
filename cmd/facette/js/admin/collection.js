@@ -79,7 +79,7 @@ function adminCollectionSetupTerminate() {
                 itemList({
                     filter: value
                 }, 'collections').pipe(function (data) {
-                    if (data !== null && data[0].id != collectionId) {
+                    if (data.length > 0 && data[0].id != collectionId) {
                         input
                             .attr('title', $.t('collection.mesg_exists'))
                             .addClass('error');

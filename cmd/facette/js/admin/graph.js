@@ -411,7 +411,7 @@ function adminGraphSetupTerminate() {
                 itemList({
                     filter: value
                 }, 'graphs').pipe(function (data) {
-                    if (data !== null && data[0].id != graphId) {
+                    if (data.length > 0 && data[0].id != graphId) {
                         input
                             .attr('title', $.t('graph.mesg_exists'))
                             .addClass('error');
