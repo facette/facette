@@ -5,7 +5,7 @@ Requirements
 ------------
 
  * Go language environment (>= 1.2)
- * `librrd` library and development files (>= 1.4.0)
+ * RRDtool library and development files (>= 1.4.0)
  * pkg-config helper tool
  * Node.js "npm" package manager
  * Pandoc document converter
@@ -14,7 +14,7 @@ Debian/Ubuntu:
 
    apt-get install build-essential golang-go librrd-dev pkg-config npm pandoc
 
-Darwin:
+Mac OS X (with brew):
 
    brew install rrdtool pkg-config npm pandoc
 
