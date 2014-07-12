@@ -3,6 +3,7 @@ package library
 import (
 	"path"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/facette/facette/pkg/logger"
@@ -42,7 +43,7 @@ func (library *Library) ExpandGroup(name string, groupType int) []string {
 
 	group := item.(*Group)
 
-	result := set.New(set.ThreadSafe)
+	itemSet := set.New(set.ThreadSafe)
 
 	for _, entry := range group.Entries {
 		var re *regexp.Regexp
@@ -71,7 +72,7 @@ func (library *Library) ExpandGroup(name string, groupType int) []string {
 					continue
 				}
 
-				result.Add(source.Name)
+				itemSet.Add(source.Name)
 			}
 		} else if groupType == LibraryItemMetricGroup {
 			for _, source := range library.Catalog.Origins[entry.Origin].Sources {
@@ -89,11 +90,14 @@ func (library *Library) ExpandGroup(name string, groupType int) []string {
 						continue
 					}
 
-					result.Add(metric.Name)
+					itemSet.Add(metric.Name)
 				}
 			}
 		}
 	}
 
-	return set.StringSlice(result)
+	result := set.StringSlice(itemSet)
+	sort.Strings(result)
+
+	return result
 }
