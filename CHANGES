@@ -1,6 +1,17 @@
 CHANGES
 =======
 
+0.1.1 (2014-07-12)
+------------------
+
+ * Fix bug occurring at provider shutdown
+ * Fix UI glitches
+ * Fix missing URL prefixes on static assets
+ * Fix JS console errors caused by duplicate names check
+ * Fix scale precision issue (#65)
+ * Makefile improvements
+ * Minor bugfixes
+
 0.1.0 (2014-07-01)
 ------------------
 
