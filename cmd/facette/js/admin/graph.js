@@ -15,7 +15,8 @@ function adminGraphGetData() {
 }
 
 function adminGraphGetGroup(entry) {
-    var group;
+    var group,
+        serieValue;
 
     if (entry.attr('data-group')) {
         group = $.extend({
@@ -28,14 +29,16 @@ function adminGraphGetGroup(entry) {
                 group.series.push(adminGraphGetValue($(this)));
             });
     } else {
+        serieValue = adminGraphGetValue(entry);
+
         group = {
-            name: entry.attr('data-serie'),
+            name: serieValue.name || entry.attr('data-serie'),
             type: OPER_GROUP_TYPE_NONE,
             series: [],
             options: {}
         };
 
-        group.series.push(adminGraphGetValue(entry));
+        group.series.push(serieValue);
 
         if (group.series[0])
             group.options = group.series[0].options || {};
@@ -97,6 +100,7 @@ function adminGraphCreateSerie(name, value) {
         .data({
             expands: {},
             proxies: [],
+            renamed: false,
             value: value
         });
 
@@ -369,6 +373,49 @@ function adminGraphRestorePosition() {
     });
 }
 
+function adminGraphAutoNameSeries(force) {
+    var $items = listGetItems('step-1-metrics'),
+        refCounts = {
+            origin: [],
+            source: []
+        };
+
+    force = typeof force == 'boolean' ? force : false;
+
+    $items.each(function () {
+        var $item = $(this),
+            value = adminGraphGetValue($item);
+
+        if (refCounts.origin.indexOf(value.origin) == -1)
+            refCounts.origin.push(value.origin);
+
+        if (refCounts.source.indexOf(value.source) == -1)
+            refCounts.source.push(value.source);
+    });
+
+    $items.each(function () {
+        var $item = $(this),
+            value;
+
+        if ($item.data('renamed') && !force)
+            return;
+
+        value = adminGraphGetValue($item);
+
+        value.name = value.metric;
+
+        if (refCounts.origin.length > 1)
+            value.name = value.origin + '/' + value.source + '/' + value.name;
+        else if (refCounts.source.length > 1)
+            value.name = value.source + '/' + value.name;
+
+        if (force)
+            $item.data('renamed', false);
+
+        domFillItem($item, value);
+    });
+}
+
 function adminGraphSetupTerminate() {
     // Register admin panes
     paneRegister('graph-list', function () {
@@ -428,6 +475,8 @@ function adminGraphSetupTerminate() {
         paneStepRegister('graph-edit', 1, function () {
             var $fieldset = $('[data-step=1] fieldset');
 
+            $pane.find('button[name=auto-name]').show();
+
             $fieldset.find('button[name=metric-update], button[name=metric-cancel]').hide();
 
             if (graphId)
@@ -442,6 +491,8 @@ function adminGraphSetupTerminate() {
                 $listSeries,
                 expand = false,
                 expandQuery = [];
+
+            $pane.find('button[name=auto-name]').hide();
 
             if ($items.length === 0) {
                 overlayCreate('alert', {
@@ -506,8 +557,8 @@ function adminGraphSetupTerminate() {
                         }
 
                         // Restore expanded state
-                        if (!$.isEmptyObject(listMatch('step-1-metrics').find('[data-serie=' +
-                                $item.attr('data-serie') + ']').data('expands')))
+                        if (!$.isEmptyObject(listMatch('step-1-metrics').find('[data-serie="' +
+                                $item.attr('data-serie') + '"]').data('expands')))
                             $item.find('a[href$=#expand-serie]').trigger('click');
                     });
                 });
@@ -520,6 +571,8 @@ function adminGraphSetupTerminate() {
         paneStepRegister('graph-edit', 3, function () {
             var $step = $('[data-step=3]');
 
+            $pane.find('button[name=auto-name]').hide();
+
             $step.find('select:last').trigger('change');
 
             setTimeout(function () {
@@ -531,6 +584,8 @@ function adminGraphSetupTerminate() {
         paneStepRegister('graph-edit', 'stack', function () {
             var $listSeries = listMatch('step-stack-series'),
                 $listStacks = listMatch('step-stack-groups');
+
+            $pane.find('button[name=auto-name]').hide();
 
             listEmpty($listSeries);
 
@@ -667,7 +722,7 @@ function adminGraphSetupTerminate() {
 
                 if (!expands[serieName]) {
                     expands[serieName] = {
-                        name: serieName,
+                        name: (adminGraphGetValue($itemSrc).name || name) + ' (' + i + ')',
                         origin: data[i][0],
                         source: data[i][1],
                         metric: data[i][2]
@@ -794,6 +849,8 @@ function adminGraphSetupTerminate() {
             if (listGetCount($list) === 0)
                 listSay($list, $.t('metric.mesg_none'), 'info');
 
+            adminGraphAutoNameSeries();
+
             PANE_UNLOAD_LOCK = true;
 
             $('[data-step=1] fieldset input[name=origin]').focus();
@@ -821,8 +878,7 @@ function adminGraphSetupTerminate() {
             value = adminGraphGetValue($item).name;
 
             $overlay = overlayCreate('prompt', {
-                message: $.t(e.target.href.endsWith('#rename-stack') ? 'graph.labl_stack_name' :
-                    'graph.labl_serie_name'),
+                message: $.t(attrName == 'data-stack' ? 'graph.labl_stack_name' : 'graph.labl_serie_name'),
                 callbacks: {
                     validate: function (data) {
                         if (!data)
@@ -833,6 +889,11 @@ function adminGraphSetupTerminate() {
                         paneMatch('graph-edit').find('[' + attrName + '="' + serieName + '"]').each(function () {
                             $(this).find('.name:first').text(data);
                         });
+
+                        if (attrName == 'data-serie') {
+                            $item.data('source').data('renamed', true);
+                            $pane.find('button[name=auto-name]').removeAttr('disabled');
+                        }
 
                         PANE_UNLOAD_LOCK = true;
                     }
@@ -998,9 +1059,19 @@ function adminGraphSetupTerminate() {
                     $metric,
                     $source,
                     $origin,
-                    name;
+                    name,
+                    metricName;
 
                 switch (e.target.name) {
+                case 'auto-name':
+                    if (e.target.disabled)
+                        return;
+
+                    adminGraphAutoNameSeries(true);
+                    $pane.find('button[name=auto-name]').attr('disabled', 'disabled');
+
+                    break;
+
                 case 'metric-add':
                 case 'metric-update':
                     if (e.target.disabled)
@@ -1016,15 +1087,17 @@ function adminGraphSetupTerminate() {
                     if (e.target.name == 'metric-update')
                         $entryActive = listGetItems($list, '.active');
 
+                    metricName = ($metric.data('value') && $metric.data('value').source.endsWith('groups/') ?
+                        'group:' : '') + $metric.val();
+
                     name = $entryActive && $entryActive.data('value').name || null;
 
                     $entry = adminGraphCreateSerie(name, {
-                        name: name,
+                        name: name || metricName,
                         origin: $origin.val(),
                         source: ($source.data('value') && $source.data('value').source.endsWith('groups/') ?
                             'group:' : '') + $source.val(),
-                        metric: ($metric.data('value') && $metric.data('value').source.endsWith('groups/') ?
-                            'group:' : '') + $metric.val()
+                        metric: metricName
                     });
 
                     if ($entryActive)
@@ -1041,6 +1114,8 @@ function adminGraphSetupTerminate() {
 
                     $fieldset.find('button[name=metric-add]').show();
                     $fieldset.find('button[name=metric-update], button[name=metric-cancel]').hide();
+
+                    adminGraphAutoNameSeries();
 
                     PANE_UNLOAD_LOCK = true;
 
@@ -1230,7 +1305,7 @@ function adminGraphSetupTerminate() {
                     $itemSerie = adminGraphCreateSerie(null, $.extend(data.groups[i].series[j], {
                         options: data.groups[i].type === OPER_GROUP_TYPE_NONE ?
                             data.groups[i].options : null
-                    }));
+                    })).data('renamed', true);
 
                     if ($itemOper)
                         adminGraphCreateProxy(PROXY_TYPE_SERIE, $itemSerie, $itemOper);
