@@ -428,7 +428,7 @@ function graphHandleActions(e) {
         // Reset graph to its initial state
         $graph.data('options', null);
         graphDraw($graph);
-    } else if (e.target.href.endsWith('#save')) {
+    } else if (e.target.href.endsWith('#export')) {
         graphExport($graph);
     } else if (e.target.href.endsWith('#set-range')) {
         // Toggle range selector
