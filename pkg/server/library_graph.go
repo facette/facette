@@ -265,7 +265,7 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 	// Get plots data
 	groupOptions := make(map[string]map[string]interface{})
 
-	data := make([]map[string]*types.PlotResult, 0)
+	data := make([][]*types.PlotResult, 0)
 
 	for _, groupItem := range graph.Groups {
 		groupOptions[groupItem.Name] = groupItem.Options
@@ -280,13 +280,21 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 			continue
 		}
 
-		plotResult, err := providerConnector.GetPlots(&types.PlotQuery{query, startTime, endTime, step,
+		plotResults, err := providerConnector.GetPlots(&types.PlotQuery{query, startTime, endTime, step,
 			plotReq.Percentiles})
 		if err != nil {
 			logger.Log(logger.LevelError, "server", "%s", err)
 		}
 
-		data = append(data, plotResult)
+		if len(plotResults) > 1 {
+			for index, entry := range plotResults {
+				entry.Name = fmt.Sprintf("%s (%s)", groupItem.Name, query.Series[index].Metric.Name)
+			}
+		} else if len(plotResults) == 1 {
+			plotResults[0].Name = groupItem.Name
+		}
+
+		data = append(data, plotResults)
 	}
 
 	response := &PlotResponse{
@@ -311,17 +319,17 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 	plotMax := 0
 
 	for _, groupItem := range graph.Groups {
-		var plotResult map[string]*types.PlotResult
+		var plotResult []*types.PlotResult
 
 		plotResult, data = data[0], data[1:]
 
-		for serieName, serieResult := range plotResult {
+		for _, serieResult := range plotResult {
 			if len(serieResult.Plots) > plotMax {
 				plotMax = len(serieResult.Plots)
 			}
 
 			response.Series = append(response.Series, &SerieResponse{
-				Name:    serieName,
+				Name:    serieResult.Name,
 				Plots:   serieResult.Plots,
 				Info:    serieResult.Info,
 				Options: groupOptions[groupItem.Name],
@@ -341,7 +349,6 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 	var providerConnector connector.Connector
 
 	query := &types.GroupQuery{
-		Name:  groupItem.Name,
 		Type:  groupItem.Type,
 		Scale: groupItem.Scale,
 	}
@@ -393,7 +400,6 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 					}
 
 					query.Series = append(query.Series, &types.SerieQuery{
-						Name: fmt.Sprintf("%s-%d", serieItem.Name, index),
 						Metric: &types.MetricQuery{
 							Name:   metric.OriginalName,
 							Origin: metric.Source.Origin.OriginalName,
@@ -433,12 +439,6 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 						Source: metric.Source.OriginalName,
 					},
 					Scale: serieItem.Scale,
-				}
-
-				if len(serieSources) > 1 {
-					serie.Name = fmt.Sprintf("%s-%d", serieItem.Name, index)
-				} else {
-					serie.Name = serieItem.Name
 				}
 
 				query.Series = append(query.Series, serie)

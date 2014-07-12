@@ -56,7 +56,7 @@ func init() {
 }
 
 // GetPlots retrieves time series data from origin based on a query and a time interval.
-func (connector *RRDConnector) GetPlots(query *types.PlotQuery) (map[string]*types.PlotResult, error) {
+func (connector *RRDConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotResult, error) {
 	var xport *rrd.Exporter
 
 	if len(query.Group.Series) == 0 {
@@ -65,8 +65,7 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) (map[string]*typ
 		query.Group.Type = OperGroupTypeNone
 	}
 
-	result := make(map[string]*types.PlotResult)
-	series := make(map[string]string)
+	result := make([]*types.PlotResult, 0)
 
 	stack := make([]string, 0)
 
@@ -91,61 +90,56 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) (map[string]*typ
 				continue
 			}
 
-			serieTemp := fmt.Sprintf("serie%d", count)
-			serieName := serie.Name
-
+			itemName := fmt.Sprintf("serie%d", count)
 			count += 1
 
 			graph.Def(
-				serieTemp+"-orig0",
+				itemName+"-orig0",
 				connector.metrics[serie.Metric.Source][serie.Metric.Name].FilePath,
 				connector.metrics[serie.Metric.Source][serie.Metric.Name].Dataset,
 				"AVERAGE",
 			)
 
 			if serie.Scale != 0 {
-				graph.CDef(serieTemp+"-orig1", fmt.Sprintf("%s-orig0,%g,*", serieTemp, serie.Scale))
+				graph.CDef(itemName+"-orig1", fmt.Sprintf("%s-orig0,%g,*", itemName, serie.Scale))
 			} else {
-				graph.CDef(serieTemp+"-orig1", serieTemp+"-orig0")
+				graph.CDef(itemName+"-orig1", itemName+"-orig0")
 			}
 
 			if query.Group.Scale != 0 {
-				graph.CDef(serieTemp, fmt.Sprintf("%s-orig1,%g,*", serieTemp, query.Group.Scale))
+				graph.CDef(itemName, fmt.Sprintf("%s-orig1,%g,*", itemName, query.Group.Scale))
 			} else {
-				graph.CDef(serieTemp, serieTemp+"-orig1")
+				graph.CDef(itemName, itemName+"-orig1")
 			}
 
 			// Set graph information request
-			rrdSetGraph(graph, serieTemp, serieName, query.Percentiles)
+			rrdSetGraph(graph, itemName, query.Percentiles)
 
 			// Set plots request
 			xport.Def(
-				serieTemp+"-orig0",
+				itemName+"-orig0",
 				connector.metrics[serie.Metric.Source][serie.Metric.Name].FilePath,
 				connector.metrics[serie.Metric.Source][serie.Metric.Name].Dataset,
 				"AVERAGE",
 			)
 
 			if serie.Scale != 0 {
-				xport.CDef(serieTemp+"-orig1", fmt.Sprintf("%s-orig0,%g,*", serieTemp, serie.Scale))
+				xport.CDef(itemName+"-orig1", fmt.Sprintf("%s-orig0,%g,*", itemName, serie.Scale))
 			} else {
-				xport.CDef(serieTemp+"-orig1", serieTemp+"-orig0")
+				xport.CDef(itemName+"-orig1", itemName+"-orig0")
 			}
 
 			if query.Group.Scale != 0 {
-				xport.CDef(serieTemp, fmt.Sprintf("%s-orig1,%g,*", serieTemp, query.Group.Scale))
+				xport.CDef(itemName, fmt.Sprintf("%s-orig1,%g,*", itemName, query.Group.Scale))
 			} else {
-				xport.CDef(serieTemp, serieTemp+"-orig1")
+				xport.CDef(itemName, itemName+"-orig1")
 			}
 
-			xport.XportDef(serieTemp, serieTemp)
-
-			// Set serie matching
-			series[serieTemp] = serieName
+			xport.XportDef(itemName, itemName)
 		}
 
 	case OperGroupTypeAvg, OperGroupTypeSum:
-		serieName := fmt.Sprintf("serie%d", count)
+		itemName := fmt.Sprintf("serie%d", count)
 		count += 1
 
 		for index, serie := range query.Group.Series {
@@ -153,7 +147,7 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) (map[string]*typ
 				continue
 			}
 
-			serieTemp := serieName + fmt.Sprintf("-tmp%d", index)
+			serieTemp := itemName + fmt.Sprintf("-tmp%d", index)
 
 			graph.Def(
 				serieTemp+"-ori",
@@ -184,30 +178,27 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) (map[string]*typ
 			stack = append(stack, strconv.Itoa(len(query.Group.Series)), "/")
 		}
 
-		graph.CDef(serieName+"-orig", strings.Join(stack, ","))
+		graph.CDef(itemName+"-orig", strings.Join(stack, ","))
 
 		if query.Group.Scale != 0 {
-			graph.CDef(serieName, fmt.Sprintf("%s-orig,%g,*", serieName, query.Group.Scale))
+			graph.CDef(itemName, fmt.Sprintf("%s-orig,%g,*", itemName, query.Group.Scale))
 		} else {
-			graph.CDef(serieName, serieName+"-orig")
+			graph.CDef(itemName, itemName+"-orig")
 		}
 
 		// Set graph information request
-		rrdSetGraph(graph, serieName, query.Group.Name, query.Percentiles)
+		rrdSetGraph(graph, itemName, query.Percentiles)
 
 		// Set plots request
-		xport.CDef(serieName+"-orig", strings.Join(stack, ","))
+		xport.CDef(itemName+"-orig", strings.Join(stack, ","))
 
 		if query.Group.Scale != 0 {
-			xport.CDef(serieName, fmt.Sprintf("%s-orig,%g,*", serieName, query.Group.Scale))
+			xport.CDef(itemName, fmt.Sprintf("%s-orig,%g,*", itemName, query.Group.Scale))
 		} else {
-			xport.CDef(serieName, serieName+"-orig")
+			xport.CDef(itemName, itemName+"-orig")
 		}
 
-		xport.XportDef(serieName, serieName)
-
-		// Set serie matching
-		series[serieName] = query.Group.Name
+		xport.XportDef(itemName, itemName)
 
 	default:
 		return nil, fmt.Errorf("unknown operator type %d", query.Group.Type)
@@ -221,13 +212,17 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) (map[string]*typ
 		return nil, err
 	}
 
-	for index, serieName := range data.Legends {
-		result[series[serieName]] = &types.PlotResult{Info: make(map[string]types.PlotValue)}
+	for index, itemName := range data.Legends {
+		plotResult := &types.PlotResult{
+			Name: itemName,
+			Info: make(map[string]types.PlotValue),
+		}
 
 		for i := 0; i < data.RowCnt; i++ {
-			result[series[serieName]].Plots = append(result[series[serieName]].Plots,
-				types.PlotValue(data.ValueAt(index, i)))
+			plotResult.Plots = append(plotResult.Plots, types.PlotValue(data.ValueAt(index, i)))
 		}
+
+		result = append(result, plotResult)
 	}
 
 	// Parse graph information
@@ -332,7 +327,13 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan *catal
 	return nil
 }
 
-func rrdParseInfo(info rrd.GraphInfo, data map[string]*types.PlotResult) {
+func rrdParseInfo(info rrd.GraphInfo, data []*types.PlotResult) {
+	refMap := make(map[string]*types.PlotResult)
+
+	for _, entry := range data {
+		refMap[entry.Name] = entry
+	}
+
 	for _, value := range info.Print {
 		chunks := strings.SplitN(value, ",", 3)
 
@@ -341,38 +342,41 @@ func rrdParseInfo(info rrd.GraphInfo, data map[string]*types.PlotResult) {
 			chunkFloat = math.NaN()
 		}
 
-		if data[chunks[0]] == nil {
-			data[chunks[0]] = &types.PlotResult{Info: make(map[string]types.PlotValue)}
+		if refMap[chunks[0]] == nil {
+			plotResult := &types.PlotResult{Info: make(map[string]types.PlotValue)}
+
+			data = append(data, plotResult)
+			refMap[chunks[0]] = plotResult
 		}
 
-		data[chunks[0]].Info[chunks[1]] = types.PlotValue(chunkFloat)
+		refMap[chunks[0]].Info[chunks[1]] = types.PlotValue(chunkFloat)
 	}
 }
 
-func rrdSetGraph(graph *rrd.Grapher, serieName, itemName string, percentiles []float64) {
-	graph.VDef(serieName+"-min", serieName+",MINIMUM")
-	graph.Print(serieName+"-min", itemName+",min,%lf")
+func rrdSetGraph(graph *rrd.Grapher, itemName string, percentiles []float64) {
+	graph.VDef(itemName+"-min", itemName+",MINIMUM")
+	graph.Print(itemName+"-min", itemName+",min,%lf")
 
-	graph.VDef(serieName+"-avg", serieName+",AVERAGE")
-	graph.Print(serieName+"-avg", itemName+",avg,%lf")
+	graph.VDef(itemName+"-avg", itemName+",AVERAGE")
+	graph.Print(itemName+"-avg", itemName+",avg,%lf")
 
-	graph.VDef(serieName+"-max", serieName+",MAXIMUM")
-	graph.Print(serieName+"-max", itemName+",max,%lf")
+	graph.VDef(itemName+"-max", itemName+",MAXIMUM")
+	graph.Print(itemName+"-max", itemName+",max,%lf")
 
-	graph.VDef(serieName+"-last", serieName+",LAST")
-	graph.Print(serieName+"-last", itemName+",last,%lf")
+	graph.VDef(itemName+"-last", itemName+",LAST")
+	graph.Print(itemName+"-last", itemName+",last,%lf")
 
 	for index, percentile := range percentiles {
-		graph.CDef(fmt.Sprintf("%s-cdef%d", serieName, index),
-			fmt.Sprintf("%s,UN,0,%s,IF", serieName, serieName))
-		graph.VDef(fmt.Sprintf("%s-vdef%d", serieName, index),
-			fmt.Sprintf("%s-cdef%d,%f,PERCENT", serieName, index, percentile))
+		graph.CDef(fmt.Sprintf("%s-cdef%d", itemName, index),
+			fmt.Sprintf("%s,UN,0,%s,IF", itemName, itemName))
+		graph.VDef(fmt.Sprintf("%s-vdef%d", itemName, index),
+			fmt.Sprintf("%s-cdef%d,%f,PERCENT", itemName, index, percentile))
 
 		if percentile-float64(int(percentile)) != 0 {
-			graph.Print(fmt.Sprintf("%s-vdef%d", serieName, index),
+			graph.Print(fmt.Sprintf("%s-vdef%d", itemName, index),
 				fmt.Sprintf("%s,%.2fth,%%lf", itemName, percentile))
 		} else {
-			graph.Print(fmt.Sprintf("%s-vdef%d", serieName, index),
+			graph.Print(fmt.Sprintf("%s-vdef%d", itemName, index),
 				fmt.Sprintf("%s,%.0fth,%%lf", itemName, percentile))
 		}
 	}

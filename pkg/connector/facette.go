@@ -81,7 +81,7 @@ func init() {
 }
 
 // GetPlots retrieves time series data from origin based on a query and a time interval.
-func (connector *FacetteConnector) GetPlots(query *types.PlotQuery) (map[string]*types.PlotResult, error) {
+func (connector *FacetteConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotResult, error) {
 	// Convert plotQuery into plotRequest-like to forward query to upstream Facette API
 	plotRequest := facettePlotRequest{
 		Time:  query.StartTime,
@@ -92,14 +92,14 @@ func (connector *FacetteConnector) GetPlots(query *types.PlotQuery) (map[string]
 			},
 			Groups: []*library.OperGroup{
 				&library.OperGroup{
-					Name: query.Group.Name,
+					Name: "group0",
 					Type: query.Group.Type,
 					Series: func(series []*types.SerieQuery) []*library.Serie {
 						requestSeries := make([]*library.Serie, len(series))
 
-						for i, serie := range series {
-							requestSeries[i] = &library.Serie{
-								Name:   serie.Name,
+						for index, serie := range series {
+							requestSeries[index] = &library.Serie{
+								Name:   fmt.Sprintf("serie%d", index),
 								Origin: serie.Metric.Origin,
 								Source: serie.Metric.Source,
 								Metric: serie.Metric.Name,
@@ -167,13 +167,13 @@ func (connector *FacetteConnector) GetPlots(query *types.PlotQuery) (map[string]
 		return nil, fmt.Errorf("unable to unmarshal upstream response: %s", err)
 	}
 
-	result := make(map[string]*types.PlotResult)
+	result := make([]*types.PlotResult, 0)
 
 	for _, serie := range plotResponse.Series {
-		result[serie.Name] = &types.PlotResult{
+		result = append(result, &types.PlotResult{
 			Plots: serie.Plots,
 			Info:  serie.Info,
-		}
+		})
 	}
 
 	return result, nil

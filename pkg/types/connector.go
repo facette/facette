@@ -17,7 +17,6 @@ type PlotQuery struct {
 
 // GroupQuery represents a plot group query.
 type GroupQuery struct {
-	Name   string
 	Type   int
 	Series []*SerieQuery
 	Scale  float64
@@ -25,7 +24,6 @@ type GroupQuery struct {
 
 // SerieQuery represents a serie entry in a GroupQuery.
 type SerieQuery struct {
-	Name   string
 	Metric *MetricQuery
 	Scale  float64
 }
@@ -39,6 +37,7 @@ type MetricQuery struct {
 
 // PlotResult represents a plot request result.
 type PlotResult struct {
+	Name  string
 	Plots []PlotValue
 	Info  map[string]PlotValue
 }
@@ -64,8 +63,7 @@ func (plotQuery *PlotQuery) String() string {
 
 func (groupQuery *GroupQuery) String() string {
 	return fmt.Sprintf(
-		"GroupQuery{Name:\"%s\" Type:%d Scale:%g Series:[%s]}",
-		groupQuery.Name,
+		"GroupQuery{Type:%d Scale:%g Series:[%s]}",
 		groupQuery.Type,
 		groupQuery.Scale,
 		func(series []*SerieQuery) string {
@@ -82,8 +80,7 @@ func (groupQuery *GroupQuery) String() string {
 
 func (serieQuery *SerieQuery) String() string {
 	return fmt.Sprintf(
-		"SerieQuery{Name:\"%s\" Scale:%g Metric:%s}",
-		serieQuery.Name,
+		"SerieQuery{Scale:%g Metric:%s}",
 		serieQuery.Scale,
 		serieQuery.Metric,
 	)

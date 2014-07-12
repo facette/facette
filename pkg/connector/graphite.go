@@ -65,8 +65,8 @@ func init() {
 }
 
 // GetPlots retrieves time series data from provider based on a query and a time interval.
-func (connector *GraphiteConnector) GetPlots(query *types.PlotQuery) (map[string]*types.PlotResult, error) {
-	var result map[string]*types.PlotResult
+func (connector *GraphiteConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotResult, error) {
+	var result []*types.PlotResult
 
 	if len(query.Group.Series) == 0 {
 		return nil, fmt.Errorf("group has no series")
@@ -209,19 +209,19 @@ func graphiteCheckBackendResponse(response *http.Response) error {
 }
 
 func graphiteBuildQueryURL(query *types.GroupQuery, startTime, endTime time.Time) (string, error) {
-	var (
-		serieName string
-		target    string
-	)
-
 	now := time.Now()
 
 	fromTime := 0
 
 	queryURL := fmt.Sprintf("%s?format=json", graphiteURLRender)
 
+	count := 0
+
 	if query.Type == OperGroupTypeNone {
 		for _, serie := range query.Series {
+			itemName := fmt.Sprintf("serie%d", count)
+			count += 1
+
 			target := fmt.Sprintf("%s.%s", serie.Metric.Source, serie.Metric.Name)
 
 			if serie.Scale != 0 {
@@ -231,19 +231,20 @@ func graphiteBuildQueryURL(query *types.GroupQuery, startTime, endTime time.Time
 			queryURL += fmt.Sprintf(
 				"&target=legendValue(alias(%s, '%s'), 'min', 'max', 'avg', 'last')",
 				target,
-				serie.Name,
+				itemName,
 			)
 		}
-
 	} else {
-		serieName = query.Name
+		itemName := fmt.Sprintf("serie%d", count)
+		count += 1
+
 		targets := make([]string, 0)
 
 		for _, serie := range query.Series {
 			targets = append(targets, fmt.Sprintf("%s.%s", serie.Metric.Source, serie.Metric.Name))
 		}
 
-		target = fmt.Sprintf("group(%s)", strings.Join(targets, ","))
+		target := fmt.Sprintf("group(%s)", strings.Join(targets, ","))
 
 		if query.Series[0].Scale != 0 {
 			target = fmt.Sprintf("scale(%s, %g)", target, query.Series[0].Scale)
@@ -259,7 +260,7 @@ func graphiteBuildQueryURL(query *types.GroupQuery, startTime, endTime time.Time
 		target = fmt.Sprintf(
 			"legendValue(alias(%s, '%s'), 'min', 'max', 'avg', 'last')",
 			target,
-			serieName,
+			itemName,
 		)
 
 		queryURL += fmt.Sprintf("&target=%s", target)
@@ -280,34 +281,31 @@ func graphiteBuildQueryURL(query *types.GroupQuery, startTime, endTime time.Time
 	return queryURL, nil
 }
 
-func graphiteExtractPlotResult(plots []graphitePlot) (map[string]*types.PlotResult, error) {
-	var (
-		serieName           string
-		min, max, avg, last float64
-	)
+func graphiteExtractPlotResult(plots []graphitePlot) ([]*types.PlotResult, error) {
+	var min, max, avg, last float64
 
-	results := make(map[string]*types.PlotResult)
+	result := make([]*types.PlotResult, 0)
 
 	for _, plot := range plots {
-		result := &types.PlotResult{Info: make(map[string]types.PlotValue)}
+		plotResult := &types.PlotResult{Info: make(map[string]types.PlotValue)}
 
 		for _, plotPoint := range plot.Datapoints {
-			result.Plots = append(result.Plots, types.PlotValue(plotPoint[0]))
+			plotResult.Plots = append(plotResult.Plots, types.PlotValue(plotPoint[0]))
 		}
 
 		// Scan the target legend for serie name and plot min/max/avg/last info
 		if index := strings.Index(plots[0].Target, "(min"); index > 0 {
-			fmt.Sscanf(plot.Target[0:index], "%s ", &serieName)
+			fmt.Sscanf(plot.Target[0:index], "%s ", &plotResult.Name)
 			fmt.Sscanf(plot.Target[index:], "(min: %f) (max: %f) (avg: %f) (last: %f)", &min, &max, &avg, &last)
 		}
 
-		result.Info["min"] = types.PlotValue(min)
-		result.Info["max"] = types.PlotValue(max)
-		result.Info["avg"] = types.PlotValue(avg)
-		result.Info["last"] = types.PlotValue(last)
+		plotResult.Info["min"] = types.PlotValue(min)
+		plotResult.Info["max"] = types.PlotValue(max)
+		plotResult.Info["avg"] = types.PlotValue(avg)
+		plotResult.Info["last"] = types.PlotValue(last)
 
-		results[serieName] = result
+		result = append(result, plotResult)
 	}
 
-	return results, nil
+	return result, nil
 }
