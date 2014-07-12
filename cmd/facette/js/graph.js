@@ -145,25 +145,28 @@ function graphDraw(graph, postpone, delay, preview) {
                             redraw: graphTableUpdate,
                             togglePlotLine: function () {
                                 var $element,
-                                    re = new RegExp('(^| +)active( +|$)');
-
-                                $(this.chart.container).find('.highcharts-table-value.active').css({
-                                    color: 'inherit',
-                                    fill: 'inherit'
-                                });
+                                    regexp = new RegExp('(^| +)active( +|$)'),
+                                    wasActive = false;
 
                                 $element = $(this.element);
+
+                                if ($element.attr('class') && $element.attr('class').match(regexp))
+                                    wasActive = true;
+
+                                $(this.chart.container).find('.highcharts-table-value.active').each(function () {
+                                    var $item = $(this);
+
+                                    $item.css({
+                                        color: 'inherit',
+                                        fill: 'inherit'
+                                    }).attr('class', $item.attr('class').replace(regexp, ''));
+                                });
 
                                 // Remove existing plot line
                                 this.chart.yAxis[0].removePlotLine('plotline0');
 
-                                if ($element.attr('class') && $element.attr('class').match(re)) {
-                                    $element
-                                        .removeAttr('class')
-                                        .removeAttr('style');
-
+                                if (wasActive)
                                     return;
-                                }
 
                                 // Set element active
                                 $element
@@ -171,7 +174,7 @@ function graphDraw(graph, postpone, delay, preview) {
                                         color: '#e30',
                                         fill: '#e30'
                                     })
-                                    .attr('class', 'active');
+                                    .attr('class', $element.attr('class') + ' active');
 
                                 // Draw new plot line
                                 this.chart.yAxis[0].addPlotLine({
