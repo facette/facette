@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"runtime"
 )
 
 // PrintUsage prettifies the output of command-line usage.
@@ -22,5 +23,10 @@ func PrintUsage(output io.Writer, usage string) {
 
 // PrintVersion prettifies the output of command-line usage.
 func PrintVersion(version string) {
-	fmt.Printf("%s version %s\n", path.Base(os.Args[0]), version)
+	fmt.Printf("%s version %s\nGo version: %s (%s)\n",
+		path.Base(os.Args[0]),
+		version,
+		runtime.Version(),
+		runtime.Compiler,
+	)
 }
