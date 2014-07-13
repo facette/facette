@@ -4,15 +4,18 @@ import (
 	"bytes"
 	"html/template"
 	"net/http"
+	"path"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/facette/facette/pkg/utils"
 )
 
 func (server *Server) execTemplate(writer http.ResponseWriter, status int, data interface{}, files ...string) error {
 	var err error
 
-	tmpl := template.New("layout.html").Funcs(template.FuncMap{
+	tmpl := template.New(path.Base(files[0])).Funcs(template.FuncMap{
 		"asset":  server.templateAsset,
 		"dump":   templateDumpMap,
 		"eq":     templateEqual,
@@ -35,6 +38,11 @@ func (server *Server) execTemplate(writer http.ResponseWriter, status int, data 
 	}
 
 	writer.WriteHeader(status)
+
+	if utils.HTTPGetContentType(writer) == "text/xml" {
+		writer.Write([]byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"))
+	}
+
 	writer.Write(tmplData.Bytes())
 
 	return err

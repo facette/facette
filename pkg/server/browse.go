@@ -8,6 +8,7 @@ import (
 
 	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/pkg/logger"
+	"github.com/facette/facette/pkg/utils"
 )
 
 func (server *Server) serveBrowse(writer http.ResponseWriter, request *http.Request) {
@@ -30,7 +31,8 @@ func (server *Server) serveBrowse(writer http.ResponseWriter, request *http.Requ
 		err = server.serveBrowseCollection(writer, request)
 	} else if strings.HasPrefix(request.URL.Path, urlBrowsePath+"graphs/") {
 		err = server.serveBrowseGraph(writer, request)
-	} else if request.URL.Path == urlBrowsePath+"search" {
+	} else if request.URL.Path == urlBrowsePath+"search" ||
+		request.URL.Path == urlBrowsePath+"opensearch.xml" {
 		err = server.serveBrowseSearch(writer, request)
 	} else if request.URL.Path == urlBrowsePath {
 		err = server.serveBrowseIndex(writer, request)
@@ -52,8 +54,10 @@ func (server *Server) serveBrowseIndex(writer http.ResponseWriter, request *http
 		http.StatusOK,
 		struct {
 			URLPrefix string
+			Request   *http.Request
 		}{
 			URLPrefix: server.Config.URLPrefix,
+			Request:   request,
 		},
 		path.Join(server.Config.BaseDir, "template", "layout.html"),
 		path.Join(server.Config.BaseDir, "template", "common", "element.html"),
@@ -143,6 +147,7 @@ func (server *Server) serveBrowseGraph(writer http.ResponseWriter, request *http
 
 func (server *Server) serveBrowseSearch(writer http.ResponseWriter, request *http.Request) error {
 	data := struct {
+		URLBase     string
 		URLPrefix   string
 		Count       int
 		Request     *http.Request
@@ -151,6 +156,20 @@ func (server *Server) serveBrowseSearch(writer http.ResponseWriter, request *htt
 	}{
 		URLPrefix: server.Config.URLPrefix,
 		Request:   request,
+	}
+
+	// Handle OpenSearch
+	if request.URL.Path == urlBrowsePath+"opensearch.xml" {
+		data.URLBase = utils.HTTPGetURLBase(request)
+
+		writer.Header().Set("Content-Type", "text/xml; charset=utf-8")
+
+		return server.execTemplate(
+			writer,
+			http.StatusOK,
+			data,
+			path.Join(server.Config.BaseDir, "template", "opensearch.xml"),
+		)
 	}
 
 	// Perform search filtering

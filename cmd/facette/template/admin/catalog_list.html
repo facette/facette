@@ -1,6 +1,6 @@
 {{ define "title" }}Administration Panel: {{ if eq .Section "origins" }}Origins{{ end }}{{ if eq .Section "sources" }}Sources{{ end }}{{ if eq .Section "metrics" }}Metrics{{ end }} — Facette{{ end }}
 
-{{ define "script" }}
+{{ define "head" }}
 		<script src="{{ .URLPrefix }}{{ asset "/static/jquery.js" }}"></script>
 		<script src="{{ .URLPrefix }}{{ asset "/static/i18next.js" }}"></script>
 		<script src="{{ .URLPrefix }}{{ asset "/static/moment.js" }}"></script>

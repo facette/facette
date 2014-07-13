@@ -1,0 +1,7 @@
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+	<ShortName>Facette ({{ .Request.Host }})</ShortName>
+	<Description>{{ .Request.Host }} — Search</Description>
+	<Tags>facette</Tags>
+	<Url type="text/html" template="{{ .URLBase }}{{ .URLPrefix }}/browse/search?q={searchTerms}"/>
+	<Image type="image/png" height="32" width="32">{{ .URLBase }}{{ .URLPrefix }}/static/favicon.png</Image>
+</OpenSearchDescription>

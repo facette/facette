@@ -1,6 +1,7 @@
 {{ define "title" }}Facette{{ end }}
 
-{{ define "script" }}
+{{ define "head" }}
+		<link rel="search" href="{{ .URLPrefix }}/browse/opensearch.xml" title="Add {{ .Request.Host }} search" type="application/opensearchdescription+xml">
 		<script src="{{ .URLPrefix }}{{ asset "/static/jquery.js" }}"></script>
 		<script src="{{ .URLPrefix }}{{ asset "/static/i18next.js" }}"></script>
 		<script src="{{ .URLPrefix }}{{ asset "/static/facette.js" }}"></script>

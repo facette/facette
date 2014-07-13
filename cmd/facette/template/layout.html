@@ -6,7 +6,7 @@
 		<meta name="url-prefix" content="{{ .URLPrefix }}">{{ end }}
 		<link rel="stylesheet" href="{{ .URLPrefix }}{{ asset "/static/style.css" }}" media="screen">
 		<link rel="stylesheet" href="{{ .URLPrefix }}{{ asset "/static/style.print.css" }}" media="print">
-		<link rel="shortcut icon" href="{{ .URLPrefix }}{{ asset "/static/favicon.png" }}">{{ template "script" . }}</head>
+		<link rel="shortcut icon" href="{{ .URLPrefix }}{{ asset "/static/favicon.png" }}">{{ template "head" . }}</head>
 	<body>
 {{ template "body" . }}
 	</body>

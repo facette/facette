@@ -16,6 +16,8 @@ func HTTPGetContentType(input interface{}) string {
 		header = input.(*http.Request).Header
 	case *http.Response:
 		header = input.(*http.Response).Header
+	case http.ResponseWriter:
+		header = input.(http.ResponseWriter).Header()
 	default:
 		return ""
 	}
@@ -28,4 +30,17 @@ func HTTPGetContentType(input interface{}) string {
 	}
 
 	return contentType
+}
+
+// HTTPGetURLBase returns the HTTP URL base based on available header values.
+func HTTPGetURLBase(request *http.Request) string {
+	base := request.Header.Get("X-Forwarded-Proto")
+
+	if base == "" {
+		base = "http"
+	}
+
+	base += "://" + request.Host
+
+	return base
 }
