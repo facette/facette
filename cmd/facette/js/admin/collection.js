@@ -207,6 +207,8 @@ function adminCollectionSetupTerminate() {
                         name: $graph.val()
                     });
 
+                    $item.find('input[name=graph-enabled]').attr('checked', 'checked');
+
                     adminCollectionUpdatePlaceholder($item);
 
                     listSay($list, null);
