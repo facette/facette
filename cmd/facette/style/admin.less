@@ -149,3 +149,16 @@ button[name=auto-name] {
 	float: left;
 	margin: 1em 0;
 }
+
+[data-list=step-1-graphs] .unknown .name {
+	background-color: @ErrorBackgroundColor;
+	border-radius: 0.35em;
+	color: @MessageTextColor;
+	padding: 0 0.5em;
+}
+
+[data-list=step-1-graphs] .unknown .name:before {
+	content: '\f06a';
+	font-family: 'FontAwesome';
+	margin-right: 0.5em;
+}

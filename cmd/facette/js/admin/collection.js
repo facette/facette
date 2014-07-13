@@ -42,7 +42,7 @@ function adminCollectionGetData() {
     return data;
 }
 
-function adminCollectionUpdatePlaceholders(item) {
+function adminCollectionUpdatePlaceholder(item) {
     item.find('input[name=graph-title]').attr('placeholder', item.find('.name').text());
 }
 
@@ -207,7 +207,7 @@ function adminCollectionSetupTerminate() {
                         name: $graph.val()
                     });
 
-                    adminCollectionUpdatePlaceholders($item);
+                    adminCollectionUpdatePlaceholder($item);
 
                     listSay($list, null);
                     listUpdateCount($list);
@@ -256,7 +256,7 @@ function adminCollectionSetupTerminate() {
                 PANE_UNLOAD_LOCK = true;
 
                 if (e.target.name == 'graph-range')
-                    adminCollectionUpdatePlaceholders($(e.target).closest('[data-graph]'));
+                    adminCollectionUpdatePlaceholder($(e.target).closest('[data-graph]'));
             })
             .on('keyup', '[data-step=1] fieldset input', adminHandleFieldType);
 
@@ -308,16 +308,24 @@ function adminCollectionSetupTerminate() {
                 query.collection = collectionId;
 
             itemList(query, 'graphs').pipe(function (data) {
-                var func = function () {
-                        var $item = $(this);
-
-                        domFillItem($item, data[i]);
-                        adminCollectionUpdatePlaceholders($item);
-                    },
+                var info = {},
                     i;
 
                 for (i in data)
-                    $listGraphs.find('[data-graph=' + data[i].id + ']').each(func);
+                    info[data[i].id] = data[i];
+
+                $listGraphs.find('[data-graph]').each(function () {
+                    var $item = $(this),
+                        id = $item.attr('data-graph');
+
+                    if (!info[id]) {
+                        $item.addClass('unknown');
+                        info[id] = {name: $.t('graph.mesg_unknown')};
+                    }
+
+                    domFillItem($item, info[id]);
+                    adminCollectionUpdatePlaceholder($item);
+                });
             });
         });
     });
