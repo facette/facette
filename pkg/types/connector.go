@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 )
@@ -40,6 +41,43 @@ type PlotResult struct {
 	Name  string
 	Plots []PlotValue
 	Info  map[string]PlotValue
+}
+
+// Percentiles calculates the percentile values of a PlotResult plots
+func (plotResult PlotResult) Percentiles(percentiles []float64) {
+	set := make([]float64, len(plotResult.Plots))
+	for i, _ := range plotResult.Plots {
+		set[i] = float64(plotResult.Plots[i])
+	}
+
+	if len(percentiles) == 0 {
+		return
+	}
+
+	setSize := len(plotResult.Plots)
+	if setSize == 0 {
+		return
+	}
+
+	sort.Float64s(set)
+
+	for _, percentile := range percentiles {
+		percentileString := fmt.Sprintf("%gth", percentile)
+
+		rank := (percentile / 100) * float64(setSize+1)
+		rankInt := int(rank)
+		rankFrac := rank - float64(rankInt)
+
+		if rank <= 0.0 {
+			plotResult.Info[percentileString] = PlotValue(set[0])
+			continue
+		} else if rank-1.0 >= float64(setSize) {
+			plotResult.Info[percentileString] = PlotValue(set[setSize-1])
+			continue
+		}
+
+		plotResult.Info[percentileString] = PlotValue(set[rankInt-1] + rankFrac*(set[rankInt]-set[rankInt-1]))
+	}
 }
 
 func (plotQuery *PlotQuery) String() string {
