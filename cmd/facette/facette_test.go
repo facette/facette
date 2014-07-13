@@ -813,13 +813,13 @@ func Test_LibraryCollectionHandle(test *testing.T) {
 
 	collectionBase.Entries = append(collectionBase.Entries,
 		&library.CollectionEntry{ID: "00000000-0000-0000-0000-000000000000",
-			Options: map[string]string{"range": "-1h"}})
+			Options: map[string]interface{}{"range": "-1h"}})
 	collectionBase.Entries = append(collectionBase.Entries,
 		&library.CollectionEntry{ID: "00000000-0000-0000-0000-000000000000",
-			Options: map[string]string{"range": "-1d"}})
+			Options: map[string]interface{}{"range": "-1d"}})
 	collectionBase.Entries = append(collectionBase.Entries,
 		&library.CollectionEntry{ID: "00000000-0000-0000-0000-000000000000",
-			Options: map[string]string{"range": "-1w"}})
+			Options: map[string]interface{}{"range": "-1w"}})
 
 	// Test GET on collections list
 	listBase := server.ItemListResponse{}
