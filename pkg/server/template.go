@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"fmt"
 	"html/template"
 	"net/http"
 	"path"
@@ -60,7 +61,7 @@ func templateNotEqual(x, y interface{}) bool {
 	return !templateEqual(x, y)
 }
 
-func templateDumpMap(x map[string]string) string {
+func templateDumpMap(x map[string]interface{}) string {
 	chunks := make([]string, 0)
 
 	for key, value := range x {
@@ -68,7 +69,19 @@ func templateDumpMap(x map[string]string) string {
 			continue
 		}
 
-		chunks = append(chunks, key+": "+value)
+		switch value.(type) {
+		case []interface{}:
+			valueString := make([]string, len(value.([]interface{})))
+
+			for index, entry := range value.([]interface{}) {
+				valueString[index] = fmt.Sprintf("%v", entry)
+			}
+
+			chunks = append(chunks, fmt.Sprintf("%s: %v", key, strings.Join(valueString, ", ")))
+
+		default:
+			chunks = append(chunks, fmt.Sprintf("%s: %v", key, value))
+		}
 	}
 
 	return strings.Join(chunks, "; ")

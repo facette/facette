@@ -61,6 +61,27 @@ textarea,
 	}
 }
 
+input[type=checkbox] {
+	display: none;
+}
+
+input[type=checkbox] + label::before {
+	color: @FormBorderColor;
+	content: '\f096';
+	display: inline-block;
+	font-size: 1.25em;
+	margin-right: 0.25em;
+	height: 1.25em;
+	text-align: center;
+	vertical-align: middle;
+	width: 1.25em;
+}
+
+input[type=checkbox]:checked + label::before {
+	color: @FormButtonBackgroundColor;
+	content: '\f14a';
+}
+
 button {
 	background-color: @FormButtonBackgroundColor;
 	border-color: transparent;

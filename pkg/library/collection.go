@@ -1,6 +1,10 @@
 package library
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/facette/facette/pkg/config"
+)
 
 // Collection represents a collection of graphs.
 type Collection struct {
@@ -13,25 +17,24 @@ type Collection struct {
 
 // CollectionEntry represents a collection entry.
 type CollectionEntry struct {
-	ID      string            `json:"id"`
-	Options map[string]string `json:"options"`
+	ID      string                 `json:"id"`
+	Options map[string]interface{} `json:"options"`
 }
 
-// FilterCollection filters collection entries by graphs titles.
+// FilterCollection filters collection entries by graphs titles and enable state.
 func (library *Library) FilterCollection(collection *Collection, filter string) *Collection {
-	if filter == "" {
-		return nil
-	}
-
 	collectionTemp := &Collection{}
 	*collectionTemp = *collection
 	collectionTemp.Entries = nil
 
 	for _, entry := range collection.Entries {
-		if _, ok := entry.Options["title"]; !ok {
+		if enabled, err := config.GetBool(entry.Options, "enabled", false); err != nil || !enabled {
 			continue
-		} else if !strings.Contains(strings.ToLower(entry.Options["title"]), strings.ToLower(filter)) {
-			continue
+		} else if filter != "" {
+			if title, err := config.GetString(entry.Options, "title", false); err != nil ||
+				!strings.Contains(strings.ToLower(title), strings.ToLower(filter)) {
+				continue
+			}
 		}
 
 		collectionTemp.Entries = append(collectionTemp.Entries, entry)

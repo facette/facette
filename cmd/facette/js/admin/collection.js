@@ -33,7 +33,8 @@ function adminCollectionGetData() {
                 range: $range.val() || $range.attr('placeholder'),
                 sample: $item.find('input[name=graph-sample]').val(),
                 constants: $item.find('input[name=graph-constants]').val(),
-                percentiles: $item.find('input[name=graph-percentiles]').val()
+                percentiles: $item.find('input[name=graph-percentiles]').val(),
+                enabled: $item.find('input[name=graph-enabled]').is(':checked')
             }
         });
     });
@@ -279,6 +280,9 @@ function adminCollectionSetupTerminate() {
                 $item.find('input[name=graph-sample]').val(data.entries[i].options.sample || '');
                 $item.find('input[name=graph-constants]').val(data.entries[i].options.constants || '');
                 $item.find('input[name=graph-percentiles]').val(data.entries[i].options.percentiles || '');
+
+                if (data.entries[i].options.enabled)
+                    $item.find('input[name=graph-enabled]').attr('checked', 'checked');
             }
 
             $pane = paneMatch('collection-edit');

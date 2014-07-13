@@ -89,11 +89,7 @@ func (server *Server) serveBrowseCollection(writer http.ResponseWriter, request 
 		return err
 	}
 
-	data.Collection.Collection = item.(*library.Collection)
-
-	if request.FormValue("q") != "" {
-		data.Collection.Collection = server.Library.FilterCollection(data.Collection.Collection, request.FormValue("q"))
-	}
+	data.Collection.Collection = server.Library.FilterCollection(item.(*library.Collection), request.FormValue("q"))
 
 	if data.Collection.Collection.Parent != nil {
 		data.Collection.Parent = data.Collection.Collection.Parent.ID
