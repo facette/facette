@@ -45,7 +45,8 @@ $.fn.extend({
 /* Highcharts */
 if (window.Highcharts) {
     Highcharts.drawTable = function (data) {
-        var chart = this,
+        var $container,
+            chart = this,
             options = chart.options,
             cellLeft,
             columnKeys = ['min', 'avg', 'max', 'last'],
@@ -56,8 +57,10 @@ if (window.Highcharts) {
 
         cellLeft = tableLeft;
 
+        $container = $(chart.container);
+
         // Clean up previous table
-        $(chart.container).find('.highcharts-table-group').remove();
+        $container.find('.highcharts-table-group').remove();
 
         // Render custom legend
         $.each(chart.series, function (i, serie) {
@@ -70,6 +73,32 @@ if (window.Highcharts) {
                     'class': 'highcharts-table-group'
                 })
                 .add();
+
+            element = chart.renderer.text('\uf176', tableLeft - GRAPH_LEGEND_ROW_HEIGHT * 0.5, tableTop +
+                    i * GRAPH_LEGEND_ROW_HEIGHT + GRAPH_LEGEND_ROW_HEIGHT / 2)
+                .attr({
+                    'class': 'highcharts-table-action',
+                    color: options.plotOptions.area.dataLabels.style.color
+                })
+                .css({
+                    cursor: 'pointer',
+                    display: 'none',
+                    fontFamily: 'FontAwesome',
+                    opacity: 0.25
+                })
+                .add(groups[serie.name])
+                .element;
+
+            Highcharts.addEvent(element, 'mouseenter mouseleave', function (e) {
+                $(e.target).css('opacity', e.type == 'mouseenter' ? 1 : 0.25);
+            });
+
+            Highcharts.addEvent(element, 'click', function () {
+                var $element = $(element),
+                    serie = chart.get($element.text());
+
+                serie.group.toFront();
+            });
 
             chart.renderer.rect(tableLeft, tableTop + i * GRAPH_LEGEND_ROW_HEIGHT, GRAPH_LEGEND_ROW_HEIGHT * 0.75,
                     GRAPH_LEGEND_ROW_HEIGHT * 0.65, 2)
@@ -169,6 +198,11 @@ if (window.Highcharts) {
                 box = element.getBBox();
                 cellLeft = Math.max(cellLeft, box.x + box.width + GRAPH_LEGEND_ROW_HEIGHT);
             });
+        });
+
+        // Attach events
+        $container.closest('[data-graph]').on('mouseenter mouseleave', function (e) {
+            $container.find('.highcharts-table-action').toggle(e.type == 'mouseenter');
         });
     };
 }
