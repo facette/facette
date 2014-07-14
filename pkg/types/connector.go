@@ -46,7 +46,7 @@ type PlotResult struct {
 // Percentiles calculates the percentile values of a PlotResult plots
 func (plotResult PlotResult) Percentiles(percentiles []float64) {
 	set := make([]float64, len(plotResult.Plots))
-	for i, _ := range plotResult.Plots {
+	for i := range plotResult.Plots {
 		set[i] = float64(plotResult.Plots[i])
 	}
 
