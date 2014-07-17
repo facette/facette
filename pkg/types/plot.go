@@ -98,6 +98,36 @@ type PlotResult struct {
 	Info  map[string]PlotValue
 }
 
+// Summarize calculates the min/max/average and percentile values of a PlotResult plots, and stores the results into
+// the Info map.
+func (plotResult PlotResult) Summarize(percentiles []float64) {
+	var min, max, total PlotValue
+
+	if len(plotResult.Plots) > 0 {
+		min = plotResult.Plots[0]
+	}
+
+	for i := range plotResult.Plots {
+		if plotResult.Plots[i] < min {
+			min = plotResult.Plots[i]
+		}
+
+		if plotResult.Plots[i] > max {
+			max = plotResult.Plots[i]
+		}
+
+		total += plotResult.Plots[i]
+	}
+
+	plotResult.Info["min"] = min
+	plotResult.Info["max"] = max
+	plotResult.Info["average"] = total / PlotValue(len(plotResult.Plots))
+
+	if len(percentiles) > 0 {
+		plotResult.Percentiles(percentiles)
+	}
+}
+
 // Percentiles calculates the percentile values of a PlotResult plots
 func (plotResult PlotResult) Percentiles(percentiles []float64) {
 	set := make([]float64, len(plotResult.Plots))
