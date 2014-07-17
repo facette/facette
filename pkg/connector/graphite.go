@@ -208,7 +208,7 @@ func graphiteCheckBackendResponse(response *http.Response) error {
 	return nil
 }
 
-func graphiteBuildQueryURL(query *types.GroupQuery, startTime, endTime time.Time) (string, error) {
+func graphiteBuildQueryURL(queryGroup *types.PlotQueryGroup, startTime, endTime time.Time) (string, error) {
 	now := time.Now()
 
 	fromTime := 0
@@ -217,8 +217,8 @@ func graphiteBuildQueryURL(query *types.GroupQuery, startTime, endTime time.Time
 
 	count := 0
 
-	if query.Type == OperGroupTypeNone {
-		for _, serie := range query.Series {
+	if queryGroup.Type == OperGroupTypeNone {
+		for _, serie := range queryGroup.Series {
 			itemName := fmt.Sprintf("serie%d", count)
 			count += 1
 
@@ -240,17 +240,17 @@ func graphiteBuildQueryURL(query *types.GroupQuery, startTime, endTime time.Time
 
 		targets := make([]string, 0)
 
-		for _, serie := range query.Series {
+		for _, serie := range queryGroup.Series {
 			targets = append(targets, fmt.Sprintf("%s.%s", serie.Metric.Source, serie.Metric.Name))
 		}
 
 		target := fmt.Sprintf("group(%s)", strings.Join(targets, ","))
 
-		if query.Series[0].Scale != 0 {
-			target = fmt.Sprintf("scale(%s, %g)", target, query.Series[0].Scale)
+		if queryGroup.Series[0].Scale != 0 {
+			target = fmt.Sprintf("scale(%s, %g)", target, queryGroup.Series[0].Scale)
 		}
 
-		switch query.Type {
+		switch queryGroup.Type {
 		case OperGroupTypeAvg:
 			target = fmt.Sprintf("averageSeries(%s)", target)
 		case OperGroupTypeSum:

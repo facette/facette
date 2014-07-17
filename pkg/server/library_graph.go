@@ -344,11 +344,11 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 	server.serveResponse(writer, response, http.StatusOK)
 }
 
-func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.OperGroup) (*types.GroupQuery,
+func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.OperGroup) (*types.PlotQueryGroup,
 	connector.Connector, error) {
 	var providerConnector connector.Connector
 
-	query := &types.GroupQuery{
+	query := &types.PlotQueryGroup{
 		Type:  groupItem.Type,
 		Scale: groupItem.Scale,
 	}
@@ -399,8 +399,8 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 						return nil, nil, fmt.Errorf("connectors differ between series")
 					}
 
-					query.Series = append(query.Series, &types.SerieQuery{
-						Metric: &types.MetricQuery{
+					query.Series = append(query.Series, &types.PlotQuerySerie{
+						Metric: &types.PlotQueryMetric{
 							Name:   metric.OriginalName,
 							Origin: metric.Source.Origin.OriginalName,
 							Source: metric.Source.OriginalName,
@@ -432,8 +432,8 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 					return nil, nil, fmt.Errorf("connectors differ between series")
 				}
 
-				serie := &types.SerieQuery{
-					Metric: &types.MetricQuery{
+				serie := &types.PlotQuerySerie{
+					Metric: &types.PlotQueryMetric{
 						Name:   metric.OriginalName,
 						Origin: metric.Source.Origin.OriginalName,
 						Source: metric.Source.OriginalName,

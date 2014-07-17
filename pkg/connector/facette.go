@@ -94,7 +94,7 @@ func (connector *FacetteConnector) GetPlots(query *types.PlotQuery) ([]*types.Pl
 				&library.OperGroup{
 					Name: "group0",
 					Type: query.Group.Type,
-					Series: func(series []*types.SerieQuery) []*library.Serie {
+					Series: func(series []*types.PlotQuerySerie) []*library.Serie {
 						requestSeries := make([]*library.Serie, len(series))
 
 						for index, serie := range series {
