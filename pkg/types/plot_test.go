@@ -1,16 +1,17 @@
 package types
 
 import (
+	"math"
 	"testing"
 )
 
 var plotResult = PlotResult{
 	Plots: []PlotValue{
-		61.0, 69.0, 98.0, 56.0, 43.0,
-		68.0, 87.0, 95.0, 69.0, 79.0,
-		99.0, 54.0, 88.0, 99.0, 77.0,
-		85.0, 62.0, 71.0, 78.0, 72.0,
-		89.0, 70.0, 96.0, 93.0, 66.0,
+		PlotValue(math.NaN()), 61.0, 69.0, 98.0, 56.0, 43.0,
+		68.0, PlotValue(math.NaN()), 87.0, 95.0, 69.0, 79.0,
+		99.0, 54.0, 88.0, PlotValue(math.NaN()), 99.0, 77.0,
+		85.0, PlotValue(math.NaN()), 62.0, 71.0, 78.0, 72.0,
+		89.0, 70.0, 96.0, 93.0, 66.0, PlotValue(math.NaN()),
 	},
 	Info: make(map[string]PlotValue),
 }
@@ -24,7 +25,7 @@ func Test_PlotResult_Summarize(test *testing.T) {
 	minExpectedValue = 43.0
 	maxExpectedValue = 99.0
 	avgExpectedValue = 76.96
-	lastExpectedValue = 66.0
+	lastExpectedValue = PlotValue(math.NaN())
 	pct20thExpectedValue = 62.8
 	pct50thExpectedValue = 77.0
 	pct90thExpectedValue = 98.4
@@ -46,7 +47,7 @@ func Test_PlotResult_Summarize(test *testing.T) {
 		test.Fail()
 	}
 
-	if plotResult.Info["last"] != lastExpectedValue {
+	if !plotResult.Info["last"].IsNaN() {
 		test.Logf("\nExpected last=%g\nbut got %g", lastExpectedValue, plotResult.Info["last"])
 		test.Fail()
 	}

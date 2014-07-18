@@ -103,6 +103,7 @@ type PlotResult struct {
 func (plotResult PlotResult) Summarize(percentiles []float64) {
 	var (
 		min, max, total PlotValue
+		nValidPlots     int64
 		nPlots          = len(plotResult.Plots)
 	)
 
@@ -112,7 +113,7 @@ func (plotResult PlotResult) Summarize(percentiles []float64) {
 	}
 
 	for i := range plotResult.Plots {
-		if plotResult.Plots[i] < min {
+		if !plotResult.Plots[i].IsNaN() && plotResult.Plots[i] < min || min.IsNaN() {
 			min = plotResult.Plots[i]
 		}
 
@@ -120,12 +121,15 @@ func (plotResult PlotResult) Summarize(percentiles []float64) {
 			max = plotResult.Plots[i]
 		}
 
-		total += plotResult.Plots[i]
+		if !plotResult.Plots[i].IsNaN() {
+			total += plotResult.Plots[i]
+			nValidPlots++
+		}
 	}
 
 	plotResult.Info["min"] = min
 	plotResult.Info["max"] = max
-	plotResult.Info["avg"] = total / PlotValue(nPlots)
+	plotResult.Info["avg"] = total / PlotValue(nValidPlots)
 
 	if len(percentiles) > 0 {
 		plotResult.Percentiles(percentiles)
@@ -134,16 +138,18 @@ func (plotResult PlotResult) Summarize(percentiles []float64) {
 
 // Percentiles calculates the percentile values of a PlotResult plots
 func (plotResult PlotResult) Percentiles(percentiles []float64) {
-	set := make([]float64, len(plotResult.Plots))
+	set := make([]float64, 0)
 	for i := range plotResult.Plots {
-		set[i] = float64(plotResult.Plots[i])
+		if !plotResult.Plots[i].IsNaN() {
+			set = append(set, float64(plotResult.Plots[i]))
+		}
 	}
 
 	if len(percentiles) == 0 {
 		return
 	}
 
-	setSize := len(plotResult.Plots)
+	setSize := len(set)
 	if setSize == 0 {
 		return
 	}
@@ -182,4 +188,9 @@ func (value PlotValue) MarshalJSON() ([]byte, error) {
 	}
 
 	return json.Marshal(float64(value))
+}
+
+// IsNaN reports whether the PlotValue is an IEEE 754 “not-a-number” value.
+func (value PlotValue) IsNaN() bool {
+	return math.IsNaN(float64(value))
 }
