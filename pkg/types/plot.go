@@ -125,7 +125,7 @@ func (plotResult PlotResult) Summarize(percentiles []float64) {
 
 	plotResult.Info["min"] = min
 	plotResult.Info["max"] = max
-	plotResult.Info["average"] = total / PlotValue(nPlots)
+	plotResult.Info["avg"] = total / PlotValue(nPlots)
 
 	if len(percentiles) > 0 {
 		plotResult.Percentiles(percentiles)
