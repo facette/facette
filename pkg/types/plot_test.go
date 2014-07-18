@@ -17,13 +17,14 @@ var plotResult = PlotResult{
 
 func Test_PlotResult_Summarize(test *testing.T) {
 	var (
-		minExpectedValue, maxExpectedValue, averageExpectedValue         PlotValue
-		pct20thExpectedValue, pct50thExpectedValue, pct90thExpectedValue PlotValue
+		minExpectedValue, maxExpectedValue, averageExpectedValue, lastExpectedValue PlotValue
+		pct20thExpectedValue, pct50thExpectedValue, pct90thExpectedValue            PlotValue
 	)
 
 	minExpectedValue = 43.0
 	maxExpectedValue = 99.0
 	averageExpectedValue = 76.96
+	lastExpectedValue = 66.0
 	pct20thExpectedValue = 62.8
 	pct50thExpectedValue = 77.0
 	pct90thExpectedValue = 98.4
@@ -42,6 +43,11 @@ func Test_PlotResult_Summarize(test *testing.T) {
 
 	if plotResult.Info["average"] != averageExpectedValue {
 		test.Logf("\nExpected average=%g\nbut got %g", averageExpectedValue, plotResult.Info["average"])
+		test.Fail()
+	}
+
+	if plotResult.Info["last"] != lastExpectedValue {
+		test.Logf("\nExpected last=%g\nbut got %g", lastExpectedValue, plotResult.Info["last"])
 		test.Fail()
 	}
 
