@@ -1241,10 +1241,10 @@ function adminGraphSetupTerminate() {
                     $next.focus();
                 }
             })
-            .on('change', '[data-step=3] select', function (e) {
+            .on('change', '[data-step=3] select, [data-step=3] input[type=radio]', function (e) {
                 var $target = $(e.target);
 
-                if (e._init || !e._select)
+                if (e._init || !e._select && e.target.tagName == 'SELECT')
                     return;
 
                 if (e.target.name == 'stack-mode') {
