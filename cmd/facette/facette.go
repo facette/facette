@@ -32,7 +32,7 @@ func init() {
 	flag.StringVar(&flagConfig, "c", config.DefaultConfigFile, "configuration file path")
 	flag.BoolVar(&flagHelp, "h", false, "display this help and exit")
 	flag.StringVar(&flagLog, "l", config.DefaultLogFile, "log file path")
-	flag.StringVar(&flagLogLevel, "L", config.DefaultLogLevel, "logging level")
+	flag.StringVar(&flagLogLevel, "L", config.DefaultLogLevel, "logging level (error, warning, notice, info, debug)")
 	flag.BoolVar(&flagVersion, "V", false, "display software version and exit")
 	flag.Usage = func() { utils.PrintUsage(os.Stderr, cmdUsage) }
 	flag.Parse()
