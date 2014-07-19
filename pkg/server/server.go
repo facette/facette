@@ -38,6 +38,9 @@ func NewServer(configPath, logPath string, logLevel int) *Server {
 	return &Server{
 		Config: &config.Config{
 			Path:         configPath,
+			BindAddr:     config.DefaultBindAddr,
+			BaseDir:      config.DefaultBaseDir,
+			DataDir:      config.DefaultDataDir,
 			ProvidersDir: config.DefaultProvidersDir,
 			LogFile:      logPath,
 		},

@@ -14,6 +14,12 @@ import (
 const (
 	// DefaultConfigFile represents the default configuration file location.
 	DefaultConfigFile string = "/etc/facette/facette.json"
+	// DefaultBindAddr represents the default server binding address.
+	DefaultBindAddr string = "localhost:12003"
+	// DefaultBaseDir represents the default server base directory location.
+	DefaultBaseDir string = "/usr/share/facette"
+	// DefaultDataDir represents the default internal data files directory location.
+	DefaultDataDir string = "/var/lib/facette"
 	// DefaultProvidersDir represents the default providers definition files directory location.
 	DefaultProvidersDir string = "/etc/facette/providers"
 	// DefaultLogFile represents the default log file location.
