@@ -280,8 +280,7 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 			continue
 		}
 
-		plotResults, err := providerConnector.GetPlots(&types.PlotQuery{query, startTime, endTime, step,
-			plotReq.Percentiles})
+		plotResults, err := providerConnector.GetPlots(&types.PlotQuery{query, startTime, endTime, step})
 		if err != nil {
 			logger.Log(logger.LevelError, "server", "%s", err)
 		}
@@ -289,9 +288,11 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 		if len(plotResults) > 1 {
 			for index, entry := range plotResults {
 				entry.Name = fmt.Sprintf("%s (%s)", groupItem.Name, query.Series[index].Metric.Name)
+				entry.Summarize(plotReq.Percentiles)
 			}
 		} else if len(plotResults) == 1 {
 			plotResults[0].Name = groupItem.Name
+			plotResults[0].Summarize(plotReq.Percentiles)
 		}
 
 		data = append(data, plotResults)

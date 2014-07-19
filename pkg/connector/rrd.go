@@ -4,7 +4,6 @@ package connector
 
 import (
 	"fmt"
-	"math"
 	"os"
 	"regexp"
 	"strconv"
@@ -112,9 +111,6 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotRe
 				graph.CDef(itemName, itemName+"-orig1")
 			}
 
-			// Set graph information request
-			rrdSetGraph(graph, itemName, query.Percentiles)
-
 			// Set plots request
 			xport.Def(
 				itemName+"-orig0",
@@ -186,9 +182,6 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotRe
 			graph.CDef(itemName, itemName+"-orig")
 		}
 
-		// Set graph information request
-		rrdSetGraph(graph, itemName, query.Percentiles)
-
 		// Set plots request
 		xport.CDef(itemName+"-orig", strings.Join(stack, ","))
 
@@ -225,14 +218,6 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotRe
 
 		result = append(result, plotResult)
 	}
-
-	// Parse graph information
-	graphInfo, _, err := graph.Graph(query.StartTime, query.EndTime)
-	if err != nil {
-		return nil, err
-	}
-
-	rrdParseInfo(graphInfo, result)
 
 	data.FreeValues()
 
@@ -326,59 +311,4 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan *catal
 	}
 
 	return nil
-}
-
-func rrdParseInfo(info rrd.GraphInfo, data []*types.PlotResult) {
-	refMap := make(map[string]*types.PlotResult)
-
-	for _, entry := range data {
-		refMap[entry.Name] = entry
-	}
-
-	for _, value := range info.Print {
-		chunks := strings.SplitN(value, ",", 3)
-
-		chunkFloat, err := strconv.ParseFloat(chunks[2], 64)
-		if err != nil {
-			chunkFloat = math.NaN()
-		}
-
-		if refMap[chunks[0]] == nil {
-			plotResult := &types.PlotResult{Info: make(map[string]types.PlotValue)}
-
-			data = append(data, plotResult)
-			refMap[chunks[0]] = plotResult
-		}
-
-		refMap[chunks[0]].Info[chunks[1]] = types.PlotValue(chunkFloat)
-	}
-}
-
-func rrdSetGraph(graph *rrd.Grapher, itemName string, percentiles []float64) {
-	graph.VDef(itemName+"-min", itemName+",MINIMUM")
-	graph.Print(itemName+"-min", itemName+",min,%lf")
-
-	graph.VDef(itemName+"-avg", itemName+",AVERAGE")
-	graph.Print(itemName+"-avg", itemName+",avg,%lf")
-
-	graph.VDef(itemName+"-max", itemName+",MAXIMUM")
-	graph.Print(itemName+"-max", itemName+",max,%lf")
-
-	graph.VDef(itemName+"-last", itemName+",LAST")
-	graph.Print(itemName+"-last", itemName+",last,%lf")
-
-	for index, percentile := range percentiles {
-		graph.CDef(fmt.Sprintf("%s-cdef%d", itemName, index),
-			fmt.Sprintf("%s,UN,0,%s,IF", itemName, itemName))
-		graph.VDef(fmt.Sprintf("%s-vdef%d", itemName, index),
-			fmt.Sprintf("%s-cdef%d,%f,PERCENT", itemName, index, percentile))
-
-		if percentile-float64(int(percentile)) != 0 {
-			graph.Print(fmt.Sprintf("%s-vdef%d", itemName, index),
-				fmt.Sprintf("%s,%.2fth,%%lf", itemName, percentile))
-		} else {
-			graph.Print(fmt.Sprintf("%s-vdef%d", itemName, index),
-				fmt.Sprintf("%s,%.0fth,%%lf", itemName, percentile))
-		}
-	}
 }

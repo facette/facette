@@ -11,28 +11,18 @@ import (
 
 // PlotQuery represents a plot query to a connector.
 type PlotQuery struct {
-	Group       *PlotQueryGroup
-	StartTime   time.Time
-	EndTime     time.Time
-	Step        time.Duration
-	Percentiles []float64
+	Group     *PlotQueryGroup
+	StartTime time.Time
+	EndTime   time.Time
+	Step      time.Duration
 }
 
 func (plotQuery *PlotQuery) String() string {
 	return fmt.Sprintf(
-		"PlotQuery{StartTime:%s EndTime:%s Step:%s Percentiles:[%s] Group:%s}",
+		"PlotQuery{StartTime:%s EndTime:%s Step:%s Group:%s}",
 		plotQuery.StartTime.String(),
 		plotQuery.EndTime.String(),
 		plotQuery.Step.String(),
-		func(percentiles []float64) string {
-			percentilesStrings := make([]string, len(percentiles))
-
-			for i, percentile := range percentiles {
-				percentilesStrings[i] = fmt.Sprintf("%s", percentile)
-			}
-
-			return strings.Join(percentilesStrings, ", ")
-		}(plotQuery.Percentiles),
 		plotQuery.Group,
 	)
 }
