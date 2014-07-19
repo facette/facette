@@ -53,7 +53,23 @@ if (window.Highcharts) {
             groups = {},
             tableLeft = chart.plotLeft,
             tableTop = chart.plotTop + chart.plotHeight + options.chart.spacingBottom -
-                chart.series.length * GRAPH_LEGEND_ROW_HEIGHT;
+                chart.series.length * GRAPH_LEGEND_ROW_HEIGHT,
+            groupTimeout = {},
+            groupEvent = function (e) {
+                var $group = $(e.target).closest('.highcharts-table-group'),
+                    serie = $group.find('.highcharts-table-serie').text();
+
+                if (groupTimeout[serie])
+                    clearTimeout(groupTimeout[serie]);
+
+                groupTimeout[serie] = setTimeout(function () {
+                    if (e.type == 'mouseover')
+                        $group.parent().find('.highcharts-table-action').css('visibility', 'hidden');
+
+                    $group.children('.highcharts-table-action')
+                        .css('visibility', e.type == 'mouseover' ? 'visible' : 'hidden');
+                }, e.type == 'mouseenter' ? 0 : 500);
+            };
 
         cellLeft = tableLeft;
 
@@ -87,14 +103,11 @@ if (window.Highcharts) {
                     cursor: 'pointer',
                     display: 'none',
                     fontFamily: 'FontAwesome',
-                    opacity: 0.25
+                    opacity: 0.25,
+                    visibility: 'hidden'
                 })
                 .add(groups[serie.name])
                 .element;
-
-            Highcharts.addEvent(element, 'mouseenter mouseleave', function (e) {
-                $(e.target).css('opacity', e.type == 'mouseenter' ? 1 : 0.25);
-            });
 
             Highcharts.addEvent(element, 'click', function () {
                 var $element = $(element),
@@ -103,12 +116,20 @@ if (window.Highcharts) {
                 serie.group.toFront();
             });
 
-            chart.renderer.rect(tableLeft, tableTop + i * GRAPH_LEGEND_ROW_HEIGHT, GRAPH_LEGEND_ROW_HEIGHT * 0.75,
+            Highcharts.addEvent(element, 'mouseenter mouseout', function (e) {
+                $(e.target).css('opacity', e.type == 'mouseenter' ? 1 : 0.25);
+                groupEvent(e);
+            });
+
+            element = chart.renderer.rect(tableLeft, tableTop + i * GRAPH_LEGEND_ROW_HEIGHT, GRAPH_LEGEND_ROW_HEIGHT * 0.75,
                     GRAPH_LEGEND_ROW_HEIGHT * 0.65, 2)
                 .attr({
                     fill: serie.color
                 })
-                .add(groups[serie.name]);
+                .add(groups[serie.name])
+                .element;
+
+            Highcharts.addEvent(element, 'mouseenter mouseout', groupEvent);
 
             element = chart.renderer.text(serie.name, tableLeft + GRAPH_LEGEND_ROW_HEIGHT, tableTop +
                     i * GRAPH_LEGEND_ROW_HEIGHT + GRAPH_LEGEND_ROW_HEIGHT / 2)
@@ -125,6 +146,8 @@ if (window.Highcharts) {
                 var serie = chart.get($(element).text());
                 serie.setVisible(!serie.visible);
             });
+
+            Highcharts.addEvent(element, 'mouseenter mouseout', groupEvent);
 
             // Update start position
             box = element.getBBox();
