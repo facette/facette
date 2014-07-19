@@ -74,6 +74,9 @@ if (window.Highcharts) {
                 })
                 .add();
 
+            if (!serie.visible)
+                $(groups[serie.name].element).css('opacity', 0.35);
+
             element = chart.renderer.text('\uf176', tableLeft - GRAPH_LEGEND_ROW_HEIGHT * 0.5, tableTop +
                     i * GRAPH_LEGEND_ROW_HEIGHT + GRAPH_LEGEND_ROW_HEIGHT / 2)
                 .attr({
@@ -119,11 +122,8 @@ if (window.Highcharts) {
                 .element;
 
             Highcharts.addEvent(element, 'click', function () {
-                var $element = $(element),
-                    serie = chart.get($element.text());
-
+                var serie = chart.get($(element).text());
                 serie.setVisible(!serie.visible);
-                $element.closest('g').css('opacity', serie.visible ? 1 : 0.35);
             });
 
             // Update start position
