@@ -224,7 +224,8 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) (map[string]*typ
 	for index, serieName := range data.Legends {
 		result[series[serieName]] = &types.PlotResult{Info: make(map[string]types.PlotValue)}
 
-		for i := 0; i < data.RowCnt; i++ {
+		// FIXME: skip last garbage entry (see https://github.com/ziutek/rrd/pull/13)
+		for i := 0; i < data.RowCnt-1; i++ {
 			result[series[serieName]].Plots = append(result[series[serieName]].Plots,
 				types.PlotValue(data.ValueAt(index, i)))
 		}
