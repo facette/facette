@@ -218,7 +218,8 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotRe
 			Info: make(map[string]types.PlotValue),
 		}
 
-		for i := 0; i < data.RowCnt; i++ {
+		// FIXME: skip last garbage entry (see https://github.com/ziutek/rrd/pull/13)
+		for i := 0; i < data.RowCnt-1; i++ {
 			plotResult.Plots = append(plotResult.Plots, types.PlotValue(data.ValueAt(index, i)))
 		}
 
