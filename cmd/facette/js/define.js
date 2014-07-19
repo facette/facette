@@ -35,6 +35,11 @@ var EVENT_KEY_TAB    = 9,
     GRAPH_DRAW_DELAY        = 250,
     GRAPH_LEGEND_ROW_HEIGHT = 24,
 
+    GRAPH_PLOTLINE_COLORS = [
+        '#16a085', '#27ae60', '#2980b9', '#8e44ad',
+        '#2c3e50', '#f39c12', '#d35400', '#c0392b'
+    ],
+
     LIST_FETCH_LIMIT = 50,
 
     PATTERN_TEST_LIMIT = 10,

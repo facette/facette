@@ -146,40 +146,40 @@ function graphDraw(graph, postpone, delay, preview) {
                             togglePlotLine: function () {
                                 var $element,
                                     regexp = new RegExp('(^| +)active( +|$)'),
-                                    wasActive = false;
+                                    name;
 
                                 $element = $(this.element);
 
-                                if ($element.attr('class') && $element.attr('class').match(regexp))
-                                    wasActive = true;
-
-                                $(this.chart.container).find('.highcharts-table-value.active').each(function () {
-                                    var $item = $(this);
-
-                                    $item.css({
-                                        color: 'inherit',
-                                        fill: 'inherit'
-                                    }).attr('class', $item.attr('class').replace(regexp, ''));
-                                });
+                                name = 'plotline-' + this.serie.name + '-' + this.name;
 
                                 // Remove existing plot line
-                                this.chart.yAxis[0].removePlotLine('plotline0');
+                                this.chart.yAxis[0].removePlotLine(name);
 
-                                if (wasActive)
+                                if ($element.attr('class') && $element.attr('class').match(regexp)) {
+                                    $element.css({
+                                        color: 'inherit',
+                                        fill: 'inherit'
+                                    }).attr('class', $element.attr('class').replace(regexp, ''));
+
                                     return;
+                                }
 
                                 // Set element active
+                                if (!this.chart.options._data.plotlines[name])
+                                    this.chart.options._data.plotlines[name] = GRAPH_PLOTLINE_COLORS[Object.keys(this
+                                        .chart.options._data.plotlines).length % GRAPH_PLOTLINE_COLORS.length];
+
                                 $element
                                     .css({
-                                        color: '#e30',
-                                        fill: '#e30'
+                                        color: this.chart.options._data.plotlines[name],
+                                        fill: this.chart.options._data.plotlines[name]
                                     })
                                     .attr('class', $element.attr('class') + ' active');
 
                                 // Draw new plot line
                                 this.chart.yAxis[0].addPlotLine({
-                                    id: 'plotline0',
-                                    color: '#e30',
+                                    id: name,
+                                    color: this.chart.options._data.plotlines[name],
                                     value: this.value,
                                     width: 1.5,
                                     zIndex: 100
@@ -228,6 +228,9 @@ function graphDraw(graph, postpone, delay, preview) {
                         title: {
                             text: null
                         }
+                    },
+                    _data: {
+                        plotlines: {}
                     },
                     _opts: data
                 };
