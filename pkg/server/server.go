@@ -26,8 +26,10 @@ type Server struct {
 	providerWorkers worker.WorkerPool
 	catalogWorker   *worker.Worker
 	serveWorker     *worker.Worker
-	startTime       time.Time
+	configPath      string
+	logPath         string
 	logLevel        int
+	startTime       time.Time
 	loading         bool
 	stopping        bool
 	wg              *sync.WaitGroup
@@ -37,16 +39,17 @@ type Server struct {
 func NewServer(configPath, logPath string, logLevel int) *Server {
 	return &Server{
 		Config: &config.Config{
-			Path:         configPath,
 			BindAddr:     config.DefaultBindAddr,
 			BaseDir:      config.DefaultBaseDir,
 			DataDir:      config.DefaultDataDir,
 			ProvidersDir: config.DefaultProvidersDir,
-			LogFile:      logPath,
+			PidFile:      config.DefaultPidFile,
 		},
-		providers: make(map[string]*provider.Provider),
-		wg:        &sync.WaitGroup{},
-		logLevel:  logLevel,
+		configPath: configPath,
+		logPath:    logPath,
+		logLevel:   logLevel,
+		providers:  make(map[string]*provider.Provider),
+		wg:         &sync.WaitGroup{},
 	}
 }
 
@@ -57,7 +60,7 @@ func (server *Server) Reload(config bool) error {
 	server.loading = true
 
 	if config {
-		if err := server.Config.Reload(); err != nil {
+		if err := server.Config.Reload(server.configPath); err != nil {
 			logger.Log(logger.LevelError, "server", "unable to reload configuration: %s", err)
 			return err
 		}
@@ -76,11 +79,11 @@ func (server *Server) Run() error {
 	server.startTime = time.Now()
 
 	// Set up server logging
-	if server.Config.LogFile != "" && server.Config.LogFile != "-" {
-		dirPath, _ := path.Split(server.Config.LogFile)
+	if server.logPath != "" && server.logPath != "-" {
+		dirPath, _ := path.Split(server.logPath)
 		os.MkdirAll(dirPath, 0755)
 
-		serverOutput, err := os.OpenFile(server.Config.LogFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		serverOutput, err := os.OpenFile(server.logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			logger.Log(logger.LevelError, "server", "unable to open log file: %s", err)
 			return err
@@ -94,7 +97,7 @@ func (server *Server) Run() error {
 	logger.SetLevel(server.logLevel)
 
 	// Load server configuration
-	if err := server.Config.Reload(); err != nil {
+	if err := server.Config.Reload(server.configPath); err != nil {
 		logger.Log(logger.LevelError, "server", "unable to load configuration: %s", err)
 		return err
 	}

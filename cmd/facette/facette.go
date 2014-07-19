@@ -7,7 +7,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/server"
 	"github.com/facette/facette/pkg/utils"
@@ -15,13 +14,17 @@ import (
 
 const (
 	cmdUsage string = "Usage: %s [OPTIONS]"
+
+	defaultConfigFile string = "/etc/facette/facette.json"
+	defaultLogPath    string = ""
+	defaultLogLevel   string = "warning"
 )
 
 var (
 	version      string
 	flagConfig   string
 	flagHelp     bool
-	flagLog      string
+	flagLogPath  string
 	flagLogLevel string
 	flagVersion  bool
 	logLevel     int
@@ -29,10 +32,10 @@ var (
 )
 
 func init() {
-	flag.StringVar(&flagConfig, "c", config.DefaultConfigFile, "configuration file path")
+	flag.StringVar(&flagConfig, "c", defaultConfigFile, "configuration file path")
 	flag.BoolVar(&flagHelp, "h", false, "display this help and exit")
-	flag.StringVar(&flagLog, "l", config.DefaultLogFile, "log file path")
-	flag.StringVar(&flagLogLevel, "L", config.DefaultLogLevel, "logging level (error, warning, notice, info, debug)")
+	flag.StringVar(&flagLogPath, "l", defaultLogPath, "log file path")
+	flag.StringVar(&flagLogLevel, "L", defaultLogLevel, "logging level (error, warning, notice, info, debug)")
 	flag.BoolVar(&flagVersion, "V", false, "display software version and exit")
 	flag.Usage = func() { utils.PrintUsage(os.Stderr, cmdUsage) }
 	flag.Parse()
@@ -55,7 +58,7 @@ func init() {
 
 func main() {
 	// Create new server instance and load configuration
-	instance := server.NewServer(flagConfig, flagLog, logLevel)
+	instance := server.NewServer(flagConfig, flagLogPath, logLevel)
 
 	// Reload server configuration on SIGHUP
 	sigChan := make(chan os.Signal, 1)

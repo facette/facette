@@ -15,6 +15,8 @@ const (
 Commands:
    reload    send reload signal to server
    support   list supported features`
+
+	defaultConfigFile string = "/etc/facette/facette.json"
 )
 
 var (
@@ -26,7 +28,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&flagConfig, "c", config.DefaultConfigFile, "configuration file path")
+	flag.StringVar(&flagConfig, "c", defaultConfigFile, "configuration file path")
 	flag.IntVar(&flagDebug, "d", 0, "debugging level")
 	flag.BoolVar(&flagHelp, "h", false, "display this help and exit")
 	flag.BoolVar(&flagVersion, "V", false, "display software version and exit")

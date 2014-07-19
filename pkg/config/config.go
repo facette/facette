@@ -12,8 +12,6 @@ import (
 )
 
 const (
-	// DefaultConfigFile represents the default configuration file location.
-	DefaultConfigFile string = "/etc/facette/facette.json"
 	// DefaultBindAddr represents the default server binding address.
 	DefaultBindAddr string = "localhost:12003"
 	// DefaultBaseDir represents the default server base directory location.
@@ -22,18 +20,14 @@ const (
 	DefaultDataDir string = "/var/lib/facette"
 	// DefaultProvidersDir represents the default providers definition files directory location.
 	DefaultProvidersDir string = "/etc/facette/providers"
-	// DefaultLogFile represents the default log file location.
-	DefaultLogFile string = ""
-	// DefaultLogLevel represents the default log level.
-	DefaultLogLevel string = "warning"
+	// DefaultPidFile represents the default server process PID file location.
+	DefaultPidFile string = "/var/run/facette/facette.pid"
 	// DefaultPlotSample represents the default plot sample for graph querying.
 	DefaultPlotSample int = 400
 )
 
 // Config represents the global configuration of the instance.
 type Config struct {
-	Path         string                     `json:"-"`
-	LogFile      string                     `json:"-"`
 	BindAddr     string                     `json:"bind"`
 	BaseDir      string                     `json:"base_dir"`
 	DataDir      string                     `json:"data_dir"`
@@ -84,14 +78,12 @@ func (config *Config) Load(filePath string) error {
 		return errOutput
 	}
 
-	config.Path = filePath
-
 	return nil
 }
 
 // Reload reloads the configuration.
-func (config *Config) Reload() error {
-	return config.Load(config.Path)
+func (config *Config) Reload(configPath string) error {
+	return config.Load(configPath)
 }
 
 func getSetting(config map[string]interface{}, setting string, kind reflect.Kind,
