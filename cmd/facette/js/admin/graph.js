@@ -156,6 +156,9 @@ function adminGraphCreateGroup(name, value) {
 
         if (value.options.scale)
             $item.find('a[href=#set-scale]').text(value.options.scale.toPrecision(3));
+
+        if (value.options.unit)
+            $item.find('a[href=#set-unit]').text(value.options.unit);
     }
 
     return $item;
@@ -243,6 +246,8 @@ function adminGraphCreateProxy(type, item, list) {
         if (value.options.scale)
             $item.find('a[href=#set-scale]').text(value.options.scale.toPrecision(3));
 
+        if (value.options.unit)
+            $item.find('a[href=#set-unit]').text(value.options.unit);
     }
 
     return $item;
@@ -745,6 +750,8 @@ function adminGraphSetupTerminate() {
                     if (expands[serieName].options.scale !== 0)
                         $item.find('a[href=#set-scale]').text(expands[serieName].options.scale);
 
+                    if (expands[serieName].options.unit !== 0)
+                        $item.find('a[href=#set-unit]').text(expands[serieName].options.unit);
                 }
 
                 $item.find('.count').remove();
@@ -1050,6 +1057,57 @@ function adminGraphSetupTerminate() {
                             $input.val(e.target.value);
                     })
                     .val(value.options.scale)
+                    .trigger({
+                        type: 'change',
+                        _init: true
+                    });
+            });
+        });
+
+        linkRegister('set-unit', function (e) {
+            var $target = $(e.target),
+                $item = $target.closest('[data-serie], [data-group]'),
+                $unit = $item.find('a[href=#set-unit]'),
+                value = adminGraphGetValue($item);
+
+            $.ajax({
+                url: urlPrefix + '/api/v1/library/units/labels',
+                type: 'GET'
+            }).pipe(function (data) {
+                var $input,
+                    $overlay,
+                    options = [];
+
+                $.each(data, function (i, entry) { /*jshint unused: true */
+                    options.push([entry.name, entry.label]);
+                });
+
+                $overlay = overlayCreate('select', {
+                    message: $.t('graph.labl_unit'),
+                    value: value.options.unit,
+                    callbacks: {
+                        validate: function (data) {
+                            value.options.unit = data;
+                            $unit.text(data || '');
+                        }
+                    },
+                    labels: {
+                        validate: {
+                            text: $.t('graph.labl_unit_set')
+                        }
+                    },
+                    reset: 0,
+                    options: options
+                });
+
+                $input = $overlay.find('input[name=value]');
+
+                $overlay.find('select')
+                    .on('change', function (e) {
+                        if (e.target.value)
+                            $input.val(e.target.value);
+                    })
+                    .val(value.options.unit)
                     .trigger({
                         type: 'change',
                         _init: true

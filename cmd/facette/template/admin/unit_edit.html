@@ -1,0 +1,43 @@
+{{ define "title" }}Administration Panel: Units — Facette{{ end }}
+
+{{ define "head" }}
+		<script src="{{ .URLPrefix }}{{ asset "/static/jquery.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/i18next.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/facette.js" }}"></script>
+{{ end }}
+
+{{ define "content" }}
+		<article data-pane="unit-edit" data-paneopts="section: {{ .Section }}{{ if ne .Path "add" }}; id: {{ .Path }}{{ end }}">
+			<header>
+				<h1>Administration Panel — {{ if eq .Path "add" }}New{{ else }}Edit{{ end }} Unit</h1>
+			</header>
+
+			<footer>
+				<button class="danger" name="step-cancel">Cancel</button>
+				<button name="step-save">Save Unit</button>
+			</footer>
+
+			<section>
+				<h1>Unit Definition</h1>
+
+				<div class="scrollarea">
+					<div class="block">
+						<h2>General Information</h2>
+
+						<label for="unit-name">Name:</label>
+						<input class="full input" data-input="unit-name" data-inputopts="check: true" id="unit-name" name="unit-name" type="text">
+
+						<label for="unit-desc">Description:</label>
+						<textarea id="unit-desc" name="unit-desc"></textarea>
+					</div>
+
+					<div class="block">
+						<h2>Unit Parameters</h2>
+
+						<label for="unit-label">Label: <span class="note">e.g. B, Hz, %, µs</span></label>
+						<input class="input" data-input="unit-label" id="unit-label" name="unit-label" type="text">
+					</div>
+				</div>
+			</section>
+		</article>
+{{ end }}

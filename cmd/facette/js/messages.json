@@ -1,8 +1,8 @@
 {
     "collection": {
         "labl_clone": "Clone Collection",
-        "labl_delete": "Delete Collection",
         "labl_collection_name": "Collection Name:",
+        "labl_delete": "Delete Collection",
         "mesg_delete": "You are about to delete “__name__” collection. This action can’t be undone.",
         "mesg_delete_fail": "Unable to delete the collection!",
         "mesg_exists": "A collection with the same name already exists!",
@@ -14,15 +14,17 @@
     "graph": {
         "labl_clone": "Clone Graph",
         "labl_collapse": "Collapse Serie",
+        "labl_color": "Serie Color:",
+        "labl_color_set": "Set Color",
         "labl_delete": "Delete Graph",
         "labl_graph_name": "Graph Name:",
+        "labl_scale": "Scale:",
+        "labl_scale_set": "Set Scale",
         "labl_serie_name": "Serie Name:",
         "labl_stack_name": "Stack Name:",
         "labl_time_range": "Time Range:",
-        "labl_color": "Serie Color:",
-        "labl_color_set": "Set Color",
-        "labl_scale": "Scale:",
-        "labl_scale_set": "Set Scale",
+        "labl_unit": "Unit:",
+        "labl_unit_set": "Set Unit",
         "mesg_collapse": "You are about to collapse a serie with grouped elements. This will remove them from associated groups.",
         "mesg_delete": "You are about to delete “__name__” graph. This action can’t be undone.",
         "mesg_delete_fail": "Unable to delete the graph!",
@@ -49,9 +51,9 @@
     "item": {
         "labl_matching": "Matching items:",
         "labl_total": "Total:",
+        "mesg_load_nomatch": "Your search doesn’t match any item",
         "mesg_missing": "You must at least add one item!",
-        "mesg_none": "No item found",
-        "mesg_load_nomatch": "Your search doesn’t match any item"
+        "mesg_none": "No item found"
     },
     "list": {
         "labl_reset": "Reset",
@@ -62,11 +64,11 @@
         "labl_connector": "Connector:",
         "labl_origins": "Origins:",
         "labl_reload": "Reload Resources",
-        "labl_sources": "Sources:",
         "labl_reset_default": "Reset to Default",
+        "labl_sources": "Sources:",
+        "mesg_field_mandatory": "This field is mandatory!",
         "mesg_loading": "Loading data…",
         "mesg_no_description": "No description available",
-        "mesg_field_mandatory": "This field is mandatory!",
         "mesg_reload": "You are about to reload server resources. This may take a while.",
         "mesg_server_loading": "Reloading resources, please wait…",
         "mesg_unknown_error": "An unhandled error has occured.",
@@ -95,5 +97,15 @@
     "source": {
         "mesg_load_nomatch": "Your search doesn’t match any source",
         "mesg_none": "No source found"
+    },
+    "unit": {
+        "labl_clone": "Clone Unit",
+        "labl_delete": "Delete Unit",
+        "labl_group_name": "Unit Name:",
+        "mesg_delete": "You are about to delete “__name__” unit. This action can’t be undone.",
+        "mesg_delete_fail": "Unable to delete the unit!",
+        "mesg_exists": "A unit with the same name already exists!",
+        "mesg_none": "No unit found",
+        "mesg_save_fail": "Unable to save unit!"
     }
 }

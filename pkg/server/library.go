@@ -16,6 +16,10 @@ func (server *Server) serveLibrary(writer http.ResponseWriter, request *http.Req
 		server.serveScaleValues(writer, request)
 	} else if strings.HasPrefix(request.URL.Path, urlLibraryPath+"scales/") {
 		server.serveScale(writer, request)
+	} else if request.URL.Path == urlLibraryPath+"units/labels" {
+		server.serveUnitLabels(writer, request)
+	} else if strings.HasPrefix(request.URL.Path, urlLibraryPath+"units/") {
+		server.serveUnit(writer, request)
 	} else if request.URL.Path == urlLibraryPath+"expand" {
 		server.serveGroupExpand(writer, request)
 	} else if request.URL.Path == urlLibraryPath+"graphs/plots" {

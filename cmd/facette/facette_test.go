@@ -556,6 +556,245 @@ func Test_LibraryScaleHandle(test *testing.T) {
 	}
 }
 
+func Test_LibraryUnitHandle(test *testing.T) {
+	baseURL := fmt.Sprintf("http://%s/api/v1/library/units/", serverConfig.BindAddr)
+
+	// Define a sample unit
+	unitBase := &library.Unit{Item: library.Item{Name: "unit0", Description: "A great unit description."},
+		Label: "B"}
+
+	// Test GET on units list
+	listBase := server.ItemListResponse{}
+	listResult := server.ItemListResponse{}
+
+	response := execTestRequest(test, "GET", baseURL, nil, &listResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	if !reflect.DeepEqual(listBase, listResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", listBase, listResult)
+		test.Fail()
+	}
+
+	// Test GET on a unknown unit item
+	response = execTestRequest(test, "GET", baseURL+"/00000000-0000-0000-0000-000000000000", nil, nil)
+
+	if response.StatusCode != http.StatusNotFound {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusNotFound, response.StatusCode)
+		test.Fail()
+	}
+
+	// Test POST into unit
+	data, _ := json.Marshal(unitBase)
+
+	response = execTestRequest(test, "POST", baseURL, strings.NewReader(string(data)), nil)
+
+	if response.StatusCode != http.StatusCreated {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusCreated, response.StatusCode)
+		test.Fail()
+	}
+
+	if response.Header.Get("Location") == "" {
+		test.Logf("\nExpected `Location' header")
+		test.Fail()
+	}
+
+	unitBase.ID = response.Header.Get("Location")[strings.LastIndex(response.Header.Get("Location"), "/")+1:]
+
+	// Test GET on unit item
+	unitResult := &library.Unit{}
+
+	response = execTestRequest(test, "GET", baseURL+unitBase.ID, nil, &unitResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	if !reflect.DeepEqual(unitBase, unitResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", unitBase, unitResult)
+		test.Fail()
+	}
+
+	// Test GET on units list
+	listBase = server.ItemListResponse{&server.ItemResponse{
+		ID:          unitBase.ID,
+		Name:        unitBase.Name,
+		Description: unitBase.Description,
+	}}
+
+	listResult = server.ItemListResponse{}
+
+	response = execTestRequest(test, "GET", baseURL, nil, &listResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	for _, listItem := range listResult {
+		listItem.Modified = ""
+	}
+
+	if !reflect.DeepEqual(listBase, listResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", listBase, listResult)
+		test.Fail()
+	}
+
+	// Test GET on units labels
+	labelsBase := []server.UnitValueResponse{
+		server.UnitValueResponse{Name: unitBase.Name, Label: unitBase.Label},
+	}
+
+	labelsResult := make([]server.UnitValueResponse, 0)
+
+	response = execTestRequest(test, "GET", baseURL+"/labels", nil, &labelsResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	if !reflect.DeepEqual(labelsBase, labelsResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", labelsBase, labelsResult)
+		test.Fail()
+	}
+
+	// Test PUT on unit item
+	unitBase.Name = "unit0-updated"
+
+	data, _ = json.Marshal(unitBase)
+
+	response = execTestRequest(test, "PUT", baseURL+unitBase.ID, strings.NewReader(string(data)), nil)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	// Test GET on unit item
+	unitResult = &library.Unit{}
+
+	response = execTestRequest(test, "GET", baseURL+unitBase.ID, nil, &unitResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	if !reflect.DeepEqual(unitBase, unitResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", unitBase, unitResult)
+		test.Fail()
+	}
+
+	// Test DELETE on unit item
+	response = execTestRequest(test, "DELETE", baseURL+unitBase.ID, nil, nil)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	response = execTestRequest(test, "DELETE", baseURL+unitBase.ID, nil, nil)
+
+	if response.StatusCode != http.StatusNotFound {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusNotFound, response.StatusCode)
+		test.Fail()
+	}
+
+	// Test GET on units list (offset and limit)
+	listBase = server.ItemListResponse{}
+
+	for i := 0; i < 3; i += 1 {
+		unitTemp := &library.Unit{}
+		utils.Clone(unitBase, unitTemp)
+
+		unitTemp.ID = ""
+		unitTemp.Name = fmt.Sprintf("unit0-%d", i)
+
+		data, _ = json.Marshal(unitTemp)
+
+		response = execTestRequest(test, "POST", baseURL, strings.NewReader(string(data)), nil)
+
+		if response.StatusCode != http.StatusCreated {
+			test.Logf("\nExpected %d\nbut got  %d", http.StatusCreated, response.StatusCode)
+			test.Fail()
+		}
+
+		location := response.Header.Get("Location")
+
+		if location == "" {
+			test.Logf("\nExpected `Location' header")
+			test.Fail()
+		}
+
+		unitTemp.ID = location[strings.LastIndex(location, "/")+1:]
+
+		listBase = append(listBase, &server.ItemResponse{
+			ID:          unitTemp.ID,
+			Name:        unitTemp.Name,
+			Description: unitTemp.Description,
+		})
+	}
+
+	listResult = server.ItemListResponse{}
+
+	response = execTestRequest(test, "GET", baseURL, nil, &listResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	for _, listItem := range listResult {
+		listItem.Modified = ""
+	}
+
+	if !reflect.DeepEqual(listBase, listResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", listBase, listResult)
+		test.Fail()
+	}
+
+	listResult = server.ItemListResponse{}
+
+	response = execTestRequest(test, "GET", baseURL+"?limit=1", nil, &listResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	for _, listItem := range listResult {
+		listItem.Modified = ""
+	}
+
+	if !reflect.DeepEqual(listBase[:1], listResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", listBase[:1], listResult)
+		test.Fail()
+	}
+
+	listResult = server.ItemListResponse{}
+
+	response = execTestRequest(test, "GET", baseURL+"?offset=1&limit=2", nil, &listResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	for _, listItem := range listResult {
+		listItem.Modified = ""
+	}
+
+	if !reflect.DeepEqual(listBase[1:3], listResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", listBase[1:3], listResult)
+		test.Fail()
+	}
+}
+
 func Test_LibrarySourceGroupHandle(test *testing.T) {
 	// Define a sample source group
 	group := &library.Group{Item: library.Item{Name: "group0", Description: "A great group description."}}
