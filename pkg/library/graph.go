@@ -34,11 +34,11 @@ const (
 // Graph represents a graph containing list of series.
 type Graph struct {
 	Item
-	Type      int          `json:"type"`
-	StackMode int          `json:"stack_mode"`
-	UnitLabel string       `json:"unit_label"`
-	UnitType  int          `json:"unit_type"`
-	Groups    []*OperGroup `json:"groups"`
+	Type       int          `json:"type"`
+	StackMode  int          `json:"stack_mode"`
+	UnitType   int          `json:"unit_type"`
+	UnitLegend string       `json:"unit_legend"`
+	Groups     []*OperGroup `json:"groups"`
 }
 
 func (graph *Graph) String() string {
