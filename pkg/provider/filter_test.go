@@ -46,7 +46,7 @@ func Test_Filter_Rewrite(test *testing.T) {
 	})
 
 	if !reflect.DeepEqual(expected, actual) {
-		test.Logf("\nExpected %#v\nbut got  %#v", expected, actual)
+		test.Logf("\nExpected %s\nbut got  %s", expected, actual)
 		test.Fail()
 	}
 }
@@ -67,7 +67,7 @@ func Test_Filter_Discard(test *testing.T) {
 	})
 
 	if !reflect.DeepEqual(expected, actual) {
-		test.Logf("\nExpected %#v\nbut got  %#v", expected, actual)
+		test.Logf("\nExpected %s\nbut got  %s", expected, actual)
 		test.Fail()
 	}
 }
@@ -88,7 +88,7 @@ func Test_Filter_Sieve(test *testing.T) {
 	})
 
 	if !reflect.DeepEqual(expected, actual) {
-		test.Logf("\nExpected %#v\nbut got  %#v", expected, actual)
+		test.Logf("\nExpected %s\nbut got  %s", expected, actual)
 		test.Fail()
 	}
 }
@@ -110,7 +110,7 @@ func Test_Filter_Combined(test *testing.T) {
 	})
 
 	if !reflect.DeepEqual(expected, actual) {
-		test.Logf("\nExpected %#v\nbut got  %#v", expected, actual)
+		test.Logf("\nExpected %s\nbut got  %s", expected, actual)
 		test.Fail()
 	}
 }
