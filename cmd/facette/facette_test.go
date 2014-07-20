@@ -405,6 +405,25 @@ func Test_LibraryScaleHandle(test *testing.T) {
 		test.Fail()
 	}
 
+	// Test GET on scales values
+	labelsBase := []server.ScaleValueResponse{
+		server.ScaleValueResponse{Name: scaleBase.Name, Value: scaleBase.Value},
+	}
+
+	labelsResult := make([]server.ScaleValueResponse, 0)
+
+	response = execTestRequest(test, "GET", baseURL+"/values", nil, &labelsResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	if !reflect.DeepEqual(labelsBase, labelsResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", labelsBase, labelsResult)
+		test.Fail()
+	}
+
 	// Test PUT on scale item
 	scaleBase.Name = "scale0-updated"
 
