@@ -9,7 +9,12 @@
 
 {{ define "content" }}{{ $prefix := .URLPrefix }}{{ $q := .Request.FormValue "q" }}
 		<nav>
+			<dl class="graphlist">
+				<dt>Menu</dt>
+				<dd><a href="{{ .URLPrefix }}/browse/"><span class="icon icon-arrow-left"></span> Back to Collections</a></dd>
+			</dl>
 		</nav>
+
 
 		<article>
 			<header>
