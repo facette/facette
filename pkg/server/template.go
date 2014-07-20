@@ -20,7 +20,6 @@ func (server *Server) execTemplate(writer http.ResponseWriter, status int, data 
 		"asset":  server.templateAsset,
 		"dump":   templateDumpMap,
 		"eq":     templateEqual,
-		"hl":     templateHighlight,
 		"ne":     templateNotEqual,
 		"substr": templateSubstr,
 	})
@@ -89,8 +88,4 @@ func templateDumpMap(x map[string]interface{}) string {
 
 func templateSubstr(x string, start, end int) string {
 	return x[start:end]
-}
-
-func templateHighlight(x, y string) template.HTML {
-	return template.HTML(strings.Replace(x, y, "<strong>"+y+"</strong>", -1))
 }

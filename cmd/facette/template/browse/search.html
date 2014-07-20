@@ -32,11 +32,11 @@
 					<p class="mesgitem warning">Couldn’t find any item matching “{{ $q }}”</p>{{ else }}
 					<div class="list">{{ range .Collections }}
 						<div class="listitem">
-							<div class="name"><a href="{{ $prefix }}/browse/collections/{{ .ID }}">{{ hl .Name $q }}</a></div>
+							<div class="name"><a href="{{ $prefix }}/browse/collections/{{ .ID }}">{{ .Name }}</a></div>
 							<div class="desc">Collection</div>
 						</div>{{ end }}{{ range .Graphs }}
 						<div class="listitem">
-							<div class="name"><a href="{{ $prefix }}/browse/graphs/{{ .ID }}">{{ hl .Name $q }}</a></div>
+							<div class="name"><a href="{{ $prefix }}/browse/graphs/{{ .ID }}">{{ .Name }}</a></div>
 							<div class="desc">Graph</div>
 						</div>{{ end }}
 					</div>{{ end }}

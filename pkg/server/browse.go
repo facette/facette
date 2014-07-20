@@ -173,12 +173,12 @@ func (server *Server) serveBrowseSearch(writer http.ResponseWriter, request *htt
 		chunks := make([]string, 0)
 
 		for _, chunk := range strings.Split(strings.ToLower(request.FormValue("q")), " ") {
-			chunks = append(chunks, strings.Trim(chunk, " \t"))
+			chunks = append(chunks, "*"+strings.Trim(chunk, " \t")+"*")
 		}
 
 		for _, collection := range server.Library.Collections {
 			for _, chunk := range chunks {
-				if strings.Index(strings.ToLower(collection.Name), chunk) == -1 {
+				if ok, _ := path.Match(chunk, strings.ToLower(collection.Name)); !ok {
 					goto nextCollection
 				}
 			}
@@ -189,7 +189,7 @@ func (server *Server) serveBrowseSearch(writer http.ResponseWriter, request *htt
 
 		for _, graph := range server.Library.Graphs {
 			for _, chunk := range chunks {
-				if strings.Index(strings.ToLower(graph.Name), chunk) == -1 {
+				if ok, _ := path.Match(chunk, strings.ToLower(graph.Name)); !ok {
 					goto nextGraph
 				}
 			}
