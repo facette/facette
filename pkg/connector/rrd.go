@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/config"
@@ -203,9 +204,11 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotRe
 	}
 
 	// Get plots
+	step := query.EndTime.Sub(query.StartTime) / time.Duration(query.Sample)
+
 	data := rrd.XportResult{}
 
-	data, err := xport.Xport(query.StartTime, query.EndTime, query.Step)
+	data, err := xport.Xport(query.StartTime, query.EndTime, step)
 	if err != nil {
 		return nil, err
 	}

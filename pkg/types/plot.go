@@ -14,15 +14,15 @@ type PlotQuery struct {
 	Group     *PlotQueryGroup
 	StartTime time.Time
 	EndTime   time.Time
-	Step      time.Duration
+	Sample    int
 }
 
 func (plotQuery *PlotQuery) String() string {
 	return fmt.Sprintf(
-		"PlotQuery{StartTime:%s EndTime:%s Step:%s Group:%s}",
+		"PlotQuery{StartTime:%s EndTime:%s Sample:%d Group:%s}",
 		plotQuery.StartTime.String(),
 		plotQuery.EndTime.String(),
-		plotQuery.Step.String(),
+		plotQuery.Sample,
 		plotQuery.Group,
 	)
 }

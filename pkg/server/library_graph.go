@@ -265,8 +265,6 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 		return
 	}
 
-	step := endTime.Sub(startTime) / time.Duration(plotReq.Sample)
-
 	// Get plots data
 	groupOptions := make(map[string]map[string]interface{})
 
@@ -285,7 +283,7 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 			continue
 		}
 
-		plotResults, err := providerConnector.GetPlots(&types.PlotQuery{query, startTime, endTime, step})
+		plotResults, err := providerConnector.GetPlots(&types.PlotQuery{query, startTime, endTime, plotReq.Sample})
 		if err != nil {
 			logger.Log(logger.LevelError, "server", "%s", err)
 		}
@@ -307,7 +305,7 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 		ID:          graph.ID,
 		Start:       startTime.Format(time.RFC3339),
 		End:         endTime.Format(time.RFC3339),
-		Step:        step.Seconds(),
+		Step:        (endTime.Sub(startTime) / time.Duration(plotReq.Sample)).Seconds(),
 		Name:        graph.Name,
 		Description: graph.Description,
 		Type:        graph.Type,

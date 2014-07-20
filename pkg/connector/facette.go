@@ -84,8 +84,9 @@ func init() {
 func (connector *FacetteConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotResult, error) {
 	// Convert plotQuery into plotRequest-like to forward query to upstream Facette API
 	plotRequest := facettePlotRequest{
-		Time:  query.StartTime,
-		Range: utils.DurationToRange(query.EndTime.Sub(query.StartTime)),
+		Time:   query.StartTime,
+		Range:  utils.DurationToRange(query.EndTime.Sub(query.StartTime)),
+		Sample: query.Sample,
 		Graph: library.Graph{
 			Item: library.Item{
 				Name: "facette",
@@ -113,10 +114,6 @@ func (connector *FacetteConnector) GetPlots(query *types.PlotQuery) ([]*types.Pl
 				},
 			},
 		},
-	}
-
-	if query.Step != 0 {
-		plotRequest.Sample = int((query.EndTime.Sub(query.StartTime) / query.Step).Seconds())
 	}
 
 	requestBody, err := json.Marshal(plotRequest)
