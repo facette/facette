@@ -65,16 +65,14 @@ type OperGroup struct {
 	Type    int                    `json:"type"`
 	StackID int                    `json:"stack_id"`
 	Series  []*Serie               `json:"series"`
-	Scale   float64                `json:"scale"`
 	Options map[string]interface{} `json:"options"`
 }
 
 func (group *OperGroup) String() string {
 	return fmt.Sprintf(
-		"OperGroup{Name:\"%s\" Type:%d Scale:%g Series:[%s]}",
+		"OperGroup{Name:\"%s\" Type:%d StackID:%d Series:[%s] Options:%v}",
 		group.Name,
 		group.Type,
-		group.Scale,
 		func(series []*Serie) string {
 			serieStrings := make([]string, len(series))
 
@@ -84,25 +82,26 @@ func (group *OperGroup) String() string {
 
 			return strings.Join(serieStrings, ", ")
 		}(group.Series),
+		group.Options,
 	)
 }
 
 // Serie represents a serie entry.
 type Serie struct {
-	Name   string  `json:"name"`
-	Origin string  `json:"origin"`
-	Source string  `json:"source"`
-	Metric string  `json:"metric"`
-	Scale  float64 `json:"scale"`
+	Name    string                 `json:"name"`
+	Origin  string                 `json:"origin"`
+	Source  string                 `json:"source"`
+	Metric  string                 `json:"metric"`
+	Options map[string]interface{} `json:"options"`
 }
 
 func (serie *Serie) String() string {
 	return fmt.Sprintf(
-		"Serie{Name:\"%s\" Origin:\"%s\" Source:\"%s\" Metric:\"%s\" Scale:%g}",
+		"Serie{Name:\"%s\" Origin:\"%s\" Source:\"%s\" Metric:\"%s\" Options:%v}",
 		serie.Name,
 		serie.Origin,
 		serie.Source,
 		serie.Metric,
-		serie.Scale,
+		serie.Options,
 	)
 }

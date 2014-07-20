@@ -99,17 +99,17 @@ func (connector *FacetteConnector) GetPlots(query *types.PlotQuery) ([]*types.Pl
 
 						for index, serie := range series {
 							requestSeries[index] = &library.Serie{
-								Name:   fmt.Sprintf("serie%d", index),
-								Origin: serie.Metric.Origin,
-								Source: serie.Metric.Source,
-								Metric: serie.Metric.Name,
-								Scale:  serie.Scale,
+								Name:    fmt.Sprintf("serie%d", index),
+								Origin:  serie.Metric.Origin,
+								Source:  serie.Metric.Source,
+								Metric:  serie.Metric.Name,
+								Options: serie.Options,
 							}
 						}
 
 						return requestSeries
 					}(query.Group.Series),
-					Scale: query.Group.Scale,
+					Options: query.Group.Options,
 				},
 			},
 		},

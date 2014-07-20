@@ -14,15 +14,26 @@ function domFillItem(item, data, formatters) {
     }
 }
 
-function formatValue(value, type) {
+function formatValue(value, type, unit) {
+    var result;
+
     switch (type) {
     case UNIT_TYPE_FIXED:
-        return Math.round(value * 100) / 100;
+        result = Math.round(value * 100) / 100;
+        break;
+
     case UNIT_TYPE_METRIC:
-        return humanReadable(value);
+        result = humanReadable(value);
+        break;
+
     default:
-        return value;
+        result = value;
     }
+
+    if (unit)
+        result += unit;
+
+    return result;
 }
 
 function humanReadable(number) {

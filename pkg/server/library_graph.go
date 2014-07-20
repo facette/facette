@@ -350,8 +350,8 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 	var providerConnector connector.Connector
 
 	query := &types.PlotQueryGroup{
-		Type:  groupItem.Type,
-		Scale: groupItem.Scale,
+		Type:    groupItem.Type,
+		Options: groupItem.Options,
 	}
 
 	for _, serieItem := range groupItem.Series {
@@ -406,7 +406,7 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 							Origin: metric.Source.Origin.OriginalName,
 							Source: metric.Source.OriginalName,
 						},
-						Scale: serieItem.Scale,
+						Options: serieItem.Options,
 					})
 
 					index += 1
@@ -439,7 +439,7 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 						Origin: metric.Source.Origin.OriginalName,
 						Source: metric.Source.OriginalName,
 					},
-					Scale: serieItem.Scale,
+					Options: serieItem.Options,
 				}
 
 				query.Series = append(query.Series, serie)

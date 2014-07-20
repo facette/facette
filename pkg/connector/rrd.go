@@ -99,14 +99,17 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotRe
 				"AVERAGE",
 			)
 
-			if serie.Scale != 0 {
-				graph.CDef(itemName+"-orig1", fmt.Sprintf("%s-orig0,%g,*", itemName, serie.Scale))
+			serieScale, _ := config.GetFloat(serie.Options, "scale", false)
+			groupScale, _ := config.GetFloat(query.Group.Options, "scale", false)
+
+			if serieScale != 0 {
+				graph.CDef(itemName+"-orig1", fmt.Sprintf("%s-orig0,%g,*", itemName, serieScale))
 			} else {
 				graph.CDef(itemName+"-orig1", itemName+"-orig0")
 			}
 
-			if query.Group.Scale != 0 {
-				graph.CDef(itemName, fmt.Sprintf("%s-orig1,%g,*", itemName, query.Group.Scale))
+			if groupScale != 0 {
+				graph.CDef(itemName, fmt.Sprintf("%s-orig1,%g,*", itemName, groupScale))
 			} else {
 				graph.CDef(itemName, itemName+"-orig1")
 			}
@@ -119,14 +122,14 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotRe
 				"AVERAGE",
 			)
 
-			if serie.Scale != 0 {
-				xport.CDef(itemName+"-orig1", fmt.Sprintf("%s-orig0,%g,*", itemName, serie.Scale))
+			if serieScale != 0 {
+				xport.CDef(itemName+"-orig1", fmt.Sprintf("%s-orig0,%g,*", itemName, serieScale))
 			} else {
 				xport.CDef(itemName+"-orig1", itemName+"-orig0")
 			}
 
-			if query.Group.Scale != 0 {
-				xport.CDef(itemName, fmt.Sprintf("%s-orig1,%g,*", itemName, query.Group.Scale))
+			if groupScale != 0 {
+				xport.CDef(itemName, fmt.Sprintf("%s-orig1,%g,*", itemName, groupScale))
 			} else {
 				xport.CDef(itemName, itemName+"-orig1")
 			}
@@ -174,10 +177,12 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotRe
 			stack = append(stack, strconv.Itoa(len(query.Group.Series)), "/")
 		}
 
+		groupScale, _ := config.GetFloat(query.Group.Options, "scale", false)
+
 		graph.CDef(itemName+"-orig", strings.Join(stack, ","))
 
-		if query.Group.Scale != 0 {
-			graph.CDef(itemName, fmt.Sprintf("%s-orig,%g,*", itemName, query.Group.Scale))
+		if groupScale != 0 {
+			graph.CDef(itemName, fmt.Sprintf("%s-orig,%g,*", itemName, groupScale))
 		} else {
 			graph.CDef(itemName, itemName+"-orig")
 		}
@@ -185,8 +190,8 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotRe
 		// Set plots request
 		xport.CDef(itemName+"-orig", strings.Join(stack, ","))
 
-		if query.Group.Scale != 0 {
-			xport.CDef(itemName, fmt.Sprintf("%s-orig,%g,*", itemName, query.Group.Scale))
+		if groupScale != 0 {
+			xport.CDef(itemName, fmt.Sprintf("%s-orig,%g,*", itemName, groupScale))
 		} else {
 			xport.CDef(itemName, itemName+"-orig")
 		}

@@ -148,13 +148,15 @@ function adminGraphCreateGroup(name, value) {
         type: type
     });
 
-    if (value.options && value.options.color)
-        $item.find('.color')
-            .removeClass('auto')
-            .css('color', value.options.color);
+    if (value.options) {
+        if (value.options.color)
+            $item.find('.color')
+                .removeClass('auto')
+                .css('color', value.options.color);
 
-    if (value.scale)
-        $item.find('a[href=#set-scale]').text(value.scale.toPrecision(3));
+        if (value.options.scale)
+            $item.find('a[href=#set-scale]').text(value.options.scale.toPrecision(3));
+    }
 
     return $item;
 }
@@ -232,13 +234,16 @@ function adminGraphCreateProxy(type, item, list) {
 
     domFillItem($item, value);
 
-    if (value.options && value.options.color)
-        $item.find('.color')
-            .removeClass('auto')
-            .css('color', value.options.color);
+    if (value.options) {
+        if (value.options.color)
+            $item.find('.color')
+                .removeClass('auto')
+                .css('color', value.options.color);
 
-    if (value.scale)
-        $item.find('a[href=#set-scale]').text(value.scale.toPrecision(3));
+        if (value.options.scale)
+            $item.find('a[href=#set-scale]').text(value.options.scale.toPrecision(3));
+
+    }
 
     return $item;
 }
@@ -731,13 +736,16 @@ function adminGraphSetupTerminate() {
 
                 domFillItem($item, expands[serieName]);
 
-                if (expands[serieName].options && expands[serieName].options.color)
-                    $item.find('.color')
-                        .removeClass('auto')
-                        .css('color', expands[serieName].options.color);
+                if (expands[serieName].options) {
+                    if (expands[serieName].options.color)
+                        $item.find('.color')
+                            .removeClass('auto')
+                            .css('color', expands[serieName].options.color);
 
-                if (expands[serieName].scale !== 0)
-                    $item.find('a[href=#set-scale]').text(expands[serieName].scale);
+                    if (expands[serieName].options.scale !== 0)
+                        $item.find('a[href=#set-scale]').text(expands[serieName].options.scale);
+
+                }
 
                 $item.find('.count').remove();
                 $item.find('a[href$=#expand-serie]').remove();
@@ -1017,11 +1025,11 @@ function adminGraphSetupTerminate() {
 
                 $overlay = overlayCreate('select', {
                     message: $.t('graph.labl_scale'),
-                    value: value.scale,
+                    value: value.options.scale,
                     callbacks: {
                         validate: function (data) {
                             data = parseFloat(data);
-                            value.scale = data;
+                            value.options.scale = data;
                             $scale.text(data ? data.toPrecision(3) : '');
                         }
                     },
@@ -1041,7 +1049,7 @@ function adminGraphSetupTerminate() {
                         if (e.target.value)
                             $input.val(e.target.value);
                     })
-                    .val(value.scale)
+                    .val(value.options.scale)
                     .trigger({
                         type: 'change',
                         _init: true

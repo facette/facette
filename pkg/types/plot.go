@@ -29,16 +29,15 @@ func (plotQuery *PlotQuery) String() string {
 
 // PlotQueryGroup represents a plot query operation group.
 type PlotQueryGroup struct {
-	Type   int
-	Series []*PlotQuerySerie
-	Scale  float64
+	Type    int
+	Series  []*PlotQuerySerie
+	Options map[string]interface{}
 }
 
 func (queryGroup *PlotQueryGroup) String() string {
 	return fmt.Sprintf(
-		"PlotQueryGroup{Type:%d Scale:%g Series:[%s]}",
+		"PlotQueryGroup{Type:%d Scale:%g Series:[%s] Options:%v}",
 		queryGroup.Type,
-		queryGroup.Scale,
 		func(series []*PlotQuerySerie) string {
 			seriesStrings := make([]string, len(series))
 
@@ -48,20 +47,21 @@ func (queryGroup *PlotQueryGroup) String() string {
 
 			return strings.Join(seriesStrings, ", ")
 		}(queryGroup.Series),
+		queryGroup.Options,
 	)
 }
 
 // PlotQuerySerie represents a serie entry in a PlotQueryGroup.
 type PlotQuerySerie struct {
-	Metric *PlotQueryMetric
-	Scale  float64
+	Metric  *PlotQueryMetric
+	Options map[string]interface{}
 }
 
 func (querySerie *PlotQuerySerie) String() string {
 	return fmt.Sprintf(
-		"PlotQuerySerie{Scale:%g Metric:%s}",
-		querySerie.Scale,
+		"PlotQuerySerie{Metric:%s Options:%v}",
 		querySerie.Metric,
+		querySerie.Options,
 	)
 }
 

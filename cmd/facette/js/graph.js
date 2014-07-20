@@ -106,7 +106,7 @@ function graphDraw(graph, postpone, delay, preview) {
                     highchartOpts,
                     startTime,
                     endTime,
-                    info = {},
+                    serieData = {},
                     i;
 
                 if (data.message) {
@@ -134,7 +134,7 @@ function graphDraw(graph, postpone, delay, preview) {
 
                 graphTableUpdate = function () {
                     if (!preview)
-                        Highcharts.drawTable.apply(this, [info]);
+                        Highcharts.drawTable.apply(this, [serieData]);
                 };
 
                 highchartOpts = {
@@ -324,7 +324,10 @@ function graphDraw(graph, postpone, delay, preview) {
                         color: data.series[i].options ? data.series[i].options.color : null
                     });
 
-                    info[data.series[i].name] = data.series[i].info;
+                    serieData[data.series[i].name] = {
+                        info: data.series[i].info,
+                        options: data.series[i].options
+                    };
                 }
 
                 // Prepare legend spacing
