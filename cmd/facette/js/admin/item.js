@@ -3,6 +3,11 @@ function adminItemHandlePaneList(itemType) {
     var paneSection = paneMatch(itemType + '-list').opts('pane').section;
 
     // Register links
+    linkRegister('show-' + itemType, function (e) {
+        window.location = urlPrefix + '/browse/' + paneSection + '/' +
+            $(e.target).closest('[data-itemid]').attr('data-itemid');
+    });
+
     linkRegister('edit-' + itemType, function (e) {
         window.location = urlPrefix + '/admin/' + paneSection + '/' +
             $(e.target).closest('[data-itemid]').attr('data-itemid');
