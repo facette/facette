@@ -225,6 +225,10 @@ func (server *Server) serveGroupExpand(writer http.ResponseWriter, request *http
 				}
 			}
 		} else if strings.HasPrefix(entry[2], library.LibraryGroupPrefix) {
+			if _, ok := server.Catalog.Origins[entry[0]].Sources[entry[1]]; !ok {
+				continue
+			}
+
 			for _, metricName := range server.Library.ExpandGroup(
 				strings.TrimPrefix(entry[2], library.LibraryGroupPrefix),
 				library.LibraryItemMetricGroup,

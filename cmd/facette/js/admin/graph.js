@@ -562,7 +562,7 @@ function adminGraphSetupTerminate() {
                                 $item.find('a[href$=#collapse-serie]').remove();
                             }
                         } else {
-                            $item.find('.count').remove();
+                            $item.find('.count').text(0);
                             $item.find('a[href$=#expand-serie], a[href$=#collapse-serie]').remove();
                         }
 
