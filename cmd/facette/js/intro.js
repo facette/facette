@@ -22,8 +22,10 @@ $(function () {
 
 "use strict";
 
-var $body = $(document.body),
+var $head = $(document.head),
+	$body = $(document.body),
     $window = $(window);
 
 // Get URL prefix
-var urlPrefix = $(document.head).find('meta[name=url-prefix]').attr('content') || '';
+var urlPrefix = $head.find('meta[name=url-prefix]').attr('content') || '',
+	readOnly = $head.find('meta[name=read-only]').attr('content') == 'true';

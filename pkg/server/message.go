@@ -6,6 +6,7 @@ const (
 	mesgFormOffsetInvalid    string = "Request offset must be an integer"
 	mesgFormOffsetOutOfRange string = "Request offset is out of range"
 	mesgMethodNotAllowed     string = "Request method is not allowed"
+	mesgReadOnlyMode         string = "Instance is read-only"
 	mesgResourceConflict     string = "A resource conflict has occured"
 	mesgResourceInvalid      string = "Resource is invalid"
 	mesgResourceNotFound     string = "Unable to find requested resource"

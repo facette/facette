@@ -18,9 +18,11 @@ func (server *Server) serveError(writer http.ResponseWriter, status int) {
 		status,
 		struct {
 			URLPrefix string
+			ReadOnly  bool
 			Status    int
 		}{
 			URLPrefix: server.Config.URLPrefix,
+			ReadOnly:  server.Config.ReadOnly,
 			Status:    status,
 		},
 		path.Join(server.Config.BaseDir, "template", "layout.html"),
@@ -36,6 +38,9 @@ func (server *Server) serveError(writer http.ResponseWriter, status int) {
 func (server *Server) serveReload(writer http.ResponseWriter, request *http.Request) {
 	if request.Method != "GET" && request.Method != "HEAD" {
 		server.serveResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
+		return
+	} else if server.Config.ReadOnly {
+		server.serveResponse(writer, serverResponse{mesgReadOnlyMode}, http.StatusForbidden)
 		return
 	}
 
@@ -95,8 +100,10 @@ func (server *Server) serveWait(writer http.ResponseWriter, request *http.Reques
 		http.StatusServiceUnavailable,
 		struct {
 			URLPrefix string
+			ReadOnly  bool
 		}{
 			URLPrefix: server.Config.URLPrefix,
+			ReadOnly:  server.Config.ReadOnly,
 		},
 		path.Join(server.Config.BaseDir, "template", "layout.html"),
 		path.Join(server.Config.BaseDir, "template", "wait.html"),

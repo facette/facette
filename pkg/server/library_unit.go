@@ -14,6 +14,11 @@ import (
 )
 
 func (server *Server) serveUnit(writer http.ResponseWriter, request *http.Request) {
+	if request.Method != "GET" && request.Method != "HEAD" && server.Config.ReadOnly {
+		server.serveResponse(writer, serverResponse{mesgReadOnlyMode}, http.StatusForbidden)
+		return
+	}
+
 	unitID := strings.TrimPrefix(request.URL.Path, urlLibraryPath+"units/")
 
 	switch request.Method {

@@ -19,6 +19,11 @@ import (
 )
 
 func (server *Server) serveGraph(writer http.ResponseWriter, request *http.Request) {
+	if request.Method != "GET" && request.Method != "HEAD" && server.Config.ReadOnly {
+		server.serveResponse(writer, serverResponse{mesgReadOnlyMode}, http.StatusForbidden)
+		return
+	}
+
 	graphID := strings.TrimPrefix(request.URL.Path, urlLibraryPath+"graphs/")
 
 	switch request.Method {

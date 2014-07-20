@@ -21,6 +21,11 @@ func (server *Server) serveCollection(writer http.ResponseWriter, request *http.
 		Parent string `json:"parent"`
 	}
 
+	if request.Method != "GET" && request.Method != "HEAD" && server.Config.ReadOnly {
+		server.serveResponse(writer, serverResponse{mesgReadOnlyMode}, http.StatusForbidden)
+		return
+	}
+
 	collectionID := strings.TrimPrefix(request.URL.Path, urlLibraryPath+"collections/")
 
 	switch request.Method {

@@ -41,6 +41,9 @@ function graphDraw(graph, postpone, delay, preview) {
 
             graph.find('.graphctrl .ranges').hide();
 
+            if (readOnly)
+                graph.find('.graphctrl .edit').hide();
+
             graph.find('.placeholder').text(graph.data('options').title || 'N/A');
         }
     }

@@ -12,10 +12,10 @@
 			<header>
 				<h1>Administration Panel — Graphs</h1>
 
-				<nav>
+				<nav>{{ if not .ReadOnly }}
 					<ul>
 						<li><a class="icon icon-add" href="{{ .URLPrefix }}/admin/graphs/add" title="Add Graph"></a></li>
-					</ul>
+					</ul>{{ end }}
 				</nav>
 
 				<div class="filter icon icon-search">
@@ -29,16 +29,16 @@
 
 					<div class="listmesg" data-listmesg="graphs"></div>
 
-					<div class="listitem" data-listtmpl="graphs">
+					<div class="listitem" data-listtmpl="graphs">{{ if not .ReadOnly }}
 						<div class="actions">
 							<a class="icon icon-remove" href="#remove-graph" title="Remove Graph"></a>
-						</div>
+						</div>{{ end }}
 						<div class="date">Last updated on <span></span></div>
 						<div>
 							<span class="name"></span>
-							<span class="actions">
+							<span class="actions">{{ if not .ReadOnly }}
 								<a class="icon icon-edit" href="#edit-graph" title="Edit Graph"></a>
-								<a class="icon icon-copy" href="#clone-graph" title="Clone Graph"></a>
+								<a class="icon icon-copy" href="#clone-graph" title="Clone Graph"></a>{{ end }}
 								<a class="icon icon-goto" href="#show-graph" title="Go to Graph"></a>
 							</span>
 						</div>
