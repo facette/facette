@@ -32,13 +32,13 @@ function adminReloadServer() {
     return $.ajax({
         url: urlPrefix + '/reload',
         type: 'GET'
-    }).always(function ($deferred) {
+    }).always(function (xhr) {
         if (ADMIN_RELOAD_TIMEOUT)
             clearTimeout(ADMIN_RELOAD_TIMEOUT);
 
         overlayDestroy('loader');
 
-        if ($deferred.state() == "resolved")
+        if (!xhr)
             window.location.reload(true);
     });
 }
