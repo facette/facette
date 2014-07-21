@@ -229,7 +229,7 @@ func graphiteBuildQueryURL(queryGroup *types.PlotQueryGroup, startTime, endTime 
 				target = fmt.Sprintf("scale(%s, %g)", target, scale)
 			}
 
-			queryURL += fmt.Sprintf("&target=legendValue(%s, 'min', 'max', 'avg', 'last')", target)
+			queryURL += fmt.Sprintf("&target=%s", target)
 		}
 	} else {
 		count += 1
@@ -253,8 +253,6 @@ func graphiteBuildQueryURL(queryGroup *types.PlotQueryGroup, startTime, endTime 
 			target = fmt.Sprintf("sumSeries(%s)", target)
 		}
 
-		target = fmt.Sprintf("legendValue(%s, 'min', 'max', 'avg', 'last')", target)
-
 		queryURL += fmt.Sprintf("&target=summarize(%s, \"%s\", \"avg\")", target, interval)
 	}
 
@@ -274,8 +272,6 @@ func graphiteBuildQueryURL(queryGroup *types.PlotQueryGroup, startTime, endTime 
 }
 
 func graphiteExtractPlotResult(plots []graphitePlot) ([]*types.PlotResult, error) {
-	var min, max, avg, last float64
-
 	result := make([]*types.PlotResult, 0)
 
 	for _, plot := range plots {
@@ -284,19 +280,6 @@ func graphiteExtractPlotResult(plots []graphitePlot) ([]*types.PlotResult, error
 		for _, plotPoint := range plot.Datapoints {
 			plotResult.Plots = append(plotResult.Plots, types.PlotValue(plotPoint[0]))
 		}
-
-		// Scan the target legend for serie name and plot min/max/avg/last info
-		if index := strings.Index(plots[0].Target, "(min"); index > 0 {
-			fmt.Sscanf(plot.Target[0:index], "%s ", &plotResult.Name)
-			fmt.Sscanf(plot.Target[index:], "(min: %f) (max: %f) (avg: %f) (last: %f)", &min, &max, &avg, &last)
-		}
-
-		plotResult.Info["min"] = types.PlotValue(min)
-		plotResult.Info["max"] = types.PlotValue(max)
-		plotResult.Info["avg"] = types.PlotValue(avg)
-		plotResult.Info["last"] = types.PlotValue(last)
-
-		fmt.Printf("graphite: serie %s: %#v\n", plotResult.Name, plotResult.Info)
 
 		result = append(result, plotResult)
 	}
