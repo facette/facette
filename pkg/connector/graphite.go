@@ -221,7 +221,6 @@ func graphiteBuildQueryURL(queryGroup *types.PlotQueryGroup, startTime, endTime 
 
 	if queryGroup.Type == OperGroupTypeNone {
 		for _, serie := range queryGroup.Series {
-			itemName := fmt.Sprintf("serie%d", count)
 			count += 1
 
 			target := fmt.Sprintf("%s.%s", serie.Metric.Source, serie.Metric.Name)
@@ -230,14 +229,9 @@ func graphiteBuildQueryURL(queryGroup *types.PlotQueryGroup, startTime, endTime 
 				target = fmt.Sprintf("scale(%s, %g)", target, scale)
 			}
 
-			queryURL += fmt.Sprintf(
-				"&target=legendValue(alias(%s, '%s'), 'min', 'max', 'avg', 'last')",
-				target,
-				itemName,
-			)
+			queryURL += fmt.Sprintf("&target=legendValue(%s, 'min', 'max', 'avg', 'last')", target)
 		}
 	} else {
-		itemName := fmt.Sprintf("serie%d", count)
 		count += 1
 
 		targets := make([]string, 0)
@@ -259,11 +253,7 @@ func graphiteBuildQueryURL(queryGroup *types.PlotQueryGroup, startTime, endTime 
 			target = fmt.Sprintf("sumSeries(%s)", target)
 		}
 
-		target = fmt.Sprintf(
-			"legendValue(alias(%s, '%s'), 'min', 'max', 'avg', 'last')",
-			target,
-			itemName,
-		)
+		target = fmt.Sprintf("legendValue(%s, 'min', 'max', 'avg', 'last')", target)
 
 		queryURL += fmt.Sprintf("&target=summarize(%s, \"%s\", \"avg\")", target, interval)
 	}
@@ -305,6 +295,8 @@ func graphiteExtractPlotResult(plots []graphitePlot) ([]*types.PlotResult, error
 		plotResult.Info["max"] = types.PlotValue(max)
 		plotResult.Info["avg"] = types.PlotValue(avg)
 		plotResult.Info["last"] = types.PlotValue(last)
+
+		fmt.Printf("graphite: serie %s: %#v\n", plotResult.Name, plotResult.Info)
 
 		result = append(result, plotResult)
 	}
