@@ -1024,7 +1024,8 @@ function adminGraphSetupTerminate() {
             }).pipe(function (data) {
                 var $input,
                     $overlay,
-                    options = [];
+                    options = [],
+                    scaleValue = value.options && value.options.scale ? value.options.scale : '';
 
                 $.each(data, function (i, entry) { /*jshint unused: true */
                     options.push([entry.name, entry.value]);
@@ -1032,7 +1033,7 @@ function adminGraphSetupTerminate() {
 
                 $overlay = overlayCreate('select', {
                     message: $.t('graph.labl_scale'),
-                    value: value.options.scale,
+                    value: scaleValue,
                     callbacks: {
                         validate: function (data) {
                             data = parseFloat(data);
@@ -1056,7 +1057,7 @@ function adminGraphSetupTerminate() {
                         if (e.target.value)
                             $input.val(e.target.value);
                     })
-                    .val(value.options.scale)
+                    .val(scaleValue)
                     .trigger({
                         type: 'change',
                         _init: true
@@ -1076,7 +1077,8 @@ function adminGraphSetupTerminate() {
             }).pipe(function (data) {
                 var $input,
                     $overlay,
-                    options = [];
+                    options = [],
+                    unitValue = value.options && value.options.unit ? value.options.unit : '';
 
                 $.each(data, function (i, entry) { /*jshint unused: true */
                     options.push([entry.name, entry.label]);
@@ -1084,7 +1086,7 @@ function adminGraphSetupTerminate() {
 
                 $overlay = overlayCreate('select', {
                     message: $.t('graph.labl_unit'),
-                    value: value.options.unit,
+                    value: unitValue,
                     callbacks: {
                         validate: function (data) {
                             value.options.unit = data;
@@ -1107,7 +1109,7 @@ function adminGraphSetupTerminate() {
                         if (e.target.value)
                             $input.val(e.target.value);
                     })
-                    .val(value.options.unit)
+                    .val(unitValue)
                     .trigger({
                         type: 'change',
                         _init: true
