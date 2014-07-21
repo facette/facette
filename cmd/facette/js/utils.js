@@ -30,8 +30,12 @@ function formatValue(value, type, unit) {
         result = value;
     }
 
-    if (unit)
+    if (unit) {
+        if (result == '0')
+            result += ' ';
+
         result += unit;
+    }
 
     return result;
 }
@@ -44,7 +48,7 @@ function humanReadable(number) {
         return '0';
 
     index = parseInt(Math.log(Math.abs(number)) / Math.log(1000), 10);
-    return (Math.round((number / Math.pow(1000, index) * 100)) / 100) + units[index];
+    return (Math.round((number / Math.pow(1000, index) * 100)) / 100) + ' ' + units[index];
 }
 
 function rgbToHex(value) {
