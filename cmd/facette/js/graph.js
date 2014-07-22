@@ -211,9 +211,19 @@ function graphDraw(graph, postpone, delay, preview) {
                     },
                     tooltip: {
                         formatter: function () {
-                            return moment(this.x).format('LLL') + '<br>' + this.series.name + ': <strong>' +
-                                (this.y !== null ? formatValue(this.y, data.unit_type) : 'null') + '</strong>';
+                            var tooltip = moment(this.x).format('LLL'),
+                                i;
+
+                            for (i in this.points) {
+                                tooltip += '<br><span class="highcharts-tooltip-color" style="background-color: ' +
+                                    this.points[i].series.color + '"></span> ' + this.points[i].series.name +
+                                    ': <strong>' + (this.points[i].y !== null ? formatValue(this.points[i].y,
+                                    data.unit_type) : 'null') + '</strong>';
+                            }
+
+                            return tooltip;
                         },
+                        shared: true,
                         useHTML: true
                     },
                     xAxis: {
