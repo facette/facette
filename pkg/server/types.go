@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/facette/facette/pkg/library"
-	"github.com/facette/facette/pkg/types"
+	"github.com/facette/facette/pkg/plot"
 )
 
 // ExpandRequest represents an expand request structure in the server backend.
@@ -192,11 +192,11 @@ type PlotResponse struct {
 
 // SerieResponse represents a serie response structure in the server backend.
 type SerieResponse struct {
-	Name    string                     `json:"name"`
-	StackID int                        `json:"stack_id"`
-	Plots   []types.PlotValue          `json:"plots"`
-	Info    map[string]types.PlotValue `json:"info"`
-	Options map[string]interface{}     `json:"options"`
+	Name    string                    `json:"name"`
+	StackID int                       `json:"stack_id"`
+	Plots   []plot.PlotValue          `json:"plots"`
+	Info    map[string]plot.PlotValue `json:"info"`
+	Options map[string]interface{}    `json:"options"`
 }
 
 // Unexported types

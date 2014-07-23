@@ -14,7 +14,7 @@ import (
 
 	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/config"
-	"github.com/facette/facette/pkg/types"
+	"github.com/facette/facette/pkg/plot"
 	"github.com/facette/facette/pkg/utils"
 )
 
@@ -65,10 +65,10 @@ func init() {
 }
 
 // GetPlots retrieves time series data from provider based on a query and a time interval.
-func (connector *GraphiteConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotResult, error) {
+func (connector *GraphiteConnector) GetPlots(query *plot.PlotQuery) ([]*plot.PlotResult, error) {
 	var (
 		graphitePlots []graphitePlot
-		result        []*types.PlotResult
+		result        []*plot.PlotResult
 	)
 
 	if len(query.Group.Series) == 0 {
@@ -211,7 +211,7 @@ func graphiteCheckBackendResponse(response *http.Response) error {
 	return nil
 }
 
-func graphiteBuildQueryURL(queryGroup *types.PlotQueryGroup, startTime, endTime time.Time) (string, error) {
+func graphiteBuildQueryURL(queryGroup *plot.PlotQueryGroup, startTime, endTime time.Time) (string, error) {
 	var targets []string
 
 	now := time.Now()
@@ -272,14 +272,14 @@ func graphiteBuildQueryURL(queryGroup *types.PlotQueryGroup, startTime, endTime 
 	return queryURL, nil
 }
 
-func graphiteExtractPlotResult(plots []graphitePlot) ([]*types.PlotResult, error) {
-	var result []*types.PlotResult
+func graphiteExtractPlotResult(graphitePlots []graphitePlot) ([]*plot.PlotResult, error) {
+	var result []*plot.PlotResult
 
-	for _, plot := range plots {
-		plotResult := &types.PlotResult{Info: make(map[string]types.PlotValue)}
+	for _, graphitePlot := range graphitePlots {
+		plotResult := &plot.PlotResult{Info: make(map[string]plot.PlotValue)}
 
-		for _, plotPoint := range plot.Datapoints {
-			plotResult.Plots = append(plotResult.Plots, types.PlotValue(plotPoint[0]))
+		for _, plotPoint := range graphitePlot.Datapoints {
+			plotResult.Plots = append(plotResult.Plots, plot.PlotValue(plotPoint[0]))
 		}
 
 		result = append(result, plotResult)

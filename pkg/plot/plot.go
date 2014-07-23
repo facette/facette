@@ -1,4 +1,5 @@
-package types
+// Package plot provides plot-related types and methods.
+package plot
 
 import (
 	"encoding/json"

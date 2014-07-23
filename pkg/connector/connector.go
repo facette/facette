@@ -3,7 +3,7 @@ package connector
 
 import (
 	"github.com/facette/facette/pkg/catalog"
-	"github.com/facette/facette/pkg/types"
+	"github.com/facette/facette/pkg/plot"
 )
 
 const (
@@ -18,7 +18,7 @@ const (
 
 // Connector represents the main interface of a connector handler.
 type Connector interface {
-	GetPlots(query *types.PlotQuery) ([]*types.PlotResult, error)
+	GetPlots(query *plot.PlotQuery) ([]*plot.PlotResult, error)
 	Refresh(string, chan *catalog.Record) error
 }
 

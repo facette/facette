@@ -13,7 +13,7 @@ import (
 	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/library"
-	"github.com/facette/facette/pkg/types"
+	"github.com/facette/facette/pkg/plot"
 	"github.com/facette/facette/pkg/utils"
 )
 
@@ -45,11 +45,11 @@ type facettePlotResponse struct {
 }
 
 type facetteSerie struct {
-	Name    string                     `json:"name"`
-	StackID int                        `json:"stack_id"`
-	Plots   []types.PlotValue          `json:"plots"`
-	Info    map[string]types.PlotValue `json:"info"`
-	Options map[string]interface{}     `json:"options"`
+	Name    string                    `json:"name"`
+	StackID int                       `json:"stack_id"`
+	Plots   []plot.PlotValue          `json:"plots"`
+	Info    map[string]plot.PlotValue `json:"info"`
+	Options map[string]interface{}    `json:"options"`
 }
 
 // FacetteConnector represents the main structure of the Facette connector.
@@ -81,8 +81,8 @@ func init() {
 }
 
 // GetPlots retrieves time series data from origin based on a query and a time interval.
-func (connector *FacetteConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotResult, error) {
-	var result []*types.PlotResult
+func (connector *FacetteConnector) GetPlots(query *plot.PlotQuery) ([]*plot.PlotResult, error) {
+	var result []*plot.PlotResult
 
 	// Convert plotQuery into plotRequest-like to forward query to upstream Facette API
 	plotRequest := facettePlotRequest{
@@ -97,7 +97,7 @@ func (connector *FacetteConnector) GetPlots(query *types.PlotQuery) ([]*types.Pl
 				&library.OperGroup{
 					Name: "group0",
 					Type: query.Group.Type,
-					Series: func(series []*types.PlotQuerySerie) []*library.Serie {
+					Series: func(series []*plot.PlotQuerySerie) []*library.Serie {
 						requestSeries := make([]*library.Serie, len(series))
 
 						for index, serie := range series {
@@ -167,7 +167,7 @@ func (connector *FacetteConnector) GetPlots(query *types.PlotQuery) ([]*types.Pl
 	}
 
 	for _, serie := range plotResponse.Series {
-		result = append(result, &types.PlotResult{
+		result = append(result, &plot.PlotResult{
 			Plots: serie.Plots,
 			Info:  serie.Info,
 		})

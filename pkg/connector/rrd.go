@@ -13,7 +13,7 @@ import (
 	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/logger"
-	"github.com/facette/facette/pkg/types"
+	"github.com/facette/facette/pkg/plot"
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/ziutek/rrd"
 )
@@ -57,9 +57,9 @@ func init() {
 }
 
 // GetPlots retrieves time series data from origin based on a query and a time interval.
-func (connector *RRDConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotResult, error) {
+func (connector *RRDConnector) GetPlots(query *plot.PlotQuery) ([]*plot.PlotResult, error) {
 	var (
-		result []*types.PlotResult
+		result []*plot.PlotResult
 		stack  []string
 		xport  *rrd.Exporter
 	)
@@ -226,14 +226,14 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotRe
 	}
 
 	for index, itemName := range data.Legends {
-		plotResult := &types.PlotResult{
+		plotResult := &plot.PlotResult{
 			Name: itemName,
-			Info: make(map[string]types.PlotValue),
+			Info: make(map[string]plot.PlotValue),
 		}
 
 		// FIXME: skip last garbage entry (see https://github.com/ziutek/rrd/pull/13)
 		for i := 0; i < data.RowCnt-1; i++ {
-			plotResult.Plots = append(plotResult.Plots, types.PlotValue(data.ValueAt(index, i)))
+			plotResult.Plots = append(plotResult.Plots, plot.PlotValue(data.ValueAt(index, i)))
 		}
 
 		result = append(result, plotResult)
