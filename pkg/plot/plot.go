@@ -12,8 +12,13 @@ import (
 
 // Plot represents a graph plot.
 type Plot struct {
-	Time  time.Time
-	Value Value
+	Time  time.Time `json:"time"`
+	Value Value     `json:"value"`
+}
+
+// MarshalJSON handles JSON marshalling of the Plot type.
+func (plot Plot) MarshalJSON() ([]byte, error) {
+	return json.Marshal([]interface{}{int(plot.Time.Unix()), plot.Value})
 }
 
 // Value represents a graph plot value.

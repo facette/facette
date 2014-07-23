@@ -110,7 +110,8 @@ function graphDraw(graph, postpone, delay, preview) {
                     startTime,
                     endTime,
                     serieData = {},
-                    i;
+                    i,
+                    j;
 
                 if (data.message) {
                     graph.children('.graphctrl')
@@ -329,6 +330,12 @@ function graphDraw(graph, postpone, delay, preview) {
                 }
 
                 for (i in data.series) {
+                    // Transform unix epochs to Date objects
+                    for (j in data.series[i].plots) {
+                        data.series[i].plots[j] = [moment(data.series[i].plots[j][0]).toDate(),
+                            data.series[i].plots[j][1]];
+                    }
+
                     highchartOpts.series.push({
                         id: data.series[i].name,
                         name: data.series[i].name,

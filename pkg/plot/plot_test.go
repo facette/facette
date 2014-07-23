@@ -40,12 +40,14 @@ func Test_Series_Downsample(test *testing.T) {
 	}
 
 	for _, entry := range []sampleTest{
-		sampleTest{5, []Plot{{Value: 65.4}, {Value: 79.6}, {Value: 83.4}, {Value: 73.6}, {Value: 82.8}}},
+		sampleTest{5, []Plot{
+			{Value: 65.4}, {Value: 79.6}, {Value: 83.4}, {Value: 73.6}, {Value: 82.8},
+		}},
 		sampleTest{15, []Plot{
 			{Value: 61}, {Value: 83.5}, {Value: 49.5}, {Value: 68}, {Value: 91},
 			{Value: 74}, {Value: 76.5}, {Value: 88}, {Value: 88}, {Value: 85},
-			{Value: 66.5}, {Value: 75}, {Value: 79.5}, {Value: 94.5}, {Value: 66}},
-		},
+			{Value: 66.5}, {Value: 75}, {Value: 79.5}, {Value: 94.5}, {Value: 66},
+		}},
 		sampleTest{30, plotSeries.Plots},
 		sampleTest{60, plotSeries.Plots},
 	} {
