@@ -47,7 +47,7 @@ type facettePlotResponse struct {
 type facetteSerie struct {
 	Name    string                 `json:"name"`
 	StackID int                    `json:"stack_id"`
-	Plots   []plot.Value           `json:"plots"`
+	Plots   []plot.Plot            `json:"plots"`
 	Summary map[string]plot.Value  `json:"summary"`
 	Options map[string]interface{} `json:"options"`
 }
@@ -81,8 +81,8 @@ func init() {
 }
 
 // GetPlots retrieves time series data from origin based on a query and a time interval.
-func (connector *FacetteConnector) GetPlots(query *plot.Query) ([]*plot.Result, error) {
-	var result []*plot.Result
+func (connector *FacetteConnector) GetPlots(query *plot.Query) ([]*plot.Series, error) {
+	var resultSeries []*plot.Series
 
 	// Convert plotQuery into plotRequest-like to forward query to upstream Facette API
 	plotRequest := facettePlotRequest{
@@ -167,13 +167,13 @@ func (connector *FacetteConnector) GetPlots(query *plot.Query) ([]*plot.Result, 
 	}
 
 	for _, serie := range plotResponse.Series {
-		result = append(result, &plot.Result{
+		resultSeries = append(resultSeries, &plot.Series{
 			Plots:   serie.Plots,
 			Summary: serie.Summary,
 		})
 	}
 
-	return result, nil
+	return resultSeries, nil
 }
 
 // Refresh triggers a full connector data update.

@@ -194,7 +194,7 @@ type PlotResponse struct {
 type SerieResponse struct {
 	Name    string                 `json:"name"`
 	StackID int                    `json:"stack_id"`
-	Plots   []plot.Value           `json:"plots"`
+	Plots   []plot.Plot            `json:"plots"`
 	Summary map[string]plot.Value  `json:"summary"`
 	Options map[string]interface{} `json:"options"`
 }

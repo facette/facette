@@ -57,11 +57,11 @@ func init() {
 }
 
 // GetPlots retrieves time series data from origin based on a query and a time interval.
-func (connector *RRDConnector) GetPlots(query *plot.Query) ([]*plot.Result, error) {
+func (connector *RRDConnector) GetPlots(query *plot.Query) ([]*plot.Series, error) {
 	var (
-		result []*plot.Result
-		stack  []string
-		xport  *rrd.Exporter
+		resultSeries []*plot.Series
+		stack        []string
+		xport        *rrd.Exporter
 	)
 
 	if len(query.Group.Series) == 0 {
@@ -226,22 +226,28 @@ func (connector *RRDConnector) GetPlots(query *plot.Query) ([]*plot.Result, erro
 	}
 
 	for index, itemName := range data.Legends {
-		plotResult := &plot.Result{
+		series := &plot.Series{
 			Name:    itemName,
 			Summary: make(map[string]plot.Value),
 		}
 
 		// FIXME: skip last garbage entry (see https://github.com/ziutek/rrd/pull/13)
 		for i := 0; i < data.RowCnt-1; i++ {
-			plotResult.Plots = append(plotResult.Plots, plot.Value(data.ValueAt(index, i)))
+			series.Plots = append(
+				series.Plots,
+				plot.Plot{
+					Value: plot.Value(data.ValueAt(index, i)),
+					Time:  query.StartTime.Add(time.Duration(i) * step * time.Second),
+				},
+			)
 		}
 
-		result = append(result, plotResult)
+		resultSeries = append(resultSeries, series)
 	}
 
 	data.FreeValues()
 
-	return result, nil
+	return resultSeries, nil
 }
 
 // Refresh triggers a full connector data update.

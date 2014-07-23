@@ -18,7 +18,7 @@ const (
 
 // Connector represents the main interface of a connector handler.
 type Connector interface {
-	GetPlots(query *plot.Query) ([]*plot.Result, error)
+	GetPlots(query *plot.Query) ([]*plot.Series, error)
 	Refresh(string, chan *catalog.Record) error
 }
 

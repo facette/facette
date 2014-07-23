@@ -65,10 +65,10 @@ func init() {
 }
 
 // GetPlots retrieves time series data from provider based on a query and a time interval.
-func (connector *GraphiteConnector) GetPlots(query *plot.Query) ([]*plot.Result, error) {
+func (connector *GraphiteConnector) GetPlots(query *plot.Query) ([]*plot.Series, error) {
 	var (
 		graphitePlots []graphitePlot
-		result        []*plot.Result
+		resultSeries  []*plot.Series
 	)
 
 	if len(query.Group.Series) == 0 {
@@ -123,11 +123,11 @@ func (connector *GraphiteConnector) GetPlots(query *plot.Query) ([]*plot.Result,
 		return nil, fmt.Errorf("unable to unmarshal JSON data: %s", err)
 	}
 
-	if result, err = graphiteExtractResult(graphitePlots); err != nil {
+	if resultSeries, err = graphiteExtractResult(graphitePlots); err != nil {
 		return nil, fmt.Errorf("unable to extract plot values from backend response: %s", err)
 	}
 
-	return result, nil
+	return resultSeries, nil
 }
 
 // Refresh triggers a full connector data update.
@@ -272,18 +272,21 @@ func graphiteBuildQueryURL(queryGroup *plot.QueryGroup, startTime, endTime time.
 	return queryURL, nil
 }
 
-func graphiteExtractResult(graphitePlots []graphitePlot) ([]*plot.Result, error) {
-	var result []*plot.Result
+func graphiteExtractResult(graphitePlots []graphitePlot) ([]*plot.Series, error) {
+	var resultSeries []*plot.Series
 
 	for _, graphitePlot := range graphitePlots {
-		plotResult := &plot.Result{Summary: make(map[string]plot.Value)}
+		series := &plot.Series{Summary: make(map[string]plot.Value)}
 
 		for _, plotPoint := range graphitePlot.Datapoints {
-			plotResult.Plots = append(plotResult.Plots, plot.Value(plotPoint[0]))
+			series.Plots = append(
+				series.Plots,
+				plot.Plot{Value: plot.Value(plotPoint[0]), Time: time.Unix(int64(plotPoint[1]), 0)},
+			)
 		}
 
-		result = append(result, plotResult)
+		resultSeries = append(resultSeries, series)
 	}
 
-	return result, nil
+	return resultSeries, nil
 }

@@ -7,30 +7,30 @@ import (
 	"github.com/facette/facette/pkg/utils"
 )
 
-var plotResult = Result{
-	Plots: []Value{
-		Value(math.NaN()), 61.0, 69.0, 98.0, 56.0, 43.0,
-		68.0, Value(math.NaN()), 87.0, 95.0, 69.0, 79.0,
-		99.0, 54.0, 88.0, Value(math.NaN()), 99.0, 77.0,
-		85.0, Value(math.NaN()), 62.0, 71.0, 78.0, 72.0,
-		89.0, 70.0, 96.0, 93.0, 66.0, Value(math.NaN()),
+var plotSeries = Series{
+	Plots: []Plot{
+		{Value: Value(math.NaN())}, {Value: 61.0}, {Value: 69.0}, {Value: 98.0}, {Value: 56.0}, {Value: 43.0},
+		{Value: 68.0}, {Value: Value(math.NaN())}, {Value: 87.0}, {Value: 95.0}, {Value: 69.0}, {Value: 79.0},
+		{Value: 99.0}, {Value: 54.0}, {Value: 88.0}, {Value: Value(math.NaN())}, {Value: 99.0}, {Value: 77.0},
+		{Value: 85.0}, {Value: Value(math.NaN())}, {Value: 62.0}, {Value: 71.0}, {Value: 78.0}, {Value: 72.0},
+		{Value: 89.0}, {Value: 70.0}, {Value: 96.0}, {Value: 93.0}, {Value: 66.0}, {Value: Value(math.NaN())},
 	},
 	Summary: make(map[string]Value),
 }
 
-func Test_Result_Downsample(test *testing.T) {
+func Test_Series_Downsample(test *testing.T) {
 	type sampleTest struct {
 		Sample int
-		Result []Value
+		Series []Plot
 	}
 
-	equalFunc := func(a, b []Value) bool {
+	equalFunc := func(a, b []Plot) bool {
 		if len(a) != len(b) {
 			return false
 		}
 
 		for i := range a {
-			if a[i].IsNaN() && !b[i].IsNaN() || !a[i].IsNaN() && a[i] != b[i] {
+			if a[i].Value.IsNaN() && !b[i].Value.IsNaN() || !a[i].Value.IsNaN() && a[i].Value != b[i].Value {
 				return false
 			}
 		}
@@ -39,24 +39,28 @@ func Test_Result_Downsample(test *testing.T) {
 	}
 
 	for _, entry := range []sampleTest{
-		sampleTest{5, []Value{65.4, 79.6, 83.4, 73.6, 82.8}},
-		sampleTest{15, []Value{61, 83.5, 49.5, 68, 91, 74, 76.5, 88, 88, 85, 66.5, 75, 79.5, 94.5, 66}},
-		sampleTest{30, plotResult.Plots},
-		sampleTest{60, plotResult.Plots},
+		sampleTest{5, []Plot{{Value: 65.4}, {Value: 79.6}, {Value: 83.4}, {Value: 73.6}, {Value: 82.8}}},
+		sampleTest{15, []Plot{
+			{Value: 61}, {Value: 83.5}, {Value: 49.5}, {Value: 68}, {Value: 91},
+			{Value: 74}, {Value: 76.5}, {Value: 88}, {Value: 88}, {Value: 85},
+			{Value: 66.5}, {Value: 75}, {Value: 79.5}, {Value: 94.5}, {Value: 66}},
+		},
+		sampleTest{30, plotSeries.Plots},
+		sampleTest{60, plotSeries.Plots},
 	} {
-		result := Result{}
-		utils.Clone(&plotResult, &result)
+		series := Series{}
+		utils.Clone(&plotSeries, &series)
 
-		result.Downsample(entry.Sample)
+		series.Downsample(entry.Sample)
 
-		if !equalFunc(entry.Result, result.Plots) {
-			test.Logf("\nExpected %#v\nbut got  %#v", entry.Result, result.Plots)
+		if !equalFunc(entry.Series, series.Plots) {
+			test.Logf("\nExpected %#v\nbut got  %#v", entry.Series, series.Plots)
 			test.Fail()
 		}
 	}
 }
 
-func Test_Result_Summarize(test *testing.T) {
+func Test_Series_Summarize(test *testing.T) {
 	var (
 		minExpectedValue, maxExpectedValue, avgExpectedValue, lastExpectedValue Value
 		pct20thExpectedValue, pct50thExpectedValue, pct90thExpectedValue        Value
@@ -70,40 +74,40 @@ func Test_Result_Summarize(test *testing.T) {
 	pct50thExpectedValue = 77.0
 	pct90thExpectedValue = 98.4
 
-	plotResult.Summarize([]float64{20.0, 50.0, 90.0})
+	plotSeries.Summarize([]float64{20.0, 50.0, 90.0})
 
-	if plotResult.Summary["min"] != minExpectedValue {
-		test.Logf("\nExpected min=%g\nbut got %g", minExpectedValue, plotResult.Summary["min"])
+	if plotSeries.Summary["min"] != minExpectedValue {
+		test.Logf("\nExpected min=%g\nbut got %g", minExpectedValue, plotSeries.Summary["min"])
 		test.Fail()
 	}
 
-	if plotResult.Summary["max"] != maxExpectedValue {
-		test.Logf("\nExpected max=%g\nbut got %g", maxExpectedValue, plotResult.Summary["max"])
+	if plotSeries.Summary["max"] != maxExpectedValue {
+		test.Logf("\nExpected max=%g\nbut got %g", maxExpectedValue, plotSeries.Summary["max"])
 		test.Fail()
 	}
 
-	if plotResult.Summary["avg"] != avgExpectedValue {
-		test.Logf("\nExpected avg=%g\nbut got %g", avgExpectedValue, plotResult.Summary["avg"])
+	if plotSeries.Summary["avg"] != avgExpectedValue {
+		test.Logf("\nExpected avg=%g\nbut got %g", avgExpectedValue, plotSeries.Summary["avg"])
 		test.Fail()
 	}
 
-	if !plotResult.Summary["last"].IsNaN() {
-		test.Logf("\nExpected last=%g\nbut got %g", lastExpectedValue, plotResult.Summary["last"])
+	if !plotSeries.Summary["last"].IsNaN() {
+		test.Logf("\nExpected last=%g\nbut got %g", lastExpectedValue, plotSeries.Summary["last"])
 		test.Fail()
 	}
 
-	if plotResult.Summary["20th"] != pct20thExpectedValue {
-		test.Logf("\nExpected 20th=%g\nbut got %g", pct20thExpectedValue, plotResult.Summary["20th"])
+	if plotSeries.Summary["20th"] != pct20thExpectedValue {
+		test.Logf("\nExpected 20th=%g\nbut got %g", pct20thExpectedValue, plotSeries.Summary["20th"])
 		test.Fail()
 	}
 
-	if plotResult.Summary["50th"] != pct50thExpectedValue {
-		test.Logf("\nExpected 50th=%g\nbut got %g", pct50thExpectedValue, plotResult.Summary["50th"])
+	if plotSeries.Summary["50th"] != pct50thExpectedValue {
+		test.Logf("\nExpected 50th=%g\nbut got %g", pct50thExpectedValue, plotSeries.Summary["50th"])
 		test.Fail()
 	}
 
-	if plotResult.Summary["90th"] != pct90thExpectedValue {
-		test.Logf("\nExpected 90th=%g\nbut got %g", pct90thExpectedValue, plotResult.Summary["90th"])
+	if plotSeries.Summary["90th"] != pct90thExpectedValue {
+		test.Logf("\nExpected 90th=%g\nbut got %g", pct90thExpectedValue, plotSeries.Summary["90th"])
 		test.Fail()
 	}
 }

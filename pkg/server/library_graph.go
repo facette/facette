@@ -185,7 +185,7 @@ func (server *Server) serveGraphList(writer http.ResponseWriter, request *http.R
 
 func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.Request) {
 	var (
-		data               [][]*plot.Result
+		graphPlotSeries    [][]*plot.Series
 		err                error
 		graph              *library.Graph
 		item               interface{}
@@ -200,7 +200,7 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 		return
 	}
 
-	// Parse input JSON for graph data
+	// Parse input JSON for graph series
 	body, _ := ioutil.ReadAll(request.Body)
 
 	plotReq := PlotRequest{}
@@ -267,7 +267,7 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 		return
 	}
 
-	// Get plots data
+	// Get graph plots series
 	groupOptions := make(map[string]map[string]interface{})
 
 	for _, groupItem := range graph.Groups {
@@ -279,28 +279,28 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 				logger.Log(logger.LevelError, "server", "%s", err)
 			}
 
-			data = append(data, nil)
+			graphPlotSeries = append(graphPlotSeries, nil)
 			continue
 		}
 
-		plotResults, err := providerConnector.GetPlots(&plot.Query{query, startTime, endTime, plotReq.Sample})
+		plotSeries, err := providerConnector.GetPlots(&plot.Query{query, startTime, endTime, plotReq.Sample})
 		if err != nil {
 			logger.Log(logger.LevelError, "server", "%s", err)
 		}
 
-		if len(plotResults) > 1 {
-			for index, entry := range plotResults {
+		if len(plotSeries) > 1 {
+			for index, entry := range plotSeries {
 				entry.Name = fmt.Sprintf("%s (%s)", groupItem.Name, query.Series[index].Metric.Name)
 				entry.Summarize(plotReq.Percentiles)
 				entry.Downsample(plotReq.Sample)
 			}
-		} else if len(plotResults) == 1 {
-			plotResults[0].Name = groupItem.Name
-			plotResults[0].Summarize(plotReq.Percentiles)
-			plotResults[0].Downsample(plotReq.Sample)
+		} else if len(plotSeries) == 1 {
+			plotSeries[0].Name = groupItem.Name
+			plotSeries[0].Summarize(plotReq.Percentiles)
+			plotSeries[0].Downsample(plotReq.Sample)
 		}
 
-		data = append(data, plotResults)
+		graphPlotSeries = append(graphPlotSeries, plotSeries)
 	}
 
 	response := &PlotResponse{
@@ -317,7 +317,7 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 		Modified:    graph.Modified,
 	}
 
-	if len(data) == 0 {
+	if len(graphPlotSeries) == 0 {
 		server.serveResponse(writer, serverResponse{mesgEmptyData}, http.StatusOK)
 		return
 	}
@@ -325,11 +325,11 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 	plotMax := 0
 
 	for _, groupItem := range graph.Groups {
-		var plotResult []*plot.Result
+		var series []*plot.Series
 
-		plotResult, data = data[0], data[1:]
+		series, graphPlotSeries = graphPlotSeries[0], graphPlotSeries[1:]
 
-		for _, serieResult := range plotResult {
+		for _, serieResult := range series {
 			if len(serieResult.Plots) > plotMax {
 				plotMax = len(serieResult.Plots)
 			}

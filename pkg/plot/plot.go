@@ -108,27 +108,29 @@ func (queryMetric *QueryMetric) String() string {
 	)
 }
 
-// Result represents the result of a plot request.
-type Result struct {
+// Series represents a series of plots.
+type Series struct {
 	Name    string
-	Plots   []Value
+	Plots   []Plot
 	Summary map[string]Value
 }
 
-// Downsample applies a sampling function on Result plots, reducing the number of points.
-func (result *Result) Downsample(sample int) {
-	if sample >= len(result.Plots) {
+// Downsample applies a sampling function on a series of plots, reducing the number of points.
+func (series *Series) Downsample(sample int) {
+	var nPlots = len(series.Plots)
+
+	if sample >= len(series.Plots) {
 		return
 	}
 
-	plots := result.Plots[:]
-	result.Plots = make([]Value, 0)
+	plots := series.Plots[:]
+	series.Plots = make([]Plot, 0)
 
-	pad := len(plots) / sample
+	pad := nPlots / sample
 
 	refinePad := 0
-	if len(plots)%sample > 0 {
-		refinePad = len(plots) / (len(plots) % sample)
+	if nPlots%sample > 0 {
+		refinePad = nPlots / (nPlots % sample)
 	}
 
 	padCount := 0
@@ -136,14 +138,14 @@ func (result *Result) Downsample(sample int) {
 	bucket := 0.0
 	bucketCount := 0.0
 
-	for i := 0; i < len(plots); i++ {
+	for i := 0; i < nPlots; i++ {
 		// Refine sampling by appending one more plot at regular interval (pad + 1)
 		if refinePad == 0 || (i+1)%refinePad != 0 {
 			padCount++
 		}
 
-		if !plots[i].IsNaN() {
-			bucket += float64(plots[i])
+		if !plots[i].Value.IsNaN() {
+			bucket += float64(plots[i].Value)
 			bucketCount++
 		}
 
@@ -151,11 +153,11 @@ func (result *Result) Downsample(sample int) {
 			padCount = 0
 
 			if bucketCount == 0 {
-				result.Plots = append(result.Plots, Value(math.NaN()))
+				series.Plots = append(series.Plots, Plot{Value: Value(math.NaN()), Time: plots[nPlots-1].Time})
 				continue
 			}
 
-			result.Plots = append(result.Plots, Value(bucket/bucketCount))
+			series.Plots = append(series.Plots, Plot{Value: Value(bucket / bucketCount), Time: plots[nPlots-1].Time})
 
 			bucket = 0
 			bucketCount = 0
@@ -163,55 +165,55 @@ func (result *Result) Downsample(sample int) {
 	}
 
 	if bucketCount > 0 {
-		result.Plots = append(result.Plots, Value(bucket/bucketCount))
+		series.Plots = append(series.Plots, Plot{Value: Value(bucket / bucketCount), Time: plots[nPlots-1].Time})
 	}
 }
 
-// Summarize calculates the min/max/average/last and percentile values of a Result plots, and stores the results
+// Summarize calculates the min/max/average/last and percentile values of a series of plots, and stores the results
 // into the Summary map.
-func (result Result) Summarize(percentiles []float64) {
+func (series Series) Summarize(percentiles []float64) {
 	var (
 		min, max, total Value
 		nValidPlots     int64
-		nPlots          = len(result.Plots)
+		nPlots          = len(series.Plots)
 	)
 
 	if nPlots > 0 {
-		min = result.Plots[0]
-		result.Summary["last"] = result.Plots[nPlots-1]
+		min = series.Plots[0].Value
+		series.Summary["last"] = series.Plots[nPlots-1].Value
 	}
 
-	for i := range result.Plots {
-		if !result.Plots[i].IsNaN() && result.Plots[i] < min || min.IsNaN() {
-			min = result.Plots[i]
+	for i := range series.Plots {
+		if !series.Plots[i].Value.IsNaN() && series.Plots[i].Value < min || min.IsNaN() {
+			min = series.Plots[i].Value
 		}
 
-		if result.Plots[i] > max {
-			max = result.Plots[i]
+		if series.Plots[i].Value > max {
+			max = series.Plots[i].Value
 		}
 
-		if !result.Plots[i].IsNaN() {
-			total += result.Plots[i]
+		if !series.Plots[i].Value.IsNaN() {
+			total += series.Plots[i].Value
 			nValidPlots++
 		}
 	}
 
-	result.Summary["min"] = min
-	result.Summary["max"] = max
-	result.Summary["avg"] = total / Value(nValidPlots)
+	series.Summary["min"] = min
+	series.Summary["max"] = max
+	series.Summary["avg"] = total / Value(nValidPlots)
 
 	if len(percentiles) > 0 {
-		result.Percentiles(percentiles)
+		series.Percentiles(percentiles)
 	}
 }
 
-// Percentiles calculates the percentile values of a Result plots
-func (result Result) Percentiles(percentiles []float64) {
+// Percentiles calculates the percentile values of a series of plots.
+func (series Series) Percentiles(percentiles []float64) {
 	var set []float64
 
-	for i := range result.Plots {
-		if !result.Plots[i].IsNaN() {
-			set = append(set, float64(result.Plots[i]))
+	for i := range series.Plots {
+		if !series.Plots[i].Value.IsNaN() {
+			set = append(set, float64(series.Plots[i].Value))
 		}
 	}
 
@@ -234,13 +236,13 @@ func (result Result) Percentiles(percentiles []float64) {
 		rankFrac := rank - float64(rankInt)
 
 		if rank <= 0.0 {
-			result.Summary[percentileString] = Value(set[0])
+			series.Summary[percentileString] = Value(set[0])
 			continue
 		} else if rank-1.0 >= float64(setSize) {
-			result.Summary[percentileString] = Value(set[setSize-1])
+			series.Summary[percentileString] = Value(set[setSize-1])
 			continue
 		}
 
-		result.Summary[percentileString] = Value(set[rankInt-1] + rankFrac*(set[rankInt]-set[rankInt-1]))
+		series.Summary[percentileString] = Value(set[rankInt-1] + rankFrac*(set[rankInt]-set[rankInt-1]))
 	}
 }
