@@ -185,7 +185,7 @@ func (server *Server) serveGraphList(writer http.ResponseWriter, request *http.R
 
 func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.Request) {
 	var (
-		graphPlotSeries    [][]*plot.Series
+		graphPlotSeries    [][]plot.Series
 		err                error
 		graph              *library.Graph
 		item               interface{}
@@ -325,7 +325,7 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 	plotMax := 0
 
 	for _, groupItem := range graph.Groups {
-		var series []*plot.Series
+		var series []plot.Series
 
 		series, graphPlotSeries = graphPlotSeries[0], graphPlotSeries[1:]
 

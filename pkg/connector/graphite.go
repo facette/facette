@@ -65,10 +65,10 @@ func init() {
 }
 
 // GetPlots retrieves time series data from provider based on a query and a time interval.
-func (connector *GraphiteConnector) GetPlots(query *plot.Query) ([]*plot.Series, error) {
+func (connector *GraphiteConnector) GetPlots(query *plot.Query) ([]plot.Series, error) {
 	var (
 		graphitePlots []graphitePlot
-		resultSeries  []*plot.Series
+		resultSeries  []plot.Series
 	)
 
 	if len(query.Group.Series) == 0 {
@@ -272,11 +272,11 @@ func graphiteBuildQueryURL(queryGroup *plot.QueryGroup, startTime, endTime time.
 	return queryURL, nil
 }
 
-func graphiteExtractResult(graphitePlots []graphitePlot) ([]*plot.Series, error) {
-	var resultSeries []*plot.Series
+func graphiteExtractResult(graphitePlots []graphitePlot) ([]plot.Series, error) {
+	var resultSeries []plot.Series
 
 	for _, graphitePlot := range graphitePlots {
-		series := &plot.Series{Summary: make(map[string]plot.Value)}
+		series := plot.Series{Summary: make(map[string]plot.Value)}
 
 		for _, plotPoint := range graphitePlot.Datapoints {
 			series.Plots = append(

@@ -57,9 +57,9 @@ func init() {
 }
 
 // GetPlots retrieves time series data from origin based on a query and a time interval.
-func (connector *RRDConnector) GetPlots(query *plot.Query) ([]*plot.Series, error) {
+func (connector *RRDConnector) GetPlots(query *plot.Query) ([]plot.Series, error) {
 	var (
-		resultSeries []*plot.Series
+		resultSeries []plot.Series
 		stack        []string
 		xport        *rrd.Exporter
 	)
@@ -226,7 +226,7 @@ func (connector *RRDConnector) GetPlots(query *plot.Query) ([]*plot.Series, erro
 	}
 
 	for index, itemName := range data.Legends {
-		series := &plot.Series{
+		series := plot.Series{
 			Name:    itemName,
 			Summary: make(map[string]plot.Value),
 		}

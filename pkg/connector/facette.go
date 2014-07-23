@@ -81,8 +81,8 @@ func init() {
 }
 
 // GetPlots retrieves time series data from origin based on a query and a time interval.
-func (connector *FacetteConnector) GetPlots(query *plot.Query) ([]*plot.Series, error) {
-	var resultSeries []*plot.Series
+func (connector *FacetteConnector) GetPlots(query *plot.Query) ([]plot.Series, error) {
+	var resultSeries []plot.Series
 
 	// Convert plotQuery into plotRequest-like to forward query to upstream Facette API
 	plotRequest := facettePlotRequest{
@@ -167,7 +167,7 @@ func (connector *FacetteConnector) GetPlots(query *plot.Query) ([]*plot.Series, 
 	}
 
 	for _, serie := range plotResponse.Series {
-		resultSeries = append(resultSeries, &plot.Series{
+		resultSeries = append(resultSeries, plot.Series{
 			Plots:   serie.Plots,
 			Summary: serie.Summary,
 		})
