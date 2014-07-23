@@ -48,7 +48,7 @@ UGLIFYSCRIPT_ARGS = --comments --compress --mangle --screw-ie8
 NPM_UGLIFYJS = uglify-js
 
 JSHINT ?= jshint
-JSHINT_ARGS = --show-non-errors
+JSHINT_ARGS =
 NPM_JSHINT = jshint
 
 LESSC ?= lessc
