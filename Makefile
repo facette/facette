@@ -241,6 +241,8 @@ TMPL_SRC = $(wildcard cmd/facette/template/*/*.html) \
 	$(wildcard cmd/facette/template/*.html) \
 	$(wildcard cmd/facette/template/*.xml)
 
+TMPL_OUTPUT = $(BUILD_DIR)/template
+
 $(SCRIPT_OUTPUT): uglifyjs $(SCRIPT_SRC)
 	@$(call mesg_start,static,Merging script files into $(notdir $(SCRIPT_OUTPUT:.js=.src.js))...)
 	@install -d -m 0755 $(BUILD_DIR)/static && cat $(SCRIPT_SRC) >$(SCRIPT_OUTPUT:.js=.src.js) && \
@@ -281,29 +283,33 @@ $(STYLE_EXTRA_OUTPUT): $(STYLE_EXTRA)
 	@cp -r $(STYLE_EXTRA) $(BUILD_DIR)/static/ && \
 		$(call mesg_ok) || $(call mesg_fail)
 
-clean-static:
-	@$(call mesg_start,clean,Cleaning static files...)
-	@rm -rf $(BUILD_DIR)/static && \
-		$(call mesg_ok) || $(call mesg_fail)
-
-build-static: $(SCRIPT_OUTPUT) $(SCRIPT_EXTRA_OUTPUT) $(MESG_OUTPUT) $(STYLE_OUTPUT) $(STYLE_PRINT_OUTPUT) \
-	$(STYLE_EXTRA_OUTPUT)
-
-.PHONY: install-static
-install-static: build-static $(TMPL_SRC)
+$(TMPL_OUTPUT): $(TMPL_SRC)
 ifeq ($(UNAME), Darwin)
 	$(eval COPY_CMD=rsync -rR)
 else
 	$(eval COPY_CMD=cp -r --parents)
 endif
+	@$(call mesg_start,build,Copying template files...)
+	@install -d -m 0755 $(BUILD_DIR)/template && \
+		(cd cmd/facette/template; $(COPY_CMD) $(TMPL_SRC:cmd/facette/template/%=%) ../../../$(TMPL_OUTPUT)) && \
+		$(call mesg_ok) || $(call mesg_fail)
+
+clean-static:
+	@$(call mesg_start,clean,Cleaning static files...)
+	@rm -rf $(BUILD_DIR)/static $(BUILD_DIR)/template && \
+		$(call mesg_ok) || $(call mesg_fail)
+
+build-static: $(SCRIPT_OUTPUT) $(SCRIPT_EXTRA_OUTPUT) $(MESG_OUTPUT) $(STYLE_OUTPUT) $(STYLE_PRINT_OUTPUT) \
+	$(STYLE_EXTRA_OUTPUT) $(TMPL_OUTPUT)
+
+.PHONY: install-static
+install-static: build-static $(TMPL_SRC)
 	@$(call mesg_start,install,Installing static files...)
 	@install -d -m 0755 $(PREFIX)/share/facette/static && cp -Rp $(SCRIPT_OUTPUT) $(SCRIPT_EXTRA_OUTPUT) \
 		$(MESG_OUTPUT) $(STYLE_OUTPUT) $(STYLE_PRINT_OUTPUT) $(STYLE_EXTRA_OUTPUT) $(PREFIX)/share/facette/static && \
 		$(call mesg_ok) || $(call mesg_fail)
 	@$(call mesg_start,install,Installing template files...)
-	@install -d -m 0755 $(PREFIX)/share/facette/template && \
-		(cd cmd/facette/template; $(COPY_CMD) $(TMPL_SRC:cmd/facette/template/%=%) \
-			$(PREFIX)/share/facette/template) && \
+	@cp -Rp $(TMPL_OUTPUT) $(PREFIX)/share/facette && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 .PHONY: devel-static
@@ -358,18 +364,20 @@ test-server: $(TEST_DIR) build-bin
 
 # Distribution
 DIST_DIR = dist
+DIST_BUILD_DIR = $(DIST_DIR)/$(BUILD_NAME)
 
 clean-dist:
 	@$(call mesg_start,clean,Cleaning distribution files...)
-	@rm -rf $(BUILD_DIR)/dist && \
+	@rm -rf $(DIST_DIR)/facette-* && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 .PHONY: dist
 dist:
-	$(eval PREFIX=$(realpath $(DIST_DIR)/$(BUILD_NAME)))
-	@$(MAKE) PREFIX=$(PREFIX) --no-print-directory install
+	@$(call mesg_start,dist,Creating distribution disrectory...)
+	@install -d -m 0755 $(DIST_DIR)/$(BUILD_NAME) && \
+		$(call mesg_ok) || $(call mesg_fail)
+	@$(MAKE) PREFIX=$(DIST_DIR)/$(BUILD_NAME) --no-print-directory install
 	@$(call mesg_start,dist,Build distribution tarball...)
 	@install -d -m 0755 $(DIST_DIR) && \
-		$(TAR) -C $(dir $(PREFIX)) -czf $(DIST_DIR)/$(BUILD_NAME:facette-%=facette-$(VERSION)-%).tar.gz \
-			$(notdir $(PREFIX)) && \
+		$(TAR) -C $(DIST_DIR) -czf $(DIST_DIR)/$(BUILD_NAME:facette-%=facette-$(VERSION)-%).tar.gz $(BUILD_NAME) && \
 		$(call mesg_ok) || $(call mesg_fail)
