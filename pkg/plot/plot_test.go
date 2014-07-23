@@ -1,6 +1,7 @@
 package plot
 
 import (
+	"fmt"
 	"math"
 	"testing"
 
@@ -9,11 +10,11 @@ import (
 
 var plotSeries = Series{
 	Plots: []Plot{
-		{Value: Value(math.NaN())}, {Value: 61.0}, {Value: 69.0}, {Value: 98.0}, {Value: 56.0}, {Value: 43.0},
-		{Value: 68.0}, {Value: Value(math.NaN())}, {Value: 87.0}, {Value: 95.0}, {Value: 69.0}, {Value: 79.0},
-		{Value: 99.0}, {Value: 54.0}, {Value: 88.0}, {Value: Value(math.NaN())}, {Value: 99.0}, {Value: 77.0},
-		{Value: 85.0}, {Value: Value(math.NaN())}, {Value: 62.0}, {Value: 71.0}, {Value: 78.0}, {Value: 72.0},
-		{Value: 89.0}, {Value: 70.0}, {Value: 96.0}, {Value: 93.0}, {Value: 66.0}, {Value: Value(math.NaN())},
+		{Value: Value(math.NaN())}, {Value: 61}, {Value: 69}, {Value: 98}, {Value: 56}, {Value: 43},
+		{Value: 68}, {Value: Value(math.NaN())}, {Value: 87}, {Value: 95}, {Value: 69}, {Value: 79},
+		{Value: 99}, {Value: 54}, {Value: 88}, {Value: Value(math.NaN())}, {Value: 99}, {Value: 77},
+		{Value: 85}, {Value: Value(math.NaN())}, {Value: 62}, {Value: 71}, {Value: 78}, {Value: 72},
+		{Value: 89}, {Value: 70}, {Value: 96}, {Value: 93}, {Value: 66}, {Value: Value(math.NaN())},
 	},
 	Summary: make(map[string]Value),
 }
@@ -66,15 +67,15 @@ func Test_Series_Summarize(test *testing.T) {
 		pct20thExpectedValue, pct50thExpectedValue, pct90thExpectedValue        Value
 	)
 
-	minExpectedValue = 43.0
-	maxExpectedValue = 99.0
+	minExpectedValue = 43
+	maxExpectedValue = 99
 	avgExpectedValue = 76.96
 	lastExpectedValue = Value(math.NaN())
 	pct20thExpectedValue = 62.8
-	pct50thExpectedValue = 77.0
+	pct50thExpectedValue = 77
 	pct90thExpectedValue = 98.4
 
-	plotSeries.Summarize([]float64{20.0, 50.0, 90.0})
+	plotSeries.Summarize([]float64{20, 50, 90})
 
 	if plotSeries.Summary["min"] != minExpectedValue {
 		test.Logf("\nExpected min=%g\nbut got %g", minExpectedValue, plotSeries.Summary["min"])
@@ -110,4 +111,85 @@ func Test_Series_Summarize(test *testing.T) {
 		test.Logf("\nExpected 90th=%g\nbut got %g", pct90thExpectedValue, plotSeries.Summary["90th"])
 		test.Fail()
 	}
+}
+
+func Test_SumSeries(test *testing.T) {
+	var (
+		// Valid series
+		testFull = []Series{
+			{Plots: []Plot{{Value: 61}, {Value: 69}, {Value: 98}, {Value: 56}, {Value: 43}}},
+			{Plots: []Plot{{Value: 68}, {Value: 87}, {Value: 95}, {Value: 69}, {Value: 79}}},
+			{Plots: []Plot{{Value: 99}, {Value: 54}, {Value: 88}, {Value: 99}, {Value: 77}}},
+			{Plots: []Plot{{Value: 85}, {Value: 62}, {Value: 71}, {Value: 78}, {Value: 72}}},
+			{Plots: []Plot{{Value: 89}, {Value: 70}, {Value: 96}, {Value: 93}, {Value: 66}}},
+		}
+
+		expectedFull = Series{
+			Plots: []Plot{{Value: 402}, {Value: 342}, {Value: 448}, {Value: 395}, {Value: 337}},
+		}
+
+		// Valid series featuring NaN plot values
+		testNaN = []Series{
+			{Plots: []Plot{
+				{Value: 61}, {Value: 69}, {Value: 98}, {Value: 56}, {Value: 43}},
+			},
+			{Plots: []Plot{
+				{Value: Value(math.NaN())}, {Value: 62}, {Value: 71}, {Value: 78}, {Value: 72}},
+			},
+			{Plots: []Plot{
+				{Value: 89}, {Value: 70}, {Value: Value(math.NaN())}, {Value: 93}, {Value: 66}},
+			},
+		}
+
+		expectedNaN = Series{
+			Plots: []Plot{{Value: 150}, {Value: 201}, {Value: 169}, {Value: 227}, {Value: 181}},
+		}
+
+		// Invalid series: not normalized
+		testNotNormalized = []Series{
+			Series{Plots: []Plot{{Value: 85}, {Value: 62}, {Value: 71}, {Value: 78}, {Value: 72}}},
+			Series{Plots: []Plot{{Value: 70}, {Value: 96}, {Value: 93}, {Value: 66}}},
+		}
+	)
+
+	sumFull, err := SumSeries(testFull)
+	if err != nil {
+		test.Logf("SumSeries(testFull) returned an error: %s", err)
+		test.Fail()
+	}
+
+	if err = compareSeries(expectedFull, sumFull); err != nil {
+		test.Logf(fmt.Sprintf("SumSeries(testFull): %s", err))
+		test.Fail()
+		return
+	}
+
+	sumNaN, err := SumSeries(testNaN)
+	if err != nil {
+		test.Logf("SumSeries(testNaN) returned an error: %s", err)
+		test.Fail()
+	}
+
+	if err = compareSeries(expectedNaN, sumNaN); err != nil {
+		test.Logf(fmt.Sprintf("SumSeries(testNaN): %s", err))
+		test.Fail()
+		return
+	}
+
+	_, err = SumSeries(testNotNormalized)
+	if err == nil {
+		test.Logf("SumSeries(testNotNormalized) did not return an error")
+		test.Fail()
+		return
+	}
+}
+
+func compareSeries(expected, actual Series) error {
+	for i := range expected.Plots {
+		if expected.Plots[i] != actual.Plots[i] {
+			return fmt.Errorf("\nExpected %v\nbut got %v", expected.Plots, actual.Plots)
+		}
+	}
+
+	return nil
 }

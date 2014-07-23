@@ -246,3 +246,35 @@ func (series Series) Percentiles(percentiles []float64) {
 		series.Summary[percentileString] = Value(set[rankInt-1] + rankFrac*(set[rankInt]-set[rankInt-1]))
 	}
 }
+
+// SumSeries add series plots together and return the sum at each datapoint.
+func SumSeries(series []Series) (Series, error) {
+	nSeries := len(series)
+	if nSeries == 0 {
+		return Series{}, fmt.Errorf("no series provided")
+	}
+
+	// Check if series are normalized (= have the same number of plots)
+	plotsPerSeries := len(series[0].Plots)
+	for i := range series {
+		if len(series[i].Plots) != plotsPerSeries {
+			return Series{}, fmt.Errorf("series are not normalized")
+		}
+
+		plotsPerSeries = len(series[0].Plots)
+	}
+
+	sum := Series{Plots: make([]Plot, plotsPerSeries)}
+
+	for i := 0; i < plotsPerSeries; i++ {
+		for _, serie := range series {
+			if !serie.Plots[i].Value.IsNaN() {
+				sum.Plots[i].Value += serie.Plots[i].Value
+			}
+
+			sum.Plots[i].Time = series[0].Plots[i].Time
+		}
+	}
+
+	return sum, nil
+}
