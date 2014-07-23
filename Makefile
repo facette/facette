@@ -71,7 +71,7 @@ jshint:
 		$(call npm_install,$(NPM_JSHINT)); \
 	fi
 
-clean: clean-bin clean-doc clean-static clean-test
+clean: clean-bin clean-doc clean-static clean-test clean-dist
 	@$(call mesg_start,clean,Cleaning source symlink...)
 	@rm -rf $(BUILD_DIR)/src && \
 		$(call mesg_ok) || $(call mesg_fail)
@@ -79,9 +79,9 @@ clean: clean-bin clean-doc clean-static clean-test
 	@(test ! -d $(BUILD_DIR) || rmdir $(BUILD_DIR)) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
-.PHONY: build
 build: build-bin build-doc build-static
 
+.PHONY: install
 install: install-bin install-doc install-static
 
 devel: install devel-static
@@ -118,6 +118,7 @@ clean-bin:
 
 build-bin: $(BIN_OUTPUT)
 
+.PHONY: install-bin
 install-bin: build-bin
 	@$(call mesg_start,install,Installing binaries...)
 	@install -d -m 0755 $(PREFIX)/bin && cp $(BIN_OUTPUT) $(PREFIX)/bin && \
@@ -144,6 +145,7 @@ clean-doc:
 
 build-doc: $(MAN_OUTPUT)
 
+.PHONY: install-doc
 install-doc: build-doc
 	@$(call mesg_start,install,Installing manuals files...)
 	@install -d -m 0755 $(PREFIX)/share && cp -Rp $(BUILD_DIR)/man $(PREFIX)/share && \
@@ -287,11 +289,12 @@ clean-static:
 build-static: $(SCRIPT_OUTPUT) $(SCRIPT_EXTRA_OUTPUT) $(MESG_OUTPUT) $(STYLE_OUTPUT) $(STYLE_PRINT_OUTPUT) \
 	$(STYLE_EXTRA_OUTPUT)
 
+.PHONY: install-static
 install-static: build-static $(TMPL_SRC)
 ifeq ($(UNAME), Darwin)
-	$(eval COPY_CMD = rsync -rR)
+	$(eval COPY_CMD=rsync -rR)
 else
-	$(eval COPY_CMD = cp -r --parents)
+	$(eval COPY_CMD=cp -r --parents)
 endif
 	@$(call mesg_start,install,Installing static files...)
 	@install -d -m 0755 $(PREFIX)/share/facette/static && cp -Rp $(SCRIPT_OUTPUT) $(SCRIPT_EXTRA_OUTPUT) \
@@ -299,9 +302,11 @@ endif
 		$(call mesg_ok) || $(call mesg_fail)
 	@$(call mesg_start,install,Installing template files...)
 	@install -d -m 0755 $(PREFIX)/share/facette/template && \
-		(cd cmd/facette/template; $(COPY_CMD) $(PREFIX)/share/facette/template) && \
+		(cd cmd/facette/template; $(COPY_CMD) $(TMPL_SRC:cmd/facette/template/%=%) \
+			$(PREFIX)/share/facette/template) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
+.PHONY: devel-static
 devel-static: install-static
 	@$(call mesg_start,install,Installing static development files...)
 	@cp $(SCRIPT_OUTPUT:.js=.src.js) $(PREFIX)/share/facette/static/$(notdir $(SCRIPT_OUTPUT)) && \
@@ -354,7 +359,15 @@ test-server: $(TEST_DIR) build-bin
 # Distribution
 DIST_DIR = dist
 
-dist: install
+clean-dist:
+	@$(call mesg_start,clean,Cleaning distribution files...)
+	@rm -rf $(BUILD_DIR)/dist && \
+		$(call mesg_ok) || $(call mesg_fail)
+
+.PHONY: dist
+dist:
+	$(eval PREFIX=$(realpath $(DIST_DIR)/$(BUILD_NAME)))
+	@$(MAKE) PREFIX=$(PREFIX) --no-print-directory install
 	@$(call mesg_start,dist,Build distribution tarball...)
 	@install -d -m 0755 $(DIST_DIR) && \
 		$(TAR) -C $(dir $(PREFIX)) -czf $(DIST_DIR)/$(BUILD_NAME:facette-%=facette-$(VERSION)-%).tar.gz \
