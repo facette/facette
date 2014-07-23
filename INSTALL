@@ -27,7 +27,7 @@ Run the building command:
    make
    make install
 
-By default Facette will be built in the `tmp` directory and installed in the `build` directory. To change the
+By default Facette will be built in the `build` directory and installed in the `/usr/local` one. To change the
 installation directory set the `PREFIX` variable:
 
    sudo make PREFIX=/path/to/directory install

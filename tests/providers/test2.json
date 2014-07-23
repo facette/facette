@@ -1,7 +1,7 @@
 {
 	"connector": {
 		"type": "rrd",
-		"path": "tests/data",
+		"path": "../../tests/data",
 		"pattern": "(?P<source>[^/]+)/(?P<metric>.+).rrd"
 	},
 	"filters": [

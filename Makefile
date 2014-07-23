@@ -5,20 +5,18 @@ VERSION = 0.2.0dev
 TAGS ?= graphite \
 	rrd
 
+PREFIX ?= /usr/local
+
 UNAME := $(shell uname -s)
-
-TEMP_DIR = tmp
-
-GOPATH = $(realpath $(TEMP_DIR))
-export GOPATH
-
-GO ?= go
-
-BUILD_DIR = build
 
 BUILD_NAME = facette-$(shell $(GO) env GOOS)-$(shell $(GO) env GOARCH)
 
-PREFIX ?= $(BUILD_DIR)/$(BUILD_NAME)
+BUILD_DIR = build/$(BUILD_NAME)
+
+GOPATH = $(realpath $(BUILD_DIR))
+export GOPATH
+
+GO ?= go
 
 mesg_start = echo "$(shell tty -s && tput setaf 4)$(1):$(shell tty -s && tput sgr0) $(2)"
 mesg_step = echo "$(1)"
@@ -57,11 +55,6 @@ NPM_LESSC = less
 
 all: build
 
-clean:
-	@$(call mesg_start,main,Cleaning temporary files...)
-	@rm -rf node_modules $(TEMP_DIR) $(BUILD_DIR)/$(BUILD_NAME) && \
-		$(call mesg_ok) || $(call mesg_fail)
-
 # npm scripts
 lessc:
 	@if [ -z "$(call path_search,$(LESSC))" ]; then \
@@ -78,6 +71,14 @@ jshint:
 		$(call npm_install,$(NPM_JSHINT)); \
 	fi
 
+clean: clean-bin clean-doc clean-static clean-test
+	@$(call mesg_start,clean,Cleaning source symlink...)
+	@rm -rf $(BUILD_DIR)/src && \
+		$(call mesg_ok) || $(call mesg_fail)
+	@$(call mesg_start,clean,Removing build directory...)
+	@(test ! -d $(BUILD_DIR) || rmdir $(BUILD_DIR)) && \
+		$(call mesg_ok) || $(call mesg_fail)
+
 .PHONY: build
 build: build-bin build-doc build-static
 
@@ -89,33 +90,37 @@ lint: lint-bin lint-static
 
 test: test-pkg test-server
 
-$(TEMP_DIR)/src/github.com/facette/facette:
+$(BUILD_DIR)/src/github.com/facette/facette:
 	@$(call mesg_start,main,Creating source symlink...)
-	@mkdir -p $(TEMP_DIR)/src/github.com/facette && \
-		ln -s ../../../.. $(TEMP_DIR)/src/github.com/facette/facette && \
+	@mkdir -p $(BUILD_DIR)/src/github.com/facette && \
+		ln -s ../../../../.. $(BUILD_DIR)/src/github.com/facette/facette && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 # Binaries
 BIN_SRC = $(wildcard cmd/*/*.go)
 
-BIN_OUTPUT = $(addprefix $(TEMP_DIR)/bin/, $(notdir $(wildcard cmd/*)))
+BIN_OUTPUT = $(addprefix $(BUILD_DIR)/bin/, $(notdir $(wildcard cmd/*)))
 
 PKG_SRC = $(wildcard pkg/*/*.go)
 
-$(BIN_OUTPUT): $(PKG_SRC) $(BIN_SRC) $(TEMP_DIR)/src/github.com/facette/facette
+$(BIN_OUTPUT): $(PKG_SRC) $(BIN_SRC) $(BUILD_DIR)/src/github.com/facette/facette
 	@$(call mesg_start,$(notdir $@),Building $(notdir $@)...)
 	@install -d -m 0755 $(dir $@) && $(GO) build \
 			-ldflags "-X main.version $(VERSION)" \
 			-tags "$(TAGS)" \
 			-o $@ cmd/$(notdir $@)/*.go && \
 		$(call mesg_ok) || $(call mesg_fail)
-	@test ! -f cmd/$(notdir $@)/Makefile || make --no-print-directory -C cmd/$(notdir $@) build
+
+clean-bin:
+	@$(call mesg_start,clean,Cleaning binaries...)
+	@rm -rf $(BUILD_DIR)/bin && \
+		$(call mesg_ok) || $(call mesg_fail)
 
 build-bin: $(BIN_OUTPUT)
 
 install-bin: build-bin
 	@$(call mesg_start,install,Installing binaries...)
-	@install -d -m 0755 $(PREFIX)/bin && rm -f $(BIN_OUTPUT:tmp/%=$(PREFIX)/%) && cp $(BIN_OUTPUT) $(PREFIX)/bin && \
+	@install -d -m 0755 $(PREFIX)/bin && cp $(BIN_OUTPUT) $(PREFIX)/bin && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 lint-bin: build-bin
@@ -125,18 +130,23 @@ lint-bin: build-bin
 # Documentation
 MAN_SRC = $(wildcard docs/man/*.[0-9].md)
 
-MAN_OUTPUT = $(addprefix $(TEMP_DIR)/man/, $(notdir $(MAN_SRC:.md=)))
+MAN_OUTPUT = $(addprefix $(BUILD_DIR)/man/, $(notdir $(MAN_SRC:.md=)))
 
 $(MAN_OUTPUT): $(MAN_SRC)
 	@$(call mesg_start,docs,Generating $(notdir $@) manual page...)
 	@install -d -m 0755 $(dir $@) && $(PANDOC) $(PANDOC_ARGS) docs/man/$(notdir $@).md >$@ && \
 		$(call mesg_ok) || $(call mesg_fail)
 
+clean-doc:
+	@$(call mesg_start,clean,Cleaning manuals files...)
+	@rm -rf $(BUILD_DIR)/man && \
+		$(call mesg_ok) || $(call mesg_fail)
+
 build-doc: $(MAN_OUTPUT)
 
 install-doc: build-doc
 	@$(call mesg_start,install,Installing manuals files...)
-	@install -d -m 0755 $(PREFIX)/share && cp -Rp $(TEMP_DIR)/man $(PREFIX)/share && \
+	@install -d -m 0755 $(PREFIX)/share && cp -Rp $(BUILD_DIR)/man $(PREFIX)/share && \
 		$(call mesg_ok) || $(call mesg_fail)
 	@$(call mesg_start,install,Installing examples files...)
 	@install -d -m 0755 $(PREFIX)/share/facette/examples && cp -Rp docs/examples $(PREFIX)/share/facette && \
@@ -178,7 +188,7 @@ SCRIPT_SRC = cmd/facette/js/intro.js \
 	cmd/facette/js/i18n.js \
 	cmd/facette/js/outro.js
 
-SCRIPT_OUTPUT = $(TEMP_DIR)/static/facette.js
+SCRIPT_OUTPUT = $(BUILD_DIR)/static/facette.js
 
 SCRIPT_EXTRA = cmd/facette/js/thirdparty/jquery.js \
 	cmd/facette/js/thirdparty/jquery.datepicker.js \
@@ -189,11 +199,11 @@ SCRIPT_EXTRA = cmd/facette/js/thirdparty/jquery.js \
 	cmd/facette/js/thirdparty/canvg.js \
 	cmd/facette/js/thirdparty/rgbcolor.js
 
-SCRIPT_EXTRA_OUTPUT = $(addprefix $(TEMP_DIR)/static/, $(notdir $(SCRIPT_EXTRA)))
+SCRIPT_EXTRA_OUTPUT = $(addprefix $(BUILD_DIR)/static/, $(notdir $(SCRIPT_EXTRA)))
 
 MESG_SRC = cmd/facette/js/messages.json
 
-MESG_OUTPUT = $(TEMP_DIR)/static/$(notdir $(MESG_SRC))
+MESG_OUTPUT = $(BUILD_DIR)/static/$(notdir $(MESG_SRC))
 
 STYLE_SRC = cmd/facette/style/intro.less \
 	cmd/facette/style/define.less \
@@ -209,13 +219,13 @@ STYLE_SRC = cmd/facette/style/intro.less \
 	cmd/facette/style/admin.less \
 	cmd/facette/style/graph.less
 
-STYLE_OUTPUT = $(TEMP_DIR)/static/style.css
+STYLE_OUTPUT = $(BUILD_DIR)/static/style.css
 
 STYLE_PRINT_SRC = cmd/facette/style/intro.less \
 	cmd/facette/style/define.less \
 	cmd/facette/style/common-print.less
 
-STYLE_PRINT_OUTPUT = $(TEMP_DIR)/static/style.print.css
+STYLE_PRINT_OUTPUT = $(BUILD_DIR)/static/style.print.css
 
 STYLE_EXTRA = cmd/facette/style/extra/favicon.png \
 	cmd/facette/style/extra/fonts \
@@ -223,17 +233,15 @@ STYLE_EXTRA = cmd/facette/style/extra/favicon.png \
 	cmd/facette/style/extra/logo-text.png \
 	cmd/facette/style/extra/logo-text-light.png
 
-STYLE_EXTRA_OUTPUT = $(addprefix $(TEMP_DIR)/static/, $(notdir $(STYLE_EXTRA)))
+STYLE_EXTRA_OUTPUT = $(addprefix $(BUILD_DIR)/static/, $(notdir $(STYLE_EXTRA)))
 
 TMPL_SRC = $(wildcard cmd/facette/template/*/*.html) \
 	$(wildcard cmd/facette/template/*.html) \
 	$(wildcard cmd/facette/template/*.xml)
 
-TMPL_OUTPUT = $(TEMP_DIR)/template
-
 $(SCRIPT_OUTPUT): uglifyjs $(SCRIPT_SRC)
 	@$(call mesg_start,static,Merging script files into $(notdir $(SCRIPT_OUTPUT:.js=.src.js))...)
-	@install -d -m 0755 $(TEMP_DIR)/static && cat $(SCRIPT_SRC) >$(SCRIPT_OUTPUT:.js=.src.js) && \
+	@install -d -m 0755 $(BUILD_DIR)/static && cat $(SCRIPT_SRC) >$(SCRIPT_OUTPUT:.js=.src.js) && \
 		$(call mesg_ok) || $(call mesg_fail)
 	@$(call mesg_start,static,Packing $(notdir $(SCRIPT_OUTPUT:.js=.src.js)) file...)
 	@$(UGLIFYJS) $(UGLIFYSCRIPT_ARGS) --output $(SCRIPT_OUTPUT) $(SCRIPT_OUTPUT:.js=.src.js) && \
@@ -241,18 +249,18 @@ $(SCRIPT_OUTPUT): uglifyjs $(SCRIPT_SRC)
 
 $(SCRIPT_EXTRA_OUTPUT): $(SCRIPT_EXTRA)
 	@$(call mesg_start,static,Copying third-party files...)
-	@cp -r $(SCRIPT_EXTRA) $(TEMP_DIR)/static/ && \
+	@cp -r $(SCRIPT_EXTRA) $(BUILD_DIR)/static/ && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 $(MESG_OUTPUT): $(MESG_SRC)
 	@$(call mesg_start,static,Packing $(MESG_SRC) file...)
-	@install -d -m 0755 $(TEMP_DIR)/static && \
+	@install -d -m 0755 $(BUILD_DIR)/static && \
 		sed -e 's/^\s\+//g;s/\s\+$$//g' $(MESG_SRC) | sed -e ':a;N;s/\n//;ta' >$(MESG_OUTPUT) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 $(STYLE_OUTPUT): lessc $(STYLE_SRC)
 	@$(call mesg_start,static,Merging style files into $(notdir $(STYLE_OUTPUT:.css=.src.css))...)
-	@install -d -m 0755 $(TEMP_DIR)/static && cat $(STYLE_SRC) >$(STYLE_OUTPUT:.css=.src.css) && \
+	@install -d -m 0755 $(BUILD_DIR)/static && cat $(STYLE_SRC) >$(STYLE_OUTPUT:.css=.src.css) && \
 		$(call mesg_ok) || $(call mesg_fail)
 	@$(call mesg_start,static,Packing $(notdir $(STYLE_OUTPUT:.css=.src.css)) file...)
 	@$(LESSC) $(LESSC_ARGS) --yui-compress $(STYLE_OUTPUT:.css=.src.css) >$(STYLE_OUTPUT) && \
@@ -260,7 +268,7 @@ $(STYLE_OUTPUT): lessc $(STYLE_SRC)
 
 $(STYLE_PRINT_OUTPUT): lessc $(STYLE_PRINT_SRC)
 	@$(call mesg_start,static,Merging style files into $(notdir $(STYLE_PRINT_OUTPUT:.css=.src.css))...)
-	@install -d -m 0755 $(TEMP_DIR)/static && cat $(STYLE_PRINT_SRC) >$(STYLE_PRINT_OUTPUT:.css=.src.css) && \
+	@install -d -m 0755 $(BUILD_DIR)/static && cat $(STYLE_PRINT_SRC) >$(STYLE_PRINT_OUTPUT:.css=.src.css) && \
 		$(call mesg_ok) || $(call mesg_fail)
 	@$(call mesg_start,static,Packing $(notdir $(STYLE_PRINT_OUTPUT:.css=.src.css)) file...)
 	@$(LESSC) $(LESSC_ARGS) --yui-compress $(STYLE_PRINT_OUTPUT:.css=.src.css) >$(STYLE_PRINT_OUTPUT) && \
@@ -268,30 +276,30 @@ $(STYLE_PRINT_OUTPUT): lessc $(STYLE_PRINT_SRC)
 
 $(STYLE_EXTRA_OUTPUT): $(STYLE_EXTRA)
 	@$(call mesg_start,static,Copying extra files...)
-	@cp -r $(STYLE_EXTRA) $(TEMP_DIR)/static/ && \
+	@cp -r $(STYLE_EXTRA) $(BUILD_DIR)/static/ && \
 		$(call mesg_ok) || $(call mesg_fail)
 
-$(TMPL_OUTPUT): $(TMPL_SRC)
+clean-static:
+	@$(call mesg_start,clean,Cleaning static files...)
+	@rm -rf $(BUILD_DIR)/static && \
+		$(call mesg_ok) || $(call mesg_fail)
+
+build-static: $(SCRIPT_OUTPUT) $(SCRIPT_EXTRA_OUTPUT) $(MESG_OUTPUT) $(STYLE_OUTPUT) $(STYLE_PRINT_OUTPUT) \
+	$(STYLE_EXTRA_OUTPUT)
+
+install-static: build-static $(TMPL_SRC)
 ifeq ($(UNAME), Darwin)
 	$(eval COPY_CMD = rsync -rR)
 else
 	$(eval COPY_CMD = cp -r --parents)
 endif
-	@$(call mesg_start,static,Copying template files...)
-	@install -d -m 0755 $(TMPL_OUTPUT) && \
-		(cd cmd/facette/template; $(COPY_CMD) $(TMPL_SRC:cmd/facette/template/%=%) ../../../$(TMPL_OUTPUT)/) && \
-		$(call mesg_ok) || $(call mesg_fail)
-
-build-static: $(SCRIPT_OUTPUT) $(SCRIPT_EXTRA_OUTPUT) $(MESG_OUTPUT) $(STYLE_OUTPUT) $(STYLE_PRINT_OUTPUT) \
-	$(STYLE_EXTRA_OUTPUT) $(TMPL_OUTPUT)
-
-install-static: build-static
 	@$(call mesg_start,install,Installing static files...)
 	@install -d -m 0755 $(PREFIX)/share/facette/static && cp -Rp $(SCRIPT_OUTPUT) $(SCRIPT_EXTRA_OUTPUT) \
 		$(MESG_OUTPUT) $(STYLE_OUTPUT) $(STYLE_PRINT_OUTPUT) $(STYLE_EXTRA_OUTPUT) $(PREFIX)/share/facette/static && \
 		$(call mesg_ok) || $(call mesg_fail)
 	@$(call mesg_start,install,Installing template files...)
-	@cp -Rp $(TMPL_OUTPUT) $(PREFIX)/share/facette && \
+	@install -d -m 0755 $(PREFIX)/share/facette/template && \
+		(cd cmd/facette/template; $(COPY_CMD) $(PREFIX)/share/facette/template) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 devel-static: install-static
@@ -309,34 +317,38 @@ lint-static: jshint $(SCRIPT_OUTPUT)
 		$(call mesg_ok) || $(call mesg_fail)
 
 # Test
-TEST_DIR = $(TEMP_DIR)/tests
+TEST_DIR = $(BUILD_DIR)/tests
 
 TEST_PKG = $(wildcard pkg/*)
 
 $(TEST_DIR):
 	@install -d -m 0755 $(TEST_DIR)
 
-$(TEST_PKG): $(TEST_DIR) $(TEMP_DIR)/src/github.com/facette/facette
+$(TEST_PKG): $(TEST_DIR) $(BUILD_DIR)/src/github.com/facette/facette
 	@$(call mesg_start,test,Testing $@ package...)
-	@(cd $(TEST_DIR) && $(GO) test -c -i ../../$@ && \
+	@(cd $(TEST_DIR) && $(GO) test -c -i ../../../$@ && \
 		(test ! -f ./$(@:pkg/%=%).test || ./$(@:pkg/%=%).test -test.v=true) && \
 		$(call mesg_ok) || $(call mesg_fail))
+
+clean-test:
+	@$(call mesg_start,clean,Cleaning test data...)
+	@rm -rf $(BUILD_DIR)/tests $(BUILD_DIR)/pkg && \
+		$(call mesg_ok) || $(call mesg_fail)
 
 test-pkg: $(TEST_PKG)
 
 test-server: $(TEST_DIR) build-bin
 	@$(call mesg_start,test,Starting facette server...)
-	@($(TEMP_DIR)/bin/facette -c tests/facette.json \
-		-l tmp/tests/facette.log -L debug >/dev/null &) && \
+	@(cd $(BUILD_DIR); bin/facette -c ../../tests/facette.json -l tests/facette.log -L debug &) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 	@$(call mesg_start,test,Running server tests...)
-	@(cd $(TEMP_DIR)/tests; $(GO) test -c -i ../../cmd/facette) && \
-		./$(TEMP_DIR)/tests/facette.test -test.v=true -c tests/facette.json && \
-		$(call mesg_ok) || (kill -2 `cat $(TEMP_DIR)/tests/facette.pid`; $(call mesg_fail))
+	@(cd $(BUILD_DIR)/tests; $(GO) test -c -i ../../../cmd/facette) && \
+		(cd $(BUILD_DIR)/; ./tests/facette.test -test.v=true -c ../../tests/facette.json) && \
+		$(call mesg_ok) || (kill -2 `cat $(BUILD_DIR)/tests/facette.pid`; $(call mesg_fail))
 
 	@$(call mesg_start,test,Stopping facette server...)
-	@kill -2 `cat $(TEMP_DIR)/tests/facette.pid` && \
+	@kill -2 `cat $(BUILD_DIR)/tests/facette.pid` && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 # Distribution

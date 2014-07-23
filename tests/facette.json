@@ -1,7 +1,7 @@
 {
 	"bind": ":7778",
-	"base_dir": "tmp",
-	"data_dir": "tmp/tests/data",
-	"pid_file": "tmp/tests/facette.pid",
-	"providers_dir": "tests/providers"
+	"base_dir": "",
+	"data_dir": "tests/data",
+	"pid_file": "tests/facette.pid",
+	"providers_dir": "../../tests/providers"
 }

@@ -1,5 +1,4 @@
 build
 dist
 thirdparty/checkouts
-tmp
 node_modules
