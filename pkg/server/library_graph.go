@@ -185,7 +185,7 @@ func (server *Server) serveGraphList(writer http.ResponseWriter, request *http.R
 
 func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.Request) {
 	var (
-		data               [][]*plot.PlotResult
+		data               [][]*plot.Result
 		err                error
 		graph              *library.Graph
 		item               interface{}
@@ -273,7 +273,7 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 	for _, groupItem := range graph.Groups {
 		groupOptions[groupItem.Name] = groupItem.Options
 
-		query, providerConnector, err := server.preparePlotQuery(&plotReq, groupItem)
+		query, providerConnector, err := server.prepareQuery(&plotReq, groupItem)
 		if err != nil {
 			if err != os.ErrInvalid {
 				logger.Log(logger.LevelError, "server", "%s", err)
@@ -283,7 +283,7 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 			continue
 		}
 
-		plotResults, err := providerConnector.GetPlots(&plot.PlotQuery{query, startTime, endTime, plotReq.Sample})
+		plotResults, err := providerConnector.GetPlots(&plot.Query{query, startTime, endTime, plotReq.Sample})
 		if err != nil {
 			logger.Log(logger.LevelError, "server", "%s", err)
 		}
@@ -325,7 +325,7 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 	plotMax := 0
 
 	for _, groupItem := range graph.Groups {
-		var plotResult []*plot.PlotResult
+		var plotResult []*plot.Result
 
 		plotResult, data = data[0], data[1:]
 
@@ -350,7 +350,7 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 	server.serveResponse(writer, response, http.StatusOK)
 }
 
-func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.OperGroup) (*plot.PlotQueryGroup,
+func (server *Server) prepareQuery(plotReq *PlotRequest, groupItem *library.OperGroup) (*plot.QueryGroup,
 	connector.Connector, error) {
 
 	var (
@@ -358,7 +358,7 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 		serieSources      []string
 	)
 
-	query := &plot.PlotQueryGroup{
+	query := &plot.QueryGroup{
 		Type:    groupItem.Type,
 		Options: groupItem.Options,
 	}
@@ -407,8 +407,8 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 						return nil, nil, fmt.Errorf("connectors differ between series")
 					}
 
-					query.Series = append(query.Series, &plot.PlotQuerySerie{
-						Metric: &plot.PlotQueryMetric{
+					query.Series = append(query.Series, &plot.QuerySerie{
+						Metric: &plot.QueryMetric{
 							Name:   metric.OriginalName,
 							Origin: metric.Source.Origin.OriginalName,
 							Source: metric.Source.OriginalName,
@@ -440,8 +440,8 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 					return nil, nil, fmt.Errorf("connectors differ between series")
 				}
 
-				serie := &plot.PlotQuerySerie{
-					Metric: &plot.PlotQueryMetric{
+				serie := &plot.QuerySerie{
+					Metric: &plot.QueryMetric{
 						Name:   metric.OriginalName,
 						Origin: metric.Source.Origin.OriginalName,
 						Source: metric.Source.OriginalName,

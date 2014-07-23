@@ -65,10 +65,10 @@ func init() {
 }
 
 // GetPlots retrieves time series data from provider based on a query and a time interval.
-func (connector *GraphiteConnector) GetPlots(query *plot.PlotQuery) ([]*plot.PlotResult, error) {
+func (connector *GraphiteConnector) GetPlots(query *plot.Query) ([]*plot.Result, error) {
 	var (
 		graphitePlots []graphitePlot
-		result        []*plot.PlotResult
+		result        []*plot.Result
 	)
 
 	if len(query.Group.Series) == 0 {
@@ -123,7 +123,7 @@ func (connector *GraphiteConnector) GetPlots(query *plot.PlotQuery) ([]*plot.Plo
 		return nil, fmt.Errorf("unable to unmarshal JSON data: %s", err)
 	}
 
-	if result, err = graphiteExtractPlotResult(graphitePlots); err != nil {
+	if result, err = graphiteExtractResult(graphitePlots); err != nil {
 		return nil, fmt.Errorf("unable to extract plot values from backend response: %s", err)
 	}
 
@@ -211,7 +211,7 @@ func graphiteCheckBackendResponse(response *http.Response) error {
 	return nil
 }
 
-func graphiteBuildQueryURL(queryGroup *plot.PlotQueryGroup, startTime, endTime time.Time) (string, error) {
+func graphiteBuildQueryURL(queryGroup *plot.QueryGroup, startTime, endTime time.Time) (string, error) {
 	var targets []string
 
 	now := time.Now()
@@ -272,14 +272,14 @@ func graphiteBuildQueryURL(queryGroup *plot.PlotQueryGroup, startTime, endTime t
 	return queryURL, nil
 }
 
-func graphiteExtractPlotResult(graphitePlots []graphitePlot) ([]*plot.PlotResult, error) {
-	var result []*plot.PlotResult
+func graphiteExtractResult(graphitePlots []graphitePlot) ([]*plot.Result, error) {
+	var result []*plot.Result
 
 	for _, graphitePlot := range graphitePlots {
-		plotResult := &plot.PlotResult{Summary: make(map[string]plot.PlotValue)}
+		plotResult := &plot.Result{Summary: make(map[string]plot.Value)}
 
 		for _, plotPoint := range graphitePlot.Datapoints {
-			plotResult.Plots = append(plotResult.Plots, plot.PlotValue(plotPoint[0]))
+			plotResult.Plots = append(plotResult.Plots, plot.Value(plotPoint[0]))
 		}
 
 		result = append(result, plotResult)

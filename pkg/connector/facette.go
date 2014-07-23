@@ -45,11 +45,11 @@ type facettePlotResponse struct {
 }
 
 type facetteSerie struct {
-	Name    string                    `json:"name"`
-	StackID int                       `json:"stack_id"`
-	Plots   []plot.PlotValue          `json:"plots"`
-	Summary map[string]plot.PlotValue `json:"summary"`
-	Options map[string]interface{}    `json:"options"`
+	Name    string                 `json:"name"`
+	StackID int                    `json:"stack_id"`
+	Plots   []plot.Value           `json:"plots"`
+	Summary map[string]plot.Value  `json:"summary"`
+	Options map[string]interface{} `json:"options"`
 }
 
 // FacetteConnector represents the main structure of the Facette connector.
@@ -81,8 +81,8 @@ func init() {
 }
 
 // GetPlots retrieves time series data from origin based on a query and a time interval.
-func (connector *FacetteConnector) GetPlots(query *plot.PlotQuery) ([]*plot.PlotResult, error) {
-	var result []*plot.PlotResult
+func (connector *FacetteConnector) GetPlots(query *plot.Query) ([]*plot.Result, error) {
+	var result []*plot.Result
 
 	// Convert plotQuery into plotRequest-like to forward query to upstream Facette API
 	plotRequest := facettePlotRequest{
@@ -97,7 +97,7 @@ func (connector *FacetteConnector) GetPlots(query *plot.PlotQuery) ([]*plot.Plot
 				&library.OperGroup{
 					Name: "group0",
 					Type: query.Group.Type,
-					Series: func(series []*plot.PlotQuerySerie) []*library.Serie {
+					Series: func(series []*plot.QuerySerie) []*library.Serie {
 						requestSeries := make([]*library.Serie, len(series))
 
 						for index, serie := range series {
@@ -167,7 +167,7 @@ func (connector *FacetteConnector) GetPlots(query *plot.PlotQuery) ([]*plot.Plot
 	}
 
 	for _, serie := range plotResponse.Series {
-		result = append(result, &plot.PlotResult{
+		result = append(result, &plot.Result{
 			Plots:   serie.Plots,
 			Summary: serie.Summary,
 		})

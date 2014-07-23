@@ -192,11 +192,11 @@ type PlotResponse struct {
 
 // SerieResponse represents a serie response structure in the server backend.
 type SerieResponse struct {
-	Name    string                    `json:"name"`
-	StackID int                       `json:"stack_id"`
-	Plots   []plot.PlotValue          `json:"plots"`
-	Summary map[string]plot.PlotValue `json:"summary"`
-	Options map[string]interface{}    `json:"options"`
+	Name    string                 `json:"name"`
+	StackID int                    `json:"stack_id"`
+	Plots   []plot.Value           `json:"plots"`
+	Summary map[string]plot.Value  `json:"summary"`
+	Options map[string]interface{} `json:"options"`
 }
 
 // Unexported types

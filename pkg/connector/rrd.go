@@ -57,9 +57,9 @@ func init() {
 }
 
 // GetPlots retrieves time series data from origin based on a query and a time interval.
-func (connector *RRDConnector) GetPlots(query *plot.PlotQuery) ([]*plot.PlotResult, error) {
+func (connector *RRDConnector) GetPlots(query *plot.Query) ([]*plot.Result, error) {
 	var (
-		result []*plot.PlotResult
+		result []*plot.Result
 		stack  []string
 		xport  *rrd.Exporter
 	)
@@ -226,14 +226,14 @@ func (connector *RRDConnector) GetPlots(query *plot.PlotQuery) ([]*plot.PlotResu
 	}
 
 	for index, itemName := range data.Legends {
-		plotResult := &plot.PlotResult{
+		plotResult := &plot.Result{
 			Name:    itemName,
-			Summary: make(map[string]plot.PlotValue),
+			Summary: make(map[string]plot.Value),
 		}
 
 		// FIXME: skip last garbage entry (see https://github.com/ziutek/rrd/pull/13)
 		for i := 0; i < data.RowCnt-1; i++ {
-			plotResult.Plots = append(plotResult.Plots, plot.PlotValue(data.ValueAt(index, i)))
+			plotResult.Plots = append(plotResult.Plots, plot.Value(data.ValueAt(index, i)))
 		}
 
 		result = append(result, plotResult)

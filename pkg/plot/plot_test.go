@@ -7,24 +7,24 @@ import (
 	"github.com/facette/facette/pkg/utils"
 )
 
-var plotResult = PlotResult{
-	Plots: []PlotValue{
-		PlotValue(math.NaN()), 61.0, 69.0, 98.0, 56.0, 43.0,
-		68.0, PlotValue(math.NaN()), 87.0, 95.0, 69.0, 79.0,
-		99.0, 54.0, 88.0, PlotValue(math.NaN()), 99.0, 77.0,
-		85.0, PlotValue(math.NaN()), 62.0, 71.0, 78.0, 72.0,
-		89.0, 70.0, 96.0, 93.0, 66.0, PlotValue(math.NaN()),
+var plotResult = Result{
+	Plots: []Value{
+		Value(math.NaN()), 61.0, 69.0, 98.0, 56.0, 43.0,
+		68.0, Value(math.NaN()), 87.0, 95.0, 69.0, 79.0,
+		99.0, 54.0, 88.0, Value(math.NaN()), 99.0, 77.0,
+		85.0, Value(math.NaN()), 62.0, 71.0, 78.0, 72.0,
+		89.0, 70.0, 96.0, 93.0, 66.0, Value(math.NaN()),
 	},
-	Summary: make(map[string]PlotValue),
+	Summary: make(map[string]Value),
 }
 
-func Test_PlotResult_Downsample(test *testing.T) {
+func Test_Result_Downsample(test *testing.T) {
 	type sampleTest struct {
 		Sample int
-		Result []PlotValue
+		Result []Value
 	}
 
-	equalFunc := func(a, b []PlotValue) bool {
+	equalFunc := func(a, b []Value) bool {
 		if len(a) != len(b) {
 			return false
 		}
@@ -39,12 +39,12 @@ func Test_PlotResult_Downsample(test *testing.T) {
 	}
 
 	for _, entry := range []sampleTest{
-		sampleTest{5, []PlotValue{65.4, 79.6, 83.4, 73.6, 82.8}},
-		sampleTest{15, []PlotValue{61, 83.5, 49.5, 68, 91, 74, 76.5, 88, 88, 85, 66.5, 75, 79.5, 94.5, 66}},
+		sampleTest{5, []Value{65.4, 79.6, 83.4, 73.6, 82.8}},
+		sampleTest{15, []Value{61, 83.5, 49.5, 68, 91, 74, 76.5, 88, 88, 85, 66.5, 75, 79.5, 94.5, 66}},
 		sampleTest{30, plotResult.Plots},
 		sampleTest{60, plotResult.Plots},
 	} {
-		result := PlotResult{}
+		result := Result{}
 		utils.Clone(&plotResult, &result)
 
 		result.Downsample(entry.Sample)
@@ -56,16 +56,16 @@ func Test_PlotResult_Downsample(test *testing.T) {
 	}
 }
 
-func Test_PlotResult_Summarize(test *testing.T) {
+func Test_Result_Summarize(test *testing.T) {
 	var (
-		minExpectedValue, maxExpectedValue, avgExpectedValue, lastExpectedValue PlotValue
-		pct20thExpectedValue, pct50thExpectedValue, pct90thExpectedValue        PlotValue
+		minExpectedValue, maxExpectedValue, avgExpectedValue, lastExpectedValue Value
+		pct20thExpectedValue, pct50thExpectedValue, pct90thExpectedValue        Value
 	)
 
 	minExpectedValue = 43.0
 	maxExpectedValue = 99.0
 	avgExpectedValue = 76.96
-	lastExpectedValue = PlotValue(math.NaN())
+	lastExpectedValue = Value(math.NaN())
 	pct20thExpectedValue = 62.8
 	pct50thExpectedValue = 77.0
 	pct90thExpectedValue = 98.4
