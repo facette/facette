@@ -3,6 +3,8 @@ package types
 import (
 	"math"
 	"testing"
+
+	"github.com/facette/facette/pkg/utils"
 )
 
 var plotResult = PlotResult{
@@ -14,6 +16,44 @@ var plotResult = PlotResult{
 		89.0, 70.0, 96.0, 93.0, 66.0, PlotValue(math.NaN()),
 	},
 	Info: make(map[string]PlotValue),
+}
+
+func Test_PlotResult_Downsample(test *testing.T) {
+	type sampleTest struct {
+		Sample int
+		Result []PlotValue
+	}
+
+	equalFunc := func(a, b []PlotValue) bool {
+		if len(a) != len(b) {
+			return false
+		}
+
+		for i := range a {
+			if a[i].IsNaN() && !b[i].IsNaN() || !a[i].IsNaN() && a[i] != b[i] {
+				return false
+			}
+		}
+
+		return true
+	}
+
+	for _, entry := range []sampleTest{
+		sampleTest{5, []PlotValue{65.4, 79.6, 83.4, 73.6, 82.8}},
+		sampleTest{15, []PlotValue{61, 83.5, 49.5, 68, 91, 74, 76.5, 88, 88, 85, 66.5, 75, 79.5, 94.5, 66}},
+		sampleTest{30, plotResult.Plots},
+		sampleTest{60, plotResult.Plots},
+	} {
+		result := PlotResult{}
+		utils.Clone(&plotResult, &result)
+
+		result.Downsample(entry.Sample)
+
+		if !equalFunc(entry.Result, result.Plots) {
+			test.Logf("\nExpected %#v\nbut got  %#v", entry.Result, result.Plots)
+			test.Fail()
+		}
+	}
 }
 
 func Test_PlotResult_Summarize(test *testing.T) {

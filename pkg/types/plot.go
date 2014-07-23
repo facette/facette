@@ -88,6 +88,58 @@ type PlotResult struct {
 	Info  map[string]PlotValue
 }
 
+// Downsample applies a sampling function on PlotResult plots, reducing the number of points.
+func (plotResult *PlotResult) Downsample(sample int) {
+	if sample >= len(plotResult.Plots) {
+		return
+	}
+
+	plots := plotResult.Plots[:]
+	plotResult.Plots = make([]PlotValue, 0)
+
+	pad := len(plots) / sample
+
+	refinePad := 0
+	if len(plots)%sample > 0 {
+		refinePad = len(plots) / (len(plots) % sample)
+	}
+
+	padCount := 0
+
+	bucket := 0.0
+	bucketCount := 0.0
+
+	for i := 0; i < len(plots); i++ {
+		// Refine sampling by appending one more plot at regular interval (pad + 1)
+		if refinePad == 0 || (i+1)%refinePad != 0 {
+			padCount++
+		}
+
+		if !plots[i].IsNaN() {
+			bucket += float64(plots[i])
+			bucketCount++
+		}
+
+		if padCount == pad {
+			padCount = 0
+
+			if bucketCount == 0 {
+				plotResult.Plots = append(plotResult.Plots, PlotValue(math.NaN()))
+				continue
+			}
+
+			plotResult.Plots = append(plotResult.Plots, PlotValue(bucket/bucketCount))
+
+			bucket = 0
+			bucketCount = 0
+		}
+	}
+
+	if bucketCount > 0 {
+		plotResult.Plots = append(plotResult.Plots, PlotValue(bucket/bucketCount))
+	}
+}
+
 // Summarize calculates the min/max/average/last and percentile values of a PlotResult plots, and stores the results
 // into the Info map.
 func (plotResult PlotResult) Summarize(percentiles []float64) {

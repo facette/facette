@@ -21,6 +21,7 @@ import (
 type rrdMetric struct {
 	Dataset  string
 	FilePath string
+	Step     time.Duration
 }
 
 // RRDConnector represents the main structure of the RRD connector.
@@ -82,6 +83,7 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotRe
 	}
 
 	count := 0
+	step := time.Duration(0)
 
 	switch query.Group.Type {
 	case OperGroupTypeNone:
@@ -136,6 +138,10 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotRe
 			}
 
 			xport.XportDef(itemName, itemName)
+
+			if connector.metrics[serie.Metric.Source][serie.Metric.Name].Step > step {
+				step = connector.metrics[serie.Metric.Source][serie.Metric.Name].Step
+			}
 		}
 
 	case OperGroupTypeAvg, OperGroupTypeSum:
@@ -172,6 +178,10 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotRe
 			} else {
 				stack = append(stack, serieTemp, "+")
 			}
+
+			if connector.metrics[serie.Metric.Source][serie.Metric.Name].Step > step {
+				step = connector.metrics[serie.Metric.Source][serie.Metric.Name].Step
+			}
 		}
 
 		if query.Group.Type == OperGroupTypeAvg {
@@ -204,7 +214,9 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotRe
 	}
 
 	// Get plots
-	step := query.EndTime.Sub(query.StartTime) / time.Duration(query.Sample)
+	if step == 0 {
+		step = query.EndTime.Sub(query.StartTime) / time.Duration(config.DefaultPlotSample)
+	}
 
 	data := rrd.XportResult{}
 
@@ -300,7 +312,11 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan *catal
 			for dsName := range info["ds.index"].(map[string]interface{}) {
 				metricFullName := metricName + "/" + dsName
 
-				connector.metrics[sourceName][metricFullName] = &rrdMetric{Dataset: dsName, FilePath: filePath}
+				connector.metrics[sourceName][metricFullName] = &rrdMetric{
+					Dataset:  dsName,
+					FilePath: filePath,
+					Step:     time.Duration(info["step"].(uint)),
+				}
 
 				outputChan <- &catalog.Record{
 					Origin:    originName,

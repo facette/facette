@@ -77,7 +77,7 @@ func (connector *GraphiteConnector) GetPlots(query *types.PlotQuery) ([]*types.P
 		query.Group.Type = OperGroupTypeNone
 	}
 
-	queryURL, err := graphiteBuildQueryURL(query.Group, query.StartTime, query.EndTime, query.Sample)
+	queryURL, err := graphiteBuildQueryURL(query.Group, query.StartTime, query.EndTime)
 	if err != nil {
 		return nil, fmt.Errorf("unable to build Graphite query URL: %s", err)
 	}
@@ -211,14 +211,12 @@ func graphiteCheckBackendResponse(response *http.Response) error {
 	return nil
 }
 
-func graphiteBuildQueryURL(queryGroup *types.PlotQueryGroup, startTime, endTime time.Time, sample int) (string, error) {
+func graphiteBuildQueryURL(queryGroup *types.PlotQueryGroup, startTime, endTime time.Time) (string, error) {
 	var targets []string
 
 	now := time.Now()
 
 	fromTime := 0
-
-	interval := fmt.Sprintf("%.0fseconds", (endTime.Sub(startTime) / time.Duration(sample)).Seconds())
 
 	queryURL := fmt.Sprintf("%s?format=json", graphiteURLRender)
 
@@ -256,7 +254,7 @@ func graphiteBuildQueryURL(queryGroup *types.PlotQueryGroup, startTime, endTime 
 			target = fmt.Sprintf("sumSeries(%s)", target)
 		}
 
-		queryURL += fmt.Sprintf("&target=summarize(%s, \"%s\", \"avg\")", target, interval)
+		queryURL += fmt.Sprintf("&target=%s", target)
 	}
 
 	if startTime.Before(now) {
