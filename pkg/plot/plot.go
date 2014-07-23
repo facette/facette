@@ -269,7 +269,10 @@ func SumSeries(series []Series) (Series, error) {
 		plotsPerSeries = len(series[0].Plots)
 	}
 
-	sum := Series{Plots: make([]Plot, plotsPerSeries)}
+	sum := Series{
+		Plots:   make([]Plot, plotsPerSeries),
+		Summary: make(map[string]Value),
+	}
 
 	for i := 0; i < plotsPerSeries; i++ {
 		for _, serie := range series {
