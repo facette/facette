@@ -276,7 +276,7 @@ func graphiteExtractPlotResult(graphitePlots []graphitePlot) ([]*plot.PlotResult
 	var result []*plot.PlotResult
 
 	for _, graphitePlot := range graphitePlots {
-		plotResult := &plot.PlotResult{Info: make(map[string]plot.PlotValue)}
+		plotResult := &plot.PlotResult{Summary: make(map[string]plot.PlotValue)}
 
 		for _, plotPoint := range graphitePlot.Datapoints {
 			plotResult.Plots = append(plotResult.Plots, plot.PlotValue(plotPoint[0]))

@@ -15,7 +15,7 @@ var plotResult = PlotResult{
 		85.0, PlotValue(math.NaN()), 62.0, 71.0, 78.0, 72.0,
 		89.0, 70.0, 96.0, 93.0, 66.0, PlotValue(math.NaN()),
 	},
-	Info: make(map[string]PlotValue),
+	Summary: make(map[string]PlotValue),
 }
 
 func Test_PlotResult_Downsample(test *testing.T) {
@@ -72,38 +72,38 @@ func Test_PlotResult_Summarize(test *testing.T) {
 
 	plotResult.Summarize([]float64{20.0, 50.0, 90.0})
 
-	if plotResult.Info["min"] != minExpectedValue {
-		test.Logf("\nExpected min=%g\nbut got %g", minExpectedValue, plotResult.Info["min"])
+	if plotResult.Summary["min"] != minExpectedValue {
+		test.Logf("\nExpected min=%g\nbut got %g", minExpectedValue, plotResult.Summary["min"])
 		test.Fail()
 	}
 
-	if plotResult.Info["max"] != maxExpectedValue {
-		test.Logf("\nExpected max=%g\nbut got %g", maxExpectedValue, plotResult.Info["max"])
+	if plotResult.Summary["max"] != maxExpectedValue {
+		test.Logf("\nExpected max=%g\nbut got %g", maxExpectedValue, plotResult.Summary["max"])
 		test.Fail()
 	}
 
-	if plotResult.Info["avg"] != avgExpectedValue {
-		test.Logf("\nExpected avg=%g\nbut got %g", avgExpectedValue, plotResult.Info["avg"])
+	if plotResult.Summary["avg"] != avgExpectedValue {
+		test.Logf("\nExpected avg=%g\nbut got %g", avgExpectedValue, plotResult.Summary["avg"])
 		test.Fail()
 	}
 
-	if !plotResult.Info["last"].IsNaN() {
-		test.Logf("\nExpected last=%g\nbut got %g", lastExpectedValue, plotResult.Info["last"])
+	if !plotResult.Summary["last"].IsNaN() {
+		test.Logf("\nExpected last=%g\nbut got %g", lastExpectedValue, plotResult.Summary["last"])
 		test.Fail()
 	}
 
-	if plotResult.Info["20th"] != pct20thExpectedValue {
-		test.Logf("\nExpected 20th=%g\nbut got %g", pct20thExpectedValue, plotResult.Info["20th"])
+	if plotResult.Summary["20th"] != pct20thExpectedValue {
+		test.Logf("\nExpected 20th=%g\nbut got %g", pct20thExpectedValue, plotResult.Summary["20th"])
 		test.Fail()
 	}
 
-	if plotResult.Info["50th"] != pct50thExpectedValue {
-		test.Logf("\nExpected 50th=%g\nbut got %g", pct50thExpectedValue, plotResult.Info["50th"])
+	if plotResult.Summary["50th"] != pct50thExpectedValue {
+		test.Logf("\nExpected 50th=%g\nbut got %g", pct50thExpectedValue, plotResult.Summary["50th"])
 		test.Fail()
 	}
 
-	if plotResult.Info["90th"] != pct90thExpectedValue {
-		test.Logf("\nExpected 90th=%g\nbut got %g", pct90thExpectedValue, plotResult.Info["90th"])
+	if plotResult.Summary["90th"] != pct90thExpectedValue {
+		test.Logf("\nExpected 90th=%g\nbut got %g", pct90thExpectedValue, plotResult.Summary["90th"])
 		test.Fail()
 	}
 }

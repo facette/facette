@@ -338,7 +338,7 @@ function graphDraw(graph, postpone, delay, preview) {
                     });
 
                     serieData[data.series[i].name] = {
-                        info: data.series[i].info,
+                        summary: data.series[i].summary,
                         options: data.series[i].options
                     };
                 }

@@ -48,7 +48,7 @@ type facetteSerie struct {
 	Name    string                    `json:"name"`
 	StackID int                       `json:"stack_id"`
 	Plots   []plot.PlotValue          `json:"plots"`
-	Info    map[string]plot.PlotValue `json:"info"`
+	Summary map[string]plot.PlotValue `json:"summary"`
 	Options map[string]interface{}    `json:"options"`
 }
 
@@ -168,8 +168,8 @@ func (connector *FacetteConnector) GetPlots(query *plot.PlotQuery) ([]*plot.Plot
 
 	for _, serie := range plotResponse.Series {
 		result = append(result, &plot.PlotResult{
-			Plots: serie.Plots,
-			Info:  serie.Info,
+			Plots:   serie.Plots,
+			Summary: serie.Summary,
 		})
 	}
 

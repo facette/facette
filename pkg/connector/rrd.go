@@ -227,8 +227,8 @@ func (connector *RRDConnector) GetPlots(query *plot.PlotQuery) ([]*plot.PlotResu
 
 	for index, itemName := range data.Legends {
 		plotResult := &plot.PlotResult{
-			Name: itemName,
-			Info: make(map[string]plot.PlotValue),
+			Name:    itemName,
+			Summary: make(map[string]plot.PlotValue),
 		}
 
 		// FIXME: skip last garbage entry (see https://github.com/ziutek/rrd/pull/13)

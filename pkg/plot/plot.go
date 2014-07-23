@@ -84,9 +84,9 @@ func (queryMetric *PlotQueryMetric) String() string {
 
 // PlotResult represents the result of a plot request.
 type PlotResult struct {
-	Name  string
-	Plots []PlotValue
-	Info  map[string]PlotValue
+	Name    string
+	Plots   []PlotValue
+	Summary map[string]PlotValue
 }
 
 // Downsample applies a sampling function on PlotResult plots, reducing the number of points.
@@ -142,7 +142,7 @@ func (plotResult *PlotResult) Downsample(sample int) {
 }
 
 // Summarize calculates the min/max/average/last and percentile values of a PlotResult plots, and stores the results
-// into the Info map.
+// into the Summary map.
 func (plotResult PlotResult) Summarize(percentiles []float64) {
 	var (
 		min, max, total PlotValue
@@ -152,7 +152,7 @@ func (plotResult PlotResult) Summarize(percentiles []float64) {
 
 	if nPlots > 0 {
 		min = plotResult.Plots[0]
-		plotResult.Info["last"] = plotResult.Plots[nPlots-1]
+		plotResult.Summary["last"] = plotResult.Plots[nPlots-1]
 	}
 
 	for i := range plotResult.Plots {
@@ -170,9 +170,9 @@ func (plotResult PlotResult) Summarize(percentiles []float64) {
 		}
 	}
 
-	plotResult.Info["min"] = min
-	plotResult.Info["max"] = max
-	plotResult.Info["avg"] = total / PlotValue(nValidPlots)
+	plotResult.Summary["min"] = min
+	plotResult.Summary["max"] = max
+	plotResult.Summary["avg"] = total / PlotValue(nValidPlots)
 
 	if len(percentiles) > 0 {
 		plotResult.Percentiles(percentiles)
@@ -208,14 +208,14 @@ func (plotResult PlotResult) Percentiles(percentiles []float64) {
 		rankFrac := rank - float64(rankInt)
 
 		if rank <= 0.0 {
-			plotResult.Info[percentileString] = PlotValue(set[0])
+			plotResult.Summary[percentileString] = PlotValue(set[0])
 			continue
 		} else if rank-1.0 >= float64(setSize) {
-			plotResult.Info[percentileString] = PlotValue(set[setSize-1])
+			plotResult.Summary[percentileString] = PlotValue(set[setSize-1])
 			continue
 		}
 
-		plotResult.Info[percentileString] = PlotValue(set[rankInt-1] + rankFrac*(set[rankInt]-set[rankInt-1]))
+		plotResult.Summary[percentileString] = PlotValue(set[rankInt-1] + rankFrac*(set[rankInt]-set[rankInt-1]))
 	}
 }
 

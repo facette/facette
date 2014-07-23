@@ -154,10 +154,10 @@ if (window.Highcharts) {
             cellLeft = Math.max(cellLeft, box.x + box.width + GRAPH_LEGEND_ROW_HEIGHT);
 
             // Update column keys list
-            if (!data[serie.name].info)
+            if (!data[serie.name].summary)
                 return;
 
-            keys = Object.keys(data[serie.name].info);
+            keys = Object.keys(data[serie.name].summary);
             keys.sort();
 
             $.each(keys, function (i, key) { /*jshint unused: true */
@@ -193,8 +193,8 @@ if (window.Highcharts) {
                     valueLeft = box.x + box.width + GRAPH_LEGEND_ROW_HEIGHT * 0.35;
                 }
 
-                value = data[serie.name].info && data[serie.name].info[key] !== undefined ?
-                    data[serie.name].info[key] : null;
+                value = data[serie.name].summary && data[serie.name].summary[key] !== undefined ?
+                    data[serie.name].summary[key] : null;
 
                 element = chart.renderer.text(value !== null ? formatValue(value, options._opts.unit_type,
                         data[serie.name].options && data[serie.name].options.unit || null) : 'null',

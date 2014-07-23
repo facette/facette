@@ -337,7 +337,7 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 			response.Series = append(response.Series, &SerieResponse{
 				Name:    serieResult.Name,
 				Plots:   serieResult.Plots,
-				Info:    serieResult.Info,
+				Summary: serieResult.Summary,
 				Options: groupOptions[groupItem.Name],
 			})
 		}
