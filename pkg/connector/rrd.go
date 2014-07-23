@@ -57,17 +57,17 @@ func init() {
 
 // GetPlots retrieves time series data from origin based on a query and a time interval.
 func (connector *RRDConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotResult, error) {
-	var xport *rrd.Exporter
+	var (
+		result []*types.PlotResult
+		stack  []string
+		xport  *rrd.Exporter
+	)
 
 	if len(query.Group.Series) == 0 {
 		return nil, fmt.Errorf("group has no series")
 	} else if query.Group.Type != OperGroupTypeNone && len(query.Group.Series) == 1 {
 		query.Group.Type = OperGroupTypeNone
 	}
-
-	result := make([]*types.PlotResult, 0)
-
-	stack := make([]string, 0)
 
 	graph := rrd.NewGrapher()
 
@@ -91,7 +91,7 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotRe
 			}
 
 			itemName := fmt.Sprintf("serie%d", count)
-			count += 1
+			count++
 
 			graph.Def(
 				itemName+"-orig0",
@@ -140,7 +140,7 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotRe
 
 	case OperGroupTypeAvg, OperGroupTypeSum:
 		itemName := fmt.Sprintf("serie%d", count)
-		count += 1
+		count++
 
 		for index, serie := range query.Group.Series {
 			if serie.Metric == nil {
@@ -233,7 +233,7 @@ func (connector *RRDConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotRe
 }
 
 // Refresh triggers a full connector data update.
-func (connector *RRDConnector) Refresh(originName string, outputChan chan *catalog.CatalogRecord) error {
+func (connector *RRDConnector) Refresh(originName string, outputChan chan *catalog.Record) error {
 	// Compile pattern
 	re := regexp.MustCompile(connector.pattern)
 
@@ -302,7 +302,7 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan *catal
 
 				connector.metrics[sourceName][metricFullName] = &rrdMetric{Dataset: dsName, FilePath: filePath}
 
-				outputChan <- &catalog.CatalogRecord{
+				outputChan <- &catalog.Record{
 					Origin:    originName,
 					Source:    sourceName,
 					Metric:    metricFullName,

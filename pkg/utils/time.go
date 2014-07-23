@@ -27,6 +27,8 @@ type durationUnit struct {
 
 // DurationToRange converts a duration into a string-defined time range.
 func DurationToRange(duration time.Duration) string {
+	var chunks []string
+
 	units := []durationUnit{
 		durationUnit{86400, "d"},
 		durationUnit{3600, "h"},
@@ -34,7 +36,6 @@ func DurationToRange(duration time.Duration) string {
 		durationUnit{1, "s"},
 	}
 
-	chunks := make([]string, 0)
 	seconds := int(math.Abs(duration.Seconds()))
 
 	for _, unit := range units {
@@ -57,11 +58,11 @@ func DurationToRange(duration time.Duration) string {
 
 // TimeApplyRange applies a string-defined time range to a specific date.
 func TimeApplyRange(refTime time.Time, input string) (time.Time, error) {
+	var chunks []int
+
 	re := regexp.MustCompile(durationRegexp)
 
 	modifier := 1
-
-	chunks := make([]int, 0)
 
 	for key, value := range re.FindStringSubmatch(strings.Trim(input, " ")) {
 		var intVal int

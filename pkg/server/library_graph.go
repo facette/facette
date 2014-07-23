@@ -123,7 +123,10 @@ func (server *Server) serveGraph(writer http.ResponseWriter, request *http.Reque
 }
 
 func (server *Server) serveGraphList(writer http.ResponseWriter, request *http.Request) {
-	var offset, limit int
+	var (
+		items         ItemListResponse
+		offset, limit int
+	)
 
 	if response, status := server.parseListRequest(writer, request, &offset, &limit); status != http.StatusOK {
 		server.serveResponse(writer, response, status)
@@ -152,8 +155,6 @@ func (server *Server) serveGraphList(writer http.ResponseWriter, request *http.R
 	}
 
 	// Fill graphs list
-	items := make(ItemListResponse, 0)
-
 	for _, graph := range server.Library.Graphs {
 		if !graphSet.IsEmpty() && !graphSet.Has(graph.ID) {
 			continue
@@ -184,6 +185,7 @@ func (server *Server) serveGraphList(writer http.ResponseWriter, request *http.R
 
 func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.Request) {
 	var (
+		data               [][]*types.PlotResult
 		err                error
 		graph              *library.Graph
 		item               interface{}
@@ -268,8 +270,6 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 	// Get plots data
 	groupOptions := make(map[string]map[string]interface{})
 
-	data := make([][]*types.PlotResult, 0)
-
 	for _, groupItem := range graph.Groups {
 		groupOptions[groupItem.Name] = groupItem.Options
 
@@ -350,7 +350,11 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 
 func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.OperGroup) (*types.PlotQueryGroup,
 	connector.Connector, error) {
-	var providerConnector connector.Connector
+
+	var (
+		providerConnector connector.Connector
+		serieSources      []string
+	)
 
 	query := &types.PlotQueryGroup{
 		Type:    groupItem.Type,
@@ -362,8 +366,6 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 		if _, ok := server.Catalog.Origins[serieItem.Origin]; !ok {
 			return nil, nil, fmt.Errorf("unknown serie origin `%s'", serieItem.Origin)
 		}
-
-		serieSources := make([]string, 0)
 
 		if strings.HasPrefix(serieItem.Source, library.LibraryGroupPrefix) {
 			serieSources = server.Library.ExpandGroup(
@@ -412,7 +414,7 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 						Options: serieItem.Options,
 					})
 
-					index += 1
+					index++
 				}
 			} else {
 				metric := server.Catalog.GetMetric(serieItem.Origin, serieSource, serieItem.Metric)
@@ -447,7 +449,7 @@ func (server *Server) preparePlotQuery(plotReq *PlotRequest, groupItem *library.
 
 				query.Series = append(query.Series, serie)
 
-				index += 1
+				index++
 			}
 		}
 	}

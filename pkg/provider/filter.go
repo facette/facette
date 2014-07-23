@@ -10,14 +10,14 @@ import (
 )
 
 type filterChain struct {
-	Input  chan *catalog.CatalogRecord
-	output chan *catalog.CatalogRecord
+	Input  chan *catalog.Record
+	output chan *catalog.Record
 	rules  []*config.ProviderFilterConfig
 }
 
-func newFilterChain(filters []*config.ProviderFilterConfig, output chan *catalog.CatalogRecord) filterChain {
+func newFilterChain(filters []*config.ProviderFilterConfig, output chan *catalog.Record) filterChain {
 	chain := filterChain{
-		Input:  make(chan *catalog.CatalogRecord),
+		Input:  make(chan *catalog.Record),
 		output: output,
 		rules:  make([]*config.ProviderFilterConfig, 0),
 	}

@@ -12,7 +12,7 @@ import (
 )
 
 func (server *Server) startProviderWorkers() error {
-	server.providerWorkers = worker.NewWorkerPool()
+	server.providerWorkers = worker.NewPool()
 
 	logger.Log(logger.LevelDebug, "server", "declaring providers")
 

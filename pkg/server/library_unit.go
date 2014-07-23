@@ -119,7 +119,10 @@ func (server *Server) serveUnit(writer http.ResponseWriter, request *http.Reques
 }
 
 func (server *Server) serveUnitList(writer http.ResponseWriter, request *http.Request) {
-	var offset, limit int
+	var (
+		items         ItemListResponse
+		offset, limit int
+	)
 
 	if response, status := server.parseListRequest(writer, request, &offset, &limit); status != http.StatusOK {
 		server.serveResponse(writer, response, status)
@@ -127,8 +130,6 @@ func (server *Server) serveUnitList(writer http.ResponseWriter, request *http.Re
 	}
 
 	// Fill units list
-	items := make(ItemListResponse, 0)
-
 	for _, unit := range server.Library.Units {
 		if request.FormValue("filter") != "" && !utils.FilterMatch(request.FormValue("filter"), unit.Name) {
 			continue
@@ -154,7 +155,10 @@ func (server *Server) serveUnitList(writer http.ResponseWriter, request *http.Re
 }
 
 func (server *Server) serveUnitLabels(writer http.ResponseWriter, request *http.Request) {
-	var offset, limit int
+	var (
+		items         UnitValueListResponse
+		offset, limit int
+	)
 
 	if request.Method != "GET" && request.Method != "HEAD" {
 		server.serveResponse(writer, nil, http.StatusMethodNotAllowed)
@@ -167,8 +171,6 @@ func (server *Server) serveUnitLabels(writer http.ResponseWriter, request *http.
 	}
 
 	// Fill units values list
-	items := make(UnitValueListResponse, 0)
-
 	for _, unit := range server.Library.Units {
 		items = append(items, &UnitValueResponse{
 			Name:  unit.Name,

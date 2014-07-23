@@ -61,7 +61,7 @@ func templateNotEqual(x, y interface{}) bool {
 }
 
 func templateDumpMap(x map[string]interface{}) string {
-	chunks := make([]string, 0)
+	var chunks []string
 
 	for key, value := range x {
 		if value == "" {

@@ -23,7 +23,7 @@ type Server struct {
 	Catalog         *catalog.Catalog
 	Library         *library.Library
 	providers       map[string]*provider.Provider
-	providerWorkers worker.WorkerPool
+	providerWorkers worker.Pool
 	catalogWorker   *worker.Worker
 	serveWorker     *worker.Worker
 	configPath      string

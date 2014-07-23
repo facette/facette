@@ -66,7 +66,10 @@ func init() {
 
 // GetPlots retrieves time series data from provider based on a query and a time interval.
 func (connector *GraphiteConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotResult, error) {
-	var result []*types.PlotResult
+	var (
+		graphitePlots []graphitePlot
+		result        []*types.PlotResult
+	)
 
 	if len(query.Group.Series) == 0 {
 		return nil, fmt.Errorf("group has no series")
@@ -116,7 +119,6 @@ func (connector *GraphiteConnector) GetPlots(query *types.PlotQuery) ([]*types.P
 		return nil, fmt.Errorf("unable to read HTTP response body: %s", err)
 	}
 
-	graphitePlots := make([]graphitePlot, 0)
 	if err = json.Unmarshal(data, &graphitePlots); err != nil {
 		return nil, fmt.Errorf("unable to unmarshal JSON data: %s", err)
 	}
@@ -129,7 +131,9 @@ func (connector *GraphiteConnector) GetPlots(query *types.PlotQuery) ([]*types.P
 }
 
 // Refresh triggers a full connector data update.
-func (connector *GraphiteConnector) Refresh(originName string, outputChan chan *catalog.CatalogRecord) error {
+func (connector *GraphiteConnector) Refresh(originName string, outputChan chan *catalog.Record) error {
+	var metrics []string
+
 	httpTransport := &http.Transport{
 		Dial: (&net.Dialer{
 			// Enable dual IPv4/IPv6 stack connectivity:
@@ -167,7 +171,6 @@ func (connector *GraphiteConnector) Refresh(originName string, outputChan chan *
 		return fmt.Errorf("unable to read HTTP response body: %s", err)
 	}
 
-	metrics := make([]string, 0)
 	if err = json.Unmarshal(data, &metrics); err != nil {
 		return fmt.Errorf("unable to unmarshal JSON data: %s", err)
 	}
@@ -185,7 +188,7 @@ func (connector *GraphiteConnector) Refresh(originName string, outputChan chan *
 			metricName = metric[index+1:]
 		}
 
-		outputChan <- &catalog.CatalogRecord{
+		outputChan <- &catalog.Record{
 			Origin:    originName,
 			Source:    sourceName,
 			Metric:    metricName,
@@ -209,6 +212,8 @@ func graphiteCheckBackendResponse(response *http.Response) error {
 }
 
 func graphiteBuildQueryURL(queryGroup *types.PlotQueryGroup, startTime, endTime time.Time, sample int) (string, error) {
+	var targets []string
+
 	now := time.Now()
 
 	fromTime := 0
@@ -221,7 +226,7 @@ func graphiteBuildQueryURL(queryGroup *types.PlotQueryGroup, startTime, endTime 
 
 	if queryGroup.Type == OperGroupTypeNone {
 		for _, serie := range queryGroup.Series {
-			count += 1
+			count++
 
 			target := fmt.Sprintf("%s.%s", serie.Metric.Source, serie.Metric.Name)
 
@@ -232,9 +237,7 @@ func graphiteBuildQueryURL(queryGroup *types.PlotQueryGroup, startTime, endTime 
 			queryURL += fmt.Sprintf("&target=%s", target)
 		}
 	} else {
-		count += 1
-
-		targets := make([]string, 0)
+		count++
 
 		for _, serie := range queryGroup.Series {
 			targets = append(targets, fmt.Sprintf("%s.%s", serie.Metric.Source, serie.Metric.Name))
@@ -272,7 +275,7 @@ func graphiteBuildQueryURL(queryGroup *types.PlotQueryGroup, startTime, endTime 
 }
 
 func graphiteExtractPlotResult(plots []graphitePlot) ([]*types.PlotResult, error) {
-	result := make([]*types.PlotResult, 0)
+	var result []*types.PlotResult
 
 	for _, plot := range plots {
 		plotResult := &types.PlotResult{Info: make(map[string]types.PlotValue)}

@@ -148,6 +148,8 @@ func (server *Server) serveBrowseGraph(writer http.ResponseWriter, request *http
 }
 
 func (server *Server) serveBrowseSearch(writer http.ResponseWriter, request *http.Request) error {
+	var chunks []string
+
 	data := struct {
 		URLBase     string
 		URLPrefix   string
@@ -178,8 +180,6 @@ func (server *Server) serveBrowseSearch(writer http.ResponseWriter, request *htt
 
 	// Perform search filtering
 	if request.FormValue("q") != "" {
-		chunks := make([]string, 0)
-
 		for _, chunk := range strings.Split(strings.ToLower(request.FormValue("q")), " ") {
 			chunks = append(chunks, "*"+strings.Trim(chunk, " \t")+"*")
 		}

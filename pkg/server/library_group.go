@@ -131,7 +131,10 @@ func (server *Server) serveGroup(writer http.ResponseWriter, request *http.Reque
 }
 
 func (server *Server) serveGroupList(writer http.ResponseWriter, request *http.Request) {
-	var offset, limit int
+	var (
+		items         ItemListResponse
+		offset, limit int
+	)
 
 	if response, status := server.parseListRequest(writer, request, &offset, &limit); status != http.StatusOK {
 		server.serveResponse(writer, response, status)
@@ -139,8 +142,6 @@ func (server *Server) serveGroupList(writer http.ResponseWriter, request *http.R
 	}
 
 	// Fill groups list
-	items := make(ItemListResponse, 0)
-
 	isSource := strings.HasPrefix(request.URL.Path, urlLibraryPath+"sourcegroups/")
 
 	for _, group := range server.Library.Groups {
@@ -173,6 +174,8 @@ func (server *Server) serveGroupList(writer http.ResponseWriter, request *http.R
 }
 
 func (server *Server) serveGroupExpand(writer http.ResponseWriter, request *http.Request) {
+	var response []ExpandRequest
+
 	if request.Method != "POST" {
 		server.serveResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
 		return
@@ -186,8 +189,6 @@ func (server *Server) serveGroupExpand(writer http.ResponseWriter, request *http
 		server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 		return
 	}
-
-	response := make([]ExpandRequest, 0)
 
 	for _, entry := range query {
 		item := ExpandRequest{}

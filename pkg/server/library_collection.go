@@ -159,8 +159,10 @@ func (server *Server) serveCollection(writer http.ResponseWriter, request *http.
 
 func (server *Server) serveCollectionList(writer http.ResponseWriter, request *http.Request) {
 	var (
-		collection    *library.Collection
-		offset, limit int
+		collection      *library.Collection
+		collectionStack []*library.Collection
+		items           CollectionListResponse
+		offset, limit   int
 	)
 
 	if response, status := server.parseListRequest(writer, request, &offset, &limit); status != http.StatusOK {
@@ -170,8 +172,6 @@ func (server *Server) serveCollectionList(writer http.ResponseWriter, request *h
 
 	// Check for item exclusion
 	excludeSet := set.New(set.ThreadSafe)
-
-	collectionStack := make([]*library.Collection, 0)
 
 	if request.FormValue("exclude") != "" {
 		if item, err := server.Library.GetItem(request.FormValue("exclude"), library.LibraryItemCollection); err == nil {
@@ -186,8 +186,6 @@ func (server *Server) serveCollectionList(writer http.ResponseWriter, request *h
 	}
 
 	// Fill collections list
-	items := make(CollectionListResponse, 0)
-
 	for _, collection := range server.Library.Collections {
 		if request.FormValue("parent") != "" && (request.FormValue("parent") == "" &&
 			collection.Parent != nil || request.FormValue("parent") != "" &&

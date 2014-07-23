@@ -10,11 +10,11 @@ import (
 // Catalog represents the main structure of a catalog instance.
 type Catalog struct {
 	Origins    map[string]*Origin
-	RecordChan chan *CatalogRecord
+	RecordChan chan *Record
 }
 
-// CatalogRecord represents a catalog record.
-type CatalogRecord struct {
+// Record represents a catalog record.
+type Record struct {
 	Origin         string
 	Source         string
 	Metric         string
@@ -24,7 +24,7 @@ type CatalogRecord struct {
 	Connector      interface{}
 }
 
-func (r CatalogRecord) String() string {
+func (r Record) String() string {
 	return fmt.Sprintf("{Origin: \"%s\", Source: \"%s\", Metric: \"%s\"}", r.Origin, r.Source, r.Metric)
 }
 
@@ -32,12 +32,12 @@ func (r CatalogRecord) String() string {
 func NewCatalog() *Catalog {
 	return &Catalog{
 		Origins:    make(map[string]*Origin),
-		RecordChan: make(chan *CatalogRecord),
+		RecordChan: make(chan *Record),
 	}
 }
 
 // Insert inserts a new record in the catalog.
-func (catalog *Catalog) Insert(record *CatalogRecord) {
+func (catalog *Catalog) Insert(record *Record) {
 	logger.Log(
 		logger.LevelDebug,
 		"catalog",

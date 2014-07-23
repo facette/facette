@@ -128,7 +128,8 @@ func (plotResult PlotResult) Summarize(percentiles []float64) {
 
 // Percentiles calculates the percentile values of a PlotResult plots
 func (plotResult PlotResult) Percentiles(percentiles []float64) {
-	set := make([]float64, 0)
+	var set []float64
+
 	for i := range plotResult.Plots {
 		if !plotResult.Plots[i].IsNaN() {
 			set = append(set, float64(plotResult.Plots[i]))

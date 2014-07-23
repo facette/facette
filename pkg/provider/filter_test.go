@@ -9,35 +9,35 @@ import (
 )
 
 func Test_Filter_Rewrite(test *testing.T) {
-	expected := []catalog.CatalogRecord{
-		{Origin: "collectd", Source: "host1_example_net", Metric: "net.eth0.octets.rx",
-			OriginalOrigin: "collectd", OriginalSource: "host1.example.net", OriginalMetric: "interface-eth0.if_octets.rx"},
-		{Origin: "collectd", Source: "host1_example_net", Metric: "net.eth0.octets.tx",
-			OriginalOrigin: "collectd", OriginalSource: "host1.example.net", OriginalMetric: "interface-eth0.if_octets.tx"},
-		{Origin: "collectd", Source: "host1_example_net", Metric: "net.eth0.packets.rx",
-			OriginalOrigin: "collectd", OriginalSource: "host1.example.net", OriginalMetric: "interface-eth0.if_packets.rx"},
-		{Origin: "collectd", Source: "host1_example_net", Metric: "net.eth0.packets.tx",
-			OriginalOrigin: "collectd", OriginalSource: "host1.example.net", OriginalMetric: "interface-eth0.if_packets.tx"},
-		{Origin: "collectd", Source: "host1_example_net", Metric: "load.load.shortterm",
-			OriginalOrigin: "collectd", OriginalSource: "host1.example.net", OriginalMetric: "load.load.shortterm"},
-		{Origin: "collectd", Source: "host1_example_net", Metric: "load.load.midterm",
-			OriginalOrigin: "collectd", OriginalSource: "host1.example.net", OriginalMetric: "load.load.midterm"},
-		{Origin: "collectd", Source: "host1_example_net", Metric: "load.load.longterm",
-			OriginalOrigin: "collectd", OriginalSource: "host1.example.net", OriginalMetric: "load.load.longterm"},
-		{Origin: "collectd", Source: "host2_example_net", Metric: "net.eth0.octets.rx",
-			OriginalOrigin: "collectd", OriginalSource: "host2.example.net", OriginalMetric: "interface-eth0.if_octets.rx"},
-		{Origin: "collectd", Source: "host2_example_net", Metric: "net.eth0.octets.tx",
-			OriginalOrigin: "collectd", OriginalSource: "host2.example.net", OriginalMetric: "interface-eth0.if_octets.tx"},
-		{Origin: "collectd", Source: "host2_example_net", Metric: "net.eth0.packets.rx",
-			OriginalOrigin: "collectd", OriginalSource: "host2.example.net", OriginalMetric: "interface-eth0.if_packets.rx"},
-		{Origin: "collectd", Source: "host2_example_net", Metric: "net.eth0.packets.tx",
-			OriginalOrigin: "collectd", OriginalSource: "host2.example.net", OriginalMetric: "interface-eth0.if_packets.tx"},
-		{Origin: "collectd", Source: "host2_example_net", Metric: "load.load.shortterm",
-			OriginalOrigin: "collectd", OriginalSource: "host2.example.net", OriginalMetric: "load.load.shortterm"},
-		{Origin: "collectd", Source: "host2_example_net", Metric: "load.load.midterm",
-			OriginalOrigin: "collectd", OriginalSource: "host2.example.net", OriginalMetric: "load.load.midterm"},
-		{Origin: "collectd", Source: "host2_example_net", Metric: "load.load.longterm",
-			OriginalOrigin: "collectd", OriginalSource: "host2.example.net", OriginalMetric: "load.load.longterm"},
+	expected := []catalog.Record{
+		{Origin: "collectd", Source: "host1_example_net", Metric: "net.eth0.octets.rx", OriginalOrigin: "collectd",
+			OriginalSource: "host1.example.net", OriginalMetric: "interface-eth0.if_octets.rx"},
+		{Origin: "collectd", Source: "host1_example_net", Metric: "net.eth0.octets.tx", OriginalOrigin: "collectd",
+			OriginalSource: "host1.example.net", OriginalMetric: "interface-eth0.if_octets.tx"},
+		{Origin: "collectd", Source: "host1_example_net", Metric: "net.eth0.packets.rx", OriginalOrigin: "collectd",
+			OriginalSource: "host1.example.net", OriginalMetric: "interface-eth0.if_packets.rx"},
+		{Origin: "collectd", Source: "host1_example_net", Metric: "net.eth0.packets.tx", OriginalOrigin: "collectd",
+			OriginalSource: "host1.example.net", OriginalMetric: "interface-eth0.if_packets.tx"},
+		{Origin: "collectd", Source: "host1_example_net", Metric: "load.load.shortterm", OriginalOrigin: "collectd",
+			OriginalSource: "host1.example.net", OriginalMetric: "load.load.shortterm"},
+		{Origin: "collectd", Source: "host1_example_net", Metric: "load.load.midterm", OriginalOrigin: "collectd",
+			OriginalSource: "host1.example.net", OriginalMetric: "load.load.midterm"},
+		{Origin: "collectd", Source: "host1_example_net", Metric: "load.load.longterm", OriginalOrigin: "collectd",
+			OriginalSource: "host1.example.net", OriginalMetric: "load.load.longterm"},
+		{Origin: "collectd", Source: "host2_example_net", Metric: "net.eth0.octets.rx", OriginalOrigin: "collectd",
+			OriginalSource: "host2.example.net", OriginalMetric: "interface-eth0.if_octets.rx"},
+		{Origin: "collectd", Source: "host2_example_net", Metric: "net.eth0.octets.tx", OriginalOrigin: "collectd",
+			OriginalSource: "host2.example.net", OriginalMetric: "interface-eth0.if_octets.tx"},
+		{Origin: "collectd", Source: "host2_example_net", Metric: "net.eth0.packets.rx", OriginalOrigin: "collectd",
+			OriginalSource: "host2.example.net", OriginalMetric: "interface-eth0.if_packets.rx"},
+		{Origin: "collectd", Source: "host2_example_net", Metric: "net.eth0.packets.tx", OriginalOrigin: "collectd",
+			OriginalSource: "host2.example.net", OriginalMetric: "interface-eth0.if_packets.tx"},
+		{Origin: "collectd", Source: "host2_example_net", Metric: "load.load.shortterm", OriginalOrigin: "collectd",
+			OriginalSource: "host2.example.net", OriginalMetric: "load.load.shortterm"},
+		{Origin: "collectd", Source: "host2_example_net", Metric: "load.load.midterm", OriginalOrigin: "collectd",
+			OriginalSource: "host2.example.net", OriginalMetric: "load.load.midterm"},
+		{Origin: "collectd", Source: "host2_example_net", Metric: "load.load.longterm", OriginalOrigin: "collectd",
+			OriginalSource: "host2.example.net", OriginalMetric: "load.load.longterm"},
 	}
 
 	actual := runTestFilter([]*config.ProviderFilterConfig{
@@ -52,7 +52,7 @@ func Test_Filter_Rewrite(test *testing.T) {
 }
 
 func Test_Filter_Discard(test *testing.T) {
-	expected := []catalog.CatalogRecord{
+	expected := []catalog.Record{
 		{Origin: "collectd", Source: "host2.example.net", Metric: "load.load.shortterm",
 			OriginalOrigin: "collectd", OriginalSource: "host2.example.net", OriginalMetric: "load.load.shortterm"},
 		{Origin: "collectd", Source: "host2.example.net", Metric: "load.load.midterm",
@@ -73,7 +73,7 @@ func Test_Filter_Discard(test *testing.T) {
 }
 
 func Test_Filter_Sieve(test *testing.T) {
-	expected := []catalog.CatalogRecord{
+	expected := []catalog.Record{
 		{Origin: "collectd", Source: "host1.example.net", Metric: "load.load.shortterm",
 			OriginalOrigin: "collectd", OriginalSource: "host1.example.net", OriginalMetric: "load.load.shortterm"},
 		{Origin: "collectd", Source: "host1.example.net", Metric: "load.load.midterm",
@@ -94,7 +94,7 @@ func Test_Filter_Sieve(test *testing.T) {
 }
 
 func Test_Filter_Combined(test *testing.T) {
-	expected := []catalog.CatalogRecord{
+	expected := []catalog.Record{
 		{Origin: "collectd", Source: "host1.example.net", Metric: "load.shortterm",
 			OriginalOrigin: "collectd", OriginalSource: "host1.example.net", OriginalMetric: "load.load.shortterm"},
 		{Origin: "collectd", Source: "host1.example.net", Metric: "load.midterm",
@@ -115,8 +115,10 @@ func Test_Filter_Combined(test *testing.T) {
 	}
 }
 
-func runTestFilter(filters []*config.ProviderFilterConfig) []catalog.CatalogRecord {
-	var testRecords = []catalog.CatalogRecord{
+func runTestFilter(filters []*config.ProviderFilterConfig) []catalog.Record {
+	var filteredRecords []catalog.Record
+
+	testRecords := []catalog.Record{
 		{Origin: "collectd", Source: "host1.example.net", Metric: "interface-eth0.if_octets.rx"},
 		{Origin: "collectd", Source: "host1.example.net", Metric: "interface-eth0.if_octets.tx"},
 		{Origin: "collectd", Source: "host1.example.net", Metric: "interface-eth0.if_packets.rx"},
@@ -133,14 +135,12 @@ func runTestFilter(filters []*config.ProviderFilterConfig) []catalog.CatalogReco
 		{Origin: "collectd", Source: "host2.example.net", Metric: "load.load.longterm"},
 	}
 
-	filterOutput := make(chan *catalog.CatalogRecord)
+	filterOutput := make(chan *catalog.Record)
 
 	filterChain := newFilterChain(filters, filterOutput)
 
-	filteredRecords := make([]catalog.CatalogRecord, 0)
-
 	done := make(chan struct{})
-	go func(doneChan chan struct{}, recordChan chan *catalog.CatalogRecord, records *[]catalog.CatalogRecord) {
+	go func(doneChan chan struct{}, recordChan chan *catalog.Record, records *[]catalog.Record) {
 		for {
 			select {
 			case <-doneChan:

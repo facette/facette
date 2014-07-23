@@ -23,12 +23,12 @@ var (
 )
 
 func Test_CatalogOriginList(test *testing.T) {
+	var result []string
+
 	base := []string{
 		"test1",
 		"test2",
 	}
-
-	result := make([]string, 0)
 
 	// Test GET on source list
 	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/origins/", serverConfig.BindAddr),
@@ -122,12 +122,12 @@ func Test_CatalogOriginGet(test *testing.T) {
 }
 
 func Test_CatalogSourceList(test *testing.T) {
+	var result []string
+
 	base := []string{
 		"source1",
 		"source2",
 	}
-
-	result := make([]string, 0)
 
 	// Test GET on source list
 	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/sources/", serverConfig.BindAddr), nil,
@@ -222,6 +222,8 @@ func Test_CatalogSourceGet(test *testing.T) {
 }
 
 func Test_CatalogMetricList(test *testing.T) {
+	var result []string
+
 	// Test GET on metrics list
 	base := []string{
 		"database1.test",
@@ -230,8 +232,6 @@ func Test_CatalogMetricList(test *testing.T) {
 		"database2/test",
 		"database3/test",
 	}
-
-	result := make([]string, 0)
 
 	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/metrics/", serverConfig.BindAddr), nil,
 		&result)
@@ -318,6 +318,12 @@ func Test_CatalogMetricGet(test *testing.T) {
 }
 
 func Test_LibraryScaleHandle(test *testing.T) {
+	var (
+		listBase     server.ItemListResponse
+		listResult   server.ItemListResponse
+		valuesResult []server.ScaleValueResponse
+	)
+
 	baseURL := fmt.Sprintf("http://%s/api/v1/library/scales/", serverConfig.BindAddr)
 
 	// Define a sample scale
@@ -325,9 +331,6 @@ func Test_LibraryScaleHandle(test *testing.T) {
 		Value: 0.125}
 
 	// Test GET on scales list
-	listBase := server.ItemListResponse{}
-	listResult := server.ItemListResponse{}
-
 	response := execTestRequest(test, "GET", baseURL, nil, &listResult)
 
 	if response.StatusCode != http.StatusOK {
@@ -406,21 +409,19 @@ func Test_LibraryScaleHandle(test *testing.T) {
 	}
 
 	// Test GET on scales values
-	labelsBase := []server.ScaleValueResponse{
+	valuesBase := []server.ScaleValueResponse{
 		server.ScaleValueResponse{Name: scaleBase.Name, Value: scaleBase.Value},
 	}
 
-	labelsResult := make([]server.ScaleValueResponse, 0)
-
-	response = execTestRequest(test, "GET", baseURL+"/values", nil, &labelsResult)
+	response = execTestRequest(test, "GET", baseURL+"/values", nil, &valuesResult)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
 		test.Fail()
 	}
 
-	if !reflect.DeepEqual(labelsBase, labelsResult) {
-		test.Logf("\nExpected %#v\nbut got  %#v", labelsBase, labelsResult)
+	if !reflect.DeepEqual(valuesBase, valuesResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", valuesBase, valuesResult)
 		test.Fail()
 	}
 
@@ -469,7 +470,7 @@ func Test_LibraryScaleHandle(test *testing.T) {
 	// Test GET on scales list (offset and limit)
 	listBase = server.ItemListResponse{}
 
-	for i := 0; i < 3; i += 1 {
+	for i := 0; i < 3; i++ {
 		scaleTemp := &library.Scale{}
 		utils.Clone(scaleBase, scaleTemp)
 
@@ -557,6 +558,12 @@ func Test_LibraryScaleHandle(test *testing.T) {
 }
 
 func Test_LibraryUnitHandle(test *testing.T) {
+	var (
+		listBase     server.ItemListResponse
+		listResult   server.ItemListResponse
+		labelsResult []server.UnitValueResponse
+	)
+
 	baseURL := fmt.Sprintf("http://%s/api/v1/library/units/", serverConfig.BindAddr)
 
 	// Define a sample unit
@@ -564,9 +571,6 @@ func Test_LibraryUnitHandle(test *testing.T) {
 		Label: "B"}
 
 	// Test GET on units list
-	listBase := server.ItemListResponse{}
-	listResult := server.ItemListResponse{}
-
 	response := execTestRequest(test, "GET", baseURL, nil, &listResult)
 
 	if response.StatusCode != http.StatusOK {
@@ -649,8 +653,6 @@ func Test_LibraryUnitHandle(test *testing.T) {
 		server.UnitValueResponse{Name: unitBase.Name, Label: unitBase.Label},
 	}
 
-	labelsResult := make([]server.UnitValueResponse, 0)
-
 	response = execTestRequest(test, "GET", baseURL+"/labels", nil, &labelsResult)
 
 	if response.StatusCode != http.StatusOK {
@@ -708,7 +710,7 @@ func Test_LibraryUnitHandle(test *testing.T) {
 	// Test GET on units list (offset and limit)
 	listBase = server.ItemListResponse{}
 
-	for i := 0; i < 3; i += 1 {
+	for i := 0; i < 3; i++ {
 		unitTemp := &library.Unit{}
 		utils.Clone(unitBase, unitTemp)
 
@@ -824,6 +826,11 @@ func Test_LibraryMetricGroupHandle(test *testing.T) {
 }
 
 func Test_LibraryGraphHandle(test *testing.T) {
+	var (
+		listBase   server.ItemListResponse
+		listResult server.ItemListResponse
+	)
+
 	baseURL := fmt.Sprintf("http://%s/api/v1/library/graphs/", serverConfig.BindAddr)
 
 	// Define a sample graph
@@ -845,9 +852,6 @@ func Test_LibraryGraphHandle(test *testing.T) {
 	graphBase.Groups = append(graphBase.Groups, group)
 
 	// Test GET on graphs list
-	listBase := server.ItemListResponse{}
-	listResult := server.ItemListResponse{}
-
 	response := execTestRequest(test, "GET", baseURL, nil, &listResult)
 
 	if response.StatusCode != http.StatusOK {
@@ -970,7 +974,7 @@ func Test_LibraryGraphHandle(test *testing.T) {
 	// Test GET on graphs list (offset and limit)
 	listBase = server.ItemListResponse{}
 
-	for i := 0; i < 3; i += 1 {
+	for i := 0; i < 3; i++ {
 		graphTemp := &library.Graph{}
 		utils.Clone(graphBase, graphTemp)
 
@@ -1058,10 +1062,14 @@ func Test_LibraryGraphHandle(test *testing.T) {
 }
 
 func Test_LibraryCollectionHandle(test *testing.T) {
-	var collectionBase struct {
-		*library.Collection
-		Parent string `json:"parent"`
-	}
+	var (
+		listBase       server.ItemListResponse
+		listResult     server.ItemListResponse
+		collectionBase struct {
+			*library.Collection
+			Parent string `json:"parent"`
+		}
+	)
 
 	baseURL := fmt.Sprintf("http://%s/api/v1/library/collections/", serverConfig.BindAddr)
 
@@ -1080,9 +1088,6 @@ func Test_LibraryCollectionHandle(test *testing.T) {
 			Options: map[string]interface{}{"range": "-1w"}})
 
 	// Test GET on collections list
-	listBase := server.ItemListResponse{}
-	listResult := server.ItemListResponse{}
-
 	response := execTestRequest(test, "GET", baseURL, nil, &listResult)
 
 	if response.StatusCode != http.StatusOK {
@@ -1205,7 +1210,7 @@ func Test_LibraryCollectionHandle(test *testing.T) {
 	// Test GET on collections list (offset and limit)
 	listBase = server.ItemListResponse{}
 
-	for i := 0; i < 3; i += 1 {
+	for i := 0; i < 3; i++ {
 		collectionTemp := &library.Collection{}
 		utils.Clone(collectionBase, collectionTemp)
 
@@ -1295,12 +1300,15 @@ func Test_LibraryCollectionHandle(test *testing.T) {
 func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group, expandData,
 	expandBase server.ExpandRequest) {
 
+	var (
+		listBase     server.ItemListResponse
+		listResult   server.ItemListResponse
+		expandResult []server.ExpandRequest
+	)
+
 	baseURL := fmt.Sprintf("http://%s/api/v1/library/%s/", serverConfig.BindAddr, urlPrefix)
 
 	// Test GET on groups list
-	listBase := server.ItemListResponse{}
-	listResult := server.ItemListResponse{}
-
 	response := execTestRequest(test, "GET", baseURL, nil, &listResult)
 
 	if response.StatusCode != http.StatusOK {
@@ -1408,8 +1416,6 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 	// Test group expansion
 	data, _ = json.Marshal(expandData)
 
-	expandResult := make([]server.ExpandRequest, 0)
-
 	response = execTestRequest(test, "POST", fmt.Sprintf("http://%s/api/v1/library/expand", serverConfig.BindAddr),
 		strings.NewReader(string(data)), &expandResult)
 
@@ -1444,7 +1450,7 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 	// Test GET on groups list (offset and limit)
 	listBase = server.ItemListResponse{}
 
-	for i := 0; i < 3; i += 1 {
+	for i := 0; i < 3; i++ {
 		groupTemp := &library.Group{}
 		utils.Clone(groupBase, groupTemp)
 

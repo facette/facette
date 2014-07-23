@@ -82,6 +82,8 @@ func init() {
 
 // GetPlots retrieves time series data from origin based on a query and a time interval.
 func (connector *FacetteConnector) GetPlots(query *types.PlotQuery) ([]*types.PlotResult, error) {
+	var result []*types.PlotResult
+
 	// Convert plotQuery into plotRequest-like to forward query to upstream Facette API
 	plotRequest := facettePlotRequest{
 		Time:   query.StartTime,
@@ -164,8 +166,6 @@ func (connector *FacetteConnector) GetPlots(query *types.PlotQuery) ([]*types.Pl
 		return nil, fmt.Errorf("unable to unmarshal upstream response: %s", err)
 	}
 
-	result := make([]*types.PlotResult, 0)
-
 	for _, serie := range plotResponse.Series {
 		result = append(result, &types.PlotResult{
 			Plots: serie.Plots,
@@ -177,7 +177,7 @@ func (connector *FacetteConnector) GetPlots(query *types.PlotQuery) ([]*types.Pl
 }
 
 // Refresh triggers a full connector data update.
-func (connector *FacetteConnector) Refresh(originName string, outputChan chan *catalog.CatalogRecord) error {
+func (connector *FacetteConnector) Refresh(originName string, outputChan chan *catalog.Record) error {
 	httpTransport := &http.Transport{
 		Dial: (&net.Dialer{
 			// Enable dual IPv4/IPv6 stack connectivity:
@@ -220,7 +220,7 @@ func (connector *FacetteConnector) Refresh(originName string, outputChan chan *c
 	for upstreamOriginName, upstreamOrigin := range upstreamCatalog {
 		for sourceName, metrics := range upstreamOrigin {
 			for _, metric := range metrics {
-				outputChan <- &catalog.CatalogRecord{
+				outputChan <- &catalog.Record{
 					Origin:    upstreamOriginName,
 					Source:    sourceName,
 					Metric:    metric,

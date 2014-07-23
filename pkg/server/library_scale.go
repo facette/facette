@@ -119,7 +119,10 @@ func (server *Server) serveScale(writer http.ResponseWriter, request *http.Reque
 }
 
 func (server *Server) serveScaleList(writer http.ResponseWriter, request *http.Request) {
-	var offset, limit int
+	var (
+		items         ItemListResponse
+		offset, limit int
+	)
 
 	if response, status := server.parseListRequest(writer, request, &offset, &limit); status != http.StatusOK {
 		server.serveResponse(writer, response, status)
@@ -127,8 +130,6 @@ func (server *Server) serveScaleList(writer http.ResponseWriter, request *http.R
 	}
 
 	// Fill scales list
-	items := make(ItemListResponse, 0)
-
 	for _, scale := range server.Library.Scales {
 		if request.FormValue("filter") != "" && !utils.FilterMatch(request.FormValue("filter"), scale.Name) {
 			continue
@@ -154,7 +155,10 @@ func (server *Server) serveScaleList(writer http.ResponseWriter, request *http.R
 }
 
 func (server *Server) serveScaleValues(writer http.ResponseWriter, request *http.Request) {
-	var offset, limit int
+	var (
+		items         ScaleValueListResponse
+		offset, limit int
+	)
 
 	if request.Method != "GET" && request.Method != "HEAD" {
 		server.serveResponse(writer, nil, http.StatusMethodNotAllowed)
@@ -167,8 +171,6 @@ func (server *Server) serveScaleValues(writer http.ResponseWriter, request *http
 	}
 
 	// Fill scales values list
-	items := make(ScaleValueListResponse, 0)
-
 	for _, scale := range server.Library.Scales {
 		items = append(items, &ScaleValueResponse{
 			Name:  scale.Name,

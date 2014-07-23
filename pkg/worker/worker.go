@@ -27,8 +27,8 @@ type Worker struct {
 	wg        *sync.WaitGroup
 }
 
-// WorkerPool represents a pool of worker instances.
-type WorkerPool struct {
+// Pool represents a pool of worker instances.
+type Pool struct {
 	Workers []*Worker
 	Wg      *sync.WaitGroup
 }
@@ -115,16 +115,16 @@ func (worker *Worker) Shutdown() {
 	}
 }
 
-// NewWorkerPool creates a new worker pool.
-func NewWorkerPool() WorkerPool {
-	return WorkerPool{
+// NewPool creates a new worker pool.
+func NewPool() Pool {
+	return Pool{
 		Workers: make([]*Worker, 0),
 		Wg:      &sync.WaitGroup{},
 	}
 }
 
 // Add adds worker to the worker pool.
-func (workerPool *WorkerPool) Add(worker *Worker) {
+func (workerPool *Pool) Add(worker *Worker) {
 	workerPool.Wg.Add(1)
 	worker.wg = workerPool.Wg
 
@@ -132,7 +132,7 @@ func (workerPool *WorkerPool) Add(worker *Worker) {
 }
 
 // Broadcast sends an event to all workers of the worker pool.
-func (workerPool WorkerPool) Broadcast(event int, args ...interface{}) {
+func (workerPool Pool) Broadcast(event int, args ...interface{}) {
 	for _, worker := range workerPool.Workers {
 		worker.SendEvent(event, true, args...)
 	}

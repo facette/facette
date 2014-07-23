@@ -51,9 +51,10 @@ func (server *Server) serveReload(writer http.ResponseWriter, request *http.Requ
 }
 
 func (server *Server) serveResponse(writer http.ResponseWriter, data interface{}, status int) {
-	var err error
-
-	output := make([]byte, 0)
+	var (
+		err    error
+		output []byte
+	)
 
 	if data != nil {
 		output, err = json.Marshal(data)
