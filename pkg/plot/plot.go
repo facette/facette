@@ -253,36 +253,39 @@ func (series Series) Percentiles(percentiles []float64) {
 }
 
 // SumSeries add series plots together and return the sum at each datapoint.
-func SumSeries(series []Series) (Series, error) {
-	nSeries := len(series)
+func SumSeries(seriesList []Series) (Series, error) {
+	nSeries := len(seriesList)
+
 	if nSeries == 0 {
 		return Series{}, fmt.Errorf("no series provided")
 	}
 
-	// Check if series are normalized (= have the same number of plots)
-	plotsPerSeries := len(series[0].Plots)
-	for i := range series {
-		if len(series[i].Plots) != plotsPerSeries {
-			return Series{}, fmt.Errorf("series are not normalized")
+	// Find out the longest series of the list
+	maxPlots := len(seriesList[0].Plots)
+	for i := range seriesList {
+		if len(seriesList[i].Plots) > maxPlots {
+			maxPlots = len(seriesList[i].Plots)
 		}
-
-		plotsPerSeries = len(series[0].Plots)
 	}
 
-	sum := Series{
-		Plots:   make([]Plot, plotsPerSeries),
+	sumSeries := Series{
+		Plots:   make([]Plot, maxPlots),
 		Summary: make(map[string]Value),
 	}
 
-	for i := 0; i < plotsPerSeries; i++ {
-		for _, serie := range series {
-			if !serie.Plots[i].Value.IsNaN() {
-				sum.Plots[i].Value += serie.Plots[i].Value
+	for plotIndex := 0; plotIndex < maxPlots; plotIndex++ {
+		for _, series := range seriesList {
+			// Skip shorter series
+			if plotIndex >= len(series.Plots) {
+				continue
 			}
 
-			sum.Plots[i].Time = series[0].Plots[i].Time
+			if !series.Plots[plotIndex].Value.IsNaN() {
+				sumSeries.Plots[plotIndex].Value += series.Plots[plotIndex].Value
+				sumSeries.Plots[plotIndex].Time = series.Plots[plotIndex].Time
+			}
 		}
 	}
 
-	return sum, nil
+	return sumSeries, nil
 }

@@ -147,10 +147,15 @@ func Test_SumSeries(test *testing.T) {
 			Plots: []Plot{{Value: 150}, {Value: 201}, {Value: 169}, {Value: 227}, {Value: 181}},
 		}
 
-		// Invalid series: not normalized
+		// Valid series: not normalized
 		testNotNormalized = []Series{
 			Series{Plots: []Plot{{Value: 85}, {Value: 62}, {Value: 71}, {Value: 78}, {Value: 72}}},
-			Series{Plots: []Plot{{Value: 70}, {Value: 96}, {Value: 93}, {Value: 66}}},
+			Series{Plots: []Plot{{Value: 70}, {Value: 96}, {Value: 93}}},
+			Series{Plots: []Plot{{Value: 55}, {Value: 48}, {Value: 39}, {Value: 53}}},
+		}
+
+		expectedNotNormalized = Series{
+			Plots: []Plot{{Value: 210}, {Value: 206}, {Value: 203}, {Value: 131}, {Value: 72}},
 		}
 	)
 
@@ -178,9 +183,14 @@ func Test_SumSeries(test *testing.T) {
 		return
 	}
 
-	_, err = SumSeries(testNotNormalized)
-	if err == nil {
-		test.Logf("SumSeries(testNotNormalized) did not return an error")
+	sumNotNormalized, err := SumSeries(testNotNormalized)
+	if err != nil {
+		test.Logf("SumSeries(testNotNormalized) returned an error: %s", err)
+		test.Fail()
+	}
+
+	if err = compareSeries(expectedNotNormalized, sumNotNormalized); err != nil {
+		test.Logf(fmt.Sprintf("SumSeries(testNotNormalized): %s", err))
 		test.Fail()
 		return
 	}
