@@ -11,6 +11,7 @@ case "$1" in
     remove)
         unset_perms /etc/facette
         unset_perms /etc/facette/facette.json
+        unset_perms /etc/facette/providers
         unset_perms /var/lib/facette
         unset_perms /var/log/facette
 
