@@ -1,6 +1,10 @@
 
 function adminCollectionCreateGraph(value) {
-    var $item = listAppend(listMatch('step-1-graphs'))
+    var $list = listMatch('step-1-graphs'),
+        $item,
+        id;
+
+    $item = listAppend($list)
         .attr('data-graph', value.id)
         .data('value', value);
 
@@ -8,6 +12,14 @@ function adminCollectionCreateGraph(value) {
 
     $item.find('.toggle a[href=#hide-options]').hide();
     $item.find('.options').hide();
+
+    // Make checkbox id unique
+    id = 'graph-enabled-item' + (listGetCount($list) - 1);
+
+    $item.find('input[name=graph-enabled]')
+        .attr('id', id);
+    $item.find('label[for=graph-enabled]')
+        .attr('for', id);
 
     return $item;
 }
