@@ -91,14 +91,14 @@ func getSetting(config map[string]interface{}, setting string, kind reflect.Kind
 	mandatory bool, fallbackValue interface{}) (interface{}, error) {
 	if _, ok := config[setting]; !ok {
 		if mandatory {
-			return fallbackValue, fmt.Errorf("missing `%s' mandatory setting", setting)
+			return fallbackValue, fmt.Errorf("missing mandatory setting `%s'", setting)
 		}
 
 		return fallbackValue, nil
 	}
 
 	if reflect.ValueOf(config[setting]).Kind() != kind {
-		return fallbackValue, fmt.Errorf("setting `%s' value should be a %s", setting, kind.String())
+		return fallbackValue, fmt.Errorf("setting `%s' value should be of type %s", setting, kind.String())
 	}
 
 	return config[setting], nil
