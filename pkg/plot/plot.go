@@ -172,11 +172,11 @@ func (series *Series) Downsample(sample int) {
 			padCount = 0
 
 			if bucketCount == 0 {
-				series.Plots = append(series.Plots, Plot{Value: Value(math.NaN()), Time: plots[nPlots-1].Time})
+				series.Plots = append(series.Plots, Plot{Value: Value(math.NaN()), Time: plots[i].Time})
 				continue
 			}
 
-			series.Plots = append(series.Plots, Plot{Value: Value(bucket / bucketCount), Time: plots[nPlots-1].Time})
+			series.Plots = append(series.Plots, Plot{Value: Value(bucket / bucketCount), Time: plots[i].Time})
 
 			bucket = 0
 			bucketCount = 0

@@ -268,8 +268,6 @@ function graphDraw(graph, postpone, delay, preview) {
                     marker: {
                         enabled: false
                     },
-                    pointInterval: data.step * 1000,
-                    pointStart: startTime.valueOf(),
                     states: {
                         hover: {
                             lineWidth: 2.5
@@ -331,10 +329,8 @@ function graphDraw(graph, postpone, delay, preview) {
 
                 for (i in data.series) {
                     // Transform unix epochs to Date objects
-                    for (j in data.series[i].plots) {
-                        data.series[i].plots[j] = [moment(data.series[i].plots[j][0]).toDate(),
-                            data.series[i].plots[j][1]];
-                    }
+                    for (j in data.series[i].plots)
+                        data.series[i].plots[j] = [data.series[i].plots[j][0] * 1000, data.series[i].plots[j][1]];
 
                     highchartOpts.series.push({
                         id: data.series[i].name,
