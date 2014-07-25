@@ -18,7 +18,21 @@ type Plot struct {
 
 // MarshalJSON handles JSON marshalling of the Plot type.
 func (plot Plot) MarshalJSON() ([]byte, error) {
-	return json.Marshal([]interface{}{int(plot.Time.Unix()), plot.Value})
+	return json.Marshal([2]interface{}{int(plot.Time.Unix()), plot.Value})
+}
+
+// UnmarshalJSON handles JSON marshalling of the Plot type.
+func (plot *Plot) UnmarshalJSON(data []byte) error {
+	var input [2]float64
+
+	if err := json.Unmarshal(data, &input); err != nil {
+		return err
+	}
+
+	plot.Time = time.Unix(int64(input[0]), 0)
+	plot.Value = Value(input[1])
+
+	return nil
 }
 
 // Value represents a graph plot value.
