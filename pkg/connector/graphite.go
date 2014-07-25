@@ -9,11 +9,13 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/config"
+	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/plot"
 	"github.com/facette/facette/pkg/utils"
 )
@@ -34,7 +36,9 @@ type GraphiteConnector struct {
 	name        string
 	URL         string
 	insecureTLS bool
+	pattern     string
 	timeout     float64
+	series      map[string]map[string]string
 }
 
 func init() {
@@ -44,9 +48,14 @@ func init() {
 		connector := &GraphiteConnector{
 			name:        name,
 			insecureTLS: false,
+			series:      make(map[string]map[string]string),
 		}
 
 		if connector.URL, err = config.GetString(settings, "url", true); err != nil {
+			return nil, err
+		}
+
+		if connector.pattern, err = config.GetString(settings, "pattern", true); err != nil {
 			return nil, err
 		}
 
@@ -138,7 +147,29 @@ func (connector *GraphiteConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 
 // Refresh triggers a full connector data update.
 func (connector *GraphiteConnector) Refresh(originName string, outputChan chan *catalog.Record) error {
-	var metrics []string
+	var seriesList []string
+
+	// Compile pattern
+	re := regexp.MustCompile(connector.pattern)
+
+	// Validate pattern keywords
+	groups := make(map[string]bool)
+
+	for _, key := range re.SubexpNames() {
+		if key == "" {
+			continue
+		} else if key == "source" || key == "metric" {
+			groups[key] = true
+		} else {
+			return fmt.Errorf("graphite[%s]: invalid pattern keyword `%s'", connector.name, key)
+		}
+	}
+
+	if !groups["source"] {
+		return fmt.Errorf("graphite[%s]: missing pattern keyword `source'", connector.name)
+	} else if !groups["metric"] {
+		return fmt.Errorf("graphite[%s]: missing pattern keyword `metric'", connector.name)
+	}
 
 	httpTransport := &http.Transport{
 		Dial: (&net.Dialer{
@@ -177,22 +208,38 @@ func (connector *GraphiteConnector) Refresh(originName string, outputChan chan *
 		return fmt.Errorf("graphite[%s]: unable to read HTTP response body: %s", connector.name, err)
 	}
 
-	if err = json.Unmarshal(data, &metrics); err != nil {
+	if err = json.Unmarshal(data, &seriesList); err != nil {
 		return fmt.Errorf("graphite[%s]: unable to unmarshal JSON data: %s", connector.name, err)
 	}
 
-	for _, metric := range metrics {
+	for _, series := range seriesList {
 		var sourceName, metricName string
 
-		index := strings.Index(metric, ".")
-
-		if index == -1 {
-			sourceName = "unknown"
-			metricName = metric
-		} else {
-			sourceName = metric[0:index]
-			metricName = metric[index+1:]
+		submatch := re.FindStringSubmatch(series)
+		if len(submatch) == 0 {
+			logger.Log(
+				logger.LevelInfo,
+				"connector",
+				"graphite[%s]: file `%s' does not match pattern, ignoring",
+				connector.name,
+				series,
+			)
+			return nil
 		}
+
+		if re.SubexpNames()[1] == "source" {
+			sourceName = submatch[1]
+			metricName = submatch[2]
+		} else {
+			sourceName = submatch[2]
+			metricName = submatch[1]
+		}
+
+		if _, ok := connector.series[sourceName]; !ok {
+			connector.series[sourceName] = make(map[string]string)
+		}
+
+		connector.series[sourceName][metricName] = series
 
 		outputChan <- &catalog.Record{
 			Origin:    originName,

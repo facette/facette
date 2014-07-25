@@ -1,7 +1,8 @@
 {
 	"connector": {
 		"type": "graphite",
-		"url": "http://graphite.example.net/"
+		"url": "http://graphite.example.net/",
+		"pattern": "(?P<source>[^\\.]+)\\.(?P<metric>.+)"
 	},
 
 		"filters": [
