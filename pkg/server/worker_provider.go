@@ -68,7 +68,7 @@ func workerProviderInit(w *worker.Worker, args ...interface{}) {
 	logger.Log(logger.LevelDebug, "provider", "%s: init", prov.Name)
 
 	// Instanciate the connector according to its type
-	conn, err := connector.Connectors[connectorType](prov.Config.Connector)
+	conn, err := connector.Connectors[connectorType](prov.Name, prov.Config.Connector)
 	if err != nil {
 		w.ReturnErr(err)
 		return

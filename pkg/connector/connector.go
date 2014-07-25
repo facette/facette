@@ -24,5 +24,5 @@ type Connector interface {
 
 var (
 	// Connectors represents the list of all available connector handlers.
-	Connectors = make(map[string]func(map[string]interface{}) (Connector, error))
+	Connectors = make(map[string]func(string, map[string]interface{}) (Connector, error))
 )

@@ -31,16 +31,18 @@ type graphitePlot struct {
 
 // GraphiteConnector represents the main structure of the Graphite connector.
 type GraphiteConnector struct {
+	name        string
 	URL         string
 	insecureTLS bool
 	timeout     float64
 }
 
 func init() {
-	Connectors["graphite"] = func(settings map[string]interface{}) (Connector, error) {
+	Connectors["graphite"] = func(name string, settings map[string]interface{}) (Connector, error) {
 		var err error
 
 		connector := &GraphiteConnector{
+			name:        name,
 			insecureTLS: false,
 		}
 
@@ -72,14 +74,14 @@ func (connector *GraphiteConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 	)
 
 	if len(query.Group.Series) == 0 {
-		return nil, fmt.Errorf("group has no series")
+		return nil, fmt.Errorf("graphite[%s]: group has no series", connector.name)
 	} else if query.Group.Type != OperGroupTypeNone && len(query.Group.Series) == 1 {
 		query.Group.Type = OperGroupTypeNone
 	}
 
 	queryURL, err := graphiteBuildQueryURL(query.Group, query.StartTime, query.EndTime)
 	if err != nil {
-		return nil, fmt.Errorf("unable to build Graphite query URL: %s", err)
+		return nil, fmt.Errorf("graphite[%s]: unable to build query URL: %s", connector.name, err)
 	}
 
 	httpTransport := &http.Transport{
@@ -99,7 +101,7 @@ func (connector *GraphiteConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 
 	request, err := http.NewRequest("GET", strings.TrimSuffix(connector.URL, "/")+queryURL, nil)
 	if err != nil {
-		return nil, fmt.Errorf("unable to set up HTTP request: %s", err)
+		return nil, fmt.Errorf("graphite[%s]: unable to set up HTTP request: %s", connector.name, err)
 	}
 
 	request.Header.Add("User-Agent", "Facette")
@@ -107,24 +109,28 @@ func (connector *GraphiteConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 
 	response, err := httpClient.Do(request)
 	if err != nil {
-		return nil, fmt.Errorf("unable to perform HTTP request: %s", err)
+		return nil, fmt.Errorf("graphite[%s]: unable to perform HTTP request: %s", connector.name, err)
 	}
 
 	if err = graphiteCheckBackendResponse(response); err != nil {
-		return nil, fmt.Errorf("invalid HTTP backend response: %s", err)
+		return nil, fmt.Errorf("graphite[%s]: invalid HTTP backend response: %s", connector.name, err)
 	}
 
 	data, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return nil, fmt.Errorf("unable to read HTTP response body: %s", err)
+		return nil, fmt.Errorf("graphite[%s]: unable to read HTTP response body: %s", connector.name, err)
 	}
 
 	if err = json.Unmarshal(data, &graphitePlots); err != nil {
-		return nil, fmt.Errorf("unable to unmarshal JSON data: %s", err)
+		return nil, fmt.Errorf("graphite[%s]: unable to unmarshal JSON data: %s", connector.name, err)
 	}
 
 	if resultSeries, err = graphiteExtractResult(graphitePlots); err != nil {
-		return nil, fmt.Errorf("unable to extract plot values from backend response: %s", err)
+		return nil, fmt.Errorf(
+			"graphite[%s]: unable to extract plot values from backend response: %s",
+			connector.name,
+			err,
+		)
 	}
 
 	return resultSeries, nil
@@ -151,7 +157,7 @@ func (connector *GraphiteConnector) Refresh(originName string, outputChan chan *
 
 	request, err := http.NewRequest("GET", strings.TrimSuffix(connector.URL, "/")+graphiteURLMetrics, nil)
 	if err != nil {
-		return fmt.Errorf("unable to set up HTTP request: %s", err)
+		return fmt.Errorf("graphite[%s]: unable to set up HTTP request: %s", connector.name, err)
 	}
 
 	request.Header.Add("User-Agent", "Facette")
@@ -159,20 +165,20 @@ func (connector *GraphiteConnector) Refresh(originName string, outputChan chan *
 
 	response, err := httpClient.Do(request)
 	if err != nil {
-		return fmt.Errorf("unable to perform HTTP request: %s", err)
+		return fmt.Errorf("graphite[%s]: unable to perform HTTP request: %s", connector.name, err)
 	}
 
 	if err = graphiteCheckBackendResponse(response); err != nil {
-		return fmt.Errorf("invalid HTTP backend response: %s", err)
+		return fmt.Errorf("graphite[%s]: invalid HTTP backend response: %s", connector.name, err)
 	}
 
 	data, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return fmt.Errorf("unable to read HTTP response body: %s", err)
+		return fmt.Errorf("graphite[%s]: unable to read HTTP response body: %s", connector.name, err)
 	}
 
 	if err = json.Unmarshal(data, &metrics); err != nil {
-		return fmt.Errorf("unable to unmarshal JSON data: %s", err)
+		return fmt.Errorf("graphite[%s]: unable to unmarshal JSON data: %s", connector.name, err)
 	}
 
 	for _, metric := range metrics {

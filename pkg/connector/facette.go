@@ -54,15 +54,16 @@ type facetteSeries struct {
 
 // FacetteConnector represents the main structure of the Facette connector.
 type FacetteConnector struct {
+	name     string
 	upstream string
 	timeout  float64
 }
 
 func init() {
-	Connectors["facette"] = func(settings map[string]interface{}) (Connector, error) {
+	Connectors["facette"] = func(name string, settings map[string]interface{}) (Connector, error) {
 		var err error
 
-		connector := &FacetteConnector{}
+		connector := &FacetteConnector{name: name}
 
 		if connector.upstream, err = config.GetString(settings, "upstream", true); err != nil {
 			return nil, err
@@ -120,7 +121,7 @@ func (connector *FacetteConnector) GetPlots(query *plot.Query) ([]plot.Series, e
 
 	requestBody, err := json.Marshal(plotRequest)
 	if err != nil {
-		return nil, fmt.Errorf("unable to marshal plot request: %s", err)
+		return nil, fmt.Errorf("facette[%s]: unable to marshal plot request: %s", connector.name, err)
 	}
 
 	httpTransport := &http.Transport{
@@ -139,7 +140,7 @@ func (connector *FacetteConnector) GetPlots(query *plot.Query) ([]plot.Series, e
 		strings.TrimSuffix(connector.upstream, "/")+facetteURLLibraryGraphsPlots,
 		bytes.NewReader(requestBody))
 	if err != nil {
-		return nil, fmt.Errorf("unable to set up HTTP request: %s", err)
+		return nil, fmt.Errorf("facette[%s]: unable to set up HTTP request: %s", connector.name, err)
 	}
 
 	request.Header.Add("Content-Type", "application/json")
@@ -148,22 +149,22 @@ func (connector *FacetteConnector) GetPlots(query *plot.Query) ([]plot.Series, e
 
 	response, err := httpClient.Do(request)
 	if err != nil {
-		return nil, fmt.Errorf("unable to perform HTTP request: %s", err)
+		return nil, fmt.Errorf("facette[%s]: unable to perform HTTP request: %s", connector.name, err)
 	}
 
 	if err := facetteCheckConnectorResponse(response); err != nil {
-		return nil, fmt.Errorf("invalid upstream HTTP response: %s", err)
+		return nil, fmt.Errorf("facette[%s]: invalid upstream HTTP response: %s", connector.name, err)
 	}
 
 	data, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return nil, fmt.Errorf("unable to read HTTP response body: %s", err)
+		return nil, fmt.Errorf("facette[%s]: unable to read HTTP response body: %s", connector.name, err)
 	}
 
 	plotResponse := facettePlotResponse{}
 
 	if err := json.Unmarshal(data, &plotResponse); err != nil {
-		return nil, fmt.Errorf("unable to unmarshal upstream response: %s", err)
+		return nil, fmt.Errorf("facette[%s]: unable to unmarshal upstream response: %s", connector.name, err)
 	}
 
 	for _, series := range plotResponse.Series {
@@ -191,7 +192,7 @@ func (connector *FacetteConnector) Refresh(originName string, outputChan chan *c
 
 	request, err := http.NewRequest("GET", strings.TrimSuffix(connector.upstream, "/")+facetteURLCatalog, nil)
 	if err != nil {
-		return fmt.Errorf("unable to set up HTTP request: %s", err)
+		return fmt.Errorf("facette[%s]: unable to set up HTTP request: %s", connector.name, err)
 	}
 
 	request.Header.Add("User-Agent", "Facette")
@@ -199,21 +200,21 @@ func (connector *FacetteConnector) Refresh(originName string, outputChan chan *c
 
 	response, err := httpClient.Do(request)
 	if err != nil {
-		return fmt.Errorf("unable to perform HTTP request: %s", err)
+		return fmt.Errorf("facette[%s]: unable to perform HTTP request: %s", connector.name, err)
 	}
 
 	if err = facetteCheckConnectorResponse(response); err != nil {
-		return fmt.Errorf("invalid HTTP backend response: %s", err)
+		return fmt.Errorf("facette[%s]: invalid HTTP backend response: %s", connector.name, err)
 	}
 
 	data, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return fmt.Errorf("unable to read HTTP response body: %s", err)
+		return fmt.Errorf("facette[%s]: unable to read HTTP response body: %s", connector.name, err)
 	}
 
 	upstreamCatalog := make(map[string]map[string][]string)
 	if err = json.Unmarshal(data, &upstreamCatalog); err != nil {
-		return fmt.Errorf("unable to unmarshal JSON data: %s", err)
+		return fmt.Errorf("facette[%s]: unable to unmarshal JSON data: %s", connector.name, err)
 	}
 
 	// Parse the upstream catalog entries and append them to our local catalog

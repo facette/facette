@@ -26,6 +26,7 @@ type rrdMetric struct {
 
 // RRDConnector represents the main structure of the RRD connector.
 type RRDConnector struct {
+	name    string
 	path    string
 	pattern string
 	daemon  string
@@ -33,10 +34,11 @@ type RRDConnector struct {
 }
 
 func init() {
-	Connectors["rrd"] = func(settings map[string]interface{}) (Connector, error) {
+	Connectors["rrd"] = func(name string, settings map[string]interface{}) (Connector, error) {
 		var err error
 
 		connector := &RRDConnector{
+			name:    name,
 			metrics: make(map[string]map[string]*rrdMetric),
 		}
 
@@ -65,7 +67,7 @@ func (connector *RRDConnector) GetPlots(query *plot.Query) ([]plot.Series, error
 	)
 
 	if len(query.Group.Series) == 0 {
-		return nil, fmt.Errorf("group has no series")
+		return nil, fmt.Errorf("rrd[%s]: group has no series", connector.name)
 	} else if query.Group.Type != OperGroupTypeNone && len(query.Group.Series) == 1 {
 		query.Group.Type = OperGroupTypeNone
 	}
@@ -210,7 +212,7 @@ func (connector *RRDConnector) GetPlots(query *plot.Query) ([]plot.Series, error
 		xport.XportDef(itemName, itemName)
 
 	default:
-		return nil, fmt.Errorf("unknown operator type %d", query.Group.Type)
+		return nil, fmt.Errorf("rrd[%s]: unknown operator type %d", connector.name, query.Group.Type)
 	}
 
 	// Get plots
@@ -264,14 +266,14 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan *catal
 		} else if key == "source" || key == "metric" {
 			groups[key] = true
 		} else {
-			return fmt.Errorf("invalid pattern keyword `%s'", key)
+			return fmt.Errorf("rrd[%s]: invalid pattern keyword `%s'", connector.name, key)
 		}
 	}
 
 	if !groups["source"] {
-		return fmt.Errorf("missing pattern keyword `source'")
+		return fmt.Errorf("rrd[%s]: missing pattern keyword `source'", connector.name)
 	} else if !groups["metric"] {
-		return fmt.Errorf("missing pattern keyword `metric'")
+		return fmt.Errorf("rrd[%s]: missing pattern keyword `metric'", connector.name)
 	}
 
 	// Search for files and parse their path for source/metric pairs
@@ -291,7 +293,13 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan *catal
 
 		submatch := re.FindStringSubmatch(filePath[len(connector.path)+1:])
 		if len(submatch) == 0 {
-			logger.Log(logger.LevelInfo, "connector: rrd", "file `%s' does not match pattern, ignoring", filePath)
+			logger.Log(
+				logger.LevelInfo,
+				"connector",
+				"rrd[%s]: file `%s' does not match pattern, ignoring",
+				connector.name,
+				filePath,
+			)
 			return nil
 		}
 
@@ -310,7 +318,7 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan *catal
 		// Extract metric information from .rrd file
 		info, err := rrd.Info(filePath)
 		if err != nil {
-			logger.Log(logger.LevelWarning, "connector: rrd", "%s", err)
+			logger.Log(logger.LevelWarning, "connector", "rrd[%s]: %s", connector.name, err)
 			return nil
 		}
 
