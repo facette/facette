@@ -113,13 +113,13 @@ function graphDraw(graph, postpone, delay, preview) {
                     i,
                     j;
 
-                if (data.message) {
+                if (data.message || !data.series) {
                     graph.children('.graphctrl')
                         .attr('disabled', 'disabled')
                         .find('a:not([href="#refresh"])')
                             .attr('disabled', 'disabled');
 
-                    graph.find('.placeholder').text(data.message);
+                    graph.find('.placeholder').text(data.message ? data.message : $.t('graph.mesg_empty_series'));
 
                     return;
                 } else {

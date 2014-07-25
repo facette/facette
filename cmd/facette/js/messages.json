@@ -28,6 +28,7 @@
         "mesg_collapse": "You are about to collapse a series with grouped elements. This will remove them from associated groups.",
         "mesg_delete": "You are about to delete “__name__” graph. This action can’t be undone.",
         "mesg_delete_fail": "Unable to delete the graph!",
+        "mesg_empty_series": "Empty series",
         "mesg_exists": "A graph with the same name already exists!",
         "mesg_item_exists": "An item with the same name already exists!",
         "mesg_load_failed": "Failed to load “__name__” graph",
