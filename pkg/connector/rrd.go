@@ -87,26 +87,26 @@ func (connector *RRDConnector) GetPlots(query *plot.Query) ([]plot.Series, error
 
 	switch query.Group.Type {
 	case OperGroupTypeNone:
-		for _, serie := range query.Group.Series {
-			if serie.Metric == nil {
+		for _, series := range query.Group.Series {
+			if series.Metric == nil {
 				continue
 			}
 
-			itemName := fmt.Sprintf("serie%d", count)
+			itemName := fmt.Sprintf("series%d", count)
 			count++
 
 			graph.Def(
 				itemName+"-orig0",
-				connector.metrics[serie.Metric.Source][serie.Metric.Name].FilePath,
-				connector.metrics[serie.Metric.Source][serie.Metric.Name].Dataset,
+				connector.metrics[series.Metric.Source][series.Metric.Name].FilePath,
+				connector.metrics[series.Metric.Source][series.Metric.Name].Dataset,
 				"AVERAGE",
 			)
 
-			serieScale, _ := config.GetFloat(serie.Options, "scale", false)
+			seriesScale, _ := config.GetFloat(series.Options, "scale", false)
 			groupScale, _ := config.GetFloat(query.Group.Options, "scale", false)
 
-			if serieScale != 0 {
-				graph.CDef(itemName+"-orig1", fmt.Sprintf("%s-orig0,%g,*", itemName, serieScale))
+			if seriesScale != 0 {
+				graph.CDef(itemName+"-orig1", fmt.Sprintf("%s-orig0,%g,*", itemName, seriesScale))
 			} else {
 				graph.CDef(itemName+"-orig1", itemName+"-orig0")
 			}
@@ -120,13 +120,13 @@ func (connector *RRDConnector) GetPlots(query *plot.Query) ([]plot.Series, error
 			// Set plots request
 			xport.Def(
 				itemName+"-orig0",
-				connector.metrics[serie.Metric.Source][serie.Metric.Name].FilePath,
-				connector.metrics[serie.Metric.Source][serie.Metric.Name].Dataset,
+				connector.metrics[series.Metric.Source][series.Metric.Name].FilePath,
+				connector.metrics[series.Metric.Source][series.Metric.Name].Dataset,
 				"AVERAGE",
 			)
 
-			if serieScale != 0 {
-				xport.CDef(itemName+"-orig1", fmt.Sprintf("%s-orig0,%g,*", itemName, serieScale))
+			if seriesScale != 0 {
+				xport.CDef(itemName+"-orig1", fmt.Sprintf("%s-orig0,%g,*", itemName, seriesScale))
 			} else {
 				xport.CDef(itemName+"-orig1", itemName+"-orig0")
 			}
@@ -139,48 +139,48 @@ func (connector *RRDConnector) GetPlots(query *plot.Query) ([]plot.Series, error
 
 			xport.XportDef(itemName, itemName)
 
-			if connector.metrics[serie.Metric.Source][serie.Metric.Name].Step > step {
-				step = connector.metrics[serie.Metric.Source][serie.Metric.Name].Step
+			if connector.metrics[series.Metric.Source][series.Metric.Name].Step > step {
+				step = connector.metrics[series.Metric.Source][series.Metric.Name].Step
 			}
 		}
 
 	case OperGroupTypeAvg, OperGroupTypeSum:
-		itemName := fmt.Sprintf("serie%d", count)
+		itemName := fmt.Sprintf("series%d", count)
 		count++
 
-		for index, serie := range query.Group.Series {
-			if serie.Metric == nil {
+		for index, series := range query.Group.Series {
+			if series.Metric == nil {
 				continue
 			}
 
-			serieTemp := itemName + fmt.Sprintf("-tmp%d", index)
+			seriesTemp := itemName + fmt.Sprintf("-tmp%d", index)
 
 			graph.Def(
-				serieTemp+"-ori",
-				connector.metrics[serie.Metric.Source][serie.Metric.Name].FilePath,
-				connector.metrics[serie.Metric.Source][serie.Metric.Name].Dataset,
+				seriesTemp+"-ori",
+				connector.metrics[series.Metric.Source][series.Metric.Name].FilePath,
+				connector.metrics[series.Metric.Source][series.Metric.Name].Dataset,
 				"AVERAGE",
 			)
 
-			graph.CDef(serieTemp, fmt.Sprintf("%s-ori,UN,0,%s-ori,IF", serieTemp, serieTemp))
+			graph.CDef(seriesTemp, fmt.Sprintf("%s-ori,UN,0,%s-ori,IF", seriesTemp, seriesTemp))
 
 			xport.Def(
-				serieTemp+"-ori",
-				connector.metrics[serie.Metric.Source][serie.Metric.Name].FilePath,
-				connector.metrics[serie.Metric.Source][serie.Metric.Name].Dataset,
+				seriesTemp+"-ori",
+				connector.metrics[series.Metric.Source][series.Metric.Name].FilePath,
+				connector.metrics[series.Metric.Source][series.Metric.Name].Dataset,
 				"AVERAGE",
 			)
 
-			xport.CDef(serieTemp, fmt.Sprintf("%s-ori,UN,0,%s-ori,IF", serieTemp, serieTemp))
+			xport.CDef(seriesTemp, fmt.Sprintf("%s-ori,UN,0,%s-ori,IF", seriesTemp, seriesTemp))
 
 			if len(stack) == 0 {
-				stack = append(stack, serieTemp)
+				stack = append(stack, seriesTemp)
 			} else {
-				stack = append(stack, serieTemp, "+")
+				stack = append(stack, seriesTemp, "+")
 			}
 
-			if connector.metrics[serie.Metric.Source][serie.Metric.Name].Step > step {
-				step = connector.metrics[serie.Metric.Source][serie.Metric.Name].Step
+			if connector.metrics[series.Metric.Source][series.Metric.Name].Step > step {
+				step = connector.metrics[series.Metric.Source][series.Metric.Name].Step
 			}
 		}
 

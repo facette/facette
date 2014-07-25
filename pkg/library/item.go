@@ -350,7 +350,7 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 	case LibraryItemGraph:
 		// Check for definition names duplicates
 		groupSet := set.New(set.ThreadSafe)
-		serieSet := set.New(set.ThreadSafe)
+		seriesSet := set.New(set.ThreadSafe)
 
 		for _, group := range item.(*Graph).Groups {
 			if group == nil {
@@ -363,16 +363,16 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 
 			groupSet.Add(group.Name)
 
-			for _, serie := range group.Series {
-				if serie == nil {
-					logger.Log(logger.LevelError, "library", "found null serie in group `%s'", group.Name)
+			for _, series := range group.Series {
+				if series == nil {
+					logger.Log(logger.LevelError, "library", "found null series in group `%s'", group.Name)
 					return os.ErrInvalid
-				} else if serieSet.Has(serie.Name) {
-					logger.Log(logger.LevelError, "library", "duplicate serie name `%s'", serie.Name)
+				} else if seriesSet.Has(series.Name) {
+					logger.Log(logger.LevelError, "library", "duplicate series name `%s'", series.Name)
 					return os.ErrExist
 				}
 
-				serieSet.Add(serie.Name)
+				seriesSet.Add(series.Name)
 			}
 		}
 

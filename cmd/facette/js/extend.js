@@ -57,12 +57,12 @@ if (window.Highcharts) {
             groupTimeout = {},
             groupEvent = function (e) {
                 var $group = $(e.target).closest('.highcharts-table-group'),
-                    serie = $group.find('.highcharts-table-serie').text();
+                    series = $group.find('.highcharts-table-series').text();
 
-                if (groupTimeout[serie])
-                    clearTimeout(groupTimeout[serie]);
+                if (groupTimeout[series])
+                    clearTimeout(groupTimeout[series]);
 
-                groupTimeout[serie] = setTimeout(function () {
+                groupTimeout[series] = setTimeout(function () {
                     if (e.type == 'mouseover')
                         $group.parent().find('.highcharts-table-action').css('visibility', 'hidden');
 
@@ -79,19 +79,19 @@ if (window.Highcharts) {
         $container.find('.highcharts-table-group').remove();
 
         // Render custom legend
-        $.each(chart.series, function (i, serie) {
+        $.each(chart.series, function (i, series) {
             var box,
                 element,
                 keys;
 
-            groups[serie.name] = chart.renderer.g()
+            groups[series.name] = chart.renderer.g()
                 .attr({
                     'class': 'highcharts-table-group'
                 })
                 .add();
 
-            if (!serie.visible)
-                $(groups[serie.name].element).css('opacity', 0.35);
+            if (!series.visible)
+                $(groups[series.name].element).css('opacity', 0.35);
 
             element = chart.renderer.text('\uf176', tableLeft - GRAPH_LEGEND_ROW_HEIGHT * 0.5, tableTop +
                     i * GRAPH_LEGEND_ROW_HEIGHT + GRAPH_LEGEND_ROW_HEIGHT / 2)
@@ -106,14 +106,14 @@ if (window.Highcharts) {
                     opacity: 0.25,
                     visibility: 'hidden'
                 })
-                .add(groups[serie.name])
+                .add(groups[series.name])
                 .element;
 
             Highcharts.addEvent(element, 'click', function () {
                 var $element = $(element),
-                    serie = chart.get($element.text());
+                    series = chart.get($element.text());
 
-                serie.group.toFront();
+                series.group.toFront();
             });
 
             Highcharts.addEvent(element, 'mouseenter mouseout', function (e) {
@@ -124,27 +124,27 @@ if (window.Highcharts) {
             element = chart.renderer.rect(tableLeft, tableTop + i * GRAPH_LEGEND_ROW_HEIGHT, GRAPH_LEGEND_ROW_HEIGHT * 0.75,
                     GRAPH_LEGEND_ROW_HEIGHT * 0.65, 2)
                 .attr({
-                    fill: serie.color
+                    fill: series.color
                 })
-                .add(groups[serie.name])
+                .add(groups[series.name])
                 .element;
 
             Highcharts.addEvent(element, 'mouseenter mouseout', groupEvent);
 
-            element = chart.renderer.text(serie.name, tableLeft + GRAPH_LEGEND_ROW_HEIGHT, tableTop +
+            element = chart.renderer.text(series.name, tableLeft + GRAPH_LEGEND_ROW_HEIGHT, tableTop +
                     i * GRAPH_LEGEND_ROW_HEIGHT + GRAPH_LEGEND_ROW_HEIGHT / 2)
                 .attr({
-                    'class': 'highcharts-table-serie'
+                    'class': 'highcharts-table-series'
                 })
                 .css({
                     cursor: 'pointer'
                 })
-                .add(groups[serie.name])
+                .add(groups[series.name])
                 .element;
 
             Highcharts.addEvent(element, 'click', function () {
-                var serie = chart.get($(element).text());
-                serie.setVisible(!serie.visible);
+                var series = chart.get($(element).text());
+                series.setVisible(!series.visible);
             });
 
             Highcharts.addEvent(element, 'mouseenter mouseout', groupEvent);
@@ -154,10 +154,10 @@ if (window.Highcharts) {
             cellLeft = Math.max(cellLeft, box.x + box.width + GRAPH_LEGEND_ROW_HEIGHT);
 
             // Update column keys list
-            if (!data[serie.name].summary)
+            if (!data[series.name].summary)
                 return;
 
-            keys = Object.keys(data[serie.name].summary);
+            keys = Object.keys(data[series.name].summary);
             keys.sort();
 
             $.each(keys, function (i, key) { /*jshint unused: true */
@@ -174,7 +174,7 @@ if (window.Highcharts) {
                 keyLeft = cellLeft,
                 valueLeft = 0;
 
-            $.each(chart.series, function (i, serie) {
+            $.each(chart.series, function (i, series) {
                 var value;
 
                 element = chart.renderer.text(key, keyLeft, tableTop + i * GRAPH_LEGEND_ROW_HEIGHT +
@@ -185,7 +185,7 @@ if (window.Highcharts) {
                     .css({
                         color: options.plotOptions.area.dataLabels.style.color
                     })
-                    .add(groups[serie.name])
+                    .add(groups[series.name])
                     .element;
 
                 if (valueLeft === 0) {
@@ -193,11 +193,11 @@ if (window.Highcharts) {
                     valueLeft = box.x + box.width + GRAPH_LEGEND_ROW_HEIGHT * 0.35;
                 }
 
-                value = data[serie.name].summary && data[serie.name].summary[key] !== undefined ?
-                    data[serie.name].summary[key] : null;
+                value = data[series.name].summary && data[series.name].summary[key] !== undefined ?
+                    data[series.name].summary[key] : null;
 
                 element = chart.renderer.text(value !== null ? formatValue(value, options._opts.unit_type,
-                        data[serie.name].options && data[serie.name].options.unit || null) : 'null',
+                        data[series.name].options && data[series.name].options.unit || null) : 'null',
                         valueLeft, tableTop + i * GRAPH_LEGEND_ROW_HEIGHT + GRAPH_LEGEND_ROW_HEIGHT / 2)
                     .attr({
                         'class': 'highcharts-table-value',
@@ -206,7 +206,7 @@ if (window.Highcharts) {
                     .css({
                         cursor: 'pointer'
                     })
-                    .add(groups[serie.name])
+                    .add(groups[series.name])
                     .element;
 
                 Highcharts.addEvent(element, 'click', function (e) {
@@ -215,7 +215,7 @@ if (window.Highcharts) {
                             chart: chart,
                             element: e.target,
                             name: key,
-                            serie: serie,
+                            series: series,
                             value: parseFloat($(e.target).closest('.highcharts-table-value').attr('data-value')) || null
                         });
                 });

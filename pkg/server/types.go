@@ -176,22 +176,22 @@ func (r UnitValueListResponse) slice(i, j int) interface{} {
 
 // PlotResponse represents a plot response structure in the server backend.
 type PlotResponse struct {
-	ID          string           `json:"id"`
-	Start       string           `json:"start"`
-	End         string           `json:"end"`
-	Step        float64          `json:"step"`
-	Name        string           `json:"name"`
-	Description string           `json:"description"`
-	Type        int              `json:"type"`
-	StackMode   int              `json:"stack_mode"`
-	UnitType    int              `json:"unit_type"`
-	UnitLegend  string           `json:"unit_legend"`
-	Series      []*SerieResponse `json:"series"`
-	Modified    time.Time        `json:"modified"`
+	ID          string            `json:"id"`
+	Start       string            `json:"start"`
+	End         string            `json:"end"`
+	Step        float64           `json:"step"`
+	Name        string            `json:"name"`
+	Description string            `json:"description"`
+	Type        int               `json:"type"`
+	StackMode   int               `json:"stack_mode"`
+	UnitType    int               `json:"unit_type"`
+	UnitLegend  string            `json:"unit_legend"`
+	Series      []*SeriesResponse `json:"series"`
+	Modified    time.Time         `json:"modified"`
 }
 
-// SerieResponse represents a serie response structure in the server backend.
-type SerieResponse struct {
+// SeriesResponse represents a series response structure in the server backend.
+type SeriesResponse struct {
 	Name    string                 `json:"name"`
 	StackID int                    `json:"stack_id"`
 	Plots   []plot.Plot            `json:"plots"`

@@ -838,15 +838,15 @@ func Test_LibraryGraphHandle(test *testing.T) {
 		StackMode: library.StackModeNormal}
 
 	group := &library.OperGroup{Name: "group0", Type: connector.OperGroupTypeAvg}
-	group.Series = append(group.Series, &library.Serie{Name: "serie0", Origin: "test", Source: "source1",
+	group.Series = append(group.Series, &library.Series{Name: "series0", Origin: "test", Source: "source1",
 		Metric: "database1/test"})
-	group.Series = append(group.Series, &library.Serie{Name: "serie1", Origin: "test", Source: "source2",
+	group.Series = append(group.Series, &library.Series{Name: "series1", Origin: "test", Source: "source2",
 		Metric: "group:group0"})
 
 	graphBase.Groups = append(graphBase.Groups, group)
 
-	group = &library.OperGroup{Name: "serie2", Type: connector.OperGroupTypeNone}
-	group.Series = append(group.Series, &library.Serie{Name: "serie2", Origin: "test", Source: "group:group0",
+	group = &library.OperGroup{Name: "series2", Type: connector.OperGroupTypeNone}
+	group.Series = append(group.Series, &library.Series{Name: "series2", Origin: "test", Source: "group:group0",
 		Metric: "database2/test"})
 
 	graphBase.Groups = append(graphBase.Groups, group)

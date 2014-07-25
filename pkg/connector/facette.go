@@ -32,19 +32,19 @@ type facettePlotRequest struct {
 }
 
 type facettePlotResponse struct {
-	ID          string          `json:"id"`
-	Start       string          `json:"start"`
-	End         string          `json:"end"`
-	Step        float64         `json:"step"`
-	Name        string          `json:"name"`
-	Description string          `json:"description"`
-	Type        int             `json:"type"`
-	StackMode   int             `json:"stack_mode"`
-	Series      []*facetteSerie `json:"series"`
-	Modified    time.Time       `json:"modified"`
+	ID          string           `json:"id"`
+	Start       string           `json:"start"`
+	End         string           `json:"end"`
+	Step        float64          `json:"step"`
+	Name        string           `json:"name"`
+	Description string           `json:"description"`
+	Type        int              `json:"type"`
+	StackMode   int              `json:"stack_mode"`
+	Series      []*facetteSeries `json:"series"`
+	Modified    time.Time        `json:"modified"`
 }
 
-type facetteSerie struct {
+type facetteSeries struct {
 	Name    string                 `json:"name"`
 	StackID int                    `json:"stack_id"`
 	Plots   []plot.Plot            `json:"plots"`
@@ -97,16 +97,16 @@ func (connector *FacetteConnector) GetPlots(query *plot.Query) ([]plot.Series, e
 				&library.OperGroup{
 					Name: "group0",
 					Type: query.Group.Type,
-					Series: func(series []*plot.QuerySerie) []*library.Serie {
-						requestSeries := make([]*library.Serie, len(series))
+					Series: func(series []*plot.QuerySeries) []*library.Series {
+						requestSeries := make([]*library.Series, len(series))
 
-						for index, serie := range series {
-							requestSeries[index] = &library.Serie{
-								Name:    fmt.Sprintf("serie%d", index),
-								Origin:  serie.Metric.Origin,
-								Source:  serie.Metric.Source,
-								Metric:  serie.Metric.Name,
-								Options: serie.Options,
+						for index, entry := range series {
+							requestSeries[index] = &library.Series{
+								Name:    fmt.Sprintf("series%d", index),
+								Origin:  entry.Metric.Origin,
+								Source:  entry.Metric.Source,
+								Metric:  entry.Metric.Name,
+								Options: entry.Options,
 							}
 						}
 
@@ -166,10 +166,10 @@ func (connector *FacetteConnector) GetPlots(query *plot.Query) ([]plot.Series, e
 		return nil, fmt.Errorf("unable to unmarshal upstream response: %s", err)
 	}
 
-	for _, serie := range plotResponse.Series {
+	for _, series := range plotResponse.Series {
 		resultSeries = append(resultSeries, plot.Series{
-			Plots:   serie.Plots,
-			Summary: serie.Summary,
+			Plots:   series.Plots,
+			Summary: series.Summary,
 		})
 	}
 

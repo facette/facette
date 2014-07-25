@@ -109,7 +109,7 @@ function graphDraw(graph, postpone, delay, preview) {
                     highchartOpts,
                     startTime,
                     endTime,
-                    serieData = {},
+                    seriesData = {},
                     i,
                     j;
 
@@ -138,7 +138,7 @@ function graphDraw(graph, postpone, delay, preview) {
 
                 graphTableUpdate = function () {
                     if (!preview)
-                        Highcharts.drawTable.apply(this, [serieData]);
+                        Highcharts.drawTable.apply(this, [seriesData]);
                 };
 
                 highchartOpts = {
@@ -154,7 +154,7 @@ function graphDraw(graph, postpone, delay, preview) {
 
                                 $element = $(this.element);
 
-                                name = 'plotline-' + this.serie.name + '-' + this.name;
+                                name = 'plotline-' + this.series.name + '-' + this.name;
 
                                 // Remove existing plot line
                                 this.chart.yAxis[0].removePlotLine(name);
@@ -340,7 +340,7 @@ function graphDraw(graph, postpone, delay, preview) {
                         color: data.series[i].options ? data.series[i].options.color : null
                     });
 
-                    serieData[data.series[i].name] = {
+                    seriesData[data.series[i].name] = {
                         summary: data.series[i].summary,
                         options: data.series[i].options
                     };

@@ -76,7 +76,7 @@ func (plotQuery *Query) String() string {
 // QueryGroup represents a plot query operation group.
 type QueryGroup struct {
 	Type    int
-	Series  []*QuerySerie
+	Series  []*QuerySeries
 	Options map[string]interface{}
 }
 
@@ -84,11 +84,10 @@ func (queryGroup *QueryGroup) String() string {
 	return fmt.Sprintf(
 		"QueryGroup{Type:%d Scale:%g Series:[%s] Options:%v}",
 		queryGroup.Type,
-		func(series []*QuerySerie) string {
+		func(series []*QuerySeries) string {
 			seriesStrings := make([]string, len(series))
-
-			for i, serie := range series {
-				seriesStrings[i] = fmt.Sprintf("%s", serie)
+			for i, entry := range series {
+				seriesStrings[i] = fmt.Sprintf("%s", entry)
 			}
 
 			return strings.Join(seriesStrings, ", ")
@@ -97,21 +96,21 @@ func (queryGroup *QueryGroup) String() string {
 	)
 }
 
-// QuerySerie represents a serie entry in a QueryGroup.
-type QuerySerie struct {
+// QuerySeries represents a series entry in a QueryGroup.
+type QuerySeries struct {
 	Metric  *QueryMetric
 	Options map[string]interface{}
 }
 
-func (querySerie *QuerySerie) String() string {
+func (QuerySeries *QuerySeries) String() string {
 	return fmt.Sprintf(
-		"QuerySerie{Metric:%s Options:%v}",
-		querySerie.Metric,
-		querySerie.Options,
+		"QuerySeries{Metric:%s Options:%v}",
+		QuerySeries.Metric,
+		QuerySeries.Options,
 	)
 }
 
-// QueryMetric represents a metric entry in a QuerySerie.
+// QueryMetric represents a metric entry in a QuerySeries.
 type QueryMetric struct {
 	Name   string
 	Origin string

@@ -223,12 +223,12 @@ func graphiteBuildQueryURL(queryGroup *plot.QueryGroup, startTime, endTime time.
 	count := 0
 
 	if queryGroup.Type == OperGroupTypeNone {
-		for _, serie := range queryGroup.Series {
+		for _, series := range queryGroup.Series {
 			count++
 
-			target := fmt.Sprintf("%s.%s", serie.Metric.Source, serie.Metric.Name)
+			target := fmt.Sprintf("%s.%s", series.Metric.Source, series.Metric.Name)
 
-			if scale, _ := config.GetFloat(serie.Options, "scale", false); scale != 0 {
+			if scale, _ := config.GetFloat(series.Options, "scale", false); scale != 0 {
 				target = fmt.Sprintf("scale(%s, %g)", target, scale)
 			}
 
@@ -237,8 +237,8 @@ func graphiteBuildQueryURL(queryGroup *plot.QueryGroup, startTime, endTime time.
 	} else {
 		count++
 
-		for _, serie := range queryGroup.Series {
-			targets = append(targets, fmt.Sprintf("%s.%s", serie.Metric.Source, serie.Metric.Name))
+		for _, series := range queryGroup.Series {
+			targets = append(targets, fmt.Sprintf("%s.%s", series.Metric.Source, series.Metric.Name))
 		}
 
 		target := fmt.Sprintf("group(%s)", strings.Join(targets, ","))
