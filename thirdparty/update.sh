@@ -1,48 +1,49 @@
 #!/bin/bash
 
 read -d '' DEPENDS <<EOF
-git  https://github.com/fatih/set               master
-git  https://github.com/nu7hatch/gouuid         master
-git  https://github.com/ziutek/rrd              master
+git  https://github.com/fatih/set          master
+git  https://github.com/influxdb/influxdb  master  /client
+git  https://github.com/nu7hatch/gouuid    master
+git  https://github.com/ziutek/rrd         master
 EOF
 
 fetch_git() {
-	NAME=$1
-	URL=$2
-	BRANCH=$3
+	name=$1
+	url=$2
+	branch=$3
 
-	if [ ! -d "$SRC_DIR/checkouts/$NAME" ]; then
-		echo "Fetching $NAME..."
-		mkdir -p $SRC_DIR/checkouts/$NAME
-		git clone --quiet $URL $SRC_DIR/checkouts/$NAME -b $BRANCH
+	if [ ! -d "$SRC_DIR/checkouts/$name" ]; then
+		echo "Fetching $name..."
+		mkdir -p $SRC_DIR/checkouts/$name
+		git clone --quiet $url $SRC_DIR/checkouts/$name -b $branch
 	else
-		echo "Updating $NAME..."
-		git -C $SRC_DIR/checkouts/$NAME pull --quiet
+		echo "Updating $name..."
+		git -C $SRC_DIR/checkouts/$name pull --quiet
 	fi
 }
 
 fetch_hg() {
-	NAME=$1
-	URL=$2
-	BRANCH=$3
+	name=$1
+	url=$2
+	branch=$3
 
-	if [ ! -d "$SRC_DIR/checkouts/$NAME" ]; then
-		echo "Fetching $NAME..."
-		mkdir -p $SRC_DIR/checkouts/$NAME
-		hg clone --quiet $URL $SRC_DIR/checkouts/$NAME -b $BRANCH
+	if [ ! -d "$SRC_DIR/checkouts/$name" ]; then
+		echo "Fetching $name..."
+		mkdir -p $SRC_DIR/checkouts/$name
+		hg clone --quiet $url $SRC_DIR/checkouts/$name -b $branch
 	else
-		echo "Updating $NAME..."
-		hg -R $SRC_DIR/checkouts/$NAME pull --quiet
-		hg -R $SRC_DIR/checkouts/$NAME update --quiet
+		echo "Updating $name..."
+		hg -R $SRC_DIR/checkouts/$name pull --quiet
+		hg -R $SRC_DIR/checkouts/$name update --quiet
 	fi
 }
 
 rewrite_imports() {
-	NAME=$1
+	name=$1
 
-	echo "Rewriting $NAME import paths..."
+	echo "Rewriting $name import paths..."
 	find $SRC_DIR -type f ! -path "$SRC_DIR/checkouts/*" -name '*.go' \
-		-exec sed -e "s@\"$NAME@\"github.com/facette/facette/thirdparty/$NAME@" -i {} \;
+		-exec sed -e "s@\"$name@\"github.com/facette/facette/thirdparty/$name@" -i {} \;
 }
 
 print_usage() {
@@ -58,24 +59,24 @@ SRC_DIR=$(dirname $0)
 # Fetch dependencies
 declare -a PACKAGES
 
-IFS=$'\n'; for ENTRY in $DEPENDS; do
+IFS=$'\n'; for entry in $DEPENDS; do
 	unset IFS
-	read TYPE URL BRANCH <<<$(echo $ENTRY)
+	read type url branch path<<<$(echo $entry)
 
 	# Get package name
-	NAME=${URL#http*://}
+	name=${url#http*://}
 
 	# Fetch project source and create a local copy
-	fetch_$TYPE $NAME $URL $BRANCH
+	fetch_$type $name $url $branch
 
-	rm -rf $SRC_DIR/$NAME
-	mkdir -p $SRC_DIR/$NAME
-	cp -a $SRC_DIR/checkouts/$NAME/* $SRC_DIR/$NAME
+	rm -rf $SRC_DIR/$name
+	mkdir -p $SRC_DIR/${name}${path}
+	cp -a $SRC_DIR/checkouts/${name}${path}/* $SRC_DIR/${name}${path}
 
-	PACKAGES+=($NAME)
+	PACKAGES+=(${name}${path})
 done
 
-for NAME in ${PACKAGES[@]}; do
+for package in ${PACKAGES[@]}; do
 	# Rewrite import paths
-	rewrite_imports $NAME
+	rewrite_imports $package
 done
