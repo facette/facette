@@ -3,6 +3,7 @@
 VERSION = 0.2.0dev
 
 TAGS ?= graphite \
+	influxdb \
 	rrd
 
 PREFIX ?= /usr/local
