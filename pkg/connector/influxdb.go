@@ -16,10 +16,6 @@ import (
 	influxdb "github.com/facette/facette/thirdparty/github.com/influxdb/influxdb/client"
 )
 
-type influxdbSerie struct {
-	serieName string
-}
-
 // InfluxDBConnector represents the main structure of the InfluxDB connector.
 type InfluxDBConnector struct {
 	name     string
@@ -29,7 +25,7 @@ type InfluxDBConnector struct {
 	database string
 	client   *influxdb.Client
 	re       *regexp.Regexp
-	series   map[string]map[string]*influxdbSerie
+	series   map[string]map[string]string
 }
 
 func init() {
@@ -44,7 +40,7 @@ func init() {
 			host:     "localhost:8086",
 			username: "root",
 			password: "root",
-			series:   make(map[string]map[string]*influxdbSerie),
+			series:   make(map[string]map[string]string),
 		}
 
 		if connector.host, err = config.GetString(settings, "host", false); err != nil {
@@ -93,7 +89,7 @@ func (connector *InfluxDBConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 
 	serieNames := make([]string, len(query.Group.Series))
 	for i, serie := range query.Group.Series {
-		serieNames[i] = connector.series[serie.Metric.Source][serie.Metric.Name].serieName
+		serieNames[i] = connector.series[serie.Metric.Source][serie.Metric.Name]
 	}
 
 	influxdbQuery := fmt.Sprintf(
@@ -191,10 +187,10 @@ func (connector *InfluxDBConnector) Refresh(originName string, outputChan chan *
 		}
 
 		if _, ok := connector.series[sourceName]; !ok {
-			connector.series[sourceName] = make(map[string]*influxdbSerie)
+			connector.series[sourceName] = make(map[string]string)
 		}
 
-		connector.series[sourceName][metricName] = &influxdbSerie{serieName: serieName}
+		connector.series[sourceName][metricName] = serieName
 
 		outputChan <- &catalog.Record{
 			Origin:    originName,
