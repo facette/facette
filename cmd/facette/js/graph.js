@@ -119,7 +119,9 @@ function graphDraw(graph, postpone, delay, preview) {
                         .find('a:not([href="#refresh"])')
                             .attr('disabled', 'disabled');
 
-                    graph.find('.placeholder').text(data.message ? data.message : $.t('graph.mesg_empty_series'));
+                    graph.find('.placeholder')
+                        .addClass('icon icon-warning')
+                        .text(data.message ? data.message : $.t('graph.mesg_empty_series'));
 
                     return;
                 } else {
