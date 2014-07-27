@@ -36,14 +36,17 @@ type GraphiteConnector struct {
 	name        string
 	URL         string
 	insecureTLS bool
-	pattern     string
 	timeout     float64
+	re          *regexp.Regexp
 	series      map[string]map[string]string
 }
 
 func init() {
 	Connectors["graphite"] = func(name string, settings map[string]interface{}) (Connector, error) {
-		var err error
+		var (
+			pattern string
+			err     error
+		)
 
 		connector := &GraphiteConnector{
 			name:        name,
@@ -55,10 +58,6 @@ func init() {
 			return nil, err
 		}
 
-		if connector.pattern, err = config.GetString(settings, "pattern", true); err != nil {
-			return nil, err
-		}
-
 		if connector.insecureTLS, err = config.GetBool(settings, "allow_insecure_tls", false); err != nil {
 			return nil, err
 		}
@@ -67,6 +66,16 @@ func init() {
 			return nil, err
 		}
 
+		if pattern, err = config.GetString(settings, "pattern", true); err != nil {
+			return nil, err
+		}
+
+		// Compile regexp pattern
+		if connector.re, err = regexp.Compile(pattern); err != nil {
+			return nil, fmt.Errorf("unable to compile regexp pattern: %s", err)
+		}
+
+		// Enforce minimal timeout value bound
 		if connector.timeout <= 0 {
 			connector.timeout = graphiteDefaultTimeout
 		}
@@ -149,13 +158,10 @@ func (connector *GraphiteConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 func (connector *GraphiteConnector) Refresh(originName string, outputChan chan *catalog.Record) error {
 	var seriesList []string
 
-	// Compile pattern
-	re := regexp.MustCompile(connector.pattern)
-
 	// Validate pattern keywords
 	groups := make(map[string]bool)
 
-	for _, key := range re.SubexpNames() {
+	for _, key := range connector.re.SubexpNames() {
 		if key == "" {
 			continue
 		} else if key == "source" || key == "metric" {
@@ -215,7 +221,7 @@ func (connector *GraphiteConnector) Refresh(originName string, outputChan chan *
 	for _, series := range seriesList {
 		var sourceName, metricName string
 
-		submatch := re.FindStringSubmatch(series)
+		submatch := connector.re.FindStringSubmatch(series)
 		if len(submatch) == 0 {
 			logger.Log(
 				logger.LevelInfo,
@@ -227,7 +233,7 @@ func (connector *GraphiteConnector) Refresh(originName string, outputChan chan *
 			return nil
 		}
 
-		if re.SubexpNames()[1] == "source" {
+		if connector.re.SubexpNames()[1] == "source" {
 			sourceName = submatch[1]
 			metricName = submatch[2]
 		} else {

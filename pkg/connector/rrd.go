@@ -28,14 +28,17 @@ type rrdMetric struct {
 type RRDConnector struct {
 	name    string
 	path    string
-	pattern string
 	daemon  string
+	re      *regexp.Regexp
 	metrics map[string]map[string]*rrdMetric
 }
 
 func init() {
 	Connectors["rrd"] = func(name string, settings map[string]interface{}) (Connector, error) {
-		var err error
+		var (
+			pattern string
+			err     error
+		)
 
 		connector := &RRDConnector{
 			name:    name,
@@ -46,12 +49,17 @@ func init() {
 			return nil, err
 		}
 
-		if connector.pattern, err = config.GetString(settings, "pattern", true); err != nil {
+		if connector.daemon, err = config.GetString(settings, "daemon", false); err != nil {
 			return nil, err
 		}
 
-		if connector.daemon, err = config.GetString(settings, "daemon", false); err != nil {
+		if pattern, err = config.GetString(settings, "pattern", true); err != nil {
 			return nil, err
+		}
+
+		// Compile regexp pattern
+		if connector.re, err = regexp.Compile(pattern); err != nil {
+			return nil, fmt.Errorf("unable to compile regexp pattern: %s", err)
 		}
 
 		return connector, nil
@@ -254,13 +262,10 @@ func (connector *RRDConnector) GetPlots(query *plot.Query) ([]plot.Series, error
 
 // Refresh triggers a full connector data update.
 func (connector *RRDConnector) Refresh(originName string, outputChan chan *catalog.Record) error {
-	// Compile pattern
-	re := regexp.MustCompile(connector.pattern)
-
 	// Validate pattern keywords
 	groups := make(map[string]bool)
 
-	for _, key := range re.SubexpNames() {
+	for _, key := range connector.re.SubexpNames() {
 		if key == "" {
 			continue
 		} else if key == "source" || key == "metric" {
@@ -291,7 +296,7 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan *catal
 			return nil
 		}
 
-		submatch := re.FindStringSubmatch(filePath[len(connector.path)+1:])
+		submatch := connector.re.FindStringSubmatch(filePath[len(connector.path)+1:])
 		if len(submatch) == 0 {
 			logger.Log(
 				logger.LevelInfo,
@@ -303,7 +308,7 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan *catal
 			return nil
 		}
 
-		if re.SubexpNames()[1] == "source" {
+		if connector.re.SubexpNames()[1] == "source" {
 			sourceName = submatch[1]
 			metricName = submatch[2]
 		} else {

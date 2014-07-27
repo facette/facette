@@ -23,18 +23,21 @@ type influxdbSerie struct {
 // InfluxDBConnector represents the main structure of the InfluxDB connector.
 type InfluxDBConnector struct {
 	name     string
-	client   *influxdb.Client
 	host     string
 	username string
 	password string
 	database string
-	pattern  string
+	client   *influxdb.Client
+	re       *regexp.Regexp
 	series   map[string]map[string]*influxdbSerie
 }
 
 func init() {
 	Connectors["influxdb"] = func(name string, settings map[string]interface{}) (Connector, error) {
-		var err error
+		var (
+			pattern string
+			err     error
+		)
 
 		connector := &InfluxDBConnector{
 			name:     name,
@@ -60,8 +63,13 @@ func init() {
 			return nil, err
 		}
 
-		if connector.pattern, err = config.GetString(settings, "pattern", true); err != nil {
+		if pattern, err = config.GetString(settings, "pattern", true); err != nil {
 			return nil, err
+		}
+
+		// Compile regexp pattern
+		if connector.re, err = regexp.Compile(pattern); err != nil {
+			return nil, fmt.Errorf("unable to compile regexp pattern: %s", err)
 		}
 
 		connector.client, err = influxdb.NewClient(&influxdb.ClientConfig{
@@ -72,7 +80,7 @@ func init() {
 		})
 
 		if err != nil {
-			return nil, fmt.Errorf("influxdb[%s]: unable to create client: %s", connector.name, err)
+			return nil, fmt.Errorf("unable to create client: %s", err)
 		}
 
 		return connector, nil
@@ -136,13 +144,10 @@ func (connector *InfluxDBConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 func (connector *InfluxDBConnector) Refresh(originName string, outputChan chan *catalog.Record) error {
 	var serieName, sourceName, metricName string
 
-	// Compile pattern
-	re := regexp.MustCompile(connector.pattern)
-
 	// Validate pattern keywords
 	groups := make(map[string]bool)
 
-	for _, key := range re.SubexpNames() {
+	for _, key := range connector.re.SubexpNames() {
 		if key == "" {
 			continue
 		} else if key == "source" || key == "metric" {
@@ -166,7 +171,7 @@ func (connector *InfluxDBConnector) Refresh(originName string, outputChan chan *
 	for _, serie := range result {
 		serieName = serie.GetName()
 
-		submatch := re.FindStringSubmatch(serieName)
+		submatch := connector.re.FindStringSubmatch(serieName)
 		if len(submatch) == 0 {
 			logger.Log(logger.LevelInfo,
 				"connector",
@@ -177,7 +182,7 @@ func (connector *InfluxDBConnector) Refresh(originName string, outputChan chan *
 			return nil
 		}
 
-		if re.SubexpNames()[1] == "source" {
+		if connector.re.SubexpNames()[1] == "source" {
 			sourceName = submatch[1]
 			metricName = submatch[2]
 		} else {
