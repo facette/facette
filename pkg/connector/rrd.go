@@ -277,8 +277,8 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan *catal
 			return nil
 		}
 
-		submatch := connector.re.FindStringSubmatch(filePath[len(connector.path)+1:])
-		if len(submatch) == 0 {
+		seriesMatch, err := matchSeriesPattern(connector.re, filePath[len(connector.path)+1:])
+		if err != nil {
 			logger.Log(
 				logger.LevelInfo,
 				"connector",
@@ -289,13 +289,7 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan *catal
 			return nil
 		}
 
-		if connector.re.SubexpNames()[1] == "source" {
-			sourceName = submatch[1]
-			metricName = submatch[2]
-		} else {
-			sourceName = submatch[2]
-			metricName = submatch[1]
-		}
+		sourceName, metricName = seriesMatch[0], seriesMatch[1]
 
 		if _, ok := connector.metrics[sourceName]; !ok {
 			connector.metrics[sourceName] = make(map[string]*rrdMetric)

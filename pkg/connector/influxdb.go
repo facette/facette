@@ -138,40 +138,34 @@ func (connector *InfluxDBConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 
 // Refresh triggers a full connector data update.
 func (connector *InfluxDBConnector) Refresh(originName string, outputChan chan *catalog.Record) error {
-	var serieName, sourceName, metricName string
-
-	result, err := connector.client.QueryWithNumbers("list series")
+	seriesList, err := connector.client.QueryWithNumbers("list series")
 	if err != nil {
 		return fmt.Errorf("influxdb[%s]: unable to fetch series list: %s", connector.name, err)
 	}
 
-	for _, serie := range result {
-		serieName = serie.GetName()
+	for _, series := range seriesList {
+		var seriesName, sourceName, metricName string
 
-		submatch := connector.re.FindStringSubmatch(serieName)
-		if len(submatch) == 0 {
+		seriesName = series.GetName()
+
+		seriesMatch, err := matchSeriesPattern(connector.re, seriesName)
+		if err != nil {
 			logger.Log(logger.LevelInfo,
 				"connector",
-				"influxdb[%s]: serie `%s' does not match pattern, ignoring",
+				"influxdb[%s]: series `%s' does not match pattern, ignoring",
 				connector.name,
-				serieName,
+				seriesName,
 			)
-			return nil
+			continue
 		}
 
-		if connector.re.SubexpNames()[1] == "source" {
-			sourceName = submatch[1]
-			metricName = submatch[2]
-		} else {
-			sourceName = submatch[2]
-			metricName = submatch[1]
-		}
+		sourceName, metricName = seriesMatch[0], seriesMatch[1]
 
 		if _, ok := connector.series[sourceName]; !ok {
 			connector.series[sourceName] = make(map[string]string)
 		}
 
-		connector.series[sourceName][metricName] = serieName
+		connector.series[sourceName][metricName] = seriesName
 
 		outputChan <- &catalog.Record{
 			Origin:    originName,

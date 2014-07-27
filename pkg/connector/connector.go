@@ -62,3 +62,22 @@ func compilePattern(pattern string) (*regexp.Regexp, error) {
 
 	return re, nil
 }
+
+func matchSeriesPattern(re *regexp.Regexp, series string) ([2]string, error) {
+	var sourceName, metricName string
+
+	submatch := re.FindStringSubmatch(series)
+	if len(submatch) == 0 {
+		return [2]string{}, fmt.Errorf("series `%s' does not match pattern", series)
+	}
+
+	if re.SubexpNames()[1] == "source" {
+		sourceName = submatch[1]
+		metricName = submatch[2]
+	} else {
+		sourceName = submatch[2]
+		metricName = submatch[1]
+	}
+
+	return [2]string{sourceName, metricName}, nil
+}

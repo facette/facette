@@ -202,8 +202,8 @@ func (connector *GraphiteConnector) Refresh(originName string, outputChan chan *
 	for _, series := range seriesList {
 		var sourceName, metricName string
 
-		submatch := connector.re.FindStringSubmatch(series)
-		if len(submatch) == 0 {
+		seriesMatch, err := matchSeriesPattern(connector.re, series)
+		if err != nil {
 			logger.Log(
 				logger.LevelInfo,
 				"connector",
@@ -211,16 +211,10 @@ func (connector *GraphiteConnector) Refresh(originName string, outputChan chan *
 				connector.name,
 				series,
 			)
-			return nil
+			continue
 		}
 
-		if connector.re.SubexpNames()[1] == "source" {
-			sourceName = submatch[1]
-			metricName = submatch[2]
-		} else {
-			sourceName = submatch[2]
-			metricName = submatch[1]
-		}
+		sourceName, metricName = seriesMatch[0], seriesMatch[1]
 
 		if _, ok := connector.series[sourceName]; !ok {
 			connector.series[sourceName] = make(map[string]string)
