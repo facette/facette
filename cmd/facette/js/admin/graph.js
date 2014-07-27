@@ -387,37 +387,53 @@ function adminGraphAutoNameSeries(force) {
     var $items = listGetItems('step-1-metrics'),
         refCounts = {
             origin: [],
-            source: []
+            source: [],
+            metric: {}
         };
 
     force = typeof force == 'boolean' ? force : false;
 
     $items.each(function () {
         var $item = $(this),
-            value = adminGraphGetValue($item);
+            value = adminGraphGetValue($item),
+            fullName = value.origin+'/'+value.source+'/'+value.metric;
 
         if (refCounts.origin.indexOf(value.origin) == -1)
             refCounts.origin.push(value.origin);
 
         if (refCounts.source.indexOf(value.source) == -1)
             refCounts.source.push(value.source);
+
+        if (!refCounts.metric[fullName]) {
+            refCounts.metric[fullName] = {current: 1, count: 1};
+        } else {
+            refCounts.metric[fullName].current++;
+            refCounts.metric[fullName].count++;
+        }
     });
 
     $items.each(function () {
         var $item = $(this),
-            value;
+            value,
+            fullName;
 
         if ($item.data('renamed') && !force)
             return;
 
         value = adminGraphGetValue($item);
+        fullName = value.origin+'/'+value.source+'/'+value.metric;
 
         value.name = value.metric;
 
-        if (refCounts.origin.length > 1)
+        if (refCounts.origin.length > 1) {
             value.name = value.origin + '/' + value.source + '/' + value.name;
-        else if (refCounts.source.length > 1)
+        } else if (refCounts.source.length > 1) {
             value.name = value.source + '/' + value.name;
+        } else if (refCounts.metric[fullName].count > 1) {
+            value.name = value.name + ' (' + (refCounts.metric[fullName].count -
+                refCounts.metric[fullName].current) + ')';
+            refCounts.metric[fullName].current--;
+        }
 
         if (force)
             $item.data('renamed', false);
