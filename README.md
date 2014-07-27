@@ -6,8 +6,9 @@ Facette [![](https://api.travis-ci.org/facette/facette.png)](https://travis-ci.o
 What is Facette?
 ----------------
 
-[Facette][0] is a web application to display time series data from various sources — such as [collectd][1] or
-[Graphite][2] — on graphs, designed to be easy to setup and to use. To learn more on its architecture, read [this page](http://docs.facette.io/architecture/).
+[Facette][0] is a web application to display time series data from various sources — such as [collectd][1],
+[Graphite][2] or [InfluxDB][5] — on graphs, designed to be easy to setup and to use. To learn more on its architecture,
+read [this page](http://docs.facette.io/architecture/).
 
 The source code is available at [Github][3], licensed under the terms of the [BSD license][4].
 
@@ -28,3 +29,4 @@ Please see [INSTALL](INSTALL) file for build instructions and installation proce
 [2]: http://graphite.readthedocs.org/
 [3]: https://github.com/facette/facette
 [4]: http://opensource.org/licenses/BSD-3-Clause
+[5]: https://influxdb.org/
