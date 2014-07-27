@@ -70,8 +70,8 @@ func init() {
 			return nil, err
 		}
 
-		// Compile regexp pattern
-		if connector.re, err = regexp.Compile(pattern); err != nil {
+		// Check and compile regexp pattern
+		if connector.re, err = compilePattern(pattern); err != nil {
 			return nil, fmt.Errorf("unable to compile regexp pattern: %s", err)
 		}
 
@@ -157,25 +157,6 @@ func (connector *GraphiteConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 // Refresh triggers a full connector data update.
 func (connector *GraphiteConnector) Refresh(originName string, outputChan chan *catalog.Record) error {
 	var seriesList []string
-
-	// Validate pattern keywords
-	groups := make(map[string]bool)
-
-	for _, key := range connector.re.SubexpNames() {
-		if key == "" {
-			continue
-		} else if key == "source" || key == "metric" {
-			groups[key] = true
-		} else {
-			return fmt.Errorf("graphite[%s]: invalid pattern keyword `%s'", connector.name, key)
-		}
-	}
-
-	if !groups["source"] {
-		return fmt.Errorf("graphite[%s]: missing pattern keyword `source'", connector.name)
-	} else if !groups["metric"] {
-		return fmt.Errorf("graphite[%s]: missing pattern keyword `metric'", connector.name)
-	}
 
 	httpTransport := &http.Transport{
 		Dial: (&net.Dialer{
