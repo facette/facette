@@ -10,6 +10,18 @@ import (
 	"time"
 )
 
+const (
+	_ = iota
+	// ConsolidateAverage represents an average consolidation type.
+	ConsolidateAverage
+	// ConsolidateMax represents a maximal value consolidation type.
+	ConsolidateMax
+	// ConsolidateMin represents a minimal value consolidation type.
+	ConsolidateMin
+	// ConsolidateSum represents a sum consolidation type.
+	ConsolidateSum
+)
+
 // Plot represents a graph plot.
 type Plot struct {
 	Time  time.Time `json:"time"`
@@ -130,61 +142,58 @@ func (queryMetric *QueryMetric) String() string {
 type Series struct {
 	Name    string
 	Plots   []Plot
+	Step    int
 	Summary map[string]Value
 }
 
-// Downsample applies a sampling function on a series of plots, reducing the number of points.
-func (series *Series) Downsample(sample int) {
-	var nPlots = len(series.Plots)
-
-	if sample >= len(series.Plots) {
+// Consolidate consolidates a series of plots given a certain number of values per point.
+func (series *Series) Consolidate(pad, consolidationType int) {
+	if pad < 2 {
 		return
 	}
+
+	plotsCount := len(series.Plots)
 
 	plots := series.Plots[:]
 	series.Plots = make([]Plot, 0)
 
-	pad := nPlots / sample
+	bucket := []float64{}
 
-	refinePad := 0
-	if nPlots%sample > 0 {
-		refinePad = nPlots / (nPlots % sample)
-	}
-
-	padCount := 0
-
-	bucket := 0.0
-	bucketCount := 0.0
-
-	for i := 0; i < nPlots; i++ {
-		// Refine sampling by appending one more plot at regular interval (pad + 1)
-		if refinePad == 0 || (i+1)%refinePad != 0 {
-			padCount++
-		}
-
+	for i := 0; i < plotsCount; i++ {
 		if !plots[i].Value.IsNaN() {
-			bucket += float64(plots[i].Value)
-			bucketCount++
+			bucket = append(bucket, float64(plots[i].Value))
 		}
 
-		if padCount == pad {
-			padCount = 0
+		if (i+1)%pad == 0 {
+			if len(bucket) == 0 {
+				series.Plots = append(
+					series.Plots,
+					Plot{Value: Value(math.NaN()), Time: plots[i].Time},
+				)
 
-			if bucketCount == 0 {
-				series.Plots = append(series.Plots, Plot{Value: Value(math.NaN()), Time: plots[i].Time})
 				continue
 			}
 
-			series.Plots = append(series.Plots, Plot{Value: Value(bucket / bucketCount), Time: plots[i].Time})
+			series.Plots = append(
+				series.Plots,
+				Plot{Value: consolidateBucket(bucket, consolidationType), Time: plots[i].Time},
+			)
 
-			bucket = 0
-			bucketCount = 0
+			bucket = make([]float64, 0)
 		}
 	}
 
-	if bucketCount > 0 {
-		series.Plots = append(series.Plots, Plot{Value: Value(bucket / bucketCount), Time: plots[nPlots-1].Time})
+	if len(bucket) > 0 {
+		series.Plots = append(
+			series.Plots,
+			Plot{Value: consolidateBucket(bucket, consolidationType), Time: plots[plotsCount-1].Time},
+		)
 	}
+}
+
+// Downsample applies a sampling function on a series of plots, reducing the number of points.
+func (series *Series) Downsample(sample, consolidationType int) {
+	series.Consolidate(len(series.Plots)/sample, consolidationType)
 }
 
 // Summarize calculates the min/max/average/last and percentile values of a series of plots, and stores the results
@@ -265,40 +274,38 @@ func (series Series) Percentiles(percentiles []float64) {
 	}
 }
 
-// SumSeries add series plots together and return the sum at each datapoint.
-func SumSeries(seriesList []Series) (Series, error) {
-	nSeries := len(seriesList)
-
-	if nSeries == 0 {
-		return Series{}, fmt.Errorf("no series provided")
-	}
-
-	// Find out the longest series of the list
-	maxPlots := len(seriesList[0].Plots)
-	for i := range seriesList {
-		if len(seriesList[i].Plots) > maxPlots {
-			maxPlots = len(seriesList[i].Plots)
+func consolidateBucket(bucket []float64, consolidationType int) Value {
+	switch consolidationType {
+	case ConsolidateAverage, ConsolidateSum:
+		sum := 0.0
+		for _, entry := range bucket {
+			sum += entry
 		}
-	}
 
-	sumSeries := Series{
-		Plots:   make([]Plot, maxPlots),
-		Summary: make(map[string]Value),
-	}
-
-	for plotIndex := 0; plotIndex < maxPlots; plotIndex++ {
-		for _, series := range seriesList {
-			// Skip shorter series
-			if plotIndex >= len(series.Plots) {
-				continue
-			}
-
-			if !series.Plots[plotIndex].Value.IsNaN() {
-				sumSeries.Plots[plotIndex].Value += series.Plots[plotIndex].Value
-				sumSeries.Plots[plotIndex].Time = series.Plots[plotIndex].Time
+		if consolidationType == ConsolidateAverage {
+			return Value(sum / float64(len(bucket)))
+		} else {
+			return Value(sum)
+		}
+	case ConsolidateMax:
+		max := math.NaN()
+		for _, entry := range bucket {
+			if !math.IsNaN(entry) && entry > max || math.IsNaN(max) {
+				max = entry
 			}
 		}
+
+		return Value(max)
+	case ConsolidateMin:
+		min := math.NaN()
+		for _, entry := range bucket {
+			if !math.IsNaN(entry) && entry < min || math.IsNaN(min) {
+				min = entry
+			}
+		}
+
+		return Value(min)
 	}
 
-	return sumSeries, nil
+	return Value(math.NaN())
 }

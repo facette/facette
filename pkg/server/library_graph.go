@@ -292,12 +292,12 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 			for index, entry := range plotSeries {
 				entry.Name = fmt.Sprintf("%s (%s)", groupItem.Name, query.Series[index].Metric.Name)
 				entry.Summarize(plotReq.Percentiles)
-				entry.Downsample(plotReq.Sample)
+				entry.Downsample(plotReq.Sample, plot.ConsolidateAverage)
 			}
 		} else if len(plotSeries) == 1 {
 			plotSeries[0].Name = groupItem.Name
 			plotSeries[0].Summarize(plotReq.Percentiles)
-			plotSeries[0].Downsample(plotReq.Sample)
+			plotSeries[0].Downsample(plotReq.Sample, plot.ConsolidateAverage)
 		}
 
 		graphPlotSeries = append(graphPlotSeries, plotSeries)
