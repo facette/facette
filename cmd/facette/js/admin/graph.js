@@ -429,7 +429,9 @@ function adminGraphAutoNameSeries(force) {
             value.name = value.origin + '/' + value.source + '/' + value.name;
         } else if (refCounts.source.length > 1) {
             value.name = value.source + '/' + value.name;
-        } else if (refCounts.metric[fullName].count > 1) {
+        }
+
+        if (refCounts.metric[fullName].count > 1) {
             value.name = value.name + ' (' + (refCounts.metric[fullName].count -
                 refCounts.metric[fullName].current) + ')';
             refCounts.metric[fullName].current--;
