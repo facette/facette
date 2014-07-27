@@ -218,10 +218,11 @@ type serverResponse struct {
 }
 
 type statsResponse struct {
-	Origins     int `json:"origins"`
-	Sources     int `json:"sources"`
-	Metrics     int `json:"metrics"`
-	Graphs      int `json:"graphs"`
-	Collections int `json:"collections"`
-	Groups      int `json:"groups"`
+	Origins      int `json:"origins"`
+	Sources      int `json:"sources"`
+	Metrics      int `json:"metrics"`
+	Graphs       int `json:"graphs"`
+	Collections  int `json:"collections"`
+	SourceGroups int `json:"sourcegroups"`
+	MetricGroups int `json:"metricgroups"`
 }
