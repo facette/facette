@@ -127,10 +127,11 @@ func (connector *InfluxDBConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 		}
 		return []plot.Series{sumSeries}, nil
 	} else if query.Group.Type == OperGroupTypeAvg {
-		return nil, fmt.Errorf(
-			"influxdb[%s]: average series grouping not supported by influxdb connector",
-			connector.name,
-		)
+		avgSeries, err := plot.AvgSeries(resultSeries)
+		if err != nil {
+			return nil, fmt.Errorf("influxdb[%s]: unable to average series: %s", connector.name, err)
+		}
+		return []plot.Series{avgSeries}, nil
 	} else {
 		return resultSeries, nil
 	}
