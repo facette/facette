@@ -31,6 +31,8 @@ func Test_CatalogOriginList(test *testing.T) {
 	}
 
 	// Test GET on source list
+	result = make([]string, 0)
+
 	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/origins/", serverConfig.BindAddr),
 		nil, &result)
 
@@ -130,6 +132,8 @@ func Test_CatalogSourceList(test *testing.T) {
 	}
 
 	// Test GET on source list
+	result = make([]string, 0)
+
 	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/sources/", serverConfig.BindAddr), nil,
 		&result)
 
@@ -143,7 +147,7 @@ func Test_CatalogSourceList(test *testing.T) {
 		test.Fail()
 	}
 
-	// Test GET on source list (limit)
+	// Test GET on source list (offset and limit)
 	result = make([]string, 0)
 
 	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/sources/?limit=1", serverConfig.BindAddr),
@@ -159,7 +163,6 @@ func Test_CatalogSourceList(test *testing.T) {
 		test.Fail()
 	}
 
-	// Test GET on source list (offset and limit)
 	result = make([]string, 0)
 
 	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/sources/?offset=1&limit=1",
@@ -224,7 +227,6 @@ func Test_CatalogSourceGet(test *testing.T) {
 func Test_CatalogMetricList(test *testing.T) {
 	var result []string
 
-	// Test GET on metrics list
 	base := []string{
 		"database1.test",
 		"database1/test",
@@ -232,6 +234,9 @@ func Test_CatalogMetricList(test *testing.T) {
 		"database2/test",
 		"database3/test",
 	}
+
+	// Test GET on metrics list
+	result = make([]string, 0)
 
 	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/metrics/", serverConfig.BindAddr), nil,
 		&result)
@@ -247,6 +252,8 @@ func Test_CatalogMetricList(test *testing.T) {
 	}
 
 	// Test GET on metrics list (offset and limit)
+	result = make([]string, 0)
+
 	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/metrics/?limit=2", serverConfig.BindAddr),
 		nil, &result)
 
@@ -259,6 +266,8 @@ func Test_CatalogMetricList(test *testing.T) {
 		test.Logf("\nExpected %#v\nbut got  %#v", base[:2], result)
 		test.Fail()
 	}
+
+	result = make([]string, 0)
 
 	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/metrics/?offset=2&limit=2",
 		serverConfig.BindAddr), nil, &result)
@@ -274,6 +283,8 @@ func Test_CatalogMetricList(test *testing.T) {
 	}
 
 	// Test GET on metrics list (source-specific)
+	result = make([]string, 0)
+
 	response = execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/metrics/?source=source1",
 		serverConfig.BindAddr), nil, &result)
 
@@ -331,6 +342,9 @@ func Test_LibraryScaleHandle(test *testing.T) {
 		Value: 0.125}
 
 	// Test GET on scales list
+	listBase = server.ItemListResponse{}
+	listResult = server.ItemListResponse{}
+
 	response := execTestRequest(test, "GET", baseURL, nil, &listResult)
 
 	if response.StatusCode != http.StatusOK {
@@ -571,6 +585,9 @@ func Test_LibraryUnitHandle(test *testing.T) {
 		Label: "B"}
 
 	// Test GET on units list
+	listBase = server.ItemListResponse{}
+	listResult = server.ItemListResponse{}
+
 	response := execTestRequest(test, "GET", baseURL, nil, &listResult)
 
 	if response.StatusCode != http.StatusOK {
@@ -852,6 +869,9 @@ func Test_LibraryGraphHandle(test *testing.T) {
 	graphBase.Groups = append(graphBase.Groups, group)
 
 	// Test GET on graphs list
+	listBase = server.ItemListResponse{}
+	listResult = server.ItemListResponse{}
+
 	response := execTestRequest(test, "GET", baseURL, nil, &listResult)
 
 	if response.StatusCode != http.StatusOK {
@@ -1088,6 +1108,9 @@ func Test_LibraryCollectionHandle(test *testing.T) {
 			Options: map[string]interface{}{"range": "-1w"}})
 
 	// Test GET on collections list
+	listBase = server.ItemListResponse{}
+	listResult = server.ItemListResponse{}
+
 	response := execTestRequest(test, "GET", baseURL, nil, &listResult)
 
 	if response.StatusCode != http.StatusOK {
@@ -1309,6 +1332,9 @@ func execGroupHandle(test *testing.T, urlPrefix string, groupBase *library.Group
 	baseURL := fmt.Sprintf("http://%s/api/v1/library/%s/", serverConfig.BindAddr, urlPrefix)
 
 	// Test GET on groups list
+	listBase = server.ItemListResponse{}
+	listResult = server.ItemListResponse{}
+
 	response := execTestRequest(test, "GET", baseURL, nil, &listResult)
 
 	if response.StatusCode != http.StatusOK {

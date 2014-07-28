@@ -155,6 +155,8 @@ func (server *Server) serveGraphList(writer http.ResponseWriter, request *http.R
 	}
 
 	// Fill graphs list
+	items = make(ItemListResponse, 0)
+
 	for _, graph := range server.Library.Graphs {
 		if !graphSet.IsEmpty() && !graphSet.Has(graph.ID) {
 			continue

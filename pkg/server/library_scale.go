@@ -130,6 +130,8 @@ func (server *Server) serveScaleList(writer http.ResponseWriter, request *http.R
 	}
 
 	// Fill scales list
+	items = make(ItemListResponse, 0)
+
 	for _, scale := range server.Library.Scales {
 		if request.FormValue("filter") != "" && !utils.FilterMatch(request.FormValue("filter"), scale.Name) {
 			continue
@@ -171,6 +173,8 @@ func (server *Server) serveScaleValues(writer http.ResponseWriter, request *http
 	}
 
 	// Fill scales values list
+	items = make(ScaleValueListResponse, 0)
+
 	for _, scale := range server.Library.Scales {
 		items = append(items, &ScaleValueResponse{
 			Name:  scale.Name,

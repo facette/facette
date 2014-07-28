@@ -142,6 +142,8 @@ func (server *Server) serveGroupList(writer http.ResponseWriter, request *http.R
 	}
 
 	// Fill groups list
+	items = make(ItemListResponse, 0)
+
 	isSource := strings.HasPrefix(request.URL.Path, urlLibraryPath+"sourcegroups/")
 
 	for _, group := range server.Library.Groups {

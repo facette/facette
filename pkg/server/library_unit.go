@@ -130,6 +130,8 @@ func (server *Server) serveUnitList(writer http.ResponseWriter, request *http.Re
 	}
 
 	// Fill units list
+	items = make(ItemListResponse, 0)
+
 	for _, unit := range server.Library.Units {
 		if request.FormValue("filter") != "" && !utils.FilterMatch(request.FormValue("filter"), unit.Name) {
 			continue
@@ -171,6 +173,8 @@ func (server *Server) serveUnitLabels(writer http.ResponseWriter, request *http.
 	}
 
 	// Fill units values list
+	items = make(UnitValueListResponse, 0)
+
 	for _, unit := range server.Library.Units {
 		items = append(items, &UnitValueResponse{
 			Name:  unit.Name,
