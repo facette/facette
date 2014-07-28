@@ -85,7 +85,7 @@ build: build-bin build-doc build-static
 .PHONY: install
 install: install-bin install-doc install-static
 
-devel: install devel-static
+devel: build devel-static
 
 lint: lint-bin lint-static
 
@@ -314,13 +314,13 @@ install-static: build-static $(TMPL_SRC)
 		$(call mesg_ok) || $(call mesg_fail)
 
 .PHONY: devel-static
-devel-static: install-static
-	@$(call mesg_start,install,Installing static development files...)
-	@cp $(SCRIPT_OUTPUT:.js=.src.js) $(PREFIX)/share/facette/static/$(notdir $(SCRIPT_OUTPUT)) && \
+devel-static: build-static
+	@$(call mesg_start,install,Copying static development files...)
+	@cp $(SCRIPT_OUTPUT:.js=.src.js) $(BUILD_DIR)/static/$(notdir $(SCRIPT_OUTPUT)) && \
 		$(call mesg_ok) || $(call mesg_fail)
-	@$(call mesg_start,install,Installing static third-party development files...)
+	@$(call mesg_start,install,Copying static third-party development files...)
 	@(for ENTRY in $(SCRIPT_EXTRA:.js=.src.js); do \
-		cp $$ENTRY $(PREFIX)/share/facette/static/`basename $$ENTRY | sed -e 's@\.src\.js$$@.js@'`; \
+		cp $$ENTRY $(BUILD_DIR)/static/`basename $$ENTRY | sed -e 's@\.src\.js$$@.js@'`; \
 	done) && $(call mesg_ok) || $(call mesg_fail)
 
 lint-static: jshint $(SCRIPT_OUTPUT)
