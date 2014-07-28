@@ -1,6 +1,6 @@
 {
 	"bind": ":12003",
-	"base_dir": "/usr/share/facette",
+	"base_dir": "/usr/local/share/facette",
 	"providers_dir": "/etc/facette/providers",
 	"data_dir": "/var/lib/facette",
 	"pid_file": "/var/run/facette/facette.pid"
