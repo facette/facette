@@ -284,9 +284,9 @@ func consolidateBucket(bucket []float64, consolidationType int) Value {
 
 		if consolidationType == ConsolidateAverage {
 			return Value(sum / float64(len(bucket)))
-		} else {
-			return Value(sum)
 		}
+
+		return Value(sum)
 	case ConsolidateMax:
 		max := math.NaN()
 		for _, entry := range bucket {

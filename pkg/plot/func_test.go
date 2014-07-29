@@ -3,6 +3,7 @@ package plot
 import (
 	"fmt"
 	"math"
+	"reflect"
 	"testing"
 )
 
@@ -36,8 +37,8 @@ func Test_FuncAvgSeries(test *testing.T) {
 
 		expectedNaN = Series{
 			Plots: []Plot{
-				{Value: 75}, {Value: 67}, {Value: 84.5},
-				{Value: 75.66666666666667}, {Value: 60.333333333333336}},
+				{Value: 75}, {Value: 67}, {Value: 84.5}, {Value: 75.66666666666667}, {Value: 60.333333333333336},
+			},
 		}
 
 		// Valid series: not normalized
@@ -49,7 +50,8 @@ func Test_FuncAvgSeries(test *testing.T) {
 
 		expectedNotNormalized = Series{
 			Plots: []Plot{
-				{Value: 70}, {Value: 68.66666666666667}, {Value: 67.66666666666667}, {Value: 65.5}, {Value: 72}},
+				{Value: 70}, {Value: 68.66666666666667}, {Value: 67.66666666666667}, {Value: 65.5}, {Value: 72},
+			},
 		}
 	)
 
@@ -87,6 +89,45 @@ func Test_FuncAvgSeries(test *testing.T) {
 		test.Logf(fmt.Sprintf("AvgSeries(testNotNormalized): %s", err))
 		test.Fail()
 		return
+	}
+}
+
+func Test_FuncNormalize(test *testing.T) {
+	testSeries := []Series{
+		{Plots: []Plot{
+			{Value: 12}, {Value: 4}, {Value: 22}, {Value: Value(math.NaN())}, {Value: 8},
+			{Value: 6}, {Value: 8}, {Value: Value(math.NaN())}, {Value: 1}, {Value: 56},
+			{Value: 2}, {Value: 32}, {Value: 22}, {Value: 30}, {Value: 3},
+			{Value: 2}, {Value: 3}, {Value: 15}, {Value: 26}, {Value: 31},
+			{Value: 22}, {Value: Value(math.NaN())}, {Value: 28}, {Value: 1},
+		}, Step: 200},
+		{Plots: []Plot{
+			{Value: 2}, {Value: 6}, {Value: 4}, {Value: Value(math.NaN())},
+			{Value: 11}, {Value: 9}, {Value: 8}, {Value: 8},
+			{Value: 22}, {Value: Value(math.NaN())}, {Value: 16}, {Value: 4},
+		}, Step: 400},
+		{Plots: []Plot{
+			{Value: 7}, {Value: 12}, {Value: 5},
+		}, Step: 1600},
+	}
+
+	expectedSeries := []Series{
+		{Plots: []Plot{
+			{Value: 10}, {Value: 18.5}, {Value: 18},
+		}, Step: 1600},
+		{Plots: []Plot{
+			{Value: 4}, {Value: 9}, {Value: 14},
+		}, Step: 1600},
+		{Plots: []Plot{
+			{Value: 7}, {Value: 12}, {Value: 5},
+		}, Step: 1600},
+	}
+
+	normalizedSeries, _ := Normalize(testSeries, ConsolidateAverage)
+
+	if !reflect.DeepEqual(expectedSeries, normalizedSeries) {
+		test.Logf("\nExpected %#v\nbut got  %#v", expectedSeries, normalizedSeries)
+		test.Fail()
 	}
 }
 
