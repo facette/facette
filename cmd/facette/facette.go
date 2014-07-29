@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"sort"
 	"syscall"
 
+	"github.com/facette/facette/pkg/connector"
 	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/server"
 	"github.com/facette/facette/pkg/utils"
@@ -44,6 +46,19 @@ func init() {
 		utils.PrintUsage(os.Stdout, cmdUsage)
 	} else if flagVersion {
 		utils.PrintVersion(version)
+
+		connectors := []string{}
+		for connector := range connector.Connectors {
+			connectors = append(connectors, connector)
+		}
+
+		sort.Strings(connectors)
+
+		fmt.Printf("\nAvailable connectors:\n")
+		for _, connector := range connectors {
+			fmt.Printf("   %s\n", connector)
+		}
+
 		os.Exit(0)
 	} else if flagConfig == "" {
 		fmt.Fprintf(os.Stderr, "Error: configuration file path is mandatory\n")

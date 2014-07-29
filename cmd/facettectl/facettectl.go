@@ -61,7 +61,7 @@ func main() {
 	}
 
 	switch flag.Args()[0] {
-	case "reload", "support":
+	case "reload":
 		handler = handleService
 	default:
 		utils.PrintUsage(os.Stderr, cmdUsage)
