@@ -34,6 +34,7 @@ var EVENT_KEY_TAB    = 9,
     GRAPH_DEFAULT_RANGE     = '-1h',
     GRAPH_DRAW_DELAY        = 250,
     GRAPH_LEGEND_ROW_HEIGHT = 24,
+    GRAPH_SPACING_SIZE      = 16,
 
     GRAPH_PLOTLINE_COLORS = [
         '#16a085', '#27ae60', '#2980b9', '#8e44ad',

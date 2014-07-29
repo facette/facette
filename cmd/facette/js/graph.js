@@ -192,10 +192,10 @@ function graphDraw(graph, postpone, delay, preview) {
                                 });
                             }
                         },
-                        spacingBottom: 16,
-                        spacingLeft: 16,
-                        spacingRight: 16,
-                        spacingTop: 16,
+                        spacingBottom: GRAPH_SPACING_SIZE,
+                        spacingLeft: GRAPH_SPACING_SIZE,
+                        spacingRight: GRAPH_SPACING_SIZE,
+                        spacingTop: GRAPH_SPACING_SIZE,
                     },
                     credits: {
                         enabled: false
@@ -536,7 +536,6 @@ function graphHandleMouse(e) {
     var $target = $(e.target),
         $graph = $target.closest('[data-graph]'),
         $control = $graph.children('.graphctrl'),
-        margin,
         offset;
 
     // Handle control lock
@@ -569,14 +568,13 @@ function graphHandleMouse(e) {
     }
 
     // Handle steps display
-    margin = $graph.innerWidth() / 8;
     offset = $graph.offset();
 
     if ($target.closest('.actions').length === 0) {
-        if (e.pageX - offset.left <= margin) {
+        if (e.pageX - offset.left <= GRAPH_SPACING_SIZE * 2) {
             $control.find('.step a[href$=#step-backward]').addClass('active');
             return;
-        } else if (e.pageX - offset.left >= $graph.width() - margin) {
+        } else if (e.pageX - offset.left >= $graph.width() - GRAPH_SPACING_SIZE * 2) {
             $control.find('.step a[href$=#step-forward]').addClass('active');
             return;
         }
