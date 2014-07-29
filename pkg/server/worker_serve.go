@@ -13,7 +13,7 @@ const (
 	urlAdminPath   string = "/admin/"
 	urlBrowsePath  string = "/browse/"
 	urlShowPath    string = "/show/"
-	urlReloadPath  string = "/reload"
+	urlReloadPath  string = "/api/v1/reload"
 	urlCatalogPath string = "/api/v1/catalog/"
 	urlLibraryPath string = "/api/v1/library/"
 	urlStatsPath   string = "/api/v1/stats"

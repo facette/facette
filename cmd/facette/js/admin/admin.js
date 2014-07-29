@@ -30,7 +30,7 @@ function adminReloadServer() {
     }, 500);
 
     return $.ajax({
-        url: urlPrefix + '/reload',
+        url: urlPrefix + '/api/v1/reload',
         type: 'GET'
     }).always(function (xhr) {
         if (ADMIN_RELOAD_TIMEOUT)
