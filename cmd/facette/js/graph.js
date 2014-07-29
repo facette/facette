@@ -116,7 +116,7 @@ function graphDraw(graph, postpone, delay, preview) {
                 if (data.message || !data.series) {
                     graph.children('.graphctrl')
                         .attr('disabled', 'disabled')
-                        .find('a:not([href="#refresh"])')
+                        .find('a:not([href="#edit"], [href="#refresh"])')
                             .attr('disabled', 'disabled');
 
                     graph.find('.placeholder')
