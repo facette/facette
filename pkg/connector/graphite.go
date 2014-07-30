@@ -254,12 +254,8 @@ func graphiteBuildQueryURL(queryGroup *plot.QueryGroup, startTime, endTime time.
 
 	queryURL := fmt.Sprintf("%s?format=json", graphiteURLRender)
 
-	count := 0
-
 	if queryGroup.Type == OperGroupTypeNone {
 		for _, series := range queryGroup.Series {
-			count++
-
 			target := fmt.Sprintf("%s.%s", series.Metric.Source, series.Metric.Name)
 
 			if scale, _ := config.GetFloat(series.Options, "scale", false); scale != 0 {
@@ -269,8 +265,6 @@ func graphiteBuildQueryURL(queryGroup *plot.QueryGroup, startTime, endTime time.
 			queryURL += fmt.Sprintf("&target=%s", target)
 		}
 	} else {
-		count++
-
 		for _, series := range queryGroup.Series {
 			targets = append(targets, fmt.Sprintf("%s.%s", series.Metric.Source, series.Metric.Name))
 		}
