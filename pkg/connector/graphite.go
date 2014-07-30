@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 	"time"
@@ -97,7 +98,7 @@ func (connector *GraphiteConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 		query.Group.Type = OperGroupTypeNone
 	}
 
-	queryURL, err := graphiteBuildQueryURL(query, connector.series)
+	URLQuery, err := graphiteBuildURLQuery(query, connector.series)
 	if err != nil {
 		return nil, fmt.Errorf("graphite[%s]: unable to build query URL: %s", connector.name, err)
 	}
@@ -117,7 +118,11 @@ func (connector *GraphiteConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 
 	httpClient := http.Client{Transport: httpTransport}
 
-	request, err := http.NewRequest("GET", strings.TrimSuffix(connector.URL, "/")+queryURL, nil)
+	request, err := http.NewRequest(
+		"GET",
+		strings.TrimSuffix(connector.URL, "/")+graphiteURLRender+"?"+URLQuery,
+		nil,
+	)
 	if err != nil {
 		return nil, fmt.Errorf("graphite[%s]: unable to set up HTTP request: %s", connector.name, err)
 	}
@@ -245,14 +250,14 @@ func graphiteCheckBackendResponse(response *http.Response) error {
 	return nil
 }
 
-func graphiteBuildQueryURL(query *plot.Query, graphiteSeries map[string]map[string]string) (string, error) {
+func graphiteBuildURLQuery(query *plot.Query, graphiteSeries map[string]map[string]string) (string, error) {
 	var targets []string
 
 	now := time.Now()
 
 	fromTime := 0
 
-	queryURL := fmt.Sprintf("%s?format=json", graphiteURLRender)
+	URLQuery := "format=json"
 
 	if query.Group.Type == OperGroupTypeNone {
 		for _, series := range query.Group.Series {
@@ -262,7 +267,7 @@ func graphiteBuildQueryURL(query *plot.Query, graphiteSeries map[string]map[stri
 				target = fmt.Sprintf("scale(%s, %g)", target, scale)
 			}
 
-			queryURL += fmt.Sprintf("&target=%s", target)
+			URLQuery += fmt.Sprintf("&target=%s", url.QueryEscape(target))
 		}
 	} else {
 		for _, series := range query.Group.Series {
@@ -282,22 +287,22 @@ func graphiteBuildQueryURL(query *plot.Query, graphiteSeries map[string]map[stri
 			target = fmt.Sprintf("sumSeries(%s)", target)
 		}
 
-		queryURL += fmt.Sprintf("&target=%s", target)
+		URLQuery += fmt.Sprintf("&target=%s", url.QueryEscape(target))
 	}
 
 	if query.StartTime.Before(now) {
 		fromTime = int(now.Sub(query.StartTime).Seconds())
 	}
 
-	queryURL += fmt.Sprintf("&from=-%ds", fromTime)
+	URLQuery += fmt.Sprintf("&from=-%ds", fromTime)
 
 	// Only specify `until' parameter if EndTime is still in the past
 	if query.EndTime.Before(now) {
 		untilTime := int(time.Now().Sub(query.EndTime).Seconds())
-		queryURL += fmt.Sprintf("&until=-%ds", untilTime)
+		URLQuery += fmt.Sprintf("&until=-%ds", untilTime)
 	}
 
-	return queryURL, nil
+	return URLQuery, nil
 }
 
 func graphiteExtractResult(graphitePlots []graphitePlot) ([]plot.Series, error) {
