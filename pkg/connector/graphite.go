@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -228,11 +229,13 @@ func graphiteBuildQueryURL(query *types.GroupQuery, startTime, endTime time.Time
 				target = fmt.Sprintf("scale(%s, %g)", target, serie.Scale)
 			}
 
-			queryURL += fmt.Sprintf(
-				"&target=legendValue(alias(%s, '%s'), 'min', 'max', 'avg', 'last')",
+			target = fmt.Sprintf(
+				"legendValue(alias(%s, '%s'), 'min', 'max', 'avg', 'last')",
 				target,
 				serie.Name,
 			)
+
+			queryURL += fmt.Sprintf("&target=%s", url.QueryEscape(target))
 		}
 
 	} else {
@@ -262,7 +265,7 @@ func graphiteBuildQueryURL(query *types.GroupQuery, startTime, endTime time.Time
 			serieName,
 		)
 
-		queryURL += fmt.Sprintf("&target=%s", target)
+		queryURL += fmt.Sprintf("&target=%s", url.QueryEscape(target))
 	}
 
 	if startTime.Before(now) {
