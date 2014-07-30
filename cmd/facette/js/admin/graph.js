@@ -1324,7 +1324,8 @@ function adminGraphSetupTerminate() {
                     if ($next.attr('data-input') !== undefined)
                         $next = $next.children('input');
 
-                    $next.focus();
+                    if (!e._autofill || $next.prop("tagName") != 'BUTTON')
+                        $next.focus();
                 }
             })
             .on('change', '[data-step=3] select, [data-step=3] input[type=radio]', function (e) {

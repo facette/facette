@@ -157,11 +157,13 @@ function inputHandleKeyComplete(e) {
         $target.removeData('value');
 
     // Stop if value didn't change or empty
-    if (e.target.value == e.target._lastValue) {
-        return;
-    } else if (!e.target.value) {
-        e.target._lastValue = null;
-        return;
+    if (!e._autofill) {
+        if (e.target.value == e.target._lastValue) {
+            return;
+        } else if (!e.target.value) {
+            e.target._lastValue = null;
+            return;
+        }
     }
 
     INPUT_TIMEOUTS[name] = setTimeout(function () {
@@ -182,8 +184,10 @@ function inputHandleKeyComplete(e) {
         INPUT_REQUESTS[name] = [];
 
         // Prepare menu
-        menuSay($menu, 'Loading...');
-        menuEmpty($menu);
+        if (!e._autofill) {
+            menuSay($menu, 'Loading...');
+            menuEmpty($menu);
+        }
 
         // Execute completion requests
         $.each(sources, function (i, source) {
@@ -194,15 +198,54 @@ function inputHandleKeyComplete(e) {
             };
 
             source.success = function (data, textStatus, xhr) { /*jshint unused: true */
-                items[xhr._source] = data;
+                items[xhr._source] = {
+                    data: data,
+                    total: parseInt(xhr.getResponseHeader('X-Total-Records'), 10)
+                };
             };
+
+            if (e._autofill)
+                source.data = $.extend(source.data, {limit: 1});
 
             INPUT_REQUESTS[name].push($.ajax(source));
         });
 
         // Call autocomplete callback when all sources have been fetched
         $.when.apply(null, INPUT_REQUESTS[name]).then(function () {
-            inputUpdate($input, items);
+            var entries = [],
+                source;
+
+            if (e._autofill) {
+                for (source in items) {
+                    if (items[source].data.length === 0)
+                        continue;
+
+                    entries.push.apply(entries, items[source].data);
+                }
+
+                if (entries.length == 1 && items[source].total == 1) {
+                    if (typeof entries[0] == 'string') {
+                        entries[0] = {
+                            name: entries[0],
+                            source: source
+                        };
+                    } else {
+                        entries[0].source = source;
+                    }
+
+                    $target
+                        .data('value', entries[0])
+                        .val(entries[0].name)
+                        .select()
+                        .trigger({
+                            type: 'change',
+                            _autofill: true
+                        });
+                }
+            } else {
+                inputUpdate($input, items);
+            }
+
             delete INPUT_REQUESTS[name];
         });
 
@@ -237,6 +280,12 @@ function inputInit(element) {
 
         // Make width consistent
         $menu.css('min-width', $input.width());
+
+        // Try to auto-fill input field
+        $input.find('input').trigger({
+            type: 'keyup',
+            _autofill: true
+        });
     }
 }
 
@@ -283,10 +332,10 @@ function inputUpdate(input, data) {
     count = 0;
 
     $.each(data, function (source, entries) {
-        if (!entries)
+        if (!entries.data)
             return;
 
-        $.each(entries, function (i, entry) { /*jshint unused: true */
+        $.each(entries.data, function (i, entry) { /*jshint unused: true */
             if (typeof entry == 'string') {
                 entry = {
                     name: entry,

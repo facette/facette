@@ -286,7 +286,7 @@ function adminGroupSetupTerminate() {
                     $button.removeAttr('disabled');
 
                 // Select next item
-                if (!e._typing && $target.val())
+                if (!e._typing && !e._autofill && $target.val())
                     $target.closest('[data-input]').nextAll('button:first').focus();
             })
             .on('change', '[data-step=2] :input', function () {
