@@ -97,7 +97,7 @@ func (connector *GraphiteConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 		query.Group.Type = OperGroupTypeNone
 	}
 
-	queryURL, err := graphiteBuildQueryURL(query.Group, query.StartTime, query.EndTime)
+	queryURL, err := graphiteBuildQueryURL(query, connector.series)
 	if err != nil {
 		return nil, fmt.Errorf("graphite[%s]: unable to build query URL: %s", connector.name, err)
 	}
@@ -245,7 +245,7 @@ func graphiteCheckBackendResponse(response *http.Response) error {
 	return nil
 }
 
-func graphiteBuildQueryURL(queryGroup *plot.QueryGroup, startTime, endTime time.Time) (string, error) {
+func graphiteBuildQueryURL(query *plot.Query, graphiteSeries map[string]map[string]string) (string, error) {
 	var targets []string
 
 	now := time.Now()
@@ -254,9 +254,9 @@ func graphiteBuildQueryURL(queryGroup *plot.QueryGroup, startTime, endTime time.
 
 	queryURL := fmt.Sprintf("%s?format=json", graphiteURLRender)
 
-	if queryGroup.Type == OperGroupTypeNone {
-		for _, series := range queryGroup.Series {
-			target := fmt.Sprintf("%s.%s", series.Metric.Source, series.Metric.Name)
+	if query.Group.Type == OperGroupTypeNone {
+		for _, series := range query.Group.Series {
+			target := graphiteSeries[series.Metric.Source][series.Metric.Name]
 
 			if scale, _ := config.GetFloat(series.Options, "scale", false); scale != 0 {
 				target = fmt.Sprintf("scale(%s, %g)", target, scale)
@@ -265,17 +265,17 @@ func graphiteBuildQueryURL(queryGroup *plot.QueryGroup, startTime, endTime time.
 			queryURL += fmt.Sprintf("&target=%s", target)
 		}
 	} else {
-		for _, series := range queryGroup.Series {
-			targets = append(targets, fmt.Sprintf("%s.%s", series.Metric.Source, series.Metric.Name))
+		for _, series := range query.Group.Series {
+			targets = append(targets, graphiteSeries[series.Metric.Source][series.Metric.Name])
 		}
 
 		target := fmt.Sprintf("group(%s)", strings.Join(targets, ","))
 
-		if scale, _ := config.GetFloat(queryGroup.Series[0].Options, "scale", false); scale != 0 {
+		if scale, _ := config.GetFloat(query.Group.Series[0].Options, "scale", false); scale != 0 {
 			target = fmt.Sprintf("scale(%s, %g)", target, scale)
 		}
 
-		switch queryGroup.Type {
+		switch query.Group.Type {
 		case OperGroupTypeAvg:
 			target = fmt.Sprintf("averageSeries(%s)", target)
 		case OperGroupTypeSum:
@@ -285,15 +285,15 @@ func graphiteBuildQueryURL(queryGroup *plot.QueryGroup, startTime, endTime time.
 		queryURL += fmt.Sprintf("&target=%s", target)
 	}
 
-	if startTime.Before(now) {
-		fromTime = int(now.Sub(startTime).Seconds())
+	if query.StartTime.Before(now) {
+		fromTime = int(now.Sub(query.StartTime).Seconds())
 	}
 
 	queryURL += fmt.Sprintf("&from=-%ds", fromTime)
 
-	// Only specify `until' parameter if endTime is still in the past
-	if endTime.Before(now) {
-		untilTime := int(time.Now().Sub(endTime).Seconds())
+	// Only specify `until' parameter if EndTime is still in the past
+	if query.EndTime.Before(now) {
+		untilTime := int(time.Now().Sub(query.EndTime).Seconds())
 		queryURL += fmt.Sprintf("&until=-%ds", untilTime)
 	}
 
