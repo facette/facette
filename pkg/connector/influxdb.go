@@ -108,6 +108,7 @@ func (connector *InfluxDBConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 		series := plot.Series{
 			Name:    query.Group.Series[i].Metric.Name,
 			Summary: make(map[string]plot.Value),
+			Step:    int(query.EndTime.Sub(query.StartTime) / time.Duration(query.Sample)),
 		}
 
 		for _, point := range influxdbSeries.GetPoints() {
