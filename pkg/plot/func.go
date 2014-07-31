@@ -103,11 +103,17 @@ func SumSeries(seriesList []Series) (Series, error) {
 		return Series{}, fmt.Errorf("no series provided")
 	}
 
+	// Normalize series
+	normalizedSeriesList, err := NormalizeSeries(seriesList, ConsolidateAverage)
+	if err != nil {
+		return Series{}, fmt.Errorf("unable to normalize series: %s", err)
+	}
+
 	// Find out the longest series of the list
-	maxPlots := len(seriesList[0].Plots)
-	for i := range seriesList {
-		if len(seriesList[i].Plots) > maxPlots {
-			maxPlots = len(seriesList[i].Plots)
+	maxPlots := len(normalizedSeriesList[0].Plots)
+	for i := range normalizedSeriesList {
+		if len(normalizedSeriesList[i].Plots) > maxPlots {
+			maxPlots = len(normalizedSeriesList[i].Plots)
 		}
 	}
 
@@ -117,7 +123,7 @@ func SumSeries(seriesList []Series) (Series, error) {
 	}
 
 	for plotIndex := 0; plotIndex < maxPlots; plotIndex++ {
-		for _, series := range seriesList {
+		for _, series := range normalizedSeriesList {
 			// Skip shorter series
 			if plotIndex >= len(series.Plots) {
 				continue
