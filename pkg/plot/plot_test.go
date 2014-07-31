@@ -1,6 +1,7 @@
 package plot
 
 import (
+	"fmt"
 	"math"
 	"testing"
 
@@ -128,6 +129,25 @@ func Test_SeriesDownsample(test *testing.T) {
 			test.Logf("\nExpected %#v\nbut got  %#v", entry.Series, series.Plots)
 			test.Fail()
 		}
+	}
+}
+
+func Test_SeriesScale(test *testing.T) {
+	var (
+		testSeries = Series{
+			Plots: []Plot{{Value: 0.61}, {Value: 0.69}, {Value: 0.98}, {Value: Value(math.NaN())}, {Value: 0.43}},
+		}
+
+		expectedSeries = Series{
+			Plots: []Plot{{Value: 61}, {Value: 69}, {Value: 98}, {Value: Value(math.NaN())}, {Value: 43}},
+		}
+	)
+
+	testSeries.Scale(Value(100))
+	if err := compareSeries(expectedSeries, testSeries); err != nil {
+		test.Logf(fmt.Sprintf("%s", err))
+		test.Fail()
+		return
 	}
 }
 

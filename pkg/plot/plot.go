@@ -184,6 +184,15 @@ func (series *Series) Downsample(sample, consolidationType int) {
 	series.Consolidate(len(series.Plots)/sample, consolidationType)
 }
 
+// Scale applies a factor on a series of plots.
+func (series *Series) Scale(factor Value) {
+	for i := range series.Plots {
+		if !series.Plots[i].Value.IsNaN() {
+			series.Plots[i].Value *= factor
+		}
+	}
+}
+
 // Summarize calculates the min/max/average/last and percentile values of a series of plots, and stores the results
 // into the Summary map.
 func (series Series) Summarize(percentiles []float64) {
