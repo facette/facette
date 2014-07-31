@@ -82,8 +82,9 @@ type QueryGroup struct {
 
 func (queryGroup *QueryGroup) String() string {
 	return fmt.Sprintf(
-		"QueryGroup{Type:%d Scale:%g Series:[%s] Options:%v}",
+		"QueryGroup{Type:%d Options:%v Series:[%s]}",
 		queryGroup.Type,
+		queryGroup.Options,
 		func(series []*QuerySeries) string {
 			seriesStrings := make([]string, len(series))
 			for i, entry := range series {
@@ -92,7 +93,6 @@ func (queryGroup *QueryGroup) String() string {
 
 			return strings.Join(seriesStrings, ", ")
 		}(queryGroup.Series),
-		queryGroup.Options,
 	)
 }
 
