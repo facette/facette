@@ -190,7 +190,9 @@ function adminGroupSetupTerminate() {
                     $entry = adminGroupCreateItem({
                         pattern: (parseInt($select.val(), 10) !== 0 ? type + ':' : '') + $item.val(),
                         origin: $origin.val()
-                    }).find('.type').text(type);
+                    });
+
+                    $entry.find('.type').text(type);
 
                     if ($entryActive)
                         $entryActive.replaceWith($entry);
