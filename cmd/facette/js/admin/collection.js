@@ -118,27 +118,7 @@ function adminCollectionSetupTerminate() {
         });
 
         // Register links
-        linkRegister('move-up move-down', function (e) {
-            var $target = $(e.target),
-                $item = $target.closest('.listitem'),
-                $itemNext;
-
-            if (e.target.href.endsWith('#move-up')) {
-                $itemNext = $item.prevAll('.listitem:first');
-
-                if ($itemNext.length === 0)
-                    return;
-
-                $item.detach().insertBefore($itemNext);
-            } else {
-                $itemNext = $item.nextAll('.listitem:first');
-
-                if ($itemNext.length === 0)
-                    return;
-
-                $item.detach().insertAfter($itemNext);
-            }
-        });
+        linkRegister('move-up move-down', adminItemHandleReorder);
 
         linkRegister('remove-graph', function (e) {
             var $target = $(e.target),

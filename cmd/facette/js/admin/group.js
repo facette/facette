@@ -106,6 +106,8 @@ function adminGroupSetupTerminate() {
         });
 
         // Register links
+        linkRegister('move-up move-down', adminItemHandleReorder);
+
         linkRegister('remove-item', function (e) {
             var $target = $(e.target),
                 $list = $target.closest('[data-list]');
@@ -259,7 +261,7 @@ function adminGroupSetupTerminate() {
                 else if (value.pattern.startsWith('regexp:'))
                     value = {origin: value.origin, type: MATCH_TYPE_REGEXP, item: value.pattern.substr(7)};
                 else
-                    value = {origin: value.origin, type: MATCH_TYPE_NORMAL, item: value.pattern};
+                    value = {origin: value.origin, type: MATCH_TYPE_SINGLE, item: value.pattern};
 
                 $fieldset.find('button[name=item-add]').toggle(!active);
                 $fieldset.find('button[name=item-update], button[name=item-cancel]').toggle(active);

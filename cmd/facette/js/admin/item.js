@@ -100,3 +100,25 @@ function adminItemHandlePaneSave(pane, itemId, itemType, callback) {
             });
         });
 }
+
+function adminItemHandleReorder(e) {
+    var $target = $(e.target),
+        $item = $target.closest('[data-listitem]'),
+        $itemNext;
+
+    if (e.target.href.endsWith('#move-up')) {
+        $itemNext = $item.prevAll('[data-listitem]:first');
+
+        if ($itemNext.length === 0)
+            return;
+
+        $item.detach().insertBefore($itemNext);
+    } else {
+        $itemNext = $item.nextAll('[data-listitem]:first');
+
+        if ($itemNext.length === 0)
+            return;
+
+        $item.detach().insertAfter($itemNext);
+    }
+}
