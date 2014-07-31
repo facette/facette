@@ -50,31 +50,32 @@ func Test_FuncAvgSeries(test *testing.T) {
 	var (
 		// Valid series
 		testFull = []Series{
-			{Plots: []Plot{{Value: 61}, {Value: 69}, {Value: 98}, {Value: 56}, {Value: 43}}},
-			{Plots: []Plot{{Value: 68}, {Value: 87}, {Value: 95}, {Value: 69}, {Value: 79}}},
-			{Plots: []Plot{{Value: 99}, {Value: 54}, {Value: 88}, {Value: 99}, {Value: 77}}},
-			{Plots: []Plot{{Value: 85}, {Value: 62}, {Value: 71}, {Value: 78}, {Value: 72}}},
-			{Plots: []Plot{{Value: 89}, {Value: 70}, {Value: 96}, {Value: 93}, {Value: 66}}},
+			{Step: 10, Plots: []Plot{{Value: 61}, {Value: 69}, {Value: 98}, {Value: 56}, {Value: 43}}},
+			{Step: 10, Plots: []Plot{{Value: 68}, {Value: 87}, {Value: 95}, {Value: 69}, {Value: 79}}},
+			{Step: 10, Plots: []Plot{{Value: 99}, {Value: 54}, {Value: 88}, {Value: 99}, {Value: 77}}},
+			{Step: 10, Plots: []Plot{{Value: 85}, {Value: 62}, {Value: 71}, {Value: 78}, {Value: 72}}},
+			{Step: 10, Plots: []Plot{{Value: 89}, {Value: 70}, {Value: 96}, {Value: 93}, {Value: 66}}},
 		}
 
 		expectedFull = Series{
-			Plots: []Plot{{Value: 80.4}, {Value: 68.4}, {Value: 89.6}, {Value: 79}, {Value: 67.4}},
+			Step: 10, Plots: []Plot{{Value: 80.4}, {Value: 68.4}, {Value: 89.6}, {Value: 79}, {Value: 67.4}},
 		}
 
 		// Valid series featuring NaN plot values
 		testNaN = []Series{
-			{Plots: []Plot{
+			{Step: 10, Plots: []Plot{
 				{Value: 61}, {Value: 69}, {Value: 98}, {Value: 56}, {Value: 43}},
 			},
-			{Plots: []Plot{
+			{Step: 10, Plots: []Plot{
 				{Value: Value(math.NaN())}, {Value: 62}, {Value: 71}, {Value: 78}, {Value: 72}},
 			},
-			{Plots: []Plot{
+			{Step: 10, Plots: []Plot{
 				{Value: 89}, {Value: 70}, {Value: Value(math.NaN())}, {Value: 93}, {Value: 66}},
 			},
 		}
 
 		expectedNaN = Series{
+			Step: 10,
 			Plots: []Plot{
 				{Value: 75}, {Value: 67}, {Value: 84.5}, {Value: 75.66666666666667}, {Value: 60.333333333333336},
 			},
@@ -82,15 +83,26 @@ func Test_FuncAvgSeries(test *testing.T) {
 
 		// Valid series: not normalized
 		testNotNormalized = []Series{
-			Series{Plots: []Plot{{Value: 85}, {Value: 62}, {Value: 71}, {Value: 78}, {Value: 72}}},
-			Series{Plots: []Plot{{Value: 70}, {Value: 96}, {Value: 93}}},
-			Series{Plots: []Plot{{Value: 55}, {Value: 48}, {Value: 39}, {Value: 53}}},
+			{Plots: []Plot{
+				{Value: 12}, {Value: 4}, {Value: 22}, {Value: Value(math.NaN())}, {Value: 8},
+				{Value: 6}, {Value: 8}, {Value: Value(math.NaN())}, {Value: 1}, {Value: 56},
+				{Value: 2}, {Value: 32}, {Value: 22}, {Value: 30}, {Value: 3},
+				{Value: 2}, {Value: 3}, {Value: 15}, {Value: 26}, {Value: 31},
+				{Value: 22}, {Value: Value(math.NaN())}, {Value: 28}, {Value: 1},
+			}, Step: 200},
+			{Plots: []Plot{
+				{Value: 2}, {Value: 6}, {Value: 4}, {Value: Value(math.NaN())},
+				{Value: 11}, {Value: 9}, {Value: 8}, {Value: 8},
+				{Value: 22}, {Value: Value(math.NaN())}, {Value: 16}, {Value: 4},
+			}, Step: 400},
+			{Plots: []Plot{
+				{Value: 7}, {Value: 12}, {Value: 5},
+			}, Step: 1600},
 		}
 
 		expectedNotNormalized = Series{
-			Plots: []Plot{
-				{Value: 70}, {Value: 68.66666666666667}, {Value: 67.66666666666667}, {Value: 65.5}, {Value: 72},
-			},
+			Step:  1600,
+			Plots: []Plot{{Value: 7}, {Value: 13.166666666666666}, {Value: 12.333333333333334}},
 		}
 	)
 
@@ -143,8 +155,7 @@ func Test_FuncSumSeries(test *testing.T) {
 		}
 
 		expectedFull = Series{
-			Step:  10,
-			Plots: []Plot{{Value: 402}, {Value: 342}, {Value: 448}, {Value: 395}, {Value: 337}},
+			Step: 10, Plots: []Plot{{Value: 402}, {Value: 342}, {Value: 448}, {Value: 395}, {Value: 337}},
 		}
 
 		// Valid series featuring NaN plot values
