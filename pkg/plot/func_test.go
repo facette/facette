@@ -240,7 +240,11 @@ func Test_FuncSumSeries(test *testing.T) {
 
 func compareSeries(expected, actual Series) error {
 	for i := range expected.Plots {
-		if expected.Plots[i] != actual.Plots[i] {
+		if expected.Plots[i].Value.IsNaN() {
+			if expected.Plots[i].Value.IsNaN() && !actual.Plots[i].Value.IsNaN() {
+				return fmt.Errorf("\nExpected %v\nbut got %v", expected.Plots, actual.Plots)
+			}
+		} else if expected.Plots[i] != actual.Plots[i] {
 			return fmt.Errorf("\nExpected %v\nbut got %v", expected.Plots, actual.Plots)
 		}
 	}
