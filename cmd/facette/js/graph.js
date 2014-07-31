@@ -64,11 +64,29 @@ function graphDraw(graph, postpone, delay, preview) {
             // Parse graph options
             graphOpts = graph.data('options') || graph.opts('graph');
 
-            if (typeof graphOpts.zoom != 'boolean')
-                graphOpts.zoom = graphOpts.zoom && graphOpts.zoom.trim().toLowerCase() == 'false' ? false : true;
+            if (typeof graphOpts.zoom != 'boolean') {
+                if (typeof graphOpts.zoom == 'undefined')
+                    graphOpts.zoom = true;
+                else
+                    graphOpts.zoom = graphOpts.zoom &&
+                        graphOpts.zoom.trim().toLowerCase() == 'false' ? false : true;
+            }
 
-            if (typeof graphOpts.expand != 'boolean')
-                graphOpts.expand = graphOpts.expand && graphOpts.expand.trim().toLowerCase() == 'false' ? false : true;
+            if (typeof graphOpts.expand != 'boolean') {
+                if (typeof graphOpts.expand == 'undefined')
+                    graphOpts.expand = true;
+                else
+                    graphOpts.expand = graphOpts.expand &&
+                        graphOpts.expand.trim().toLowerCase() == 'false' ? false : true;
+            }
+
+            if (typeof graphOpts.legend != 'boolean') {
+                if (typeof graphOpts.legend == 'undefined')
+                    graphOpts.legend = false;
+                else
+                    graphOpts.legend = graphOpts.legend &&
+                        graphOpts.legend.trim().toLowerCase() == 'false' ? false : true;
+            }
 
             if (graphOpts.sample)
                 graphOpts.sample = parseInt(graphOpts.sample, 10);
@@ -93,6 +111,8 @@ function graphDraw(graph, postpone, delay, preview) {
 
             if (preview) {
                 query.graph = preview;
+
+                graphOpts.legend = false;
             } else {
                 query.id = graph.attr('data-graph');
             }
@@ -139,7 +159,7 @@ function graphDraw(graph, postpone, delay, preview) {
                 endTime   = moment(data.end);
 
                 graphTableUpdate = function () {
-                    if (!preview)
+                    if (graphOpts.legend)
                         Highcharts.drawTable.apply(this, [seriesData]);
                 };
 
@@ -192,7 +212,7 @@ function graphDraw(graph, postpone, delay, preview) {
                                 });
                             }
                         },
-                        spacingBottom: GRAPH_SPACING_SIZE,
+                        spacingBottom: GRAPH_SPACING_SIZE * 2,
                         spacingLeft: GRAPH_SPACING_SIZE,
                         spacingRight: GRAPH_SPACING_SIZE,
                         spacingTop: GRAPH_SPACING_SIZE,
@@ -349,14 +369,28 @@ function graphDraw(graph, postpone, delay, preview) {
                 }
 
                 // Prepare legend spacing
-                if (!preview)
-                    highchartOpts.chart.spacingBottom = highchartOpts.series.length * GRAPH_LEGEND_ROW_HEIGHT +
-                        highchartOpts.chart.spacingBottom * 2;
-
                 $container = graph.children('.graphcntr');
 
-                if (!preview && !$container.highcharts() && graphOpts.expand)
-                    $container.height($container.height() + highchartOpts.chart.spacingBottom);
+                if (graphOpts.legend) {
+                    highchartOpts.chart.spacingBottom = highchartOpts.series.length * GRAPH_LEGEND_ROW_HEIGHT +
+                        highchartOpts.chart.spacingBottom;
+
+                    if (graph.data('toggled-legend') && graphOpts.expand) {
+                        $container.height($container.outerHeight() + highchartOpts.series.length *
+                            GRAPH_LEGEND_ROW_HEIGHT);
+
+                        graph.data('toggled-legend', false);
+                    }
+                } else {
+                    highchartOpts.chart.spacingBottom = GRAPH_SPACING_SIZE * 2;
+
+                    if (graph.data('toggled-legend') && graphOpts.expand) {
+                        $container.height($container.outerHeight() - highchartOpts.series.length *
+                            GRAPH_LEGEND_ROW_HEIGHT);
+
+                        graph.data('toggled-legend', false);
+                    }
+                }
 
                 $container.highcharts(highchartOpts);
 
@@ -503,6 +537,18 @@ function graphHandleActions(e) {
         graphUpdateOptions($graph, {
             time: moment(graphObj.xAxis[0].min).add(delta).format(TIME_RFC3339),
             range: $graph.data('options').range.replace(/^-/, '')
+        });
+
+        graphDraw($graph);
+    } else if (e.target.href.endsWith('#toggle-legend')) {
+        var graphOpts = $graph.data('options') || $graph.opts('graph');
+
+        $target.toggleClass('icon-fold icon-unfold');
+
+        $graph.data('toggled-legend', true);
+
+        graphUpdateOptions($graph, {
+            legend: typeof graphOpts.legend == 'boolean' ? !graphOpts.legend : true
         });
 
         graphDraw($graph);

@@ -109,6 +109,29 @@
 			}
 		}
 
+		.legend {
+			background-color: @GraphBackgroundColor;
+			border-radius: 0.25em 0.25em 0 0;
+			bottom: 0;
+			height: 1em;
+			left: 50%;
+			line-height: 1em;
+			margin-left: -1.5em;
+			position: absolute;
+			text-align: center;
+			vertical-align: bottom;
+			width: 3em;
+
+			a {
+				color: @GraphTextColor;
+				display: block;
+
+				&::before {
+					margin-right: 0;
+				}
+			}
+		}
+
 		.actions {
 			border-radius: 0.25em;
 			cursor: default;
@@ -147,7 +170,7 @@
 	}
 
 	.graphcntr {
-		height: 18em;
+		height: 20em;
 	}
 }
 

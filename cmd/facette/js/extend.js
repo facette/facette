@@ -52,8 +52,7 @@ if (window.Highcharts) {
             columnKeys = ['min', 'avg', 'max', 'last'],
             groups = {},
             tableLeft = chart.plotLeft,
-            tableTop = chart.plotTop + chart.plotHeight + options.chart.spacingBottom -
-                chart.series.length * GRAPH_LEGEND_ROW_HEIGHT,
+            tableTop = chart.plotTop + chart.plotHeight + GRAPH_SPACING_SIZE * 2.5,
             groupTimeout = {},
             groupEvent = function (e) {
                 var $group = $(e.target).closest('.highcharts-table-group'),
