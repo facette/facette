@@ -168,7 +168,8 @@ function adminGroupSetupTerminate() {
                     $select,
                     $origin,
                     name,
-                    type;
+                    type,
+                    isPattern;
 
                 switch (e.target.name) {
                 case 'item-add':
@@ -186,13 +187,17 @@ function adminGroupSetupTerminate() {
                         $entryActive = listGetItems('step-1-items', '.active');
 
                     type = $select.children('option:selected').text().toLowerCase();
+                    isPattern = parseInt($select.val(), 10) !== MATCH_TYPE_SINGLE;
 
                     $entry = adminGroupCreateItem({
-                        pattern: (parseInt($select.val(), 10) !== 0 ? type + ':' : '') + $item.val(),
+                        pattern: (isPattern ? type + ':' : '') + $item.val(),
                         origin: $origin.val()
                     });
 
                     $entry.find('.type').text(type);
+
+                    if (!isPattern)
+                        $entry.find('a[href=#test-pattern]').remove();
 
                     if ($entryActive)
                         $entryActive.replaceWith($entry);
@@ -310,8 +315,12 @@ function adminGroupSetupTerminate() {
 
             $listItems = listMatch('step-1-items');
 
-            for (i in data.entries)
+            for (i in data.entries) {
                 $item = adminGroupCreateItem(data.entries[i]);
+
+                if (!data.entries[i].pattern.startsWith('glob:') && !data.entries[i].pattern.startsWith('regexp:'))
+                    $item.find('a[href=#test-pattern]').remove();
+            }
 
             $pane = paneMatch('group-edit');
 
