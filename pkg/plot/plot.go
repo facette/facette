@@ -10,18 +10,6 @@ import (
 	"time"
 )
 
-const (
-	_ = iota
-	// ConsolidateAverage represents an average consolidation type.
-	ConsolidateAverage
-	// ConsolidateMax represents a maximal value consolidation type.
-	ConsolidateMax
-	// ConsolidateMin represents a minimal value consolidation type.
-	ConsolidateMin
-	// ConsolidateSum represents a sum consolidation type.
-	ConsolidateSum
-)
-
 // Plot represents a graph plot.
 type Plot struct {
 	Time  time.Time `json:"time"`

@@ -6,6 +6,49 @@ import (
 	"github.com/facette/facette/pkg/utils"
 )
 
+const (
+	_ = iota
+	// ConsolidateAverage represents an average consolidation type.
+	ConsolidateAverage
+	// ConsolidateMax represents a maximal value consolidation type.
+	ConsolidateMax
+	// ConsolidateMin represents a minimal value consolidation type.
+	ConsolidateMin
+	// ConsolidateSum represents a sum consolidation type.
+	ConsolidateSum
+)
+
+// NormalizeSeries aligns series steps to the less precise one.
+func NormalizeSeries(series []Series, consolidationType int) ([]Series, error) {
+	var step int
+
+	seriesCount := len(series)
+
+	if seriesCount == 0 {
+		return nil, fmt.Errorf("no series provided")
+	}
+
+	outputSeries := make([]Series, seriesCount)
+
+	// Get least common multiple
+	step = series[0].Step
+	if seriesCount > 1 {
+		for i := 1; i < seriesCount; i++ {
+			step = lcm(step, series[i].Step)
+		}
+	}
+
+	for i, serie := range series {
+		outputSeries[i] = Series{}
+		utils.Clone(&serie, &outputSeries[i])
+
+		outputSeries[i].Consolidate(step/outputSeries[i].Step, consolidationType)
+		outputSeries[i].Step = step
+	}
+
+	return outputSeries, nil
+}
+
 // AvgSeries returns a new series averaging each series' datapoints.
 func AvgSeries(seriesList []Series) (Series, error) {
 	nSeries := len(seriesList)
@@ -50,37 +93,6 @@ func AvgSeries(seriesList []Series) (Series, error) {
 	}
 
 	return avgSeries, nil
-}
-
-// Normalize aligns series steps to the less precise one.
-func Normalize(series []Series, consolidationType int) ([]Series, error) {
-	var step int
-
-	seriesCount := len(series)
-
-	if seriesCount == 0 {
-		return nil, fmt.Errorf("no series provided")
-	}
-
-	outputSeries := make([]Series, seriesCount)
-
-	// Get least common multiple
-	step = series[0].Step
-	if seriesCount > 1 {
-		for i := 1; i < seriesCount; i++ {
-			step = lcm(step, series[i].Step)
-		}
-	}
-
-	for i, serie := range series {
-		outputSeries[i] = Series{}
-		utils.Clone(&serie, &outputSeries[i])
-
-		outputSeries[i].Consolidate(step/outputSeries[i].Step, consolidationType)
-		outputSeries[i].Step = step
-	}
-
-	return outputSeries, nil
 }
 
 // SumSeries add series plots together and return the sum at each datapoint.
