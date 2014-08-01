@@ -1,6 +1,15 @@
 CHANGES
 =======
 
+0.1.2 (2014-08-01)
+------------------
+
+ * Fix crash expanding group with unknown source
+ * Fix crash while reading RRD files with numeric DS names
+ * Fix missing URL escaping in Graphite connector
+ * Fix RRD key parsing issue with numeric DS names
+ * Fix some UI issues with graphs legends
+
 0.1.1 (2014-07-12)
 ------------------
 
@@ -8,7 +17,7 @@ CHANGES
  * Fix UI glitches
  * Fix missing URL prefixes on static assets
  * Fix JS console errors caused by duplicate names check
- * Fix scale precision issue (#65)
+ * Fix scale precision issue
  * Makefile improvements
  * Minor bugfixes
 

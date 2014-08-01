@@ -1,3 +1,9 @@
+facette (0.1.2-1~wheezy) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Vincent Batoufflet <vincent@batoufflet.info>  Fri, 01 Aug 2014 14:47:20 +0200
+
 facette (0.1.1-1~wheezy) unstable; urgency=medium
 
   * New upstream release
