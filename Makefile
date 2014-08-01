@@ -382,3 +382,7 @@ dist:
 	@install -d -m 0755 $(DIST_DIR) && \
 		$(TAR) -C $(DIST_DIR) -czf $(DIST_DIR)/$(BUILD_NAME:facette-%=facette-$(VERSION)-%).tar.gz $(BUILD_NAME) && \
 		$(call mesg_ok) || $(call mesg_fail)
+
+.PHONY: dist
+docker:
+	docker build -t facette-latest .
