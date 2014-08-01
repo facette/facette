@@ -1,5 +1,5 @@
 /**
- * @license Highcharts JS v4.0.1 (2014-04-24)
+ * @license Highcharts JS v4.0.3 (2014-07-03)
  * Exporting module
  *
  * (c) 2010-2014 Torstein Honsi
@@ -250,6 +250,7 @@ extend(Chart.prototype, {
 		each(chart.series, function (serie) {
 			seriesOptions = merge(serie.options, {
 				animation: false, // turn off animation
+				enableMouseTracking: false,
 				showCheckbox: false,
 				visible: serie.visible
 			});
@@ -294,7 +295,10 @@ extend(Chart.prototype, {
 			.replace(/<svg /, '<svg xmlns:xlink="http://www.w3.org/1999/xlink" ')
 			.replace(/ href=/g, ' xlink:href=')
 			.replace(/\n/, ' ')
-			.replace(/<\/svg>.*?$/, '</svg>') // any HTML added to the container after the SVG (#894)
+			// Any HTML added to the container after the SVG (#894)
+			.replace(/<\/svg>.*?$/, '</svg>') 
+			// Batik doesn't support rgba fills and strokes (#3095)
+			.replace(/(fill|stroke)="rgba\(([ 0-9]+,[ 0-9]+,[ 0-9]+),([ 0-9\.]+)\)"/g, '$1="rgb($2)" $1-opacity="$3"') 
 			/* This fails in IE < 8
 			.replace(/([0-9]+)\.([0-9]+)/g, function(s1, s2, s3) { // round off to save weight
 				return s2 +'.'+ s3[0];
