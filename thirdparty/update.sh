@@ -12,7 +12,7 @@ fetch_git() {
 	url=$2
 	branch=$3
 
-	if [ ! -d "$SRC_DIR/checkouts/$name" ]; then
+	if [[ ! -d "$SRC_DIR/checkouts/$name" ]]; then
 		echo "Fetching $name..."
 		mkdir -p $SRC_DIR/checkouts/$name
 		git clone --quiet $url $SRC_DIR/checkouts/$name -b $branch
@@ -27,7 +27,7 @@ fetch_hg() {
 	url=$2
 	branch=$3
 
-	if [ ! -d "$SRC_DIR/checkouts/$name" ]; then
+	if [[ ! -d "$SRC_DIR/checkouts/$name" ]]; then
 		echo "Fetching $name..."
 		mkdir -p $SRC_DIR/checkouts/$name
 		hg clone --quiet $url $SRC_DIR/checkouts/$name -b $branch
@@ -52,7 +52,7 @@ print_usage() {
 }
 
 # Parse command-line arguments
-[ $# -ne 0 ] && print_usage
+[[ $# -ne 0 ]] && print_usage
 
 SRC_DIR=$(dirname $0)
 
@@ -61,7 +61,7 @@ declare -a PACKAGES
 
 IFS=$'\n'; for entry in $DEPENDS; do
 	unset IFS
-	read type url branch path<<<$(echo $entry)
+	read type url branch paths<<<$(echo $entry)
 
 	# Get package name
 	name=${url#http*://}
@@ -69,11 +69,21 @@ IFS=$'\n'; for entry in $DEPENDS; do
 	# Fetch project source and create a local copy
 	fetch_$type $name $url $branch
 
-	rm -rf $SRC_DIR/$name
-	mkdir -p $SRC_DIR/${name}${path}
-	cp -a $SRC_DIR/checkouts/${name}${path}/* $SRC_DIR/${name}${path}
+	rm -rf $SRC_DIR/$name/*
 
-	PACKAGES+=(${name}${path})
+	[[ -d "$SRC_DIR/$name" ]] || mkdir -p $SRC_DIR/${name}
+
+	# If specific paths are specified
+	if [[ -n "$paths" ]]; then
+		for path in $paths; do
+			cp -a $SRC_DIR/checkouts/${name}${path} $SRC_DIR/${name}${path}
+		done
+	else
+		cp -a $SRC_DIR/checkouts/${name}/* $SRC_DIR/${name}
+
+	fi
+
+	PACKAGES+=(${name})
 done
 
 for package in ${PACKAGES[@]}; do
