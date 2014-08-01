@@ -383,6 +383,8 @@ dist:
 		$(TAR) -C $(DIST_DIR) -czf $(DIST_DIR)/$(BUILD_NAME:facette-%=facette-$(VERSION)-%).tar.gz $(BUILD_NAME) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
+DOCKER_NAME ?= facette-latest
+
 .PHONY: dist
 docker:
-	docker build -t facette-latest .
+	docker build -t $(DOCKER_NAME) .
