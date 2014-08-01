@@ -146,6 +146,10 @@ func SumSeries(seriesList []Series) (Series, error) {
 }
 
 func gcd(a, b int) int {
+	if a <= 0 || b <= 0 {
+		return 0
+	}
+
 	c := a % b
 	if c == 0 {
 		return b
