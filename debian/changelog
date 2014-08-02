@@ -1,3 +1,9 @@
+facette (0.1.2-2~wheezy) unstable; urgency=medium
+
+  * Add missing `mime-support` package dependency
+
+ -- Vincent Batoufflet <vincent@batoufflet.info>  Sat, 02 Aug 2014 08:30:18 +0200
+
 facette (0.1.2-1~wheezy) unstable; urgency=medium
 
   * New upstream release
