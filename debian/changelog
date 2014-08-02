@@ -1,4 +1,22 @@
-facette (0.1.0~git0) unstable; urgency=low
+facette (0.1.2-2) unstable; urgency=medium
+
+  * Add missing `mime-support` package dependency
+
+ -- Vincent Batoufflet <vincent@batoufflet.info>  Sat, 02 Aug 2014 08:30:18 +0200
+
+facette (0.1.2-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Vincent Batoufflet <vincent@batoufflet.info>  Fri, 01 Aug 2014 14:47:20 +0200
+
+facette (0.1.1-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Vincent Batoufflet <vincent@batoufflet.info>  Sat, 12 Jul 2014 17:10:39 +0200
+
+facette (0.1.0-1) unstable; urgency=low
 
   * Initial release
 
