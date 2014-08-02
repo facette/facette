@@ -226,8 +226,7 @@ function graphDraw(graph, postpone, delay, preview) {
                     legend: {
                         enabled: false
                     },
-                    plotOptions: {
-                    },
+                    plotOptions: {},
                     series: [],
                     title: {
                         text: null
