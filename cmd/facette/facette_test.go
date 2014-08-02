@@ -5,17 +5,23 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
+	"path"
 	"reflect"
+	"strconv"
 	"strings"
+	"syscall"
 	"testing"
+	"time"
 
 	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/connector"
 	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/pkg/server"
 	"github.com/facette/facette/pkg/utils"
+	"github.com/facette/facette/thirdparty/github.com/ziutek/rrd"
 )
 
 var (
@@ -1311,4 +1317,39 @@ func init() {
 		fmt.Println("Error: " + err.Error())
 		os.Exit(1)
 	}
+
+	// Create temporary sample RRD files
+	rrdDir := path.Join("tmp", "tests", "rrd")
+
+	os.MkdirAll(path.Join(rrdDir, "source1"), 0755)
+	os.MkdirAll(path.Join(rrdDir, "source2"), 0755)
+
+	creator := rrd.NewCreator(path.Join(rrdDir, "source1", "database1.rrd"), time.Now(), 1)
+	creator.RRA("AVERAGE", 0.5, 1, 100)
+	creator.DS("test", "COUNTER", 2, 0, 100)
+
+	err = creator.Create(true)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	os.Link(path.Join(rrdDir, "source1", "database1.rrd"), path.Join(rrdDir, "source1", "database2.rrd"))
+	os.Link(path.Join(rrdDir, "source1", "database1.rrd"), path.Join(rrdDir, "source2", "database2.rrd"))
+	os.Link(path.Join(rrdDir, "source1", "database1.rrd"), path.Join(rrdDir, "source2", "database3.rrd"))
+
+	// Reload server to take newly created RRD files into account
+	data, err := ioutil.ReadFile(serverConfig.PidFile)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	pid, err := strconv.Atoi(strings.Trim(string(data), "\n"))
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	syscall.Kill(pid, syscall.SIGHUP)
+
+	// Wait few seconds for the reload to be completed
+	time.Sleep(5 * time.Second)
 }

@@ -1,7 +1,7 @@
 {
 	"connector": {
 		"type": "rrd",
-		"path": "tests/data",
+		"path": "tmp/tests/rrd",
 		"pattern": "(?P<source>[^/]+)/(?P<metric>.+).rrd"
 	}
 }
