@@ -13,6 +13,6 @@ Homepage: https://github.com/facette/facette
 
 Package: facette
 Architecture: any
-Depends: adduser, ${shlibs:Depends}, ${misc:Depends}
+Depends: adduser, mime-support, ${shlibs:Depends}, ${misc:Depends}
 Description: graphing web front-end
  Facette is a graphing web front-end for RRD files.
