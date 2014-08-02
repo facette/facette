@@ -1,9 +1,9 @@
 Index: facette/Makefile
 ===================================================================
---- facette.orig/Makefile	2014-06-30 15:01:29.085489827 +0200
-+++ facette/Makefile	2014-06-30 15:01:55.785490022 +0200
-@@ -254,7 +254,7 @@
- 	@install -d -m 0755 $(TEMP_DIR)/static && cat $(STYLE_SRC) >$(STYLE_OUTPUT:.css=.src.css) && \
+--- facette.orig/Makefile	2014-08-02 10:04:49.681550781 +0200
++++ facette/Makefile	2014-08-02 10:04:49.677550728 +0200
+@@ -266,7 +266,7 @@
+ 	@install -d -m 0755 $(BUILD_DIR)/static && cat $(STYLE_SRC) >$(STYLE_OUTPUT:.css=.src.css) && \
  		$(call mesg_ok) || $(call mesg_fail)
  	@$(call mesg_start,static,Packing $(notdir $(STYLE_OUTPUT:.css=.src.css)) file...)
 -	@$(LESSC) $(LESSC_ARGS) --yui-compress $(STYLE_OUTPUT:.css=.src.css) >$(STYLE_OUTPUT) && \
@@ -11,8 +11,8 @@ Index: facette/Makefile
  		$(call mesg_ok) || $(call mesg_fail)
  
  $(STYLE_PRINT_OUTPUT): lessc $(STYLE_PRINT_SRC)
-@@ -262,7 +262,7 @@
- 	@install -d -m 0755 $(TEMP_DIR)/static && cat $(STYLE_PRINT_SRC) >$(STYLE_PRINT_OUTPUT:.css=.src.css) && \
+@@ -274,7 +274,7 @@
+ 	@install -d -m 0755 $(BUILD_DIR)/static && cat $(STYLE_PRINT_SRC) >$(STYLE_PRINT_OUTPUT:.css=.src.css) && \
  		$(call mesg_ok) || $(call mesg_fail)
  	@$(call mesg_start,static,Packing $(notdir $(STYLE_PRINT_OUTPUT:.css=.src.css)) file...)
 -	@$(LESSC) $(LESSC_ARGS) --yui-compress $(STYLE_PRINT_OUTPUT:.css=.src.css) >$(STYLE_PRINT_OUTPUT) && \

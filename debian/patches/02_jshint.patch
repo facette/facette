@@ -1,8 +1,8 @@
 Index: facette/Makefile
 ===================================================================
---- facette.orig/Makefile	2014-06-30 15:11:32.196078386 +0200
-+++ facette/Makefile	2014-06-30 15:29:37.920488198 +0200
-@@ -74,9 +74,7 @@
+--- facette.orig/Makefile	2014-08-02 10:04:38.076997816 +0200
++++ facette/Makefile	2014-08-02 10:04:38.072997626 +0200
+@@ -68,9 +68,7 @@
  	fi
  
  jshint:
@@ -11,9 +11,9 @@ Index: facette/Makefile
 -	fi
 +	@#PATCH: “Evil” JSHint removal
  
- .PHONY: build
- build: build-bin build-doc build-static
-@@ -303,9 +301,7 @@
+ clean: clean-bin clean-doc clean-static clean-test clean-dist
+ 	@$(call mesg_start,clean,Cleaning source symlink...)
+@@ -324,9 +322,7 @@
  	done) && $(call mesg_ok) || $(call mesg_fail)
  
  lint-static: jshint $(SCRIPT_OUTPUT)
@@ -23,4 +23,4 @@ Index: facette/Makefile
 +	@#PATCH: “Evil” JSHint removal
  
  # Test
- TEST_DIR = $(TEMP_DIR)/tests
+ TEST_DIR = $(BUILD_DIR)/tests
