@@ -2,14 +2,16 @@ package plot
 
 import (
 	"fmt"
-
-	"github.com/facette/facette/pkg/utils"
+	"math"
+	"time"
 )
 
 const (
 	_ = iota
 	// ConsolidateAverage represents an average consolidation type.
 	ConsolidateAverage
+	// ConsolidateLast represents a last value consolidation type.
+	ConsolidateLast
 	// ConsolidateMax represents a maximal value consolidation type.
 	ConsolidateMax
 	// ConsolidateMin represents a minimal value consolidation type.
@@ -18,131 +20,255 @@ const (
 	ConsolidateSum
 )
 
-// NormalizeSeries aligns series steps to the less precise one.
-func NormalizeSeries(series []Series, consolidationType int) ([]Series, error) {
-	var step int
+const (
+	_ = iota
+	// OperTypeNone represents a null operation group mode.
+	OperTypeNone
+	// OperTypeAverage represents a AVG operation group mode.
+	OperTypeAverage
+	// OperTypeSum represents a SUM operation group mode.
+	OperTypeSum
+)
 
-	seriesCount := len(series)
+type plotBucket struct {
+	startTime time.Time
+	plots     []Plot
+}
 
+// Consolidate consolidates plots buckets based on consolidation function.
+func (bucket plotBucket) Consolidate(consolidationType int) Plot {
+	consolidatedPlot := Plot{
+		Value: Value(math.NaN()),
+		Time:  bucket.startTime,
+	}
+
+	bucketCount := len(bucket.plots)
+	if bucketCount == 0 {
+		return consolidatedPlot
+	}
+
+	switch consolidationType {
+	case ConsolidateAverage:
+		sum := 0.0
+		sumCount := 0
+		for _, plot := range bucket.plots {
+			if plot.Value.IsNaN() {
+				continue
+			}
+
+			sum += float64(plot.Value)
+			sumCount++
+		}
+
+		if sumCount > 0 {
+			consolidatedPlot.Value = Value(sum / float64(sumCount))
+		}
+
+		if bucketCount == 1 {
+			consolidatedPlot.Time = bucket.plots[0].Time
+		} else {
+			// Interpolate median time
+			consolidatedPlot.Time = bucket.plots[0].Time.Add(bucket.plots[bucketCount-1].Time.
+				Sub(bucket.plots[0].Time) / 2)
+		}
+
+	case ConsolidateSum:
+		sum := 0.0
+		sumCount := 0
+		for _, plot := range bucket.plots {
+			if plot.Value.IsNaN() {
+				continue
+			}
+
+			sum += float64(plot.Value)
+			sumCount++
+		}
+
+		if sumCount > 0 {
+			consolidatedPlot.Value = Value(sum)
+		}
+
+		consolidatedPlot.Time = bucket.plots[bucketCount-1].Time
+
+	case ConsolidateLast:
+		consolidatedPlot = bucket.plots[bucketCount-1]
+
+	case ConsolidateMax:
+		for _, plot := range bucket.plots {
+			if !plot.Value.IsNaN() && plot.Value > consolidatedPlot.Value || consolidatedPlot.Value.IsNaN() {
+				consolidatedPlot = plot
+			}
+		}
+
+	case ConsolidateMin:
+		for _, plot := range bucket.plots {
+			if !plot.Value.IsNaN() && plot.Value < consolidatedPlot.Value || consolidatedPlot.Value.IsNaN() {
+				consolidatedPlot = plot
+			}
+		}
+	}
+
+	return consolidatedPlot
+}
+
+// Normalize aligns series steps to the less precise one.
+func Normalize(seriesList []Series, startTime, endTime time.Time, sample int, consolidationType int) ([]Series, error) {
+	if sample == 0 {
+		return nil, fmt.Errorf("sample must be greater than zero")
+	}
+
+	seriesCount := len(seriesList)
 	if seriesCount == 0 {
 		return nil, fmt.Errorf("no series provided")
 	}
 
-	outputSeries := make([]Series, seriesCount)
+	consolidatedSeries := make([]Series, seriesCount)
 
-	// Get least common multiple
-	step = series[0].Step
-	if seriesCount > 1 {
-		for i := 1; i < seriesCount; i++ {
-			step = lcm(step, series[i].Step)
+	buckets := make([][]plotBucket, seriesCount)
+
+	// Override sample to max series length if smaller than requested
+	maxLength := 0
+	for _, series := range seriesList {
+		seriesLength := len(series.Plots)
+		if seriesLength > maxLength {
+			maxLength = seriesLength
 		}
 	}
 
-	for i, serie := range series {
-		outputSeries[i] = Series{}
-		utils.Clone(&serie, &outputSeries[i])
-
-		outputSeries[i].Consolidate(step/outputSeries[i].Step, consolidationType)
-		outputSeries[i].Step = step
+	if maxLength > 0 && maxLength < sample {
+		sample = maxLength
 	}
 
-	return outputSeries, nil
-}
+	// Calculate the common step for all series based on time specs and requested sampling
+	step := endTime.Sub(startTime) / time.Duration(sample)
 
-// AvgSeries returns a new series averaging each series' datapoints.
-func AvgSeries(seriesList []Series) (Series, error) {
-	nSeries := len(seriesList)
+	// Store each series' plots into the proper time step plot buckets,
+	// then consolidate each series plots buckets according to consolidation function
+	for seriesIndex, series := range seriesList {
+		buckets[seriesIndex] = make([]plotBucket, sample)
 
-	if nSeries == 0 {
-		return Series{}, fmt.Errorf("no series provided")
-	}
-
-	// Normalize series
-	normalizedSeriesList, err := NormalizeSeries(seriesList, ConsolidateAverage)
-	if err != nil {
-		return Series{}, fmt.Errorf("unable to normalize series: %s", err)
-	}
-
-	// Find out the longest series of the list
-	maxPlots := len(normalizedSeriesList[0].Plots)
-	for i := range normalizedSeriesList {
-		if len(normalizedSeriesList[i].Plots) > maxPlots {
-			maxPlots = len(normalizedSeriesList[i].Plots)
+		// Initialize time step plot buckets
+		for stepIndex := 0; stepIndex < sample; stepIndex++ {
+			buckets[seriesIndex][stepIndex] = plotBucket{
+				startTime: startTime.Add(time.Duration(stepIndex) * step),
+				plots:     make([]Plot, 0),
+			}
 		}
-	}
 
-	avgSeries := Series{
-		Plots:   make([]Plot, maxPlots),
-		Summary: make(map[string]Value),
-	}
-
-	for plotIndex := 0; plotIndex < maxPlots; plotIndex++ {
-		var validPlots Value
-
-		for _, series := range normalizedSeriesList {
-			// Skip shorter series
-			if plotIndex >= len(series.Plots) {
+		// Dispatch series plots in the right time plot bucket
+		for _, plot := range series.Plots {
+			// Discard series plots out of time specs range
+			if plot.Time.Before(startTime) || plot.Time.After(endTime) {
 				continue
 			}
 
-			if !series.Plots[plotIndex].Value.IsNaN() {
-				avgSeries.Plots[plotIndex].Value += series.Plots[plotIndex].Value
-				avgSeries.Plots[plotIndex].Time = series.Plots[plotIndex].Time
-				validPlots++
+			plotIndex := int64(float64(plot.Time.UnixNano()-startTime.UnixNano())/float64(step.Nanoseconds())+1) - 1
+			if plotIndex >= int64(sample) {
+				continue
 			}
 
+			buckets[seriesIndex][plotIndex].plots = append(buckets[seriesIndex][plotIndex].plots, plot)
 		}
 
-		if validPlots > 0 {
-			avgSeries.Plots[plotIndex].Value /= validPlots
+		consolidatedSeries[seriesIndex] = Series{
+			Name:    seriesList[seriesIndex].Name,
+			Plots:   make([]Plot, sample),
+			Summary: make(map[string]Value),
+		}
+
+		seriesLength := len(series.Plots)
+
+		plotRatio := sample / seriesLength
+		plotCount := 0
+		plotLast := Value(math.NaN())
+		plotStep := endTime.Sub(startTime) / time.Duration(sample)
+
+		// Consolidate each series' plot buckets
+		for bucketIndex := range buckets[seriesIndex] {
+			consolidatedSeries[seriesIndex].Plots[bucketIndex] = buckets[seriesIndex][bucketIndex].
+				Consolidate(consolidationType)
+
+			if seriesCount == 1 {
+				continue
+			}
+
+			plot := &consolidatedSeries[seriesIndex].Plots[bucketIndex]
+
+			// Align times on consolidated series lists
+			plot.Time = buckets[seriesIndex][bucketIndex].startTime.Add(plotStep)
+
+			if plotRatio <= 1 {
+				continue
+			}
+
+			// Interpolate missing plots values
+			if !plot.Value.IsNaN() {
+				if plotCount <= plotRatio && !plotLast.IsNaN() {
+					plotChunk := (plot.Value - plotLast) / Value(plotCount+1)
+
+					for plotIndex := bucketIndex - plotCount; plotIndex < bucketIndex; plotIndex++ {
+						consolidatedSeries[seriesIndex].Plots[plotIndex].Value = plotLast +
+							Value(plotCount-(bucketIndex-plotIndex)+1)*plotChunk
+					}
+				}
+
+				plotLast = plot.Value
+				plotCount = 0
+			} else {
+				plotCount++
+			}
 		}
 	}
 
-	return avgSeries, nil
+	return consolidatedSeries, nil
+}
+
+// AverageSeries returns a new series averaging each series' datapoints.
+func AverageSeries(seriesList []Series) (Series, error) {
+	return operSeries(seriesList, OperTypeAverage)
 }
 
 // SumSeries add series plots together and return the sum at each datapoint.
 func SumSeries(seriesList []Series) (Series, error) {
+	return operSeries(seriesList, OperTypeSum)
+}
+
+func operSeries(seriesList []Series, operType int) (Series, error) {
 	nSeries := len(seriesList)
 
 	if nSeries == 0 {
 		return Series{}, fmt.Errorf("no series provided")
 	}
 
-	// Normalize series
-	normalizedSeriesList, err := NormalizeSeries(seriesList, ConsolidateAverage)
-	if err != nil {
-		return Series{}, fmt.Errorf("unable to normalize series: %s", err)
-	}
+	plotsCount := len(seriesList[0].Plots)
 
-	// Find out the longest series of the list
-	maxPlots := len(normalizedSeriesList[0].Plots)
-	for i := range normalizedSeriesList {
-		if len(normalizedSeriesList[i].Plots) > maxPlots {
-			maxPlots = len(normalizedSeriesList[i].Plots)
-		}
-	}
-
-	sumSeries := Series{
-		Plots:   make([]Plot, maxPlots),
+	operSeries := Series{
+		Plots:   make([]Plot, plotsCount),
 		Summary: make(map[string]Value),
 	}
 
-	for plotIndex := 0; plotIndex < maxPlots; plotIndex++ {
-		for _, series := range normalizedSeriesList {
-			// Skip shorter series
-			if plotIndex >= len(series.Plots) {
+	for plotIndex := 0; plotIndex < plotsCount; plotIndex++ {
+		operSeries.Plots[plotIndex].Time = seriesList[0].Plots[plotIndex].Time
+
+		sumCount := 0
+
+		for _, series := range seriesList {
+			if series.Plots[plotIndex].Value.IsNaN() {
 				continue
 			}
 
-			if !series.Plots[plotIndex].Value.IsNaN() {
-				sumSeries.Plots[plotIndex].Value += series.Plots[plotIndex].Value
-				sumSeries.Plots[plotIndex].Time = series.Plots[plotIndex].Time
-			}
+			operSeries.Plots[plotIndex].Value += series.Plots[plotIndex].Value
+			sumCount++
+		}
+
+		if sumCount == 0 {
+			operSeries.Plots[plotIndex].Value = Value(math.NaN())
+		} else if operType == OperTypeAverage {
+			operSeries.Plots[plotIndex].Value /= Value(sumCount)
 		}
 	}
 
-	return sumSeries, nil
+	return operSeries, nil
 }
 
 func gcd(a, b int) int {

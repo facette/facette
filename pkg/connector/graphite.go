@@ -85,6 +85,11 @@ func init() {
 	}
 }
 
+// GetName returns the name of the current connector.
+func (connector *GraphiteConnector) GetName() string {
+	return connector.name
+}
+
 // GetPlots retrieves time series data from provider based on a query and a time interval.
 func (connector *GraphiteConnector) GetPlots(query *plot.Query) ([]plot.Series, error) {
 	var (
@@ -92,10 +97,8 @@ func (connector *GraphiteConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 		resultSeries  []plot.Series
 	)
 
-	if len(query.Group.Series) == 0 {
-		return nil, fmt.Errorf("graphite[%s]: group has no series", connector.name)
-	} else if query.Group.Type != OperGroupTypeNone && len(query.Group.Series) == 1 {
-		query.Group.Type = OperGroupTypeNone
+	if len(query.Series) == 0 {
+		return nil, fmt.Errorf("graphite[%s]: requested series list is empty", connector.name)
 	}
 
 	URLQuery, err := graphiteBuildURLQuery(query, connector.series)
@@ -251,43 +254,18 @@ func graphiteCheckBackendResponse(response *http.Response) error {
 }
 
 func graphiteBuildURLQuery(query *plot.Query, graphiteSeries map[string]map[string]string) (string, error) {
-	var targets []string
-
 	now := time.Now()
 
 	fromTime := 0
 
 	URLQuery := "format=json"
 
-	if query.Group.Type == OperGroupTypeNone {
-		for _, series := range query.Group.Series {
-			target := graphiteSeries[series.Metric.Source][series.Metric.Name]
-
-			if scale, _ := config.GetFloat(series.Options, "scale", false); scale != 0 {
-				target = fmt.Sprintf("scale(%s, %g)", target, scale)
-			}
-
-			URLQuery += fmt.Sprintf("&target=%s", url.QueryEscape(target))
-		}
-	} else {
-		for _, series := range query.Group.Series {
-			targets = append(targets, graphiteSeries[series.Metric.Source][series.Metric.Name])
-		}
-
-		target := fmt.Sprintf("group(%s)", strings.Join(targets, ","))
-
-		if scale, _ := config.GetFloat(query.Group.Series[0].Options, "scale", false); scale != 0 {
-			target = fmt.Sprintf("scale(%s, %g)", target, scale)
-		}
-
-		switch query.Group.Type {
-		case OperGroupTypeAvg:
-			target = fmt.Sprintf("averageSeries(%s)", target)
-		case OperGroupTypeSum:
-			target = fmt.Sprintf("sumSeries(%s)", target)
-		}
-
-		URLQuery += fmt.Sprintf("&target=%s", url.QueryEscape(target))
+	for _, series := range query.Series {
+		URLQuery += fmt.Sprintf(
+			"&target=alias(%s, \"%s\")",
+			url.QueryEscape(graphiteSeries[series.Source][series.Metric]),
+			series.Name,
+		)
 	}
 
 	if query.StartTime.Before(now) {
@@ -309,7 +287,10 @@ func graphiteExtractResult(graphitePlots []graphitePlot) ([]plot.Series, error) 
 	var resultSeries []plot.Series
 
 	for _, graphitePlot := range graphitePlots {
-		series := plot.Series{Summary: make(map[string]plot.Value)}
+		series := plot.Series{
+			Name:    graphitePlot.Target,
+			Summary: make(map[string]plot.Value),
+		}
 
 		for _, plotPoint := range graphitePlot.Datapoints {
 			series.Plots = append(

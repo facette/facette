@@ -9,18 +9,9 @@ import (
 	"github.com/facette/facette/pkg/plot"
 )
 
-const (
-	_ = iota
-	// OperGroupTypeNone represents a null operation group mode.
-	OperGroupTypeNone
-	// OperGroupTypeAvg represents a AVG operation group mode.
-	OperGroupTypeAvg
-	// OperGroupTypeSum represents a SUM operation group mode.
-	OperGroupTypeSum
-)
-
 // Connector represents the main interface of a connector handler.
 type Connector interface {
+	GetName() string
 	GetPlots(query *plot.Query) ([]plot.Series, error)
 	Refresh(string, chan *catalog.Record) error
 }

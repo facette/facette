@@ -187,11 +187,9 @@ func (server *Server) serveGraphList(writer http.ResponseWriter, request *http.R
 
 func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.Request) {
 	var (
-		graphPlotSeries    [][]plot.Series
-		err                error
-		graph              *library.Graph
-		item               interface{}
-		startTime, endTime time.Time
+		err   error
+		graph *library.Graph
+		item  interface{}
 	)
 
 	if request.Method != "POST" && request.Method != "HEAD" {
@@ -202,52 +200,18 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 		return
 	}
 
-	// Parse input JSON for graph series
-	body, _ := ioutil.ReadAll(request.Body)
-
-	plotReq := PlotRequest{}
-
-	if err := json.Unmarshal(body, &plotReq); err != nil {
+	// Parse plots request
+	plotReq, err := parsePlotRequest(request)
+	if err != nil {
 		logger.Log(logger.LevelError, "server", "%s", err)
 		server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 		return
 	}
 
-	if plotReq.Time == "" {
-		endTime = time.Now()
-	} else if strings.HasPrefix(strings.Trim(plotReq.Range, " "), "-") {
-		if endTime, err = time.Parse(time.RFC3339, plotReq.Time); err != nil {
-			logger.Log(logger.LevelError, "server", "%s", err)
-			server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
-			return
-		}
-	} else {
-		if startTime, err = time.Parse(time.RFC3339, plotReq.Time); err != nil {
-			logger.Log(logger.LevelError, "server", "%s", err)
-			server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
-			return
-		}
-	}
-
-	if startTime.IsZero() {
-		if startTime, err = utils.TimeApplyRange(endTime, plotReq.Range); err != nil {
-			logger.Log(logger.LevelError, "server", "%s", err)
-			server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
-			return
-		}
-	} else if endTime, err = utils.TimeApplyRange(startTime, plotReq.Range); err != nil {
-		logger.Log(logger.LevelError, "server", "%s", err)
-		server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
-		return
-	}
-
-	if plotReq.Sample == 0 {
-		plotReq.Sample = config.DefaultPlotSample
-	}
-
-	// Get graph from library
+	// Get graph definition from the plot request
 	graph = plotReq.Graph
 
+	// If a Graph ID has been provided in the plot request, fetch the graph definition from the library instead
 	if plotReq.ID != "" {
 		if item, err = server.Library.GetItem(plotReq.ID, library.LibraryItemGraph); err == nil {
 			graph = item.(*library.Graph)
@@ -258,6 +222,7 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 		err = os.ErrNotExist
 	}
 
+	// Stop if an error was encountered
 	if err != nil {
 		if os.IsNotExist(err) {
 			server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
@@ -269,47 +234,214 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 		return
 	}
 
-	// Get graph plots series
-	groupOptions := make(map[string]map[string]interface{})
+	// Prepare queries to be executed by the providers
+	providerQueries, err := server.prepareProviderQueries(plotReq, graph)
+	if err != nil {
+		if os.IsNotExist(err) {
+			server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
+		} else {
+			logger.Log(logger.LevelError, "server", "%s", err)
+			server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
+		}
+
+		return
+	}
+
+	plotSeries, err := executeQueries(providerQueries)
+	if err != nil {
+		logger.Log(logger.LevelError, "server", "unable to execute provider queries: %s", err)
+		server.serveResponse(writer, serverResponse{mesgProviderQueryError}, http.StatusInternalServerError)
+		return
+	}
+
+	if len(plotSeries) == 0 {
+		server.serveResponse(writer, serverResponse{mesgEmptyData}, http.StatusOK)
+		return
+	}
+
+	response, err := makePlotsResponse(plotSeries, plotReq, graph)
+	if err != nil {
+		logger.Log(logger.LevelError, "server", "unable to make plots response: %s", err)
+		server.serveResponse(writer, serverResponse{mesgPlotOperationError}, http.StatusInternalServerError)
+		return
+	}
+
+	server.serveResponse(writer, response, http.StatusOK)
+}
+
+func (server *Server) prepareProviderQueries(plotReq *PlotRequest,
+	graph *library.Graph) (map[string]*providerQuery, error) {
+
+	providerQueries := make(map[string]*providerQuery)
 
 	for _, groupItem := range graph.Groups {
-		groupOptions[groupItem.Name] = groupItem.Options
+		for _, seriesItem := range groupItem.Series {
+			var seriesSources []string
 
-		query, providerConnector, err := server.prepareQuery(&plotReq, groupItem)
-		if err != nil {
-			if err != os.ErrInvalid {
-				logger.Log(logger.LevelError, "server", "%s", err)
+			// Check for unknown origins
+			if _, ok := server.Catalog.Origins[seriesItem.Origin]; !ok {
+				logger.Log(logger.LevelWarning, "server", "unknown series origin `%s'", seriesItem.Origin)
+				return nil, os.ErrNotExist
 			}
 
-			graphPlotSeries = append(graphPlotSeries, nil)
+			// Expand source groups
+			if strings.HasPrefix(seriesItem.Source, library.LibraryGroupPrefix) {
+				seriesSources = server.Library.ExpandGroup(
+					strings.TrimPrefix(seriesItem.Source, library.LibraryGroupPrefix),
+					library.LibraryItemSourceGroup,
+				)
+			} else {
+				seriesSources = []string{seriesItem.Source}
+			}
+
+			// Process series metrics
+			for _, sourceItem := range seriesSources {
+				var seriesMetrics []string
+
+				// Expand metric groups
+				if strings.HasPrefix(seriesItem.Metric, library.LibraryGroupPrefix) {
+					seriesMetrics = server.Library.ExpandGroup(
+						strings.TrimPrefix(seriesItem.Metric, library.LibraryGroupPrefix),
+						library.LibraryItemMetricGroup,
+					)
+				} else {
+					seriesMetrics = []string{seriesItem.Metric}
+				}
+
+				for _, metricItem := range seriesMetrics {
+					// Get series metric
+					metric := server.Catalog.GetMetric(seriesItem.Origin, sourceItem, metricItem)
+					if metric == nil {
+						logger.Log(logger.LevelWarning, "server", "unknown metric `%s' for source `%s' (origin: %s)",
+							metricItem, sourceItem, seriesItem.Origin)
+
+						continue
+					}
+
+					// Get provider name
+					providerName := metric.Connector.(connector.Connector).GetName()
+
+					// Initialize provider query if needed
+					if _, ok := providerQueries[providerName]; !ok {
+						providerQueries[providerName] = &providerQuery{
+							query: plot.Query{
+								StartTime: plotReq.startTime,
+								EndTime:   plotReq.endTime,
+								Sample:    plotReq.Sample,
+								Series:    make([]plot.QuerySeries, 0),
+							},
+							queryMap:  make([]providerQueryMap, 0),
+							connector: metric.Connector.(connector.Connector),
+						}
+					}
+
+					// Append metric to provider query
+					providerQueries[providerName].query.Series = append(
+						providerQueries[providerName].query.Series,
+						plot.QuerySeries{
+							Name:   fmt.Sprintf("series%d", len(providerQueries[providerName].query.Series)),
+							Origin: metric.Source.Origin.OriginalName,
+							Source: metric.Source.OriginalName,
+							Metric: metric.OriginalName,
+						},
+					)
+
+					// Keep track of user-defined series name and source/metric information
+					providerQueries[providerName].queryMap = append(
+						providerQueries[providerName].queryMap,
+						providerQueryMap{
+							seriesName: seriesItem.Name,
+							sourceName: metric.Source.Name,
+							metricName: metric.Name,
+						},
+					)
+				}
+			}
+		}
+	}
+
+	return providerQueries, nil
+}
+
+func parsePlotRequest(request *http.Request) (*PlotRequest, error) {
+	var err error
+
+	plotReq := &PlotRequest{}
+
+	// Parse input JSON for plots request
+	body, _ := ioutil.ReadAll(request.Body)
+	if err = json.Unmarshal(body, plotReq); err != nil {
+		return nil, err
+	}
+
+	// Check plots request parameters
+	if plotReq.Time.IsZero() {
+		plotReq.endTime = time.Now()
+	} else if strings.HasPrefix(strings.Trim(plotReq.Range, " "), "-") {
+		plotReq.endTime = plotReq.Time
+	} else {
+		plotReq.startTime = plotReq.Time
+	}
+
+	if plotReq.startTime.IsZero() {
+		if plotReq.startTime, err = utils.TimeApplyRange(plotReq.endTime, plotReq.Range); err != nil {
+			return nil, err
+		}
+	} else if plotReq.endTime, err = utils.TimeApplyRange(plotReq.startTime, plotReq.Range); err != nil {
+		return nil, err
+	}
+
+	if plotReq.Sample == 0 {
+		plotReq.Sample = config.DefaultPlotSample
+	}
+
+	return plotReq, nil
+}
+
+func executeQueries(queries map[string]*providerQuery) (map[string][]plot.Series, error) {
+	plotSeries := make(map[string][]plot.Series)
+
+	for _, providerQuery := range queries {
+		plots, err := providerQuery.connector.GetPlots(&providerQuery.query)
+		if err != nil {
+			logger.Log(logger.LevelError, "server", "%s", err)
 			continue
 		}
 
-		plotSeries, err := providerConnector.GetPlots(&plot.Query{query, startTime, endTime, plotReq.Sample})
-		if err != nil {
-			logger.Log(logger.LevelError, "server", "%s", err)
-		}
-
-		if len(plotSeries) > 1 {
-			for index, entry := range plotSeries {
-				entry.Name = fmt.Sprintf("%s (%s)", groupItem.Name, query.Series[index].Metric.Name)
-				entry.Summarize(plotReq.Percentiles)
-				entry.Downsample(plotReq.Sample, plot.ConsolidateAverage)
+		// Re-arrange internal plot results according to original queries
+		for plotsIndex, plotsItem := range plots {
+			// Add metric name detail to series name is a source/metric group
+			if strings.HasPrefix(providerQuery.queryMap[plotsIndex].seriesName, library.LibraryGroupPrefix) {
+				plotsItem.Name = fmt.Sprintf(
+					"%s (%s)",
+					providerQuery.queryMap[plotsIndex].sourceName,
+					providerQuery.queryMap[plotsIndex].metricName,
+				)
+			} else {
+				plotsItem.Name = providerQuery.queryMap[plotsIndex].seriesName
 			}
-		} else if len(plotSeries) == 1 {
-			plotSeries[0].Name = groupItem.Name
-			plotSeries[0].Summarize(plotReq.Percentiles)
-			plotSeries[0].Downsample(plotReq.Sample, plot.ConsolidateAverage)
-		}
 
-		graphPlotSeries = append(graphPlotSeries, plotSeries)
+			if _, ok := plotSeries[providerQuery.queryMap[plotsIndex].seriesName]; !ok {
+				plotSeries[providerQuery.queryMap[plotsIndex].seriesName] = make([]plot.Series, 0)
+			}
+
+			plotSeries[providerQuery.queryMap[plotsIndex].seriesName] = append(
+				plotSeries[providerQuery.queryMap[plotsIndex].seriesName],
+				plotsItem,
+			)
+		}
 	}
+
+	return plotSeries, nil
+}
+
+func makePlotsResponse(plotSeries map[string][]plot.Series, plotReq *PlotRequest,
+	graph *library.Graph) (*PlotResponse, error) {
 
 	response := &PlotResponse{
 		ID:          graph.ID,
-		Start:       startTime.Format(time.RFC3339),
-		End:         endTime.Format(time.RFC3339),
-		Step:        (endTime.Sub(startTime) / time.Duration(plotReq.Sample)).Seconds(),
+		Start:       plotReq.startTime.Format(time.RFC3339),
+		End:         plotReq.endTime.Format(time.RFC3339),
 		Name:        graph.Name,
 		Description: graph.Description,
 		Type:        graph.Type,
@@ -319,146 +451,79 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 		Modified:    graph.Modified,
 	}
 
-	if len(graphPlotSeries) == 0 {
-		server.serveResponse(writer, serverResponse{mesgEmptyData}, http.StatusOK)
-		return
-	}
-
-	plotMax := 0
-
 	for _, groupItem := range graph.Groups {
-		var series []plot.Series
+		groupSeries := make([]plot.Series, 0)
 
-		series, graphPlotSeries = graphPlotSeries[0], graphPlotSeries[1:]
-
-		for _, seriesResult := range series {
-			if len(seriesResult.Plots) > plotMax {
-				plotMax = len(seriesResult.Plots)
+		for _, seriesItem := range groupItem.Series {
+			if _, ok := plotSeries[seriesItem.Name]; !ok {
+				return nil, fmt.Errorf("unable to find plots for `%s' series", seriesItem.Name)
 			}
 
+			for _, plotItem := range plotSeries[seriesItem.Name] {
+				// Apply series scale if any
+				if scale, _ := config.GetFloat(seriesItem.Options, "scale", false); scale != 0 {
+					plotItem.Scale(plot.Value(scale))
+				}
+
+				groupSeries = append(groupSeries, plotItem)
+			}
+		}
+
+		// Normalize all series plots on the same time step
+		consolidatedSeries, err := plot.Normalize(
+			groupSeries,
+			plotReq.startTime,
+			plotReq.endTime,
+			plotReq.Sample,
+			plot.ConsolidateAverage,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("unable to consolidate series: %s", err)
+		}
+
+		// Perform requested series operations
+		if groupItem.Type == plot.OperTypeAverage || groupItem.Type == plot.OperTypeSum {
+			var (
+				operSeries plot.Series
+				err        error
+			)
+
+			if groupItem.Type == plot.OperTypeAverage {
+				operSeries, err = plot.AverageSeries(consolidatedSeries)
+				if err != nil {
+					return nil, fmt.Errorf("unable to average series: %s", err)
+				}
+			} else {
+				operSeries, err = plot.SumSeries(consolidatedSeries)
+				if err != nil {
+					return nil, fmt.Errorf("unable to sum series: %s", err)
+				}
+			}
+
+			operSeries.Name = groupItem.Name
+
+			groupSeries = []plot.Series{operSeries}
+
+			// Apply group scale if any
+			if scale, _ := config.GetFloat(groupItem.Options, "scale", false); scale != 0 {
+				groupSeries[0].Scale(plot.Value(scale))
+			}
+		} else {
+			groupSeries = consolidatedSeries
+		}
+
+		for _, seriesItem := range groupSeries {
+			// Summarize each series (compute min/max/avg/last values)
+			seriesItem.Summarize(plotReq.Percentiles)
+
 			response.Series = append(response.Series, &SeriesResponse{
-				Name:    seriesResult.Name,
-				Plots:   seriesResult.Plots,
-				Summary: seriesResult.Summary,
-				Options: groupOptions[groupItem.Name],
+				Name:    seriesItem.Name,
+				Plots:   seriesItem.Plots,
+				Summary: seriesItem.Summary,
+				Options: groupItem.Options,
 			})
 		}
 	}
 
-	if plotMax > 0 {
-		response.Step = (endTime.Sub(startTime) / time.Duration(plotMax)).Seconds()
-	}
-
-	server.serveResponse(writer, response, http.StatusOK)
-}
-
-func (server *Server) prepareQuery(plotReq *PlotRequest, groupItem *library.OperGroup) (*plot.QueryGroup,
-	connector.Connector, error) {
-
-	var (
-		providerConnector connector.Connector
-		seriesSources     []string
-	)
-
-	query := &plot.QueryGroup{
-		Type:    groupItem.Type,
-		Options: groupItem.Options,
-	}
-
-	for _, seriesItem := range groupItem.Series {
-		// Check for connectors errors or conflicts
-		if _, ok := server.Catalog.Origins[seriesItem.Origin]; !ok {
-			return nil, nil, fmt.Errorf("unknown series origin `%s'", seriesItem.Origin)
-		}
-
-		if strings.HasPrefix(seriesItem.Source, library.LibraryGroupPrefix) {
-			seriesSources = server.Library.ExpandGroup(
-				strings.TrimPrefix(seriesItem.Source, library.LibraryGroupPrefix),
-				library.LibraryItemSourceGroup,
-			)
-		} else {
-			seriesSources = []string{seriesItem.Source}
-		}
-
-		index := 0
-
-		for _, seriesEntry := range seriesSources {
-			if strings.HasPrefix(seriesItem.Metric, library.LibraryGroupPrefix) {
-				for _, seriesChunk := range server.Library.ExpandGroup(
-					strings.TrimPrefix(seriesItem.Metric, library.LibraryGroupPrefix),
-					library.LibraryItemMetricGroup,
-				) {
-					metric := server.Catalog.GetMetric(seriesItem.Origin, seriesEntry, seriesChunk)
-
-					if metric == nil {
-						logger.Log(
-							logger.LevelWarning,
-							"server",
-							"unknown metric `%s' for source `%s' (origin: %s)",
-							seriesChunk,
-							seriesEntry,
-							seriesItem.Origin,
-						)
-
-						continue
-					}
-
-					if providerConnector == nil {
-						providerConnector = metric.Connector.(connector.Connector)
-					} else if providerConnector != metric.Connector.(connector.Connector) {
-						return nil, nil, fmt.Errorf("connectors differ between series")
-					}
-
-					query.Series = append(query.Series, &plot.QuerySeries{
-						Metric: &plot.QueryMetric{
-							Name:   metric.OriginalName,
-							Origin: metric.Source.Origin.OriginalName,
-							Source: metric.Source.OriginalName,
-						},
-						Options: seriesItem.Options,
-					})
-
-					index++
-				}
-			} else {
-				metric := server.Catalog.GetMetric(seriesItem.Origin, seriesEntry, seriesItem.Metric)
-
-				if metric == nil {
-					logger.Log(
-						logger.LevelWarning,
-						"server",
-						"unknown metric `%s' for source `%s' (origin: %s)",
-						seriesItem.Metric,
-						seriesEntry,
-						seriesItem.Origin,
-					)
-
-					continue
-				}
-
-				if providerConnector == nil {
-					providerConnector = metric.Connector.(connector.Connector)
-				} else if providerConnector != metric.Connector.(connector.Connector) {
-					return nil, nil, fmt.Errorf("connectors differ between series")
-				}
-
-				query.Series = append(query.Series, &plot.QuerySeries{
-					Metric: &plot.QueryMetric{
-						Name:   metric.OriginalName,
-						Origin: metric.Source.Origin.OriginalName,
-						Source: metric.Source.OriginalName,
-					},
-					Options: seriesItem.Options,
-				})
-
-				index++
-			}
-		}
-	}
-
-	if len(query.Series) == 0 {
-		return nil, nil, os.ErrInvalid
-	}
-
-	return query, providerConnector, nil
+	return response, nil
 }
