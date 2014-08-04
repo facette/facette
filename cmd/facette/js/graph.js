@@ -724,7 +724,16 @@ function graphSetupTerminate() {
 }
 
 function graphUpdateOptions(graph, options) {
-    graph.data('options', $.extend(graph.data('options'), options));
+    var key;
+
+    options = $.extend(graph.data('options'), options);
+
+    for (key in options) {
+        if (!options[key])
+            delete options[key];
+    }
+
+    graph.data('options', options);
 }
 
 // Register setup callbacks
