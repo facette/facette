@@ -247,7 +247,7 @@ func (connector *RRDConnector) GetPlots(query *plot.Query) ([]plot.Series, error
 				series.Plots,
 				plot.Plot{
 					Value: plot.Value(data.ValueAt(index, i)),
-					Time:  query.StartTime.Add(time.Duration(i) * step * time.Second),
+					Time:  query.StartTime.Add(data.Step * time.Duration(i)),
 				},
 			)
 		}
@@ -309,7 +309,7 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan *catal
 				connector.metrics[sourceName][metricFullName] = &rrdMetric{
 					Dataset:  dsName,
 					FilePath: filePath,
-					Step:     time.Duration(info["step"].(uint)),
+					Step:     time.Duration(info["step"].(uint)) * time.Second,
 				}
 
 				outputChan <- &catalog.Record{
