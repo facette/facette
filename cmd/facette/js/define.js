@@ -45,4 +45,5 @@ var EVENT_KEY_TAB    = 9,
 
     PATTERN_TEST_LIMIT = 10,
 
+    TIME_DISPLAY = 'MMMM D YYYY, HH:mm:ss',
     TIME_RFC3339 = 'YYYY-MM-DDTHH:mm:ss.SSSZ';

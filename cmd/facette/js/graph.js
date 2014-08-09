@@ -233,7 +233,7 @@ function graphDraw(graph, postpone, delay, preview) {
                     },
                     tooltip: {
                         formatter: function () {
-                            var tooltip = moment(this.x).format('LLL'),
+                            var tooltip = moment(this.x).format(TIME_DISPLAY),
                                 i;
 
                             for (i in this.points) {
@@ -310,7 +310,7 @@ function graphDraw(graph, postpone, delay, preview) {
                     }
 
                     highchartOpts.subtitle = {
-                        text: startTime.format('LLL') + ' — ' + endTime.format('LLL')
+                        text: startTime.format(TIME_DISPLAY) + ' — ' + endTime.format(TIME_DISPLAY)
                     };
 
                     if (data.unit_legend)

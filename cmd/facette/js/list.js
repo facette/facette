@@ -288,7 +288,7 @@ function listUpdate(list, listFilter, offset) {
 
             $item.find('.name').text(data[i].name);
             $item.find('.desc').text(data[i].description || $.t('main.mesg_no_description'));
-            $item.find('.date span').text(moment(data[i].modified).format('LLL'));
+            $item.find('.date span').text(moment(data[i].modified).format(TIME_DISPLAY));
 
             if (!data[i].description)
                 $item.find('.desc').addClass('placeholder');
