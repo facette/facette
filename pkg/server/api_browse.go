@@ -6,6 +6,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/utils"
@@ -54,11 +55,11 @@ func (server *Server) serveBrowseIndex(writer http.ResponseWriter, request *http
 		http.StatusOK,
 		struct {
 			URLPrefix string
-			ReadOnly  bool
+			API       config.APIConfig
 			Request   *http.Request
 		}{
 			URLPrefix: server.Config.URLPrefix,
-			ReadOnly:  server.Config.ReadOnly,
+			API:       server.Config.API,
 			Request:   request,
 		},
 		path.Join(server.Config.BaseDir, "template", "layout.html"),
@@ -76,12 +77,12 @@ func (server *Server) serveBrowseCollection(writer http.ResponseWriter, request 
 
 	data := struct {
 		URLPrefix  string
-		ReadOnly   bool
+		API        config.APIConfig
 		Collection *collectionData
 		Request    *http.Request
 	}{
 		URLPrefix:  server.Config.URLPrefix,
-		ReadOnly:   server.Config.ReadOnly,
+		API:        server.Config.API,
 		Collection: &collectionData{Collection: &library.Collection{}},
 		Request:    request,
 	}
@@ -116,12 +117,12 @@ func (server *Server) serveBrowseCollection(writer http.ResponseWriter, request 
 func (server *Server) serveBrowseGraph(writer http.ResponseWriter, request *http.Request) error {
 	data := struct {
 		URLPrefix string
-		ReadOnly  bool
+		API       config.APIConfig
 		Graph     *library.Graph
 		Request   *http.Request
 	}{
 		URLPrefix: server.Config.URLPrefix,
-		ReadOnly:  server.Config.ReadOnly,
+		API:       server.Config.API,
 		Request:   request,
 	}
 
@@ -153,14 +154,14 @@ func (server *Server) serveBrowseSearch(writer http.ResponseWriter, request *htt
 	data := struct {
 		URLBase     string
 		URLPrefix   string
-		ReadOnly    bool
+		API         config.APIConfig
 		Count       int
 		Request     *http.Request
 		Collections []*library.Collection
 		Graphs      []*library.Graph
 	}{
 		URLPrefix: server.Config.URLPrefix,
-		ReadOnly:  server.Config.ReadOnly,
+		API:       server.Config.API,
 		Request:   request,
 	}
 

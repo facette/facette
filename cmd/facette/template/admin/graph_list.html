@@ -12,7 +12,7 @@
 			<header>
 				<h1>Administration Panel — Graphs</h1>
 
-				<nav>{{ if not .ReadOnly }}
+				<nav>{{ if not .API.ReadOnly }}
 					<ul>
 						<li><a class="icon icon-add" href="{{ .URLPrefix }}/admin/graphs/add" title="Add Graph"></a></li>
 					</ul>{{ end }}
@@ -29,14 +29,14 @@
 
 					<div class="listmesg" data-listmesg="graphs"></div>
 
-					<div class="listitem" data-listtmpl="graphs">{{ if not .ReadOnly }}
+					<div class="listitem" data-listtmpl="graphs">{{ if not .API.ReadOnly }}
 						<div class="actions">
 							<a class="icon icon-remove" href="#remove-graph" title="Remove Graph"></a>
 						</div>{{ end }}
 						<div class="date">Last updated on <span></span></div>
 						<div>
 							<span class="name"></span>
-							<span class="actions">{{ if not .ReadOnly }}
+							<span class="actions">{{ if not .API.ReadOnly }}
 								<a class="icon icon-edit" href="#edit-graph" title="Edit Graph"></a>
 								<a class="icon icon-copy" href="#clone-graph" title="Clone Graph"></a>{{ end }}
 								<a class="icon icon-goto" href="#show-graph" title="Go to Graph"></a>

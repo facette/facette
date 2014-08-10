@@ -12,7 +12,7 @@
 			<header>
 				<h1>Administration Panel — {{ if eq .Section "sourcegroups" }}Source{{ else }}Metric{{ end }} Groups</h1>
 
-				<nav>{{ if not .ReadOnly }}
+				<nav>{{ if not .API.ReadOnly }}
 					<ul>
 						<li><a class="icon icon-add" href="{{ .URLPrefix }}/admin/{{ .Section }}/add" title="Add Group"></a></li>
 					</ul>{{ end }}
@@ -29,13 +29,13 @@
 
 					<div class="listmesg" data-listmesg="{{ .Section }}"></div>
 
-					<div class="listitem" data-listtmpl="{{ .Section }}">{{ if not .ReadOnly }}
+					<div class="listitem" data-listtmpl="{{ .Section }}">{{ if not .API.ReadOnly }}
 						<div class="actions">
 							<a class="icon icon-remove" href="#remove-group" title="Remove Group"></a>
 						</div>{{ end }}
 						<div class="date">Last updated on <span></span></div>
 						<div>
-							<span class="name"></span>{{ if not .ReadOnly }}
+							<span class="name"></span>{{ if not .API.ReadOnly }}
 							<span class="actions">
 								<a class="icon icon-edit" href="#edit-group" title="Edit Group"></a>
 								<a class="icon icon-copy" href="#clone-group" title="Clone Group"></a>

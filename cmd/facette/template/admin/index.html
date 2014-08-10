@@ -13,7 +13,7 @@
 				<h1>Administration Panel</h1>
 			</header>
 
-			<section class="scrollarea full">{{ if .ReadOnly }}
+			<section class="scrollarea full">{{ if .API.ReadOnly }}
 				<div class="mesgitem warning">Important: this instance is running in <strong>read-only mode</strong>.</div>
 
 				{{ end }}

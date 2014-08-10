@@ -7,6 +7,7 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/logger"
 )
 
@@ -16,11 +17,11 @@ func (server *Server) serveError(writer http.ResponseWriter, status int) {
 		status,
 		struct {
 			URLPrefix string
-			ReadOnly  bool
+			API       config.APIConfig
 			Status    int
 		}{
 			URLPrefix: server.Config.URLPrefix,
-			ReadOnly:  server.Config.ReadOnly,
+			API:       server.Config.API,
 			Status:    status,
 		},
 		path.Join(server.Config.BaseDir, "template", "layout.html"),
@@ -51,10 +52,10 @@ func (server *Server) serveWait(writer http.ResponseWriter, request *http.Reques
 		http.StatusServiceUnavailable,
 		struct {
 			URLPrefix string
-			ReadOnly  bool
+			API       config.APIConfig
 		}{
 			URLPrefix: server.Config.URLPrefix,
-			ReadOnly:  server.Config.ReadOnly,
+			API:       server.Config.API,
 		},
 		path.Join(server.Config.BaseDir, "template", "layout.html"),
 		path.Join(server.Config.BaseDir, "template", "wait.html"),

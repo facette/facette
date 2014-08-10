@@ -36,8 +36,11 @@ func (server *Server) serveReload(writer http.ResponseWriter, request *http.Requ
 	if request.Method != "GET" && request.Method != "HEAD" {
 		server.serveResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
 		return
-	} else if server.Config.ReadOnly {
+	} else if server.Config.API.ReadOnly {
 		server.serveResponse(writer, serverResponse{mesgReadOnlyMode}, http.StatusForbidden)
+		return
+	} else if server.Config.API.DisableReload {
+		server.serveResponse(writer, serverResponse{mesgDisabledCommand}, http.StatusForbidden)
 		return
 	}
 

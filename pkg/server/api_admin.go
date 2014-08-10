@@ -6,6 +6,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/pkg/logger"
 )
@@ -54,11 +55,11 @@ func (server *Server) serveAdminCatalog(writer http.ResponseWriter, request *htt
 		http.StatusOK,
 		struct {
 			URLPrefix string
-			ReadOnly  bool
+			API       config.APIConfig
 			Section   string
 		}{
 			URLPrefix: server.Config.URLPrefix,
-			ReadOnly:  server.Config.ReadOnly,
+			API:       server.Config.API,
 			Section:   strings.TrimRight(strings.TrimPrefix(request.URL.Path, urlAdminPath), "/"),
 		},
 		path.Join(server.Config.BaseDir, "template", "layout.html"),
@@ -73,12 +74,12 @@ func (server *Server) serveAdminCollection(writer http.ResponseWriter, request *
 
 	data := struct {
 		URLPrefix string
-		ReadOnly  bool
+		API       config.APIConfig
 		Section   string
 		Path      string
 	}{
 		URLPrefix: server.Config.URLPrefix,
-		ReadOnly:  server.Config.ReadOnly,
+		API:       server.Config.API,
 	}
 
 	data.Section, data.Path = splitAdminURLPath(request.URL.Path)
@@ -109,7 +110,7 @@ func (server *Server) serveAdminGraph(writer http.ResponseWriter, request *http.
 
 	data := struct {
 		URLPrefix           string
-		ReadOnly            bool
+		API                 config.APIConfig
 		Section             string
 		Path                string
 		GraphTypeArea       int
@@ -121,7 +122,7 @@ func (server *Server) serveAdminGraph(writer http.ResponseWriter, request *http.
 		GraphUnitTypeMetric int
 	}{
 		URLPrefix: server.Config.URLPrefix,
-		ReadOnly:  server.Config.ReadOnly,
+		API:       server.Config.API,
 	}
 
 	data.Section, data.Path = splitAdminURLPath(request.URL.Path)
@@ -165,13 +166,13 @@ func (server *Server) serveAdminGroup(writer http.ResponseWriter, request *http.
 
 	data := struct {
 		URLPrefix string
-		ReadOnly  bool
+		API       config.APIConfig
 		Section   string
 		Path      string
 		Origins   []string
 	}{
 		URLPrefix: server.Config.URLPrefix,
-		ReadOnly:  server.Config.ReadOnly,
+		API:       server.Config.API,
 	}
 
 	data.Section, data.Path = splitAdminURLPath(request.URL.Path)
@@ -212,14 +213,14 @@ func (server *Server) serveAdminUnit(writer http.ResponseWriter, request *http.R
 
 	data := struct {
 		URLPrefix        string
-		ReadOnly         bool
+		API              config.APIConfig
 		Section          string
 		Path             string
 		UnitTypeAbsolute int
 		UnitTypeDuration int
 	}{
 		URLPrefix: server.Config.URLPrefix,
-		ReadOnly:  server.Config.ReadOnly,
+		API:       server.Config.API,
 	}
 
 	data.Section, data.Path = splitAdminURLPath(request.URL.Path)
@@ -253,12 +254,12 @@ func (server *Server) serveAdminScale(writer http.ResponseWriter, request *http.
 
 	data := struct {
 		URLPrefix string
-		ReadOnly  bool
+		API       config.APIConfig
 		Section   string
 		Path      string
 	}{
 		URLPrefix: server.Config.URLPrefix,
-		ReadOnly:  server.Config.ReadOnly,
+		API:       server.Config.API,
 	}
 
 	data.Section, data.Path = splitAdminURLPath(request.URL.Path)
@@ -290,12 +291,12 @@ func (server *Server) serveAdminIndex(writer http.ResponseWriter, request *http.
 		http.StatusOK,
 		struct {
 			URLPrefix string
-			ReadOnly  bool
+			API       config.APIConfig
 			Section   string
 			Stats     *statsResponse
 		}{
 			URLPrefix: server.Config.URLPrefix,
-			ReadOnly:  server.Config.ReadOnly,
+			API:       server.Config.API,
 			Section:   "",
 			Stats:     server.getStats(writer, request),
 		},

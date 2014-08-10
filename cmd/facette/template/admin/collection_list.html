@@ -12,7 +12,7 @@
 			<header>
 				<h1>Administration Panel — Collections</h1>
 
-				<nav>{{ if not .ReadOnly }}
+				<nav>{{ if not .API.ReadOnly }}
 					<ul>
 						<li><a class="icon icon-add" href="{{ .URLPrefix }}/admin/collections/add" title="Add Collection"></a></li>
 					</ul>{{ end }}
@@ -29,14 +29,14 @@
 
 					<div class="listmesg" data-listmesg="collections"></div>
 
-					<div class="listitem" data-listtmpl="collections">{{ if not .ReadOnly }}
+					<div class="listitem" data-listtmpl="collections">{{ if not .API.ReadOnly }}
 						<div class="actions">
 							<a class="icon icon-remove" href="#remove-collection" title="Remove Collection"></a>
 						</div>{{ end }}
 						<div class="date">Last updated on <span></span></div>
 						<div>
 							<span class="name"></span>
-							<span class="actions">{{ if not .ReadOnly }}
+							<span class="actions">{{ if not .API.ReadOnly }}
 								<a class="icon icon-edit" href="#edit-collection" title="Edit Collection"></a>
 								<a class="icon icon-copy" href="#clone-collection" title="Clone Collection"></a>{{ end }}
 								<a class="icon icon-goto" href="#show-collection" title="Go to Collection"></a>

@@ -20,7 +20,7 @@ func (server *Server) serveGroup(writer http.ResponseWriter, request *http.Reque
 		groupType int
 	)
 
-	if request.Method != "GET" && request.Method != "HEAD" && server.Config.ReadOnly {
+	if request.Method != "GET" && request.Method != "HEAD" && server.Config.API.ReadOnly {
 		server.serveResponse(writer, serverResponse{mesgReadOnlyMode}, http.StatusForbidden)
 		return
 	}

@@ -24,7 +24,7 @@
 				<dt>Catalog</dt>
 				<dd><a class="icon icon-square icon-origin{{ if eq .Section "origins" }} current{{ end }}" href="{{ .URLPrefix }}/admin/origins/">Origins</a></dd>
 				<dd><a class="icon icon-square icon-source{{ if eq .Section "sources" }} current{{ end }}" href="{{ .URLPrefix }}/admin/sources/">Sources</a></dd>
-				<dd><a class="icon icon-square icon-metric{{ if eq .Section "metrics" }} current{{ end }}" href="{{ .URLPrefix }}/admin/metrics/">Metrics</a></dd>{{ if not .ReadOnly }}
+				<dd><a class="icon icon-square icon-metric{{ if eq .Section "metrics" }} current{{ end }}" href="{{ .URLPrefix }}/admin/metrics/">Metrics</a></dd>{{ if and (not .API.ReadOnly) (not .API.DisableReload) }}
 				<dt>System</dt>
 				<dd><a class="icon icon-refresh" href="#reload">Reload Resources</a></dd>{{ end }}
 			</dl>
