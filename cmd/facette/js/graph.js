@@ -143,6 +143,8 @@ function graphDraw(graph, postpone, delay, preview) {
                         .addClass('icon icon-warning')
                         .text(data.message ? data.message : $.t('graph.mesg_empty_series'));
 
+                    $deferred.resolve();
+
                     return;
                 } else {
                     graph.children('.graphctrl')
