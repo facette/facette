@@ -84,9 +84,7 @@ func newFilterChain(filters []*config.ProviderFilterConfig, output chan *catalog
 						goto nextRecord
 					}
 
-					if rule.Rewrite != "" {
-						record.Origin = rule.PatternRegexp.ReplaceAllString(record.Origin, rule.Rewrite)
-					}
+					record.Origin = rule.PatternRegexp.ReplaceAllString(record.Origin, rule.Rewrite)
 				}
 
 				if (rule.Target == "source" || rule.Target == "any") && !rule.PatternRegexp.MatchString(record.Source) {
@@ -114,9 +112,7 @@ func newFilterChain(filters []*config.ProviderFilterConfig, output chan *catalog
 						goto nextRecord
 					}
 
-					if rule.Rewrite != "" {
-						record.Source = rule.PatternRegexp.ReplaceAllString(record.Source, rule.Rewrite)
-					}
+					record.Source = rule.PatternRegexp.ReplaceAllString(record.Source, rule.Rewrite)
 				}
 
 				if (rule.Target == "metric" || rule.Target == "any") && !rule.PatternRegexp.MatchString(record.Metric) {
@@ -144,9 +140,7 @@ func newFilterChain(filters []*config.ProviderFilterConfig, output chan *catalog
 						goto nextRecord
 					}
 
-					if rule.Rewrite != "" {
-						record.Metric = rule.PatternRegexp.ReplaceAllString(record.Metric, rule.Rewrite)
-					}
+					record.Metric = rule.PatternRegexp.ReplaceAllString(record.Metric, rule.Rewrite)
 				}
 			}
 
