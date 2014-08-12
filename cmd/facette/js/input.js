@@ -257,7 +257,8 @@ function inputHandleKeyComplete(e) {
 function inputInit(element) {
     var $input,
         $element = $(element),
-        $menu;
+        $menu,
+        inputOpts;
 
     element.value = element._lastValue = '';
 
@@ -271,7 +272,9 @@ function inputInit(element) {
         .removeAttr('data-input')
         .removeAttr('data-inputopts');
 
-    if ($input.opts('input').sources) {
+    inputOpts = $input.opts('input');
+
+    if (inputOpts.sources) {
         element.setAttribute('autocomplete', 'off');
 
         // Create new menu
@@ -282,10 +285,12 @@ function inputInit(element) {
         $menu.css('min-width', $input.width());
 
         // Try to auto-fill input field
-        $input.find('input').trigger({
-            type: 'keyup',
-            _autofill: true
-        });
+        if (inputOpts.autofill && inputOpts.autofill.trim().toLowerCase() != 'false') {
+            $input.find('input').trigger({
+                type: 'keyup',
+                _autofill: true
+            });
+        }
     }
 }
 
