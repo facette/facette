@@ -4,6 +4,12 @@ function browseCollectionSetupTerminate() {
         .addClass('current')
         .parentsUntil('[data-tree]').show();
 
+    // Register links
+    linkRegister('edit-collection', function (e) {
+        // Go to Administration Panel
+        window.location = urlPrefix + '/admin/collections/' + $(e.target).closest('[data-pane]').opts('pane').id;
+    });
+
     // Attach events
     $body
         .on('click', '[data-tree=collections] a', function (e) {

@@ -29,7 +29,8 @@
 				<h1>{{ .Collection.Name }}</h1>
 
 				<nav>
-					<ul>
+					<ul>{{ if not .API.ReadOnly }}
+						<li><a class="icon icon-edit" href="#edit-collection" title="Edit Collection"></a></li>{{ end }}
 						<li><a class="icon icon-print" href="#print" title="Print Page"></a></li>
 					</ul>
 				</nav>
