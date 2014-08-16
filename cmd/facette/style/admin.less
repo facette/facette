@@ -132,9 +132,19 @@ section {
 
 [data-pane=collection-edit] {
 	.listitem {
+		.icon.placeholder {
+			float: left;
+			padding: 0;
+		}
+
+		.toggle {
+			margin-left: 1.875em;
+		}
+
 		.block {
 			.column-count(2);
 			.column-gap(2em);
+			padding-left: 1.875em !important;
 
 			& > div {
 				display: inline-block;
