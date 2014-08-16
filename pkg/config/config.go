@@ -89,6 +89,7 @@ func (config *Config) Reload(configPath string) error {
 
 func getSetting(config map[string]interface{}, setting string, kind reflect.Kind,
 	mandatory bool, fallbackValue interface{}) (interface{}, error) {
+
 	if _, ok := config[setting]; !ok {
 		if mandatory {
 			return fallbackValue, fmt.Errorf("missing mandatory setting `%s'", setting)
@@ -97,8 +98,10 @@ func getSetting(config map[string]interface{}, setting string, kind reflect.Kind
 		return fallbackValue, nil
 	}
 
-	if reflect.ValueOf(config[setting]).Kind() != kind {
-		return fallbackValue, fmt.Errorf("setting `%s' value should be of type %s", setting, kind.String())
+	configKind := reflect.ValueOf(config[setting]).Kind()
+	if configKind != kind {
+		return fallbackValue, fmt.Errorf("setting `%s' value should be of type %s and not %s", setting, kind.String(),
+			configKind.String())
 	}
 
 	return config[setting], nil
@@ -112,8 +115,8 @@ func GetString(config map[string]interface{}, setting string, mandatory bool) (s
 
 // GetInt returns the int value of a configuration setting.
 func GetInt(config map[string]interface{}, setting string, mandatory bool) (int, error) {
-	value, err := getSetting(config, setting, reflect.Int, mandatory, 0)
-	return value.(int), err
+	value, err := getSetting(config, setting, reflect.Float64, mandatory, 0.0)
+	return int(value.(float64)), err
 }
 
 // GetFloat returns the float value of a configuration setting.
