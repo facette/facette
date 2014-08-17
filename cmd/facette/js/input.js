@@ -77,7 +77,7 @@ function inputHandleFocus(e) {
 function inputHandleKey(e) {
     var $input = $(e.target).closest('[data-input]');
 
-    if (($input.opts('input').check || '').trim().toLowerCase() == 'true')
+    if ($input.opts('input').check)
         inputHandleKeyCheck(e);
     else if ($input.opts('input').sources)
         inputHandleKeyComplete(e);

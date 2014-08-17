@@ -80,7 +80,7 @@ function listInit(element) {
         // Initialize list content
         listSay($item, null);
 
-        if (($item.opts('list').init || '').trim().toLowerCase() == 'true') {
+        if ($item.opts('list').init) {
             listUpdate($item).then(function () { $deferred.resolve(); });
         } else {
             listSay($item, $.t(($item.opts('list').messages || 'item') + '.mesg_none'), 'info');
