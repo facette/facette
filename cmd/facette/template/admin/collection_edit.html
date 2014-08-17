@@ -72,9 +72,8 @@
 										<input name="graph-percentiles" type="text">
 									</div>
 									<div>
-										<label>Options:</label>
-										<input id="graph-enabled" name="graph-enabled" type="checkbox">
-										<label class="icon" for="graph-enabled">Enable Graph</label>
+										<label>Refresh Interval:</label><span class="note">in seconds: e.g. 30, 60, 1800</span>
+										<input name="graph-refresh-interval" placeholder="" type="text">
 									</div>
 								</dd>
 							</dl>
@@ -100,8 +99,11 @@
 					<div class="block">
 						<h2>Optional Settings</h2>
 
+						<label for="collection-refresh-interval">Default Refresh Interval: <span class="note">in seconds: e.g. 30, 60, 1800</span></label>
+						<input class="input" data-input="collection-refresh-interval" id="collection-refresh-interval" name="collection-refresh-interval" type="text">
+
 						<label for="collection-parent">Parent Collection <span class="note">leave empty for top-level collection</span></label>
-						<input data-input="collection" data-inputopts="sources: library/collections/{{ if ne .Path "add" }}; exclude: {{ .Path }}{{ end }}; autofill: false" id="collection-parent" name="collection-parent" type="text">
+						<input class="input" data-input="collection" data-inputopts="sources: library/collections/{{ if ne .Path "add" }}; exclude: {{ .Path }}{{ end }}; autofill: false" id="collection-parent" name="collection-parent" type="text">
 					</div>
 				</div>
 			</section>

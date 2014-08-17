@@ -204,12 +204,16 @@ func (server *Server) serveCollectionList(writer http.ResponseWriter, request *h
 			continue
 		}
 
-		collectionItem := &CollectionResponse{ItemResponse: ItemResponse{
-			ID:          collection.ID,
-			Name:        collection.Name,
-			Description: collection.Description,
-			Modified:    collection.Modified.Format(time.RFC3339),
-		}, HasChildren: len(collection.Children) > 0}
+		collectionItem := &CollectionResponse{
+			ItemResponse: ItemResponse{
+				ID:          collection.ID,
+				Name:        collection.Name,
+				Description: collection.Description,
+				Modified:    collection.Modified.Format(time.RFC3339),
+			},
+			Options:     collection.Options,
+			HasChildren: len(collection.Children) > 0,
+		}
 
 		if collection.Parent != nil {
 			collectionItem.Parent = &collection.Parent.ID

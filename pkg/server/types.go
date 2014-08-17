@@ -101,8 +101,9 @@ func (r ItemListResponse) slice(i, j int) interface{} {
 // CollectionResponse represents a collection response structure in the server backend.
 type CollectionResponse struct {
 	ItemResponse
-	Parent      *string `json:"parent"`
-	HasChildren bool    `json:"has_children"`
+	Parent      *string                `json:"parent"`
+	Options     map[string]interface{} `json:"options"`
+	HasChildren bool                   `json:"has_children"`
 }
 
 // CollectionListResponse represents a list of collections response structure in the backend server.

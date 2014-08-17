@@ -48,6 +48,12 @@ function graphDraw(graph, postpone, delay, preview) {
         }
     }
 
+    // Clear previous refresh timeout
+    if (graph.data('timeout')) {
+        clearTimeout(graph.data('timeout'));
+        graph.removeData('timeout');
+    }
+
     // Postpone graph draw
     if (postpone) {
         graphEnqueue(graph.get(0));
@@ -64,29 +70,14 @@ function graphDraw(graph, postpone, delay, preview) {
             // Parse graph options
             graphOpts = graph.data('options') || graph.opts('graph');
 
-            if (typeof graphOpts.zoom != 'boolean') {
-                if (typeof graphOpts.zoom == 'undefined')
-                    graphOpts.zoom = true;
-                else
-                    graphOpts.zoom = graphOpts.zoom &&
-                        graphOpts.zoom.trim().toLowerCase() == 'false' ? false : true;
-            }
+            if (typeof graphOpts.zoom == 'undefined')
+                graphOpts.zoom = true;
 
-            if (typeof graphOpts.expand != 'boolean') {
-                if (typeof graphOpts.expand == 'undefined')
-                    graphOpts.expand = true;
-                else
-                    graphOpts.expand = graphOpts.expand &&
-                        graphOpts.expand.trim().toLowerCase() == 'false' ? false : true;
-            }
+            if (typeof graphOpts.expand == 'undefined')
+                graphOpts.expand = true;
 
-            if (typeof graphOpts.legend != 'boolean') {
-                if (typeof graphOpts.legend == 'undefined')
-                    graphOpts.legend = false;
-                else
-                    graphOpts.legend = graphOpts.legend &&
-                        graphOpts.legend.trim().toLowerCase() == 'false' ? false : true;
-            }
+            if (typeof graphOpts.legend == 'undefined')
+                graphOpts.legend = false;
 
             if (graphOpts.sample)
                 graphOpts.sample = parseInt(graphOpts.sample, 10);
@@ -394,6 +385,13 @@ function graphDraw(graph, postpone, delay, preview) {
                 }
 
                 $container.highcharts(highchartOpts);
+
+                // Set next refresh if needed
+                if (graphOpts.refresh_interval) {
+                    graph.data('timeout', setTimeout(function () {
+                        graphDraw(graph, !graph.inViewport());
+                    }, graphOpts.refresh_interval * 1000));
+                }
 
                 $deferred.resolve();
             }).fail(function () {

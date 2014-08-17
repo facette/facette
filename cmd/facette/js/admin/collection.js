@@ -31,23 +31,38 @@ function adminCollectionGetData() {
             description: $pane.find('textarea[name=collection-desc]').val(),
             parent: ($pane.find('input[name=collection-parent]').data('value') || {}).id,
             entries: []
-        };
+        },
+        refresh_interval = $pane.find('input[name=collection-refresh-interval]').val();
+
+    if (refresh_interval)
+        data.options = {refresh_interval: parseInt(refresh_interval, 10)};
 
     listGetItems('step-1-graphs').each(function () {
         var $item = $(this),
             $range = $item.find('input[name=graph-range]'),
-            $title = $item.find('input[name=graph-title]');
+            $title = $item.find('input[name=graph-title]'),
+            options,
+            value;
+
+        options = {
+            title: $title.val() || $title.attr('placeholder'),
+            range: $range.val() || $range.attr('placeholder'),
+            constants: $item.find('input[name=graph-constants]').val(),
+            percentiles: $item.find('input[name=graph-percentiles]').val(),
+            enabled: $item.find('input[name=graph-enabled]').is(':checked')
+        };
+
+        value = $item.find('input[name=graph-sample]').val();
+        if (value)
+            options.sample = parseInt(value, 10);
+
+        value = $item.find('input[name=graph-refresh-interval]').val();
+        if (value)
+            options.refresh_interval = parseInt(value, 10);
 
         data.entries.push({
             id: $item.attr('data-graph'),
-            options: {
-                title: $title.val() || $title.attr('placeholder'),
-                range: $range.val() || $range.attr('placeholder'),
-                sample: $item.find('input[name=graph-sample]').val(),
-                constants: $item.find('input[name=graph-constants]').val(),
-                percentiles: $item.find('input[name=graph-percentiles]').val(),
-                enabled: $item.find('input[name=graph-enabled]').is(':checked')
-            }
+            options: options
         });
     });
 
@@ -277,12 +292,18 @@ function adminCollectionSetupTerminate() {
 
                 if (data.entries[i].options.enabled)
                     $item.find('input[name=graph-enabled]').attr('checked', 'checked');
+
+                if (data.entries[i].options.refresh_interval)
+                    $item.find('input[name=graph-refresh-interval]').val(data.entries[i].options.refresh_interval);
             }
 
             $pane = paneMatch('collection-edit');
 
             $pane.find('input[name=collection-name]').val(data.name);
             $pane.find('textarea[name=collection-desc]').val(data.description);
+
+            if (data.options && data.options.refresh_interval)
+                $pane.find('input[name=collection-refresh-interval]').val(data.options.refresh_interval);
 
             if (data.parent) {
                 itemLoad(data.parent, 'collections').pipe(function (data) {

@@ -78,6 +78,11 @@ function splitAttributeValue(attrValue) {
         key   = entries[i].substr(0, index).trim();
         value = entries[i].substr(index + 1).trim();
 
+        if ($.isNumeric(value))
+            value = parseFloat(value);
+        else if (['false', 'true'].indexOf(value.toLowerCase()) != -1)
+            value = value.toLowerCase() == 'true';
+
         result[key] = value;
     }
 
