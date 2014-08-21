@@ -6,4 +6,4 @@
 ENABLED=false
 
 # Options for facette
-OPTIONS="-c /etc/facette/facette.json"
+OPTIONS="-c /etc/facette/facette.json -l /var/log/facette/facette.log"
