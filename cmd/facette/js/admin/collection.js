@@ -14,11 +14,11 @@ function adminCollectionCreateGraph(value) {
     $item.find('.options').hide();
 
     // Make checkbox id unique
-    id = 'graph-enabled-item' + (listGetCount($list) - 1);
+    id = 'graph-shown-item' + (listGetCount($list) - 1);
 
-    $item.find('input[name=graph-enabled]')
+    $item.find('input[name=graph-shown]')
         .attr('id', id);
-    $item.find('label[for=graph-enabled]')
+    $item.find('label[for=graph-shown]')
         .attr('for', id);
 
     return $item;
@@ -49,7 +49,7 @@ function adminCollectionGetData() {
             range: $range.val() || $range.attr('placeholder'),
             constants: $item.find('input[name=graph-constants]').val(),
             percentiles: $item.find('input[name=graph-percentiles]').val(),
-            enabled: $item.find('input[name=graph-enabled]').is(':checked')
+            enabled: $item.find('input[name=graph-shown]').is(':checked')
         };
 
         value = $item.find('input[name=graph-sample]').val();
@@ -214,7 +214,7 @@ function adminCollectionSetupTerminate() {
                         name: $graph.val()
                     });
 
-                    $item.find('input[name=graph-enabled]').attr('checked', 'checked');
+                    $item.find('input[name=graph-shown]').attr('checked', 'checked');
 
                     adminCollectionUpdatePlaceholder($item);
 
@@ -291,7 +291,7 @@ function adminCollectionSetupTerminate() {
                 $item.find('input[name=graph-percentiles]').val(data.entries[i].options.percentiles || '');
 
                 if (data.entries[i].options.enabled)
-                    $item.find('input[name=graph-enabled]').attr('checked', 'checked');
+                    $item.find('input[name=graph-shown]').attr('checked', 'checked');
 
                 if (data.entries[i].options.refresh_interval)
                     $item.find('input[name=graph-refresh-interval]').val(data.entries[i].options.refresh_interval);
