@@ -195,7 +195,7 @@ func (series *Series) Scale(factor Value) {
 
 // Summarize calculates the min/max/average/last and percentile values of a series of plots, and stores the results
 // into the Summary map.
-func (series Series) Summarize(percentiles []float64) {
+func (series *Series) Summarize(percentiles []float64) {
 	var (
 		min, max, total Value
 		nValidPlots     int64
@@ -232,7 +232,7 @@ func (series Series) Summarize(percentiles []float64) {
 }
 
 // Percentiles calculates the percentile values of a series of plots.
-func (series Series) Percentiles(percentiles []float64) {
+func (series *Series) Percentiles(percentiles []float64) {
 	var set []float64
 
 	for i := range series.Plots {
