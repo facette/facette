@@ -12,7 +12,7 @@
 			<header>
 				<h1>Administration Panel — Units</h1>
 
-				<nav>{{ if not .API.ReadOnly }}
+				<nav>{{ if not .ReadOnly }}
 					<ul>
 						<li><a class="icon icon-add" href="{{ .URLPrefix }}/admin/{{ .Section }}/add" title="Add Unit"></a></li>
 					</ul>{{ end }}
@@ -29,13 +29,13 @@
 
 					<div class="listmesg" data-listmesg="{{ .Section }}"></div>
 
-					<div class="listitem" data-listtmpl="{{ .Section }}">{{ if not .API.ReadOnly }}
+					<div class="listitem" data-listtmpl="{{ .Section }}">{{ if not .ReadOnly }}
 						<div class="actions">
 							<a class="icon icon-remove" href="#remove-unit" title="Remove Unit"></a>
 						</div>{{ end }}
 						<div class="date">Last updated on <span></span></div>
 						<div>
-							<span class="name"></span>{{ if not .API.ReadOnly }}
+							<span class="name"></span>{{ if not .ReadOnly }}
 							<span class="actions">
 								<a class="icon icon-edit" href="#edit-unit" title="Edit Unit"></a>
 								<a class="icon icon-copy" href="#clone-unit" title="Clone Unit"></a>

@@ -34,7 +34,7 @@ type Config struct {
 	ProvidersDir string                     `json:"providers_dir"`
 	PidFile      string                     `json:"pid_file"`
 	URLPrefix    string                     `json:"url_prefix"`
-	API          APIConfig                  `json:"api"`
+	ReadOnly     bool                       `json:"read_only"`
 	Providers    map[string]*ProviderConfig `json:"-"`
 }
 
@@ -80,11 +80,6 @@ func (config *Config) Load(filePath string) error {
 	}
 
 	return nil
-}
-
-// Reload reloads the configuration.
-func (config *Config) Reload(configPath string) error {
-	return config.Load(configPath)
 }
 
 func getSetting(config map[string]interface{}, setting string, kind reflect.Kind,

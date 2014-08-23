@@ -21,7 +21,7 @@ func (server *Server) serveCollection(writer http.ResponseWriter, request *http.
 		Parent string `json:"parent"`
 	}
 
-	if request.Method != "GET" && request.Method != "HEAD" && server.Config.API.ReadOnly {
+	if request.Method != "GET" && request.Method != "HEAD" && server.Config.ReadOnly {
 		server.serveResponse(writer, serverResponse{mesgReadOnlyMode}, http.StatusForbidden)
 		return
 	}

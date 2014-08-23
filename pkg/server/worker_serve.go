@@ -13,7 +13,6 @@ const (
 	urlAdminPath   string = "/admin/"
 	urlBrowsePath  string = "/browse/"
 	urlShowPath    string = "/show/"
-	urlReloadPath  string = "/api/v1/reload"
 	urlCatalogPath string = "/api/v1/catalog/"
 	urlLibraryPath string = "/api/v1/library/"
 	urlStatsPath   string = "/api/v1/stats"
@@ -55,7 +54,6 @@ func workerServeRun(w *worker.Worker, args ...interface{}) {
 	router.HandleFunc(urlAdminPath, server.serveAdmin)
 	router.HandleFunc(urlBrowsePath, server.serveBrowse)
 	router.HandleFunc(urlShowPath, server.serveShow)
-	router.HandleFunc(urlReloadPath, server.serveReload)
 	router.HandleFunc(urlStatsPath, server.serveStats)
 
 	router.HandleFunc("/", server.serveBrowse)

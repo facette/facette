@@ -1627,7 +1627,7 @@ func init() {
 	os.Link(path.Join(rrdDir, "source1", "database1.rrd"), path.Join(rrdDir, "source2", "database2.rrd"))
 	os.Link(path.Join(rrdDir, "source1", "database1.rrd"), path.Join(rrdDir, "source2", "database3.rrd"))
 
-	// Reload server to take newly created RRD files into account
+	// Refresh server to take newly created RRD files into account
 	data, err := ioutil.ReadFile(serverConfig.PidFile)
 	if err != nil {
 		log.Fatalln(err)
@@ -1638,8 +1638,8 @@ func init() {
 		log.Fatalln(err)
 	}
 
-	syscall.Kill(pid, syscall.SIGHUP)
+	syscall.Kill(pid, syscall.SIGUSR1)
 
-	// Wait few seconds for the reload to be completed
+	// Wait few seconds for the refresh to be completed
 	time.Sleep(5 * time.Second)
 }

@@ -134,9 +134,6 @@ function overlaySetupInit() {
         var $item = $(this);
         OVERLAY_TEMPLATES[$item.attr('data-overlay')] = $item.detach();
     });
-
-    if ($('[data-wait]').length > 0)
-        adminReloadServer();
 }
 
 // Register setup callbacks

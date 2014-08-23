@@ -75,15 +75,15 @@ func main() {
 	// Create new server instance and load configuration
 	instance := server.NewServer(flagConfig, flagLogPath, logLevel)
 
-	// Reload server configuration on SIGHUP
+	// Handle server signals
 	sigChan := make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGHUP, syscall.SIGTERM)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGUSR1)
 
 	go func() {
 		for sig := range sigChan {
 			switch sig {
-			case syscall.SIGHUP:
-				instance.Reload(true)
+			case syscall.SIGUSR1:
+				instance.Refresh()
 				break
 
 			case syscall.SIGINT, syscall.SIGTERM:

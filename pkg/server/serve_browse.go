@@ -6,7 +6,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/utils"
@@ -55,11 +54,11 @@ func (server *Server) serveBrowseIndex(writer http.ResponseWriter, request *http
 		http.StatusOK,
 		struct {
 			URLPrefix string
-			API       config.APIConfig
+			ReadOnly  bool
 			Request   *http.Request
 		}{
 			URLPrefix: server.Config.URLPrefix,
-			API:       server.Config.API,
+			ReadOnly:  server.Config.ReadOnly,
 			Request:   request,
 		},
 		path.Join(server.Config.BaseDir, "template", "layout.html"),
@@ -77,12 +76,12 @@ func (server *Server) serveBrowseCollection(writer http.ResponseWriter, request 
 
 	data := struct {
 		URLPrefix  string
-		API        config.APIConfig
+		ReadOnly   bool
 		Collection *collectionData
 		Request    *http.Request
 	}{
 		URLPrefix:  server.Config.URLPrefix,
-		API:        server.Config.API,
+		ReadOnly:   server.Config.ReadOnly,
 		Collection: &collectionData{Collection: &library.Collection{}},
 		Request:    request,
 	}
@@ -117,12 +116,12 @@ func (server *Server) serveBrowseCollection(writer http.ResponseWriter, request 
 func (server *Server) serveBrowseGraph(writer http.ResponseWriter, request *http.Request) error {
 	data := struct {
 		URLPrefix string
-		API       config.APIConfig
+		ReadOnly  bool
 		Graph     *library.Graph
 		Request   *http.Request
 	}{
 		URLPrefix: server.Config.URLPrefix,
-		API:       server.Config.API,
+		ReadOnly:  server.Config.ReadOnly,
 		Request:   request,
 	}
 
@@ -154,14 +153,14 @@ func (server *Server) serveBrowseSearch(writer http.ResponseWriter, request *htt
 	data := struct {
 		URLBase     string
 		URLPrefix   string
-		API         config.APIConfig
+		ReadOnly    bool
 		Count       int
 		Request     *http.Request
 		Collections []*library.Collection
 		Graphs      []*library.Graph
 	}{
 		URLPrefix: server.Config.URLPrefix,
-		API:       server.Config.API,
+		ReadOnly:  server.Config.ReadOnly,
 		Request:   request,
 	}
 

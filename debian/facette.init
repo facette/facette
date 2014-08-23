@@ -47,11 +47,6 @@ do_stop() {
     return "$RETVAL"
 }
 
-do_reload() {
-    start-stop-daemon --stop --signal 1 --quiet --pidfile $PIDFILE --name $NAME
-    return 0
-}
-
 case "$1" in
     start)
         if [ "$ENABLED" != "true" ]; then
@@ -77,12 +72,7 @@ case "$1" in
     status)
         status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
         ;;
-    reload|force-reload)
-        log_daemon_msg "Reloading $DESC" "$NAME"
-        do_reload
-        log_end_msg $?
-        ;;
-    restart)
+    restart|force-reload)
         log_daemon_msg "Restarting $DESC" "$NAME"
         do_stop
         case "$?" in
@@ -100,7 +90,7 @@ case "$1" in
         esac
         ;;
     *)
-        echo "Usage: $SCRIPTNAME {start|stop|restart|reload|force-reload}" >&2
+        echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload}" >&2
         exit 3
         ;;
 esac

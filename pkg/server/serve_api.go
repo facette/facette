@@ -32,24 +32,6 @@ func (server *Server) serveResponse(writer http.ResponseWriter, data interface{}
 	}
 }
 
-func (server *Server) serveReload(writer http.ResponseWriter, request *http.Request) {
-	if request.Method != "GET" && request.Method != "HEAD" {
-		server.serveResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
-		return
-	} else if server.Config.API.ReadOnly {
-		server.serveResponse(writer, serverResponse{mesgReadOnlyMode}, http.StatusForbidden)
-		return
-	} else if server.Config.API.DisableReload {
-		server.serveResponse(writer, serverResponse{mesgDisabledCommand}, http.StatusForbidden)
-		return
-	}
-
-	// Reload resources without reloading configuration
-	server.Reload(false)
-
-	server.serveResponse(writer, nil, http.StatusOK)
-}
-
 func (server *Server) serveStats(writer http.ResponseWriter, request *http.Request) {
 	if request.Method != "GET" && request.Method != "HEAD" {
 		server.serveResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)

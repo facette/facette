@@ -21,24 +21,3 @@ function adminHandlePaneStep(e, name) {
     else if (e.target.name == 'step-next' && ADMIN_PANES[name].active < ADMIN_PANES[name].count)
         paneGoto(name, ADMIN_PANES[name].active + 1);
 }
-
-function adminReloadServer() {
-    ADMIN_RELOAD_TIMEOUT = setTimeout(function () {
-        overlayCreate('loader', {
-            message: $.t('main.mesg_server_loading')
-        });
-    }, 500);
-
-    return $.ajax({
-        url: urlPrefix + '/api/v1/reload',
-        type: 'GET'
-    }).always(function (xhr) {
-        if (ADMIN_RELOAD_TIMEOUT)
-            clearTimeout(ADMIN_RELOAD_TIMEOUT);
-
-        overlayDestroy('loader');
-
-        if (!xhr)
-            window.location.reload(true);
-    });
-}

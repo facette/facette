@@ -10,11 +10,10 @@ import (
 )
 
 const (
-	cmdUsage = `Usage: %s [OPTIONS] reload
+	cmdUsage = `Usage: %s [OPTIONS] COMMAND
 
 Commands:
-   reload    send reload signal to server
-   support   list supported features`
+   refresh  refresh server catalog and library`
 
 	defaultConfigFile string = "/etc/facette/facette.json"
 )
@@ -22,14 +21,12 @@ Commands:
 var (
 	version     string
 	flagConfig  string
-	flagDebug   int
 	flagHelp    bool
 	flagVersion bool
 )
 
 func init() {
 	flag.StringVar(&flagConfig, "c", defaultConfigFile, "configuration file path")
-	flag.IntVar(&flagDebug, "d", 0, "debugging level")
 	flag.BoolVar(&flagHelp, "h", false, "display this help and exit")
 	flag.BoolVar(&flagVersion, "V", false, "display software version and exit")
 	flag.Usage = func() { utils.PrintUsage(os.Stderr, cmdUsage) }
@@ -61,7 +58,7 @@ func main() {
 	}
 
 	switch flag.Args()[0] {
-	case "reload":
+	case "refresh":
 		handler = handleService
 	default:
 		utils.PrintUsage(os.Stderr, cmdUsage)

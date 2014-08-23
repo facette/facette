@@ -6,7 +6,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/pkg/logger"
 )
@@ -38,13 +37,13 @@ func (server *Server) serveShow(writer http.ResponseWriter, request *http.Reques
 func (server *Server) serveShowGraph(writer http.ResponseWriter, request *http.Request) error {
 	data := struct {
 		URLPrefix string
-		API       config.APIConfig
+		ReadOnly  bool
 		Graph     *library.Graph
 		Request   *http.Request
 		Range     string
 	}{
 		URLPrefix: server.Config.URLPrefix,
-		API:       server.Config.API,
+		ReadOnly:  server.Config.ReadOnly,
 		Range:     request.FormValue("range"),
 		Request:   request,
 	}

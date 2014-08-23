@@ -30,7 +30,6 @@ type Server struct {
 	logPath         string
 	logLevel        int
 	startTime       time.Time
-	loading         bool
 	stopping        bool
 	wg              *sync.WaitGroup
 }
@@ -53,25 +52,10 @@ func NewServer(configPath, logPath string, logLevel int) *Server {
 	}
 }
 
-// Reload reloads the configuration and refreshes both catalog and library.
-func (server *Server) Reload(config bool) error {
-	logger.Log(logger.LevelNotice, "server", "reloading")
-
-	server.loading = true
-
-	if config {
-		if err := server.Config.Reload(server.configPath); err != nil {
-			logger.Log(logger.LevelError, "server", "unable to reload configuration: %s", err)
-			return err
-		}
-	}
-
+// Refresh refreshes both catalog and library.
+func (server *Server) Refresh() {
 	server.providerWorkers.Broadcast(eventCatalogRefresh, nil)
 	server.Library.Refresh()
-
-	server.loading = false
-
-	return nil
 }
 
 // Run starts the server serving the HTTP responses.
@@ -97,7 +81,7 @@ func (server *Server) Run() error {
 	logger.SetLevel(server.logLevel)
 
 	// Load server configuration
-	if err := server.Config.Reload(server.configPath); err != nil {
+	if err := server.Config.Load(server.configPath); err != nil {
 		logger.Log(logger.LevelError, "server", "unable to load configuration: %s", err)
 		return err
 	}

@@ -5,22 +5,6 @@ function adminSetupInit() {
 }
 
 if (String(window.location.pathname).startsWith(urlPrefix + '/admin/')) {
-    // Register links
-    linkRegister('reload', function () {
-        overlayCreate('confirm', {
-            message: $.t('main.mesg_reload'),
-            callbacks: {
-                validate: adminReloadServer
-            },
-            labels: {
-                validate: {
-                    text: $.t('main.labl_reload'),
-                    style: 'danger'
-                }
-            }
-        });
-    });
-
     // Register setup callbacks
     setupRegister(SETUP_CALLBACK_INIT, adminSetupInit);
     setupRegister(SETUP_CALLBACK_TERM, adminGraphSetupTerminate);

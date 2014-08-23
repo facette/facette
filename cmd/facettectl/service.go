@@ -15,8 +15,8 @@ func handleService(config *config.Config, args []string) error {
 	cmd := &cmdServer{config: config}
 
 	switch args[0] {
-	case "reload":
-		return cmd.reload(args[1:])
+	case "refresh":
+		return cmd.refresh(args[1:])
 	}
 
 	return nil
@@ -26,7 +26,7 @@ type cmdServer struct {
 	config *config.Config
 }
 
-func (cmd *cmdServer) reload(args []string) error {
+func (cmd *cmdServer) refresh(args []string) error {
 	if len(args) > 0 {
 		return os.ErrInvalid
 	}
@@ -47,5 +47,5 @@ func (cmd *cmdServer) reload(args []string) error {
 		return err
 	}
 
-	return syscall.Kill(pid, syscall.SIGHUP)
+	return syscall.Kill(pid, syscall.SIGUSR1)
 }

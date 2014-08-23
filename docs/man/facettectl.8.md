@@ -1,6 +1,6 @@
 % FACETTECTL(8) facette
-% Vincent Batoufflet <vincent@batoufflet.info>
-% May 24, 2014
+% Vincent Batoufflet <vincent@batoufflet.info>, Marc Falzon <marc@falzon.me>
+% August 23, 2014
 
 # NAME
 
@@ -12,7 +12,10 @@ facettectl [*options*] command
 
 # DESCRIPTION
 
-Facette is a graphing web front-end for RRD files. This utility administrates the application.
+Facette is a a web application to display time series data from various sources — such as collectd, Graphite or
+InfluxDB — on graphs.
+
+This utility administrates the application.
 
 # COMMANDS
 
@@ -24,8 +27,11 @@ reload
 -c *file*
 :   Specify the application configuration file path (type: string, default: /etc/facette/facette.json).
 
--d *level*
-:   Specify the server debugging information level (type: integer, default: 0).
+-h
+:   Display application help and exit.
+
+-V
+:   Display the application version and exit.
 
 # SEE ALSO
 
