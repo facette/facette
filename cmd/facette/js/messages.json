@@ -69,6 +69,7 @@
         "mesg_field_mandatory": "This field is mandatory!",
         "mesg_loading": "Loading data…",
         "mesg_no_description": "No description available",
+        "mesg_nomatch": "No match found",
         "mesg_unknown_error": "An unhandled error has occured.",
         "mesg_unsaved_changes": "All unsaved changes will be lost!"
     },

@@ -130,6 +130,8 @@ function adminGroupSetupTerminate() {
                 url: urlPrefix + '/api/v1/catalog/' + (groupType == 'sourcegroups' ? 'sources' : 'metrics') + '/',
                 type: 'GET',
                 data: {
+                    origin: $item.data('value').origin,
+                    source: $item.data('value').source,
                     filter: $item.data('value').pattern,
                     limit: PATTERN_TEST_LIMIT
                 }
@@ -147,9 +149,13 @@ function adminGroupSetupTerminate() {
 
                 $tooltip.html('<span class="label">' + $.t('item.labl_matching') + '</span><br>');
 
-                $.each(data, function (i, entry) { /*jshint unused: true */
-                    $tooltip.append(entry + '<br>');
-                });
+                if (data.length === 0) {
+                    $tooltip.append($.t('main.mesg_nomatch'));
+                } else {
+                    $.each(data, function (i, entry) { /*jshint unused: true */
+                        $tooltip.append(entry + '<br>');
+                    });
+                }
 
                 if (records > data.length)
                     $tooltip.append('…<br><span class="label">' + $.t('item.labl_total') + '</span> ' +
