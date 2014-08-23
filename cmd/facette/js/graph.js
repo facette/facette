@@ -515,6 +515,8 @@ function graphHandleActions(e) {
         // Reset graph to its initial state
         $graph.data('options', null);
         graphDraw($graph);
+    } else if (e.target.href.endsWith('#embed')) {
+        window.open(urlPrefix + '/show/graphs/' + $(e.target).closest('[data-graph]').attr('data-graph'));
     } else if (e.target.href.endsWith('#export')) {
         graphExport($graph);
     } else if (e.target.href.endsWith('#set-range')) {
