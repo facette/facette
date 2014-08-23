@@ -338,6 +338,7 @@ func (server *Server) serveGraphPlots(writer http.ResponseWriter, request *http.
 
 			response.Series = append(response.Series, &SeriesResponse{
 				Name:    seriesResult.Name,
+				StackID: groupItem.StackID,
 				Plots:   seriesResult.Plots,
 				Summary: seriesResult.Summary,
 				Options: groupOptions[groupItem.Name],
