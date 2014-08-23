@@ -226,14 +226,41 @@ function graphDraw(graph, postpone, delay, preview) {
                     },
                     tooltip: {
                         formatter: function () {
-                            var tooltip = moment(this.x).format('LLL'),
-                                i;
+                            var tooltip = '<strong>' + moment(this.x).format('LLL') + '</strong>',
+                                stacks = {},
+                                i,
+                                stackName,
+                                total;
 
                             for (i in this.points) {
-                                tooltip += '<br><span class="highcharts-tooltip-color" style="background-color: ' +
-                                    this.points[i].series.color + '"></span> ' + this.points[i].series.name +
-                                    ': <strong>' + (this.points[i].y !== null ? formatValue(this.points[i].y,
-                                    data.unit_type) : 'null') + '</strong>';
+                                if (!stacks[this.points[i].series.stackKey])
+                                    stacks[this.points[i].series.stackKey] = [];
+
+                                stacks[this.points[i].series.stackKey].push({
+                                    name: this.points[i].series.name,
+                                    value: this.points[i].y,
+                                    color: this.points[i].series.color,
+                                });
+                            }
+
+                            for (stackName in stacks) {
+                                tooltip += '<div class="highcharts-tooltip-block">';
+
+                                total = 0;
+
+                                for (i in  stacks[stackName]) {
+                                    tooltip += '<div><span class="highcharts-tooltip-color" style="background-color: ' +
+                                        stacks[stackName][i].color + '"></span> ' + stacks[stackName][i].name +
+                                        ': <strong>' + (stacks[stackName][i].value !== null ?
+                                        formatValue(stacks[stackName][i].value, data.unit_type) : 'null') +
+                                        '</strong></div>';
+
+                                    if (stacks[stackName][i].value !== null)
+                                        total += stacks[stackName][i].value;
+                                }
+
+                                tooltip += '<div class="highcharts-tooltip-total">Total: <strong>' +
+                                    (total !== null ? formatValue(total, data.unit_type) : 'null') + '</strong></div>';
                             }
 
                             return tooltip;
