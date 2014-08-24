@@ -1,5 +1,8 @@
 {
 	"bind": ":12003",
+	"socket_user": "",
+	"socket_group": "",
+	"socket_mode": "",
 	"base_dir": "/usr/local/share/facette",
 	"providers_dir": "/etc/facette/providers",
 	"data_dir": "/var/lib/facette",
