@@ -61,7 +61,12 @@ func workerServeRun(w *worker.Worker, args ...interface{}) {
 	http.Handle("/", router)
 
 	// Start serving HTTP requests
-	listener, err := net.Listen("tcp", server.Config.BindAddr)
+	netType := "tcp"
+	if server.Config.BindAddr[0] == '/' {
+		netType = "unix"
+	}
+	
+	listener, err := net.Listen(netType, server.Config.BindAddr)
 	if err != nil {
 		w.ReturnErr(err)
 		return
