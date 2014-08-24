@@ -43,6 +43,8 @@ func NewServer(configPath, logPath string, logLevel int) *Server {
 			DataDir:      config.DefaultDataDir,
 			ProvidersDir: config.DefaultProvidersDir,
 			PidFile:      config.DefaultPidFile,
+			SocketUser:   config.DefaultSocketUser,
+			SocketGroup:  config.DefaultSocketGroup,
 		},
 		configPath: configPath,
 		logPath:    logPath,

@@ -14,6 +14,10 @@ import (
 const (
 	// DefaultBindAddr represents the default server binding address.
 	DefaultBindAddr string = "localhost:12003"
+	// DefaultSocketUser indicates that the socket owning user should not be changed
+	DefaultSocketUser int = -1
+	// DefaultSocketUser indicates that the socket owning group should not be changed
+	DefaultSocketGroup int = -1
 	// DefaultBaseDir represents the default server base directory location.
 	DefaultBaseDir string = "/usr/share/facette"
 	// DefaultDataDir represents the default internal data files directory location.
@@ -29,9 +33,9 @@ const (
 // Config represents the global configuration of the instance.
 type Config struct {
 	BindAddr     string                     `json:"bind"`
-	SocketUser   string                     `json:"socket_user"`
-	SocketGroup  string                     `json:"socket_group"`
-	SocketMode   string                     `json:"socket_mode"`
+	SocketUser   int                        `json:"socket_user,string"`
+	SocketGroup  int                        `json:"socket_group,string"`
+	SocketMode   *string                    `json:"socket_mode"`
 	BaseDir      string                     `json:"base_dir"`
 	DataDir      string                     `json:"data_dir"`
 	ProvidersDir string                     `json:"providers_dir"`
