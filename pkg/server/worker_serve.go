@@ -3,6 +3,10 @@ package server
 import (
 	"net"
 	"net/http"
+	"os"
+	"os/user"
+	"strconv"
+	"errors"
 
 	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/worker"
@@ -74,6 +78,83 @@ func workerServeRun(w *worker.Worker, args ...interface{}) {
 
 	logger.Log(logger.LevelInfo, "serveWorker", "listening on %s", server.Config.BindAddr)
 
+	if netType == "unix" {
+		uid := -1
+		gid := -1
+		
+		// Get owning user
+		if server.Config.SocketUser != "" {
+			uid, err = strconv.Atoi(server.Config.SocketUser)
+			if err != nil {
+				userInfo, err := user.Lookup(server.Config.SocketUser)
+				if err != nil {
+					logger.Log(logger.LevelError, "serveWorker", "failed to look up user %s", server.Config.SocketUser)
+					listener.Close()
+					w.ReturnErr(err)
+					return
+				}
+				
+				uid, err = strconv.Atoi(userInfo.Uid)
+				if err != nil {
+					logger.Log(logger.LevelError, "serveWorker", "Invalid UID '%s' for user '%s'", userInfo.Uid, server.Config.SocketUser)
+					listener.Close()
+					w.ReturnErr(err)
+					return
+				}
+			}
+			
+			if uid < 0 {
+				listener.Close()
+				w.ReturnErr(errors.New("UID from socket_user is less than 0 (socket_user has to be valid UID or username)"))
+				return
+			}
+		}
+		
+		// Get owning group (until now, go doesn't support group lookus)
+		if server.Config.SocketGroup != "" {
+			gid, err = strconv.Atoi(server.Config.SocketGroup)
+			
+			if err != nil {
+				logger.Log(logger.LevelError, "serveWorker", "Invalid socket_group (has to be valid GID)")
+				listener.Close()
+				w.ReturnErr(err)
+				return
+			} else if gid < 0 {
+				listener.Close()
+				w.ReturnErr(errors.New("GID from socket_group is less than 0 (socket_group has to be valid GID)"))
+				return
+			}
+		}
+		
+		// Change owing user and group
+		logger.Log(logger.LevelInfo, "serveWorker", "changing ownership of unix socket to UID %v (%s) and GID %v (%s)", uid, server.Config.SocketUser, gid, server.Config.SocketGroup)
+		err = os.Chown(server.Config.BindAddr, uid, gid)
+		if err != nil {
+			listener.Close()
+			w.ReturnErr(err)
+			return
+		}
+		
+		// Change mode
+		if server.Config.SocketMode != "" {
+			mode, err := strconv.ParseUint(server.Config.SocketMode, 8, 32)
+			if err != nil {
+				logger.Log(logger.LevelError, "serveWorker", "socket_mode is invalid")
+				listener.Close()
+				w.ReturnErr(err)
+				return
+			}
+			
+			logger.Log(logger.LevelInfo, "serveWorker", "changing file permissions mode of unix socket to %04o", mode)
+			err = os.Chmod(server.Config.BindAddr, os.FileMode(mode))
+			if err != nil {
+				listener.Close()
+				w.ReturnErr(err)
+				return
+			}
+		}
+	}
+	
 	go http.Serve(listener, nil)
 
 	for {

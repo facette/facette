@@ -29,6 +29,9 @@ const (
 // Config represents the global configuration of the instance.
 type Config struct {
 	BindAddr     string                     `json:"bind"`
+	SocketUser   string                     `json:"socket_user"`
+	SocketGroup  string                     `json:"socket_group"`
+	SocketMode   string                     `json:"socket_mode"`
 	BaseDir      string                     `json:"base_dir"`
 	DataDir      string                     `json:"data_dir"`
 	ProvidersDir string                     `json:"providers_dir"`
