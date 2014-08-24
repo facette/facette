@@ -7,6 +7,7 @@ import (
 	"os/user"
 	"strconv"
 	"errors"
+	"strings"
 
 	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/worker"
@@ -66,11 +67,18 @@ func workerServeRun(w *worker.Worker, args ...interface{}) {
 
 	// Start serving HTTP requests
 	netType := "tcp"
-	if server.Config.BindAddr[0] == '/' {
-		netType = "unix"
+	address := server.Config.BindAddr
+	for _, scheme := range [...]string{"tcp", "tcp4", "tcp6", "unix"} {
+		prefix := scheme + "://"
+		
+		if strings.HasPrefix(address, prefix) {
+			netType = scheme
+			address = strings.TrimPrefix(address, prefix)
+			break
+		}
 	}
 	
-	listener, err := net.Listen(netType, server.Config.BindAddr)
+	listener, err := net.Listen(netType, address)
 	if err != nil {
 		w.ReturnErr(err)
 		return
