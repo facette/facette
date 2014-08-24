@@ -68,14 +68,14 @@ func workerServeRun(w *worker.Worker, args ...interface{}) {
 	address := server.Config.BindAddr
 	for _, scheme := range [...]string{"tcp", "tcp4", "tcp6", "unix"} {
 		prefix := scheme + "://"
-		
+
 		if strings.HasPrefix(address, prefix) {
 			netType = scheme
 			address = strings.TrimPrefix(address, prefix)
 			break
 		}
 	}
-	
+
 	listener, err := net.Listen(netType, address)
 	if err != nil {
 		w.ReturnErr(err)
@@ -87,7 +87,8 @@ func workerServeRun(w *worker.Worker, args ...interface{}) {
 	if netType == "unix" {
 		// Change owing user and group
 		if server.Config.SocketUser >= 0 || server.Config.SocketGroup >= 0 {
-			logger.Log(logger.LevelDebug, "serveWorker", "changing ownership of unix socket to UID %v and GID %v", server.Config.SocketUser, server.Config.SocketGroup)
+			logger.Log(logger.LevelDebug, "serveWorker", "changing ownership of unix socket to UID %v and GID %v",
+					   server.Config.SocketUser, server.Config.SocketGroup)
 			err = os.Chown(address, server.Config.SocketUser, server.Config.SocketGroup)
 			if err != nil {
 				listener.Close()
@@ -95,7 +96,7 @@ func workerServeRun(w *worker.Worker, args ...interface{}) {
 				return
 			}
 		}
-		
+
 		// Change mode
 		if server.Config.SocketMode != nil {
 			mode, err := strconv.ParseUint(*server.Config.SocketMode, 8, 32)
@@ -105,7 +106,7 @@ func workerServeRun(w *worker.Worker, args ...interface{}) {
 				w.ReturnErr(err)
 				return
 			}
-			
+
 			logger.Log(logger.LevelDebug, "serveWorker", "changing file permissions mode of unix socket to %04o", mode)
 			err = os.Chmod(address, os.FileMode(mode))
 			if err != nil {
@@ -115,7 +116,7 @@ func workerServeRun(w *worker.Worker, args ...interface{}) {
 			}
 		}
 	}
-	
+
 	go http.Serve(listener, nil)
 
 	for {
