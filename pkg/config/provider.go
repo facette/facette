@@ -11,10 +11,9 @@ type ProviderConfig struct {
 
 // ProviderFilterConfig represents a filtering rule in an ProviderConfig instance.
 type ProviderFilterConfig struct {
+	Action        string         `json:"action"`
 	Pattern       string         `json:"pattern"`
-	Rewrite       string         `json:"rewrite"`
-	Discard       bool           `json:"discard"`
-	Sieve         bool           `json:"sieve"`
 	Target        string         `json:"target"`
+	Into          string         `json:"into"`
 	PatternRegexp *regexp.Regexp `json:"-"`
 }

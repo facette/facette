@@ -8,6 +8,6 @@
 	},
 
 	"filters": [
-		{ "target": "source", "pattern": "_", "rewrite": "." }
+		{ "action": "rewrite", "target": "source", "pattern": "_", "into": "." }
 	]
 }

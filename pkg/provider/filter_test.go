@@ -41,8 +41,8 @@ func Test_Filter_Rewrite(test *testing.T) {
 	}
 
 	actual := runTestFilter([]*config.ProviderFilterConfig{
-		{Target: "source", Pattern: "\\.", Rewrite: "_"},
-		{Target: "metric", Pattern: "^interface-(.+)\\.if_(.+)\\.(.+)$", Rewrite: "net.$1.$2.$3"},
+		{Action: "rewrite", Target: "source", Pattern: "\\.", Into: "_"},
+		{Action: "rewrite", Target: "metric", Pattern: "^interface-(.+)\\.if_(.+)\\.(.+)$", Into: "net.$1.$2.$3"},
 	})
 
 	if !reflect.DeepEqual(expected, actual) {
@@ -62,8 +62,8 @@ func Test_Filter_Discard(test *testing.T) {
 	}
 
 	actual := runTestFilter([]*config.ProviderFilterConfig{
-		{Target: "source", Pattern: "host1\\.example\\.net", Discard: true},
-		{Target: "metric", Pattern: "^interface", Discard: true},
+		{Action: "discard", Target: "source", Pattern: "host1\\.example\\.net"},
+		{Action: "discard", Target: "metric", Pattern: "^interface"},
 	})
 
 	if !reflect.DeepEqual(expected, actual) {
@@ -83,8 +83,8 @@ func Test_Filter_Sieve(test *testing.T) {
 	}
 
 	actual := runTestFilter([]*config.ProviderFilterConfig{
-		{Target: "source", Pattern: "host1\\.example\\.net", Sieve: true},
-		{Target: "metric", Pattern: "load", Sieve: true},
+		{Action: "sieve", Target: "source", Pattern: "host1\\.example\\.net"},
+		{Action: "sieve", Target: "metric", Pattern: "load"},
 	})
 
 	if !reflect.DeepEqual(expected, actual) {
@@ -104,9 +104,9 @@ func Test_Filter_Combined(test *testing.T) {
 	}
 
 	actual := runTestFilter([]*config.ProviderFilterConfig{
-		{Target: "source", Pattern: "host1\\.example\\.net", Sieve: true},
-		{Target: "metric", Pattern: "interface", Discard: true},
-		{Target: "metric", Pattern: "load\\.load", Rewrite: "load"},
+		{Action: "sieve", Target: "source", Pattern: "host1\\.example\\.net"},
+		{Action: "discard", Target: "metric", Pattern: "interface"},
+		{Action: "rewrite", Target: "metric", Pattern: "load\\.load", Into: "load"},
 	})
 
 	if !reflect.DeepEqual(expected, actual) {

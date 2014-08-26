@@ -22,6 +22,9 @@ func newFilterChain(filters []*config.ProviderFilterConfig, output chan *catalog
 		rules:  make([]*config.ProviderFilterConfig, 0),
 	}
 
+	actionSet := set.New(set.NonThreadSafe)
+	actionSet.Add("rewrite", "discard", "sieve")
+
 	targetSet := set.New(set.NonThreadSafe)
 	targetSet.Add("any", "origin", "source", "metric")
 
@@ -30,8 +33,13 @@ func newFilterChain(filters []*config.ProviderFilterConfig, output chan *catalog
 			filter.Target = "any"
 		}
 
+		if !actionSet.Has(filter.Action) {
+			logger.Log(logger.LevelWarning, "provider", "unknown `%s' filter action, discarding", filter.Action)
+			continue
+		}
+
 		if !targetSet.Has(filter.Target) {
-			logger.Log(logger.LevelWarning, "provider", "unknown `%s' filter target", filter.Target)
+			logger.Log(logger.LevelWarning, "provider", "unknown `%s' filter target, discarding", filter.Target)
 			continue
 		}
 
@@ -60,7 +68,7 @@ func newFilterChain(filters []*config.ProviderFilterConfig, output chan *catalog
 
 			for _, rule := range chain.rules {
 				if (rule.Target == "origin" || rule.Target == "any") && !rule.PatternRegexp.MatchString(record.Origin) {
-					if rule.Sieve {
+					if rule.Action == "sieve" {
 						logger.Log(
 							logger.LevelDebug,
 							"server",
@@ -73,7 +81,7 @@ func newFilterChain(filters []*config.ProviderFilterConfig, output chan *catalog
 				}
 
 				if (rule.Target == "origin" || rule.Target == "any") && rule.PatternRegexp.MatchString(record.Origin) {
-					if rule.Discard {
+					if rule.Action == "discard" {
 						logger.Log(
 							logger.LevelDebug,
 							"server",
@@ -84,13 +92,13 @@ func newFilterChain(filters []*config.ProviderFilterConfig, output chan *catalog
 						goto nextRecord
 					}
 
-					if rule.Rewrite != "" {
-						record.Origin = rule.PatternRegexp.ReplaceAllString(record.Origin, rule.Rewrite)
+					if rule.Action == "rewrite" {
+						record.Origin = rule.PatternRegexp.ReplaceAllString(record.Origin, rule.Into)
 					}
 				}
 
 				if (rule.Target == "source" || rule.Target == "any") && !rule.PatternRegexp.MatchString(record.Source) {
-					if rule.Sieve {
+					if rule.Action == "sieve" {
 						logger.Log(
 							logger.LevelDebug,
 							"server",
@@ -103,7 +111,7 @@ func newFilterChain(filters []*config.ProviderFilterConfig, output chan *catalog
 				}
 
 				if (rule.Target == "source" || rule.Target == "any") && rule.PatternRegexp.MatchString(record.Source) {
-					if rule.Discard {
+					if rule.Action == "discard" {
 						logger.Log(
 							logger.LevelDebug,
 							"server",
@@ -114,13 +122,13 @@ func newFilterChain(filters []*config.ProviderFilterConfig, output chan *catalog
 						goto nextRecord
 					}
 
-					if rule.Rewrite != "" {
-						record.Source = rule.PatternRegexp.ReplaceAllString(record.Source, rule.Rewrite)
+					if rule.Action == "rewrite" {
+						record.Source = rule.PatternRegexp.ReplaceAllString(record.Source, rule.Into)
 					}
 				}
 
 				if (rule.Target == "metric" || rule.Target == "any") && !rule.PatternRegexp.MatchString(record.Metric) {
-					if rule.Sieve {
+					if rule.Action == "sieve" {
 						logger.Log(
 							logger.LevelDebug,
 							"server",
@@ -133,7 +141,7 @@ func newFilterChain(filters []*config.ProviderFilterConfig, output chan *catalog
 				}
 
 				if (rule.Target == "metric" || rule.Target == "any") && rule.PatternRegexp.MatchString(record.Metric) {
-					if rule.Discard {
+					if rule.Action == "discard" {
 						logger.Log(
 							logger.LevelDebug,
 							"server",
@@ -144,8 +152,8 @@ func newFilterChain(filters []*config.ProviderFilterConfig, output chan *catalog
 						goto nextRecord
 					}
 
-					if rule.Rewrite != "" {
-						record.Metric = rule.PatternRegexp.ReplaceAllString(record.Metric, rule.Rewrite)
+					if rule.Action == "rewrite" {
+						record.Metric = rule.PatternRegexp.ReplaceAllString(record.Metric, rule.Into)
 					}
 				}
 			}

@@ -5,7 +5,7 @@
 		"pattern": "(?P<source>[^/]+)/(?P<metric>.+).rrd"
 	},
 	"filters": [
-		{"pattern": "source2", "discard": true, "target": "source"},
-		{"pattern": "/", "rewrite": ".", "target": "metric"}
+		{"action": "discard", "pattern": "source2", "target": "source"},
+		{"action": "rewrite", "pattern": "/", "into": ".", "target": "metric"}
 	]
 }
