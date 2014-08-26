@@ -85,7 +85,7 @@ func workerServeRun(w *worker.Worker, args ...interface{}) {
 	logger.Log(logger.LevelInfo, "serveWorker", "listening on %s", server.Config.BindAddr)
 
 	if netType == "unix" {
-		// Change owing user and group
+		// Change owning user and group
 		if server.Config.SocketUser >= 0 || server.Config.SocketGroup >= 0 {
 			logger.Log(logger.LevelDebug, "serveWorker", "changing ownership of unix socket to UID %v and GID %v",
 					   server.Config.SocketUser, server.Config.SocketGroup)
