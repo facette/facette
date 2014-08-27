@@ -13,7 +13,7 @@ import (
 
 const (
 	// DefaultBindAddr represents the default server binding address.
-	DefaultBindAddr string = "localhost:12003"
+	DefaultBindAddr string = "tcp://localhost:12003"
 	// DefaultSocketUser indicates that the socket owning user should not be changed
 	DefaultSocketUser int = -1
 	// DefaultSocketUser indicates that the socket owning group should not be changed
