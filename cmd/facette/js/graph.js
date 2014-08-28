@@ -226,7 +226,7 @@ function graphDraw(graph, postpone, delay, preview) {
                     },
                     tooltip: {
                         formatter: function () {
-                            var tooltip = '<strong>' + moment(this.x).format('LLL') + '</strong>',
+                            var tooltip = '<strong>' + moment(this.x).format(TIME_DISPLAY) + '</strong>',
                                 stacks = {},
                                 i,
                                 stackName,
@@ -333,7 +333,7 @@ function graphDraw(graph, postpone, delay, preview) {
                     }
 
                     highchartOpts.subtitle = {
-                        text: startTime.format('LLL') + ' — ' + endTime.format('LLL')
+                        text: startTime.format(TIME_DISPLAY) + ' — ' + endTime.format(TIME_DISPLAY)
                     };
 
                     if (data.unit_legend)
@@ -756,7 +756,16 @@ function graphSetupTerminate() {
 }
 
 function graphUpdateOptions(graph, options) {
-    graph.data('options', $.extend(graph.data('options'), options));
+    var key;
+
+    options = $.extend(graph.data('options'), options);
+
+    for (key in options) {
+        if (!options[key])
+            delete options[key];
+    }
+
+    graph.data('options', options);
 }
 
 // Register setup callbacks

@@ -132,7 +132,7 @@ function adminGraphCreateGroup(name, value) {
     $item.find('[data-listtmpl]')
         .attr('data-listtmpl', name);
 
-    if (value.type == OPER_GROUP_TYPE_AVG)
+    if (value.type == OPER_GROUP_TYPE_AVERAGE)
         type = 'avg';
     else if (value.type == OPER_GROUP_TYPE_SUM)
         type = 'sum';
@@ -224,7 +224,7 @@ function adminGraphCreateProxy(type, item, list) {
     value = $.extend({}, item.data('value'));
 
     if (type == PROXY_TYPE_GROUP) {
-        if (value.type == OPER_GROUP_TYPE_AVG)
+        if (value.type == OPER_GROUP_TYPE_AVERAGE)
             value.type = 'avg';
         else if (value.type == OPER_GROUP_TYPE_SUM)
             value.type = 'sum';
@@ -670,14 +670,19 @@ function adminGraphSetupTerminate() {
         });
 
         // Register links
-        linkRegister('add-avg add-sum add-stack', function (e) {
-            if (e.target.href.substr(-5) == 'stack') {
+        linkRegister('add-none add-average add-sum add-stack', function (e) {
+            if (e.target.href.substr(-6) == '-stack') {
                 // Add stack group
                 adminGraphCreateStack({});
+            } else if (e.target.href.substr(-5) == '-none') {
+                // Add `none' operation group (use for plots consolidation)
+                adminGraphCreateGroup(null, {
+                    type: OPER_GROUP_TYPE_NONE
+                });
             } else {
                 // Add operation group
                 adminGraphCreateGroup(null, {
-                    type: e.target.href.substr(-3) == 'avg' ? OPER_GROUP_TYPE_AVG : OPER_GROUP_TYPE_SUM
+                    type: e.target.href.substr(-8) == '-average' ? OPER_GROUP_TYPE_AVERAGE : OPER_GROUP_TYPE_SUM
                 });
             }
 

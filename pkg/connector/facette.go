@@ -1,3 +1,5 @@
+// +build facette
+
 package connector
 
 import (
@@ -79,6 +81,11 @@ func init() {
 
 		return connector, nil
 	}
+}
+
+// GetName returns the name of the current connector.
+func (connector *FacetteConnector) GetName() string {
+	return connector.name
 }
 
 // GetPlots retrieves time series data from origin based on a query and a time interval.

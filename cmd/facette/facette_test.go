@@ -17,8 +17,8 @@ import (
 	"time"
 
 	"github.com/facette/facette/pkg/config"
-	"github.com/facette/facette/pkg/connector"
 	"github.com/facette/facette/pkg/library"
+	"github.com/facette/facette/pkg/plot"
 	"github.com/facette/facette/pkg/server"
 	"github.com/facette/facette/pkg/utils"
 	"github.com/facette/facette/thirdparty/github.com/ziutek/rrd"
@@ -860,7 +860,7 @@ func Test_LibraryGraphHandle(test *testing.T) {
 	graphBase := &library.Graph{Item: library.Item{Name: "graph0", Description: "A great graph description."},
 		StackMode: library.StackModeNormal}
 
-	group := &library.OperGroup{Name: "group0", Type: connector.OperGroupTypeAvg}
+	group := &library.OperGroup{Name: "group0", Type: plot.OperTypeAverage}
 	group.Series = append(group.Series, &library.Series{Name: "series0", Origin: "test", Source: "source1",
 		Metric: "database1/test"})
 	group.Series = append(group.Series, &library.Series{Name: "series1", Origin: "test", Source: "source2",
@@ -868,7 +868,7 @@ func Test_LibraryGraphHandle(test *testing.T) {
 
 	graphBase.Groups = append(graphBase.Groups, group)
 
-	group = &library.OperGroup{Name: "series2", Type: connector.OperGroupTypeNone}
+	group = &library.OperGroup{Name: "series2", Type: plot.OperTypeNone}
 	group.Series = append(group.Series, &library.Series{Name: "series2", Origin: "test", Source: "group:group0",
 		Metric: "database2/test"})
 
@@ -1641,5 +1641,5 @@ func init() {
 	syscall.Kill(pid, syscall.SIGUSR1)
 
 	// Wait few seconds for the refresh to be completed
-	time.Sleep(5 * time.Second)
+	time.Sleep(3 * time.Second)
 }

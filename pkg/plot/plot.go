@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"math"
 	"sort"
-	"strings"
 	"time"
 )
 
@@ -57,72 +56,36 @@ func (value Value) IsNaN() bool {
 
 // Query represents a plot query to a connector.
 type Query struct {
-	Group     *QueryGroup
 	StartTime time.Time
 	EndTime   time.Time
 	Sample    int
+	Series    []QuerySeries
 }
 
-func (plotQuery *Query) String() string {
+func (query *Query) String() string {
 	return fmt.Sprintf(
-		"Query{StartTime:%s EndTime:%s Sample:%d Group:%s}",
-		plotQuery.StartTime.String(),
-		plotQuery.EndTime.String(),
-		plotQuery.Sample,
-		plotQuery.Group,
+		"Query{StartTime:%s EndTime:%s Sample:%d Series:%s}",
+		query.StartTime,
+		query.EndTime,
+		query.Sample,
+		query.Series,
 	)
 }
 
-// QueryGroup represents a plot query operation group.
-type QueryGroup struct {
-	Type    int
-	Series  []*QuerySeries
-	Options map[string]interface{}
-}
-
-func (queryGroup *QueryGroup) String() string {
-	return fmt.Sprintf(
-		"QueryGroup{Type:%d Options:%v Series:[%s]}",
-		queryGroup.Type,
-		queryGroup.Options,
-		func(series []*QuerySeries) string {
-			seriesStrings := make([]string, len(series))
-			for i, entry := range series {
-				seriesStrings[i] = fmt.Sprintf("%s", entry)
-			}
-
-			return strings.Join(seriesStrings, ", ")
-		}(queryGroup.Series),
-	)
-}
-
-// QuerySeries represents a series entry in a QueryGroup.
+// QuerySeries represents a series entry in a Query.
 type QuerySeries struct {
-	Metric  *QueryMetric
-	Options map[string]interface{}
-}
-
-func (QuerySeries *QuerySeries) String() string {
-	return fmt.Sprintf(
-		"QuerySeries{Metric:%s Options:%v}",
-		QuerySeries.Metric,
-		QuerySeries.Options,
-	)
-}
-
-// QueryMetric represents a metric entry in a QuerySeries.
-type QueryMetric struct {
 	Name   string
 	Origin string
 	Source string
+	Metric string
 }
 
-func (queryMetric *QueryMetric) String() string {
+func (metric *QuerySeries) String() string {
 	return fmt.Sprintf(
-		"QueryMetric{Name:\"%s\" Source:\"%s\" Origin:\"%s\"}",
-		queryMetric.Name,
-		queryMetric.Source,
-		queryMetric.Origin,
+		"QuerySeries{Name:\"%s\" Source:\"%s\" Origin:\"%s\"}",
+		metric.Name,
+		metric.Source,
+		metric.Origin,
 	)
 }
 
@@ -134,54 +97,12 @@ type Series struct {
 	Summary map[string]Value
 }
 
-// Consolidate consolidates a series of plots given a certain number of values per point.
-func (series *Series) Consolidate(pad, consolidationType int) {
-	if pad < 2 {
-		return
-	}
-
-	plotsCount := len(series.Plots)
-
-	plots := series.Plots[:]
-	series.Plots = make([]Plot, 0)
-
-	bucket := []float64{}
-
-	for i := 0; i < plotsCount; i++ {
-		if !plots[i].Value.IsNaN() {
-			bucket = append(bucket, float64(plots[i].Value))
-		}
-
-		if (i+1)%pad == 0 {
-			if len(bucket) == 0 {
-				series.Plots = append(
-					series.Plots,
-					Plot{Value: Value(math.NaN()), Time: plots[i].Time},
-				)
-
-				continue
-			}
-
-			series.Plots = append(
-				series.Plots,
-				Plot{Value: consolidateBucket(bucket, consolidationType), Time: plots[i].Time},
-			)
-
-			bucket = make([]float64, 0)
-		}
-	}
-
-	if len(bucket) > 0 {
-		series.Plots = append(
-			series.Plots,
-			Plot{Value: consolidateBucket(bucket, consolidationType), Time: plots[plotsCount-1].Time},
-		)
-	}
-}
-
 // Downsample applies a sampling function on a series of plots, reducing the number of points.
-func (series *Series) Downsample(sample, consolidationType int) {
-	series.Consolidate(len(series.Plots)/sample, consolidationType)
+func (series *Series) Downsample(startTime, endTime time.Time, sample, consolidationType int) {
+	consolidatedSeries, _ := Normalize([]Series{*series}, startTime, endTime, sample, consolidationType)
+	consolidatedSeries[0].Name = series.Name
+
+	*series = consolidatedSeries[0]
 }
 
 // Scale applies a factor on a series of plots.
@@ -220,6 +141,10 @@ func (series *Series) Summarize(percentiles []float64) {
 			total += series.Plots[i].Value
 			nValidPlots++
 		}
+	}
+
+	if series.Summary == nil {
+		series.Summary = make(map[string]Value)
 	}
 
 	series.Summary["min"] = min
@@ -269,40 +194,4 @@ func (series *Series) Percentiles(percentiles []float64) {
 
 		series.Summary[percentileString] = Value(set[rankInt-1] + rankFrac*(set[rankInt]-set[rankInt-1]))
 	}
-}
-
-func consolidateBucket(bucket []float64, consolidationType int) Value {
-	switch consolidationType {
-	case ConsolidateAverage, ConsolidateSum:
-		sum := 0.0
-		for _, entry := range bucket {
-			sum += entry
-		}
-
-		if consolidationType == ConsolidateAverage {
-			return Value(sum / float64(len(bucket)))
-		}
-
-		return Value(sum)
-	case ConsolidateMax:
-		max := math.NaN()
-		for _, entry := range bucket {
-			if !math.IsNaN(entry) && entry > max || math.IsNaN(max) {
-				max = entry
-			}
-		}
-
-		return Value(max)
-	case ConsolidateMin:
-		min := math.NaN()
-		for _, entry := range bucket {
-			if !math.IsNaN(entry) && entry < min || math.IsNaN(min) {
-				min = entry
-			}
-		}
-
-		return Value(min)
-	}
-
-	return Value(math.NaN())
 }

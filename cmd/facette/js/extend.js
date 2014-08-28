@@ -153,7 +153,7 @@ if (window.Highcharts) {
             cellLeft = Math.max(cellLeft, box.x + box.width + GRAPH_LEGEND_ROW_HEIGHT);
 
             // Update column keys list
-            if (!data[series.name].summary)
+            if (!data[series.name] || !data[series.name].summary)
                 return;
 
             keys = Object.keys(data[series.name].summary);
@@ -192,7 +192,7 @@ if (window.Highcharts) {
                     valueLeft = box.x + box.width + GRAPH_LEGEND_ROW_HEIGHT * 0.35;
                 }
 
-                value = data[series.name].summary && data[series.name].summary[key] !== undefined ?
+                value = data[series.name] && data[series.name].summary && data[series.name].summary[key] !== undefined ?
                     data[series.name].summary[key] : null;
 
                 element = chart.renderer.text(value !== null ? formatValue(value, options._opts.unit_type,
