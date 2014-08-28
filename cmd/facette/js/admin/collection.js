@@ -261,6 +261,10 @@ function adminCollectionSetupTerminate() {
                 if (!e._typing && !e._autofill && $target.val())
                     $target.closest('[data-input]').nextAll('button:first').focus();
             })
+            .on('change', '[data-step=1] .scrollarea input[type=checkbox]', function (e) {
+                var $target = $(e.target);
+                $target.closest('[data-listitem]').toggleClass('hidden', !$target.is(':checked'));
+            })
             .on('change', '[data-step=1] .scrollarea :input, [data-step=2] :input', function (e) {
                 PANE_UNLOAD_LOCK = true;
 
@@ -292,6 +296,8 @@ function adminCollectionSetupTerminate() {
 
                 if (data.entries[i].options.enabled)
                     $item.find('input[name=graph-shown]').attr('checked', 'checked');
+                else
+                    $item.addClass('hidden');
 
                 if (data.entries[i].options.refresh_interval)
                     $item.find('input[name=graph-refresh-interval]').val(data.entries[i].options.refresh_interval);
