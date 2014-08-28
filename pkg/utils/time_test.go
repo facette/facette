@@ -32,7 +32,7 @@ func Test_TimeApplyRange(test *testing.T) {
 }
 
 func Test_DurationToRange(test *testing.T) {
-	refTime := time.Now()
+	refTime := time.Now().UTC()
 
 	if result := DurationToRange(refTime.Sub(refTime.Add(time.Hour))); result != "-1h" {
 		test.Logf("\nExpected %#v\nbut got  %#v", "-1h", result)
