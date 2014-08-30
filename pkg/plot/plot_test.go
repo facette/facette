@@ -75,36 +75,43 @@ func Test_SeriesSummarize(test *testing.T) {
 	if plotSeries.Summary["min"] != minExpectedValue {
 		test.Logf("\nExpected min=%g\nbut got %g", minExpectedValue, plotSeries.Summary["min"])
 		test.Fail()
+		return
 	}
 
 	if plotSeries.Summary["max"] != maxExpectedValue {
 		test.Logf("\nExpected max=%g\nbut got %g", maxExpectedValue, plotSeries.Summary["max"])
 		test.Fail()
+		return
 	}
 
 	if plotSeries.Summary["avg"] != avgExpectedValue {
 		test.Logf("\nExpected avg=%g\nbut got %g", avgExpectedValue, plotSeries.Summary["avg"])
 		test.Fail()
+		return
 	}
 
 	if !plotSeries.Summary["last"].IsNaN() {
 		test.Logf("\nExpected last=%g\nbut got %g", lastExpectedValue, plotSeries.Summary["last"])
 		test.Fail()
+		return
 	}
 
 	if plotSeries.Summary["20th"] != pct20thExpectedValue {
 		test.Logf("\nExpected 20th=%g\nbut got %g", pct20thExpectedValue, plotSeries.Summary["20th"])
 		test.Fail()
+		return
 	}
 
 	if plotSeries.Summary["50th"] != pct50thExpectedValue {
 		test.Logf("\nExpected 50th=%g\nbut got %g", pct50thExpectedValue, plotSeries.Summary["50th"])
 		test.Fail()
+		return
 	}
 
 	if plotSeries.Summary["90th"] != pct90thExpectedValue {
 		test.Logf("\nExpected 90th=%g\nbut got %g", pct90thExpectedValue, plotSeries.Summary["90th"])
 		test.Fail()
+		return
 	}
 }
 

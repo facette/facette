@@ -470,7 +470,7 @@ func makePlotsResponse(plotSeries map[string][]plot.Series, plotReq *PlotRequest
 		}
 
 		// Normalize all series plots on the same time step
-		consolidatedSeries, err := plot.Normalize(
+		normalizedSeries, err := plot.Normalize(
 			groupSeries,
 			plotReq.startTime,
 			plotReq.endTime,
@@ -489,12 +489,12 @@ func makePlotsResponse(plotSeries map[string][]plot.Series, plotReq *PlotRequest
 			)
 
 			if groupItem.Type == plot.OperTypeAverage {
-				operSeries, err = plot.AverageSeries(consolidatedSeries)
+				operSeries, err = plot.AverageSeries(normalizedSeries)
 				if err != nil {
 					return nil, fmt.Errorf("unable to average series: %s", err)
 				}
 			} else {
-				operSeries, err = plot.SumSeries(consolidatedSeries)
+				operSeries, err = plot.SumSeries(normalizedSeries)
 				if err != nil {
 					return nil, fmt.Errorf("unable to sum series: %s", err)
 				}
@@ -509,7 +509,14 @@ func makePlotsResponse(plotSeries map[string][]plot.Series, plotReq *PlotRequest
 				groupSeries[0].Scale(plot.Value(scale))
 			}
 		} else {
-			groupSeries = consolidatedSeries
+			groupSeries = normalizedSeries
+
+			// Apply group scale if any
+			if scale, _ := config.GetFloat(groupItem.Options, "scale", false); scale != 0 {
+				for _, seriesItem := range groupSeries {
+					seriesItem.Scale(plot.Value(scale))
+				}
+			}
 		}
 
 		for _, seriesItem := range groupSeries {
@@ -518,6 +525,7 @@ func makePlotsResponse(plotSeries map[string][]plot.Series, plotReq *PlotRequest
 
 			response.Series = append(response.Series, &SeriesResponse{
 				Name:    seriesItem.Name,
+				StackID: groupItem.StackID,
 				Plots:   seriesItem.Plots,
 				Summary: seriesItem.Summary,
 				Options: groupItem.Options,
