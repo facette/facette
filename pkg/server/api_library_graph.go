@@ -438,6 +438,8 @@ func executeQueries(queries map[string]*providerQuery) (map[string][]plot.Series
 func makePlotsResponse(plotSeries map[string][]plot.Series, plotReq *PlotRequest,
 	graph *library.Graph) (*PlotResponse, error) {
 
+	var err error
+
 	response := &PlotResponse{
 		ID:          graph.ID,
 		Start:       plotReq.startTime.Format(time.RFC3339),
@@ -469,16 +471,22 @@ func makePlotsResponse(plotSeries map[string][]plot.Series, plotReq *PlotRequest
 			}
 		}
 
+		if len(groupSeries) == 0 {
+			continue
+		}
+
 		// Normalize all series plots on the same time step
-		normalizedSeries, err := plot.Normalize(
-			groupSeries,
-			plotReq.startTime,
-			plotReq.endTime,
-			plotReq.Sample,
-			plot.ConsolidateAverage,
-		)
-		if err != nil {
-			return nil, fmt.Errorf("unable to consolidate series: %s", err)
+		if groupItem.Type != plot.OperTypeNone {
+			groupSeries, err = plot.Normalize(
+				groupSeries,
+				plotReq.startTime,
+				plotReq.endTime,
+				plotReq.Sample,
+				plot.ConsolidateAverage,
+			)
+			if err != nil {
+				return nil, fmt.Errorf("unable to consolidate series: %s", err)
+			}
 		}
 
 		// Perform requested series operations
@@ -489,12 +497,12 @@ func makePlotsResponse(plotSeries map[string][]plot.Series, plotReq *PlotRequest
 			)
 
 			if groupItem.Type == plot.OperTypeAverage {
-				operSeries, err = plot.AverageSeries(normalizedSeries)
+				operSeries, err = plot.AverageSeries(groupSeries)
 				if err != nil {
 					return nil, fmt.Errorf("unable to average series: %s", err)
 				}
 			} else {
-				operSeries, err = plot.SumSeries(normalizedSeries)
+				operSeries, err = plot.SumSeries(groupSeries)
 				if err != nil {
 					return nil, fmt.Errorf("unable to sum series: %s", err)
 				}
@@ -503,19 +511,12 @@ func makePlotsResponse(plotSeries map[string][]plot.Series, plotReq *PlotRequest
 			operSeries.Name = groupItem.Name
 
 			groupSeries = []plot.Series{operSeries}
+		}
 
-			// Apply group scale if any
-			if scale, _ := config.GetFloat(groupItem.Options, "scale", false); scale != 0 {
-				groupSeries[0].Scale(plot.Value(scale))
-			}
-		} else {
-			groupSeries = normalizedSeries
-
-			// Apply group scale if any
-			if scale, _ := config.GetFloat(groupItem.Options, "scale", false); scale != 0 {
-				for _, seriesItem := range groupSeries {
-					seriesItem.Scale(plot.Value(scale))
-				}
+		// Apply group scale if any
+		if scale, _ := config.GetFloat(groupItem.Options, "scale", false); scale != 0 {
+			for _, seriesItem := range groupSeries {
+				seriesItem.Scale(plot.Value(scale))
 			}
 		}
 

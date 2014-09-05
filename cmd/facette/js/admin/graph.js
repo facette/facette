@@ -133,9 +133,11 @@ function adminGraphCreateGroup(name, value) {
         .attr('data-listtmpl', name);
 
     if (value.type == OPER_GROUP_TYPE_AVERAGE)
-        type = 'avg';
+        type = 'average';
     else if (value.type == OPER_GROUP_TYPE_SUM)
         type = 'sum';
+    else if (value.type == OPER_GROUP_TYPE_NORMALIZE)
+        type = 'normalize';
     else
         type = '';
 
@@ -670,20 +672,23 @@ function adminGraphSetupTerminate() {
         });
 
         // Register links
-        linkRegister('add-none add-average add-sum add-stack', function (e) {
-            if (e.target.href.substr(-6) == '-stack') {
+        linkRegister('add-average add-sum add-normalize add-stack', function (e) {
+            var operGroupType;
+
+            if (e.target.href.endsWith('-stack')) {
                 // Add stack group
                 adminGraphCreateStack({});
-            } else if (e.target.href.substr(-5) == '-none') {
-                // Add `none' operation group (use for plots consolidation)
-                adminGraphCreateGroup(null, {
-                    type: OPER_GROUP_TYPE_NONE
-                });
             } else {
-                // Add operation group
-                adminGraphCreateGroup(null, {
-                    type: e.target.href.substr(-8) == '-average' ? OPER_GROUP_TYPE_AVERAGE : OPER_GROUP_TYPE_SUM
-                });
+                if (e.target.href.endsWith('-average'))
+                    operGroupType = OPER_GROUP_TYPE_AVERAGE;
+                else if (e.target.href.endsWith('-sum'))
+                    operGroupType = OPER_GROUP_TYPE_SUM;
+                else if (e.target.href.endsWith('-normalize'))
+                    operGroupType = OPER_GROUP_TYPE_NORMALIZE;
+                else
+                    return;
+
+                adminGraphCreateGroup(null, {type: operGroupType});
             }
 
             PANE_UNLOAD_LOCK = true;

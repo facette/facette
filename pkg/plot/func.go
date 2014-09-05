@@ -28,6 +28,8 @@ const (
 	OperTypeAverage
 	// OperTypeSum represents a SUM operation group mode.
 	OperTypeSum
+	// OperTypeNormalize represents a NORMALIZE operation group mode.
+	OperTypeNormalize
 )
 
 type plotBucket struct {
