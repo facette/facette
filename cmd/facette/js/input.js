@@ -285,7 +285,7 @@ function inputInit(element) {
         $menu.css('min-width', $input.width());
 
         // Try to auto-fill input field
-        if (inputOpts.autofill && inputOpts.autofill.trim().toLowerCase() != 'false') {
+        if (!inputOpts.autofill || inputOpts.autofill.trim().toLowerCase() != 'false') {
             $input.find('input').trigger({
                 type: 'keyup',
                 _autofill: true
