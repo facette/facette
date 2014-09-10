@@ -1,6 +1,30 @@
 CHANGES
 =======
 
+0.2.0 (2014-09-10)
+------------------
+
+ * Add InfluxDB connector (experimental)
+ * Add UNIX socket support for backend
+ * Add `sieve' provider filter type
+ * Implement internal series operations handling
+ * Add read-only mode
+ * Add embeddable graphs support
+ * Add multiple fixed graph plot lines support
+ * Implement series auto-naming
+ * Make graph legends foldable
+ * Add per stack series summing
+ * Add graphs visibility toggling in collections
+ * Add collection graphs auto-refresh support
+ * Add Docker image support
+ * Add OpenSearch support
+ * Add HiDPI displays support
+ * Make base server settings optional
+ * Remove refresh API calls
+ * Updated provider filter rules format
+ * Various bug fixes
+ * UI improvments
+
 0.1.2 (2014-08-01)
 ------------------
 
