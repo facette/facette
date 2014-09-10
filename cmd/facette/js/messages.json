@@ -43,9 +43,10 @@
         "labl_clone": "Clone Group",
         "labl_delete": "Delete Group",
         "labl_group_name": "Group Name:",
-        "mesg_delete": "You are about to delete “__name__” group. This action can’t be undone.",
         "mesg_delete_fail": "Unable to delete the group!",
+        "mesg_delete": "You are about to delete “__name__” group. This action can’t be undone.",
         "mesg_exists": "A group with the same name already exists!",
+        "mesg_load_nomatch": "Your search doesn’t match any group",
         "mesg_none": "No group found",
         "mesg_save_fail": "Unable to save group!"
     },
@@ -101,9 +102,10 @@
         "labl_clone": "Clone Unit",
         "labl_delete": "Delete Unit",
         "labl_group_name": "Unit Name:",
-        "mesg_delete": "You are about to delete “__name__” unit. This action can’t be undone.",
         "mesg_delete_fail": "Unable to delete the unit!",
+        "mesg_delete": "You are about to delete “__name__” unit. This action can’t be undone.",
         "mesg_exists": "A unit with the same name already exists!",
+        "mesg_load_nomatch": "Your search doesn’t match any unit",
         "mesg_none": "No unit found",
         "mesg_save_fail": "Unable to save unit!"
     }
