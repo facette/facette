@@ -278,6 +278,10 @@ func (server *Server) prepareProviderQueries(plotReq *PlotRequest,
 		for _, seriesItem := range groupItem.Series {
 			var seriesSources []string
 
+			if seriesItem == nil {
+				return nil, os.ErrNotExist
+			}
+
 			// Check for unknown origins
 			if _, ok := server.Catalog.Origins[seriesItem.Origin]; !ok {
 				logger.Log(logger.LevelWarning, "server", "unknown series origin `%s'", seriesItem.Origin)
