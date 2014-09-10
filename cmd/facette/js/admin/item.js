@@ -50,7 +50,8 @@ function adminItemHandlePaneList(itemType) {
                 validate: function () {
                     itemDelete($item.attr('data-itemid'), paneSection)
                         .then(function () {
-                            listUpdate($item.closest('[data-list]'));
+                            listUpdate($item.closest('[data-list]'),
+                                $item.closest('[data-pane]').find('[data-listfilter=' + paneSection + ']').val());
                         })
                         .fail(function () {
                             overlayCreate('alert', {
