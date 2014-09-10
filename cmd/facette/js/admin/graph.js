@@ -32,7 +32,7 @@ function adminGraphGetGroup(entry) {
         seriesValue = adminGraphGetValue(entry);
 
         group = {
-            name: seriesValue.name || entry.attr('data-series'),
+            name: seriesValue && seriesValue.name || entry.attr('data-series'),
             type: OPER_GROUP_TYPE_NONE,
             series: [],
             options: {}
@@ -1200,8 +1200,10 @@ function adminGraphSetupTerminate() {
                         metric: metricName
                     });
 
-                    if ($entryActive)
-                        $entryActive.replaceWith($entry);
+                    if ($entryActive) {
+                        $entry.insertBefore($entryActive);
+                        $entryActive.find('a[href=#remove-metric]').trigger('click');
+                    }
 
                     listSay($list, null);
                     listUpdateCount($list);
