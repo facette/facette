@@ -164,9 +164,10 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan *catal
 	walkFunc := func(filePath string, fileInfo os.FileInfo, err error) error {
 		var sourceName, metricName string
 
-		// Stop if previous error
+		// Report errors
 		if err != nil {
-			return err
+			logger.Log(logger.LevelWarning, "connector", "rrd[%s]: error while walking: %s", connector.name, err)
+			return nil
 		}
 
 		// Skip non-files
