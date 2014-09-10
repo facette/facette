@@ -438,8 +438,6 @@ func executeQueries(queries map[string]*providerQuery) (map[string][]plot.Series
 func makePlotsResponse(plotSeries map[string][]plot.Series, plotReq *PlotRequest,
 	graph *library.Graph) (*PlotResponse, error) {
 
-	var err error
-
 	response := &PlotResponse{
 		ID:          graph.ID,
 		Start:       plotReq.startTime.Format(time.RFC3339),
@@ -476,17 +474,15 @@ func makePlotsResponse(plotSeries map[string][]plot.Series, plotReq *PlotRequest
 		}
 
 		// Normalize all series plots on the same time step
-		if groupItem.Type != plot.OperTypeNone {
-			groupSeries, err = plot.Normalize(
-				groupSeries,
-				plotReq.startTime,
-				plotReq.endTime,
-				plotReq.Sample,
-				plot.ConsolidateAverage,
-			)
-			if err != nil {
-				return nil, fmt.Errorf("unable to consolidate series: %s", err)
-			}
+		groupSeries, err := plot.Normalize(
+			groupSeries,
+			plotReq.startTime,
+			plotReq.endTime,
+			plotReq.Sample,
+			plot.ConsolidateAverage,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("unable to consolidate series: %s", err)
 		}
 
 		// Perform requested series operations

@@ -101,14 +101,6 @@ type Series struct {
 	Summary map[string]Value
 }
 
-// Downsample applies a sampling function on a series of plots, reducing the number of points.
-func (series *Series) Downsample(startTime, endTime time.Time, sample, consolidationType int) {
-	normalizedSeries, _ := Normalize([]Series{*series}, startTime, endTime, sample, consolidationType)
-	normalizedSeries[0].Name = series.Name
-
-	*series = normalizedSeries[0]
-}
-
 // Scale applies a factor on a series of plots.
 func (series *Series) Scale(factor Value) {
 	for i := range series.Plots {

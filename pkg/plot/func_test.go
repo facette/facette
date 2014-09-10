@@ -5,8 +5,6 @@ import (
 	"reflect"
 	"testing"
 	"time"
-
-	"github.com/facette/facette/pkg/utils"
 )
 
 func Test_plotBucketConsolidate(test *testing.T) {
@@ -238,7 +236,7 @@ func Test_FuncSumSeries(test *testing.T) {
 	}
 }
 
-func Test_DownsampleAverage(test *testing.T) {
+func Test_NormalizeAverage(test *testing.T) {
 	testSlice := []sampleTest{
 		sampleTest{5, []Plot{
 			{Value: 65.4}, {Value: 79.6}, {Value: 83.4}, {Value: 73.6}, {Value: 82.8},
@@ -270,10 +268,10 @@ func Test_DownsampleAverage(test *testing.T) {
 		}
 	}
 
-	testDownsampling(test, testSlice, ConsolidateAverage)
+	testNormalize(test, testSlice, ConsolidateAverage)
 }
 
-func Test_DownsampleMax(test *testing.T) {
+func Test_NormalizeMax(test *testing.T) {
 	testSlice := []sampleTest{
 		sampleTest{5, []Plot{
 			{Value: 98}, {Value: 95}, {Value: 99}, {Value: 85}, {Value: 96},
@@ -311,10 +309,10 @@ func Test_DownsampleMax(test *testing.T) {
 		}
 	}
 
-	testDownsampling(test, testSlice, ConsolidateMax)
+	testNormalize(test, testSlice, ConsolidateMax)
 }
 
-func Test_DownsampleMin(test *testing.T) {
+func Test_NormalizeMin(test *testing.T) {
 	testSlice := []sampleTest{
 		sampleTest{5, []Plot{
 			{Value: 43}, {Value: 68}, {Value: 54}, {Value: 62}, {Value: 66},
@@ -352,10 +350,10 @@ func Test_DownsampleMin(test *testing.T) {
 		}
 	}
 
-	testDownsampling(test, testSlice, ConsolidateMin)
+	testNormalize(test, testSlice, ConsolidateMin)
 }
 
-func Test_DownsampleLast(test *testing.T) {
+func Test_NormalizeLast(test *testing.T) {
 	testSlice := []sampleTest{
 		sampleTest{5, []Plot{
 			{Value: 43}, {Value: 79}, {Value: 77}, {Value: 72}, {Value: Value(math.NaN())},
@@ -381,10 +379,10 @@ func Test_DownsampleLast(test *testing.T) {
 		}
 	}
 
-	testDownsampling(test, testSlice, ConsolidateLast)
+	testNormalize(test, testSlice, ConsolidateLast)
 }
 
-func Test_DownsampleSum(test *testing.T) {
+func Test_NormalizeSum(test *testing.T) {
 	testSlice := []sampleTest{
 		sampleTest{5, []Plot{
 			{Value: 327}, {Value: 398}, {Value: 417}, {Value: 368}, {Value: 414},
@@ -410,18 +408,15 @@ func Test_DownsampleSum(test *testing.T) {
 		}
 	}
 
-	testDownsampling(test, testSlice, ConsolidateSum)
+	testNormalize(test, testSlice, ConsolidateSum)
 }
 
-func testDownsampling(test *testing.T, testSlice []sampleTest, consolidationType int) {
+func testNormalize(test *testing.T, testSlice []sampleTest, consolidationType int) {
 	for _, entry := range testSlice {
-		series := Series{}
-		utils.Clone(&plotSeries, &series)
+		normalizedSeries, _ := Normalize([]Series{plotSeries}, startTime, endTime, entry.Sample, consolidationType)
 
-		series.Downsample(startTime, endTime, entry.Sample, consolidationType)
-
-		if !seriesEqual(entry.Plots, series.Plots, false) {
-			test.Logf("\nExpected %+v\nbut got  %+v", entry.Plots, series.Plots)
+		if !seriesEqual(entry.Plots, normalizedSeries[0].Plots, false) {
+			test.Logf("\nExpected %+v\nbut got  %+v", entry.Plots, normalizedSeries[0].Plots)
 			test.Fail()
 			return
 		}
