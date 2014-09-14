@@ -50,13 +50,13 @@ func (server *Server) parseListRequest(writer http.ResponseWriter, request *http
 	}
 
 	if offset != nil && request.FormValue("offset") != "" {
-		if *offset, err = strconv.Atoi(request.FormValue("offset")); err != nil {
+		if *offset, err = strconv.Atoi(request.FormValue("offset")); err != nil || *offset < 0 {
 			return &serverResponse{mesgFormOffsetInvalid}, http.StatusBadRequest
 		}
 	}
 
 	if limit != nil && request.FormValue("limit") != "" {
-		if *limit, err = strconv.Atoi(request.FormValue("limit")); err != nil {
+		if *limit, err = strconv.Atoi(request.FormValue("limit")); err != nil || *limit < 0 {
 			return &serverResponse{mesgFormLimitInvalid}, http.StatusBadRequest
 		}
 	}
