@@ -29,7 +29,7 @@ function adminCollectionGetData() {
         data = {
             name: $pane.find('input[name=collection-name]').val(),
             description: $pane.find('textarea[name=collection-desc]').val(),
-            parent: ($pane.find('input[name=collection-parent]').data('value') || {}).id,
+            parent: ($pane.find('input[name=collection-parent]').data('value') || {id: null}).id,
             entries: []
         },
         refresh_interval = $pane.find('input[name=collection-refresh-interval]').val();
