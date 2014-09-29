@@ -87,6 +87,18 @@ function graphDraw(graph, postpone, delay, preview) {
             if (!graphOpts.range)
                 graphOpts.range = GRAPH_DEFAULT_RANGE;
 
+            if (typeof graphOpts.percentiles != 'undefined') {
+                switch (typeof graphOpts.percentiles) {
+                case 'number':
+                    graphOpts.percentiles = [graphOpts.percentiles];
+                    break;
+
+                case 'string':
+                    $.map(graphOpts.percentiles.split(','), function (x) { return parseFloat(x.trim()); })
+                    break;
+                }
+            }
+
             // Set graph options
             graph.data('options', graphOpts);
 
@@ -95,9 +107,7 @@ function graphDraw(graph, postpone, delay, preview) {
                 time: graphOpts.time,
                 range: graphOpts.range,
                 sample: graphOpts.sample,
-                percentiles: graphOpts.percentiles ? $.map(graphOpts.percentiles.split(','), function (x) {
-                    return parseFloat(x.trim());
-                }) : undefined
+                percentiles: graphOpts.percentiles
             };
 
             if (preview) {
