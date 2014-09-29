@@ -99,6 +99,18 @@ function graphDraw(graph, postpone, delay, preview) {
                 }
             }
 
+            if (typeof graphOpts.constants != 'undefined') {
+                switch (typeof graphOpts.constants) {
+                case 'number':
+                    graphOpts.constants = [graphOpts.constants];
+                    break;
+
+                case 'string':
+                    $.map(graphOpts.constants.split(','), function (x) { return parseFloat(x.trim()); })
+                    break;
+                }
+            }
+
             // Set graph options
             graph.data('options', graphOpts);
 
@@ -127,6 +139,7 @@ function graphDraw(graph, postpone, delay, preview) {
             }).pipe(function (data) {
                 var $container,
                     graphTableUpdate,
+                    highchart,
                     highchartOpts,
                     startTime,
                     endTime,
@@ -424,7 +437,17 @@ function graphDraw(graph, postpone, delay, preview) {
                     }
                 }
 
-                $container.highcharts(highchartOpts);
+                highchart = $container.highcharts(highchartOpts).highcharts();
+
+                // Draw constants plot lines
+                for (i in graphOpts.constants) {
+                    highchart.yAxis[0].addPlotLine({
+                        color: '#d00',
+                        value: graphOpts.constants[i],
+                        width: 1,
+                        zIndex: 100
+                    });
+                }
 
                 // Set next refresh if needed
                 if (graphOpts.refresh_interval) {
