@@ -794,7 +794,7 @@ function graphUpdateOptions(graph, options) {
     options = $.extend(graph.data('options'), options);
 
     for (key in options) {
-        if (!options[key])
+        if (typeof options[key] != 'boolean' && !options[key])
             delete options[key];
     }
 
