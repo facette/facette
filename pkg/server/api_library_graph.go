@@ -458,6 +458,8 @@ func makePlotsResponse(plotSeries map[string][]plot.Series, plotReq *PlotRequest
 	for _, groupItem := range graph.Groups {
 		groupSeries := make([]plot.Series, 0)
 
+		seriesOptions := make(map[string]map[string]interface{})
+
 		for _, seriesItem := range groupItem.Series {
 			if _, ok := plotSeries[seriesItem.Name]; !ok {
 				return nil, fmt.Errorf("unable to find plots for `%s' series", seriesItem.Name)
@@ -468,6 +470,8 @@ func makePlotsResponse(plotSeries map[string][]plot.Series, plotReq *PlotRequest
 				if scale, _ := config.GetFloat(seriesItem.Options, "scale", false); scale != 0 {
 					plotItem.Scale(plot.Value(scale))
 				}
+
+				seriesOptions[seriesItem.Name] = seriesItem.Options
 
 				groupSeries = append(groupSeries, plotItem)
 			}
@@ -529,7 +533,7 @@ func makePlotsResponse(plotSeries map[string][]plot.Series, plotReq *PlotRequest
 				StackID: groupItem.StackID,
 				Plots:   seriesItem.Plots,
 				Summary: seriesItem.Summary,
-				Options: groupItem.Options,
+				Options: seriesOptions[seriesItem.Name],
 			})
 		}
 	}

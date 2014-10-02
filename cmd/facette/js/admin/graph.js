@@ -1405,10 +1405,11 @@ function adminGraphSetupTerminate() {
                 }) : null;
 
                 for (j in data.groups[i].series) {
-                    $itemSeries = adminGraphCreateSeries(null, $.extend(data.groups[i].series[j], {
-                        options: data.groups[i].type === OPER_GROUP_TYPE_NONE ?
-                            data.groups[i].options : null
-                    })).data('renamed', true);
+                    if (data.groups[i].type === OPER_GROUP_TYPE_NONE && !data.groups[i].series[j].options)
+                        data.groups[i].series[j].options = data.groups[i].options;
+
+                    $itemSeries = adminGraphCreateSeries(null, data.groups[i].series[j])
+                        .data('renamed', true);
 
                     if ($itemOper)
                         adminGraphCreateProxy(PROXY_TYPE_SERIES, $itemSeries, $itemOper);
