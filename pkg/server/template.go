@@ -70,7 +70,12 @@ func templateDumpMap(x map[string]interface{}) string {
 
 		switch value.(type) {
 		case []interface{}:
-			valueString := make([]string, len(value.([]interface{})))
+			valueLength := len(value.([]interface{}))
+			if valueLength == 0 {
+				continue
+			}
+
+			valueString := make([]string, valueLength)
 
 			for index, entry := range value.([]interface{}) {
 				valueString[index] = fmt.Sprintf("%v", entry)
