@@ -24,7 +24,7 @@ type InfluxDBConnector struct {
 	database string
 	client   *influxdb.Client
 	re       *regexp.Regexp
-	series   map[string]map[string]string
+	series   map[string]map[string][2]string
 }
 
 func init() {
@@ -39,7 +39,7 @@ func init() {
 			host:     "localhost:8086",
 			username: "root",
 			password: "root",
-			series:   make(map[string]map[string]string),
+			series:   make(map[string]map[string][2]string),
 		}
 
 		if connector.host, err = config.GetString(settings, "host", false); err != nil {
@@ -95,12 +95,15 @@ func (connector *InfluxDBConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 	}
 
 	metricsNames := make([]string, seriesLength)
+	columnsNames := make([]string, seriesLength)
 	for i, series := range query.Series {
-		metricsNames[i] = connector.series[series.Source][series.Metric]
+		metricsNames[i] = connector.series[series.Source][series.Metric][0]
+		columnsNames[i] = connector.series[series.Source][series.Metric][1]
 	}
 
 	influxdbQuery := fmt.Sprintf(
-		"select value from %s where time > %ds and time < %ds order asc",
+		"select %s from %s where time > %ds and time < %ds order asc",
+		strings.Join(columnsNames, ","),
 		strings.Join(metricsNames, ","),
 		query.StartTime.Unix(),
 		query.EndTime.Unix(),
@@ -135,7 +138,7 @@ func (connector *InfluxDBConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 
 // Refresh triggers a full connector data update.
 func (connector *InfluxDBConnector) Refresh(originName string, outputChan chan *catalog.Record) error {
-	seriesList, err := connector.client.QueryWithNumbers("list series")
+	seriesList, err := connector.client.Query("select * from /.*/ limit 1")
 	if err != nil {
 		return fmt.Errorf("influxdb[%s]: unable to fetch series list: %s", connector.name, err)
 	}
@@ -145,30 +148,49 @@ func (connector *InfluxDBConnector) Refresh(originName string, outputChan chan *
 
 		seriesName = series.GetName()
 
-		seriesMatch, err := matchSeriesPattern(connector.re, seriesName)
-		if err != nil {
+		seriesPoints := series.GetPoints()
+		if len(seriesPoints) == 0 {
 			logger.Log(logger.LevelInfo,
 				"connector",
-				"influxdb[%s]: series `%s' does not match pattern, ignoring",
+				"influxdb[%s]: series `%s' does not return sample data, ignoring",
 				connector.name,
 				seriesName,
 			)
 			continue
 		}
 
-		sourceName, metricName = seriesMatch[0], seriesMatch[1]
+		for columnIndex, columnName := range series.GetColumns() {
+			if columnName == "time" || columnName == "sequence_number" {
+				continue
+			} else if _, ok := seriesPoints[0][columnIndex].(float64); !ok {
+				continue
+			}
 
-		if _, ok := connector.series[sourceName]; !ok {
-			connector.series[sourceName] = make(map[string]string)
-		}
+			seriesMatch, err := matchSeriesPattern(connector.re, seriesName+"."+columnName)
+			if err != nil {
+				logger.Log(logger.LevelInfo,
+					"connector",
+					"influxdb[%s]: series `%s' does not match pattern, ignoring",
+					connector.name,
+					seriesName,
+				)
+				continue
+			}
 
-		connector.series[sourceName][metricName] = seriesName
+			sourceName, metricName = seriesMatch[0], seriesMatch[1]
 
-		outputChan <- &catalog.Record{
-			Origin:    originName,
-			Source:    sourceName,
-			Metric:    metricName,
-			Connector: connector,
+			if _, ok := connector.series[sourceName]; !ok {
+				connector.series[sourceName] = make(map[string][2]string)
+			}
+
+			connector.series[sourceName][metricName] = [2]string{seriesName, columnName}
+
+			outputChan <- &catalog.Record{
+				Origin:    originName,
+				Source:    sourceName,
+				Metric:    metricName,
+				Connector: connector,
+			}
 		}
 	}
 
