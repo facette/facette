@@ -2,7 +2,8 @@
 
 VERSION = 0.2.0
 
-TAGS ?= graphite \
+TAGS ?= facette \
+	graphite \
 	influxdb \
 	rrd
 
