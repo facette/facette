@@ -104,23 +104,20 @@ func (connector *FacetteConnector) GetPlots(query *plot.Query) ([]plot.Series, e
 			Groups: []*library.OperGroup{
 				&library.OperGroup{
 					Name: "group0",
-					Type: query.Group.Type,
-					Series: func(series []*plot.QuerySeries) []*library.Series {
+					Series: func(series []plot.QuerySeries) []*library.Series {
 						requestSeries := make([]*library.Series, len(series))
 
 						for index, entry := range series {
 							requestSeries[index] = &library.Series{
-								Name:    fmt.Sprintf("series%d", index),
-								Origin:  entry.Metric.Origin,
-								Source:  entry.Metric.Source,
-								Metric:  entry.Metric.Name,
-								Options: entry.Options,
+								Name:   fmt.Sprintf("series%d", index),
+								Origin: entry.Origin,
+								Source: entry.Source,
+								Metric: entry.Metric,
 							}
 						}
 
 						return requestSeries
-					}(query.Group.Series),
-					Options: query.Group.Options,
+					}(query.Series),
 				},
 			},
 		},
