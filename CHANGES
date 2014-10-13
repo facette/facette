@@ -1,6 +1,20 @@
 CHANGES
 =======
 
+0.2.1 (2014-10-13)
+------------------
+
+ * Add support for influxdb >= 0.8
+ * Fix issues with unitialized autofill option
+ * Fix bad legend rendering in embeddable mode
+ * Fix missing facette connector build in Makefile
+ * Fix broken facette connector following last code refactoring
+ * Fix bad filter match separator
+ * Fix percentiles parsing
+ * Fix missing constants draw
+ * Fix various graph/series options issues
+ * Prevent panic when offset or limit is negative
+
 0.2.0 (2014-09-10)
 ------------------
 
