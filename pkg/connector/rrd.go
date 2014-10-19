@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/facette/facette/pkg/catalog"
@@ -13,6 +14,7 @@ import (
 	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/plot"
 	"github.com/facette/facette/pkg/utils"
+	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 	"github.com/facette/facette/thirdparty/github.com/ziutek/rrd"
 )
 
@@ -201,21 +203,41 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan *catal
 			return nil
 		}
 
-		if _, ok := info["ds.index"]; ok {
-			for dsName := range info["ds.index"].(map[string]interface{}) {
-				metricFullName := metricName + "/" + dsName
+		// Extract consolidation functions list
+		cfSet := set.New(set.ThreadSafe)
 
-				connector.metrics[sourceName][metricFullName] = &rrdMetric{
-					Dataset:  dsName,
-					FilePath: filePath,
-					Step:     time.Duration(info["step"].(uint)) * time.Second,
+		if cf, ok := info["rra.cf"].([]interface{}); ok {
+			for _, entry := range cf {
+				if name, ok := entry.(string); ok {
+					cfSet.Add(strings.ToLower(name))
 				}
+			}
+		}
 
-				outputChan <- &catalog.Record{
-					Origin:    originName,
-					Source:    sourceName,
-					Metric:    metricFullName,
-					Connector: connector,
+		cfList := set.StringSlice(cfSet)
+
+		if _, ok := info["ds.index"]; ok {
+			indexes, ok := info["ds.index"].(map[string]interface{})
+			if !ok {
+				return nil
+			}
+
+			for dsName := range indexes {
+				for _, cfName := range cfList {
+					metricFullName := metricName + "/" + dsName + "/" + cfName
+
+					connector.metrics[sourceName][metricFullName] = &rrdMetric{
+						Dataset:  dsName,
+						FilePath: filePath,
+						Step:     time.Duration(info["step"].(uint)) * time.Second,
+					}
+
+					outputChan <- &catalog.Record{
+						Origin:    originName,
+						Source:    sourceName,
+						Metric:    metricFullName,
+						Connector: connector,
+					}
 				}
 			}
 		}
