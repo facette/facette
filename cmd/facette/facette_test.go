@@ -234,11 +234,11 @@ func Test_CatalogMetricList(test *testing.T) {
 	var result []string
 
 	base := []string{
-		"database1.test",
-		"database1/test",
-		"database2.test",
-		"database2/test",
-		"database3/test",
+		"database1.test.average",
+		"database1/test/average",
+		"database2.test.average",
+		"database2/test/average",
+		"database3/test/average",
 	}
 
 	// Test GET on metrics list
@@ -306,12 +306,13 @@ func Test_CatalogMetricList(test *testing.T) {
 }
 
 func Test_CatalogMetricGet(test *testing.T) {
-	base := &server.MetricResponse{Name: "database2/test", Sources: []string{"source1", "source2"},
+	base := &server.MetricResponse{Name: "database2/test/average", Sources: []string{"source1", "source2"},
 		Origins: []string{"test1"}}
+
 	result := &server.MetricResponse{}
 
 	// Test GET on metric item
-	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/metrics/database2/test",
+	response := execTestRequest(test, "GET", fmt.Sprintf("http://%s/api/v1/catalog/metrics/database2/test/average",
 		serverConfig.BindAddr), nil, &result)
 
 	if response.StatusCode != http.StatusOK {
@@ -825,10 +826,10 @@ func Test_LibrarySourceGroupHandle(test *testing.T) {
 	group := &library.Group{Item: library.Item{Name: "group0", Description: "A great group description."}}
 	group.Entries = append(group.Entries, &library.GroupEntry{Pattern: "glob:source*", Origin: "test1"})
 
-	expandData := server.ExpandRequest{[3]string{"test1", "group:group0-updated", "database1/test"}}
+	expandData := server.ExpandRequest{[3]string{"test1", "group:group0-updated", "database1/test/average"}}
 
 	expandBase := server.ExpandRequest{}
-	expandBase = append(expandBase, [3]string{"test1", "source1", "database1/test"})
+	expandBase = append(expandBase, [3]string{"test1", "source1", "database1/test/average"})
 
 	execGroupHandle(test, "sourcegroups", group, expandData, expandBase)
 }
@@ -836,14 +837,22 @@ func Test_LibrarySourceGroupHandle(test *testing.T) {
 func Test_LibraryMetricGroupHandle(test *testing.T) {
 	// Define a sample metric group
 	group := &library.Group{Item: library.Item{Name: "group0", Description: "A great group description."}}
-	group.Entries = append(group.Entries, &library.GroupEntry{Pattern: "database1/test", Origin: "test1"})
-	group.Entries = append(group.Entries, &library.GroupEntry{Pattern: "regexp:database[23]/test", Origin: "test1"})
+
+	group.Entries = append(group.Entries, &library.GroupEntry{
+		Pattern: "database1/test/average",
+		Origin:  "test1",
+	})
+
+	group.Entries = append(group.Entries, &library.GroupEntry{
+		Pattern: "regexp:database[23]/test/average",
+		Origin:  "test1",
+	})
 
 	expandData := server.ExpandRequest{[3]string{"test1", "source1", "group:group0-updated"}}
 
 	expandBase := server.ExpandRequest{}
-	expandBase = append(expandBase, [3]string{"test1", "source1", "database1/test"})
-	expandBase = append(expandBase, [3]string{"test1", "source1", "database2/test"})
+	expandBase = append(expandBase, [3]string{"test1", "source1", "database1/test/average"})
+	expandBase = append(expandBase, [3]string{"test1", "source1", "database2/test/average"})
 
 	execGroupHandle(test, "metricgroups", group, expandData, expandBase)
 }
