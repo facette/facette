@@ -189,9 +189,10 @@ func (server *Server) serveCollectionList(writer http.ResponseWriter, request *h
 	items = make(CollectionListResponse, 0)
 
 	for _, collection := range server.Library.Collections {
-		if request.FormValue("parent") != "" && (request.FormValue("parent") == "" &&
-			collection.Parent != nil || request.FormValue("parent") != "" &&
-			(collection.Parent == nil || collection.Parent.ID != request.FormValue("parent"))) {
+		if request.FormValue("parent") == "null" && collection.Parent != nil || request.FormValue("parent") != "" &&
+			request.FormValue("parent") != "null" && (collection.Parent == nil ||
+			collection.Parent.ID != request.FormValue("parent")) {
+
 			continue
 		}
 
