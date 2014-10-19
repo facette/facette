@@ -1190,7 +1190,7 @@ function adminGraphSetupTerminate() {
                     metricName = ($metric.data('value') && $metric.data('value').source.endsWith('groups/') ?
                         'group:' : '') + $metric.val();
 
-                    name = $entryActive && $entryActive.data('value').name || null;
+                    name = $entryActive && $entryActive.attr('data-series') || null;
 
                     $entry = adminGraphCreateSeries(name, {
                         name: name || metricName,
