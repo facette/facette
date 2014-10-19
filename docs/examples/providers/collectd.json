@@ -6,8 +6,8 @@
 	},
 
 	"filters": [
-		{ "action": "sieve", "target": "metric", "pattern": "/value/average$" },
-		{ "action": "rewrite", "target": "metric", "pattern": "/value/average$", "into": "/value" },
+		{ "action": "sieve", "target": "metric", "pattern": "/average$" },
+		{ "action": "rewrite", "target": "metric", "pattern": "/average$", "into": "" },
 		{ "action": "rewrite", "target": "metric", "pattern": "/", "into": "." },
 		{ "action": "rewrite", "target": "metric", "pattern": "^cpu-(\\d+)\\.cpu-(.+)\\.value$", "into": "cpu.$1.$2" },
 		{ "action": "rewrite", "target": "metric", "pattern": "^df-(.+)\\.df_complex-(.+)\\.value", "into": "df.$1.$2" },
