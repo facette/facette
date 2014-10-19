@@ -459,6 +459,7 @@ func makePlotsResponse(plotSeries map[string][]plot.Series, plotReq *PlotRequest
 		groupSeries := make([]plot.Series, 0)
 
 		seriesOptions := make(map[string]map[string]interface{})
+		seriesOptions[groupItem.Name] = groupItem.Options
 
 		for _, seriesItem := range groupItem.Series {
 			if _, ok := plotSeries[seriesItem.Name]; !ok {
