@@ -11,8 +11,10 @@ PREFIX ?= /usr/local
 
 UNAME := $(shell uname -s)
 
-BUILD_NAME = facette-$(shell $(GO) env GOOS)-$(shell $(GO) env GOARCH)
+GOOS ?= $(shell $(GO) env GOOS)
+GOARCH ?= $(shell $(GO) env GOARCH)
 
+BUILD_NAME = facette-$(GOOS)-$(GOARCH)
 BUILD_DIR = build/$(BUILD_NAME)
 
 GOPATH = $(realpath $(BUILD_DIR))
@@ -90,7 +92,7 @@ devel: build devel-static
 
 lint: lint-bin lint-static
 
-test: test-pkg test-server
+test: clean-test test-pkg test-server
 
 $(BUILD_DIR)/src/github.com/facette/facette:
 	@$(call mesg_start,main,Creating source symlink...)
@@ -339,7 +341,7 @@ $(TEST_DIR):
 
 $(TEST_PKG): $(TEST_DIR) $(BUILD_DIR)/src/github.com/facette/facette
 	@$(call mesg_start,test,Testing $@ package...)
-	@(cd $(TEST_DIR) && $(GO) test -c -i ../../../$@ && \
+	@(cd $(TEST_DIR) && $(GO) test -race -c -i ../../../$@ && \
 		(test ! -f ./$(@:pkg/%=%).test || ./$(@:pkg/%=%).test -test.v=true) && \
 		$(call mesg_ok) || $(call mesg_fail))
 
