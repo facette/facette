@@ -456,7 +456,7 @@ func makePlotsResponse(plotSeries map[string][]plot.Series, plotReq *PlotRequest
 	}
 
 	for _, groupItem := range graph.Groups {
-		groupSeries := make([]plot.Series, 0)
+		var groupSeries []plot.Series
 
 		seriesOptions := make(map[string]map[string]interface{})
 

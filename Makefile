@@ -130,7 +130,7 @@ install-bin: build-bin
 
 lint-bin: build-bin
 	@$(call mesg_start,lint,Checking sources with Golint...)
-	@$(GOLINT) $(GOLINT_ARGS) cmd pkg && $(call mesg_ok) || $(call mesg_fail)
+	@$(GOLINT) $(GOLINT_ARGS) cmd/... && $(GOLINT) $(GOLINT_ARGS) pkg/... && $(call mesg_ok) || $(call mesg_fail)
 
 # Documentation
 MAN_SRC = $(wildcard docs/man/*.[0-9].md)
