@@ -22,6 +22,7 @@ type rrdMetric struct {
 	Dataset  string
 	FilePath string
 	Step     time.Duration
+	Cf       string
 }
 
 // RRDConnector represents the main structure of the RRD connector.
@@ -101,7 +102,7 @@ func (connector *RRDConnector) GetPlots(query *plot.Query) ([]plot.Series, error
 			series.Name+"-def0",
 			connector.metrics[series.Source][series.Metric].FilePath,
 			connector.metrics[series.Source][series.Metric].Dataset,
-			"AVERAGE",
+			connector.metrics[series.Source][series.Metric].Cf,
 		)
 
 		graph.CDef(series.Name, series.Name+"-def0")
@@ -111,7 +112,7 @@ func (connector *RRDConnector) GetPlots(query *plot.Query) ([]plot.Series, error
 			series.Name+"-def0",
 			connector.metrics[series.Source][series.Metric].FilePath,
 			connector.metrics[series.Source][series.Metric].Dataset,
-			"AVERAGE",
+			connector.metrics[series.Source][series.Metric].Cf,
 		)
 
 		xport.CDef(series.Name, series.Name+"-def0")
@@ -209,7 +210,7 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan *catal
 		if cf, ok := info["rra.cf"].([]interface{}); ok {
 			for _, entry := range cf {
 				if name, ok := entry.(string); ok {
-					cfSet.Add(strings.ToLower(name))
+					cfSet.Add(name)
 				}
 			}
 		}
@@ -224,12 +225,13 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan *catal
 
 			for dsName := range indexes {
 				for _, cfName := range cfList {
-					metricFullName := metricName + "/" + dsName + "/" + cfName
+					metricFullName := metricName + "/" + dsName + "/" + strings.ToLower(cfName)
 
 					connector.metrics[sourceName][metricFullName] = &rrdMetric{
 						Dataset:  dsName,
 						FilePath: filePath,
 						Step:     time.Duration(info["step"].(uint)) * time.Second,
+						Cf:       cfName,
 					}
 
 					outputChan <- &catalog.Record{
