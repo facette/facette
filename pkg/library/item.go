@@ -24,7 +24,7 @@ type Item struct {
 
 func (item *Item) String() string {
 	return fmt.Sprintf(
-		"&Item{path:%q ID:%q Name:%q Description:%q Modified:%s}",
+		"Item{path:%q ID:%q Name:%q Description:%q Modified:%s}",
 		item.path,
 		item.ID,
 		item.Name,
