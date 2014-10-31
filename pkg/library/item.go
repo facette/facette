@@ -22,6 +22,17 @@ type Item struct {
 	Modified    time.Time `json:"-"`
 }
 
+func (item *Item) String() string {
+	return fmt.Sprintf(
+		"&Item{path:%q ID:%q Name:%q Description:%q Modified:%s}",
+		item.path,
+		item.ID,
+		item.Name,
+		item.Description,
+		item.Modified,
+	)
+}
+
 // GetItem returns the base structure of a library item.
 func (item *Item) GetItem() *Item {
 	return item
