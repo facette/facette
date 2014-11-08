@@ -3,14 +3,16 @@ package catalog
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/facette/facette/pkg/logger"
 )
 
 // Catalog represents the main structure of a catalog instance.
 type Catalog struct {
-	Origins    map[string]*Origin
 	RecordChan chan *Record
+	origins    map[string]*Origin
+	sync.RWMutex
 }
 
 // Record represents a catalog record.
@@ -31,13 +33,16 @@ func (r Record) String() string {
 // NewCatalog creates a new instance of catalog.
 func NewCatalog() *Catalog {
 	return &Catalog{
-		Origins:    make(map[string]*Origin),
 		RecordChan: make(chan *Record),
+		origins:    make(map[string]*Origin),
 	}
 }
 
 // Insert inserts a new record in the catalog.
-func (catalog *Catalog) Insert(record *Record) {
+func (c *Catalog) Insert(record *Record) {
+	c.Lock()
+	defer c.Unlock()
+
 	logger.Log(
 		logger.LevelDebug,
 		"catalog",
@@ -47,48 +52,95 @@ func (catalog *Catalog) Insert(record *Record) {
 		record.Origin,
 	)
 
-	if _, ok := catalog.Origins[record.Origin]; !ok {
-		catalog.Origins[record.Origin] = NewOrigin(
+	if _, ok := c.origins[record.Origin]; !ok {
+		c.origins[record.Origin] = NewOrigin(
 			record.Origin,
 			record.OriginalOrigin,
-			catalog,
+			c,
 		)
 	}
 
-	if _, ok := catalog.Origins[record.Origin].Sources[record.Source]; !ok {
-		catalog.Origins[record.Origin].Sources[record.Source] = NewSource(
+	if _, ok := c.origins[record.Origin].sources[record.Source]; !ok {
+		c.origins[record.Origin].sources[record.Source] = NewSource(
 			record.Source,
 			record.OriginalSource,
-			catalog.Origins[record.Origin],
+			c.origins[record.Origin],
 		)
 	}
 
-	if _, ok := catalog.Origins[record.Origin].Sources[record.Source].Metrics[record.Metric]; !ok {
-		catalog.Origins[record.Origin].Sources[record.Source].Metrics[record.Metric] = NewMetric(
+	if _, ok := c.origins[record.Origin].sources[record.Source].metrics[record.Metric]; !ok {
+		c.origins[record.Origin].sources[record.Source].metrics[record.Metric] = NewMetric(
 			record.Metric,
 			record.OriginalMetric,
-			catalog.Origins[record.Origin].Sources[record.Source],
+			c.origins[record.Origin].sources[record.Source],
 			record.Connector,
 		)
 	}
 }
 
-// GetMetric returns an existing metric entry based on its origin, source and name.
-func (catalog *Catalog) GetMetric(origin, source, name string) *Metric {
-	if _, ok := catalog.Origins[origin]; !ok {
-		return nil
-	} else if _, ok := catalog.Origins[origin].Sources[source]; !ok {
-		return nil
-	} else if _, ok := catalog.Origins[origin].Sources[source].Metrics[name]; !ok {
-		return nil
-	}
-
-	return catalog.Origins[origin].Sources[source].Metrics[name]
-}
-
 // Close closes a catalog instance.
-func (catalog *Catalog) Close() error {
-	close(catalog.RecordChan)
+func (c *Catalog) Close() error {
+	close(c.RecordChan)
 
 	return nil
+}
+
+// OriginExists returns whether an origin exists for the catalog based on its name.
+func (c *Catalog) OriginExists(name string) bool {
+	c.RLock()
+	defer c.RUnlock()
+
+	_, ok := c.origins[name]
+	return ok
+}
+
+// GetOrigin returns an existing origin entry based on its name.
+func (c *Catalog) GetOrigin(name string) (*Origin, error) {
+	c.RLock()
+	defer c.RUnlock()
+
+	if !c.OriginExists(name) {
+		return nil, fmt.Errorf("unknown origin `%s'", name)
+	}
+
+	return c.origins[name], nil
+}
+
+// GetOrigins returns a slice of origins.
+func (c *Catalog) GetOrigins() []*Origin {
+	c.RLock()
+	defer c.RUnlock()
+
+	items := make([]*Origin, 0)
+	for _, o := range c.origins {
+		items = append(items, o)
+	}
+
+	return items
+}
+
+// GetSource returns an existing source entry based on its origin and name.
+func (c *Catalog) GetSource(origin, name string) (*Source, error) {
+	c.RLock()
+	defer c.RUnlock()
+
+	o, err := c.GetOrigin(origin)
+	if err != nil {
+		return nil, err
+	}
+
+	return o.GetSource(name)
+}
+
+// GetMetric returns an existing metric entry based on its origin, source and name.
+func (c *Catalog) GetMetric(origin, source, name string) (*Metric, error) {
+	c.RLock()
+	defer c.RUnlock()
+
+	s, err := c.GetSource(origin, source)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.GetMetric(name)
 }

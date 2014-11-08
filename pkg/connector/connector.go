@@ -13,7 +13,7 @@ import (
 type Connector interface {
 	GetName() string
 	GetPlots(query *plot.Query) ([]plot.Series, error)
-	Refresh(string, chan *catalog.Record) error
+	Refresh(string, chan<- *catalog.Record) error
 }
 
 var (

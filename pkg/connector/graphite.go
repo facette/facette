@@ -163,7 +163,7 @@ func (connector *GraphiteConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 }
 
 // Refresh triggers a full connector data update.
-func (connector *GraphiteConnector) Refresh(originName string, outputChan chan *catalog.Record) error {
+func (connector *GraphiteConnector) Refresh(originName string, outputChan chan<- *catalog.Record) error {
 	var seriesList []string
 
 	httpTransport := &http.Transport{

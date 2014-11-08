@@ -34,67 +34,60 @@ type GroupEntry struct {
 
 // ExpandGroup expands a group returning a list of matching items.
 func (library *Library) ExpandGroup(name string, groupType int) []string {
-
 	item, err := library.GetItemByName(name, groupType)
 	if err != nil {
-		logger.Log(logger.LevelError, "library", "unknown item `%s': %s", name, err)
+		logger.Log(logger.LevelError, "library", "expand group: unknown item `%s': %s", name, err)
 		return make([]string, 0)
 	}
 
-	group := item.(*Group)
-
+	// Launch expansion goroutine
 	itemSet := set.New(set.ThreadSafe)
+	itemChan := make(chan [2]string)
 
-	for _, entry := range group.Entries {
+	go func(itemSet set.Interface, itemChan chan [2]string) {
 		var re *regexp.Regexp
 
-		if strings.HasPrefix(entry.Pattern, LibraryMatchPrefixRegexp) {
-			re = regexp.MustCompile(strings.TrimPrefix(entry.Pattern, LibraryMatchPrefixRegexp))
-		}
+		for entry := range itemChan {
+			if strings.HasPrefix(entry[0], LibraryMatchPrefixGlob) {
+				if ok, _ := path.Match(strings.TrimPrefix(entry[0], LibraryMatchPrefixGlob), entry[1]); !ok {
+					continue
+				}
+			} else if strings.HasPrefix(entry[0], LibraryMatchPrefixRegexp) {
+				re = regexp.MustCompile(strings.TrimPrefix(entry[0], LibraryMatchPrefixRegexp))
 
-		if _, ok := library.Catalog.Origins[entry.Origin]; !ok {
-			logger.Log(logger.LevelError, "library", "unknown group entry `%s'", entry.Origin)
+				if !re.MatchString(entry[1]) {
+					continue
+				}
+			} else if entry[0] != entry[1] {
+				continue
+			}
+
+			itemSet.Add(entry[1])
+		}
+	}(itemSet, itemChan)
+
+	// Parse group entries for patterns
+	group := item.(*Group)
+
+	for _, entry := range group.Entries {
+		origin, err := library.Catalog.GetOrigin(entry.Origin)
+		if err != nil {
+			logger.Log(logger.LevelError, "library", "%s", err)
 			continue
 		}
 
-		if groupType == LibraryItemSourceGroup {
-			for _, source := range library.Catalog.Origins[entry.Origin].Sources {
-				if strings.HasPrefix(entry.Pattern, LibraryMatchPrefixGlob) {
-					if ok, _ := path.Match(strings.TrimPrefix(entry.Pattern, LibraryMatchPrefixGlob),
-						source.Name); !ok {
-						continue
-					}
-				} else if strings.HasPrefix(entry.Pattern, LibraryMatchPrefixRegexp) {
-					if !re.MatchString(source.Name) {
-						continue
-					}
-				} else if entry.Pattern != source.Name {
-					continue
-				}
-
-				itemSet.Add(source.Name)
-			}
-		} else if groupType == LibraryItemMetricGroup {
-			for _, source := range library.Catalog.Origins[entry.Origin].Sources {
-				for _, metric := range source.Metrics {
-					if strings.HasPrefix(entry.Pattern, LibraryMatchPrefixGlob) {
-						if ok, _ := path.Match(strings.TrimPrefix(entry.Pattern, LibraryMatchPrefixGlob),
-							metric.Name); !ok {
-							continue
-						}
-					} else if strings.HasPrefix(entry.Pattern, LibraryMatchPrefixRegexp) {
-						if !re.MatchString(metric.Name) {
-							continue
-						}
-					} else if entry.Pattern != metric.Name {
-						continue
-					}
-
-					itemSet.Add(metric.Name)
+		for _, source := range origin.GetSources() {
+			if groupType == LibraryItemSourceGroup {
+				itemChan <- [2]string{entry.Pattern, source.Name}
+			} else if groupType == LibraryItemMetricGroup {
+				for _, metric := range source.GetMetrics() {
+					itemChan <- [2]string{entry.Pattern, metric.Name}
 				}
 			}
 		}
 	}
+
+	close(itemChan)
 
 	result := set.StringSlice(itemSet)
 	sort.Strings(result)

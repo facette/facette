@@ -162,7 +162,7 @@ func (connector *RRDConnector) GetPlots(query *plot.Query) ([]plot.Series, error
 }
 
 // Refresh triggers a full connector data update.
-func (connector *RRDConnector) Refresh(originName string, outputChan chan *catalog.Record) error {
+func (connector *RRDConnector) Refresh(originName string, outputChan chan<- *catalog.Record) error {
 	// Search for files and parse their path for source/metric pairs
 	walkFunc := func(filePath string, fileInfo os.FileInfo, err error) error {
 		var sourceName, metricName string

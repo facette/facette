@@ -195,7 +195,8 @@ func (server *Server) serveGroupExpand(writer http.ResponseWriter, request *http
 	for _, entry := range query {
 		item := ExpandRequest{}
 
-		if _, ok := server.Catalog.Origins[entry[0]]; !ok {
+		origin, err := server.Catalog.GetOrigin(entry[0])
+		if err != nil {
 			continue
 		}
 
@@ -204,7 +205,8 @@ func (server *Server) serveGroupExpand(writer http.ResponseWriter, request *http
 				strings.TrimPrefix(entry[1], library.LibraryGroupPrefix),
 				library.LibraryItemSourceGroup,
 			) {
-				if _, ok := server.Catalog.Origins[entry[0]].Sources[sourceName]; !ok {
+				source, err := origin.GetSource(sourceName)
+				if err != nil {
 					continue
 				}
 
@@ -213,14 +215,14 @@ func (server *Server) serveGroupExpand(writer http.ResponseWriter, request *http
 						strings.TrimPrefix(entry[2], library.LibraryGroupPrefix),
 						library.LibraryItemMetricGroup,
 					) {
-						if _, ok := server.Catalog.Origins[entry[0]].Sources[sourceName].Metrics[metricName]; !ok {
+						if !source.MetricExists(metricName) {
 							continue
 						}
 
 						item = append(item, [3]string{entry[0], sourceName, metricName})
 					}
 				} else {
-					if _, ok := server.Catalog.Origins[entry[0]].Sources[sourceName].Metrics[entry[2]]; !ok {
+					if !source.MetricExists(entry[2]) {
 						continue
 					}
 
@@ -228,7 +230,8 @@ func (server *Server) serveGroupExpand(writer http.ResponseWriter, request *http
 				}
 			}
 		} else if strings.HasPrefix(entry[2], library.LibraryGroupPrefix) {
-			if _, ok := server.Catalog.Origins[entry[0]].Sources[entry[1]]; !ok {
+			source, err := origin.GetSource(entry[1])
+			if err != nil {
 				continue
 			}
 
@@ -236,7 +239,7 @@ func (server *Server) serveGroupExpand(writer http.ResponseWriter, request *http
 				strings.TrimPrefix(entry[2], library.LibraryGroupPrefix),
 				library.LibraryItemMetricGroup,
 			) {
-				if _, ok := server.Catalog.Origins[entry[0]].Sources[entry[1]].Metrics[metricName]; !ok {
+				if !source.MetricExists(metricName) {
 					continue
 				}
 
