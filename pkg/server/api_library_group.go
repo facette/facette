@@ -211,8 +211,8 @@ func (server *Server) serveGroupExpand(writer http.ResponseWriter, request *http
 
 				if strings.HasPrefix(entry[2], library.LibraryGroupPrefix) {
 					for _, metricName := range server.Library.ExpandMetricGroup(
+						sourceName,
 						strings.TrimPrefix(entry[2], library.LibraryGroupPrefix),
-						source,
 					) {
 						if !source.MetricExists(metricName) {
 							continue
@@ -235,8 +235,8 @@ func (server *Server) serveGroupExpand(writer http.ResponseWriter, request *http
 			}
 
 			for _, metricName := range server.Library.ExpandMetricGroup(
+				entry[1],
 				strings.TrimPrefix(entry[2], library.LibraryGroupPrefix),
-				source,
 			) {
 				if !source.MetricExists(metricName) {
 					continue

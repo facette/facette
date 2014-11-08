@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"sync"
 
-	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
@@ -35,29 +35,33 @@ type GroupEntry struct {
 
 // ExpandSourceGroup expands a source group returning a list of matching items.
 func (library *Library) ExpandSourceGroup(name string) []string {
-	return library.expandGroup(name, LibraryItemSourceGroup, nil)
+	return library.expandGroup(name, LibraryItemSourceGroup, "")
 }
 
 // ExpandMetricGroup expands a metric group returning a list of matching items.
-func (library *Library) ExpandMetricGroup(name string, source *catalog.Source) []string {
-	return library.expandGroup(name, LibraryItemMetricGroup, source)
+func (library *Library) ExpandMetricGroup(sourceName, name string) []string {
+	return library.expandGroup(name, LibraryItemMetricGroup, sourceName)
 }
 
-func (library *Library) expandGroup(name string, groupType int, sourceFilter *catalog.Source) []string {
+func (library *Library) expandGroup(name string, groupType int, sourceName string) []string {
 	item, err := library.GetItemByName(name, groupType)
 	if err != nil {
-		logger.Log(logger.LevelError, "library", "expand group: unknown item `%s': %s", name, err)
-		return make([]string, 0)
+		logger.Log(logger.LevelError, "library", "expand group: unknown group `%s': %s", name, err)
+		return []string{}
 	}
 
 	// Launch expansion goroutine
 	itemSet := set.New(set.ThreadSafe)
 	itemChan := make(chan [2]string)
+	itemWg := &sync.WaitGroup{}
 
-	go func(itemSet set.Interface, itemChan chan [2]string) {
+	go func(itemSet set.Interface, itemChan chan [2]string, itemWg *sync.WaitGroup) {
 		var re *regexp.Regexp
 
+		itemWg.Add(1)
+
 		for entry := range itemChan {
+
 			if strings.HasPrefix(entry[0], LibraryMatchPrefixGlob) {
 				if ok, _ := path.Match(strings.TrimPrefix(entry[0], LibraryMatchPrefixGlob), entry[1]); !ok {
 					continue
@@ -74,30 +78,40 @@ func (library *Library) expandGroup(name string, groupType int, sourceFilter *ca
 
 			itemSet.Add(entry[1])
 		}
-	}(itemSet, itemChan)
+
+		itemWg.Done()
+	}(itemSet, itemChan, itemWg)
 
 	// Parse group entries for patterns
 	group := item.(*Group)
 
 	for _, entry := range group.Entries {
-		origin, err := library.Catalog.GetOrigin(entry.Origin)
-		if err != nil {
-			logger.Log(logger.LevelError, "library", "%s", err)
-			continue
-		}
+		if groupType == LibraryItemSourceGroup {
+			origin, err := library.Catalog.GetOrigin(entry.Origin)
+			if err != nil {
+				logger.Log(logger.LevelError, "library", "%s", err)
+				continue
+			}
 
-		for _, source := range origin.GetSources() {
-			if groupType == LibraryItemSourceGroup {
+			for _, source := range origin.GetSources() {
 				itemChan <- [2]string{entry.Pattern, source.Name}
-			} else if groupType == LibraryItemMetricGroup && source == sourceFilter {
-				for _, metric := range source.GetMetrics() {
-					itemChan <- [2]string{entry.Pattern, metric.Name}
-				}
+			}
+		} else {
+			source, err := library.Catalog.GetSource(entry.Origin, sourceName)
+			if err != nil {
+				logger.Log(logger.LevelError, "library", "%s", err)
+				continue
+			}
+
+			for _, metric := range source.GetMetrics() {
+				itemChan <- [2]string{entry.Pattern, metric.Name}
 			}
 		}
 	}
 
 	close(itemChan)
+
+	itemWg.Wait()
 
 	result := set.StringSlice(itemSet)
 	sort.Strings(result)
