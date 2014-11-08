@@ -284,9 +284,8 @@ func (server *Server) prepareProviderQueries(plotReq *PlotRequest,
 
 			// Expand source groups
 			if strings.HasPrefix(seriesItem.Source, library.LibraryGroupPrefix) {
-				seriesSources = server.Library.ExpandGroup(
+				seriesSources = server.Library.ExpandSourceGroup(
 					strings.TrimPrefix(seriesItem.Source, library.LibraryGroupPrefix),
-					library.LibraryItemSourceGroup,
 				)
 			} else {
 				seriesSources = []string{seriesItem.Source}
@@ -298,9 +297,15 @@ func (server *Server) prepareProviderQueries(plotReq *PlotRequest,
 
 				// Expand metric groups
 				if strings.HasPrefix(seriesItem.Metric, library.LibraryGroupPrefix) {
-					seriesMetrics = server.Library.ExpandGroup(
+					source, err := server.Catalog.GetSource(seriesItem.Origin, sourceItem)
+					if err != nil {
+						logger.Log(logger.LevelWarning, "server", "%s", err)
+						continue
+					}
+
+					seriesMetrics = server.Library.ExpandMetricGroup(
 						strings.TrimPrefix(seriesItem.Metric, library.LibraryGroupPrefix),
-						library.LibraryItemMetricGroup,
+						source,
 					)
 				} else {
 					seriesMetrics = []string{seriesItem.Metric}
