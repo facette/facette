@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/thirdparty/github.com/fatih/set"
 )
@@ -32,8 +33,17 @@ type GroupEntry struct {
 	Origin  string `json:"origin"`
 }
 
-// ExpandGroup expands a group returning a list of matching items.
-func (library *Library) ExpandGroup(name string, groupType int) []string {
+// ExpandSourceGroup expands a source group returning a list of matching items.
+func (library *Library) ExpandSourceGroup(name string) []string {
+	return library.expandGroup(name, LibraryItemSourceGroup, nil)
+}
+
+// ExpandMetricGroup expands a metric group returning a list of matching items.
+func (library *Library) ExpandMetricGroup(name string, source *catalog.Source) []string {
+	return library.expandGroup(name, LibraryItemMetricGroup, source)
+}
+
+func (library *Library) expandGroup(name string, groupType int, sourceFilter *catalog.Source) []string {
 	item, err := library.GetItemByName(name, groupType)
 	if err != nil {
 		logger.Log(logger.LevelError, "library", "expand group: unknown item `%s': %s", name, err)
@@ -79,7 +89,7 @@ func (library *Library) ExpandGroup(name string, groupType int) []string {
 		for _, source := range origin.GetSources() {
 			if groupType == LibraryItemSourceGroup {
 				itemChan <- [2]string{entry.Pattern, source.Name}
-			} else if groupType == LibraryItemMetricGroup {
+			} else if groupType == LibraryItemMetricGroup && source == sourceFilter {
 				for _, metric := range source.GetMetrics() {
 					itemChan <- [2]string{entry.Pattern, metric.Name}
 				}

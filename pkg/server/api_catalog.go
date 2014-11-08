@@ -230,9 +230,8 @@ func (server *Server) serveMetricList(writer http.ResponseWriter, request *http.
 	sourceSet := set.New(set.ThreadSafe)
 
 	if strings.HasPrefix(sourceName, library.LibraryGroupPrefix) {
-		for _, entryName := range server.Library.ExpandGroup(
+		for _, entryName := range server.Library.ExpandSourceGroup(
 			strings.TrimPrefix(sourceName, library.LibraryGroupPrefix),
-			library.LibraryItemSourceGroup,
 		) {
 			sourceSet.Add(entryName)
 		}
