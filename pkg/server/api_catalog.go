@@ -29,17 +29,17 @@ func (server *Server) serveCatalog(writer http.ResponseWriter, request *http.Req
 func (server *Server) serveFullCatalog(writer http.ResponseWriter, request *http.Request) {
 	catalog := make(map[string]map[string][]string)
 
-	for originName, origin := range server.Catalog.Origins {
-		catalog[originName] = make(map[string][]string)
+	for _, origin := range server.Catalog.GetOrigins() {
+		catalog[origin.Name] = make(map[string][]string)
 
-		for sourceName, sources := range origin.Sources {
-			catalog[originName][sourceName] = make([]string, 0)
+		for _, source := range origin.GetSources() {
+			catalog[origin.Name][source.Name] = make([]string, 0)
 
-			for metricName := range sources.Metrics {
-				catalog[originName][sourceName] = append(catalog[originName][sourceName], metricName)
+			for _, metric := range source.GetMetrics() {
+				catalog[origin.Name][source.Name] = append(catalog[origin.Name][source.Name], metric.Name)
 			}
 
-			sort.Strings(catalog[originName][sourceName])
+			sort.Strings(catalog[origin.Name][source.Name])
 		}
 	}
 
@@ -47,9 +47,9 @@ func (server *Server) serveFullCatalog(writer http.ResponseWriter, request *http
 }
 
 func (server *Server) serveOrigin(writer http.ResponseWriter, request *http.Request) {
-	originName := strings.TrimPrefix(request.URL.Path, urlCatalogPath+"origins/")
+	name := strings.TrimPrefix(request.URL.Path, urlCatalogPath+"origins/")
 
-	if originName == "" {
+	if name == "" {
 		server.serveOriginList(writer, request)
 		return
 	}
@@ -57,19 +57,19 @@ func (server *Server) serveOrigin(writer http.ResponseWriter, request *http.Requ
 	if response, status := server.parseShowRequest(writer, request); status != http.StatusOK {
 		server.serveResponse(writer, response, status)
 		return
-	} else if _, ok := server.Catalog.Origins[originName]; !ok {
+	} else if !server.Catalog.OriginExists(name) {
 		server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
 		return
 	}
 
-	connectorType, ok := server.Config.Providers[originName].Connector["type"].(string)
+	connectorType, ok := server.Config.Providers[name].Connector["type"].(string)
 	if !ok {
 		server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 		return
 	}
 
 	response := OriginResponse{
-		Name:      originName,
+		Name:      name,
 		Connector: connectorType,
 	}
 
@@ -85,13 +85,10 @@ func (server *Server) serveOriginList(writer http.ResponseWriter, request *http.
 	}
 
 	originSet := set.New(set.ThreadSafe)
-
-	for _, origin := range server.Catalog.Origins {
-		if request.FormValue("filter") != "" && !utils.FilterMatch(request.FormValue("filter"), origin.Name) {
-			continue
+	for _, origin := range server.Catalog.GetOrigins() {
+		if request.FormValue("filter") == "" || utils.FilterMatch(request.FormValue("filter"), origin.Name) {
+			originSet.Add(origin.Name)
 		}
-
-		originSet.Add(origin.Name)
 	}
 
 	response := &listResponse{
@@ -106,9 +103,9 @@ func (server *Server) serveOriginList(writer http.ResponseWriter, request *http.
 }
 
 func (server *Server) serveSource(writer http.ResponseWriter, request *http.Request) {
-	sourceName := strings.TrimPrefix(request.URL.Path, urlCatalogPath+"sources/")
+	name := strings.TrimPrefix(request.URL.Path, urlCatalogPath+"sources/")
 
-	if sourceName == "" {
+	if name == "" {
 		server.serveSourceList(writer, request)
 		return
 	} else if response, status := server.parseShowRequest(writer, request); status != http.StatusOK {
@@ -117,9 +114,8 @@ func (server *Server) serveSource(writer http.ResponseWriter, request *http.Requ
 	}
 
 	originSet := set.New(set.ThreadSafe)
-
-	for _, origin := range server.Catalog.Origins {
-		if _, ok := origin.Sources[sourceName]; ok {
+	for _, origin := range server.Catalog.GetOrigins() {
+		if origin.SourceExists(name) {
 			originSet.Add(origin.Name)
 		}
 	}
@@ -133,7 +129,7 @@ func (server *Server) serveSource(writer http.ResponseWriter, request *http.Requ
 	sort.Strings(origins)
 
 	response := SourceResponse{
-		Name:    sourceName,
+		Name:    name,
 		Origins: origins,
 	}
 
@@ -152,17 +148,17 @@ func (server *Server) serveSourceList(writer http.ResponseWriter, request *http.
 
 	sourceSet := set.New(set.ThreadSafe)
 
-	for _, origin := range server.Catalog.Origins {
+	for _, origin := range server.Catalog.GetOrigins() {
 		if originName != "" && origin.Name != originName {
 			continue
 		}
 
-		for key := range origin.Sources {
-			if request.FormValue("filter") != "" && !utils.FilterMatch(request.FormValue("filter"), key) {
+		for _, source := range origin.GetSources() {
+			if request.FormValue("filter") != "" && !utils.FilterMatch(request.FormValue("filter"), source.Name) {
 				continue
 			}
 
-			sourceSet.Add(key)
+			sourceSet.Add(source.Name)
 		}
 	}
 
@@ -191,9 +187,9 @@ func (server *Server) serveMetric(writer http.ResponseWriter, request *http.Requ
 	originSet := set.New(set.ThreadSafe)
 	sourceSet := set.New(set.ThreadSafe)
 
-	for _, origin := range server.Catalog.Origins {
-		for _, source := range origin.Sources {
-			if _, ok := source.Metrics[metricName]; ok {
+	for _, origin := range server.Catalog.GetOrigins() {
+		for _, source := range origin.GetSources() {
+			if source.MetricExists(metricName) {
 				originSet.Add(origin.Name)
 				sourceSet.Add(source.Name)
 			}
@@ -246,22 +242,22 @@ func (server *Server) serveMetricList(writer http.ResponseWriter, request *http.
 
 	metricSet := set.New(set.ThreadSafe)
 
-	for _, origin := range server.Catalog.Origins {
+	for _, origin := range server.Catalog.GetOrigins() {
 		if originName != "" && origin.Name != originName {
 			continue
 		}
 
-		for _, source := range origin.Sources {
+		for _, source := range origin.GetSources() {
 			if sourceName != "" && sourceSet.IsEmpty() || !sourceSet.IsEmpty() && !sourceSet.Has(source.Name) {
 				continue
 			}
 
-			for key := range source.Metrics {
-				if request.FormValue("filter") != "" && !utils.FilterMatch(request.FormValue("filter"), key) {
+			for _, metric := range source.GetMetrics() {
+				if request.FormValue("filter") != "" && !utils.FilterMatch(request.FormValue("filter"), metric.Name) {
 					continue
 				}
 
-				metricSet.Add(key)
+				metricSet.Add(metric.Name)
 			}
 		}
 	}

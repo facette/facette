@@ -182,7 +182,7 @@ func (connector *FacetteConnector) GetPlots(query *plot.Query) ([]plot.Series, e
 }
 
 // Refresh triggers a full connector data update.
-func (connector *FacetteConnector) Refresh(originName string, outputChan chan *catalog.Record) error {
+func (connector *FacetteConnector) Refresh(originName string, outputChan chan<- *catalog.Record) error {
 	httpTransport := &http.Transport{
 		Dial: (&net.Dialer{
 			// Enable dual IPv4/IPv6 stack connectivity:

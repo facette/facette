@@ -45,12 +45,12 @@ func (server *Server) getStats(writer http.ResponseWriter, request *http.Request
 	sourceSet := set.New(set.ThreadSafe)
 	metricSet := set.New(set.ThreadSafe)
 
-	for _, origin := range server.Catalog.Origins {
-		for key, source := range origin.Sources {
-			sourceSet.Add(key)
+	for _, origin := range server.Catalog.GetOrigins() {
+		for _, source := range origin.GetSources() {
+			sourceSet.Add(source.Name)
 
-			for key := range source.Metrics {
-				metricSet.Add(key)
+			for _, metric := range source.GetMetrics() {
+				metricSet.Add(metric.Name)
 			}
 		}
 	}
@@ -67,7 +67,7 @@ func (server *Server) getStats(writer http.ResponseWriter, request *http.Request
 	}
 
 	return &statsResponse{
-		Origins:      len(server.Catalog.Origins),
+		Origins:      len(server.Catalog.GetOrigins()),
 		Sources:      sourceSet.Size(),
 		Metrics:      metricSet.Size(),
 		Graphs:       len(server.Library.Graphs),

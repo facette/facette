@@ -282,12 +282,6 @@ func (server *Server) prepareProviderQueries(plotReq *PlotRequest,
 				return nil, os.ErrNotExist
 			}
 
-			// Check for unknown origins
-			if _, ok := server.Catalog.Origins[seriesItem.Origin]; !ok {
-				logger.Log(logger.LevelWarning, "server", "unknown series origin `%s'", seriesItem.Origin)
-				return nil, os.ErrNotExist
-			}
-
 			// Expand source groups
 			if strings.HasPrefix(seriesItem.Source, library.LibraryGroupPrefix) {
 				seriesSources = server.Library.ExpandGroup(
@@ -314,16 +308,14 @@ func (server *Server) prepareProviderQueries(plotReq *PlotRequest,
 
 				for _, metricItem := range seriesMetrics {
 					// Get series metric
-					metric := server.Catalog.GetMetric(seriesItem.Origin, sourceItem, metricItem)
-					if metric == nil {
-						logger.Log(logger.LevelWarning, "server", "unknown metric `%s' for source `%s' (origin: %s)",
-							metricItem, sourceItem, seriesItem.Origin)
-
+					metric, err := server.Catalog.GetMetric(seriesItem.Origin, sourceItem, metricItem)
+					if err != nil {
+						logger.Log(logger.LevelWarning, "server", "%s", err)
 						continue
 					}
 
 					// Get provider name
-					providerName := metric.Connector.(connector.Connector).GetName()
+					providerName := metric.GetConnector().(connector.Connector).GetName()
 
 					// Initialize provider query if needed
 					if _, ok := providerQueries[providerName]; !ok {
@@ -335,7 +327,7 @@ func (server *Server) prepareProviderQueries(plotReq *PlotRequest,
 								Series:    make([]plot.QuerySeries, 0),
 							},
 							queryMap:  make([]providerQueryMap, 0),
-							connector: metric.Connector.(connector.Connector),
+							connector: metric.GetConnector().(connector.Connector),
 						}
 					}
 
@@ -344,8 +336,8 @@ func (server *Server) prepareProviderQueries(plotReq *PlotRequest,
 						providerQueries[providerName].query.Series,
 						plot.QuerySeries{
 							Name:   fmt.Sprintf("series%d", len(providerQueries[providerName].query.Series)),
-							Origin: metric.Source.Origin.OriginalName,
-							Source: metric.Source.OriginalName,
+							Origin: metric.GetSource().GetOrigin().OriginalName,
+							Source: metric.GetSource().OriginalName,
 							Metric: metric.OriginalName,
 						},
 					)
@@ -355,7 +347,7 @@ func (server *Server) prepareProviderQueries(plotReq *PlotRequest,
 						providerQueries[providerName].queryMap,
 						providerQueryMap{
 							seriesName: seriesItem.Name,
-							sourceName: metric.Source.Name,
+							sourceName: metric.GetSource().Name,
 							metricName: metric.Name,
 						},
 					)

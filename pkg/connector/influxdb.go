@@ -137,7 +137,7 @@ func (connector *InfluxDBConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 }
 
 // Refresh triggers a full connector data update.
-func (connector *InfluxDBConnector) Refresh(originName string, outputChan chan *catalog.Record) error {
+func (connector *InfluxDBConnector) Refresh(originName string, outputChan chan<- *catalog.Record) error {
 	seriesList, err := connector.client.Query("select * from /.*/ limit 1")
 	if err != nil {
 		return fmt.Errorf("influxdb[%s]: unable to fetch series list: %s", connector.name, err)

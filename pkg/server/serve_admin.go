@@ -185,8 +185,8 @@ func (server *Server) serveAdminGroup(writer http.ResponseWriter, request *http.
 	if data.Path != "" && (data.Path == "add" || server.Library.ItemExists(data.Path, groupType)) {
 		tmplFile = "group_edit.html"
 
-		for originName := range server.Catalog.Origins {
-			data.Origins = append(data.Origins, originName)
+		for _, origin := range server.Catalog.GetOrigins() {
+			data.Origins = append(data.Origins, origin.Name)
 		}
 	} else if data.Path == "" {
 		tmplFile = "group_list.html"
