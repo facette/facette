@@ -1,8 +1,8 @@
 Index: facette/Makefile
 ===================================================================
---- facette.orig/Makefile	2014-08-02 10:04:38.076997816 +0200
-+++ facette/Makefile	2014-08-02 10:04:38.072997626 +0200
-@@ -68,9 +68,7 @@
+--- facette.orig/Makefile	2014-11-16 12:46:35.548306293 +0100
++++ facette/Makefile	2014-11-16 12:46:35.544306103 +0100
+@@ -71,9 +71,7 @@
  	fi
  
  jshint:
@@ -13,7 +13,7 @@ Index: facette/Makefile
  
  clean: clean-bin clean-doc clean-static clean-test clean-dist
  	@$(call mesg_start,clean,Cleaning source symlink...)
-@@ -324,9 +322,7 @@
+@@ -327,9 +325,7 @@
  	done) && $(call mesg_ok) || $(call mesg_fail)
  
  lint-static: jshint $(SCRIPT_OUTPUT)

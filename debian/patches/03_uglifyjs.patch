@@ -1,8 +1,8 @@
 Index: facette/Makefile
 ===================================================================
---- facette.orig/Makefile	2014-08-02 10:04:45.317342623 +0200
-+++ facette/Makefile	2014-08-02 10:04:45.313342434 +0200
-@@ -43,7 +43,7 @@
+--- facette.orig/Makefile	2014-11-16 12:46:40.584545502 +0100
++++ facette/Makefile	2014-11-16 12:46:40.580545314 +0100
+@@ -46,7 +46,7 @@
  PANDOC_ARGS = --standalone --to man
  
  UGLIFYJS ?= uglifyjs
