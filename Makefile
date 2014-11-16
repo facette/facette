@@ -269,7 +269,7 @@ $(STYLE_OUTPUT): lessc $(STYLE_SRC)
 	@install -d -m 0755 $(BUILD_DIR)/static && cat $(STYLE_SRC) >$(STYLE_OUTPUT:.css=.src.css) && \
 		$(call mesg_ok) || $(call mesg_fail)
 	@$(call mesg_start,static,Packing $(notdir $(STYLE_OUTPUT:.css=.src.css)) file...)
-	@$(LESSC) $(LESSC_ARGS) --yui-compress $(STYLE_OUTPUT:.css=.src.css) >$(STYLE_OUTPUT) && \
+	@$(LESSC) $(LESSC_ARGS) --compress $(STYLE_OUTPUT:.css=.src.css) >$(STYLE_OUTPUT) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 $(STYLE_PRINT_OUTPUT): lessc $(STYLE_PRINT_SRC)
@@ -277,7 +277,7 @@ $(STYLE_PRINT_OUTPUT): lessc $(STYLE_PRINT_SRC)
 	@install -d -m 0755 $(BUILD_DIR)/static && cat $(STYLE_PRINT_SRC) >$(STYLE_PRINT_OUTPUT:.css=.src.css) && \
 		$(call mesg_ok) || $(call mesg_fail)
 	@$(call mesg_start,static,Packing $(notdir $(STYLE_PRINT_OUTPUT:.css=.src.css)) file...)
-	@$(LESSC) $(LESSC_ARGS) --yui-compress $(STYLE_PRINT_OUTPUT:.css=.src.css) >$(STYLE_PRINT_OUTPUT) && \
+	@$(LESSC) $(LESSC_ARGS) --compress $(STYLE_PRINT_OUTPUT:.css=.src.css) >$(STYLE_PRINT_OUTPUT) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 $(STYLE_EXTRA_OUTPUT): $(STYLE_EXTRA)
