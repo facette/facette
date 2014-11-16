@@ -45,8 +45,8 @@ function adminCollectionGetData() {
             value;
 
         options = {
-            title: $title.val() || $title.attr('placeholder'),
-            range: $range.val() || $range.attr('placeholder'),
+            title: $title.val() || null,
+            range: $range.val() || null,
             constants: $item.find('input[name=graph-constants]').val(),
             percentiles: $item.find('input[name=graph-percentiles]').val(),
             enabled: $item.find('input[name=graph-shown]').is(':checked')

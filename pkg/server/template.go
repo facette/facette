@@ -64,7 +64,7 @@ func templateDumpMap(x map[string]interface{}) string {
 	var chunks []string
 
 	for key, value := range x {
-		if value == "" {
+		if value == "" || value == nil {
 			continue
 		}
 
@@ -75,10 +75,18 @@ func templateDumpMap(x map[string]interface{}) string {
 				continue
 			}
 
-			valueString := make([]string, valueLength)
+			valueString := make([]string, 0)
 
-			for index, entry := range value.([]interface{}) {
-				valueString[index] = fmt.Sprintf("%v", entry)
+			for _, entry := range value.([]interface{}) {
+				if entry == "" || entry == nil {
+					continue
+				}
+
+				valueString = append(valueString, fmt.Sprintf("%v", entry))
+			}
+
+			if len(valueString) == 0 {
+				continue
 			}
 
 			chunks = append(chunks, fmt.Sprintf("%s: %v", key, strings.Join(valueString, ", ")))

@@ -349,11 +349,9 @@ function graphDraw(graph, postpone, delay, preview) {
 
                     graph.children('.graphctrl').remove();
                 } else {
-                    if (graphOpts.title) {
-                        highchartOpts.title = {
-                            text: graphOpts.title
-                        };
-                    }
+                    highchartOpts.title = {
+                        text: graphOpts.title || data.name
+                    };
 
                     highchartOpts.subtitle = {
                         text: startTime.format(TIME_DISPLAY) + ' — ' + endTime.format(TIME_DISPLAY)
