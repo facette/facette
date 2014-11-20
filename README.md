@@ -46,4 +46,4 @@ To make the things easier, we will ask for the following:
 [2]: http://graphite.readthedocs.org/
 [3]: https://github.com/facette/facette
 [4]: http://opensource.org/licenses/BSD-3-Clause
-[5]: https://influxdb.org/
+[5]: https://influxdb.com/
