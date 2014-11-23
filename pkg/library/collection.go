@@ -16,6 +16,17 @@ type Collection struct {
 	Children []*Collection          `json:"-"`
 }
 
+// IndexOfChild returns the index of a child in the children list of `-1' if not found.
+func (collection *Collection) IndexOfChild(id string) int {
+	for index, entry := range collection.Children {
+		if entry.ID == id {
+			return index
+		}
+	}
+
+	return -1
+}
+
 // CollectionEntry represents a collection entry.
 type CollectionEntry struct {
 	ID      string                 `json:"id"`
