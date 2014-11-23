@@ -101,6 +101,22 @@ func (server *Server) serveBrowseCollection(writer http.ResponseWriter, request 
 		data.Collection.Parent = "null"
 	}
 
+	// Retrieve missing titles from graphs names
+	for _, entry := range data.Collection.Collection.Entries {
+		if title, ok := entry.Options["title"]; !ok || title == nil {
+			item, err := server.Library.GetItem(entry.ID, library.LibraryItemGraph)
+			if err != nil {
+				continue
+			}
+
+			if entry.Options == nil {
+				entry.Options = make(map[string]interface{})
+			}
+
+			entry.Options["title"] = item.(*library.Graph).Name
+		}
+	}
+
 	return server.execTemplate(
 		writer,
 		http.StatusOK,
