@@ -93,28 +93,12 @@ func (server *Server) serveBrowseCollection(writer http.ResponseWriter, request 
 		return err
 	}
 
-	data.Collection.Collection = server.Library.FilterCollection(item.(*library.Collection), request.FormValue("q"))
+	data.Collection.Collection = server.Library.PrepareCollection(item.(*library.Collection), request.FormValue("q"))
 
 	if data.Collection.Collection.Parent != nil {
 		data.Collection.Parent = data.Collection.Collection.Parent.ID
 	} else {
 		data.Collection.Parent = "null"
-	}
-
-	// Retrieve missing titles from graphs names
-	for _, entry := range data.Collection.Collection.Entries {
-		if title, ok := entry.Options["title"]; !ok || title == nil {
-			item, err := server.Library.GetItem(entry.ID, library.LibraryItemGraph)
-			if err != nil {
-				continue
-			}
-
-			if entry.Options == nil {
-				entry.Options = make(map[string]interface{})
-			}
-
-			entry.Options["title"] = item.(*library.Graph).Name
-		}
 	}
 
 	return server.execTemplate(

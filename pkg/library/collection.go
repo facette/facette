@@ -33,8 +33,8 @@ type CollectionEntry struct {
 	Options map[string]interface{} `json:"options"`
 }
 
-// FilterCollection filters collection entries by graphs titles and enable state.
-func (library *Library) FilterCollection(collection *Collection, filter string) *Collection {
+// PrepareCollection applies options fallback values then filters collection entries by graphs titles and state.
+func (library *Library) PrepareCollection(collection *Collection, filter string) *Collection {
 	collectionTemp := &Collection{}
 	*collectionTemp = *collection
 	collectionTemp.Entries = nil
@@ -42,6 +42,17 @@ func (library *Library) FilterCollection(collection *Collection, filter string) 
 	refreshInterval, _ := config.GetInt(collectionTemp.Options, "refresh_interval", false)
 
 	for _, entry := range collection.Entries {
+		// Retrieve missing title from graph name if none provided
+		if title, ok := entry.Options["title"]; !ok || title == nil {
+			item, err := library.GetItem(entry.ID, LibraryItemGraph)
+			if err != nil {
+				continue
+			}
+
+			entry.Options["title"] = item.(*Graph).Name
+		}
+
+		// Get global refresh interval if none provided
 		if refreshInterval > 0 {
 			if _, err := config.GetInt(entry.Options, "refresh_interval", true); err != nil {
 				entry.Options["refresh_interval"] = refreshInterval
