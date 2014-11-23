@@ -3,10 +3,12 @@
         "labl_clone": "Clone Collection",
         "labl_collection_name": "Collection Name:",
         "labl_delete": "Delete Collection",
+        "labl_refresh_interval": "Refresh Interval (in seconds):",
         "mesg_delete": "You are about to delete “__name__” collection. This action can’t be undone.",
         "mesg_delete_fail": "Unable to delete the collection!",
         "mesg_exists": "A collection with the same name already exists!",
         "mesg_graph_missing": "You must at least add one graph!",
+        "mesg_invalid_refresh_interval": "Provided refresh interval is invalid!",
         "mesg_load_nomatch": "Your search doesn’t match any collection",
         "mesg_none": "No collection found",
         "mesg_save_fail": "Unable to save collection!"
