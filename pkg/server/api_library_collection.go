@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"reflect"
 	"strings"
 	"time"
 
@@ -108,12 +107,15 @@ func (server *Server) serveCollection(writer http.ResponseWriter, request *http.
 
 		// Update parent relation
 		if item, _ := server.Library.GetItem(collectionTemp.Parent, library.LibraryItemCollection); item != nil {
-			collection := item.(*library.Collection)
+			parent := item.(*library.Collection)
 
 			// Register parent relation
-			collectionTemp.Collection.Parent = collection
-			collectionTemp.Collection.ParentID = collectionTemp.Collection.Parent.ID
-			collection.Children = append(collection.Children, collectionTemp.Collection)
+			collectionTemp.Collection.Parent = parent
+			collectionTemp.Collection.ParentID = parent.ID
+
+			if collectionTemp.Collection.ID == "" || parent.IndexOfChild(collectionTemp.Collection.ID) == -1 {
+				parent.Children = append(parent.Children, collectionTemp.Collection)
+			}
 		} else {
 			// Remove existing parent relation
 			if item, _ := server.Library.GetItem(collectionTemp.Collection.ID,
@@ -121,12 +123,9 @@ func (server *Server) serveCollection(writer http.ResponseWriter, request *http.
 				collection := item.(*library.Collection)
 
 				if collection.Parent != nil {
-					for index, child := range collection.Parent.Children {
-						if reflect.DeepEqual(child, collection) {
-							collection.Parent.Children = append(collection.Parent.Children[:index],
-								collection.Parent.Children[index+1:]...)
-							break
-						}
+					if index := collection.Parent.IndexOfChild(collectionTemp.Collection.ID); index != -1 {
+						collection.Parent.Children = append(collection.Parent.Children[:index],
+							collection.Parent.Children[index+1:]...)
 					}
 				}
 			}
