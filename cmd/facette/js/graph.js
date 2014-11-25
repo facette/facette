@@ -106,7 +106,8 @@ function graphDraw(graph, postpone, delay, preview) {
                     break;
 
                 case 'string':
-                    $.map(graphOpts.constants.split(','), function (x) { return parseFloat(x.trim()); });
+                    graphOpts.constants = $.map(graphOpts.constants.split(','),
+                        function (x) { return parseFloat(x.trim()); });
                     break;
                 }
             }
