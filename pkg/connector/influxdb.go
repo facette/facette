@@ -5,6 +5,7 @@ package connector
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -97,8 +98,8 @@ func (connector *InfluxDBConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 	metricsNames := make([]string, seriesLength)
 	columnsNames := make([]string, seriesLength)
 	for i, series := range query.Series {
-		metricsNames[i] = connector.series[series.Source][series.Metric][0]
-		columnsNames[i] = connector.series[series.Source][series.Metric][1]
+		metricsNames[i] = strconv.Quote(connector.series[series.Source][series.Metric][0])
+		columnsNames[i] = strconv.Quote(connector.series[series.Source][series.Metric][1])
 	}
 
 	influxdbQuery := fmt.Sprintf(
