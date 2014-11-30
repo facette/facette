@@ -735,8 +735,11 @@ function graphHandleQueue(force) {
                     }
                 }
 
-                if (count == GRAPH_DRAW_QUEUE[i].length)
+                if (count == GRAPH_DRAW_QUEUE[i].length) {
+                    GRAPH_DRAW_PARENTS.splice(i, 1);
+                    GRAPH_DRAW_QUEUE.splice(i, 1);
                     $(GRAPH_DRAW_PARENTS[i]).off('scroll', graphHandleQueue);
+                }
             }
 
             $.when.apply(null, $deferreds).then(function () {
