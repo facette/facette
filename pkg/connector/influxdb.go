@@ -117,21 +117,42 @@ func (connector *InfluxDBConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 
 	resultSeries := make([]plot.Series, 0)
 
-	for i, influxdbSeries := range queryResult {
-		series := plot.Series{
-			Name:    query.Series[i].Name,
-			Summary: make(map[string]plot.Value),
-			Step:    int(query.EndTime.Sub(query.StartTime) / time.Duration(query.Sample)),
+	seriesMap := make(map[string]*plot.Series)
+
+	for _, influxdbSeries := range queryResult {
+		name := influxdbSeries.GetName()
+		columns := influxdbSeries.GetColumns()[2:]
+
+		for i := range columns {
+			seriesMap[name+"\x1e"+columns[i]] = &plot.Series{
+				Summary: make(map[string]plot.Value),
+				Step:    int(query.EndTime.Sub(query.StartTime) / time.Duration(query.Sample)),
+			}
 		}
 
 		for _, point := range influxdbSeries.GetPoints() {
-			series.Plots = append(series.Plots, plot.Plot{
-				Value: plot.Value(point[2].(float64)),
-				Time:  time.Unix(int64(point[0].(float64)), 0),
-			})
+			for i := 0; i < len(columns); i++ {
+				seriesKey := name + "\x1e" + columns[i]
+				seriesMap[seriesKey].Plots = append(seriesMap[seriesKey].Plots, plot.Plot{
+					Value: plot.Value(point[i+2].(float64)),
+					Time:  time.Unix(int64(point[0].(float64)), 0),
+				})
+			}
+		}
+	}
+
+	for _, series := range query.Series {
+		seriesKey := connector.series[series.Source][series.Metric][0] + "\x1e" +
+			connector.series[series.Source][series.Metric][1]
+
+		if _, ok := seriesMap[seriesKey]; !ok {
+			continue
 		}
 
-		resultSeries = append(resultSeries, series)
+		seriesEntry := *seriesMap[seriesKey]
+		seriesEntry.Name = series.Name
+
+		resultSeries = append(resultSeries, seriesEntry)
 	}
 
 	return resultSeries, nil
