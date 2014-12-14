@@ -1,6 +1,15 @@
 CHANGES
 =======
 
+0.2.3 (2014-12-15)
+------------------
+
+ * Fix issue in InfluxDB connector with unescaped series names
+ * Fix missing titles in collection graphs listing
+ * Fix relations update with collections parents
+ * Fix issue with graph draw queue failing to propagate time spans
+ * Fix InfluxDB 1.8 client result backend support
+
 0.2.2 (2014-10-16)
 ------------------
 
