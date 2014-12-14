@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/facette/facette/pkg/catalog"
@@ -95,9 +96,11 @@ func (connector *RRDConnector) GetPlots(query *plot.Query) ([]plot.Series, error
 	step := time.Duration(0)
 
 	for _, series := range query.Series {
+		filePath := strings.Replace(connector.metrics[series.Source][series.Metric].FilePath, ":", "\\:", -1)
+
 		graph.Def(
 			series.Name+"-def0",
-			connector.metrics[series.Source][series.Metric].FilePath,
+			filePath,
 			connector.metrics[series.Source][series.Metric].Dataset,
 			"AVERAGE",
 		)
@@ -107,7 +110,7 @@ func (connector *RRDConnector) GetPlots(query *plot.Query) ([]plot.Series, error
 		// Set plots request
 		xport.Def(
 			series.Name+"-def0",
-			connector.metrics[series.Source][series.Metric].FilePath,
+			filePath,
 			connector.metrics[series.Source][series.Metric].Dataset,
 			"AVERAGE",
 		)
