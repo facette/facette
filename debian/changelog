@@ -1,3 +1,9 @@
+facette (0.2.3-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Vincent Batoufflet <vincent@batoufflet.info>  Mon, 15 Dec 2014 13:57:12 +0100
+
 facette (0.2.2-2) unstable; urgency=medium
 
   * Fix default configuration for `base_dir` setting
