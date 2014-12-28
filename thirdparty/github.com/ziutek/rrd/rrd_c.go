@@ -279,10 +279,7 @@ func parseInfoKey(ik string) (kname, kkey string, kid int) {
 	c += o + 1
 	kname = ik[:o] + ik[c+1:]
 	kkey = ik[o+1 : c]
-
-	if strings.HasPrefix(kname, "ds.") {
-		return
-	} else if id, err := strconv.Atoi(kkey); err == nil && id >= 0 {
+	if id, err := strconv.Atoi(kkey); err == nil && id >= 0 {
 		kid = id
 	}
 	return
@@ -446,7 +443,7 @@ func Fetch(filename, cf string, start, end time.Time, step time.Duration) (Fetch
 
 	rowCnt := (int(cEnd)-int(cStart))/int(cStep) + 1
 	valuesLen := dsCnt * rowCnt
-	values := make([]float64, valuesLen)
+	var values []float64
 	sliceHeader := (*reflect.SliceHeader)((unsafe.Pointer(&values)))
 	sliceHeader.Cap = valuesLen
 	sliceHeader.Len = valuesLen
@@ -458,6 +455,11 @@ func Fetch(filename, cf string, start, end time.Time, step time.Duration) (Fetch
 func (r *FetchResult) FreeValues() {
 	sliceHeader := (*reflect.SliceHeader)((unsafe.Pointer(&r.values)))
 	C.free(unsafe.Pointer(sliceHeader.Data))
+}
+
+// Values returns copy of internal array of values. 
+func (r *FetchResult) Values() []float64 {
+	return append([]float64{}, r.values...)
 }
 
 // Export data from RRD file(s)
