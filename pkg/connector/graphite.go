@@ -137,6 +137,7 @@ func (connector *GraphiteConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 	if err != nil {
 		return nil, fmt.Errorf("graphite[%s]: unable to perform HTTP request: %s", connector.name, err)
 	}
+	defer response.Body.Close()
 
 	if err = graphiteCheckBackendResponse(response); err != nil {
 		return nil, fmt.Errorf("graphite[%s]: invalid HTTP backend response: %s", connector.name, err)
@@ -193,6 +194,7 @@ func (connector *GraphiteConnector) Refresh(originName string, outputChan chan<-
 	if err != nil {
 		return fmt.Errorf("graphite[%s]: unable to perform HTTP request: %s", connector.name, err)
 	}
+	defer response.Body.Close()
 
 	if err = graphiteCheckBackendResponse(response); err != nil {
 		return fmt.Errorf("graphite[%s]: invalid HTTP backend response: %s", connector.name, err)

@@ -164,6 +164,7 @@ func (connector *FacetteConnector) GetPlots(query *plot.Query) ([]plot.Series, e
 	if err != nil {
 		return nil, fmt.Errorf("facette[%s]: unable to read HTTP response body: %s", connector.name, err)
 	}
+	defer response.Body.Close()
 
 	plotResponse := facettePlotResponse{}
 
@@ -206,6 +207,7 @@ func (connector *FacetteConnector) Refresh(originName string, outputChan chan<- 
 	if err != nil {
 		return fmt.Errorf("facette[%s]: unable to perform HTTP request: %s", connector.name, err)
 	}
+	defer response.Body.Close()
 
 	if err = facetteCheckConnectorResponse(response); err != nil {
 		return fmt.Errorf("facette[%s]: invalid HTTP backend response: %s", connector.name, err)
