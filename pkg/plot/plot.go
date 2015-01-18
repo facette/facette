@@ -86,7 +86,7 @@ type QuerySeries struct {
 
 func (metric *QuerySeries) String() string {
 	return fmt.Sprintf(
-		"QuerySeries{Name:\"%s\" Source:\"%s\" Origin:\"%s\"}",
+		"QuerySeries{Name:%q Source:%q Origin:%q}",
 		metric.Name,
 		metric.Source,
 		metric.Origin,
