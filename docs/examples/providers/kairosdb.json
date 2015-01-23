@@ -2,9 +2,17 @@
 	"connector": {
 		"type": "kairosdb",
 		"url": "http://localhost:8080/",
+		"srctags": [ "host", "name" ],
+		"start_relative": { "value": 6, "unit": "months" },
+		"aggregators": [
+			{ "metric": "^entropy\\.", "aggregator": { "name": "min", "sampling": { "value": 5, "unit": "minutes" } } },
+			{ "metric": "\\.[tr]x$", "aggregator": { "name": "max", "sampling": { "value": 5, "unit": "minutes" } } }
+		]
 	},
 
 	"filters": [
-		{ "action": "rewrite", "target": "metric", "pattern": "\\.value$", "into": "" }
+		{ "action": "rewrite", "target": "metric", "pattern": "/", "into": "." },
+		{ "action": "rewrite", "target": "metric", "pattern": "\\.value$", "into": "" },
+		{ "action": "rewrite", "target": "source", "pattern": "_/x28.*/x29$", "into": "" }
 	]
 }
