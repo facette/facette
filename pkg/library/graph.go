@@ -43,7 +43,7 @@ type Graph struct {
 
 func (graph *Graph) String() string {
 	return fmt.Sprintf(
-		"Graph{ID:\"%s\" Name:\"%s\" Type:%d Groups:[%s]}",
+		"Graph{ID:%q Name:%q Type:%d Groups:[%s]}",
 		graph.ID,
 		graph.Name,
 		graph.Type,
@@ -69,7 +69,7 @@ type OperGroup struct {
 
 func (group *OperGroup) String() string {
 	return fmt.Sprintf(
-		"OperGroup{Name:\"%s\" Type:%d StackID:%d Series:[%s] Options:%v}",
+		"OperGroup{Name:%q Type:%d StackID:%d Series:[%s] Options:%v}",
 		group.Name,
 		group.Type,
 		func(series []*Series) string {
@@ -95,7 +95,7 @@ type Series struct {
 
 func (series *Series) String() string {
 	return fmt.Sprintf(
-		"Series{Name:\"%s\" Origin:\"%s\" Source:\"%s\" Metric:\"%s\" Options:%v}",
+		"Series{Name:%q Origin:%q Source:%q Metric:%q Options:%v}",
 		series.Name,
 		series.Origin,
 		series.Source,

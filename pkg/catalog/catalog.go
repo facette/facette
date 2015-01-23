@@ -27,7 +27,7 @@ type Record struct {
 }
 
 func (r Record) String() string {
-	return fmt.Sprintf("{Origin: \"%s\", Source: \"%s\", Metric: \"%s\"}", r.Origin, r.Source, r.Metric)
+	return fmt.Sprintf("{Origin: %q, Source: %q, Metric: %q}", r.Origin, r.Source, r.Metric)
 }
 
 // NewCatalog creates a new instance of catalog.
