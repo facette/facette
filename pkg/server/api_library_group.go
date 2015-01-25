@@ -90,9 +90,11 @@ func (server *Server) serveGroup(writer http.ResponseWriter, request *http.Reque
 				return
 			}
 
+			// Clone item
 			group = &library.Group{}
 			utils.Clone(item.(*library.Group), group)
 
+			// Reset item identifier
 			group.ID = ""
 		} else {
 			// Create a new group instance

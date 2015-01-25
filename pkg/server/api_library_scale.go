@@ -78,9 +78,11 @@ func (server *Server) serveScale(writer http.ResponseWriter, request *http.Reque
 				return
 			}
 
+			// Clone item
 			scale = &library.Scale{}
 			utils.Clone(item.(*library.Scale), scale)
 
+			// Reset item identifier
 			scale.ID = ""
 		} else {
 			// Create a new scale instance
