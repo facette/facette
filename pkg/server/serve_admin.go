@@ -110,6 +110,7 @@ func (server *Server) serveAdminGraph(writer http.ResponseWriter, request *http.
 	data := struct {
 		URLPrefix           string
 		ReadOnly            bool
+		Template            bool
 		Section             string
 		Path                string
 		GraphTypeArea       int
@@ -122,6 +123,10 @@ func (server *Server) serveAdminGraph(writer http.ResponseWriter, request *http.
 	}{
 		URLPrefix: server.Config.URLPrefix,
 		ReadOnly:  server.Config.ReadOnly,
+	}
+
+	if request.FormValue("templates") != "" {
+		data.Template = true
 	}
 
 	data.Section, data.Path = splitAdminURLPath(request.URL.Path)

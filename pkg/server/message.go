@@ -7,6 +7,7 @@ const (
 	mesgFormOffsetInvalid    string = "Request offset must be an integer"
 	mesgFormOffsetOutOfRange string = "Request offset is out of range"
 	mesgMethodNotAllowed     string = "Request method is not allowed"
+	mesgMissingParameter     string = "Missing required parameter"
 	mesgPlotOperationError   string = "An error occurred while performing plots operation"
 	mesgProviderQueryError   string = "An error occurred while querying a provider"
 	mesgReadOnlyMode         string = "Instance is read-only"

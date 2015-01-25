@@ -15,6 +15,8 @@ import (
 )
 
 func (server *Server) serveGraph(writer http.ResponseWriter, request *http.Request) {
+	var graph *library.Graph
+
 	if request.Method != "GET" && request.Method != "HEAD" && server.Config.ReadOnly {
 		server.serveResponse(writer, serverResponse{mesgReadOnlyMode}, http.StatusForbidden)
 		return
@@ -60,15 +62,13 @@ func (server *Server) serveGraph(writer http.ResponseWriter, request *http.Reque
 		server.serveResponse(writer, item, http.StatusOK)
 
 	case "POST", "PUT":
-		var graph *library.Graph
-
 		if response, status := server.parseStoreRequest(writer, request, graphID); status != http.StatusOK {
 			server.serveResponse(writer, response, status)
 			return
 		}
 
+		// Inheritance requested: clone an existing graph
 		if request.Method == "POST" && request.FormValue("inherit") != "" {
-			// Get graph from library
 			item, err := server.Library.GetItem(request.FormValue("inherit"), library.LibraryItemGraph)
 			if os.IsNotExist(err) {
 				server.serveResponse(writer, serverResponse{mesgResourceNotFound}, http.StatusNotFound)
@@ -89,8 +89,6 @@ func (server *Server) serveGraph(writer http.ResponseWriter, request *http.Reque
 			// Create a new graph instance
 			graph = &library.Graph{Item: library.Item{ID: graphID}}
 		}
-
-		graph.Modified = time.Now()
 
 		// Parse input JSON for graph data
 		body, _ := ioutil.ReadAll(request.Body)
@@ -155,13 +153,39 @@ func (server *Server) serveGraphList(writer http.ResponseWriter, request *http.R
 	// Fill graphs list
 	items = make(ItemListResponse, 0)
 
+	// Flag for listing only graph templates
+	showTemplates := request.FormValue("templates") == "true" || request.FormValue("templates") == "1"
+
 	for _, graph := range server.Library.Graphs {
+		// Depending on the template flag, filter out either graphs or graph templates
+		if graph.Template && !showTemplates || !graph.Template && showTemplates {
+			continue
+		}
+
+		// Filter out graphs that don't belong in the targeted collection
 		if !graphSet.IsEmpty() && !graphSet.Has(graph.ID) {
 			continue
 		}
 
 		if request.FormValue("filter") != "" && !utils.FilterMatch(request.FormValue("filter"), graph.Name) {
 			continue
+		}
+
+		// If linked graph, expand the templated description field
+		if graph.Link != "" {
+			item, err := server.Library.GetItem(graph.Link, library.LibraryItemGraph)
+
+			if err != nil {
+				logger.Log(logger.LevelError, "server", "graph template not found")
+			} else {
+				graphTemplate := item.(*library.Graph)
+
+				if graph.Description, err = expandStringTemplate(
+					graphTemplate.Description,
+					graph.Attributes); err != nil {
+					logger.Log(logger.LevelError, "server", "failed to expand graph description: %s", err)
+				}
+			}
 		}
 
 		items = append(items, &ItemResponse{

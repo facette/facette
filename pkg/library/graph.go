@@ -34,18 +34,36 @@ const (
 // Graph represents a graph containing list of series.
 type Graph struct {
 	Item
+	Template bool `json:"template"`
+
+	// For plain/template graphs definitions
+	Title      string       `json:"title"`
 	Type       int          `json:"type"`
 	StackMode  int          `json:"stack_mode"`
 	UnitType   int          `json:"unit_type"`
 	UnitLegend string       `json:"unit_legend"`
-	Groups     []*OperGroup `json:"groups"`
+	Groups     []*OperGroup `json:"groups,omitempty"`
+
+	// For linked graphs
+	Link       string                 `json:"link,omitempty"`
+	Attributes map[string]interface{} `json:"attributes,omitempty"`
 }
 
 func (graph *Graph) String() string {
+	if graph.Link != "" {
+		return fmt.Sprintf(
+			"Graph{ID:%q Link:%s Attributes:%+v}",
+			graph.ID,
+			graph.Link,
+			graph.Attributes,
+		)
+	}
+
 	return fmt.Sprintf(
-		"Graph{ID:%q Name:%q Type:%d Groups:[%s]}",
+		"Graph{ID:%q Name:%q Title:%q Type:%d Groups:[%s]}",
 		graph.ID,
 		graph.Name,
+		graph.Title,
 		graph.Type,
 		func(groups []*OperGroup) string {
 			groupStrings := make([]string, len(groups))

@@ -73,6 +73,25 @@ func (server *Server) servePlots(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 
+	// If linked graph, expand its template
+	if graph.Link != "" || graph.ID == "" && len(graph.Attributes) > 0 {
+		if graph.Link != "" {
+			// Get graph template from library
+			item, err := server.Library.GetItem(graph.Link, library.LibraryItemGraph)
+			if err != nil {
+				logger.Log(logger.LevelError, "server", "graph template not found: %s", graph.Link)
+				return
+			}
+
+			graph = item.(*library.Graph)
+		}
+
+		if graph, err = server.expandGraphTemplate(graph); err != nil {
+			logger.Log(logger.LevelError, "server", "unable to apply graph template: %s", err)
+			server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
+		}
+	}
+
 	// Prepare queries to be executed by the providers
 	providerQueries, err := server.prepareProviderQueries(plotReq, graph)
 	if err != nil {
@@ -106,6 +125,28 @@ func (server *Server) servePlots(writer http.ResponseWriter, request *http.Reque
 	}
 
 	server.serveResponse(writer, response, http.StatusOK)
+}
+
+func (server *Server) expandGraphTemplate(graph *library.Graph) (*library.Graph, error) {
+	var err error
+
+	if graph.Title, err = expandStringTemplate(graph.Title, graph.Attributes); err != nil {
+		return nil, fmt.Errorf("failed to expand graph title: %s", err)
+	}
+
+	for _, group := range graph.Groups {
+		for _, series := range group.Series {
+			if series.Source, err = expandStringTemplate(series.Source, graph.Attributes); err != nil {
+				return nil, fmt.Errorf("failed to expand graph series %q source: %s", series.Name, err)
+			}
+
+			if series.Metric, err = expandStringTemplate(series.Metric, graph.Attributes); err != nil {
+				return nil, fmt.Errorf("failed to expand graph series %q metric: %s", series.Metric, err)
+			}
+		}
+	}
+
+	return graph, nil
 }
 
 func (server *Server) prepareProviderQueries(plotReq *PlotRequest,

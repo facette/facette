@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	txttemplate "text/template"
 
 	"github.com/facette/facette/pkg/utils"
 )
@@ -50,6 +51,26 @@ func (server *Server) execTemplate(writer http.ResponseWriter, status int, data 
 
 func (server *Server) templateAsset(x string) string {
 	return x + "?" + strconv.FormatInt(server.startTime.Unix(), 10)
+}
+
+func expandStringTemplate(t string, attr map[string]interface{}) (string, error) {
+	var (
+		buf *bytes.Buffer
+		tpl *txttemplate.Template
+		err error
+	)
+
+	buf = bytes.NewBuffer(nil)
+
+	if tpl, err = txttemplate.New("template").Parse(t); err != nil {
+		return t, fmt.Errorf("error while parsing template: %s", err)
+	}
+
+	if err = tpl.Execute(buf, attr); err != nil {
+		return t, fmt.Errorf("error while executing template: %s", err)
+	}
+
+	return buf.String(), nil
 }
 
 func templateEqual(x, y interface{}) bool {

@@ -291,6 +291,7 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 		return os.ErrInvalid
 	}
 
+	// If item has no ID specified, generate one
 	if itemStruct.ID == "" {
 		uuidTemp, err := uuid.NewV4()
 		if err != nil {
@@ -395,6 +396,8 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 		library.Collections[itemStruct.ID] = item.(*Collection)
 		library.Collections[itemStruct.ID].ID = itemStruct.ID
 	}
+
+	itemStruct.Modified = time.Now()
 
 	// Store JSON data
 	if err := utils.JSONDump(library.getFilePath(itemStruct.ID, itemType), item, itemStruct.Modified); err != nil {
