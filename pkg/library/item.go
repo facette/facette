@@ -304,6 +304,7 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 
 	// Check for name field presence/duplicates
 	if itemStruct.Name == "" {
+		logger.Log(logger.LevelError, "library", "item missing `name' field")
 		return os.ErrInvalid
 	}
 
