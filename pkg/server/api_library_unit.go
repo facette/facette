@@ -19,7 +19,7 @@ func (server *Server) serveUnit(writer http.ResponseWriter, request *http.Reques
 		return
 	}
 
-	unitID := strings.TrimPrefix(request.URL.Path, urlLibraryPath+"units/")
+	unitID := routeTrimPrefix(request.URL.Path, urlLibraryPath+"units")
 
 	switch request.Method {
 	case "DELETE":

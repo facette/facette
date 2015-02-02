@@ -25,7 +25,7 @@ func (server *Server) serveCollection(writer http.ResponseWriter, request *http.
 		return
 	}
 
-	collectionID := strings.TrimPrefix(request.URL.Path, urlLibraryPath+"collections/")
+	collectionID := routeTrimPrefix(request.URL.Path, urlLibraryPath+"collections")
 
 	switch request.Method {
 	case "DELETE":

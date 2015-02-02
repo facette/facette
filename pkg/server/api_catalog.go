@@ -13,13 +13,14 @@ import (
 func (server *Server) serveCatalog(writer http.ResponseWriter, request *http.Request) {
 	setHTTPCacheHeaders(writer)
 
-	if request.URL.Path == urlCatalogPath {
+	// Dispatch library API routes
+	if routeMatch(request.URL.Path, urlCatalogPath) {
 		server.serveFullCatalog(writer, request)
-	} else if strings.HasPrefix(request.URL.Path, urlCatalogPath+"origins/") {
+	} else if routeMatch(request.URL.Path, urlCatalogPath+"origins") {
 		server.serveOrigin(writer, request)
-	} else if strings.HasPrefix(request.URL.Path, urlCatalogPath+"sources/") {
+	} else if routeMatch(request.URL.Path, urlCatalogPath+"sources") {
 		server.serveSource(writer, request)
-	} else if strings.HasPrefix(request.URL.Path, urlCatalogPath+"metrics/") {
+	} else if routeMatch(request.URL.Path, urlCatalogPath+"metrics") {
 		server.serveMetric(writer, request)
 	} else {
 		server.serveResponse(writer, nil, http.StatusNotFound)
@@ -47,7 +48,7 @@ func (server *Server) serveFullCatalog(writer http.ResponseWriter, request *http
 }
 
 func (server *Server) serveOrigin(writer http.ResponseWriter, request *http.Request) {
-	name := strings.TrimPrefix(request.URL.Path, urlCatalogPath+"origins/")
+	name := routeTrimPrefix(request.URL.Path, urlCatalogPath+"origins")
 
 	if name == "" {
 		server.serveOriginList(writer, request)
@@ -103,7 +104,7 @@ func (server *Server) serveOriginList(writer http.ResponseWriter, request *http.
 }
 
 func (server *Server) serveSource(writer http.ResponseWriter, request *http.Request) {
-	name := strings.TrimPrefix(request.URL.Path, urlCatalogPath+"sources/")
+	name := routeTrimPrefix(request.URL.Path, urlCatalogPath+"sources")
 
 	if name == "" {
 		server.serveSourceList(writer, request)
@@ -174,7 +175,7 @@ func (server *Server) serveSourceList(writer http.ResponseWriter, request *http.
 }
 
 func (server *Server) serveMetric(writer http.ResponseWriter, request *http.Request) {
-	metricName := strings.TrimPrefix(request.URL.Path, urlCatalogPath+"metrics/")
+	metricName := routeTrimPrefix(request.URL.Path, urlCatalogPath+"metrics")
 
 	if metricName == "" {
 		server.serveMetricList(writer, request)

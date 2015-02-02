@@ -49,7 +49,7 @@ func (server *Server) serveShowGraph(writer http.ResponseWriter, request *http.R
 	}
 
 	item, err := server.Library.GetItem(
-		strings.TrimPrefix(request.URL.Path, urlShowPath+"graphs/"),
+		routeTrimPrefix(request.URL.Path, urlShowPath+"graphs"),
 		library.LibraryItemGraph,
 	)
 	if err != nil {

@@ -19,7 +19,7 @@ func (server *Server) serveScale(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	scaleID := strings.TrimPrefix(request.URL.Path, urlLibraryPath+"scales/")
+	scaleID := routeTrimPrefix(request.URL.Path, urlLibraryPath+"scales")
 
 	switch request.Method {
 	case "DELETE":

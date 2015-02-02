@@ -24,7 +24,7 @@ func (server *Server) serveGraph(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	graphID := strings.TrimPrefix(request.URL.Path, urlLibraryPath+"graphs/")
+	graphID := routeTrimPrefix(request.URL.Path, urlLibraryPath+"graphs")
 
 	switch request.Method {
 	case "DELETE":

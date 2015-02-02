@@ -86,7 +86,7 @@ func (server *Server) serveBrowseCollection(writer http.ResponseWriter, request 
 		Request:    request,
 	}
 
-	data.Collection.ID = strings.TrimPrefix(request.URL.Path, urlBrowsePath+"collections/")
+	data.Collection.ID = routeTrimPrefix(request.URL.Path, urlBrowsePath+"collections")
 
 	item, err := server.Library.GetItem(data.Collection.ID, library.LibraryItemCollection)
 	if err != nil {
@@ -126,7 +126,7 @@ func (server *Server) serveBrowseGraph(writer http.ResponseWriter, request *http
 	}
 
 	item, err := server.Library.GetItem(
-		strings.TrimPrefix(request.URL.Path, urlBrowsePath+"graphs/"),
+		routeTrimPrefix(request.URL.Path, urlBrowsePath+"graphs"),
 		library.LibraryItemGraph,
 	)
 	if err != nil {
