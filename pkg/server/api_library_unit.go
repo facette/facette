@@ -19,7 +19,7 @@ func (server *Server) serveUnit(writer http.ResponseWriter, request *http.Reques
 		return
 	}
 
-	unitID := strings.TrimPrefix(request.URL.Path, urlLibraryPath+"units/")
+	unitID := routeTrimPrefix(request.URL.Path, urlLibraryPath+"units")
 
 	switch request.Method {
 	case "DELETE":
@@ -78,9 +78,11 @@ func (server *Server) serveUnit(writer http.ResponseWriter, request *http.Reques
 				return
 			}
 
+			// Clone item
 			unit = &library.Unit{}
 			utils.Clone(item.(*library.Unit), unit)
 
+			// Reset item identifier
 			unit.ID = ""
 		} else {
 			// Create a new unit instance

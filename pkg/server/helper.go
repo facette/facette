@@ -5,6 +5,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/facette/facette/pkg/utils"
@@ -78,6 +79,19 @@ func (server *Server) parseStoreRequest(writer http.ResponseWriter, request *htt
 	}
 
 	return nil, http.StatusOK
+}
+
+func routeMatch(path, prefix string) bool {
+	// Ensure path ends with a slash
+	if !strings.HasSuffix(path, "/") {
+		path += "/"
+	}
+
+	return path == prefix || strings.HasPrefix(path, prefix+"/")
+}
+
+func routeTrimPrefix(path, prefix string) string {
+	return strings.Trim(strings.TrimPrefix(path, prefix), "/")
 }
 
 func setHTTPCacheHeaders(writer http.ResponseWriter) {

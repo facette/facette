@@ -25,7 +25,7 @@ func (server *Server) serveCollection(writer http.ResponseWriter, request *http.
 		return
 	}
 
-	collectionID := strings.TrimPrefix(request.URL.Path, urlLibraryPath+"collections/")
+	collectionID := routeTrimPrefix(request.URL.Path, urlLibraryPath+"collections")
 
 	switch request.Method {
 	case "DELETE":
@@ -88,10 +88,16 @@ func (server *Server) serveCollection(writer http.ResponseWriter, request *http.
 				return
 			}
 
+			// Temporarily remove children information then clone item
+			children := item.(*library.Collection).Children
+			item.(*library.Collection).Children = nil
+
 			utils.Clone(item.(*library.Collection), collectionTemp.Collection)
 
+			item.(*library.Collection).Children = children
+
+			// Reset item identifier
 			collectionTemp.Collection.ID = ""
-			collectionTemp.Collection.Children = nil
 		}
 
 		collectionTemp.Collection.Modified = time.Now()

@@ -132,7 +132,14 @@
 
 		// parse xml
 		svg.parseXml = function(xml) {
-			if (window.DOMParser)
+			if (typeof(Windows) != 'undefined' && typeof(Windows.Data) != 'undefined' && typeof(Windows.Data.Xml) != 'undefined') {
+				var xmlDoc = new Windows.Data.Xml.Dom.XmlDocument();
+				var settings = new Windows.Data.Xml.Dom.XmlLoadSettings();
+				settings.prohibitDtd = false;
+				xmlDoc.loadXml(xml, settings);
+				return xmlDoc;
+			}
+			else if (window.DOMParser)
 			{
 				var parser = new DOMParser();
 				return parser.parseFromString(xml, 'text/xml');
@@ -182,12 +189,12 @@
 
 			// color extensions
 				// augment the current color value with the opacity
-				svg.Property.prototype.addOpacity = function(opacity) {
+				svg.Property.prototype.addOpacity = function(opacityProp) {
 					var newValue = this.value;
-					if (opacity != null && opacity != '' && typeof(this.value)=='string') { // can only add opacity to colors, not patterns
+					if (opacityProp.value != null && opacityProp.value != '' && typeof(this.value)=='string') { // can only add opacity to colors, not patterns
 						var color = new RGBColor(this.value);
 						if (color.ok) {
-							newValue = 'rgba(' + color.r + ', ' + color.g + ', ' + color.b + ', ' + opacity + ')';
+							newValue = 'rgba(' + color.r + ', ' + color.g + ', ' + color.b + ', ' + opacityProp.numValue() + ')';
 						}
 					}
 					return new svg.Property(this.name, newValue);
@@ -535,6 +542,26 @@
 				this.apply = function(ctx) {
 					ctx.transform(this.m[0], this.m[1], this.m[2], this.m[3], this.m[4], this.m[5]);
 				}
+				this.unapply = function(ctx) {
+					var a = this.m[0];
+					var b = this.m[2];
+					var c = this.m[4];
+					var d = this.m[1];
+					var e = this.m[3];
+					var f = this.m[5];
+					var g = 0.0;
+					var h = 0.0;
+					var i = 1.0;
+					var det = 1 / (a*(e*i-f*h)-b*(d*i-f*g)+c*(d*h-e*g));
+					ctx.transform(
+						det*(e*i-f*h),
+						det*(f*g-d*i),
+						det*(c*h-b*i),
+						det*(a*i-c*g),
+						det*(b*f-c*e),
+						det*(c*d-a*f)
+					);
+				}
 				this.applyToPoint = function(p) {
 					p.applyTransform(this.m);
 				}
@@ -581,7 +608,7 @@
 				}
 			}
 
-			var data = svg.trim(svg.compressSpaces(v)).replace(/\)(\s?,\s?)/g,') ').split(/\s(?=[a-z])/);
+			var data = svg.trim(svg.compressSpaces(v)).replace(/\)([a-zA-Z])/g, ') $1').replace(/\)(\s?,\s?)/g,') ').split(/\s(?=[a-z])/);
 			for (var i=0; i<data.length; i++) {
 				var type = svg.trim(data[i].split('(')[0]);
 				var s = data[i].split('(')[1].replace(')','');
@@ -623,7 +650,7 @@
 			// scale
 			if (align == 'none') ctx.scale(scaleX, scaleY);
 			else if (meetOrSlice == 'meet') ctx.scale(scaleMin, scaleMin);
-			else if (meetOrSlice == 'slice') ctx.scale(scaleMax, scaleMax);
+			else if (meetOrSlice == 'slice') ctx.scale(scaleMax, scaleMax); 
 
 			// translate
 			ctx.translate(minX == null ? 0 : -minX, minY == null ? 0 : -minY);
@@ -658,7 +685,7 @@
 			}
 
 			// get or create style, crawls up node tree
-			this.style = function(name, createIfNotExists) {
+			this.style = function(name, createIfNotExists, skipAncestors) {
 				var s = this.styles[name];
 				if (s != null) return s;
 
@@ -668,11 +695,13 @@
 					return a;
 				}
 
-				var p = this.parent;
-				if (p != null) {
-					var ps = p.style(name);
-					if (ps != null && ps.hasValue()) {
-						return ps;
+				if (skipAncestors != true) {
+					var p = this.parent;
+					if (p != null) {
+						var ps = p.style(name);
+						if (ps != null && ps.hasValue()) {
+							return ps;
+						}
 					}
 				}
 
@@ -726,22 +755,10 @@
 				var child = childNode;
 				if (create) child = svg.CreateElement(childNode);
 				child.parent = this;
-				this.children.push(child);
+				if (child.type != 'title') { this.children.push(child);	}
 			}
 
 			if (node != null && node.nodeType == 1) { //ELEMENT_NODE
-				// add children
-				for (var i=0; i<node.childNodes.length; i++) {
-					var childNode = node.childNodes[i];
-					if (childNode.nodeType == 1) this.addChild(childNode, true); //ELEMENT_NODE
-					if (this.captureTextNodes && childNode.nodeType == 3) {
-						var text = childNode.nodeValue || childNode.text || '';
-						if (svg.trim(svg.compressSpaces(text)) != '') {
-							this.addChild(new svg.Element.tspan(childNode), false); // TEXT_NODE
-						}
-					}
-				}
-
 				// add attributes
 				for (var i=0; i<node.attributes.length; i++) {
 					var attribute = node.attributes[i];
@@ -804,6 +821,18 @@
 						svg.Definitions[this.attribute('id').value] = this;
 					}
 				}
+
+				// add children
+				for (var i=0; i<node.childNodes.length; i++) {
+					var childNode = node.childNodes[i];
+					if (childNode.nodeType == 1) this.addChild(childNode, true); //ELEMENT_NODE
+					if (this.captureTextNodes && (childNode.nodeType == 3 || childNode.nodeType == 4)) {
+						var text = childNode.nodeValue || childNode.text || '';
+						if (svg.trim(svg.compressSpaces(text)) != '') {
+							this.addChild(new svg.Element.tspan(childNode), false); // TEXT_NODE
+						}
+					}
+				}
 			}
 		}
 
@@ -820,11 +849,11 @@
 				else if (this.style('fill').hasValue()) {
 					var fillStyle = this.style('fill');
 					if (fillStyle.value == 'currentColor') fillStyle.value = this.style('color').value;
-					ctx.fillStyle = (fillStyle.value == 'none' ? 'rgba(0,0,0,0)' : fillStyle.value);
+					if (fillStyle.value != 'inherit') ctx.fillStyle = (fillStyle.value == 'none' ? 'rgba(0,0,0,0)' : fillStyle.value);
 				}
 				if (this.style('fill-opacity').hasValue()) {
 					var fillStyle = new svg.Property('fill', ctx.fillStyle);
-					fillStyle = fillStyle.addOpacity(this.style('fill-opacity').value);
+					fillStyle = fillStyle.addOpacity(this.style('fill-opacity'));
 					ctx.fillStyle = fillStyle.value;
 				}
 
@@ -836,11 +865,11 @@
 				else if (this.style('stroke').hasValue()) {
 					var strokeStyle = this.style('stroke');
 					if (strokeStyle.value == 'currentColor') strokeStyle.value = this.style('color').value;
-					ctx.strokeStyle = (strokeStyle.value == 'none' ? 'rgba(0,0,0,0)' : strokeStyle.value);
+					if (strokeStyle.value != 'inherit') ctx.strokeStyle = (strokeStyle.value == 'none' ? 'rgba(0,0,0,0)' : strokeStyle.value);
 				}
 				if (this.style('stroke-opacity').hasValue()) {
 					var strokeStyle = new svg.Property('stroke', ctx.strokeStyle);
-					strokeStyle = strokeStyle.addOpacity(this.style('stroke-opacity').value);
+					strokeStyle = strokeStyle.addOpacity(this.style('stroke-opacity'));
 					ctx.strokeStyle = strokeStyle.value;
 				}
 				if (this.style('stroke-width').hasValue()) {
@@ -854,7 +883,7 @@
 					var gaps = svg.ToNumberArray(this.style('stroke-dasharray').value);
 					if (typeof(ctx.setLineDash) != 'undefined') { ctx.setLineDash(gaps); }
 					else if (typeof(ctx.webkitLineDash) != 'undefined') { ctx.webkitLineDash = gaps; }
-					else if (typeof(ctx.mozDash ) != 'undefined') { ctx.mozDash  = gaps; }
+					else if (typeof(ctx.mozDash) != 'undefined' && !(gaps.length==1 && gaps[0]==0)) { ctx.mozDash = gaps; }
 
 					var offset = this.style('stroke-dashoffset').numValueOrDefault(1);
 					if (typeof(ctx.lineDashOffset) != 'undefined') { ctx.lineDashOffset = offset; }
@@ -879,8 +908,8 @@
 				}
 
 				// clip
-				if (this.style('clip-path').hasValue()) {
-					var clip = this.style('clip-path').getDefinition();
+				if (this.style('clip-path', false, true).hasValue()) {
+					var clip = this.style('clip-path', false, true).getDefinition();
 					if (clip != null) clip.apply(ctx);
 				}
 
@@ -905,7 +934,7 @@
 				this.path(ctx);
 				svg.Mouse.checkPath(this, ctx);
 				if (ctx.fillStyle != '') {
-					if (this.attribute('fill-rule').valueOrDefault('inherit') != 'inherit') { ctx.fill(this.attribute('fill-rule').value); }
+					if (this.style('fill-rule').valueOrDefault('inherit') != 'inherit') { ctx.fill(this.style('fill-rule').value); }
 					else { ctx.fill(); }
 				}
 				if (ctx.strokeStyle != '') ctx.stroke();
@@ -1631,7 +1660,7 @@
 				var addParentOpacity = function (color) {
 					if (parentOpacityProp.hasValue()) {
 						var p = new svg.Property('color', color);
-						return p.addOpacity(parentOpacityProp.value).value;
+						return p.addOpacity(parentOpacityProp).value;
 					}
 					return color;
 				};
@@ -1765,7 +1794,7 @@
 			if (this.offset > 1) this.offset = 1;
 
 			var stopColor = this.style('stop-color');
-			if (this.style('stop-opacity').hasValue()) stopColor = stopColor.addOpacity(this.style('stop-opacity').value);
+			if (this.style('stop-opacity').hasValue()) stopColor = stopColor.addOpacity(this.style('stop-opacity'));
 			this.color = stopColor.value;
 		}
 		svg.Element.stop.prototype = new svg.Element.ElementBase;
@@ -1814,14 +1843,17 @@
 					 || this.attribute('repeatDur').value == 'indefinite') {
 						this.duration = 0.0
 					}
+					else if (this.attribute('fill').valueOrDefault('remove') == 'freeze' && !this.frozen) {
+						this.frozen = true;
+						this.parent.animationFrozen = true;
+						this.parent.animationFrozenValue = this.getProperty().value;
+					}
 					else if (this.attribute('fill').valueOrDefault('remove') == 'remove' && !this.removed) {
 						this.removed = true;
-						this.getProperty().value = this.initialValue;
+						this.getProperty().value = this.parent.animationFrozen ? this.parent.animationFrozenValue : this.initialValue;
 						return true;
 					}
-					else {
-						return false; // no updates made
-					}
+					return false;
 				}
 				this.duration = this.duration + delta;
 
@@ -2040,6 +2072,7 @@
 				var child = parent.children[i];
 				if (child.attribute('x').hasValue()) {
 					child.x = child.attribute('x').toPixels('x') + this.getAnchorDelta(ctx, parent, i);
+					if (child.attribute('dx').hasValue()) child.x += child.attribute('dx').toPixels('x');
 				}
 				else {
 					if (this.attribute('dx').hasValue()) this.x += this.attribute('dx').toPixels('x');
@@ -2050,6 +2083,7 @@
 
 				if (child.attribute('y').hasValue()) {
 					child.y = child.attribute('y').toPixels('y');
+					if (child.attribute('dy').hasValue()) child.y += child.attribute('dy').toPixels('y');
 				}
 				else {
 					if (this.attribute('dy').hasValue()) this.y += this.attribute('dy').toPixels('y');
@@ -2199,7 +2233,7 @@
 			this.base = svg.Element.TextElementBase;
 			this.base(node);
 
-			this.hasText = true;
+			this.hasText = node.childNodes.length > 0;
 			for (var i=0; i<node.childNodes.length; i++) {
 				if (node.childNodes[i].nodeType != 3) this.hasText = false;
 			}
@@ -2218,7 +2252,7 @@
 					var fontSize = new svg.Property('fontSize', svg.Font.Parse(svg.ctx.font).fontSize);
 					svg.Mouse.checkBoundingBox(this, new svg.BoundingBox(this.x, this.y - fontSize.toPixels('y'), this.x + this.measureText(ctx), this.y));
 				}
-				else {
+				else if (this.children.length > 0) {
 					// render as temporary group
 					var g = new svg.Element.g();
 					g.children = this.children;
@@ -2243,6 +2277,7 @@
 			this.base(node);
 
 			var href = this.getHrefAttribute().value;
+			if (href == '') { return; }
 			var isSvg = href.match(/\.svg$/)
 
 			svg.Images.push(this);
@@ -2487,6 +2522,13 @@
 			this.base(node);
 
 			this.apply = function(ctx) {
+				var oldBeginPath = CanvasRenderingContext2D.prototype.beginPath;
+				CanvasRenderingContext2D.prototype.beginPath = function () { };
+
+				var oldClosePath = CanvasRenderingContext2D.prototype.closePath;
+				CanvasRenderingContext2D.prototype.closePath = function () { };
+
+				oldBeginPath.call(ctx);
 				for (var i=0; i<this.children.length; i++) {
 					var child = this.children[i];
 					if (typeof(child.path) != 'undefined') {
@@ -2496,10 +2538,15 @@
 							transform.apply(ctx);
 						}
 						child.path(ctx);
-						ctx.clip();
+						CanvasRenderingContext2D.prototype.closePath = oldClosePath;
 						if (transform) { transform.unapply(ctx); }
 					}
 				}
+				oldClosePath.call(ctx);
+				ctx.clip();
+
+				CanvasRenderingContext2D.prototype.beginPath = oldBeginPath;
+				CanvasRenderingContext2D.prototype.closePath = oldClosePath;
 			}
 
 			this.render = function(ctx) {
@@ -2764,17 +2811,25 @@
 
 				if (svg.opts['offsetX'] != null) e.attribute('x', true).value = svg.opts['offsetX'];
 				if (svg.opts['offsetY'] != null) e.attribute('y', true).value = svg.opts['offsetY'];
-				if (svg.opts['scaleWidth'] != null && svg.opts['scaleHeight'] != null) {
-					var xRatio = 1, yRatio = 1, viewBox = svg.ToNumberArray(e.attribute('viewBox').value);
-					if (e.attribute('width').hasValue()) xRatio = e.attribute('width').toPixels('x') / svg.opts['scaleWidth'];
-					else if (!isNaN(viewBox[2])) xRatio = viewBox[2] / svg.opts['scaleWidth'];
-					if (e.attribute('height').hasValue()) yRatio = e.attribute('height').toPixels('y') / svg.opts['scaleHeight'];
-					else if (!isNaN(viewBox[3])) yRatio = viewBox[3] / svg.opts['scaleHeight'];
+				if (svg.opts['scaleWidth'] != null || svg.opts['scaleHeight'] != null) {
+					var xRatio = null, yRatio = null, viewBox = svg.ToNumberArray(e.attribute('viewBox').value);
+
+					if (svg.opts['scaleWidth'] != null) {
+						if (e.attribute('width').hasValue()) xRatio = e.attribute('width').toPixels('x') / svg.opts['scaleWidth'];
+						else if (!isNaN(viewBox[2])) xRatio = viewBox[2] / svg.opts['scaleWidth'];
+					}
+
+					if (svg.opts['scaleHeight'] != null) {
+						if (e.attribute('height').hasValue()) yRatio = e.attribute('height').toPixels('y') / svg.opts['scaleHeight'];
+						else if (!isNaN(viewBox[3])) yRatio = viewBox[3] / svg.opts['scaleHeight'];
+					}
+
+					if (xRatio == null) { xRatio = yRatio; }
+					if (yRatio == null) { yRatio = xRatio; }
 
 					e.attribute('width', true).value = svg.opts['scaleWidth'];
 					e.attribute('height', true).value = svg.opts['scaleHeight'];
-					e.attribute('viewBox', true).value = '0 0 ' + (cWidth * xRatio) + ' ' + (cHeight * yRatio);
-					e.attribute('preserveAspectRatio', true).value = 'none';
+					e.attribute('transform', true).value += ' scale('+(1.0/xRatio)+','+(1.0/yRatio)+')';
 				}
 
 				// clear and render

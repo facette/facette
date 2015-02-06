@@ -1,32 +1,30 @@
 package server
 
-import (
-	"net/http"
-	"strings"
-)
+import "net/http"
 
 func (server *Server) serveLibrary(writer http.ResponseWriter, request *http.Request) {
 	setHTTPCacheHeaders(writer)
 
-	if strings.HasPrefix(request.URL.Path, urlLibraryPath+"sourcegroups/") {
+	// Dispatch library API routes
+	if routeMatch(request.URL.Path, urlLibraryPath+"sourcegroups") {
 		server.serveGroup(writer, request)
-	} else if strings.HasPrefix(request.URL.Path, urlLibraryPath+"metricgroups/") {
+	} else if routeMatch(request.URL.Path, urlLibraryPath+"metricgroups") {
 		server.serveGroup(writer, request)
-	} else if request.URL.Path == urlLibraryPath+"scales/values" {
+	} else if routeMatch(request.URL.Path, urlLibraryPath+"scales/values") {
 		server.serveScaleValues(writer, request)
-	} else if strings.HasPrefix(request.URL.Path, urlLibraryPath+"scales/") {
+	} else if routeMatch(request.URL.Path, urlLibraryPath+"scales") {
 		server.serveScale(writer, request)
-	} else if request.URL.Path == urlLibraryPath+"units/labels" {
+	} else if routeMatch(request.URL.Path, urlLibraryPath+"units/labels") {
 		server.serveUnitLabels(writer, request)
-	} else if strings.HasPrefix(request.URL.Path, urlLibraryPath+"units/") {
+	} else if routeMatch(request.URL.Path, urlLibraryPath+"units") {
 		server.serveUnit(writer, request)
-	} else if request.URL.Path == urlLibraryPath+"expand" {
+	} else if routeMatch(request.URL.Path, urlLibraryPath+"expand") {
 		server.serveGroupExpand(writer, request)
-	} else if request.URL.Path == urlLibraryPath+"graphs/plots" {
+	} else if routeMatch(request.URL.Path, urlLibraryPath+"graphs/plots") {
 		server.serveGraphPlots(writer, request)
-	} else if strings.HasPrefix(request.URL.Path, urlLibraryPath+"graphs/") {
+	} else if routeMatch(request.URL.Path, urlLibraryPath+"graphs") {
 		server.serveGraph(writer, request)
-	} else if strings.HasPrefix(request.URL.Path, urlLibraryPath+"collections/") {
+	} else if routeMatch(request.URL.Path, urlLibraryPath+"collections") {
 		server.serveCollection(writer, request)
 	} else {
 		server.serveResponse(writer, nil, http.StatusNotFound)

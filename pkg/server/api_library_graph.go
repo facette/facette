@@ -24,7 +24,7 @@ func (server *Server) serveGraph(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	graphID := strings.TrimPrefix(request.URL.Path, urlLibraryPath+"graphs/")
+	graphID := routeTrimPrefix(request.URL.Path, urlLibraryPath+"graphs")
 
 	switch request.Method {
 	case "DELETE":
@@ -83,9 +83,11 @@ func (server *Server) serveGraph(writer http.ResponseWriter, request *http.Reque
 				return
 			}
 
+			// Clone item
 			graph = &library.Graph{}
 			utils.Clone(item.(*library.Graph), graph)
 
+			// Reset item identifier
 			graph.ID = ""
 		} else {
 			// Create a new graph instance

@@ -25,11 +25,11 @@ func (server *Server) serveGroup(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	if strings.HasPrefix(request.URL.Path, urlLibraryPath+"sourcegroups") {
-		groupID = strings.TrimPrefix(request.URL.Path, urlLibraryPath+"sourcegroups/")
+	if routeMatch(request.URL.Path, urlLibraryPath+"sourcegroups") {
+		groupID = routeTrimPrefix(request.URL.Path, urlLibraryPath+"sourcegroups")
 		groupType = library.LibraryItemSourceGroup
-	} else if strings.HasPrefix(request.URL.Path, urlLibraryPath+"metricgroups") {
-		groupID = strings.TrimPrefix(request.URL.Path, urlLibraryPath+"metricgroups/")
+	} else if routeMatch(request.URL.Path, urlLibraryPath+"metricgroups") {
+		groupID = routeTrimPrefix(request.URL.Path, urlLibraryPath+"metricgroups")
 		groupType = library.LibraryItemMetricGroup
 	}
 
@@ -90,9 +90,11 @@ func (server *Server) serveGroup(writer http.ResponseWriter, request *http.Reque
 				return
 			}
 
+			// Clone item
 			group = &library.Group{}
 			utils.Clone(item.(*library.Group), group)
 
+			// Reset item identifier
 			group.ID = ""
 		} else {
 			// Create a new group instance

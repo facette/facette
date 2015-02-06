@@ -2,6 +2,7 @@ package set
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -160,6 +161,28 @@ func TestSetNonTS_IsEqual(t *testing.T) {
 	if !ok {
 		t.Error("IsEqual: set s and t are equal. However it returns false")
 	}
+
+	// same size, different content
+	a := newNonTS()
+	a.Add("1", "2", "3")
+	b := newNonTS()
+	b.Add("4", "5", "6")
+
+	ok = a.IsEqual(b)
+	if ok {
+		t.Error("IsEqual: set a and b are now equal (1). However it returns true")
+	}
+
+	// different size, similar content
+	a = newNonTS()
+	a.Add("1", "2", "3")
+	b = newNonTS()
+	b.Add("1", "2", "3", "4")
+
+	ok = a.IsEqual(b)
+	if ok {
+		t.Error("IsEqual: set s and t are now equal (2). However it returns true")
+	}
 }
 
 func TestSetNonTS_IsSubset(t *testing.T) {
@@ -201,12 +224,17 @@ func TestSetNonTS_IsSuperset(t *testing.T) {
 func TestSetNonTS_String(t *testing.T) {
 	s := newNonTS()
 	if s.String() != "[]" {
-		t.Error("String: output is not what is excepted", s.String())
+		t.Errorf("String: output is not what is excepted '%s'", s.String())
 	}
 
 	s.Add("1", "2", "3", "4")
-	if s.String() != "[1, 2, 3, 4]" {
-		t.Error("String: output is not what is excepted")
+
+	if !strings.HasPrefix(s.String(), "[") {
+		t.Error("String: output should begin with a square bracket")
+	}
+
+	if !strings.HasSuffix(s.String(), "]") {
+		t.Error("String: output should end with a square bracket")
 	}
 }
 
