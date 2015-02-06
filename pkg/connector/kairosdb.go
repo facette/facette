@@ -72,7 +72,7 @@ type KairosdbConnector struct {
 	startRelative		interface{}
 	endAbsolute		int
 	endRelative		interface{}
-	defAggregator		interface{}
+	defaultAggregator	interface{}
 	aggregators		[]metricAggregator
 	series			map[string]map[string]kairosdbSeriesEntry
 }
@@ -90,7 +90,7 @@ func init() {
 			startRelative:	nil,
 			endAbsolute:	0, // Note: Must be > 0 because of config.GetInt() behavior
 			endRelative:	nil,
-			defAggregator:	nil,
+			defaultAggregator:	nil,
 			aggregators:	nil,
 			series:		make(map[string]map[string]kairosdbSeriesEntry),
 		}
@@ -117,7 +117,7 @@ func init() {
 	                return nil, err
 		}
 
-		if connector.defAggregator, err = config.GetJsonObj(settings, "default_aggregator", false); err != nil {
+		if connector.defaultAggregator, err = config.GetJsonObj(settings, "default_aggregator", false); err != nil {
 	                return nil, err
 		}
 
@@ -159,7 +159,7 @@ func init() {
 			return nil, fmt.Errorf("kairosdb[%s]: unable to get KairosDB version: %s", connector.name, err)
 		}
 
-		logger.Log(logger.LevelInfo, "connector", "kairosdb[%s]: `%s' found", connector.name, version)
+		logger.Log(logger.LevelDebug, "connector", "kairosdb[%s]: `%s' found", connector.name, version)
 
 		if version_array[0] != 0 && version_array[1] != 9 && ( version_array[2] != 4 || version_array[2] != 5) {
 			return nil, fmt.Errorf("kairosdb[%s]: KairosDB versions 0.9.4/5 supported only", connector.name)
@@ -347,7 +347,7 @@ func (connector *KairosdbConnector) Refresh(originName string, outputChan chan<-
 			metricName := r.Name
 			aggregator := matchAggregatorPattern(connector.aggregators, metricName)
 			if aggregator == nil {
-				aggregator = connector.defAggregator
+				aggregator = connector.defaultAggregator
 			}
 
 			for _, t := range connector.sourceTags {
