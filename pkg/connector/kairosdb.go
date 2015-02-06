@@ -67,7 +67,7 @@ type KairosdbConnector struct {
 	URL			string
 	insecureTLS		bool
 	timeout			float64
-	srcTags			[]string
+	sourceTags		[]string
 	startAbsolute		int
 	startRelative		interface{}
 	endAbsolute		int
@@ -85,7 +85,7 @@ func init() {
 			name:		name,
 			insecureTLS:	true,
 			timeout:	kairosdbDefaultTimeout,
-			srcTags:	nil,
+			sourceTags:	nil,
 			startAbsolute:	0, // Note: Must be > 0 because of config.GetInt() behavior
 			startRelative:	nil,
 			endAbsolute:	0, // Note: Must be > 0 because of config.GetInt() behavior
@@ -99,7 +99,7 @@ func init() {
 			return nil, err
 		}
 
-	        if connector.srcTags, err = config.GetStringSlice(settings, "srctags", false); err != nil {
+	        if connector.sourceTags, err = config.GetStringSlice(settings, "source_tags", false); err != nil {
 	                return nil, err
 	        }
 
@@ -145,9 +145,9 @@ func init() {
 		if connector.startAbsolute <= 0 && connector.startRelative == nil {
 			connector.startRelative = map[string]interface{}{"value": 3, "unit": "months"}
 		}
-		// Enforce srcTags default
-		if connector.srcTags == nil {
-			connector.srcTags = []string{"host", "server", "device"}
+		// Enforce sourceTags default
+		if connector.sourceTags == nil {
+			connector.sourceTags = []string{"host", "server", "device"}
 		}
                 // Enforce minimal timeout value bound
                 if connector.timeout <= 0 {
@@ -198,7 +198,7 @@ func (connector *KairosdbConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 	}
 	httpClient := http.Client{Transport: httpTransport}
 
-	logger.Log(logger.LevelInfo, "connector", "kairosdb[%s]: API Call to %s: %s", connector.name,
+	logger.Log(logger.LevelDebug, "connector", "kairosdb[%s]: API Call to %s: %s", connector.name,
 		strings.TrimSuffix(connector.URL, "/")+kairosdbURLQueryMetric,
 		string(JSONquery))
 
@@ -350,7 +350,7 @@ func (connector *KairosdbConnector) Refresh(originName string, outputChan chan<-
 				aggregator = connector.defAggregator
 			}
 
-			for _, t := range connector.srcTags {
+			for _, t := range connector.sourceTags {
 				if _, ok := r.Tags[t]; !ok {
 					continue
 				}
@@ -373,7 +373,7 @@ func (connector *KairosdbConnector) Refresh(originName string, outputChan chan<-
 					}
 					sc++
 				}
-				logger.Log(logger.LevelInfo, "connector", "kairosdb[%s]: %d sources for `%s'", connector.name, sc, metricName)
+				logger.Log(logger.LevelDebug, "connector", "kairosdb[%s]: %d sources for `%s'", connector.name, sc, metricName)
 				if aggregator != nil {
 					a, _ := json.Marshal(aggregator);
 					logger.Log(logger.LevelInfo, "connector", "kairosdb[%s]: `%s' applied to `%s'",
@@ -423,20 +423,20 @@ func kairosdbExtractPlots(query *plot.Query, kairosdbSeries map[string]map[strin
 
 	for _, kairosdbPlot := range kairosdbPlots {
 
-		// REVIEW: is there a better approach to retrieve target?
+		// Is there a better approach to retrieve target?
 		var target string = ""
 		for _, series := range query.Series {
 
 			entry := kairosdbSeries[series.Source][series.Metric]
 
-			// REVIEW (KairosDB API): more than one result possible?
+			// (KairosDB API): more than one result possible?
 			m := kairosdbPlot.Results[0].Name
 
 			if _, ok := kairosdbPlot.Results[0].Tags[entry.tag]; !ok {
 				continue
 			}
 
-			// REVIEW (KairosDB API): more than one result possible?
+			// (KairosDB API): more than one result possible?
 			s := kairosdbPlot.Results[0].Tags[entry.tag][0]
 
 			if s == series.Source && m == series.Metric {
@@ -455,7 +455,7 @@ func kairosdbExtractPlots(query *plot.Query, kairosdbSeries map[string]map[strin
 			Summary: make(map[string]plot.Value),
 		}
 
-		// REVIEW (KairosDB API): more than one result possible?
+		// (KairosDB API): more than one result possible?
 		for _, plotPoint := range kairosdbPlot.Results[0].Values {
 			series.Plots = append(
 				series.Plots,
@@ -558,7 +558,7 @@ func compileAggregatorPatterns(aggregators interface{}, connector string) ([]met
         for _, a := range list {
 		aggregator := a.(map[string]interface{})
 	        if re, err = regexp.Compile(aggregator["metric"].(string)); err != nil {
-			logger.Log(logger.LevelInfo, "connector", "kairosdb[%s]: can't compile `%s', skipping",
+			logger.Log(logger.LevelWarning, "connector", "kairosdb[%s]: can't compile `%s', skipping",
 				connector, aggregator["metric"].(string))
 			continue
 	        }

@@ -2,7 +2,7 @@
 	"connector": {
 		"type": "kairosdb",
 		"url": "http://localhost:8080/",
-		"srctags": [ "host", "name" ],
+		"source_tags": [ "host", "name" ],
 		"start_relative": { "value": 6, "unit": "months" },
 		"aggregators": [
 			{ "metric": "^entropy\\.", "aggregator": { "name": "min", "sampling": { "value": 5, "unit": "minutes" } } },
