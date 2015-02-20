@@ -1,5 +1,10 @@
 #include <stdlib.h>
+#include <string.h>
 #include <rrd.h>
+
+#ifndef __COMPAT_RRDTOOL_13x
+#	define __COMPAT_RRDTOOL_13x
+#endif
 
 char *rrdError() {
 	char *err = NULL;
@@ -36,7 +41,13 @@ char *rrdGraph(rrd_info_t **ret, int argc, char **argv) {
 
 char *rrdInfo(rrd_info_t **ret, char *filename) {
 	rrd_clear_error();
+#ifdef __COMPAT_RRDTOOL_13x
+	//RRDtool 1.3.x does not export rrd_info_r
+	char *argv[2] = {NULL,filename};
+	*ret = rrd_info(2,argv);
+#else
 	*ret = rrd_info_r(filename);
+#endif
 	return rrdError();
 }
 
