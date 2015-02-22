@@ -3,6 +3,8 @@ package utils
 import (
 	"os"
 	"path/filepath"
+
+	"github.com/facette/facette/thirdparty/github.com/stretchr/powerwalk"
 )
 
 func walkDir(dirPath string, linkPath string, walkFunc filepath.WalkFunc) error {
@@ -11,7 +13,7 @@ func walkDir(dirPath string, linkPath string, walkFunc filepath.WalkFunc) error 
 	}
 
 	// Search for files recursively
-	return filepath.Walk(dirPath, func(filePath string, fileInfo os.FileInfo, err error) error {
+	return powerwalk.Walk(dirPath, func(filePath string, fileInfo os.FileInfo, err error) error {
 		mode := fileInfo.Mode() & os.ModeType
 
 		if mode == os.ModeSymlink {
