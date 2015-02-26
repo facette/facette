@@ -132,7 +132,7 @@ function graphDraw(graph, postpone, delay, preview) {
             }
 
             return $.ajax({
-                url: urlPrefix + '/api/v1/library/graphs/plots',
+                url: urlPrefix + '/api/v1/plots',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(query),

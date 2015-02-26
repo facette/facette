@@ -20,8 +20,6 @@ func (server *Server) serveLibrary(writer http.ResponseWriter, request *http.Req
 		server.serveUnit(writer, request)
 	} else if routeMatch(request.URL.Path, urlLibraryPath+"expand") {
 		server.serveGroupExpand(writer, request)
-	} else if routeMatch(request.URL.Path, urlLibraryPath+"graphs/plots") {
-		server.serveGraphPlots(writer, request)
 	} else if routeMatch(request.URL.Path, urlLibraryPath+"graphs") {
 		server.serveGraph(writer, request)
 	} else if routeMatch(request.URL.Path, urlLibraryPath+"collections") {
