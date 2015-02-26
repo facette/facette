@@ -135,20 +135,20 @@ func GetBool(config map[string]interface{}, setting string, mandatory bool) (boo
 
 // GetStringSlice returns the string slice of a configuration setting.
 func GetStringSlice(config map[string]interface{}, setting string, mandatory bool) ([]string, error) {
-        value, err := getSetting(config, setting, reflect.Slice, mandatory, nil)
+	value, err := getSetting(config, setting, reflect.Slice, mandatory, nil)
 	if err != nil || value == nil {
 		return nil, err
 	}
-        array := make([]string, 0)
+	array := make([]string, 0)
 	for _, v := range value.([]interface{}) {
 		if reflect.ValueOf(v).Kind() != reflect.String {
-	                return nil, fmt.Errorf("setting `%s' should be slice of strings and not %s", setting,
+			return nil, fmt.Errorf("setting `%s' should be slice of strings and not %s", setting,
 				reflect.ValueOf(v).Kind().String())
 		} else {
-			array = append(array, v.(string));
+			array = append(array, v.(string))
 		}
 	}
-        return array, nil
+	return array, nil
 }
 
 // GetJsonObj returns the JSON Object interface{} of a configuration setting.

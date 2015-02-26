@@ -11,9 +11,9 @@ import (
 	"net"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
-	"strconv"
 
 	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/config"
@@ -38,9 +38,9 @@ type kairosdbSeriesEntry struct {
 }
 
 type metricAggregator struct {
-        pattern string
-	re	*regexp.Regexp
-        hook    interface{}
+	pattern string
+	re      *regexp.Regexp
+	hook    interface{}
 }
 
 type MetricsQueryEntry struct {
@@ -63,18 +63,18 @@ type MetricsQueryResult struct {
 
 // KairosdbConnector represents the main structure of the Kairosdb connector.
 type KairosdbConnector struct {
-	name			string
-	URL			string
-	insecureTLS		bool
-	timeout			float64
-	sourceTags		[]string
-	startAbsolute		int
-	startRelative		interface{}
-	endAbsolute		int
-	endRelative		interface{}
-	defaultAggregator	interface{}
-	aggregators		[]metricAggregator
-	series			map[string]map[string]kairosdbSeriesEntry
+	name              string
+	URL               string
+	insecureTLS       bool
+	timeout           float64
+	sourceTags        []string
+	startAbsolute     int
+	startRelative     interface{}
+	endAbsolute       int
+	endRelative       interface{}
+	defaultAggregator interface{}
+	aggregators       []metricAggregator
+	series            map[string]map[string]kairosdbSeriesEntry
 }
 
 func init() {
@@ -82,49 +82,49 @@ func init() {
 		var err error
 		var aggregators interface{}
 		connector := &KairosdbConnector{
-			name:		name,
-			insecureTLS:	true,
-			timeout:	kairosdbDefaultTimeout,
-			sourceTags:	nil,
-			startAbsolute:	0, // Note: Must be > 0 because of config.GetInt() behavior
-			startRelative:	nil,
-			endAbsolute:	0, // Note: Must be > 0 because of config.GetInt() behavior
-			endRelative:	nil,
-			defaultAggregator:	nil,
-			aggregators:	nil,
-			series:		make(map[string]map[string]kairosdbSeriesEntry),
+			name:              name,
+			insecureTLS:       true,
+			timeout:           kairosdbDefaultTimeout,
+			sourceTags:        nil,
+			startAbsolute:     0, // Note: Must be > 0 because of config.GetInt() behavior
+			startRelative:     nil,
+			endAbsolute:       0, // Note: Must be > 0 because of config.GetInt() behavior
+			endRelative:       nil,
+			defaultAggregator: nil,
+			aggregators:       nil,
+			series:            make(map[string]map[string]kairosdbSeriesEntry),
 		}
 
 		if connector.URL, err = config.GetString(settings, "url", true); err != nil {
 			return nil, err
 		}
 
-	        if connector.sourceTags, err = config.GetStringSlice(settings, "source_tags", false); err != nil {
-	                return nil, err
-	        }
+		if connector.sourceTags, err = config.GetStringSlice(settings, "source_tags", false); err != nil {
+			return nil, err
+		}
 
-	        if connector.startAbsolute, err = config.GetInt(settings, "start_absolute", false); err != nil {
-	                return nil, err
-	        }
-	        if connector.endAbsolute, err = config.GetInt(settings, "end_absolute", false); err != nil {
-	                return nil, err
-	        }
+		if connector.startAbsolute, err = config.GetInt(settings, "start_absolute", false); err != nil {
+			return nil, err
+		}
+		if connector.endAbsolute, err = config.GetInt(settings, "end_absolute", false); err != nil {
+			return nil, err
+		}
 
 		if connector.startRelative, err = config.GetJsonObj(settings, "start_relative", false); err != nil {
-	                return nil, err
+			return nil, err
 		}
 		if connector.endRelative, err = config.GetJsonObj(settings, "end_relative", false); err != nil {
-	                return nil, err
+			return nil, err
 		}
 
 		if connector.defaultAggregator, err = config.GetJsonObj(settings, "default_aggregator", false); err != nil {
-	                return nil, err
+			return nil, err
 		}
 
 		if aggregators, err = config.GetJsonArray(settings, "aggregators", false); err != nil {
-	                return nil, err
+			return nil, err
 		}
-	        connector.aggregators = compileAggregatorPatterns(aggregators, connector.name)
+		connector.aggregators = compileAggregatorPatterns(aggregators, connector.name)
 
 		if connector.insecureTLS, err = config.GetBool(settings, "allow_insecure_tls", false); err != nil {
 			return nil, err
@@ -149,19 +149,19 @@ func init() {
 		if connector.sourceTags == nil {
 			connector.sourceTags = []string{"host", "server", "device"}
 		}
-                // Enforce minimal timeout value bound
-                if connector.timeout <= 0 {
-                        connector.timeout = kairosdbDefaultTimeout
-                }
+		// Enforce minimal timeout value bound
+		if connector.timeout <= 0 {
+			connector.timeout = kairosdbDefaultTimeout
+		}
 
-                version, version_array, err := kairosdbGetVersion(connector)
+		version, version_array, err := kairosdbGetVersion(connector)
 		if err != nil {
 			return nil, fmt.Errorf("kairosdb[%s]: unable to get KairosDB version: %s", connector.name, err)
 		}
 
 		logger.Log(logger.LevelDebug, "connector", "kairosdb[%s]: `%s' found", connector.name, version)
 
-		if version_array[0] != 0 && version_array[1] != 9 && ( version_array[2] != 4 || version_array[2] != 5) {
+		if version_array[0] != 0 && version_array[1] != 9 && (version_array[2] != 4 || version_array[2] != 5) {
 			return nil, fmt.Errorf("kairosdb[%s]: KairosDB versions 0.9.4/5 supported only", connector.name)
 		}
 
@@ -190,7 +190,7 @@ func (connector *KairosdbConnector) GetPlots(query *plot.Query) ([]plot.Series, 
 	httpTransport := &http.Transport{
 		Dial: (&net.Dialer{
 			DualStack: true,
-			Timeout: time.Duration(connector.timeout) * time.Second,
+			Timeout:   time.Duration(connector.timeout) * time.Second,
 		}).Dial,
 	}
 	if connector.insecureTLS {
@@ -249,7 +249,7 @@ func (connector *KairosdbConnector) Refresh(originName string, outputChan chan<-
 	httpTransport := &http.Transport{
 		Dial: (&net.Dialer{
 			DualStack: true,
-			Timeout: time.Duration(connector.timeout) * time.Second,
+			Timeout:   time.Duration(connector.timeout) * time.Second,
 		}).Dial,
 	}
 
@@ -285,11 +285,11 @@ func (connector *KairosdbConnector) Refresh(originName string, outputChan chan<-
 		return fmt.Errorf("kairosdb[%s]: unable to unmarshal JSON data: %s", connector.name, err)
 	}
 
-        metrics := make([]map[string]string, 0)
+	metrics := make([]map[string]string, 0)
 	for _, m := range JSONmetrics["results"] {
 		metrics = append(metrics, map[string]string{"name": m})
 	}
-        query := map[string]interface{}{"metrics": metrics}
+	query := map[string]interface{}{"metrics": metrics}
 	if connector.startAbsolute > 0 {
 		query["start_absolute"] = connector.startAbsolute
 	} else {
@@ -360,9 +360,9 @@ func (connector *KairosdbConnector) Refresh(originName string, outputChan chan<-
 						connector.series[sourceName] = make(map[string]kairosdbSeriesEntry)
 					}
 					connector.series[sourceName][metricName] = kairosdbSeriesEntry{
-						tag: t,
-						source: sourceName,
-						metric: metricName,
+						tag:        t,
+						source:     sourceName,
+						metric:     metricName,
 						aggregator: aggregator,
 					}
 					outputChan <- &catalog.Record{
@@ -375,7 +375,7 @@ func (connector *KairosdbConnector) Refresh(originName string, outputChan chan<-
 				}
 				logger.Log(logger.LevelDebug, "connector", "kairosdb[%s]: %d sources for `%s'", connector.name, sc, metricName)
 				if aggregator != nil {
-					a, _ := json.Marshal(aggregator);
+					a, _ := json.Marshal(aggregator)
 					logger.Log(logger.LevelInfo, "connector", "kairosdb[%s]: `%s' applied to `%s'",
 						connector.name, string(a), metricName)
 				}
@@ -394,7 +394,7 @@ func kairosdbBuildJSONQuery(query *plot.Query, kairosdbSeries map[string]map[str
 	}
 
 	q := PlotsQuery{StartAbsolute: query.StartTime.Unix() * 1000,
-			EndAbsolute: query.EndTime.Unix() * 1000}
+		EndAbsolute: query.EndTime.Unix() * 1000}
 
 	for _, series := range query.Series {
 		entry := kairosdbSeries[series.Source][series.Metric]
@@ -484,7 +484,7 @@ func kairosdbGetVersion(connector *KairosdbConnector) (string, [3]int, error) {
 	httpTransport := &http.Transport{
 		Dial: (&net.Dialer{
 			DualStack: true,
-			Timeout: time.Duration(connector.timeout) * time.Second,
+			Timeout:   time.Duration(connector.timeout) * time.Second,
 		}).Dial,
 	}
 	if connector.insecureTLS {
@@ -532,7 +532,7 @@ func kairosdbGetVersion(connector *KairosdbConnector) (string, [3]int, error) {
 	return "", array, fmt.Errorf("can't fetch KairosDB version")
 }
 
-func matchAggregatorPattern(aggregators []metricAggregator, metric string) (interface{}) {
+func matchAggregatorPattern(aggregators []metricAggregator, metric string) interface{} {
 	if aggregators == nil {
 		return nil
 	}
@@ -544,7 +544,7 @@ func matchAggregatorPattern(aggregators []metricAggregator, metric string) (inte
 	return nil
 }
 
-func compileAggregatorPatterns(aggregators interface{}, connector string) ([]metricAggregator) {
+func compileAggregatorPatterns(aggregators interface{}, connector string) []metricAggregator {
 	var re *regexp.Regexp
 	var err error
 
@@ -555,13 +555,13 @@ func compileAggregatorPatterns(aggregators interface{}, connector string) ([]met
 	list := aggregators.([]interface{})
 	res := make([]metricAggregator, 0)
 
-        for _, a := range list {
+	for _, a := range list {
 		aggregator := a.(map[string]interface{})
-	        if re, err = regexp.Compile(aggregator["metric"].(string)); err != nil {
+		if re, err = regexp.Compile(aggregator["metric"].(string)); err != nil {
 			logger.Log(logger.LevelWarning, "connector", "kairosdb[%s]: can't compile `%s', skipping",
 				connector, aggregator["metric"].(string))
 			continue
-	        }
+		}
 		res = append(res, metricAggregator{pattern: aggregator["metric"].(string), re: re, hook: aggregator["aggregator"]})
 	}
 	return res
