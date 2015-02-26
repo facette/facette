@@ -4,6 +4,7 @@ VERSION = 0.3.0dev
 
 TAGS ?= facette \
 	graphite \
+	kairosdb \
 	influxdb \
 	rrd
 
