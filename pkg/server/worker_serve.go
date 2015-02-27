@@ -18,6 +18,7 @@ const (
 	urlShowPath    string = "/show/"
 	urlCatalogPath string = "/api/v1/catalog/"
 	urlLibraryPath string = "/api/v1/library/"
+	urlPlotsPath   string = "/api/v1/plots"
 	urlStatsPath   string = "/api/v1/stats"
 )
 
@@ -54,6 +55,7 @@ func workerServeRun(w *worker.Worker, args ...interface{}) {
 	router.HandleFunc(urlStaticPath, server.serveStatic)
 	router.HandleFunc(urlCatalogPath, server.serveCatalog)
 	router.HandleFunc(urlLibraryPath, server.serveLibrary)
+	router.HandleFunc(urlPlotsPath, server.servePlots)
 	router.HandleFunc(urlAdminPath, server.serveAdmin)
 	router.HandleFunc(urlBrowsePath, server.serveBrowse)
 	router.HandleFunc(urlShowPath, server.serveShow)
@@ -88,7 +90,7 @@ func workerServeRun(w *worker.Worker, args ...interface{}) {
 		// Change owning user and group
 		if server.Config.SocketUser >= 0 || server.Config.SocketGroup >= 0 {
 			logger.Log(logger.LevelDebug, "serveWorker", "changing ownership of unix socket to UID %v and GID %v",
-					   server.Config.SocketUser, server.Config.SocketGroup)
+				server.Config.SocketUser, server.Config.SocketGroup)
 			err = os.Chown(address, server.Config.SocketUser, server.Config.SocketGroup)
 			if err != nil {
 				listener.Close()

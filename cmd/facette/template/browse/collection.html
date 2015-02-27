@@ -20,6 +20,7 @@
 				<dd><a href="{{ .URLPrefix }}{{ .Request.URL.Path }}"><span class="icon icon-remove"></span> Remove Filter</a></dd>{{ else }}
 				<dd><a href="{{ .URLPrefix }}/browse/"><span class="icon icon-arrow-left"></span> Back to Collections</a></dd>{{ end }}{{ range $index, $entry := .Collection.Entries }}
 				<dd><a href="#graph-{{ $index }}" title="{{ $entry.Options.title }}">{{ $entry.Options.title }}</a></dd>{{ end }}{{ else }}
+				<dd><a href="{{ .URLPrefix }}/browse/"><span class="icon icon-arrow-left"></span> Back to Collections</a></dd>
 				<dd class="placeholder icon icon-info">No graph</dd>{{ end }}
 			</dl>
 		</nav>
