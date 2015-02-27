@@ -24,8 +24,6 @@ func (server *Server) servePlots(writer http.ResponseWriter, request *http.Reque
 		item  interface{}
 	)
 
-	fmt.Printf("%v\n", request)
-
 	if request.Method != "POST" && request.Method != "HEAD" {
 		server.serveResponse(writer, serverResponse{mesgMethodNotAllowed}, http.StatusMethodNotAllowed)
 		return
