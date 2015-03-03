@@ -20,6 +20,7 @@ import (
 type InfluxDBConnector struct {
 	name     string
 	host     string
+	useTLS   bool
 	username string
 	password string
 	database string
@@ -44,6 +45,10 @@ func init() {
 		}
 
 		if connector.host, err = config.GetString(settings, "host", false); err != nil {
+			return nil, err
+		}
+
+		if connector.useTLS, err = config.GetBool(settings, "use_tls", false); err != nil {
 			return nil, err
 		}
 
@@ -73,6 +78,7 @@ func init() {
 			Username: connector.username,
 			Password: connector.password,
 			Database: connector.database,
+			IsSecure: connector.useTLS,
 		})
 
 		if err != nil {
