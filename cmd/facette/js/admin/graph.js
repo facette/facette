@@ -544,12 +544,13 @@ function adminGraphSetupTerminate() {
                     $itemSrc = $(this),
                     value = $itemSrc.data('value');
 
+                $item = adminGraphCreateProxy(PROXY_TYPE_SERIES, $itemSrc, $listSeries);
+
                 if (value.source.startsWith('group:') || value.metric.startsWith('group:')) {
                     expandQuery.push([value.origin, value.source, value.metric]);
                     expand = true;
+                    $item.addClass('expandable');
                 }
-
-                $item = adminGraphCreateProxy(PROXY_TYPE_SERIES, $itemSrc, $listSeries);
 
                 if ($listOpers.find('[data-series="' + $itemSrc.attr('data-series') + '"]').length > 0)
                     $item.addClass('linked');
@@ -571,7 +572,13 @@ function adminGraphSetupTerminate() {
                     listGetItems($listSeries).each(function (index) {
                         var $item = $(this);
 
-                        if (data[index]) {
+                        if (!$item.hasClass('expandable')) {
+                            $item.find('.count').remove();
+                            $item.find('a[href$=#expand-series], a[href$=#collapse-series]').remove();
+                            return;
+                        }
+
+                        if (data[index] && data[index].length > 0) {
                             $item.find('.count').text(data[index].length);
 
                             if (data[index].length > 1) {
