@@ -16,7 +16,7 @@ function adminGraphGetData() {
 
 function adminGraphGetGroup(entry) {
     var group,
-        seriesValue;
+        value;
 
     if (entry.attr('data-group')) {
         group = $.extend({
@@ -29,16 +29,17 @@ function adminGraphGetGroup(entry) {
                 group.series.push(adminGraphGetValue($(this)));
             });
     } else {
-        seriesValue = adminGraphGetValue(entry);
+        value = $.extend({}, adminGraphGetValue(entry));
 
         group = {
-            name: seriesValue && seriesValue.name || entry.attr('data-series'),
+            name: value && value.name || entry.attr('data-series'),
             type: OPER_GROUP_TYPE_NONE,
             series: [],
-            options: {}
+            options: $.extend({}, value.options)
         };
 
-        group.series.push(seriesValue);
+        delete value.options;
+        group.series.push(value);
     }
 
     return group;
@@ -158,6 +159,9 @@ function adminGraphCreateGroup(name, value) {
 
         if (value.options.unit)
             $item.find('a[href=#set-unit]').text(value.options.unit);
+
+        $item.find('a[href=#set-consolidate]').text(adminGraphGetConsolidateLabel(value.options.consolidate ||
+            CONSOLIDATE_AVERAGE));
     }
 
     return $item;
@@ -247,6 +251,9 @@ function adminGraphCreateProxy(type, item, list) {
 
         if (value.options.unit)
             $item.find('a[href=#set-unit]').text(value.options.unit);
+
+        $item.find('a[href=#set-consolidate]').text(adminGraphGetConsolidateLabel(value.options.consolidate ||
+            CONSOLIDATE_AVERAGE));
     }
 
     return $item;
@@ -441,6 +448,23 @@ function adminGraphAutoNameSeries(force) {
 
         domFillItem($item, value);
     });
+}
+
+function adminGraphGetConsolidateLabel(type) {
+    switch (type) {
+        case CONSOLIDATE_AVERAGE:
+            return 'avg';
+        case CONSOLIDATE_LAST:
+            return 'last';
+        case CONSOLIDATE_MAX:
+            return 'max';
+        case CONSOLIDATE_MIN:
+            return 'min';
+        case CONSOLIDATE_SUM:
+            return 'sum';
+        default:
+            return '';
+    }
 }
 
 function adminGraphSetupTerminate() {
@@ -784,6 +808,9 @@ function adminGraphSetupTerminate() {
 
                     if (expands[seriesName].options.unit !== 0)
                         $item.find('a[href=#set-unit]').text(expands[seriesName].options.unit);
+
+                    if (expands[seriesName].options.consolidate !== 0)
+                        $item.find('a[href=#set-consolidate]').text(expands[seriesName].options.consolidate);
                 }
 
                 $item.find('.count').remove();
@@ -1154,6 +1181,64 @@ function adminGraphSetupTerminate() {
                         _init: true
                     });
             });
+        });
+
+        linkRegister('set-consolidate', function (e) {
+            var $target = $(e.target),
+                $item = $target.closest('[data-series], [data-group]'),
+                $input,
+                $overlay,
+                value = adminGraphGetValue($item),
+                consolidateValue = value.options && value.options.consolidate ?
+                    value.options.consolidate : CONSOLIDATE_AVERAGE;
+
+            $overlay = overlayCreate('select', {
+                message: $.t('graph.labl_consolidate'),
+                value: consolidateValue,
+                callbacks: {
+                    validate: function (data) {
+                        data = parseInt(data, 10);
+
+                        value.options = $.extend(value.options || {}, {
+                            consolidate: data
+                        });
+
+                        $item.find('a[href=#set-consolidate]').text(adminGraphGetConsolidateLabel(data));
+                    }
+                },
+                labels: {
+                    validate: {
+                        text: $.t('graph.labl_consolidate_set')
+                    }
+                },
+                reset: 0,
+                options: [
+                    [$.t('graph.labl_consolidate_average'), CONSOLIDATE_AVERAGE],
+                    [$.t('graph.labl_consolidate_last'), CONSOLIDATE_LAST],
+                    [$.t('graph.labl_consolidate_max'), CONSOLIDATE_MAX],
+                    [$.t('graph.labl_consolidate_min'), CONSOLIDATE_MIN],
+                    [$.t('graph.labl_consolidate_sum'), CONSOLIDATE_SUM],
+                ]
+            });
+
+            $overlay.find('button[name=reset]').hide();
+
+            $overlay.find('.select')
+               .addClass('full')
+               .find('.menu .menuitem:first').remove();
+
+            $input = $overlay.find('input[name=value]').hide();
+
+            $overlay.find('select')
+                .on('change', function (e) {
+                    if (e.target.value)
+                        $input.val(e.target.value);
+                })
+                .val(consolidateValue)
+                .trigger({
+                    type: 'change',
+                    _init: true
+                });
         });
 
         // Attach events

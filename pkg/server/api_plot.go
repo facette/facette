@@ -279,7 +279,11 @@ func makePlotsResponse(plotSeries map[string][]plot.Series, plotReq *PlotRequest
 	}
 
 	for _, groupItem := range graph.Groups {
-		var groupSeries []plot.Series
+		var (
+			groupConsolidate int
+			groupSeries      []plot.Series
+			err              error
+		)
 
 		seriesOptions := make(map[string]map[string]interface{})
 		seriesOptions[groupItem.Name] = groupItem.Options
@@ -306,12 +310,17 @@ func makePlotsResponse(plotSeries map[string][]plot.Series, plotReq *PlotRequest
 		}
 
 		// Normalize all series plots on the same time step
-		groupSeries, err := plot.Normalize(
+		groupConsolidate, err = config.GetInt(groupItem.Options, "consolidate", true)
+		if err != nil {
+			groupConsolidate = plot.ConsolidateAverage
+		}
+
+		groupSeries, err = plot.Normalize(
 			groupSeries,
 			plotReq.startTime,
 			plotReq.endTime,
 			plotReq.Sample,
-			plot.ConsolidateAverage,
+			groupConsolidate,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("unable to consolidate series: %s", err)
