@@ -44,6 +44,10 @@ section {
 					&:hover {
 						color: @TextColorB;
 					}
+
+					&[href^="#rename-"] {
+						margin-right: 0.75em;
+					}
 				}
 
 				&.visible {
@@ -84,6 +88,12 @@ section {
 				line-height: 3em;
 			}
 
+			.type {
+				& + .actions {
+					font-size: 0.9em;
+				}
+			}
+
 			.color {
 				float: left;
 				text-decoration: none;
@@ -116,7 +126,7 @@ section {
 				}
 
 				& + .actions {
-					font-size: 0.8em;
+					font-size: 0.9em;
 
 					a::before {
 						float: left;
