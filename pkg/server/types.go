@@ -129,6 +129,31 @@ func (r CollectionListResponse) slice(i, j int) interface{} {
 	return r[i:j]
 }
 
+// GraphResponse represents a graph response structure in the server backend.
+type GraphResponse struct {
+	ItemResponse
+	Link string `json:"link,omitempty"`
+}
+
+// GraphListResponse represents a list of graphs response structure in the backend server.
+type GraphListResponse []*GraphResponse
+
+func (r GraphListResponse) Len() int {
+	return len(r)
+}
+
+func (r GraphListResponse) Less(i, j int) bool {
+	return r[i].Name < r[j].Name
+}
+
+func (r GraphListResponse) Swap(i, j int) {
+	r[i], r[j] = r[j], r[i]
+}
+
+func (r GraphListResponse) slice(i, j int) interface{} {
+	return r[i:j]
+}
+
 // ScaleValueResponse represents a scale value response structure in the server backend.
 type ScaleValueResponse struct {
 	Name  string  `json:"name"`
@@ -186,6 +211,7 @@ type PlotResponse struct {
 	End         string            `json:"end"`
 	Name        string            `json:"name"`
 	Description string            `json:"description"`
+	Title       string            `json:"title"`
 	Type        int               `json:"type"`
 	StackMode   int               `json:"stack_mode"`
 	UnitType    int               `json:"unit_type"`

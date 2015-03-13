@@ -15,7 +15,7 @@
 {{ define "content" }}
 		<article class="frame" data-pane="graph-show" data-paneopts="id: {{ .Graph.ID }}">
 			<section class="scrollarea full">{{ template "template_graph" }}
-				<div data-graph="{{ .Graph.ID }}" data-graphopts="title: {{ .Graph.Name }}{{ if ne .Range "" }}; range: {{ .Range }}{{ end }}; expand: false" id="graph-0"></div>
+				<div data-graph="{{ .Graph.ID }}" data-graphopts="{{ if ne .Range "" }}range: {{ .Range }}; {{ end }}expand: false" id="graph-0"></div>
 			</section>
 		</article>
 {{ end }}

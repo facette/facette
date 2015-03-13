@@ -30,19 +30,32 @@
     margin-right: 0.5em;
 }
 
-.icon-stack {
-    position: relative;
+body > nav {
+    .icon-stack {
+        position: relative;
 
-    &::after {
+        &::after {
+            .icon;
+            bottom: -0.35em;
+            font-size: 0.85em;
+            position: absolute;
+            left: 2.65em;
+            text-shadow: 1px 0 0 @NavBackgroundColor,
+                         0 1px 0 @NavBackgroundColor,
+                         -1px 0 0 @NavBackgroundColor,
+                         0 -1px 0 @NavBackgroundColor;
+        }
+    }
+}
+
+article > header {
+    .icon-stack::after {
         .icon;
-        bottom: -0.35em;
-        font-size: 0.85em;
-        position: absolute;
-        left: 2.65em;
-        text-shadow: 1px 0 0 @NavBackgroundColor,
-                     0 1px 0 @NavBackgroundColor,
-                     -1px 0 0 @NavBackgroundColor,
-                     0 -1px 0 @NavBackgroundColor;
+        margin-left: -0.75em;
+        text-shadow: 2px 0 0 @MainColor,
+                     0 2px 0 @MainColor,
+                     -2px 0 0 @MainColor,
+                     0 -2px 0 @MainColor;
     }
 }
 
@@ -77,6 +90,7 @@
 .icon-link::before         { content: '\f0c1'; }
 .icon-copy::before         { content: '\f0c5'; }
 .icon-auto::before         { content: '\f0d0'; }
+.icon-template::before     { content: '\f0f6'; }
 .icon-fold::before         { content: '\f102'; }
 .icon-unfold::before       { content: '\f103'; }
 .icon-scale::before        { content: '\f125'; }
@@ -91,6 +105,7 @@
 .icon-toggle-off::before   { content: '\f204'; }
 .icon-toggle-on::before    { content: '\f205'; }
 
+.icon-stack-add::after     { content: '\f055'; }
 .icon-stack-source::after  { content: '\f05b'; }
 .icon-stack-metric::after  { content: '\f0ae'; }
 

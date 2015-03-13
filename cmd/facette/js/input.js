@@ -100,6 +100,7 @@ function inputHandleKeyComplete(e) {
     var $target = $(e.target),
         $input = $target.closest('[data-input]'),
         $menu,
+        inputOpts,
         length,
         name = $input.attr('data-input'),
         value;
@@ -155,6 +156,13 @@ function inputHandleKeyComplete(e) {
 
     if (!e.target.value)
         $target.removeData('value');
+
+    // Stop if ignore pattern found
+    inputOpts = $input.opts('input') || {};
+    if (inputOpts.ignorepattern && e.target.value.indexOf(inputOpts.ignorepattern) != -1) {
+        menuToggle($menu, false);
+        return;
+    }
 
     // Stop if value didn't change or empty
     if (!e._autofill) {
@@ -236,11 +244,13 @@ function inputHandleKeyComplete(e) {
                     $target
                         .data('value', entries[0])
                         .val(entries[0].name)
-                        .select()
                         .trigger({
                             type: 'change',
                             _autofill: true
                         });
+
+                    if (!e._init)
+                        $target.select();
                 }
             } else {
                 inputUpdate($input, items);
@@ -364,7 +374,7 @@ function inputUpdate(input, data) {
     menuToggle($menu, true);
 
     if ($menu.find('[data-menuitem]').length === 0) {
-        menuSay($menu, 'No match', 'warn');
+        menuSay($menu, $.t('main.mesg_nomatch'), 'warn');
     } else {
         field = input.children(':input').get(0);
 

@@ -14,6 +14,39 @@ section {
 			margin: 1em 0;
 		}
 
+		.listmenu {
+			line-height: 1.8em;
+			position: absolute;
+			right: 2em;
+			top: 2em;
+
+			ul {
+				list-style-type: none;
+				overflow: auto;
+				padding: 0;
+
+				li {
+					border-radius: 0.2em;
+					color: fade(@TextColorB, 50);
+					float: left;
+					padding: 0 0.5em;
+
+					& + li {
+						margin-left: 1em;
+					}
+
+					&.current {
+						background-color: @FooterBackgroundColor;
+						color: fade(@TextColorB, 75);
+					}
+
+					a {
+						color: inherit;
+						text-decoration: none;
+					}
+				}
+			}
+		}
 
 		.listitem {
 			border-bottom: 1px solid @FooterBackgroundColor;
@@ -132,6 +165,12 @@ section {
 						float: left;
 						font-size: 1.2em;
 					}
+				}
+
+				&.linked::before {
+					.icon;
+					content: '\f0c1';
+					margin-right: 0.35em;
 				}
 			}
 

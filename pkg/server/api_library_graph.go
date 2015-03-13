@@ -99,6 +99,16 @@ func (server *Server) serveGraph(writer http.ResponseWriter, request *http.Reque
 			return
 		}
 
+		// Check for graph type consistency (either a graph or an instance but not both)
+		if !graph.Template && (graph.Link != "" || len(graph.Attributes) > 0) &&
+			(graph.Description != "" || graph.Title != "" || graph.Type != 0 || graph.StackMode != 0 ||
+				graph.UnitType != 0 || graph.UnitLegend != "" || graph.Groups != nil) ||
+			graph.Template && (graph.Link != "" || len(graph.Attributes) > 0) {
+			server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
+			return
+		}
+
+		// Store graph item
 		err := server.Library.StoreItem(graph, library.LibraryItemGraph)
 		if response, status := server.parseError(writer, request, err); status != http.StatusOK {
 			logger.Log(logger.LevelError, "server", "%s", err)
@@ -120,7 +130,7 @@ func (server *Server) serveGraph(writer http.ResponseWriter, request *http.Reque
 
 func (server *Server) serveGraphList(writer http.ResponseWriter, request *http.Request) {
 	var (
-		items         ItemListResponse
+		items         GraphListResponse
 		offset, limit int
 	)
 
@@ -151,7 +161,7 @@ func (server *Server) serveGraphList(writer http.ResponseWriter, request *http.R
 	}
 
 	// Fill graphs list
-	items = make(ItemListResponse, 0)
+	items = make(GraphListResponse, 0)
 
 	// Flag for listing only graph templates
 	showTemplates := request.FormValue("templates") == "true" || request.FormValue("templates") == "1"
@@ -188,11 +198,14 @@ func (server *Server) serveGraphList(writer http.ResponseWriter, request *http.R
 			}
 		}
 
-		items = append(items, &ItemResponse{
-			ID:          graph.ID,
-			Name:        graph.Name,
-			Description: graph.Description,
-			Modified:    graph.Modified.Format(time.RFC3339),
+		items = append(items, &GraphResponse{
+			ItemResponse: ItemResponse{
+				ID:          graph.ID,
+				Name:        graph.Name,
+				Description: graph.Description,
+				Modified:    graph.Modified.Format(time.RFC3339),
+			},
+			Link: graph.Link,
 		})
 	}
 

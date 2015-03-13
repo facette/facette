@@ -1,0 +1,68 @@
+{{ define "title" }}Administration Panel: Graphs — Facette{{ end }}
+
+{{ define "head" }}
+		<script src="{{ .URLPrefix }}{{ asset "/static/jquery.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/i18next.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/highcharts.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/moment.js" }}"></script>
+		<script src="{{ .URLPrefix }}{{ asset "/static/facette.js" }}"></script>
+{{ end }}
+
+{{ define "content" }}
+		<article data-pane="graph-link-edit" data-paneopts="section: {{ .Section }}{{ if ne .Path "add" }}; id: {{ .Path }}{{ end }}">
+			<header>
+				<h1>Administration Panel — {{ if eq .Path "add" }}New From Template{{ else }}Edit Graph{{ end }}</h1>
+			</header>
+
+			<footer>
+				<button class="danger" name="step-cancel">Cancel</button>
+				<button class="icon icon-prev" name="step-prev">Previous</button>
+				<button class="icon icon-next" name="step-next">Next</button>
+				<button name="step-save">Save Graph</button>
+			</footer>
+
+			<section data-step="1">
+				<div class="column">
+					<h1>Graph Definition</h1>
+
+					<div class="block">
+						<h2>General Information</h2>
+
+						<label for="graph-name">Name:</label>
+						<input class="full input" data-input="graph-name" data-inputopts="check: true" id="graph-name" name="graph-name" type="text">
+
+						<label for="graph">Source Template:</label>
+						<input data-input="graph" data-inputopts="sources: library/graphs/?templates=1; autofill: false" id="graph" name="graph" type="text">
+						<button name="graph-ok">OK</button>
+					</div>
+
+					<div class="block">
+						<h2>Template Attributes</h2>
+
+						<table class="list graphattrs" data-list="step-1-attrs">
+							<tbody>
+								<tr><td class="listmesg" data-listmesg="step-1-attrs" colspan="2"></td></tr>
+								<tr class="listitem" data-listtmpl="step-1-attrs">
+									<td class="key"><input type="text" disabled="disabled"></td>
+									<td class="value"><input type="text"></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<div class="column">
+					<h1>Graph Preview</h1>
+
+					<div class="scrollarea">
+						<div class="graphitem preview" data-graph="" data-graphopts="range: -1h">
+							<div class="placeholder"><span class="icon icon-arrow-left"></span> Please choose a source template</div>
+
+							<div class="graphcntr">
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+		</article>
+{{ end }}

@@ -39,6 +39,9 @@ function paneGoto(pane, step, initOnly) {
         $item.find('button[name=step-save]').attr('disabled', 'disabled');
     }
 
+    if (ADMIN_PANES[pane].count == 1)
+        $item.find('button[name=step-prev], button[name=step-next]').hide();
+
     ADMIN_PANES[pane].last   = ADMIN_PANES[pane].active;
     ADMIN_PANES[pane].active = step;
 }

@@ -34,19 +34,20 @@ const (
 // Graph represents a graph containing list of series.
 type Graph struct {
 	Item
-	Template bool `json:"template"`
 
 	// For plain/template graphs definitions
-	Title      string       `json:"title"`
-	Type       int          `json:"type"`
-	StackMode  int          `json:"stack_mode"`
-	UnitType   int          `json:"unit_type"`
-	UnitLegend string       `json:"unit_legend"`
+	Title      string       `json:"title,omitempty"`
+	Type       int          `json:"type,omitempty"`
+	StackMode  int          `json:"stack_mode,omitempty"`
+	UnitType   int          `json:"unit_type,omitempty"`
+	UnitLegend string       `json:"unit_legend,omitempty"`
 	Groups     []*OperGroup `json:"groups,omitempty"`
 
 	// For linked graphs
 	Link       string                 `json:"link,omitempty"`
 	Attributes map[string]interface{} `json:"attributes,omitempty"`
+
+	Template bool `json:"template"`
 }
 
 func (graph *Graph) String() string {

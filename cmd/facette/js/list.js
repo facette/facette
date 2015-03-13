@@ -1,7 +1,8 @@
 
 /* List */
 
-var LIST_TIMEOUTS = {};
+var LIST_CALLBACKS = {},
+    LIST_TIMEOUTS = {};
 
 function listAppend(list, refNode) {
     var $item;
@@ -115,6 +116,10 @@ function listNextName(list, attr) {
     });
 
     return prefix + (max + 1);
+}
+
+function listRegisterItemCallback(name, callback) {
+    LIST_CALLBACKS[name] = callback;
 }
 
 function listSay(list, text, type) {
@@ -252,9 +257,10 @@ function listUpdate(list, listFilter, offset) {
 
     return $.ajax(query).done(function (data, status, xhr) { /*jshint unused: true */
         var $item,
-            i,
+            name = list.attr('data-list'),
             namespace,
-            records = parseInt(xhr.getResponseHeader('X-Total-Records'), 10);
+            records = parseInt(xhr.getResponseHeader('X-Total-Records'), 10),
+            i;
 
         if (!data || data instanceof Array && data.length === 0) {
             namespace = list.opts('list').messages || 'item';
@@ -292,6 +298,10 @@ function listUpdate(list, listFilter, offset) {
 
             if (!data[i].description)
                 $item.find('.desc').addClass('placeholder');
+
+            // Execute item callback if any
+            if (LIST_CALLBACKS[name])
+                LIST_CALLBACKS[name]($item, data[i]);
         }
 
         listUpdateCount(list, records);

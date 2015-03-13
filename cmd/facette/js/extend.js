@@ -19,6 +19,31 @@ if (!String.prototype.endsWith) {
     };
 }
 
+if (!String.prototype.matchAll) {
+    String.prototype.matchAll = function (regexp) {
+        var matches = [],
+            match,
+            regexpStr,
+            index;
+
+        // Force RegExp global flag
+        if (!regexp.global) {
+            regexpStr = regexp.toString();
+            index = regexpStr.lastIndexOf('/');
+            regexp = new RegExp(regexpStr.substr(regexpStr.indexOf('/') + 1, index - 1), regexpStr.substr(index + 1) + 'g');
+        }
+
+        while ((match = regexp.exec(this))) {
+            if (match.length === 0)
+                continue;
+
+            matches.push(match[1]);
+        }
+
+        return matches;
+    };
+}
+
 /* Extend: jQuery */
 
 $.event.props.push('dataTransfer');

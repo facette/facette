@@ -52,8 +52,9 @@ func (server *Server) servePlots(writer http.ResponseWriter, request *http.Reque
 
 	// If a Graph ID has been provided in the plot request, fetch the graph definition from the library instead
 	if plotReq.ID != "" {
+		graph = &library.Graph{}
 		if item, err = server.Library.GetItem(plotReq.ID, library.LibraryItemGraph); err == nil {
-			graph = item.(*library.Graph)
+			utils.Clone(item.(*library.Graph), graph)
 		}
 	}
 
@@ -83,10 +84,10 @@ func (server *Server) servePlots(writer http.ResponseWriter, request *http.Reque
 				return
 			}
 
-			graph = item.(*library.Graph)
+			utils.Clone(item.(*library.Graph), graph)
 		}
 
-		if graph, err = server.expandGraphTemplate(graph); err != nil {
+		if err = server.expandGraphTemplate(graph); err != nil {
 			logger.Log(logger.LevelError, "server", "unable to apply graph template: %s", err)
 			server.serveResponse(writer, serverResponse{mesgUnhandledError}, http.StatusInternalServerError)
 		}
@@ -127,26 +128,26 @@ func (server *Server) servePlots(writer http.ResponseWriter, request *http.Reque
 	server.serveResponse(writer, response, http.StatusOK)
 }
 
-func (server *Server) expandGraphTemplate(graph *library.Graph) (*library.Graph, error) {
+func (server *Server) expandGraphTemplate(graph *library.Graph) error {
 	var err error
 
 	if graph.Title, err = expandStringTemplate(graph.Title, graph.Attributes); err != nil {
-		return nil, fmt.Errorf("failed to expand graph title: %s", err)
+		return fmt.Errorf("failed to expand graph title: %s", err)
 	}
 
 	for _, group := range graph.Groups {
 		for _, series := range group.Series {
 			if series.Source, err = expandStringTemplate(series.Source, graph.Attributes); err != nil {
-				return nil, fmt.Errorf("failed to expand graph series %q source: %s", series.Name, err)
+				return fmt.Errorf("failed to expand graph series %q source: %s", series.Name, err)
 			}
 
 			if series.Metric, err = expandStringTemplate(series.Metric, graph.Attributes); err != nil {
-				return nil, fmt.Errorf("failed to expand graph series %q metric: %s", series.Metric, err)
+				return fmt.Errorf("failed to expand graph series %q metric: %s", series.Metric, err)
 			}
 		}
 	}
 
-	return graph, nil
+	return nil
 }
 
 func (server *Server) prepareProviderQueries(plotReq *PlotRequest,
@@ -323,6 +324,7 @@ func makePlotsResponse(plotSeries map[string][]plot.Series, plotReq *PlotRequest
 		End:         plotReq.endTime.Format(time.RFC3339),
 		Name:        graph.Name,
 		Description: graph.Description,
+		Title:       graph.Title,
 		Type:        graph.Type,
 		StackMode:   graph.StackMode,
 		UnitType:    graph.UnitType,

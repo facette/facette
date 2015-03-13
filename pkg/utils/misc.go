@@ -11,10 +11,11 @@ import (
 // Clone performs a deep copy of an interface.
 func Clone(src, dst interface{}) {
 	buffer := new(bytes.Buffer)
-	encoder := gob.NewEncoder(buffer)
-	decoder := gob.NewDecoder(buffer)
 
+	encoder := gob.NewEncoder(buffer)
 	encoder.Encode(src)
+
+	decoder := gob.NewDecoder(buffer)
 	decoder.Decode(dst)
 }
 

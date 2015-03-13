@@ -132,7 +132,11 @@ func (server *Server) serveAdminGraph(writer http.ResponseWriter, request *http.
 	data.Section, data.Path = splitAdminURLPath(request.URL.Path)
 
 	if data.Path != "" && (data.Path == "add" || server.Library.ItemExists(data.Path, library.LibraryItemGraph)) {
-		tmplFile = "graph_edit.html"
+		if request.FormValue("linked") != "" {
+			tmplFile = "graph_edit_linked.html"
+		} else {
+			tmplFile = "graph_edit.html"
+		}
 
 		data.GraphTypeArea = library.GraphTypeArea
 		data.GraphTypeLine = library.GraphTypeLine

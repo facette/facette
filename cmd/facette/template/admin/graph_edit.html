@@ -20,7 +20,10 @@
 				<button class="icon icon-prev" name="step-prev">Previous</button>
 				<button class="icon icon-next" name="step-next">Next</button>
 				<button name="step-ok">OK</button>
-				<button name="step-save">Save Graph</button>
+				<button name="step-save">
+					<span class="default">Save Graph</span>
+					<span class="template">Save Template</span>
+				</button>
 			</footer>
 
 			<section data-step="1">
@@ -29,13 +32,13 @@
 
 					<fieldset>
 						<label for="origin">Origin</label>
-						<input data-input="origin" data-inputopts="sources: catalog/origins/" id="origin" name="origin" type="text">
+						<input data-input="origin" data-inputopts="sources: catalog/origins/; ignorepattern: {{ "{{" }}" id="origin" name="origin" type="text">
 
 						<label for="source">Source</label>
-						<input data-input="source" data-inputopts="sources: library/sourcegroups/, catalog/sources/" id="source" name="source" type="text">
+						<input data-input="source" data-inputopts="sources: library/sourcegroups/, catalog/sources/; ignorepattern: {{ "{{" }}" id="source" name="source" type="text">
 
 						<label for="metric">Metric</label>
-						<input data-input="metric" data-inputopts="sources: library/metricgroups/, catalog/metrics/" id="metric" name="metric" type="text">
+						<input data-input="metric" data-inputopts="sources: library/metricgroups/, catalog/metrics/; ignorepattern: {{ "{{" }}" id="metric" name="metric" type="text">
 
 						<button name="metric-add">Add</button>
 						<button name="metric-update">Update</button>
@@ -158,6 +161,8 @@
 						<div class="block">
 							<h2>Graph Parameters</h2>
 
+							<label for="graph-title">Title:</label>
+							<input class="full input" data-input="graph-title" id="graph-title" name="graph-title" type="text">
 							<label for="graph-type">Graph Type:</label>
 							<select data-select="graph-type" id="graph-type" name="graph-type">
 								<option value="{{ .GraphTypeArea }}">Area</option>
@@ -195,9 +200,26 @@
 
 					<div class="scrollarea">
 						<div class="graphitem preview" data-graph="" data-graphopts="range: -1h">
+							<div class="placeholder">Loading...</div>
+
 							<div class="graphcntr">
-								<div class="placeholder">Loading...</div>
 							</div>
+						</div>
+
+						<div class="tmplattrs">
+							<h2>Template Attributes</h2>
+
+							<table class="list graphattrs" data-list="step-3-attrs">
+								<tbody>
+									<tr><td class="listmesg" data-listmesg="step-3-attrs" colspan="2"></td></tr>
+									<tr class="listitem" data-listtmpl="step-3-attrs">
+										<td class="key"><input type="text" disabled="disabled"></td>
+										<td class="value"><input type="text"></td>
+									</tr>
+								</tbody>
+							</table>
+
+							<div class="mesgitem info">Note: set attributes values to test template rendering</div>
 						</div>
 					</div>
 				</div>

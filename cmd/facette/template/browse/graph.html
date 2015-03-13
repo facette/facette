@@ -22,7 +22,7 @@
 			</dl>
 		</nav>
 
-		<article data-pane="graph-show" data-paneopts="id: {{ .Graph.ID }}">
+		<article data-pane="graph-show" data-paneopts="id: {{ .Graph.ID }}{{ if ne .Graph.Link "" }}; linked: true{{ end }}">
 			<header>
 				<h1>{{ .Graph.Name }}</h1>
 
@@ -54,7 +54,7 @@
 			</header>
 
 			<section class="scrollarea full">{{ template "template_graph" }}
-				<div data-graph="{{ .Graph.ID }}" data-graphopts="title: {{ .Graph.Name }}" id="graph-0"></div>
+				<div data-graph="{{ .Graph.ID }}"{{ if ne .Graph.Link "" }} data-graphopts="linked: true"{{ end }} id="graph-0"></div>
 			</section>
 		</article>
 {{ end }}
