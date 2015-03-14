@@ -1,11 +1,11 @@
 #!/bin/bash
 
 read -d '' DEPENDS <<EOF
-git  https://github.com/fatih/set          master
-git  https://github.com/influxdb/influxdb  master  /client /LICENSE
-git  https://github.com/nu7hatch/gouuid    master
-git  https://github.com/stretchr/powerwalk master
-git  https://github.com/ziutek/rrd         master
+git  https://github.com/fatih/set           master
+git  https://github.com/influxdb/influxdb   master  /client /LICENSE
+git  https://github.com/nu7hatch/gouuid     master
+git  https://github.com/stretchr/powerwalk  master
+git  https://github.com/ziutek/rrd          master
 EOF
 
 fetch_git() {
@@ -77,6 +77,8 @@ IFS=$'\n'; for entry in $DEPENDS; do
 	# If specific paths are specified
 	if [[ -n "$paths" ]]; then
 		for path in $paths; do
+			dirname=$(dirname $SRC_DIR/${name}${path})
+			[[ -d "$dirname" ]] || mkdir -p $dirname
 			cp -a $SRC_DIR/checkouts/${name}${path} $SRC_DIR/${name}${path}
 		done
 	else
