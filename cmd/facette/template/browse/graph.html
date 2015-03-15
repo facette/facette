@@ -27,7 +27,8 @@
 				<h1>{{ .Graph.Name }}</h1>
 
 				<nav>
-					<ul>
+					<ul>{{ if not .ReadOnly }}
+						<li><a class="icon icon-edit" href="#edit-graph" title="Edit Graph"></a></li>{{ end }}
 						<li><a class="icon icon-time" href="#set-refresh" title="Set Refresh Interval"></a></li>
 						<li><a class="icon icon-print" href="#print" title="Print Page"></a></li>
 					</ul>
