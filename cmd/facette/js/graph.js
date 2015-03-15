@@ -151,7 +151,7 @@ function graphDraw(graph, postpone, delay, preview) {
                 if (data.message || !data.series) {
                     graph.children('.graphctrl')
                         .attr('disabled', 'disabled')
-                        .find('a:not([href="#edit"], [href="#refresh"]), .legend')
+                        .find('a:not([href="#edit"], [href="#refresh"], [href="#reset"]), .legend')
                             .attr('disabled', 'disabled');
 
                     graph.find('.placeholder')
@@ -164,7 +164,7 @@ function graphDraw(graph, postpone, delay, preview) {
                 } else {
                     graph.children('.graphctrl')
                         .removeAttr('disabled')
-                        .find('a:not([href="#edit"], [href="#refresh"]), .legend')
+                        .find('a:not([href="#edit"], [href="#refresh"], [href="#reset"]), .legend')
                             .removeAttr('disabled');
 
                     graph.find('.placeholder')
@@ -459,7 +459,7 @@ function graphDraw(graph, postpone, delay, preview) {
             }).fail(function () {
                 graph.children('.graphctrl')
                     .attr('disabled', 'disabled')
-                    .find('a:not([href="#edit"], [href="#refresh"]), .legend')
+                    .find('a:not([href="#edit"], [href="#refresh"], [href="#reset"]), .legend')
                         .attr('disabled', 'disabled');
 
                 graph.find('.placeholder')

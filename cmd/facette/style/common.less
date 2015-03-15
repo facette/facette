@@ -298,6 +298,28 @@ article {
 								font-size: 0.75em;
 							}
 						}
+
+						& + .menu {
+							display: none;
+							font-size: 0.7em;
+							margin: -0.125em 0 0 -1.125em;
+
+							.menucntr {
+								max-height: none;
+
+								.menuitem {
+
+									&:hover {
+										background-color: lighten(@NavBackgroundColor, 15);
+									}
+
+									a {
+										color: @NavTextColor !important;
+										display: block;
+									}
+								}
+							}
+						}
 					}
 				}
 			}

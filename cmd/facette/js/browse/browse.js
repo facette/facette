@@ -6,6 +6,60 @@ function browsePrint() {
     });
 }
 
+function browseSetRange(e) {
+    var $target = $(e.target),
+        $overlay,
+        href = $target.attr('href');
+
+    if (href == '#set-global-range') {
+        $target.next('.menu').toggle();
+    } else if (href == '#range-custom') {
+        $overlay = overlayCreate('time', {
+            callbacks: {
+                validate: function () {
+                    $('[data-graph]').each(function () {
+                        var $item = $(this);
+
+                        $.extend($item.data('options'), {
+                            time: moment($overlay.find('input[name=time]').val()).format(TIME_RFC3339),
+                            range: $overlay.find('input[name=range]').val()
+                        });
+
+                        graphDraw($item, !$item.inViewport());
+                    });
+                }
+            }
+        });
+
+        $overlay.find('input[name=time]').appendDtpicker({
+            closeOnSelected: true,
+            current: null,
+            firstDayOfWeek: 1,
+            minuteInterval: 10,
+            todayButton: false
+        });
+
+        $('a[href=#set-global-range] + .menu').hide();
+    } else if (href && href.indexOf('#range-') === 0) {
+        $('[data-graph]').each(function () {
+            var $item = $(this);
+
+            $.extend($item.data('options'), {range: '-' + href.substr(7)});
+            delete $item.data('options').time;
+
+            graphDraw($item, !$item.inViewport());
+        });
+    } else if ($target.closest('.menu').length === 0) {
+        $('a[href=#set-global-range] + .menu').hide();
+        return;
+    } else {
+        return;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+}
+
 function browseSetRefresh(e) {
     overlayCreate('prompt', {
         message: $.t('main.labl_refresh_interval'),
