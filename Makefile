@@ -178,8 +178,8 @@ SCRIPT_SRC = cmd/facette/js/intro.js \
 	cmd/facette/js/admin/intro.js \
 	cmd/facette/js/admin/admin.js \
 	cmd/facette/js/admin/item.js \
-	cmd/facette/js/admin/graph.js \
 	cmd/facette/js/admin/collection.js \
+	cmd/facette/js/admin/graph.js \
 	cmd/facette/js/admin/group.js \
 	cmd/facette/js/admin/scale.js \
 	cmd/facette/js/admin/unit.js \
@@ -188,6 +188,7 @@ SCRIPT_SRC = cmd/facette/js/intro.js \
 	cmd/facette/js/browse/intro.js \
 	cmd/facette/js/browse/browse.js \
 	cmd/facette/js/browse/collection.js \
+	cmd/facette/js/browse/graph.js \
 	cmd/facette/js/browse/outro.js \
 	cmd/facette/js/item.js \
 	cmd/facette/js/graph.js \

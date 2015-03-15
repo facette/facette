@@ -10,29 +10,7 @@ function browseCollectionSetupTerminate() {
         window.location = urlPrefix + '/admin/collections/' + $(e.target).closest('[data-pane]').opts('pane').id;
     });
 
-    linkRegister('set-refresh', function () {
-        overlayCreate('prompt', {
-            message: $.t('collection.labl_refresh_interval'),
-            callbacks: {
-                validate: function (data) {
-                    if (!data)
-                        return;
-
-                    data = parseInt(data, 10);
-                    if (isNaN(data)) {
-                        consoleToggle($.t('collection.mesg_invalid_refresh_interval'));
-                        return;
-                    }
-
-                    $('[data-graph]').each(function () {
-                        var $item = $(this);
-                        $.extend($item.data('options'), {refresh_interval: data});
-                        graphDraw($item, !$item.inViewport());
-                    });
-                }
-            }
-        });
-    });
+    linkRegister('set-refresh', browseSetRefresh);
 
     // Attach events
     $body

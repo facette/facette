@@ -5,4 +5,5 @@ if (String(window.location.pathname).startsWith(urlPrefix + '/browse/')) {
 
     // Register setup callbacks
     setupRegister(SETUP_CALLBACK_TERM, browseCollectionSetupTerminate);
+    setupRegister(SETUP_CALLBACK_TERM, browseGraphSetupTerminate);
 }
