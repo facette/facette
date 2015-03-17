@@ -40,6 +40,8 @@ function browseSetRange(e) {
         });
 
         $('a[href=#set-global-range] + .menu').hide();
+
+	e.stopImmediatePropagation();
     } else if (href && href.indexOf('#range-') === 0) {
         $('[data-graph]').each(function () {
             var $item = $(this);
