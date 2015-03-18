@@ -21,7 +21,7 @@ import (
 
 const (
 	facetteURLCatalog            string  = "/api/v1/catalog/"
-	facetteURLLibraryGraphsPlots string  = "/api/v1/library/graphs/plots"
+	facetteURLLibraryGraphsPlots string  = "/api/v1/plots"
 	facetteDefaultTimeout        float64 = 10
 )
 
