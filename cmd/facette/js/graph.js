@@ -94,7 +94,8 @@ function graphDraw(graph, postpone, delay, preview) {
                     break;
 
                 case 'string':
-                    $.map(graphOpts.percentiles.split(','), function (x) { return parseFloat(x.trim()); });
+                    graphOpts.percentiles = $.map(graphOpts.percentiles.split(','),
+                        function (x) { return parseFloat(x.trim()); });
                     break;
                 }
             }
