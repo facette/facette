@@ -60,6 +60,7 @@ func (value Value) IsNaN() bool {
 
 // Query represents a plot query to a connector.
 type Query struct {
+	Requestor string
 	StartTime time.Time
 	EndTime   time.Time
 	Sample    int

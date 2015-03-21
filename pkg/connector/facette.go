@@ -59,6 +59,7 @@ type FacetteConnector struct {
 	name     string
 	upstream string
 	timeout  float64
+	serverID string
 }
 
 func init() {
@@ -77,6 +78,10 @@ func init() {
 
 		if connector.timeout <= 0 {
 			connector.timeout = facetteDefaultTimeout
+		}
+
+		if connector.serverID, err = config.GetString(settings, "_id", true); err != nil {
+			return nil, err
 		}
 
 		return connector, nil
@@ -150,6 +155,12 @@ func (connector *FacetteConnector) GetPlots(query *plot.Query) ([]plot.Series, e
 	request.Header.Add("Content-Type", "application/json")
 	request.Header.Add("User-Agent", "Facette")
 	request.Header.Add("X-Requested-With", "FacetteConnector")
+
+	if query.Requestor != "" {
+		request.Header.Add("X-Facette-Requestor", query.Requestor)
+	} else {
+		request.Header.Add("X-Facette-Requestor", connector.serverID)
+	}
 
 	response, err := httpClient.Do(request)
 	if err != nil {

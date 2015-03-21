@@ -32,6 +32,13 @@ func (server *Server) servePlots(writer http.ResponseWriter, request *http.Reque
 		return
 	}
 
+	// Check for requests loop
+	if request.Header.Get("X-Facette-Requestor") == server.ID {
+		logger.Log(logger.LevelWarning, "server", "request loop detected, cancelled")
+		server.serveResponse(writer, serverResponse{mesgEmptyData}, http.StatusBadRequest)
+		return
+	}
+
 	// Parse plots request
 	plotReq, err := parsePlotRequest(request)
 	if err != nil {
@@ -152,6 +159,7 @@ func (server *Server) prepareProviderQueries(plotReq *PlotRequest,
 					if _, ok := providerQueries[providerName]; !ok {
 						providerQueries[providerName] = &providerQuery{
 							query: plot.Query{
+								Requestor: plotReq.requestor,
 								StartTime: plotReq.startTime,
 								EndTime:   plotReq.endTime,
 								Sample:    plotReq.Sample,
@@ -221,6 +229,9 @@ func parsePlotRequest(request *http.Request) (*PlotRequest, error) {
 	if plotReq.Sample == 0 {
 		plotReq.Sample = config.DefaultPlotSample
 	}
+
+	// Append plot requestor identifier
+	plotReq.requestor = request.Header.Get("X-Facette-Requestor")
 
 	return plotReq, nil
 }

@@ -34,6 +34,7 @@ type PlotRequest struct {
 	Graph       *library.Graph `json:"graph"`
 	startTime   time.Time
 	endTime     time.Time
+	requestor   string
 }
 
 // OriginResponse represents an origin response structure in the server backend.

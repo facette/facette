@@ -24,6 +24,9 @@ func (server *Server) startProviderWorkers() error {
 			return fmt.Errorf("provider `%s' uses unknown connector type `%s'", prov.Name, connectorType)
 		}
 
+		// Append server identifier to provider configuration
+		prov.Config.Connector["_id"] = server.ID
+
 		providerWorker := worker.NewWorker()
 		providerWorker.RegisterEvent(eventInit, workerProviderInit)
 		providerWorker.RegisterEvent(eventShutdown, workerProviderShutdown)

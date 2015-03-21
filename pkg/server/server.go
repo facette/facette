@@ -15,10 +15,12 @@ import (
 	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/provider"
 	"github.com/facette/facette/pkg/worker"
+	uuid "github.com/facette/facette/thirdparty/github.com/nu7hatch/gouuid"
 )
 
 // Server is the main structure of the server handler.
 type Server struct {
+	ID              string
 	Config          *config.Config
 	Catalog         *catalog.Catalog
 	Library         *library.Library
@@ -101,6 +103,14 @@ func (server *Server) Run() error {
 	}
 
 	server.wg.Add(1)
+
+	// Generate unique server instance identifier
+	uuidTemp, err := uuid.NewV4()
+	if err != nil {
+		return err
+	}
+
+	server.ID = uuidTemp.String()
 
 	// Create new catalog instance
 	server.Catalog = catalog.NewCatalog()
