@@ -41,7 +41,7 @@ function browseSetRange(e) {
 
         $('a[href=#set-global-range] + .menu').hide();
 
-	e.stopImmediatePropagation();
+        e.stopImmediatePropagation();
     } else if (href && href.indexOf('#range-') === 0) {
         $('[data-graph]').each(function () {
             var $item = $(this);
@@ -89,4 +89,9 @@ function browseSetRefresh(e) {
             }
         }
     });
+}
+
+function browseToggleLegend(e) {
+    $(e.target).toggleClass('icon-toggle-off icon-toggle-on active');
+    $('[data-graph] a[href=#toggle-legend]').trigger('click');
 }

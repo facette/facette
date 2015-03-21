@@ -16,6 +16,8 @@ function browseCollectionSetupTerminate() {
 
     linkRegister('set-global-refresh', browseSetRefresh);
 
+    linkRegister('toggle-legends', browseToggleLegend);
+
     // Attach events
     $body
         .on('click', '[data-tree=collections] a', function (e) {

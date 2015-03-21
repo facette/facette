@@ -56,6 +56,10 @@
 						<input name="q" placeholder="Search for Graph" type="text" value="{{ $q }}">
 					</div>
 				</form>
+
+				<div class="right">
+					<a class="icon icon-toggle-off" href="#toggle-legends"> Toggle Legends</a>
+				</div>
 			</header>
 
 			<section class="scrollarea full">{{ if .Collection.Entries }}{{ template "template_graph" }}{{ range $index, $value := .Collection.Entries }}

@@ -268,6 +268,16 @@ article {
 			font-weight: normal;
 		}
 
+		a {
+			color: fade(@BackgroundColor, 50);
+
+			&.active,
+			&:hover {
+				color: @BackgroundColor;
+				text-decoration: none;
+			}
+		}
+
 		nav {
 			float: left;
 			font-size: 1.5em;
@@ -280,13 +290,6 @@ article {
 					display: inline-block;
 
 					a {
-						color: fade(@BackgroundColor, 50);
-
-						&:hover {
-							color: @BackgroundColor;
-							text-decoration: none;
-						}
-
 						&.value {
 							margin-right: 0.5em;
 
@@ -323,6 +326,15 @@ article {
 					}
 				}
 			}
+		}
+
+		form,
+		.right {
+			float: right;
+		}
+
+		form {
+			margin-left: 2em;
 		}
 	}
 

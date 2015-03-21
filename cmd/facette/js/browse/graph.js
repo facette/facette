@@ -11,4 +11,6 @@ function browseGraphSetupTerminate() {
     $body.on('click', browseSetRange);
 
     linkRegister('set-global-refresh', browseSetRefresh);
+
+    linkRegister('toggle-legends', browseToggleLegend);
 }
