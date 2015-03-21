@@ -226,7 +226,7 @@ function graphDraw(graph, postpone, delay, preview) {
                                     color: this.chart.options._data.plotlines[name],
                                     value: this.value,
                                     width: 1.5,
-                                    zIndex: 100
+                                    zIndex: 3
                                 });
                             }
                         },
@@ -445,7 +445,7 @@ function graphDraw(graph, postpone, delay, preview) {
                         color: '#d00',
                         value: graphOpts.constants[i],
                         width: 1,
-                        zIndex: 100
+                        zIndex: 3
                     });
                 }
 
