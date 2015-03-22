@@ -137,12 +137,16 @@ func (server *Server) expandGraphTemplate(graph *library.Graph) error {
 
 	for _, group := range graph.Groups {
 		for _, series := range group.Series {
+			if series.Name, err = expandStringTemplate(series.Name, graph.Attributes); err != nil {
+				return fmt.Errorf("failed to expand graph series %q name: %s", series.Name, err)
+			}
+
 			if series.Source, err = expandStringTemplate(series.Source, graph.Attributes); err != nil {
 				return fmt.Errorf("failed to expand graph series %q source: %s", series.Name, err)
 			}
 
 			if series.Metric, err = expandStringTemplate(series.Metric, graph.Attributes); err != nil {
-				return fmt.Errorf("failed to expand graph series %q metric: %s", series.Metric, err)
+				return fmt.Errorf("failed to expand graph series %q metric: %s", series.Name, err)
 			}
 		}
 	}
