@@ -1,6 +1,21 @@
 
 /* Utils */
 
+function arrayUnique(array) {
+    var result = [],
+        length = array.length,
+        i;
+
+    for (i = 0; i < length; i++) {
+        if (result.indexOf(array[i]) != -1)
+            continue;
+
+        result.push(array[i]);
+    }
+
+    return result;
+}
+
 function domFillItem(item, data, formatters) {
     var key;
 
