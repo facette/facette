@@ -159,8 +159,7 @@ function adminGroupSetupTerminate() {
                 }
 
                 if (records > data.length)
-                    $tooltip.append('…<br><span class="label">' + $.t('item.labl_total') + '</span> ' +
-                        (records - data.length));
+                    $tooltip.append('…<br><span class="label">' + $.t('item.labl_total') + '</span> ' + records);
             });
         });
 
