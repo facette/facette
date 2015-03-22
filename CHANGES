@@ -1,6 +1,32 @@
 CHANGES
 =======
 
+0.3.0rc1 (2015-03-22)
+---------------------
+
+ * Add consolidation function choice support for operation groups
+ * Add global refresh interval/time range/legends togglers in browse UI
+ * Add graph templates support
+ * Add missing close calls on HTTP responses bodies in connectors
+ * Add new KairosDB connector
+ * Add SSL/TLS support for InfluxDB connector
+ * Add support of consolidation functions in RRD connector
+ * Add top-level collections retrieval in library API
+ * Add library items ID display in Administration Panel
+ * Improve filesystem walking times
+ * Improve HTTP routes handling
+ * Make collection entries title optional
+ * Move plots API URL away from library into a dedicated route
+ * Prevent loop when using Facette connectors relying on each others
+ * Update connectors example configurations
+ * Update thirdparty packages
+ * Fix crash when cloning collection
+ * Fix parsing issue when multiple percentiles are provided
+ * Fix plot lines z-index issue
+ * Fix quoted strings modifier syntax
+ * Various minor bug fixes
+ * UI improvements
+
 0.2.3 (2014-12-15)
 ------------------
 
