@@ -1,6 +1,6 @@
 # -*- Makefile -*-
 
-VERSION = 0.3.0dev
+VERSION = 0.3.0rc1
 
 TAGS ?= facette \
 	graphite \
