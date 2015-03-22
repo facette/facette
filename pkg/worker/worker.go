@@ -39,7 +39,7 @@ type workerEvent struct {
 	Args  []interface{}
 }
 
-// NewWorker instanciates a new worker.
+// NewWorker instantiates a new worker.
 func NewWorker() *Worker {
 	worker := &Worker{
 		State:     JobStopped,
