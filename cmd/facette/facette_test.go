@@ -1094,6 +1094,405 @@ func Test_LibraryGraphHandle(test *testing.T) {
 		test.Logf("\nExpected %#v\nbut got  %#v", listBase[1:3], listResult)
 		test.Fail()
 	}
+
+	// Delete created items
+	for _, listItem := range listBase {
+		response = execTestRequest(test, "DELETE", baseURL+listItem.ID, nil, nil)
+	}
+}
+
+func Test_LibraryGraphTemplateHandle(test *testing.T) {
+	var (
+		listBase   server.ItemListResponse
+		listResult server.ItemListResponse
+	)
+
+	baseURL := fmt.Sprintf("http://%s/api/v1/library/graphs/", serverConfig.BindAddr)
+
+	// Define a sample graph
+	graphBase := &library.Graph{
+		Item:      library.Item{Name: "graphtmpl0", Description: "A great graph description for {{ .source0 }}."},
+		Title:     "graphtmpl-{{ .source0 }}",
+		StackMode: library.StackModeNormal,
+		Template:  true,
+	}
+
+	group := &library.OperGroup{Name: "group0", Type: plot.OperTypeAverage}
+	group.Series = append(group.Series, &library.Series{Name: "series0", Origin: "test", Source: "{{ .source0 }}",
+		Metric: "{{ .metric0 }}"})
+
+	graphBase.Groups = append(graphBase.Groups, group)
+
+	// Test GET on graphs list
+	listBase = server.ItemListResponse{}
+	listResult = server.ItemListResponse{}
+
+	response := execTestRequest(test, "GET", baseURL+"?templates=1", nil, &listResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	if !reflect.DeepEqual(listBase, listResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", listBase, listResult)
+		test.Fail()
+	}
+
+	// Test POST with extra link or attributes (should fail with 400 status code)
+	graphBase.Link = "00000000-0000-0000-0000-000000000000"
+
+	data, _ := json.Marshal(graphBase)
+	response = execTestRequest(test, "POST", baseURL, strings.NewReader(string(data)), nil)
+
+	if response.StatusCode != http.StatusBadRequest {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusBadRequest, response.StatusCode)
+		test.Fail()
+	}
+
+	graphBase.Link = ""
+	graphBase.Attributes = make(map[string]interface{})
+	graphBase.Attributes["attr1"] = "value1"
+
+	data, _ = json.Marshal(graphBase)
+	response = execTestRequest(test, "POST", baseURL, strings.NewReader(string(data)), nil)
+
+	if response.StatusCode != http.StatusBadRequest {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusBadRequest, response.StatusCode)
+		test.Fail()
+	}
+
+	// Test POST into graph of a template
+	graphBase.Attributes = nil
+
+	data, _ = json.Marshal(graphBase)
+	response = execTestRequest(test, "POST", baseURL, strings.NewReader(string(data)), nil)
+
+	if response.StatusCode != http.StatusCreated {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusCreated, response.StatusCode)
+		test.Fail()
+	}
+
+	if response.Header.Get("Location") == "" {
+		test.Logf("\nExpected `Location' header")
+		test.Fail()
+	}
+
+	graphBase.ID = response.Header.Get("Location")[strings.LastIndex(response.Header.Get("Location"), "/")+1:]
+
+	// Test GET on graph item
+	graphResult := &library.Graph{}
+
+	response = execTestRequest(test, "GET", baseURL+graphBase.ID, nil, &graphResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	if !reflect.DeepEqual(graphBase, graphResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", graphBase, graphResult)
+		test.Fail()
+	}
+
+	// Test GET on graphs list without template flag (should fail with 400 status code)
+	listBase = server.ItemListResponse{}
+	listResult = server.ItemListResponse{}
+
+	response = execTestRequest(test, "GET", baseURL, nil, &listResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	for _, listItem := range listResult {
+		listItem.Modified = ""
+	}
+
+	if !reflect.DeepEqual(listBase, listResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", listBase, listResult)
+		test.Fail()
+	}
+
+	// Test GET on graphs list
+	listBase = server.ItemListResponse{&server.ItemResponse{
+		ID:          graphBase.ID,
+		Name:        graphBase.Name,
+		Description: graphBase.Description,
+	}}
+
+	listResult = server.ItemListResponse{}
+
+	response = execTestRequest(test, "GET", baseURL+"?templates=1", nil, &listResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	for _, listItem := range listResult {
+		listItem.Modified = ""
+	}
+
+	if !reflect.DeepEqual(listBase, listResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", listBase, listResult)
+		test.Fail()
+	}
+
+	// Test POST into graph of a template instance
+	tmplBase := &library.Graph{
+		Item: library.Item{Name: "graph0"},
+		Link: graphBase.ID,
+		Attributes: map[string]interface{}{
+			"source0": "source1",
+			"metric0": "database1/test",
+		},
+	}
+
+	data, _ = json.Marshal(tmplBase)
+	response = execTestRequest(test, "POST", baseURL, strings.NewReader(string(data)), nil)
+
+	if response.StatusCode != http.StatusCreated {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusCreated, response.StatusCode)
+		test.Fail()
+	}
+
+	if response.Header.Get("Location") == "" {
+		test.Logf("\nExpected `Location' header")
+		test.Fail()
+	}
+
+	tmplBase.ID = response.Header.Get("Location")[strings.LastIndex(response.Header.Get("Location"), "/")+1:]
+
+	// Test POST into graph of a template instance with extra data (should fail with 400 status code)
+	tmplBase.Template = true
+
+	data, _ = json.Marshal(tmplBase)
+	response = execTestRequest(test, "POST", baseURL, strings.NewReader(string(data)), nil)
+
+	if response.StatusCode != http.StatusBadRequest {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusBadRequest, response.StatusCode)
+		test.Fail()
+	}
+
+	tmplBase.Template = false
+
+	tmplBase.Description = "A test description."
+	tmplBase.Title = "A test title."
+	tmplBase.Type = 1
+	tmplBase.StackMode = 1
+	tmplBase.UnitType = 1
+	tmplBase.UnitLegend = "a"
+	tmplBase.Groups = make([]*library.OperGroup, 0)
+
+	data, _ = json.Marshal(tmplBase)
+	response = execTestRequest(test, "POST", baseURL, strings.NewReader(string(data)), nil)
+
+	if response.StatusCode != http.StatusBadRequest {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusBadRequest, response.StatusCode)
+		test.Fail()
+	}
+
+	tmplBase.Description = ""
+	tmplBase.Title = ""
+	tmplBase.Type = 0
+	tmplBase.StackMode = 0
+	tmplBase.UnitType = 0
+	tmplBase.UnitLegend = ""
+	tmplBase.Groups = nil
+
+	// Test GET on graph template instance item
+	graphResult = &library.Graph{}
+
+	response = execTestRequest(test, "GET", baseURL+graphBase.ID, nil, &graphResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	if !reflect.DeepEqual(graphBase, graphResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", graphBase, graphResult)
+		test.Fail()
+	}
+
+	// Test GET on graphs list
+	listBase = server.ItemListResponse{&server.ItemResponse{
+		ID:   tmplBase.ID,
+		Name: tmplBase.Name,
+		Description: strings.Replace(graphBase.Description, "{{ .source0 }}",
+			tmplBase.Attributes["source0"].(string), -1),
+	}}
+
+	listResult = server.ItemListResponse{}
+
+	response = execTestRequest(test, "GET", baseURL, nil, &listResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	for _, listItem := range listResult {
+		listItem.Modified = ""
+	}
+
+	if !reflect.DeepEqual(listBase, listResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", listBase[0], listResult[0])
+		test.Fail()
+	}
+
+	// Test DELETE on graph template instance item
+	response = execTestRequest(test, "DELETE", baseURL+tmplBase.ID, nil, nil)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	response = execTestRequest(test, "DELETE", baseURL+tmplBase.ID, nil, nil)
+
+	if response.StatusCode != http.StatusNotFound {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusNotFound, response.StatusCode)
+		test.Fail()
+	}
+
+	// Test PUT on graph item
+	graphBase.Name = "graph0-updated"
+
+	data, _ = json.Marshal(graphBase)
+
+	response = execTestRequest(test, "PUT", baseURL+graphBase.ID, strings.NewReader(string(data)), nil)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	// Test GET on graph item
+	graphResult = &library.Graph{}
+
+	response = execTestRequest(test, "GET", baseURL+graphBase.ID, nil, &graphResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	if !reflect.DeepEqual(graphBase, graphResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", graphBase, graphResult)
+		test.Fail()
+	}
+
+	// Test DELETE on graph item
+	response = execTestRequest(test, "DELETE", baseURL+graphBase.ID, nil, nil)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	response = execTestRequest(test, "DELETE", baseURL+graphBase.ID, nil, nil)
+
+	if response.StatusCode != http.StatusNotFound {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusNotFound, response.StatusCode)
+		test.Fail()
+	}
+
+	// Test GET on graphs list (offset and limit)
+	listBase = server.ItemListResponse{}
+
+	for i := 0; i < 3; i++ {
+		graphTemp := &library.Graph{}
+		utils.Clone(graphBase, graphTemp)
+
+		graphTemp.ID = ""
+		graphTemp.Name = fmt.Sprintf("graph0-%d", i)
+
+		data, _ = json.Marshal(graphTemp)
+
+		response = execTestRequest(test, "POST", baseURL, strings.NewReader(string(data)), nil)
+
+		if response.StatusCode != http.StatusCreated {
+			test.Logf("\nExpected %d\nbut got  %d", http.StatusCreated, response.StatusCode)
+			test.Fail()
+		}
+
+		location := response.Header.Get("Location")
+
+		if location == "" {
+			test.Logf("\nExpected `Location' header")
+			test.Fail()
+		}
+
+		graphTemp.ID = location[strings.LastIndex(location, "/")+1:]
+
+		listBase = append(listBase, &server.ItemResponse{
+			ID:          graphTemp.ID,
+			Name:        graphTemp.Name,
+			Description: graphTemp.Description,
+		})
+	}
+
+	listResult = server.ItemListResponse{}
+
+	response = execTestRequest(test, "GET", baseURL+"?templates=1", nil, &listResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	for _, listItem := range listResult {
+		listItem.Modified = ""
+	}
+
+	if !reflect.DeepEqual(listBase, listResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", listBase, listResult)
+		test.Fail()
+	}
+
+	listResult = server.ItemListResponse{}
+
+	response = execTestRequest(test, "GET", baseURL+"?templates=1&limit=1", nil, &listResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	for _, listItem := range listResult {
+		listItem.Modified = ""
+	}
+
+	if !reflect.DeepEqual(listBase[:1], listResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", listBase[:1], listResult)
+		test.Fail()
+	}
+
+	listResult = server.ItemListResponse{}
+
+	response = execTestRequest(test, "GET", baseURL+"?templates=1&offset=1&limit=2", nil, &listResult)
+
+	if response.StatusCode != http.StatusOK {
+		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
+		test.Fail()
+	}
+
+	for _, listItem := range listResult {
+		listItem.Modified = ""
+	}
+
+	if !reflect.DeepEqual(listBase[1:3], listResult) {
+		test.Logf("\nExpected %#v\nbut got  %#v", listBase[1:3], listResult)
+		test.Fail()
+	}
+
+	// Delete created items
+	for _, listItem := range listBase {
+		response = execTestRequest(test, "DELETE", baseURL+listItem.ID, nil, nil)
+	}
 }
 
 func Test_LibraryCollectionHandle(test *testing.T) {
