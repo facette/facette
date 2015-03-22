@@ -3,6 +3,23 @@ function adminItemHandlePaneList(itemType) {
     var paneSection = paneMatch(itemType + '-list').opts('pane').section;
 
     // Register links
+    linkRegister('show-info', function (e) {
+        var $target = $(e.target),
+            $item = $target.closest('[data-listitem]'),
+            $tooltip;
+
+        $tooltip = tooltipCreate('info', function (state) {
+            $target.toggleClass('active', state);
+            $item.toggleClass('action', state);
+        }).appendTo($body)
+            .css({
+                top: $target.offset().top,
+                left: $target.offset().left
+            });
+
+        $tooltip.html('<span class="label">id:</span> ' + $item.attr('data-itemid'));
+    });
+
     linkRegister('show-' + itemType, function (e) {
         window.location = urlPrefix + '/browse/' + paneSection + '/' +
             $(e.target).closest('[data-itemid]').attr('data-itemid');

@@ -10,6 +10,9 @@ function tooltipCreate(name, toggleCallback) {
     if (toggleCallback)
         TOOLTIP_CALLBACKS[name] = toggleCallback;
 
+    // Remove any prexisting tooltip with the same name
+    $('[data-tooltip="' + name + '"]').remove();
+
     return tooltipToggle($tooltipTemplate.clone().attr('data-tooltip', name), true);
 }
 

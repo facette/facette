@@ -140,6 +140,7 @@ function adminGroupSetupTerminate() {
                     records = parseInt(xhr.getResponseHeader('X-Total-Records'), 10);
 
                 $tooltip = tooltipCreate('info', function (state) {
+                    $target.toggleClass('active', state);
                     $item.toggleClass('action', state);
                 }).appendTo($body)
                     .css({
