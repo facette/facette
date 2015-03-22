@@ -18,9 +18,16 @@ func JSONDump(filePath string, data interface{}, modTime time.Time) error {
 	}
 
 	dirPath, _ := path.Split(filePath)
-	os.MkdirAll(dirPath, 0755)
 
-	fd, _ := os.OpenFile(filePath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	err = os.MkdirAll(dirPath, 0755)
+	if err != nil {
+		return err
+	}
+
+	fd, err := os.OpenFile(filePath, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
 	defer fd.Close()
 
 	fd.Write(output)
