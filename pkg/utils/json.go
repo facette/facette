@@ -40,14 +40,7 @@ func JSONDump(filePath string, data interface{}, modTime time.Time) error {
 
 // JSONLoad loads the JSON formatted data in result from the filesystem.
 func JSONLoad(filePath string, result interface{}) (os.FileInfo, error) {
-	if _, err := os.Stat(filePath); err != nil {
-		return nil, err
-	}
-
 	// Load JSON data from file
-	fd, _ := os.OpenFile(filePath, os.O_RDONLY, 0644)
-	defer fd.Close()
-
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return nil, err
