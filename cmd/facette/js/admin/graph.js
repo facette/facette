@@ -500,20 +500,62 @@ function adminGraphGetConsolidateLabel(type) {
 }
 
 function adminGraphGetTemplatable(groups) {
-    var result = [],
+    var $pane = paneMatch('graph-edit'),
+        result = [],
+        regexp,
         series,
         i, j;
+
+    regexp = /\{\{\s*\.([a-z0-9]+)\s*\}\}/i;
 
     for (i in groups) {
         for (j in groups[i].series) {
             series = groups[i].series[j];
-
-            result = result.concat((series.origin + '\x1e' + series.source + '\x1e' + series.metric).
-                matchAll(/\{\{\s*\.([a-z0-9]+)\s*\}\}/i));
+            result = result.concat((series.origin + '\x1e' + series.source + '\x1e' + series.metric).matchAll(regexp));
         }
     }
 
+    result = result.concat($pane.find('textarea[name=graph-desc]').val().matchAll(regexp));
+    result = result.concat($pane.find('input[name=graph-title]').val().matchAll(regexp));
+
+    result.sort();
+
     return arrayUnique(result);
+}
+
+function adminGraphUpdateAttrsList() {
+    var $pane = paneMatch('graph-edit'),
+        $listAttrs,
+        $item,
+        attrs,
+        attrsData,
+        i;
+
+    // Generate graph arguments list
+    $listAttrs = listMatch('step-3-attrs');
+
+    attrs = adminGraphGetTemplatable(adminGraphGetGroups());
+
+    if (attrs.length === 0) {
+        listSay($listAttrs, $.t('graph.mesg_no_template_attr'), 'warning');
+        $listAttrs.next('.mesgitem').hide();
+        return;
+    } else {
+        $listAttrs.next('.mesgitem').show();
+    }
+
+    listSay($listAttrs, null);
+    listEmpty($listAttrs);
+
+    attrsData = $pane.data('attrs-data') || {};
+
+    for (i in attrs) {
+        $item = listAppend($listAttrs);
+        $item.find('.key input').val(attrs[i]);
+
+        if (attrsData[attrs[i]] !== undefined)
+            $item.find('.value input').val(attrsData[attrs[i]]);
+    }
 }
 
 function adminGraphSetupTerminate() {
@@ -704,12 +746,7 @@ function adminGraphSetupTerminate() {
         });
 
         paneStepRegister('graph-edit', 3, function () {
-            var $step = $('[data-step=3]'),
-                $listAttrs,
-                $item,
-                attrs = [],
-                attrsData,
-                i;
+            var $step = $('[data-step=3]');
 
             $pane.find('button[name=auto-name]').hide();
 
@@ -727,30 +764,7 @@ function adminGraphSetupTerminate() {
                 return;
 
             // Generate graph arguments list
-            $listAttrs = listMatch('step-3-attrs');
-
-            attrs = adminGraphGetTemplatable(adminGraphGetGroups());
-
-            if (attrs.length === 0) {
-                listSay($listAttrs, $.t('graph.mesg_no_template_attr'), 'warning');
-                $listAttrs.next('.mesgitem').hide();
-                return;
-            } else {
-                $listAttrs.next('.mesgitem').show();
-            }
-
-            listSay($listAttrs, null);
-            listEmpty($listAttrs);
-
-            attrsData = $pane.data('attrs-data') || {};
-
-            for (i in attrs) {
-                $item = listAppend($listAttrs);
-                $item.find('.key input').val(attrs[i]);
-
-                if (attrsData[attrs[i]] !== undefined)
-                    $item.find('.value input').val(attrsData[attrs[i]]);
-            }
+            adminGraphUpdateAttrsList();
         });
 
         paneStepRegister('graph-edit', 'stack', function () {
@@ -1575,6 +1589,7 @@ function adminGraphSetupTerminate() {
                 }
 
                 data = adminGraphGetData();
+
                 if ($pane.data('template')) {
                     data.attributes = {};
 
@@ -1601,6 +1616,19 @@ function adminGraphSetupTerminate() {
                     .val('');
             })
             .on('keyup', '[data-step=1] fieldset input', adminHandleFieldType)
+            .on('keypress', '[data-step=3] :input[name=graph-desc], [data-step=3] :input[name=graph-title]',
+                function (e) {
+
+                var $target = $(e.target),
+                    $step = $target.closest('[data-step]');
+
+                if ($step.data('attrs-timeout')) {
+                    clearTimeout($step.data('attrs-timeout'));
+                    $step.removeData('attrs-timeout')
+                }
+
+                $step.data('attrs-timeout', setTimeout(adminGraphUpdateAttrsList, 500));
+            })
             .on('keypress', '[data-step=3] .graphattrs :input', function (e) {
                 var $target,
                     $attrs;
