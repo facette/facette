@@ -357,7 +357,9 @@ func makePlotsResponse(plotSeries map[string][]plot.Series, plotReq *PlotRequest
 					plotItem.Scale(plot.Value(scale))
 				}
 
-				seriesOptions[seriesItem.Name] = seriesItem.Options
+				if len(seriesItem.Options) != 0 {
+					seriesOptions[seriesItem.Name] = seriesItem.Options
+				}
 
 				groupSeries = append(groupSeries, plotItem)
 			}
