@@ -304,7 +304,7 @@ function graphDraw(graph, postpone, delay, preview) {
                         min: startTime.valueOf(),
                         type: 'datetime'
                     },
-                    yAxis: {
+                    yAxis: [{
                         labels: {
                             formatter: function () {
                                 return formatValue(this.value, data.unit_type);
@@ -314,7 +314,7 @@ function graphDraw(graph, postpone, delay, preview) {
                         title: {
                             text: null
                         }
-                    },
+                    }],
                     _data: {
                         plotlines: {}
                     },
@@ -397,23 +397,36 @@ function graphDraw(graph, postpone, delay, preview) {
                     break;
                 }
 
+                var seenUnits = {};
                 for (i in data.series) {
+                    var unit;
                     // Transform unix epochs to Date objects
                     for (j in data.series[i].plots)
                         data.series[i].plots[j] = [data.series[i].plots[j][0] * 1000, data.series[i].plots[j][1]];
 
+                    if (data.series[i].options && data.series[i].options.unit && data.series[i].options.unit != "") {
+                        unit = data.series[i].options.unit;
+                        seenUnits[unit] = 1; 
+                    } else {
+                        unit = 0;
+                    }
                     highchartOpts.series.push({
                         id: data.series[i].name,
                         name: data.series[i].name,
                         stack: 'stack' + data.series[i].stack_id,
                         data: data.series[i].plots,
-                        color: data.series[i].options ? data.series[i].options.color : null
+                        color: data.series[i].options ? data.series[i].options.color : null,
+                        yAxis: unit
                     });
 
                     seriesData[data.series[i].name] = {
                         summary: data.series[i].summary,
                         options: data.series[i].options
                     };
+                }
+ 
+                for (unit in seenUnits) {
+                    highchartOpts.yAxis.push({ id: unit, title: { text: unit }, opposite : true });
                 }
 
                 // Prepare legend spacing
