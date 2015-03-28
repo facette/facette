@@ -66,6 +66,10 @@ function humanReadable(number) {
     return (Math.round((number / Math.pow(1000, index) * 100)) / 100) + (index > 0 ? ' ' + units[index] : '');
 }
 
+function parseFloatList(string) {
+    return $.map(string.split(','), function (x) { return parseFloat(x.trim()); })
+}
+
 function rgbToHex(value) {
     var chunks;
 

@@ -52,6 +52,9 @@ function adminCollectionGetData() {
             enabled: $item.find('input[name=graph-shown]').is(':checked')
         };
 
+        options.constants = parseFloatList(options.constants);
+        options.percentiles = parseFloatList(options.percentiles);
+
         value = $item.find('input[name=graph-sample]').val();
         if (value)
             options.sample = parseInt(value, 10);
