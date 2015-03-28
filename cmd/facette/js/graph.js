@@ -94,8 +94,7 @@ function graphDraw(graph, postpone, delay, preview) {
                     break;
 
                 case 'string':
-                    graphOpts.percentiles = $.map(graphOpts.percentiles.split(','),
-                        function (x) { return parseFloat(x.trim()); });
+                    graphOpts.percentiles = parseFloatList(graphOpts.percentiles);
                     break;
                 }
             }
@@ -107,8 +106,7 @@ function graphDraw(graph, postpone, delay, preview) {
                     break;
 
                 case 'string':
-                    graphOpts.constants = $.map(graphOpts.constants.split(','),
-                        function (x) { return parseFloat(x.trim()); });
+                    graphOpts.constants = parseFloatList(graphOpts.constants);
                     break;
                 }
             }
