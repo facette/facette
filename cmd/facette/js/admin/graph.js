@@ -1382,6 +1382,10 @@ function adminGraphSetupTerminate() {
                     name,
                     metricName;
 
+                // Find closest button for browsers triggering event from children element
+                if (e.target.tagName != 'BUTTON')
+                    e.target = $(e.target).closest('button').get(0);
+
                 switch (e.target.name) {
                 case 'auto-name':
                     if (e.target.disabled)
