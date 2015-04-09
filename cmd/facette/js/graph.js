@@ -146,6 +146,8 @@ function graphDraw(graph, postpone, delay, preview) {
                     startTime,
                     endTime,
                     seriesData = {},
+                    seenUnits = {},
+                    unit,
                     i,
                     j;
 
@@ -397,9 +399,7 @@ function graphDraw(graph, postpone, delay, preview) {
                     break;
                 }
 
-                var seenUnits = {};
                 for (i in data.series) {
-                    var unit;
                     // Transform unix epochs to Date objects
                     for (j in data.series[i].plots)
                         data.series[i].plots[j] = [data.series[i].plots[j][0] * 1000, data.series[i].plots[j][1]];
