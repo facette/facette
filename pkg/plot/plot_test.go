@@ -65,7 +65,7 @@ func Test_SeriesSummarize(test *testing.T) {
 	minExpectedValue = 43
 	maxExpectedValue = 99
 	avgExpectedValue = 76.96
-	lastExpectedValue = Value(math.NaN())
+	lastExpectedValue = 66
 	pct20thExpectedValue = 62.8
 	pct50thExpectedValue = 77
 	pct90thExpectedValue = 98.4
@@ -90,7 +90,7 @@ func Test_SeriesSummarize(test *testing.T) {
 		return
 	}
 
-	if !plotSeries.Summary["last"].IsNaN() {
+	if plotSeries.Summary["last"] != lastExpectedValue {
 		test.Logf("\nExpected last=%g\nbut got %g", lastExpectedValue, plotSeries.Summary["last"])
 		test.Fail()
 		return
