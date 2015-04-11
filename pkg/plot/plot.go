@@ -116,8 +116,8 @@ func (series *Series) Scale(factor Value) {
 func (series *Series) Summarize(percentiles []float64) {
 	var (
 		min, max, total, current Value
-		nValidPlots     int64
-		nPlots          = len(series.Plots)
+		nValidPlots              int64
+		nPlots                   = len(series.Plots)
 	)
 
 	if nPlots > 0 {
