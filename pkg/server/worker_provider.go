@@ -115,6 +115,8 @@ func workerProviderRun(w *worker.Worker, args ...interface{}) {
 	for {
 		select {
 		case _ = <-timeChan:
+			logger.Log(logger.LevelDebug, "provider", "%s: performing refresh from connector", prov.Name)
+
 			if err := prov.Connector.Refresh(prov.Name, prov.Filters.Input); err != nil {
 				logger.Log(logger.LevelError, "provider", "%s: unable to refresh: %s", prov.Name, err)
 				continue
