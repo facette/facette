@@ -365,7 +365,7 @@ function graphDraw(graph, postpone, delay, preview) {
                     };
 
                     if (data.unit_legend)
-                        highchartOpts.yAxis.title.text = data.unit_legend;
+                        highchartOpts.yAxis[0].title.text = data.unit_legend;
 
                     if (graphOpts.zoom) {
                         highchartOpts.chart.events.selection = function (e) {
