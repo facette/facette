@@ -260,6 +260,7 @@ function graphDraw(graph, postpone, delay, preview) {
                                 stacks = {},
                                 i,
                                 stackName,
+                                unitTotal = {},
                                 total;
 
                             for (i in this.points) {
@@ -270,6 +271,7 @@ function graphDraw(graph, postpone, delay, preview) {
                                     name: this.points[i].series.name,
                                     value: this.points[i].y,
                                     color: this.points[i].series.color,
+                                    unit: this.points[i].series.yAxis.axisTitle ? this.points[i].series.yAxis.axisTitle.textStr : undefined,
                                 });
                             }
 
@@ -282,14 +284,29 @@ function graphDraw(graph, postpone, delay, preview) {
                                     tooltip += '<div><span class="highcharts-tooltip-color" style="background-color: ' +
                                         stacks[stackName][i].color + '"></span> ' + stacks[stackName][i].name +
                                         ': <strong>' + (stacks[stackName][i].value !== null ?
-                                        formatValue(stacks[stackName][i].value, data.unit_type) : 'null') +
+                                        formatValue(stacks[stackName][i].value, data.unit_type, stacks[stackName][i].unit) : 'null') +
                                         '</strong></div>';
 
-                                    if (stacks[stackName][i].value !== null)
+                                    if (stacks[stackName][i].value !== null) {
                                         total += stacks[stackName][i].value;
+                                        if (stacks[stackName][i].unit) {
+                                            if (!unitTotal[stacks[stackName][i].unit])
+                                                unitTotal[stacks[stackName][i].unit] = { 'value' : 0, 'count' : 0 };
+                                            unitTotal[stacks[stackName][i].unit].value += stacks[stackName][i].value;
+                                            unitTotal[stacks[stackName][i].unit].count += 1;
+                                        }
+                                    }
                                 }
 
                                 if (stacks[stackName].length > 1) {
+                                    tooltip += '<hr>';
+                                    for (unit in unitTotal) {
+                                        // only print totals for units used in multiple series
+                                        if (unitTotal[unit].count > 1) 
+                                            tooltip += '<div class="highcharts-tooltip-total">Total (' + unit + '): <strong>' +
+                                            (total !== null ? formatValue(unitTotal[unit].value, data.unit_type, unit) : 'null') +
+                                            '</strong></div>';
+                                    }
                                     tooltip += '<div class="highcharts-tooltip-total">Total: <strong>' +
                                         (total !== null ? formatValue(total, data.unit_type) : 'null') +
                                         '</strong></div>';
