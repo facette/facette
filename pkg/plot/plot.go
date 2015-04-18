@@ -117,12 +117,10 @@ func (series *Series) Summarize(percentiles []float64) {
 	var (
 		min, max, total, current Value
 		nValidPlots              int64
-		nPlots                   = len(series.Plots)
 	)
 
-	if nPlots > 0 {
-		min = series.Plots[0].Value
-	}
+	min = Value(math.NaN())
+	max = Value(math.NaN())
 
 	for i := range series.Plots {
 		if !series.Plots[i].Value.IsNaN() {
@@ -130,8 +128,7 @@ func (series *Series) Summarize(percentiles []float64) {
 			if current < min || min.IsNaN() {
 				min = series.Plots[i].Value
 			}
-
-			if current > max {
+			if current > max || max.IsNaN() {
 				max = current
 			}
 
