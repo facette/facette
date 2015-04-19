@@ -115,27 +115,24 @@ func (series *Series) Scale(factor Value) {
 // into the Summary map.
 func (series *Series) Summarize(percentiles []float64) {
 	var (
-		min, max, total Value
-		nValidPlots     int64
-		nPlots          = len(series.Plots)
+		min, max, total, current Value
+		nValidPlots              int64
 	)
 
-	if nPlots > 0 {
-		min = series.Plots[0].Value
-		series.Summary["last"] = series.Plots[nPlots-1].Value
-	}
+	min = Value(math.NaN())
+	max = Value(math.NaN())
 
 	for i := range series.Plots {
-		if !series.Plots[i].Value.IsNaN() && series.Plots[i].Value < min || min.IsNaN() {
-			min = series.Plots[i].Value
-		}
-
-		if series.Plots[i].Value > max {
-			max = series.Plots[i].Value
-		}
-
 		if !series.Plots[i].Value.IsNaN() {
-			total += series.Plots[i].Value
+			current = series.Plots[i].Value
+			if current < min || min.IsNaN() {
+				min = series.Plots[i].Value
+			}
+			if current > max || max.IsNaN() {
+				max = current
+			}
+
+			total += current
 			nValidPlots++
 		}
 	}
@@ -147,6 +144,7 @@ func (series *Series) Summarize(percentiles []float64) {
 	series.Summary["min"] = min
 	series.Summary["max"] = max
 	series.Summary["avg"] = total / Value(nValidPlots)
+	series.Summary["last"] = current
 
 	if len(percentiles) > 0 {
 		series.Percentiles(percentiles)
