@@ -144,6 +144,8 @@ function graphDraw(graph, postpone, delay, preview) {
                     startTime,
                     endTime,
                     seriesData = {},
+                    seenUnits = {},
+                    unit,
                     i,
                     j;
 
@@ -256,6 +258,7 @@ function graphDraw(graph, postpone, delay, preview) {
                                 stacks = {},
                                 i,
                                 stackName,
+                                unitTotal = {},
                                 total;
 
                             for (i in this.points) {
@@ -266,6 +269,7 @@ function graphDraw(graph, postpone, delay, preview) {
                                     name: this.points[i].series.name,
                                     value: this.points[i].y,
                                     color: this.points[i].series.color,
+                                    unit: this.points[i].series.yAxis.axisTitle ? this.points[i].series.yAxis.axisTitle.textStr : undefined,
                                 });
                             }
 
@@ -278,14 +282,29 @@ function graphDraw(graph, postpone, delay, preview) {
                                     tooltip += '<div><span class="highcharts-tooltip-color" style="background-color: ' +
                                         stacks[stackName][i].color + '"></span> ' + stacks[stackName][i].name +
                                         ': <strong>' + (stacks[stackName][i].value !== null ?
-                                        formatValue(stacks[stackName][i].value, data.unit_type) : 'null') +
+                                        formatValue(stacks[stackName][i].value, data.unit_type, stacks[stackName][i].unit) : 'null') +
                                         '</strong></div>';
 
-                                    if (stacks[stackName][i].value !== null)
+                                    if (stacks[stackName][i].value !== null) {
                                         total += stacks[stackName][i].value;
+                                        if (stacks[stackName][i].unit) {
+                                            if (!unitTotal[stacks[stackName][i].unit])
+                                                unitTotal[stacks[stackName][i].unit] = { 'value' : 0, 'count' : 0 };
+                                            unitTotal[stacks[stackName][i].unit].value += stacks[stackName][i].value;
+                                            unitTotal[stacks[stackName][i].unit].count += 1;
+                                        }
+                                    }
                                 }
 
                                 if (stacks[stackName].length > 1) {
+                                    tooltip += '<hr>';
+                                    for (unit in unitTotal) {
+                                        // only print totals for units used in multiple series
+                                        if (unitTotal[unit].count > 1) 
+                                            tooltip += '<div class="highcharts-tooltip-total">Total (' + unit + '): <strong>' +
+                                            (total !== null ? formatValue(unitTotal[unit].value, data.unit_type, unit) : 'null') +
+                                            '</strong></div>';
+                                    }
                                     tooltip += '<div class="highcharts-tooltip-total">Total: <strong>' +
                                         (total !== null ? formatValue(total, data.unit_type) : 'null') +
                                         '</strong></div>';
@@ -302,7 +321,7 @@ function graphDraw(graph, postpone, delay, preview) {
                         min: startTime.valueOf(),
                         type: 'datetime'
                     },
-                    yAxis: {
+                    yAxis: [{
                         labels: {
                             formatter: function () {
                                 return formatValue(this.value, data.unit_type);
@@ -312,7 +331,7 @@ function graphDraw(graph, postpone, delay, preview) {
                         title: {
                             text: null
                         }
-                    },
+                    }],
                     _data: {
                         plotlines: {}
                     },
@@ -361,7 +380,7 @@ function graphDraw(graph, postpone, delay, preview) {
                     };
 
                     if (data.unit_legend)
-                        highchartOpts.yAxis.title.text = data.unit_legend;
+                        highchartOpts.yAxis[0].title.text = data.unit_legend;
 
                     if (graphOpts.zoom) {
                         highchartOpts.chart.events.selection = function (e) {
@@ -400,18 +419,29 @@ function graphDraw(graph, postpone, delay, preview) {
                     for (j in data.series[i].plots)
                         data.series[i].plots[j] = [data.series[i].plots[j][0] * 1000, data.series[i].plots[j][1]];
 
+                    if (data.series[i].options && data.series[i].options.unit && data.series[i].options.unit != "") {
+                        unit = data.series[i].options.unit;
+                        seenUnits[unit] = 1; 
+                    } else {
+                        unit = 0;
+                    }
                     highchartOpts.series.push({
                         id: data.series[i].name,
                         name: data.series[i].name,
                         stack: 'stack' + data.series[i].stack_id,
                         data: data.series[i].plots,
-                        color: data.series[i].options ? data.series[i].options.color : null
+                        color: data.series[i].options ? data.series[i].options.color : null,
+                        yAxis: unit
                     });
 
                     seriesData[data.series[i].name] = {
                         summary: data.series[i].summary,
                         options: data.series[i].options
                     };
+                }
+ 
+                for (unit in seenUnits) {
+                    highchartOpts.yAxis.push({ id: unit, title: { text: unit }, opposite : true });
                 }
 
                 // Prepare legend spacing

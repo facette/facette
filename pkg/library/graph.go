@@ -91,6 +91,7 @@ func (group *OperGroup) String() string {
 		"OperGroup{Name:%q Type:%d StackID:%d Series:[%s] Options:%v}",
 		group.Name,
 		group.Type,
+		group.StackID,
 		func(series []*Series) string {
 			seriesStrings := make([]string, len(series))
 			for i, entry := range series {
