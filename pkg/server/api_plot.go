@@ -344,7 +344,6 @@ func makePlotsResponse(plotSeries map[string][]plot.Series, plotReq *PlotRequest
 		)
 
 		seriesOptions := make(map[string]map[string]interface{})
-		seriesOptions[groupItem.Name] = groupItem.Options
 
 		for _, seriesItem := range groupItem.Series {
 			if _, ok := plotSeries[seriesItem.Name]; !ok {
@@ -357,7 +356,14 @@ func makePlotsResponse(plotSeries map[string][]plot.Series, plotReq *PlotRequest
 					plotItem.Scale(plot.Value(scale))
 				}
 
-				seriesOptions[seriesItem.Name] = seriesItem.Options
+				// Merge options from group and series
+				seriesOptions[seriesItem.Name] = make(map[string]interface{})
+				for key, value := range groupItem.Options {
+					seriesOptions[seriesItem.Name][key] = value
+				}
+				for key, value := range seriesItem.Options {
+					seriesOptions[seriesItem.Name][key] = value
+				}
 
 				groupSeries = append(groupSeries, plotItem)
 			}
