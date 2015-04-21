@@ -553,8 +553,12 @@ function graphHandleActions(e) {
         // Refresh graph
         graphDraw($graph, false);
     } else if (e.target.href.endsWith('#reset')) {
-        // Reset graph to its initial state
-        $graph.data('options', null);
+        // Reset graph timerange
+        graphUpdateOptions($graph, {
+            time: null,
+            range: null
+        });
+
         graphDraw($graph);
     } else if (e.target.href.endsWith('#embed')) {
         window.open(urlPrefix + '/show/graphs/' + $(e.target).closest('[data-graph]').attr('data-graph'));
