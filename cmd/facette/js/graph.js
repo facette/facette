@@ -424,8 +424,9 @@ function graphDraw(graph, postpone, delay, preview) {
                     if (graph.data('toggled-legend') && graphOpts.expand) {
                         $container.height($container.outerHeight() + highchartOpts.series.length *
                             GRAPH_LEGEND_ROW_HEIGHT);
+                        graph.height($container.height());
 
-                        graph.data('toggled-legend', false);
+                        graph.data('toggled-legend', true);
                     }
                 } else {
                     highchartOpts.chart.spacingBottom = GRAPH_SPACING_SIZE * 2;
@@ -433,6 +434,7 @@ function graphDraw(graph, postpone, delay, preview) {
                     if (graph.data('toggled-legend') && graphOpts.expand) {
                         $container.height($container.outerHeight() - highchartOpts.series.length *
                             GRAPH_LEGEND_ROW_HEIGHT);
+                        graph.height($container.height());
 
                         graph.data('toggled-legend', false);
                     }
@@ -518,6 +520,7 @@ function graphHandleActions(e) {
         delta,
         location,
         options,
+        graphsize,
         range;
 
     if (e.target.getAttribute('disabled') == 'disabled') {
@@ -643,11 +646,69 @@ function graphHandleActions(e) {
         });
 
         graphDraw($graph);
+    } else if (e.target.href.endsWith('#incr-height') || e.target.href.endsWith('#decr-height')) {
+	graphsize = getGraphSize($graph);
+	if (e.target.href.endsWith('#incr-height'))
+	    graphsize.height *= 1.2;
+	else
+	    graphsize.height /= 1.2;
+	resizeGraph($graph, graphsize.width, graphsize.height);
+    } else if (e.target.href.endsWith('#incr-width') || e.target.href.endsWith('#decr-width')) {
+	graphsize = getGraphSize($graph);
+	if (e.target.href.endsWith('#incr-width'))
+	    graphsize.width *= 1.2;
+	else
+	    graphsize.width /= 1.2;
+	resizeGraph($graph, graphsize.width, graphsize.height);
+    } else if (e.target.href.endsWith('#transfer-height')) {
+	graphsize = getGraphSize($graph);
+	$graph.siblings('[data-graph]').each(function () {
+	    resizeGraph($(this), graphsize.width, graphsize.height);
+	});
     } else {
         return;
     }
 
     e.preventDefault();
+}
+
+// Resize a graph to specified dimensions. Width and height need to be
+// specified as returned by getGraphSize (just graph dimensions without
+// legend offsets)
+function resizeGraph($graph, width, height) {
+    var $container = $graph.children('.graphcntr');
+    var graphObj = $container.highcharts();
+    var legend = getLegendSize($graph);
+    var effHeight = height + legend.height;
+    $graph.width(width);
+    $graph.height(effHeight);
+    $container.height(effHeight);
+    $container.width(width);
+    graphObj.setSize(width, effHeight);
+}
+
+// return the dimensions of a graph's legend, height of 0 if legend is collapsed
+function getLegendSize($graph) {
+    var $container = $graph.children('.graphcntr');
+    var graphObj = $container.highcharts();
+    if ($graph.data('toggled-legend')) {
+	return({ 'width' : $container.outerWidth(), 'height' : graphObj.series.length * GRAPH_LEGEND_ROW_HEIGHT});
+    } else {
+	return ({'width' : $container.outerWidth(), 'height' : 0});
+    }
+}
+
+
+function getCntrSize($graph) {
+    var $container = $graph.children('.graphcntr');
+    return({ 'width' : $container.outerWidth(), 'height' :$container.outerHeight()});
+}
+
+// return the dimensions of a graph without legend height
+function getGraphSize($graph) {
+    var cntr = getCntrSize($graph);
+    var legend = getLegendSize($graph);
+    return ({ 'width' : cntr.width, 'height' : cntr.height - legend.height});
 }
 
 function graphHandleMouse(e) {
