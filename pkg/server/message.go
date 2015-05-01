@@ -1,7 +1,6 @@
 package server
 
 const (
-	mesgDisabledCommand      string = "Command administratively disabled"
 	mesgEmptyData            string = "No data"
 	mesgFormLimitInvalid     string = "Request limit must be an integer"
 	mesgFormOffsetInvalid    string = "Request offset must be an integer"
