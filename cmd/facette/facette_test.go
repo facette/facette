@@ -1199,7 +1199,7 @@ func Test_LibraryGraphTemplateHandle(test *testing.T) {
 	listBase = server.ItemListResponse{}
 	listResult = server.ItemListResponse{}
 
-	response = execTestRequest(test, "GET", baseURL, nil, &listResult)
+	response = execTestRequest(test, "GET", baseURL+"?type=raw", nil, &listResult)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
@@ -1327,7 +1327,7 @@ func Test_LibraryGraphTemplateHandle(test *testing.T) {
 
 	listResult = server.ItemListResponse{}
 
-	response = execTestRequest(test, "GET", baseURL, nil, &listResult)
+	response = execTestRequest(test, "GET", baseURL+"?type=raw", nil, &listResult)
 
 	if response.StatusCode != http.StatusOK {
 		test.Logf("\nExpected %d\nbut got  %d", http.StatusOK, response.StatusCode)
