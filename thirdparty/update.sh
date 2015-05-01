@@ -1,6 +1,7 @@
 #!/bin/bash
 
 read -d '' DEPENDS <<EOF
+git  https://github.com/facette/natsort     master
 git  https://github.com/fatih/set           master
 git  https://github.com/influxdb/influxdb   master  /client /LICENSE
 git  https://github.com/nu7hatch/gouuid     master
