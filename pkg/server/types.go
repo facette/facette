@@ -6,6 +6,7 @@ import (
 	"github.com/facette/facette/pkg/connector"
 	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/pkg/plot"
+	"github.com/facette/facette/thirdparty/github.com/facette/natsort"
 )
 
 // ExpandRequest represents an expand request structure in the server backend.
@@ -64,7 +65,7 @@ func (r StringListResponse) Len() int {
 }
 
 func (r StringListResponse) Less(i, j int) bool {
-	return r[i] < r[j]
+	return natsort.Compare(r[i], r[j])
 }
 
 func (r StringListResponse) Swap(i, j int) {
@@ -91,7 +92,7 @@ func (r ItemListResponse) Len() int {
 }
 
 func (r ItemListResponse) Less(i, j int) bool {
-	return r[i].Name < r[j].Name
+	return natsort.Compare(r[i].Name, r[j].Name)
 }
 
 func (r ItemListResponse) Swap(i, j int) {
@@ -118,7 +119,7 @@ func (r CollectionListResponse) Len() int {
 }
 
 func (r CollectionListResponse) Less(i, j int) bool {
-	return r[i].Name < r[j].Name
+	return natsort.Compare(r[i].Name, r[j].Name)
 }
 
 func (r CollectionListResponse) Swap(i, j int) {
@@ -143,7 +144,7 @@ func (r GraphListResponse) Len() int {
 }
 
 func (r GraphListResponse) Less(i, j int) bool {
-	return r[i].Name < r[j].Name
+	return natsort.Compare(r[i].Name, r[j].Name)
 }
 
 func (r GraphListResponse) Swap(i, j int) {
@@ -168,7 +169,7 @@ func (r ScaleValueListResponse) Len() int {
 }
 
 func (r ScaleValueListResponse) Less(i, j int) bool {
-	return r[i].Name < r[j].Name
+	return natsort.Compare(r[i].Name, r[j].Name)
 }
 
 func (r ScaleValueListResponse) Swap(i, j int) {
@@ -193,7 +194,7 @@ func (r UnitValueListResponse) Len() int {
 }
 
 func (r UnitValueListResponse) Less(i, j int) bool {
-	return r[i].Name < r[j].Name
+	return natsort.Compare(r[i].Name, r[j].Name)
 }
 
 func (r UnitValueListResponse) Swap(i, j int) {
