@@ -266,6 +266,7 @@ function graphDraw(graph, postpone, delay, preview) {
                                     name: this.points[i].series.name,
                                     value: this.points[i].y,
                                     color: this.points[i].series.color,
+                                    symbol: getHighchartsSymbol(this.points[i].series.symbol)
                                 });
                             }
 
@@ -275,8 +276,8 @@ function graphDraw(graph, postpone, delay, preview) {
                                 total = 0;
 
                                 for (i in stacks[stackName]) {
-                                    tooltip += '<div><span class="highcharts-tooltip-color" style="background-color: ' +
-                                        stacks[stackName][i].color + '"></span> ' + stacks[stackName][i].name +
+                                    tooltip += '<div><span style="color: ' + stacks[stackName][i].color + '">' + 
+                                        stacks[stackName][i].symbol +'</span> ' + stacks[stackName][i].name +
                                         ': <strong>' + (stacks[stackName][i].value !== null ?
                                         formatValue(stacks[stackName][i].value, data.unit_type) : 'null') +
                                         '</strong></div>';
