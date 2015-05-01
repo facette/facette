@@ -25,7 +25,7 @@
 			</header>
 
 			<section class="scrollarea full">
-				<div class="list" data-list="graphs" data-listopts="init: true; url: library/graphs/{{ if .Template }}?templates=1{{ end }}; messages: graph">
+				<div class="list" data-list="graphs" data-listopts="init: true; url: library/graphs/?type={{ if .Template }}template{{ else }}raw{{ end }}; messages: graph">
 					<h1>{{ if .Template }}Graphs Templates List{{ else }}Graphs List{{ end }} <span class="count"></span></h1>
 
 					<nav class="listmenu">
