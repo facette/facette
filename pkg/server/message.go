@@ -11,6 +11,7 @@ const (
 	mesgPlotOperationError   string = "An error occurred while performing plots operation"
 	mesgProviderQueryError   string = "An error occurred while querying a provider"
 	mesgReadOnlyMode         string = "Instance is read-only"
+	mesgRequestInvalid       string = "Request is invalid"
 	mesgResourceConflict     string = "A resource conflict has occured"
 	mesgResourceInvalid      string = "Resource is invalid"
 	mesgResourceNotFound     string = "Unable to find requested resource"
