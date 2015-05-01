@@ -51,6 +51,8 @@ function browseSetRange(e) {
 
             graphDraw($item, !$item.inViewport());
         });
+
+        $target.closest('.menu').hide();
     } else if ($target.closest('.menu').length === 0) {
         $('a[href=#set-global-range] + .menu').hide();
         return;
