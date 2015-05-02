@@ -1,4 +1,5 @@
-package utils
+// Package cmd provides common helper functions to command line binaries.
+package cmd
 
 import (
 	"flag"
