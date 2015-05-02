@@ -24,6 +24,7 @@ const (
 
 var (
 	version      string
+	buildDate    string
 	flagConfig   string
 	flagHelp     bool
 	flagLogPath  string
@@ -45,7 +46,7 @@ func init() {
 	if flagHelp {
 		cmd.PrintUsage(os.Stdout, cmdUsage)
 	} else if flagVersion {
-		cmd.PrintVersion(version)
+		cmd.PrintVersion(version, buildDate)
 
 		connectors := []string{}
 		for connector := range connector.Connectors {

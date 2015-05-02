@@ -20,6 +20,7 @@ Commands:
 
 var (
 	version     string
+	buildDate   string
 	flagConfig  string
 	flagHelp    bool
 	flagVersion bool
@@ -35,7 +36,7 @@ func init() {
 	if flagHelp {
 		cmd.PrintUsage(os.Stdout, cmdUsage)
 	} else if flagVersion {
-		cmd.PrintVersion(version)
+		cmd.PrintVersion(version, buildDate)
 		os.Exit(0)
 	} else if flagConfig == "" {
 		fmt.Fprintf(os.Stderr, "Error: configuration file path is mandatory\n")

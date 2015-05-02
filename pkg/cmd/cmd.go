@@ -23,10 +23,11 @@ func PrintUsage(output io.Writer, usage string) {
 }
 
 // PrintVersion prettifies the output of command-line usage.
-func PrintVersion(version string) {
-	fmt.Printf("%s version %s\nGo version: %s (%s)\n",
+func PrintVersion(version, buildDate string) {
+	fmt.Printf("%s version %s, built on %s\nGo version: %s (%s)\n",
 		path.Base(os.Args[0]),
 		version,
+		buildDate,
 		runtime.Version(),
 		runtime.Compiler,
 	)

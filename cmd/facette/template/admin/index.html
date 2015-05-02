@@ -16,10 +16,32 @@
 			<section class="scrollarea full">{{ if .ReadOnly }}
 				<div class="mesgitem warning">Important: this instance is running in <strong>read-only mode</strong>.</div>
 
+				{{ end }}{{ if not .HideBuildDetails }}
+				<h1>Build Information</h1>
+
+				<table class="infotable">
+					<tr>
+						<th>Version:</th>
+						<td>{{ .Build.Version }}</td>
+					</tr>
+					<tr>
+						<th>Build Date:</th>
+						<td>{{ .Build.BuildDate }}</td>
+					</tr>
+					<tr>
+						<th>Compiler:</th>
+						<td>{{ .Build.Compiler }}</td>
+					</tr>
+					<tr>
+						<th>Built-in Connectors:</th>
+						<td>{{ range $index, $connector := .Build.Connectors }}{{ if gt $index 0 }}<br>{{ end }}{{ $connector }}{{ end }}</td>
+					</tr>
+				</table>
+
 				{{ end }}
 				<h1>Catalog statistics</h1>
 
-				<table class="stats">
+				<table class="infotable">
 					<tr>
 						<th>Total Origins:</th>
 						<td> {{ .Stats.Origins }}</td>
@@ -36,7 +58,7 @@
 
 				<h1>Library statistics</h1>
 
-				<table class="stats">
+				<table class="infotable">
 					<tr>
 						<th>Total Collections:</th>
 						<td>{{ .Stats.Collections }}</td>
