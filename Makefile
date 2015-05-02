@@ -1,6 +1,8 @@
 # -*- Makefile -*-
 
-VERSION = 0.4.0dev
+VERSION := 0.4.0dev
+
+BUILD_DATE := $(shell date +%F)
 
 TAGS ?= facette \
 	graphite \
@@ -108,10 +110,17 @@ BIN_OUTPUT = $(addprefix $(BUILD_DIR)/bin/, $(notdir $(wildcard cmd/*)))
 
 PKG_SRC = $(wildcard pkg/*/*.go)
 
+PKG_LIST = $(wildcard pkg/*)
+
 $(BIN_OUTPUT): $(PKG_SRC) $(BIN_SRC) $(BUILD_DIR)/src/github.com/facette/facette
 	@$(call mesg_start,$(notdir $@),Building $(notdir $@)...)
 	@install -d -m 0755 $(dir $@) && $(GO) build \
-			-ldflags "-X main.version $(VERSION)" \
+			-ldflags " \
+				-X main.version $(VERSION) \
+				-X main.buildDate '$(BUILD_DATE)' \
+				$(PKG_LIST:%=-X github.com/facette/facette/%.version $(VERSION)) \
+				$(PKG_LIST:%=-X github.com/facette/facette/%.buildDate '$(BUILD_DATE)') \
+			" \
 			-tags "$(TAGS)" \
 			-o $@ cmd/$(notdir $@)/*.go && \
 		$(call mesg_ok) || $(call mesg_fail)
@@ -336,12 +345,10 @@ lint-static: jshint $(SCRIPT_OUTPUT)
 # Test
 TEST_DIR = $(BUILD_DIR)/tests
 
-TEST_PKG = $(wildcard pkg/*)
-
 $(TEST_DIR):
 	@install -d -m 0755 $(TEST_DIR)
 
-$(TEST_PKG): $(TEST_DIR) $(BUILD_DIR)/src/github.com/facette/facette
+$(PKG_LIST): $(TEST_DIR) $(BUILD_DIR)/src/github.com/facette/facette
 	@$(call mesg_start,test,Testing $@ package...)
 	@(cd $(TEST_DIR) && $(GO) test -race -c -i ../../../$@ && \
 		(test ! -f ./$(@:pkg/%=%).test || ./$(@:pkg/%=%).test -test.v=true) && \
@@ -352,7 +359,7 @@ clean-test:
 	@rm -rf $(BUILD_DIR)/tests $(BUILD_DIR)/pkg && \
 		$(call mesg_ok) || $(call mesg_fail)
 
-test-pkg: $(TEST_PKG)
+test-pkg: $(PKG_LIST)
 
 test-server: $(TEST_DIR) build-bin
 	@$(call mesg_start,test,Starting facette server...)

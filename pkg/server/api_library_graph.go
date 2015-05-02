@@ -164,11 +164,19 @@ func (server *Server) serveGraphList(writer http.ResponseWriter, request *http.R
 	items = make(GraphListResponse, 0)
 
 	// Flag for listing only graph templates
-	showTemplates := request.FormValue("templates") == "true" || request.FormValue("templates") == "1"
+	listType := request.FormValue("type")
+	if listType == "" {
+		listType = "all"
+	} else if listType != "raw" && listType != "template" && listType != "all" {
+		logger.Log(logger.LevelWarning, "server", "unknown list type: %s", listType)
+		server.serveResponse(writer, serverResponse{mesgRequestInvalid}, http.StatusBadRequest)
+		return
+	}
 
 	for _, graph := range server.Library.Graphs {
 		// Depending on the template flag, filter out either graphs or graph templates
-		if graph.Template && !showTemplates || !graph.Template && showTemplates {
+		if request.FormValue("type") != "all" && (graph.Template && listType == "raw" ||
+			!graph.Template && listType == "template") {
 			continue
 		}
 

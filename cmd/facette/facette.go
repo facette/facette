@@ -8,10 +8,10 @@ import (
 	"sort"
 	"syscall"
 
+	"github.com/facette/facette/pkg/cmd"
 	"github.com/facette/facette/pkg/connector"
 	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/server"
-	"github.com/facette/facette/pkg/utils"
 )
 
 const (
@@ -24,6 +24,7 @@ const (
 
 var (
 	version      string
+	buildDate    string
 	flagConfig   string
 	flagHelp     bool
 	flagLogPath  string
@@ -39,13 +40,13 @@ func init() {
 	flag.StringVar(&flagLogPath, "l", defaultLogPath, "log file path")
 	flag.StringVar(&flagLogLevel, "L", defaultLogLevel, "logging level (error, warning, notice, info, debug)")
 	flag.BoolVar(&flagVersion, "V", false, "display software version and exit")
-	flag.Usage = func() { utils.PrintUsage(os.Stderr, cmdUsage) }
+	flag.Usage = func() { cmd.PrintUsage(os.Stderr, cmdUsage) }
 	flag.Parse()
 
 	if flagHelp {
-		utils.PrintUsage(os.Stdout, cmdUsage)
+		cmd.PrintUsage(os.Stdout, cmdUsage)
 	} else if flagVersion {
-		utils.PrintVersion(version)
+		cmd.PrintVersion(version, buildDate)
 
 		connectors := []string{}
 		for connector := range connector.Connectors {
@@ -62,7 +63,7 @@ func init() {
 		os.Exit(0)
 	} else if flagConfig == "" {
 		fmt.Fprintf(os.Stderr, "Error: configuration file path is mandatory\n")
-		utils.PrintUsage(os.Stderr, cmdUsage)
+		cmd.PrintUsage(os.Stderr, cmdUsage)
 	}
 
 	if logLevel, err = logger.GetLevelByName(flagLogLevel); err != nil {
