@@ -139,3 +139,26 @@ function timeToRange(duration) {
 
     return result;
 }
+
+function getHighchartsSymbol(symbolText) { 
+	var symbol;
+	switch (symbolText) {
+	    case 'circle':
+		symbol = '●';
+		break;
+	    case 'diamond':
+		symbol = '♦';
+		break;
+	    case 'square':
+		symbol = '■';
+		break;
+	    case 'triangle':
+		symbol = '▲';
+		break;
+	    case 'triangle-down':
+		symbol = '▼';
+		break;
+	}
+	return symbol
+
+}

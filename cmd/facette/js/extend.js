@@ -145,10 +145,10 @@ if (window.Highcharts) {
                 groupEvent(e);
             });
 
-            element = chart.renderer.rect(tableLeft, tableTop + i * GRAPH_LEGEND_ROW_HEIGHT, GRAPH_LEGEND_ROW_HEIGHT * 0.75,
-                    GRAPH_LEGEND_ROW_HEIGHT * 0.65, 2)
-                .attr({
-                    fill: series.color
+            element = chart.renderer.text(getHighchartsSymbol(series.symbol), tableLeft, tableTop +
+                    i * GRAPH_LEGEND_ROW_HEIGHT + GRAPH_LEGEND_ROW_HEIGHT / 2)
+                .css({
+                    'color': series.color,
                 })
                 .add(groups[series.name])
                 .element;
