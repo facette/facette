@@ -32,17 +32,18 @@ const (
 
 // Config represents the global configuration of the instance.
 type Config struct {
-	BindAddr     string                     `json:"bind"`
-	SocketUser   int                        `json:"socket_user,string"`
-	SocketGroup  int                        `json:"socket_group,string"`
-	SocketMode   *string                    `json:"socket_mode"`
-	BaseDir      string                     `json:"base_dir"`
-	DataDir      string                     `json:"data_dir"`
-	ProvidersDir string                     `json:"providers_dir"`
-	PidFile      string                     `json:"pid_file"`
-	URLPrefix    string                     `json:"url_prefix"`
-	ReadOnly     bool                       `json:"read_only"`
-	Providers    map[string]*ProviderConfig `json:"-"`
+	BindAddr         string                     `json:"bind"`
+	SocketUser       int                        `json:"socket_user,string"`
+	SocketGroup      int                        `json:"socket_group,string"`
+	SocketMode       *string                    `json:"socket_mode"`
+	BaseDir          string                     `json:"base_dir"`
+	DataDir          string                     `json:"data_dir"`
+	ProvidersDir     string                     `json:"providers_dir"`
+	PidFile          string                     `json:"pid_file"`
+	URLPrefix        string                     `json:"url_prefix"`
+	ReadOnly         bool                       `json:"read_only"`
+	HideBuildDetails bool                       `json:"hide_build_details"`
+	Providers        map[string]*ProviderConfig `json:"-"`
 }
 
 // Load loads the configuration from the filesystem.

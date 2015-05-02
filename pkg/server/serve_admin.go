@@ -298,15 +298,19 @@ func (server *Server) serveAdminIndex(writer http.ResponseWriter, request *http.
 		writer,
 		http.StatusOK,
 		struct {
-			URLPrefix string
-			ReadOnly  bool
-			Section   string
-			Stats     *statsResponse
+			URLPrefix        string
+			ReadOnly         bool
+			HideBuildDetails bool
+			Section          string
+			Build            *buildInfo
+			Stats            *statsResponse
 		}{
-			URLPrefix: server.Config.URLPrefix,
-			ReadOnly:  server.Config.ReadOnly,
-			Section:   "",
-			Stats:     server.getStats(writer, request),
+			URLPrefix:        server.Config.URLPrefix,
+			ReadOnly:         server.Config.ReadOnly,
+			HideBuildDetails: server.Config.HideBuildDetails,
+			Section:          "",
+			Build:            server.buildInfo,
+			Stats:            server.getStats(writer, request),
 		},
 		path.Join(server.Config.BaseDir, "template", "layout.html"),
 		path.Join(server.Config.BaseDir, "template", "common", "element.html"),
