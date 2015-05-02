@@ -199,12 +199,16 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan<- *cat
 			connector.metrics[sourceName] = make(map[string]*rrdMetric)
 		}
 
+		logger.Log(logger.LevelDebug, "Refresh", "rrd[%s]: Processing file %s", connector.name, filePath)
+
 		// Extract metric information from .rrd file
 		info, err := rrd.Info(filePath)
 		if err != nil {
 			logger.Log(logger.LevelWarning, "connector", "rrd[%s]: %s", connector.name, err)
 			return nil
 		}
+
+		logger.Log(logger.LevelDebug, "Refresh", "rrd[%s]: Info: %s", connector.name, info)
 
 		// Extract consolidation functions list
 		cfSet := set.New(set.ThreadSafe)
@@ -219,8 +223,10 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan<- *cat
 
 		cfList := set.StringSlice(cfSet)
 
-		if _, ok := info["ds.index"]; ok {
-			indexes, ok := info["ds.index"].(map[string]interface{})
+		logger.Log(logger.LevelDebug, "Refresh", "rrd[%s]: DS: %s", connector.name, info["ds"])
+
+		if _, ok := info["ds.value"]; ok {
+			indexes, ok := info["ds.value"].(map[string]interface{})
 			if !ok {
 				return nil
 			}
@@ -228,6 +234,8 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan<- *cat
 			for dsName := range indexes {
 				for _, cfName := range cfList {
 					metricFullName := metricName + "/" + dsName + "/" + strings.ToLower(cfName)
+
+					logger.Log(logger.LevelDebug, "Refresh", "rrd[%s]: Found: %s", connector.name, metricFullName)
 
 					connector.metrics[sourceName][metricFullName] = &rrdMetric{
 						Dataset:  dsName,
