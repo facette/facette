@@ -515,8 +515,10 @@ function adminGraphGetTemplatable(groups) {
         }
     }
 
-    result = result.concat($pane.find('textarea[name=graph-desc]').val().matchAll(regexp));
-    result = result.concat($pane.find('input[name=graph-title]').val().matchAll(regexp));
+    if ($pane.data('template')) {
+        result = result.concat($pane.find('textarea[name=graph-desc]').val().matchAll(regexp));
+        result = result.concat($pane.find('input[name=graph-title]').val().matchAll(regexp));
+    }
 
     result.sort();
 
