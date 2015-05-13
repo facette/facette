@@ -56,7 +56,11 @@ func (library *Library) PrepareCollection(collection *Collection, filter string)
 
 		// Retrieve missing title from graph if none provided
 		if title, ok := entry.Options["title"]; !ok || title == nil {
-			entry.Options["title"] = graph.Title
+			if graph.Title != "" {
+				entry.Options["title"] = graph.Title
+			} else {
+				entry.Options["title"] = graph.Name
+			}
 		}
 
 		// Get global refresh interval if none provided
