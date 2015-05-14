@@ -136,6 +136,17 @@ function adminCollectionSetupTerminate() {
         });
 
         // Register links
+        linkRegister('edit-graph', function (e) {
+            var $item = $(e.target).closest('[data-graph]'),
+                location;
+
+            location = urlPrefix + '/admin/graphs/' + $item.attr('data-graph');
+            if ($item.data('params'))
+                location += '?' + $item.data('params');
+
+            window.location = location;
+        });
+
         linkRegister('move-up move-down', adminItemHandleReorder);
 
         linkRegister('remove-graph', function (e) {
@@ -216,6 +227,9 @@ function adminCollectionSetupTerminate() {
                         id: $graph.data('value').id,
                         name: $graph.val()
                     });
+
+                    if ($graph.data('value').link)
+                        $item.data('params', 'linked=1');
 
                     $item.find('input[name=graph-shown]').attr('checked', 'checked');
 
@@ -346,6 +360,9 @@ function adminCollectionSetupTerminate() {
                         $item.addClass('unknown');
                         info[id] = {name: $.t('graph.mesg_unknown')};
                     }
+
+                    if (info[id].link)
+                        $item.data('params', 'linked=1');
 
                     domFillItem($item, info[id]);
                     adminCollectionUpdatePlaceholder($item);
