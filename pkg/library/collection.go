@@ -49,9 +49,10 @@ func (library *Library) PrepareCollection(collection *Collection, filter string)
 
 		graph := item.(*Graph)
 
-		// Initialize options map if needed
+		// Initialize options map if needed, then set defaults
 		if entry.Options == nil {
 			entry.Options = make(map[string]interface{})
+			entry.Options["enabled"] = true
 		}
 
 		// Check for linked graph
