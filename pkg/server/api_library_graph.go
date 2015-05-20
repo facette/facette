@@ -190,6 +190,8 @@ func (server *Server) serveGraphList(writer http.ResponseWriter, request *http.R
 		}
 
 		// If linked graph, expand the templated description field
+		description := graph.Description
+
 		if graph.Link != "" {
 			item, err := server.Library.GetItem(graph.Link, library.LibraryItemGraph)
 
@@ -198,9 +200,10 @@ func (server *Server) serveGraphList(writer http.ResponseWriter, request *http.R
 			} else {
 				graphTemplate := item.(*library.Graph)
 
-				if graph.Description, err = expandStringTemplate(
+				if description, err = expandStringTemplate(
 					graphTemplate.Description,
-					graph.Attributes); err != nil {
+					graph.Attributes,
+				); err != nil {
 					logger.Log(logger.LevelError, "server", "failed to expand graph description: %s", err)
 				}
 			}
@@ -210,7 +213,7 @@ func (server *Server) serveGraphList(writer http.ResponseWriter, request *http.R
 			ItemResponse: ItemResponse{
 				ID:          graph.ID,
 				Name:        graph.Name,
-				Description: graph.Description,
+				Description: description,
 				Modified:    graph.Modified.Format(time.RFC3339),
 			},
 			Link: graph.Link,
