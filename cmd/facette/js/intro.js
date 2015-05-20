@@ -23,9 +23,12 @@ $(function () {
 "use strict";
 
 var $head = $(document.head),
-	$body = $(document.body),
+    $body = $(document.body),
     $window = $(window);
+
+// Get location path
+var locationPath = String(window.location.pathname);
 
 // Get URL prefix
 var urlPrefix = $head.find('meta[name=url-prefix]').attr('content') || '',
-	readOnly = $head.find('meta[name=read-only]').attr('content') == 'true';
+    readOnly = $head.find('meta[name=read-only]').attr('content') == 'true';
