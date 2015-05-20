@@ -11,6 +11,10 @@ function browseSetRange(e) {
         $overlay,
         href = $target.attr('href');
 
+    // Prevent event from being triggered from a graph item
+    if ($target.closest('[data-graph]'))
+        return;
+
     if (href == '#set-global-range') {
         $target.next('.menu').toggle();
     } else if (href == '#range-custom') {
