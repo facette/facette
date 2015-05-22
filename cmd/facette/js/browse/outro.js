@@ -4,6 +4,8 @@ if (locationPath.startsWith(urlPrefix + '/browse/')) {
     linkRegister('print', browsePrint);
 
     // Register setup callbacks
+    setupRegister(SETUP_CALLBACK_TERM, browseCollectionSetupTerminateTree);
+
     if (locationPath.startsWith(urlPrefix + '/browse/collections/'))
         setupRegister(SETUP_CALLBACK_TERM, browseCollectionSetupTerminate);
 
