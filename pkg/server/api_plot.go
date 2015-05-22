@@ -351,18 +351,28 @@ func makePlotsResponse(plotSeries map[string][]plot.Series, plotReq *PlotRequest
 			}
 
 			for _, plotItem := range plotSeries[seriesItem.Name] {
+				var optionKey string
+
 				// Apply series scale if any
 				if scale, _ := config.GetFloat(seriesItem.Options, "scale", false); scale != 0 {
 					plotItem.Scale(plot.Value(scale))
 				}
 
 				// Merge options from group and series
-				seriesOptions[seriesItem.Name] = make(map[string]interface{})
-				for key, value := range groupItem.Options {
-					seriesOptions[seriesItem.Name][key] = value
+				if groupItem.Type == plot.OperTypeAverage || groupItem.Type == plot.OperTypeSum {
+					optionKey = groupItem.Name
+				} else {
+					optionKey = seriesItem.Name
 				}
-				for key, value := range seriesItem.Options {
-					seriesOptions[seriesItem.Name][key] = value
+
+				seriesOptions[optionKey] = make(map[string]interface{})
+				for key, value := range groupItem.Options {
+					seriesOptions[optionKey][key] = value
+				}
+				if groupItem.Type != plot.OperTypeAverage && groupItem.Type != plot.OperTypeSum {
+					for key, value := range seriesItem.Options {
+						seriesOptions[optionKey][key] = value
+					}
 				}
 
 				groupSeries = append(groupSeries, plotItem)
