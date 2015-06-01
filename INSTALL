@@ -32,6 +32,11 @@ installation directory set the `PREFIX` variable:
 
    sudo make PREFIX=/path/to/directory install
 
+Configuration
+-------------
+
+Once installed, follow the configuration steps described here: http://docs.facette.io/configuration/
+
 Additional Targets
 ------------------
 
