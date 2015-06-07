@@ -276,10 +276,10 @@ function graphDraw(graph, postpone, delay, preview) {
                                 total = 0;
 
                                 for (i in stacks[stackName]) {
-                                    tooltip += '<div><span style="color: ' + stacks[stackName][i].color + '">' + 
+                                    tooltip += '<div><span style="color: ' + stacks[stackName][i].color + '">' +
                                         stacks[stackName][i].symbol +'</span> ' + stacks[stackName][i].name +
                                         ': <strong>' + (stacks[stackName][i].value !== null ?
-                                        formatValue(stacks[stackName][i].value, data.unit_type) : 'null') +
+                                        formatValue(stacks[stackName][i].value, {unit_type: data.unit_type}) : 'null') +
                                         '</strong></div>';
 
                                     if (stacks[stackName][i].value !== null)
@@ -288,7 +288,7 @@ function graphDraw(graph, postpone, delay, preview) {
 
                                 if (stacks[stackName].length > 1) {
                                     tooltip += '<div class="highcharts-tooltip-total">Total: <strong>' +
-                                        (total !== null ? formatValue(total, data.unit_type) : 'null') +
+                                        (total !== null ? formatValue(total, {unit_type: data.unit_type}) : 'null') +
                                         '</strong></div>';
                                 }
                             }
@@ -306,7 +306,7 @@ function graphDraw(graph, postpone, delay, preview) {
                     yAxis: {
                         labels: {
                             formatter: function () {
-                                return formatValue(this.value, data.unit_type);
+                                return formatValue(this.value, {unit_type: data.unit_type});
                             }
                         },
                         plotLines: [],

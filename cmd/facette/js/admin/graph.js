@@ -194,6 +194,9 @@ function adminGraphCreateGroup(name, value) {
 
         $item.find('a[href=#set-consolidate]').text(adminGraphGetConsolidateLabel(value.options.consolidate ||
             CONSOLIDATE_AVERAGE));
+
+        if (value.options.formatter)
+            $item.find('a[href=#set-formatter]').text(value.options.formatter);
     }
 
     return $item;
@@ -286,6 +289,9 @@ function adminGraphCreateProxy(type, item, list) {
 
         $item.find('a[href=#set-consolidate]').text(adminGraphGetConsolidateLabel(value.options.consolidate ||
             CONSOLIDATE_AVERAGE));
+
+        if (value.options.formatter)
+            $item.find('a[href=#set-formatter]').text(value.options.formatter);
     }
 
     return $item;
@@ -941,6 +947,9 @@ function adminGraphSetupTerminate() {
 
                     if (expands[seriesName].options.consolidate !== 0)
                         $item.find('a[href=#set-consolidate]').text(expands[seriesName].options.consolidate);
+
+                    if (expands[seriesName].options.formatter !== 0)
+                        $item.find('a[href=#set-formatter]').text(expands[seriesName].options.formatter);
                 }
 
                 $item.find('.count').remove();
@@ -1369,6 +1378,32 @@ function adminGraphSetupTerminate() {
                     type: 'change',
                     _init: true
                 });
+        });
+
+        linkRegister('set-formatter', function (e) {
+            var $target = $(e.target),
+                $item = $target.closest('[data-series], [data-group]'),
+                $formatter = $item.find('a[href=#set-formatter]'),
+                value = adminGraphGetValue($item);
+
+            overlayCreate('prompt', {
+                message: $.t('graph.labl_formatter'),
+                callbacks: {
+                    validate: function (data) {
+                        value.options = $.extend(value.options || {}, {
+                            formatter: data
+                        });
+
+                        $formatter.text(data || '');
+                    }
+                },
+                labels: {
+                    validate: {
+                        text: $.t('graph.labl_formatter_set')
+                    }
+                },
+                reset: ''
+            });
         });
 
         // Attach events

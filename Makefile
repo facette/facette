@@ -214,7 +214,8 @@ SCRIPT_EXTRA = cmd/facette/js/thirdparty/jquery.js \
 	cmd/facette/js/thirdparty/i18next.js \
 	cmd/facette/js/thirdparty/moment.js \
 	cmd/facette/js/thirdparty/canvg.js \
-	cmd/facette/js/thirdparty/rgbcolor.js
+	cmd/facette/js/thirdparty/rgbcolor.js \
+	cmd/facette/js/thirdparty/sprintf.js
 
 SCRIPT_EXTRA_OUTPUT = $(addprefix $(BUILD_DIR)/static/, $(notdir $(SCRIPT_EXTRA)))
 
