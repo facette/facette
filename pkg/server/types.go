@@ -265,7 +265,8 @@ type providerQuery struct {
 }
 
 type providerQueryMap struct {
-	seriesName string
-	sourceName string
-	metricName string
+	seriesName      string
+	sourceName      string
+	metricName      string
+	fromSourceGroup bool
 }
