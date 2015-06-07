@@ -231,9 +231,10 @@ func (server *Server) prepareProviderQueries(plotReq *PlotRequest,
 					providerQueries[providerName].queryMap = append(
 						providerQueries[providerName].queryMap,
 						providerQueryMap{
-							seriesName: seriesItem.Name,
-							sourceName: metric.GetSource().Name,
-							metricName: metric.Name,
+							seriesName:      seriesItem.Name,
+							sourceName:      metric.GetSource().Name,
+							metricName:      metric.Name,
+							fromSourceGroup: strings.HasPrefix(seriesItem.Source, library.LibraryGroupPrefix),
 						},
 					)
 				}
@@ -295,7 +296,9 @@ func executeQueries(queries map[string]*providerQuery) (map[string][]plot.Series
 		// Re-arrange internal plot results according to original queries
 		for plotsIndex, plotsItem := range plots {
 			// Add metric name detail to series name is a source/metric group
-			if strings.HasPrefix(providerQuery.queryMap[plotsIndex].seriesName, library.LibraryGroupPrefix) {
+			if providerQuery.queryMap[plotsIndex].fromSourceGroup ||
+				strings.HasPrefix(providerQuery.queryMap[plotsIndex].seriesName, library.LibraryGroupPrefix) {
+
 				plotsItem.Name = fmt.Sprintf(
 					"%s (%s)",
 					providerQuery.queryMap[plotsIndex].sourceName,
