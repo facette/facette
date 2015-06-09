@@ -11,6 +11,7 @@ function browseCollectionSetupTerminate() {
     });
 
     linkRegister('set-global-range', browseSetRange);
+    linkRegister('set-global-size', browseSetSize);
     $('a[href=#set-global-range] + .menu .menuitem a').on('click', browseSetRange);
     $body.on('click', browseSetRange);
 

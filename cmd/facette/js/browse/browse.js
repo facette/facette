@@ -6,6 +6,15 @@ function browsePrint() {
     });
 }
 
+function browseSetSize(e) {
+    var $target = $(e.target),
+        href = $target.attr('href');
+
+    if (href == '#set-global-size') {
+        $target.next('.menu').toggle();
+    }
+}
+ 
 function browseSetRange(e) {
     var $target = $(e.target),
         $overlay,

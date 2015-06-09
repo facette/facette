@@ -646,25 +646,6 @@ function graphHandleActions(e) {
         });
 
         graphDraw($graph);
-    } else if (e.target.href.endsWith('#incr-height') || e.target.href.endsWith('#decr-height')) {
-	graphsize = getGraphSize($graph);
-	if (e.target.href.endsWith('#incr-height'))
-	    graphsize.height *= 1.2;
-	else
-	    graphsize.height /= 1.2;
-	resizeGraph($graph, graphsize.width, graphsize.height);
-    } else if (e.target.href.endsWith('#incr-width') || e.target.href.endsWith('#decr-width')) {
-	graphsize = getGraphSize($graph);
-	if (e.target.href.endsWith('#incr-width'))
-	    graphsize.width *= 1.2;
-	else
-	    graphsize.width /= 1.2;
-	resizeGraph($graph, graphsize.width, graphsize.height);
-    } else if (e.target.href.endsWith('#transfer-height')) {
-	graphsize = getGraphSize($graph);
-	$graph.siblings('[data-graph]').each(function () {
-	    resizeGraph($(this), graphsize.width, graphsize.height);
-	});
     } else {
         return;
     }
@@ -684,7 +665,9 @@ function resizeGraph($graph, width, height) {
     $graph.height(effHeight);
     $container.height(effHeight);
     $container.width(width);
-    graphObj.setSize(width, effHeight);
+    if (graphObj) { // prevent errors if Obj isn't created due to page scrolling (out of visible area)
+        graphObj.setSize(width, effHeight);
+    }
 }
 
 // return the dimensions of a graph's legend, height of 0 if legend is collapsed
@@ -857,7 +840,36 @@ function graphSetupTerminate() {
         .on('mouseup mousedown mousemove mouseleave', '[data-graph]', graphHandleMouse)
         .on('mouseenter mouseleave', '.graphctrl .step, .graphctrl .actions', graphHandleMouse)
         .on('click', '[data-graph] a', graphHandleActions)
-        .on('click', '.graphlist a', graphHandleQueue);
+        .on('click', '.graphlist a', graphHandleQueue)
+        .on('change', '.size-slider', resizeAll);
+    $('.scrollarea.full').scroll(scrollHandler);
+}
+
+function scrollHandler() {
+    $('.actions').css("right",($('[data-graph]').width() - $(this).scrollLeft() - $(".full").width() )  + "px");
+//$(".highcharts-table-group").each(function () { $(this).children().attr("x", function(idx,old){ return parseInt(old, 10)+$(".full").scrollLeft()} )})
+}
+
+function resizeAll() {
+    var mode = this.name;
+    var value = this.value;
+    if (typeof this._oldvalue === 'undefined') {
+        this._oldvalue = 1;
+    }
+    var oldvalue = this._oldvalue;
+    $('[data-graph]').each(function() {
+        var dimensions = getGraphSize($(this)) ;
+
+        if ( mode == "width") {
+            dimensions.width = (dimensions.width / oldvalue) * value;
+        } else {
+            dimensions.height = (dimensions.height / oldvalue) * value;
+        }
+        resizeGraph($(this), dimensions.width, dimensions.height);
+    });
+    this._oldvalue = value;
+    $(this).closest(".menu").toggle();
+    scrollHandler()
 }
 
 function graphUpdateOptions(graph, options) {
