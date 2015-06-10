@@ -846,7 +846,11 @@ function graphSetupTerminate() {
 }
 
 function scrollHandler() {
-    $('.actions').css("right",($('[data-graph]').width() - $(this).scrollLeft() - $(".full").width() )  + "px");
+    var scroll =  $('.scrollarea.full').scrollLeft(),
+        width = $('.scrollarea.full').width();
+    $('.actions').css("right",($('[data-graph]').width() - scroll - width)  + "px");
+    $('.highcharts-title').each(function() { $(this).attr("x", scroll + Math.ceil(width/2) )});
+    $('.highcharts-subtitle').each(function() { $(this).attr("x", scroll + Math.ceil(width/2) )});
 //$(".highcharts-table-group").each(function () { $(this).children().attr("x", function(idx,old){ return parseInt(old, 10)+$(".full").scrollLeft()} )})
 }
 
@@ -869,7 +873,8 @@ function resizeAll() {
     });
     this._oldvalue = value;
     $(this).closest(".menu").toggle();
-    scrollHandler()
+    setTimeout(scrollHandler,500);
+
 }
 
 function graphUpdateOptions(graph, options) {
