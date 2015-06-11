@@ -657,10 +657,10 @@ function graphHandleActions(e) {
 // specified as returned by getGraphSize (just graph dimensions without
 // legend offsets)
 function resizeGraph($graph, width, height) {
-    var $container = $graph.children('.graphcntr');
-    var graphObj = $container.highcharts();
-    var legend = getLegendSize($graph);
-    var effHeight = height + legend.height;
+    var $container = $graph.children('.graphcntr'),
+        graphObj = $container.highcharts(),
+        legend = getLegendSize($graph),
+        effHeight = height + legend.height;
     $graph.width(width);
     $graph.height(effHeight);
     $container.height(effHeight);
@@ -672,8 +672,8 @@ function resizeGraph($graph, width, height) {
 
 // return the dimensions of a graph's legend, height of 0 if legend is collapsed
 function getLegendSize($graph) {
-    var $container = $graph.children('.graphcntr');
-    var graphObj = $container.highcharts();
+    var $container = $graph.children('.graphcntr'),
+        graphObj = $container.highcharts();
     if ($graph.data('toggled-legend')) {
 	return({ 'width' : $container.outerWidth(), 'height' : graphObj.series.length * GRAPH_LEGEND_ROW_HEIGHT});
     } else {
@@ -689,8 +689,8 @@ function getCntrSize($graph) {
 
 // return the dimensions of a graph without legend height
 function getGraphSize($graph) {
-    var cntr = getCntrSize($graph);
-    var legend = getLegendSize($graph);
+    var cntr = getCntrSize($graph),
+        legend = getLegendSize($graph);
     return ({ 'width' : cntr.width, 'height' : cntr.height - legend.height});
 }
 
@@ -847,20 +847,23 @@ function graphSetupTerminate() {
 
 function scrollHandler() {
     var scroll =  $('.scrollarea.full').scrollLeft(),
+        oldscroll = $('.scrollarea.full').attr("oldscroll") || 0,
+        scrolldiff = scroll - oldscroll,
         width = $('.scrollarea.full').width();
+
     $('.actions').css("right",($('[data-graph]').width() - scroll - width)  + "px");
+    $('.legend').css("left",scroll + Math.ceil(width/2)  + "px");
     $('.highcharts-title').each(function() { $(this).attr("x", scroll + Math.ceil(width/2) )});
     $('.highcharts-subtitle').each(function() { $(this).attr("x", scroll + Math.ceil(width/2) )});
-//$(".highcharts-table-group").each(function () { $(this).children().attr("x", function(idx,old){ return parseInt(old, 10)+$(".full").scrollLeft()} )})
+    $(".highcharts-table-group").each(function () { $(this).children().attr("x", function(idx,old){ return Math.ceil(parseInt(old, 10)+scrolldiff)} )})
+    $('.scrollarea.full').attr("oldscroll", scroll);
+
 }
 
 function resizeAll() {
-    var mode = this.name;
-    var value = this.value;
-    if (typeof this._oldvalue === 'undefined') {
-        this._oldvalue = 1;
-    }
-    var oldvalue = this._oldvalue;
+    var mode = this.name,
+        value = this.value,
+        oldvalue = this._oldvalue || 1;
     $('[data-graph]').each(function() {
         var dimensions = getGraphSize($(this)) ;
 
