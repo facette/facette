@@ -520,7 +520,6 @@ function graphHandleActions(e) {
         delta,
         location,
         options,
-        graphsize,
         range;
 
     if (e.target.getAttribute('disabled') == 'disabled') {
