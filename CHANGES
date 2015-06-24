@@ -1,6 +1,26 @@
 CHANGES
 =======
 
+0.3.0 (2015-06-24)
+------------------
+
+ * Add natural sorting for API results
+ * Add nginx and apache2 examples in Debian package
+ * Add links to graph edition in collections setup
+ * Add collection tree state save support
+ * Improve rrd file data point handling
+ * Make graphs in collections enabled by default
+ * Fix issue with time range global spread
+ * Fix time range reset button behavior
+ * Fix max value issue when values are negative
+ * Fix event triggering browser compatibility issue
+ * Fix graph template field parsing issues
+ * Fix issue with URL prefix check in group listing API calls
+ * Fix duplicated metrics name when expanding source groups
+ * Fix state loss on graph automatic refresh
+ * Various bug fixes
+ * UI improvements
+
 0.3.0rc1 (2015-03-22)
 ---------------------
 
