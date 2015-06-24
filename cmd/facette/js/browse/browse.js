@@ -12,7 +12,7 @@ function browseSetRange(e) {
         href = $target.attr('href');
 
     // Prevent event from being triggered from a graph item
-    if ($target.closest('[data-graph]'))
+    if ($target.closest('[data-graph]').length > 0)
         return;
 
     if (href == '#set-global-range') {
