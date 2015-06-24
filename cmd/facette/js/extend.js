@@ -225,6 +225,7 @@ if (window.Highcharts) {
                         valueLeft, tableTop + i * GRAPH_LEGEND_ROW_HEIGHT + GRAPH_LEGEND_ROW_HEIGHT / 2)
                     .attr({
                         'class': 'highcharts-table-value',
+                        'data-name': series.name + '-' + key,
                         'data-value': value
                     })
                     .css({
