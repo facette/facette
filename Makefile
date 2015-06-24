@@ -57,8 +57,9 @@ JSHINT_ARGS =
 NPM_JSHINT = jshint
 
 LESSC ?= lessc
-LESSC_ARGS = --no-color
+LESSC_ARGS = --no-color --clean-css
 NPM_LESSC = less
+NPM_LESSC_PLUGIN_CLEANCSS = less-plugin-clean-css
 
 all: build
 
@@ -66,6 +67,7 @@ all: build
 lessc:
 	@if [ -z "$(call path_search,$(LESSC))" ]; then \
 		$(call npm_install,$(NPM_LESSC)); \
+		$(call npm_install,$(NPM_LESSC_PLUGIN_CLEANCSS)); \
 	fi
 
 uglifyjs:
@@ -283,7 +285,7 @@ $(STYLE_OUTPUT): lessc $(STYLE_SRC)
 	@install -d -m 0755 $(BUILD_DIR)/static && cat $(STYLE_SRC) >$(STYLE_OUTPUT:.css=.src.css) && \
 		$(call mesg_ok) || $(call mesg_fail)
 	@$(call mesg_start,static,Packing $(notdir $(STYLE_OUTPUT:.css=.src.css)) file...)
-	@$(LESSC) $(LESSC_ARGS) --compress $(STYLE_OUTPUT:.css=.src.css) >$(STYLE_OUTPUT) && \
+	@$(LESSC) $(LESSC_ARGS) $(STYLE_OUTPUT:.css=.src.css) >$(STYLE_OUTPUT) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 $(STYLE_PRINT_OUTPUT): lessc $(STYLE_PRINT_SRC)
@@ -291,7 +293,7 @@ $(STYLE_PRINT_OUTPUT): lessc $(STYLE_PRINT_SRC)
 	@install -d -m 0755 $(BUILD_DIR)/static && cat $(STYLE_PRINT_SRC) >$(STYLE_PRINT_OUTPUT:.css=.src.css) && \
 		$(call mesg_ok) || $(call mesg_fail)
 	@$(call mesg_start,static,Packing $(notdir $(STYLE_PRINT_OUTPUT:.css=.src.css)) file...)
-	@$(LESSC) $(LESSC_ARGS) --compress $(STYLE_PRINT_OUTPUT:.css=.src.css) >$(STYLE_PRINT_OUTPUT) && \
+	@$(LESSC) $(LESSC_ARGS) $(STYLE_PRINT_OUTPUT:.css=.src.css) >$(STYLE_PRINT_OUTPUT) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 $(STYLE_EXTRA_OUTPUT): $(STYLE_EXTRA)
