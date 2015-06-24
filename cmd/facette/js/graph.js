@@ -144,6 +144,8 @@ function graphDraw(graph, postpone, delay, preview) {
                     startTime,
                     endTime,
                     seriesData = {},
+                    seriesVisibility = {},
+                    seriesPlotlines = [],
                     i,
                     j;
 
@@ -396,6 +398,20 @@ function graphDraw(graph, postpone, delay, preview) {
                     break;
                 }
 
+                // Check for previous series visibility
+                $container = graph.children('.graphcntr');
+
+                highchart = $container.highcharts();
+                if (highchart) {
+                    $.each(highchart.series, function () {
+                        seriesVisibility[this.name] = this.visible;
+                    });
+                    $.each(highchart.yAxis[0].plotLinesAndBands, function () {
+                        seriesPlotlines.push(this.id);
+                    });
+                }
+
+                // Append series data
                 for (i in data.series) {
                     // Transform unix epochs to Date objects
                     for (j in data.series[i].plots)
@@ -406,7 +422,9 @@ function graphDraw(graph, postpone, delay, preview) {
                         name: data.series[i].name,
                         stack: 'stack' + data.series[i].stack_id,
                         data: data.series[i].plots,
-                        color: data.series[i].options ? data.series[i].options.color : null
+                        color: data.series[i].options ? data.series[i].options.color : null,
+                        visible: typeof seriesVisibility[data.series[i].name] !== undefined ?
+                            seriesVisibility[data.series[i].name] : true
                     });
 
                     seriesData[data.series[i].name] = {
@@ -416,8 +434,6 @@ function graphDraw(graph, postpone, delay, preview) {
                 }
 
                 // Prepare legend spacing
-                $container = graph.children('.graphcntr');
-
                 if (graphOpts.legend) {
                     highchartOpts.chart.spacingBottom = highchartOpts.series.length * GRAPH_LEGEND_ROW_HEIGHT +
                         highchartOpts.chart.spacingBottom;
@@ -448,6 +464,16 @@ function graphDraw(graph, postpone, delay, preview) {
                         value: graphOpts.constants[i],
                         width: 1,
                         zIndex: 3
+                    });
+                }
+
+                // Re-apply plotlines if any
+                if (seriesPlotlines.length > 0) {
+                    $.each(seriesPlotlines, function(i, name) {
+                        if (name.startsWith('plotline-'))
+                            name = name.substr(9);
+
+                        graph.find('.graphcntr .highcharts-table-value[data-name="' + name + '"]').trigger('click');
                     });
                 }
 
