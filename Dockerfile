@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
     git-core && \
     ln -s /usr/bin/nodejs /usr/bin/node
 
-RUN curl -s https://storage.googleapis.com/golang/go1.3.linux-amd64.tar.gz | tar -v -C /usr/local -xz
+RUN curl -s https://storage.googleapis.com/golang/go1.4.2.linux-amd64.tar.gz | tar -v -C /usr/local -xz
 ENV PATH $PATH:/usr/local/go/bin:/go/bin
 
 COPY . /facette
