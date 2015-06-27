@@ -171,10 +171,16 @@ func init() {
 			return nil, fmt.Errorf("kairosdb[%s]: unable to get KairosDB version: %s", connector.name, err)
 		}
 
-		logger.Log(logger.LevelDebug, "connector", "kairosdb[%s]: `%s' found", connector.name, version)
-
-		if version_array[0] != 0 && version_array[1] != 9 && (version_array[2] != 4 || version_array[2] != 5) {
-			return nil, fmt.Errorf("kairosdb[%s]: KairosDB versions 0.9.4/5 supported only", connector.name)
+		if version_array[0] < 1 {
+			if version_array[1] <= 9 {
+				if version_array[1] < 9 || (version_array[1] == 9 && version_array[2] < 4) {
+					return nil, fmt.Errorf(
+						"kairosdb[%s]: only KairosDB version 0.9.4 and greater are supported (%s detected)",
+						connector.name,
+						version,
+					)
+				}
+			}
 		}
 
 		return connector, nil
