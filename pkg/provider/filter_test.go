@@ -2,6 +2,7 @@ package provider
 
 import (
 	"reflect"
+	"sync"
 	"testing"
 
 	"github.com/facette/facette/pkg/catalog"
@@ -135,6 +136,8 @@ func runTestFilter(filters []*config.ProviderFilterConfig) []catalog.Record {
 		{Origin: "collectd", Source: "host2.example.net", Metric: "load.load.longterm"},
 	}
 
+	wg := &sync.WaitGroup{}
+
 	filterOutput := make(chan *catalog.Record)
 
 	filterChain := newFilterChain(filters, filterOutput)
@@ -144,6 +147,7 @@ func runTestFilter(filters []*config.ProviderFilterConfig) []catalog.Record {
 		for {
 			select {
 			case <-doneChan:
+				wg.Done()
 				return
 			case record := <-recordChan:
 				*records = append(*records, *record)
@@ -155,7 +159,11 @@ func runTestFilter(filters []*config.ProviderFilterConfig) []catalog.Record {
 		filterChain.Input <- &testRecords[i]
 	}
 
+	wg.Add(1)
+
 	done <- struct{}{}
+
+	wg.Wait()
 
 	close(filterChain.Input)
 	close(filterOutput)
