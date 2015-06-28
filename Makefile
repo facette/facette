@@ -370,7 +370,7 @@ test-server: $(TEST_DIR) build-bin
 		$(call mesg_ok) || $(call mesg_fail)
 
 	@$(call mesg_start,test,Running server tests...)
-	@(cd $(BUILD_DIR)/tests; $(GO) test -c -i ../../../cmd/facette) && \
+	@(cd $(BUILD_DIR)/tests; $(GO) test -race -c -i ../../../cmd/facette) && \
 		(cd $(BUILD_DIR)/; ./tests/facette.test -test.v=true -c ../../tests/facette.json) && \
 		$(call mesg_ok) || (kill -2 `cat $(BUILD_DIR)/tests/facette.pid`; $(call mesg_fail))
 

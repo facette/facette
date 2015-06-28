@@ -7,6 +7,7 @@ import (
 	"path"
 	"reflect"
 	"strings"
+	"sync"
 
 	"github.com/facette/facette/pkg/utils"
 )
@@ -44,6 +45,7 @@ type Config struct {
 	ReadOnly         bool                       `json:"read_only"`
 	HideBuildDetails bool                       `json:"hide_build_details"`
 	Providers        map[string]*ProviderConfig `json:"-"`
+	sync.RWMutex
 }
 
 // Load loads the configuration from the filesystem.
@@ -64,6 +66,9 @@ func (config *Config) Load(filePath string) error {
 		}
 
 		_, providerName := path.Split(strings.TrimSuffix(filePath, ".json"))
+
+		config.Lock()
+		defer config.Unlock()
 
 		config.Providers[providerName] = &ProviderConfig{}
 
