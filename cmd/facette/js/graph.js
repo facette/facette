@@ -840,7 +840,8 @@ function graphSetupTerminate() {
         .on('mouseenter mouseleave', '.graphctrl .step, .graphctrl .actions', graphHandleMouse)
         .on('click', '[data-graph] a', graphHandleActions)
         .on('click', '.graphlist a', graphHandleQueue)
-        .on('change', '.size-slider', resizeAll);
+        .on('change', '.size-slider', resizeAll)
+        .on('input', '.size-slider', updateSliderLabel);
     $('.scrollarea.full').scroll(scrollHandler);
 }
 
@@ -859,14 +860,21 @@ function scrollHandler() {
 
 }
 
+function updateSliderLabel() {
+    if (this.id == "width-slider")
+        $('#widthlabel').html(this.value + 'x');
+    else
+        $('#heightlabel').html(this.value + 'x');
+}
+    
 function resizeAll() {
-    var mode = this.name,
+    var mode = this.id,
         value = this.value,
         oldvalue = this._oldvalue || 1;
     $('[data-graph]').each(function() {
         var dimensions = getGraphSize($(this)) ;
 
-        if ( mode == "width") {
+        if ( mode == "width-slider") {
             dimensions.width = (dimensions.width / oldvalue) * value;
         } else {
             dimensions.height = (dimensions.height / oldvalue) * value;
