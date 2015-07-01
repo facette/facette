@@ -10,6 +10,7 @@ CHANGES
  * Add collection tree state save support
  * Improve rrd file data point handling
  * Make graphs in collections enabled by default
+ * Update KairosDB API version check to support > 0.9.5
  * Fix issue with time range global spread
  * Fix time range reset button behavior
  * Fix max value issue when values are negative
