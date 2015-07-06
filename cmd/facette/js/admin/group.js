@@ -40,7 +40,7 @@ function adminGroupSetupTerminate() {
         completionCallbacks = function (input) {
             var $fieldset = input.closest('fieldset');
 
-            if (parseInt($fieldset.find('select[name=type]').val(), 10) !== 0)
+            if (parseInt($fieldset.find('select[name=type]').val(), 10) != 1)
                 return [];
 
             return inputGetSources(input, {
