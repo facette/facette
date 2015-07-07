@@ -1,6 +1,6 @@
 # -*- Makefile -*-
 
-VERSION = 0.3.0rc1
+VERSION = 0.3.0
 
 BUILD_DATE := $(shell date +%F)
 
