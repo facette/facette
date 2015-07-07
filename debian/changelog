@@ -1,8 +1,8 @@
-facette (0.3.0-1~rc1) unstable; urgency=medium
+facette (0.3.0-1) unstable; urgency=medium
 
   * New upstream release
 
- -- Vincent Batoufflet <vincent@batoufflet.info>  Sun, 22 Mar 2015 14:47:34 +0100
+ -- Vincent Batoufflet <vincent@batoufflet.info>  Tue, 07 Jul 2015 06:56:09 +0200
 
 facette (0.2.3-1) unstable; urgency=medium
 
