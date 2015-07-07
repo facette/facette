@@ -32,6 +32,8 @@
         "labl_time_range": "Time Range:",
         "labl_unit": "Unit:",
         "labl_unit_set": "Set Unit",
+        "labl_formatter": "Formatter:",
+        "labl_formatter_set": "Set Formatter",
         "mesg_collapse": "You are about to collapse a series with grouped elements. This will remove them from associated groups.",
         "mesg_delete": "You are about to delete “__name__” graph. This action can’t be undone.",
         "mesg_delete_fail": "Unable to delete the graph!",
