@@ -1,7 +1,7 @@
 CHANGES
 =======
 
-0.3.0 (2015-06-24)
+0.3.0 (2015-07-07)
 ------------------
 
  * Add natural sorting for API results
@@ -19,6 +19,7 @@ CHANGES
  * Fix issue with URL prefix check in group listing API calls
  * Fix duplicated metrics name when expanding source groups
  * Fix state loss on graph automatic refresh
+ * Fix completion issue with single entries in metric and source groups
  * Various bug fixes
  * UI improvements
 
