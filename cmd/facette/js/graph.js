@@ -144,6 +144,7 @@ function graphDraw(graph, postpone, delay, preview) {
                     startTime,
                     endTime,
                     seriesData = {},
+                    seriesIndexes = [],
                     seriesVisibility = {},
                     seriesPlotlines = [],
                     i,
@@ -412,6 +413,8 @@ function graphDraw(graph, postpone, delay, preview) {
                 }
 
                 // Append series data
+                seriesIndexes = graphGetSeriesIndexes(data.series);
+
                 for (i in data.series) {
                     // Transform unix epochs to Date objects
                     for (j in data.series[i].plots)
@@ -424,7 +427,8 @@ function graphDraw(graph, postpone, delay, preview) {
                         data: data.series[i].plots,
                         color: data.series[i].options ? data.series[i].options.color : null,
                         visible: typeof seriesVisibility[data.series[i].name] !== undefined ?
-                            seriesVisibility[data.series[i].name] : true
+                            seriesVisibility[data.series[i].name] : true,
+                        zIndex: seriesIndexes.indexOf(data.series[i].name)
                     });
 
                     seriesData[data.series[i].name] = {
@@ -535,6 +539,24 @@ function graphExport(graph) {
     } else {
         console.error("Your browser doesn't support mandatory Canvas feature");
     }
+}
+
+function graphGetSeriesIndexes(series) {
+    var ordered = series.slice(0),
+        indexes = [];
+
+    ordered.sort(function (a, b) {
+        if (!a.summary || !b.summary || !a.summary['avg'] || !b.summary['avg'])
+            return 0;
+
+        return b.summary['avg'] - a.summary['avg'];
+    });
+
+    $.each(ordered, function (index, entry) {
+        indexes.push(entry.name);
+    });
+
+    return indexes;
 }
 
 function graphHandleActions(e) {
