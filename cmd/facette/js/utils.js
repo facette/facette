@@ -53,6 +53,21 @@ function formatValue(value, opts) {
     return result;
 }
 
+function getURLParams() {
+    var params = {};
+
+    $.each(window.location.search.substr(1).split('&'), function (index, entry) {
+        var pos = entry.indexOf('=');
+
+        if (pos == -1)
+            params[entry] = undefined;
+        else
+            params[entry.substr(0, pos)] = entry.substr(pos + 1);
+    });
+
+    return params;
+}
+
 function humanReadable(number, formatter) {
     var units = ['', 'k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'],
         index;

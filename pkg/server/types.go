@@ -133,7 +133,8 @@ func (r CollectionListResponse) slice(i, j int) interface{} {
 // GraphResponse represents a graph response structure in the server backend.
 type GraphResponse struct {
 	ItemResponse
-	Link string `json:"link,omitempty"`
+	Link     string `json:"link,omitempty"`
+	Template bool   `json:"template"`
 }
 
 // GraphListResponse represents a list of graphs response structure in the backend server.

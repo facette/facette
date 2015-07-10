@@ -570,6 +570,11 @@ function adminGraphSetupTerminate() {
     // Register admin panes
     paneRegister('graph-list', function () {
         listRegisterItemCallback('graphs', function (item, entry) {
+            if (entry.template)
+                item.find('a[href=#show-graph]').remove();
+            else
+                item.find('a[href=#add-graph]').remove();
+
             if (!entry.link)
                 return;
 
@@ -581,6 +586,12 @@ function adminGraphSetupTerminate() {
         });
 
         adminItemHandlePaneList('graph');
+
+        // Register links
+        linkRegister('add-graph', function (e) {
+            window.location = urlPrefix + '/admin/graphs/add?linked=1&from=' +
+                $(e.target).closest('[data-itemid]').attr('data-itemid');
+        });
     });
 
     paneRegister('graph-edit', function () {
@@ -1812,8 +1823,29 @@ function adminGraphSetupTerminate() {
         }
         // Register pane steps
         paneStepRegister('graph-link-edit', 1, function () {
+            var linkSource;
+
             if (!graphId)
                 listSay('step-1-attrs', $.t('graph.mesg_no_template_selected'), 'info');
+
+            linkSource = getURLParams()['from'];
+            if (linkSource) {
+                itemLoad(linkSource, 'graphs').pipe(function (data) {
+                    inputMatch('graph').find(':input')
+                        .data('value', {
+                            id: data.id,
+                            name: data.name,
+                            description: data.description,
+                            modified: data.modified,
+                            template: data.template,
+                            source: 'library/graphs/?type=template'
+                        })
+                        .val(data.name)
+                        .trigger('change');
+
+                    $('button[name=graph-ok]').trigger('click');
+                });
+            }
 
             setTimeout(function () { $('[data-step=1] input').trigger('change').filter(':first').select(); }, 0);
         });

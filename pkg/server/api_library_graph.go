@@ -216,7 +216,8 @@ func (server *Server) serveGraphList(writer http.ResponseWriter, request *http.R
 				Description: description,
 				Modified:    graph.Modified.Format(time.RFC3339),
 			},
-			Link: graph.Link,
+			Link:     graph.Link,
+			Template: graph.Template,
 		})
 	}
 
