@@ -1818,6 +1818,11 @@ function adminGraphSetupTerminate() {
             setTimeout(function () { $('[data-step=1] input').trigger('change').filter(':first').select(); }, 0);
         });
 
+        // Register links
+        linkRegister('edit-template', function () {
+            window.location = urlPrefix + '/admin/graphs/' + $pane.find('input[name=graph]').data('value').id;
+        });
+
         // Attach events
         $body
             .on('click', 'button', function (e) {

@@ -13,6 +13,12 @@
 		<article data-pane="graph-link-edit" data-paneopts="section: {{ .Section }}{{ if ne .Path "add" }}; id: {{ .Path }}{{ end }}">
 			<header>
 				<h1>Administration Panel — {{ if eq .Path "add" }}New From Template{{ else }}Edit Graph{{ end }}</h1>
+
+				<nav>{{ if not .ReadOnly }}
+					<ul>
+						<li><a class="icon icon-template icon-stack icon-stack-edit" href="#edit-template" title="Edit Template"></a></li>
+					</ul>{{ end }}
+				</nav>
 			</header>
 
 			<footer>
