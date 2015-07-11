@@ -361,7 +361,7 @@ clean-test:
 	@rm -rf $(BUILD_DIR)/tests $(BUILD_DIR)/pkg && \
 		$(call mesg_ok) || $(call mesg_fail)
 
-test-pkg: $(PKG_LIST)
+test-pkg: $(PKG_LIST) $(BUILD_DIR)/src/github.com/facette/facette
 
 test-server: $(TEST_DIR) build-bin
 	@$(call mesg_start,test,Starting facette server...)
