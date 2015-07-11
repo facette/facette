@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/facette/facette/thirdparty/github.com/stretchr/powerwalk"
+	"github.com/stretchr/powerwalk"
 )
 
 func walkDir(dirPath string, linkPath string, walkFunc filepath.WalkFunc) error {

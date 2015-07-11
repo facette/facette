@@ -6,7 +6,7 @@ import (
 	"github.com/facette/facette/pkg/catalog"
 	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/logger"
-	"github.com/facette/facette/thirdparty/github.com/fatih/set"
+	"github.com/fatih/set"
 )
 
 type filterChain struct {

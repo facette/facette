@@ -9,8 +9,8 @@ import (
 
 	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/utils"
-	"github.com/facette/facette/thirdparty/github.com/fatih/set"
-	uuid "github.com/facette/facette/thirdparty/github.com/nu7hatch/gouuid"
+	"github.com/fatih/set"
+	uuid "github.com/nu7hatch/gouuid"
 )
 
 // Item represents the base structure of a library item.

@@ -14,8 +14,8 @@ import (
 	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/plot"
 	"github.com/facette/facette/pkg/utils"
-	"github.com/facette/facette/thirdparty/github.com/fatih/set"
-	"github.com/facette/facette/thirdparty/github.com/ziutek/rrd"
+	"github.com/fatih/set"
+	"github.com/ziutek/rrd"
 )
 
 type rrdMetric struct {

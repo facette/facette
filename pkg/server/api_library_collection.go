@@ -11,7 +11,7 @@ import (
 	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/utils"
-	"github.com/facette/facette/thirdparty/github.com/fatih/set"
+	"github.com/fatih/set"
 )
 
 func (server *Server) serveCollection(writer http.ResponseWriter, request *http.Request) {

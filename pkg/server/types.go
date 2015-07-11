@@ -6,7 +6,7 @@ import (
 	"github.com/facette/facette/pkg/connector"
 	"github.com/facette/facette/pkg/library"
 	"github.com/facette/facette/pkg/plot"
-	"github.com/facette/facette/thirdparty/github.com/facette/natsort"
+	"github.com/facette/natsort"
 )
 
 // ExpandRequest represents an expand request structure in the server backend.

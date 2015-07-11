@@ -8,7 +8,7 @@ import (
 	"sync"
 
 	"github.com/facette/facette/pkg/logger"
-	"github.com/facette/facette/thirdparty/github.com/fatih/set"
+	"github.com/fatih/set"
 )
 
 const (

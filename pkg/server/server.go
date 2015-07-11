@@ -18,7 +18,7 @@ import (
 	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/provider"
 	"github.com/facette/facette/pkg/worker"
-	uuid "github.com/facette/facette/thirdparty/github.com/nu7hatch/gouuid"
+	uuid "github.com/nu7hatch/gouuid"
 )
 
 var (

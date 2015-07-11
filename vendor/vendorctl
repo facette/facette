@@ -1,0 +1,261 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#
+# vendorctl: Go package dependencies control helper
+#            by Vincent Batoufflet <vincent@batoufflet.info>
+#
+
+__version__ = '0.1.0'
+
+import argparse
+import configparser
+import os
+import shutil
+import subprocess
+import sys
+import urllib.error
+import urllib.request
+
+from html.parser import HTMLParser
+
+
+class METAParser(HTMLParser):
+    data = None
+
+    def handle_starttag(self, tag, attrs):
+        if tag != 'meta':
+            return
+
+        # Search for `go-import' meta tag
+        name = self.get_attr_value(attrs, 'name')
+        if name is None or name != 'go-import':
+            return
+
+        # Parse content chunks
+        self.data = self.get_attr_value(attrs, 'content').split()[:3]
+
+    def get_attr_value(self, attrs, name):
+        values = [x[1] for x in attrs if x[0] == name]
+        return values[0] if values else None
+
+
+def exec_add(args, update=False):
+    (path, attrs) = request_meta('https://' + args.path)
+
+    if not update and config.has_section(path):
+        raise Exception("dependency `%s' is already registered" % path)
+
+    try:
+        # Fetch data from repository
+        dir_path = os.path.join(vendor_dir, 'checkouts', path)
+        src_path = os.path.join(vendor_dir, 'src', path)
+
+        attrs['branch'] = globals()['fetch_%s' % attrs['type']](attrs['url'], dir_path, args.branch)
+
+        if not os.path.exists(src_path):
+            os.makedirs(src_path)
+
+        shutil.rmtree(src_path)
+        shutil.copytree(dir_path, src_path, ignore=shutil.ignore_patterns('.git'))
+    except KeyError:
+        raise Exception("unknown `%s' SCM type" % attrs['type'])
+
+    depend_register(path, attrs)
+
+    print('OK')
+
+
+def exec_env(args):
+    if os.environ.get('GOPATH'):
+        print('export GOPATH=%s:%s' % (os.environ.get('GOPATH'), vendor_dir))
+    else:
+        print('export GOPATH=%s' % vendor_dir)
+
+
+def exec_list(args):
+    print('Registered dependencies:')
+
+    # Stop if no package dependency registered
+    if len(config.sections()) == 0:
+        print('None')
+        return
+
+    # Print package dependencies list
+    for path in sorted(config.sections()):
+        if 'branch' in config[path]:
+            path += '@' + config.get(path, 'branch')
+
+        print('   ' + path)
+
+
+def exec_remove(args):
+    if not config.has_section(args.path):
+        raise Exception("dependency `%s' is not registered" % args.path)
+
+    print("Warning: you are about to remove `%s' dependency.\nDo you want to continue? [y/N] " % args.path, end='')
+
+    answer = input()
+    if not answer.lower() in ('y', 'yes'):
+        return
+
+    # Clean up sources and directories
+    shutil.rmtree(os.path.join(vendor_dir, 'src', args.path), True)
+    shutil.rmtree(os.path.join(vendor_dir, 'checkouts', args.path), True)
+    clean_dirs()
+
+    depend_unregister(args.path)
+
+    print('OK')
+
+
+def exec_update(args):
+    # Execute package dependency update
+    exec_add(args, True)
+
+
+def depend_register(path, attrs):
+    # Append package attributes information
+    with open(args.config, 'w') as fd:
+        config[path] = attrs
+        config.write(fd)
+
+
+def depend_unregister(path):
+    # Remove package attributes information
+    with open(args.config, 'w') as fd:
+        del config[path]
+        config.write(fd)
+
+
+def fetch_git(url, path, branch=None):
+    if branch is None:
+        branch = 'master'
+
+    if not os.path.exists(path) or not os.listdir():
+        exec_command(['git', 'clone', '--quiet', url, path, '--branch', branch])
+    else:
+        exec_command(['git', '-C', path, 'checkout', '--quiet', branch])
+
+    return branch
+
+
+def fetch_hg(url, path, branch=None):
+    if branch is None:
+        branch = 'default'
+
+    if not os.path.exists(path) or not os.listdir():
+        exec_command(['hg', 'clone', '--quiet', url, path, '-b', branch])
+    else:
+        exec_command(['hg', '-R', path, 'pull', '--quiet'])
+        exec_command(['hg', '-R', path, 'update', '-r', branch, '--quiet'])
+
+    return branch
+
+
+def clean_dirs():
+    # Cleanup empty directories
+    for dir_base in (os.path.join(vendor_dir, 'checkouts'), os.path.join(vendor_dir, 'src')):
+        for dir_path in sorted([x[0] for x in os.walk(dir_base)], reverse=True):
+            if os.listdir(dir_path):
+                continue
+
+            os.rmdir(dir_path)
+
+
+def exec_command(cmd):
+    kwargs = {}
+    if not args.debug:
+        kwargs['stdout'] = subprocess.DEVNULL
+
+    if subprocess.call(cmd, **kwargs) != 0:
+        raise Exception('failed to execute command')
+
+
+def request_meta(url):
+    # Fetch URL body
+    try:
+        req = urllib.request.urlopen(url)
+    except urllib.error.HTTPError as e:
+        raise Exception("unable to fetch `%s': %s" % (url, e))
+
+    # Parse HTML content
+    parser = METAParser()
+    parser.feed(req.read().decode())
+
+    if parser.data is None:
+        raise Exception("unable to fetch `go-import' meta information")
+
+    return (parser.data[0], dict(zip(('type', 'url'), parser.data[1:])))
+
+
+def load_config(path):
+    if os.path.exists(path):
+        config.read(path)
+
+    return config
+
+
+# Get vendoring directory path
+vendor_dir = os.path.realpath(os.path.dirname(sys.argv[0]))
+
+# Initialize command parser instance
+parser = argparse.ArgumentParser(description='Go package dependencies control helper')
+parser.add_argument('-c', '--config', metavar='<path>', default='%s/vendorctl.cfg' % vendor_dir,
+                    help='set configuration file path')
+parser.add_argument('-D', '--debug', action='store_true', help='output debugging information')
+parser.add_argument('-V', '--version', action='version', version='%(prog)s ' + __version__,
+                    help='show program version and exit')
+
+subparsers = parser.add_subparsers(metavar='<command>')
+
+subparser = subparsers.add_parser('add', help='add new package dependency')
+subparser.add_argument('-b', '--branch', metavar='<branch>', help='dependency branch name')
+subparser.add_argument('path', metavar='<import-path>')
+subparser.set_defaults(func=exec_add)
+
+subparser = subparsers.add_parser('env', help='print environment update command')
+subparser.set_defaults(func=exec_env)
+
+subparser = subparsers.add_parser('list', help='list existing package dependencies')
+subparser.set_defaults(func=exec_list)
+
+subparser = subparsers.add_parser('remove', help='remove existing package dependency')
+subparser.add_argument('path', metavar='<import-path>')
+subparser.set_defaults(func=exec_remove)
+
+subparser = subparsers.add_parser('update', help='update existing package dependency')
+subparser.add_argument('-b', '--branch', metavar='<branch>', help='dependency branch name')
+subparser.add_argument('path', metavar='<import-path>')
+subparser.set_defaults(func=exec_update)
+
+try:
+    # Parse command-line arguments
+    args = parser.parse_args()
+    if not hasattr(args, 'func'):
+        parser.print_help()
+        exit(0)
+
+    # Load configuration
+    config = configparser.ConfigParser()
+    if os.path.exists(args.config):
+        config.read(args.config)
+
+    # Execute sub-parser function
+    args.func(args)
+except KeyboardInterrupt:
+    print('\rCancelled', file=sys.stderr)
+except Exception as e:
+    if args.debug:
+        print('-' * 80)
+
+        import traceback
+        traceback.print_exc()
+
+        if hasattr(e, 'errmsg'):
+            print('Error: %s' % e.errmsg)
+
+        print('-' * 80)
+
+    print('Error: %s' % e, file=sys.stderr)
+
+# vim: ts=4 sw=4 et

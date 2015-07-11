@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/facette/facette/pkg/library"
-	"github.com/facette/facette/thirdparty/github.com/fatih/set"
+	"github.com/fatih/set"
 )
 
 func (server *Server) serveResponse(writer http.ResponseWriter, data interface{}, status int) {

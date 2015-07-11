@@ -13,7 +13,7 @@ import (
 	"github.com/facette/facette/pkg/config"
 	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/plot"
-	influxdb "github.com/facette/facette/thirdparty/github.com/influxdb/influxdb/client"
+	influxdb "github.com/influxdb/influxdb/client"
 )
 
 // InfluxDBConnector represents the main structure of the InfluxDB connector.
