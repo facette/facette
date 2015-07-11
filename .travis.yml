@@ -1,15 +1,19 @@
+---
 language: go
 go:
- - release
- - 1.3
- - 1.2
+  - release
+  - 1.3
+  - 1.2
 
 before_install:
- - sudo apt-get install -qq python3 librrd-dev
+  - sudo apt-get update
+  - sudo apt-get install -qq python3 librrd-dev
 
 script:
- - make test
+  - make test
 
 notifications:
   email:
-   - dev@facette.io
+    - dev@facette.io
+
+# vim: ts=2 sw=2 et
