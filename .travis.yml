@@ -5,7 +5,7 @@ go:
  - 1.2
 
 before_install:
- - sudo apt-get install -qq librrd-dev
+ - sudo apt-get install -qq python3 librrd-dev
 
 script:
  - make test
