@@ -22,8 +22,6 @@ GOARCH ?= $(shell $(GO) env GOARCH)
 BUILD_NAME = facette-$(GOOS)-$(GOARCH)
 BUILD_DIR = build/$(BUILD_NAME)
 
-$(eval $(shell GOPATH=$(realpath $(BUILD_DIR)) vendor/vendorctl env))
-
 TAR ?= tar
 
 GOLINT ?= golint
@@ -99,10 +97,11 @@ lint: lint-bin lint-static
 test: clean-test test-pkg test-server
 
 $(BUILD_DIR)/src/github.com/facette/facette:
-	@$(call mesg_start,main,Creating source symlink...)
+	@$(call mesg_start,main,Preparing source paths...)
 	@mkdir -p $(BUILD_DIR)/src/github.com/facette && \
 		ln -s ../../../../.. $(BUILD_DIR)/src/github.com/facette/facette && \
 		$(call mesg_ok) || $(call mesg_fail)
+	$(eval $(shell GOPATH=$(realpath $(BUILD_DIR)) vendor/vendorctl env))
 
 # Binaries
 BIN_SRC = $(wildcard cmd/*/*.go)
@@ -361,7 +360,7 @@ clean-test:
 	@rm -rf $(BUILD_DIR)/tests $(BUILD_DIR)/pkg && \
 		$(call mesg_ok) || $(call mesg_fail)
 
-test-pkg: $(PKG_LIST) $(BUILD_DIR)/src/github.com/facette/facette
+test-pkg: $(PKG_LIST)
 
 test-server: $(TEST_DIR) build-bin
 	@$(call mesg_start,test,Starting facette server...)
