@@ -101,7 +101,6 @@ $(BUILD_DIR)/src/github.com/facette/facette:
 	@mkdir -p $(BUILD_DIR)/src/github.com/facette && \
 		ln -s ../../../../.. $(BUILD_DIR)/src/github.com/facette/facette && \
 		$(call mesg_ok) || $(call mesg_fail)
-	$(eval $(shell GOPATH=$(realpath $(BUILD_DIR)) vendor/vendorctl env))
 
 # Binaries
 BIN_SRC = $(wildcard cmd/*/*.go)
@@ -113,6 +112,7 @@ PKG_SRC = $(wildcard pkg/*/*.go)
 PKG_LIST = $(wildcard pkg/*)
 
 $(BIN_OUTPUT): $(PKG_SRC) $(BIN_SRC) $(BUILD_DIR)/src/github.com/facette/facette
+	$(eval $(shell GOPATH=$(realpath $(BUILD_DIR)) vendor/vendorctl env))
 	@$(call mesg_start,$(notdir $@),Building $(notdir $@)...)
 	@install -d -m 0755 $(dir $@) && $(GO) build \
 			-ldflags " \
@@ -350,6 +350,7 @@ $(TEST_DIR):
 	@install -d -m 0755 $(TEST_DIR)
 
 $(PKG_LIST): $(TEST_DIR) $(BUILD_DIR)/src/github.com/facette/facette
+	$(eval $(shell GOPATH=$(realpath $(BUILD_DIR)) vendor/vendorctl env))
 	@$(call mesg_start,test,Testing $@ package...)
 	@(cd $(TEST_DIR) && $(GO) test -race -c -i ../../../$@ && \
 		(test ! -f ./$(@:pkg/%=%).test || ./$(@:pkg/%=%).test -test.v=true) && \
