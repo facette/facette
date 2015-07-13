@@ -59,6 +59,7 @@ func newFilterChain(filters []*config.ProviderFilterConfig, output chan *catalog
 			// Forward record if no rule defined
 			if len(chain.rules) == 0 {
 				chain.output <- record
+				return
 			}
 
 			// Keep a copy of original names
