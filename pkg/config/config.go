@@ -145,16 +145,22 @@ func GetStringSlice(config map[string]interface{}, setting string, mandatory boo
 	if err != nil || value == nil {
 		return nil, err
 	}
-	array := make([]string, 0)
+	out := make([]string, 0)
 	for _, v := range value.([]interface{}) {
 		if reflect.ValueOf(v).Kind() != reflect.String {
 			return nil, fmt.Errorf("setting `%s' should be slice of strings and not %s", setting,
 				reflect.ValueOf(v).Kind().String())
 		} else {
-			array = append(array, v.(string))
+			out = append(out, v.(string))
 		}
 	}
-	return array, nil
+	return out, nil
+}
+
+// GetStringMap returns the a string map of a configuration setting.
+func GetStringMap(config map[string]interface{}, setting string, mandatory bool) (map[string]interface{}, error) {
+	value, err := getSetting(config, setting, reflect.Map, mandatory, nil)
+	return value.(map[string]interface{}), err
 }
 
 // GetJsonObj returns the JSON Object interface{} of a configuration setting.
