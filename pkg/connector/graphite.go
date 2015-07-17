@@ -3,11 +3,9 @@
 package connector
 
 import (
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -22,9 +20,9 @@ import (
 )
 
 const (
-	graphiteURLMetrics     string  = "/metrics/index.json"
-	graphiteURLRender      string  = "/render"
-	graphiteDefaultTimeout float64 = 10
+	graphiteDefaultTimeout int    = 10
+	graphiteURLMetrics     string = "/metrics/index.json"
+	graphiteURLRender      string = "/render"
 )
 
 type graphitePlot struct {
@@ -35,9 +33,9 @@ type graphitePlot struct {
 // GraphiteConnector represents the main structure of the Graphite connector.
 type GraphiteConnector struct {
 	name        string
-	URL         string
+	url         string
+	timeout     int
 	insecureTLS bool
-	timeout     float64
 	re          *regexp.Regexp
 	series      map[string]map[string]string
 }
@@ -49,221 +47,189 @@ func init() {
 			err     error
 		)
 
-		connector := &GraphiteConnector{
-			name:        name,
-			insecureTLS: false,
-			series:      make(map[string]map[string]string),
+		c := &GraphiteConnector{
+			name:   name,
+			series: make(map[string]map[string]string),
 		}
 
-		if connector.URL, err = config.GetString(settings, "url", true); err != nil {
+		if c.url, err = config.GetString(settings, "url", true); err != nil {
 			return nil, err
 		}
 
-		if connector.insecureTLS, err = config.GetBool(settings, "allow_insecure_tls", false); err != nil {
+		if c.timeout, err = config.GetInt(settings, "timeout", false); err != nil {
 			return nil, err
 		}
+		if c.timeout <= 0 {
+			c.timeout = graphiteDefaultTimeout
+		}
 
-		if connector.timeout, err = config.GetFloat(settings, "timeout", false); err != nil {
+		if c.insecureTLS, err = config.GetBool(settings, "allow_insecure_tls", false); err != nil {
 			return nil, err
 		}
 
 		if pattern, err = config.GetString(settings, "pattern", true); err != nil {
 			return nil, err
 		}
-
-		// Check and compile regexp pattern
-		if connector.re, err = compilePattern(pattern); err != nil {
+		if c.re, err = compilePattern(pattern); err != nil {
 			return nil, fmt.Errorf("unable to compile regexp pattern: %s", err)
 		}
 
-		// Enforce minimal timeout value bound
-		if connector.timeout <= 0 {
-			connector.timeout = graphiteDefaultTimeout
-		}
-
-		return connector, nil
+		return c, nil
 	}
 }
 
 // GetName returns the name of the current connector.
-func (connector *GraphiteConnector) GetName() string {
-	return connector.name
+func (c *GraphiteConnector) GetName() string {
+	return c.name
 }
 
 // GetPlots retrieves time series data from provider based on a query and a time interval.
-func (connector *GraphiteConnector) GetPlots(query *plot.Query) ([]plot.Series, error) {
+func (c *GraphiteConnector) GetPlots(query *plot.Query) ([]*plot.Series, error) {
 	var (
-		graphitePlots []graphitePlot
-		resultSeries  []plot.Series
+		plots   []graphitePlot
+		results []*plot.Series
 	)
 
 	if len(query.Series) == 0 {
-		return nil, fmt.Errorf("graphite[%s]: requested series list is empty", connector.name)
+		return nil, fmt.Errorf("graphite[%s]: requested series list is empty", c.name)
 	}
 
-	URLQuery, err := graphiteBuildURLQuery(query, connector.series)
+	// Build query URL
+	queryURL, err := graphiteBuildQueryURL(query, c.series)
 	if err != nil {
-		return nil, fmt.Errorf("graphite[%s]: unable to build query URL: %s", connector.name, err)
+		return nil, fmt.Errorf("graphite[%s]: unable to build query URL: %s", c.name, err)
 	}
 
-	httpTransport := &http.Transport{
-		Dial: (&net.Dialer{
-			// Enable dual IPv4/IPv6 stack connectivity:
-			DualStack: true,
-			// Enforce HTTP connection timeout:
-			Timeout: time.Duration(connector.timeout) * time.Second,
-		}).Dial,
-	}
+	// Request data from backend
+	client := utils.NewHTTPClient(c.timeout, c.insecureTLS)
 
-	if connector.insecureTLS {
-		httpTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	}
-
-	httpClient := http.Client{Transport: httpTransport}
-
-	request, err := http.NewRequest(
-		"GET",
-		strings.TrimSuffix(connector.URL, "/")+graphiteURLRender+"?"+URLQuery,
-		nil,
-	)
+	r, err := http.NewRequest("GET", strings.TrimSuffix(c.url, "/")+graphiteURLRender+"?"+queryURL, nil)
 	if err != nil {
-		return nil, fmt.Errorf("graphite[%s]: unable to set up HTTP request: %s", connector.name, err)
+		return nil, fmt.Errorf("graphite[%s]: unable to set up HTTP request: %s", c.name, err)
 	}
 
-	request.Header.Add("User-Agent", "Facette")
-	request.Header.Add("X-Requested-With", "GraphiteConnector")
+	r.Header.Add("User-Agent", "Facette")
+	r.Header.Add("X-Requested-With", "GraphiteConnector")
 
-	response, err := httpClient.Do(request)
+	rsp, err := client.Do(r)
 	if err != nil {
-		return nil, fmt.Errorf("graphite[%s]: unable to perform HTTP request: %s", connector.name, err)
+		return nil, fmt.Errorf("graphite[%s]: unable to perform HTTP request: %s", c.name, err)
 	}
-	defer response.Body.Close()
+	defer rsp.Body.Close()
 
-	if err = graphiteCheckBackendResponse(response); err != nil {
-		return nil, fmt.Errorf("graphite[%s]: invalid HTTP backend response: %s", connector.name, err)
+	// Parse backend response
+	if err = graphiteCheckBackendResponse(rsp); err != nil {
+		return nil, fmt.Errorf("graphite[%s]: invalid HTTP backend response: %s", c.name, err)
 	}
 
-	data, err := ioutil.ReadAll(response.Body)
+	data, err := ioutil.ReadAll(rsp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("graphite[%s]: unable to read HTTP response body: %s", connector.name, err)
+		return nil, fmt.Errorf("graphite[%s]: unable to read HTTP response body: %s", c.name, err)
 	}
 
-	if err = json.Unmarshal(data, &graphitePlots); err != nil {
-		return nil, fmt.Errorf("graphite[%s]: unable to unmarshal JSON data: %s", connector.name, err)
+	if err = json.Unmarshal(data, &plots); err != nil {
+		return nil, fmt.Errorf("graphite[%s]: unable to unmarshal JSON data: %s", c.name, err)
 	}
 
-	if resultSeries, err = graphiteExtractResult(graphitePlots); err != nil {
-		return nil, fmt.Errorf(
-			"graphite[%s]: unable to extract plot values from backend response: %s",
-			connector.name,
-			err,
-		)
+	// Extract results from response
+	if results, err = graphiteExtractResult(plots); err != nil {
+		return nil, fmt.Errorf("graphite[%s]: unable to extract plot values from backend response: %s", c.name, err)
 	}
 
-	return resultSeries, nil
+	return results, nil
 }
 
 // Refresh triggers a full connector data update.
-func (connector *GraphiteConnector) Refresh(originName string, outputChan chan<- *catalog.Record) error {
-	var seriesList []string
+func (c *GraphiteConnector) Refresh(originName string, outputChan chan<- *catalog.Record) error {
+	var series []string
 
-	httpTransport := &http.Transport{
-		Dial: (&net.Dialer{
-			// Enable dual IPv4/IPv6 stack connectivity:
-			DualStack: true,
-			// Enforce HTTP connection timeout:
-			Timeout: time.Duration(connector.timeout) * time.Second,
-		}).Dial,
-	}
+	// Request metrics from backend
+	client := utils.NewHTTPClient(c.timeout, c.insecureTLS)
 
-	if connector.insecureTLS {
-		httpTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	}
-
-	httpClient := http.Client{Transport: httpTransport}
-
-	request, err := http.NewRequest("GET", strings.TrimSuffix(connector.URL, "/")+graphiteURLMetrics, nil)
+	r, err := http.NewRequest("GET", strings.TrimSuffix(c.url, "/")+graphiteURLMetrics, nil)
 	if err != nil {
-		return fmt.Errorf("graphite[%s]: unable to set up HTTP request: %s", connector.name, err)
+		return fmt.Errorf("graphite[%s]: unable to set up HTTP request: %s", c.name, err)
 	}
 
-	request.Header.Add("User-Agent", "Facette")
-	request.Header.Add("X-Requested-With", "GraphiteConnector")
+	r.Header.Add("User-Agent", "Facette")
+	r.Header.Add("X-Requested-With", "GraphiteConnector")
 
-	response, err := httpClient.Do(request)
+	rsp, err := client.Do(r)
 	if err != nil {
-		return fmt.Errorf("graphite[%s]: unable to perform HTTP request: %s", connector.name, err)
+		return fmt.Errorf("graphite[%s]: unable to perform HTTP request: %s", c.name, err)
 	}
-	defer response.Body.Close()
+	defer rsp.Body.Close()
 
-	if err = graphiteCheckBackendResponse(response); err != nil {
-		return fmt.Errorf("graphite[%s]: invalid HTTP backend response: %s", connector.name, err)
+	// Parse backend response
+	if err = graphiteCheckBackendResponse(rsp); err != nil {
+		return fmt.Errorf("graphite[%s]: invalid HTTP backend response: %s", c.name, err)
 	}
 
-	data, err := ioutil.ReadAll(response.Body)
+	data, err := ioutil.ReadAll(rsp.Body)
 	if err != nil {
-		return fmt.Errorf("graphite[%s]: unable to read HTTP response body: %s", connector.name, err)
+		return fmt.Errorf("graphite[%s]: unable to read HTTP response body: %s", c.name, err)
 	}
 
-	if err = json.Unmarshal(data, &seriesList); err != nil {
-		return fmt.Errorf("graphite[%s]: unable to unmarshal JSON data: %s", connector.name, err)
+	if err = json.Unmarshal(data, &series); err != nil {
+		return fmt.Errorf("graphite[%s]: unable to unmarshal JSON data: %s", c.name, err)
 	}
 
-	for _, series := range seriesList {
+	for _, s := range series {
 		var sourceName, metricName string
 
-		seriesMatch, err := matchSeriesPattern(connector.re, series)
+		// Get pattern matches
+		m, err := matchSeriesPattern(c.re, s)
 		if err != nil {
 			logger.Log(
 				logger.LevelInfo,
 				"connector",
 				"graphite[%s]: file `%s' does not match pattern, ignoring",
-				connector.name,
-				series,
+				c.name,
+				s,
 			)
 			continue
 		}
 
-		sourceName, metricName = seriesMatch[0], seriesMatch[1]
+		sourceName, metricName = m[0], m[1]
 
-		if _, ok := connector.series[sourceName]; !ok {
-			connector.series[sourceName] = make(map[string]string)
+		if _, ok := c.series[sourceName]; !ok {
+			c.series[sourceName] = make(map[string]string)
 		}
 
-		connector.series[sourceName][metricName] = series
+		c.series[sourceName][metricName] = s
 
 		outputChan <- &catalog.Record{
 			Origin:    originName,
 			Source:    sourceName,
 			Metric:    metricName,
-			Connector: connector,
+			Connector: c,
 		}
 	}
 
 	return nil
 }
 
-func graphiteCheckBackendResponse(response *http.Response) error {
-	if response.StatusCode != 200 {
-		return fmt.Errorf("got HTTP status code %d, expected 200", response.StatusCode)
+func graphiteCheckBackendResponse(r *http.Response) error {
+	if r.StatusCode != 200 {
+		return fmt.Errorf("got HTTP status code %d, expected 200", r.StatusCode)
 	}
 
-	if utils.HTTPGetContentType(response) != "application/json" {
-		return fmt.Errorf("got HTTP content type `%s', expected `application/json'", response.Header["Content-Type"])
+	if utils.HTTPGetContentType(r) != "application/json" {
+		return fmt.Errorf("got HTTP content type `%s', expected `application/json'", r.Header["Content-Type"])
 	}
 
 	return nil
 }
 
-func graphiteBuildURLQuery(query *plot.Query, graphiteSeries map[string]map[string]string) (string, error) {
+func graphiteBuildQueryURL(query *plot.Query, graphiteSeries map[string]map[string]string) (string, error) {
 	now := time.Now()
 
 	fromTime := 0
 
-	URLQuery := "format=json"
+	queryURL := "format=json"
 
 	for _, series := range query.Series {
-		URLQuery += fmt.Sprintf(
+		queryURL += fmt.Sprintf(
 			"&target=alias(%s, \"%s\")",
 			url.QueryEscape(graphiteSeries[series.Source][series.Metric]),
 			series.Name,
@@ -274,35 +240,33 @@ func graphiteBuildURLQuery(query *plot.Query, graphiteSeries map[string]map[stri
 		fromTime = int(now.Sub(query.StartTime).Seconds())
 	}
 
-	URLQuery += fmt.Sprintf("&from=-%ds", fromTime)
+	queryURL += fmt.Sprintf("&from=-%ds", fromTime)
 
 	// Only specify `until' parameter if EndTime is still in the past
 	if query.EndTime.Before(now) {
-		untilTime := int(time.Now().Sub(query.EndTime).Seconds())
-		URLQuery += fmt.Sprintf("&until=-%ds", untilTime)
+		queryURL += fmt.Sprintf("&until=-%ds", int(time.Now().Sub(query.EndTime).Seconds()))
 	}
 
-	return URLQuery, nil
+	return queryURL, nil
 }
 
-func graphiteExtractResult(graphitePlots []graphitePlot) ([]plot.Series, error) {
-	var resultSeries []plot.Series
+func graphiteExtractResult(plots []graphitePlot) ([]*plot.Series, error) {
+	var results []*plot.Series
 
-	for _, graphitePlot := range graphitePlots {
-		series := plot.Series{
-			Name:    graphitePlot.Target,
-			Summary: make(map[string]plot.Value),
+	for _, p := range plots {
+		series := &plot.Series{
+			Name: p.Target,
 		}
 
-		for _, plotPoint := range graphitePlot.Datapoints {
-			series.Plots = append(
-				series.Plots,
-				plot.Plot{Value: plot.Value(plotPoint[0]), Time: time.Unix(int64(plotPoint[1]), 0)},
-			)
+		for _, d := range p.Datapoints {
+			series.Plots = append(series.Plots, plot.Plot{
+				Time:  time.Unix(int64(d[1]), 0),
+				Value: plot.Value(d[0]),
+			})
 		}
 
-		resultSeries = append(resultSeries, series)
+		results = append(results, series)
 	}
 
-	return resultSeries, nil
+	return results, nil
 }

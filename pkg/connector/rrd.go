@@ -41,16 +41,16 @@ func init() {
 			err     error
 		)
 
-		connector := &RRDConnector{
+		c := &RRDConnector{
 			name:    name,
 			metrics: make(map[string]map[string]*rrdMetric),
 		}
 
-		if connector.path, err = config.GetString(settings, "path", true); err != nil {
+		if c.path, err = config.GetString(settings, "path", true); err != nil {
 			return nil, err
 		}
 
-		if connector.daemon, err = config.GetString(settings, "daemon", false); err != nil {
+		if c.daemon, err = config.GetString(settings, "daemon", false); err != nil {
 			return nil, err
 		}
 
@@ -59,70 +59,57 @@ func init() {
 		}
 
 		// Check and compile regexp pattern
-		if connector.re, err = compilePattern(pattern); err != nil {
+		if c.re, err = compilePattern(pattern); err != nil {
 			return nil, fmt.Errorf("unable to compile regexp pattern: %s", err)
 		}
 
-		return connector, nil
+		return c, nil
 	}
 }
 
 // GetName returns the name of the current connector.
-func (connector *RRDConnector) GetName() string {
-	return connector.name
+func (c *RRDConnector) GetName() string {
+	return c.name
 }
 
 // GetPlots retrieves time series data from origin based on a query and a time interval.
-func (connector *RRDConnector) GetPlots(query *plot.Query) ([]plot.Series, error) {
+func (c *RRDConnector) GetPlots(query *plot.Query) ([]*plot.Series, error) {
 	var (
-		resultSeries []plot.Series
-		xport        *rrd.Exporter
+		results []*plot.Series
+		xport   *rrd.Exporter
 	)
 
 	if len(query.Series) == 0 {
-		return nil, fmt.Errorf("rrd[%s]: requested series list is empty", connector.name)
+		return nil, fmt.Errorf("rrd[%s]: requested series list is empty", c.name)
 	}
 
 	graph := rrd.NewGrapher()
 
-	if connector.daemon != "" {
-		graph.SetDaemon(connector.daemon)
+	if c.daemon != "" {
+		graph.SetDaemon(c.daemon)
 	}
 
 	xport = rrd.NewExporter()
 
-	if connector.daemon != "" {
-		xport.SetDaemon(connector.daemon)
+	if c.daemon != "" {
+		xport.SetDaemon(c.daemon)
 	}
 
 	step := time.Duration(0)
 
-	for _, series := range query.Series {
-		filePath := strings.Replace(connector.metrics[series.Source][series.Metric].FilePath, ":", "\\:", -1)
+	for _, s := range query.Series {
+		filePath := strings.Replace(c.metrics[s.Source][s.Metric].FilePath, ":", "\\:", -1)
 
-		graph.Def(
-			series.Name+"-def0",
-			filePath,
-			connector.metrics[series.Source][series.Metric].Dataset,
-			connector.metrics[series.Source][series.Metric].Cf,
-		)
-
-		graph.CDef(series.Name, series.Name+"-def0")
+		graph.Def(s.Name+"-def0", filePath, c.metrics[s.Source][s.Metric].Dataset, c.metrics[s.Source][s.Metric].Cf)
+		graph.CDef(s.Name, s.Name+"-def0")
 
 		// Set plots request
-		xport.Def(
-			series.Name+"-def0",
-			filePath,
-			connector.metrics[series.Source][series.Metric].Dataset,
-			connector.metrics[series.Source][series.Metric].Cf,
-		)
+		xport.Def(s.Name+"-def0", filePath, c.metrics[s.Source][s.Metric].Dataset, c.metrics[s.Source][s.Metric].Cf)
+		xport.CDef(s.Name, s.Name+"-def0")
+		xport.XportDef(s.Name, s.Name)
 
-		xport.CDef(series.Name, series.Name+"-def0")
-
-		xport.XportDef(series.Name, series.Name)
-
-		if connector.metrics[series.Source][series.Metric].Step > step {
-			step = connector.metrics[series.Source][series.Metric].Step
+		if c.metrics[s.Source][s.Metric].Step > step {
+			step = c.metrics[s.Source][s.Metric].Step
 		}
 	}
 
@@ -138,40 +125,36 @@ func (connector *RRDConnector) GetPlots(query *plot.Query) ([]plot.Series, error
 		return nil, err
 	}
 
-	for index, itemName := range data.Legends {
-		series := plot.Series{
-			Name:    itemName,
-			Summary: make(map[string]plot.Value),
+	for idx, name := range data.Legends {
+		series := &plot.Series{
+			Name: name,
 		}
 
 		// FIXME: skip last garbage entry (see https://github.com/ziutek/rrd/pull/13)
 		for i := 0; i < data.RowCnt-1; i++ {
-			series.Plots = append(
-				series.Plots,
-				plot.Plot{
-					Value: plot.Value(data.ValueAt(index, i)),
-					Time:  query.StartTime.Add(data.Step * time.Duration(i)),
-				},
-			)
+			series.Plots = append(series.Plots, plot.Plot{
+				Time:  query.StartTime.Add(data.Step * time.Duration(i)),
+				Value: plot.Value(data.ValueAt(idx, i)),
+			})
 		}
 
-		resultSeries = append(resultSeries, series)
+		results = append(results, series)
 	}
 
 	data.FreeValues()
 
-	return resultSeries, nil
+	return results, nil
 }
 
 // Refresh triggers a full connector data update.
-func (connector *RRDConnector) Refresh(originName string, outputChan chan<- *catalog.Record) error {
+func (c *RRDConnector) Refresh(originName string, outputChan chan<- *catalog.Record) error {
 	// Search for files and parse their path for source/metric pairs
 	walkFunc := func(filePath string, fileInfo os.FileInfo, err error) error {
 		var sourceName, metricName string
 
 		// Report errors
 		if err != nil {
-			logger.Log(logger.LevelWarning, "connector", "rrd[%s]: error while walking: %s", connector.name, err)
+			logger.Log(logger.LevelWarning, "connector", "rrd[%s]: error while walking: %s", c.name, err)
 			return nil
 		}
 
@@ -181,28 +164,24 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan<- *cat
 			return nil
 		}
 
-		seriesMatch, err := matchSeriesPattern(connector.re, filePath[len(connector.path)+1:])
+		// Get pattern matches
+		m, err := matchSeriesPattern(c.re, filePath[len(c.path)+1:])
 		if err != nil {
-			logger.Log(
-				logger.LevelInfo,
-				"connector",
-				"rrd[%s]: file `%s' does not match pattern, ignoring",
-				connector.name,
-				filePath,
-			)
+			logger.Log(logger.LevelInfo, "connector", "rrd[%s]: file `%s' does not match pattern, ignoring", c.name,
+				filePath)
 			return nil
 		}
 
-		sourceName, metricName = seriesMatch[0], seriesMatch[1]
+		sourceName, metricName = m[0], m[1]
 
-		if _, ok := connector.metrics[sourceName]; !ok {
-			connector.metrics[sourceName] = make(map[string]*rrdMetric)
+		if _, ok := c.metrics[sourceName]; !ok {
+			c.metrics[sourceName] = make(map[string]*rrdMetric)
 		}
 
 		// Extract metric information from .rrd file
 		info, err := rrd.Info(filePath)
 		if err != nil {
-			logger.Log(logger.LevelWarning, "connector", "rrd[%s]: %s", connector.name, err)
+			logger.Log(logger.LevelWarning, "connector", "rrd[%s]: %s", c.name, err)
 			return nil
 		}
 
@@ -229,7 +208,7 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan<- *cat
 				for _, cfName := range cfList {
 					metricFullName := metricName + "/" + dsName + "/" + strings.ToLower(cfName)
 
-					connector.metrics[sourceName][metricFullName] = &rrdMetric{
+					c.metrics[sourceName][metricFullName] = &rrdMetric{
 						Dataset:  dsName,
 						FilePath: filePath,
 						Step:     time.Duration(info["step"].(uint)) * time.Second,
@@ -240,7 +219,7 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan<- *cat
 						Origin:    originName,
 						Source:    sourceName,
 						Metric:    metricFullName,
-						Connector: connector,
+						Connector: c,
 					}
 				}
 			}
@@ -249,7 +228,7 @@ func (connector *RRDConnector) Refresh(originName string, outputChan chan<- *cat
 		return nil
 	}
 
-	if err := utils.WalkDir(connector.path, walkFunc); err != nil {
+	if err := utils.WalkDir(c.path, walkFunc); err != nil {
 		return err
 	}
 

@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -20,9 +19,9 @@ import (
 )
 
 const (
-	facetteURLCatalog            string  = "/api/v1/catalog/"
-	facetteURLLibraryGraphsPlots string  = "/api/v1/plots"
-	facetteDefaultTimeout        float64 = 10
+	facetteDefaultTimeout int    = 10
+	facetteURLCatalog     string = "/api/v1/catalog/"
+	facetteURLPlots       string = "/api/v1/plots"
 )
 
 type facettePlotRequest struct {
@@ -56,49 +55,54 @@ type facetteSeries struct {
 
 // FacetteConnector represents the main structure of the Facette connector.
 type FacetteConnector struct {
-	name     string
-	upstream string
-	timeout  float64
-	serverID string
+	name          string
+	upstream      string
+	timeout       int
+	insecureTLS   bool
+	serverID      string
+	httpTransport *http.Transport
 }
 
 func init() {
 	Connectors["facette"] = func(name string, settings map[string]interface{}) (Connector, error) {
 		var err error
 
-		connector := &FacetteConnector{name: name}
+		c := &FacetteConnector{name: name}
 
-		if connector.upstream, err = config.GetString(settings, "upstream", true); err != nil {
+		if c.upstream, err = config.GetString(settings, "upstream", true); err != nil {
 			return nil, err
 		}
 
-		if connector.timeout, err = config.GetFloat(settings, "timeout", false); err != nil {
+		if c.timeout, err = config.GetInt(settings, "timeout", false); err != nil {
+			return nil, err
+		}
+		if c.timeout <= 0 {
+			c.timeout = facetteDefaultTimeout
+		}
+
+		if c.insecureTLS, err = config.GetBool(settings, "allow_insecure_tls", false); err != nil {
 			return nil, err
 		}
 
-		if connector.timeout <= 0 {
-			connector.timeout = facetteDefaultTimeout
-		}
-
-		if connector.serverID, err = config.GetString(settings, "_id", true); err != nil {
+		if c.serverID, err = config.GetString(settings, "_id", true); err != nil {
 			return nil, err
 		}
 
-		return connector, nil
+		return c, nil
 	}
 }
 
 // GetName returns the name of the current connector.
-func (connector *FacetteConnector) GetName() string {
-	return connector.name
+func (c *FacetteConnector) GetName() string {
+	return c.name
 }
 
 // GetPlots retrieves time series data from origin based on a query and a time interval.
-func (connector *FacetteConnector) GetPlots(query *plot.Query) ([]plot.Series, error) {
-	var resultSeries []plot.Series
+func (c *FacetteConnector) GetPlots(query *plot.Query) ([]*plot.Series, error) {
+	var results []*plot.Series
 
 	// Convert plotQuery into plotRequest-like to forward query to upstream Facette API
-	plotRequest := facettePlotRequest{
+	plotReq := facettePlotRequest{
 		Time:   query.StartTime,
 		Range:  utils.DurationToRange(query.EndTime.Sub(query.StartTime)),
 		Sample: query.Sample,
@@ -110,128 +114,107 @@ func (connector *FacetteConnector) GetPlots(query *plot.Query) ([]plot.Series, e
 				&library.OperGroup{
 					Name: "group0",
 					Series: func(series []plot.QuerySeries) []*library.Series {
-						requestSeries := make([]*library.Series, len(series))
+						out := make([]*library.Series, len(series))
 
-						for index, entry := range series {
-							requestSeries[index] = &library.Series{
-								Name:   fmt.Sprintf("series%d", index),
-								Origin: entry.Origin,
-								Source: entry.Source,
-								Metric: entry.Metric,
+						for i, s := range series {
+							out[i] = &library.Series{
+								Name:   fmt.Sprintf("series%d", i),
+								Origin: s.Origin,
+								Source: s.Source,
+								Metric: s.Metric,
 							}
 						}
 
-						return requestSeries
+						return out
 					}(query.Series),
 				},
 			},
 		},
 	}
 
-	requestBody, err := json.Marshal(plotRequest)
+	body, err := json.Marshal(plotReq)
 	if err != nil {
-		return nil, fmt.Errorf("facette[%s]: unable to marshal plot request: %s", connector.name, err)
+		return nil, fmt.Errorf("facette[%s]: unable to marshal plot request: %s", c.name, err)
 	}
 
-	httpTransport := &http.Transport{
-		Dial: (&net.Dialer{
-			// Enable dual IPv4/IPv6 stack connectivity:
-			DualStack: true,
-			// Enforce HTTP connection timeout:
-			Timeout: time.Duration(connector.timeout) * time.Second,
-		}).Dial,
-	}
+	client := utils.NewHTTPClient(c.timeout, c.insecureTLS)
 
-	httpClient := http.Client{Transport: httpTransport}
-
-	request, err := http.NewRequest(
-		"POST",
-		strings.TrimSuffix(connector.upstream, "/")+facetteURLLibraryGraphsPlots,
-		bytes.NewReader(requestBody))
+	r, err := http.NewRequest("POST", strings.TrimSuffix(c.upstream, "/")+facetteURLPlots, bytes.NewReader(body))
 	if err != nil {
-		return nil, fmt.Errorf("facette[%s]: unable to set up HTTP request: %s", connector.name, err)
+		return nil, fmt.Errorf("facette[%s]: unable to set up HTTP request: %s", c.name, err)
 	}
 
-	request.Header.Add("Content-Type", "application/json")
-	request.Header.Add("User-Agent", "Facette")
-	request.Header.Add("X-Requested-With", "FacetteConnector")
+	r.Header.Add("Content-Type", "application/json")
+	r.Header.Add("User-Agent", "Facette")
+	r.Header.Add("X-Requested-With", "FacetteConnector")
 
 	if query.Requestor != "" {
-		request.Header.Add("X-Facette-Requestor", query.Requestor)
+		r.Header.Add("X-Facette-Requestor", query.Requestor)
 	} else {
-		request.Header.Add("X-Facette-Requestor", connector.serverID)
+		r.Header.Add("X-Facette-Requestor", c.serverID)
 	}
 
-	response, err := httpClient.Do(request)
+	rsp, err := client.Do(r)
 	if err != nil {
-		return nil, fmt.Errorf("facette[%s]: unable to perform HTTP request: %s", connector.name, err)
+		return nil, fmt.Errorf("facette[%s]: unable to perform HTTP request: %s", c.name, err)
 	}
 
-	if err := facetteCheckConnectorResponse(response); err != nil {
-		return nil, fmt.Errorf("facette[%s]: invalid upstream HTTP response: %s", connector.name, err)
+	if err := facetteCheckConnectorResponse(rsp); err != nil {
+		return nil, fmt.Errorf("facette[%s]: invalid upstream HTTP response: %s", c.name, err)
 	}
 
-	data, err := ioutil.ReadAll(response.Body)
+	data, err := ioutil.ReadAll(rsp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("facette[%s]: unable to read HTTP response body: %s", connector.name, err)
+		return nil, fmt.Errorf("facette[%s]: unable to read HTTP response body: %s", c.name, err)
 	}
-	defer response.Body.Close()
+	defer rsp.Body.Close()
 
-	plotResponse := facettePlotResponse{}
+	plotRsp := facettePlotResponse{}
 
-	if err := json.Unmarshal(data, &plotResponse); err != nil {
-		return nil, fmt.Errorf("facette[%s]: unable to unmarshal upstream response: %s", connector.name, err)
+	if err := json.Unmarshal(data, &plotRsp); err != nil {
+		return nil, fmt.Errorf("facette[%s]: unable to unmarshal upstream response: %s", c.name, err)
 	}
 
-	for _, series := range plotResponse.Series {
-		resultSeries = append(resultSeries, plot.Series{
-			Plots:   series.Plots,
-			Summary: series.Summary,
+	for _, s := range plotRsp.Series {
+		results = append(results, &plot.Series{
+			Plots:   s.Plots,
+			Summary: s.Summary,
 		})
 	}
 
-	return resultSeries, nil
+	return results, nil
 }
 
 // Refresh triggers a full connector data update.
-func (connector *FacetteConnector) Refresh(originName string, outputChan chan<- *catalog.Record) error {
-	httpTransport := &http.Transport{
-		Dial: (&net.Dialer{
-			// Enable dual IPv4/IPv6 stack connectivity:
-			DualStack: true,
-			// Enforce HTTP connection timeout:
-			Timeout: time.Duration(connector.timeout) * time.Second,
-		}).Dial,
-	}
+func (c *FacetteConnector) Refresh(originName string, outputChan chan<- *catalog.Record) error {
+	client := utils.NewHTTPClient(c.timeout, c.insecureTLS)
 
-	httpClient := http.Client{Transport: httpTransport}
-
-	request, err := http.NewRequest("GET", strings.TrimSuffix(connector.upstream, "/")+facetteURLCatalog, nil)
+	r, err := http.NewRequest("GET", strings.TrimSuffix(c.upstream, "/")+facetteURLCatalog, nil)
 	if err != nil {
-		return fmt.Errorf("facette[%s]: unable to set up HTTP request: %s", connector.name, err)
+		return fmt.Errorf("facette[%s]: unable to set up HTTP request: %s", c.name, err)
 	}
 
-	request.Header.Add("User-Agent", "Facette")
-	request.Header.Add("X-Requested-With", "FacetteConnector")
+	r.Header.Add("User-Agent", "Facette")
+	r.Header.Add("X-Requested-With", "FacetteConnector")
 
-	response, err := httpClient.Do(request)
+	rsp, err := client.Do(r)
 	if err != nil {
-		return fmt.Errorf("facette[%s]: unable to perform HTTP request: %s", connector.name, err)
+		return fmt.Errorf("facette[%s]: unable to perform HTTP request: %s", c.name, err)
 	}
-	defer response.Body.Close()
+	defer rsp.Body.Close()
 
-	if err = facetteCheckConnectorResponse(response); err != nil {
-		return fmt.Errorf("facette[%s]: invalid HTTP backend response: %s", connector.name, err)
+	if err = facetteCheckConnectorResponse(rsp); err != nil {
+		return fmt.Errorf("facette[%s]: invalid HTTP backend response: %s", c.name, err)
 	}
 
-	data, err := ioutil.ReadAll(response.Body)
+	data, err := ioutil.ReadAll(rsp.Body)
 	if err != nil {
-		return fmt.Errorf("facette[%s]: unable to read HTTP response body: %s", connector.name, err)
+		return fmt.Errorf("facette[%s]: unable to read HTTP response body: %s", c.name, err)
 	}
 
 	upstreamCatalog := make(map[string]map[string][]string)
 	if err = json.Unmarshal(data, &upstreamCatalog); err != nil {
-		return fmt.Errorf("facette[%s]: unable to unmarshal JSON data: %s", connector.name, err)
+		return fmt.Errorf("facette[%s]: unable to unmarshal JSON data: %s", c.name, err)
 	}
 
 	// Parse the upstream catalog entries and append them to our local catalog
@@ -242,7 +225,7 @@ func (connector *FacetteConnector) Refresh(originName string, outputChan chan<- 
 					Origin:    upstreamOriginName,
 					Source:    sourceName,
 					Metric:    metric,
-					Connector: connector,
+					Connector: c,
 				}
 			}
 		}
@@ -251,13 +234,13 @@ func (connector *FacetteConnector) Refresh(originName string, outputChan chan<- 
 	return nil
 }
 
-func facetteCheckConnectorResponse(response *http.Response) error {
-	if response.StatusCode != 200 {
-		return fmt.Errorf("got HTTP status code %d, expected 200", response.StatusCode)
+func facetteCheckConnectorResponse(r *http.Response) error {
+	if r.StatusCode != 200 {
+		return fmt.Errorf("got HTTP status code %d, expected 200", r.StatusCode)
 	}
 
-	if !strings.Contains(response.Header.Get("Content-Type"), "application/json") {
-		return fmt.Errorf("got HTTP content type `%s', expected `application/json'", response.Header["Content-Type"])
+	if !strings.Contains(r.Header.Get("Content-Type"), "application/json") {
+		return fmt.Errorf("got HTTP content type `%s', expected `application/json'", r.Header["Content-Type"])
 	}
 
 	return nil

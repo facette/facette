@@ -4,11 +4,9 @@ package connector
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"net"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -23,11 +21,11 @@ import (
 )
 
 const (
-	kairosdbURLVersion     string  = "/api/v1/version"
-	kairosdbURLMetricNames string  = "/api/v1/metricnames"
-	kairosdbURLMetricsTags string  = "/api/v1/datapoints/query/tags"
-	kairosdbURLQueryMetric string  = "/api/v1/datapoints/query"
-	kairosdbDefaultTimeout float64 = 10
+	kairosdbDefaultTimeout int    = 10
+	kairosdbURLVersion     string = "/api/v1/version"
+	kairosdbURLMetricNames string = "/api/v1/metricnames"
+	kairosdbURLMetricTags  string = "/api/v1/datapoints/query/tags"
+	kairosdbURLQueryMetric string = "/api/v1/datapoints/query"
 )
 
 type kairosdbSeriesEntry struct {
@@ -43,18 +41,18 @@ type metricAggregator struct {
 	hook    interface{}
 }
 
-type MetricsQueryEntry struct {
+type metricQueryEntry struct {
 	Name        string              `json:"name"`
 	Tags        map[string][]string `json:"tags"`
 	Aggregators []interface{}       `json:"aggregators,omitempty"`
 }
 
-type MetricsQueryResponse struct {
-	SampleSize int64                `json:"sample_size"`
-	Results    []MetricsQueryResult `json:"results"`
+type metricQueryResponse struct {
+	SampleSize int64               `json:"sample_size"`
+	Results    []metricQueryResult `json:"results"`
 }
 
-type MetricsQueryResult struct {
+type metricQueryResult struct {
 	Name    string              `json:"name"`
 	GroupBy []map[string]string `json:"group_by"`
 	Tags    map[string][]string `json:"tags"`
@@ -62,17 +60,17 @@ type MetricsQueryResult struct {
 }
 
 type plotsQuery struct {
-	StartAbsolute int64               `json:"start_absolute"`
-	EndAbsolute   int64               `json:"end_absolute"`
-	Metrics       []MetricsQueryEntry `json:"metrics"`
+	StartAbsolute int64              `json:"start_absolute"`
+	EndAbsolute   int64              `json:"end_absolute"`
+	Metrics       []metricQueryEntry `json:"metrics"`
 }
 
 // KairosdbConnector represents the main structure of the Kairosdb connector.
 type KairosdbConnector struct {
 	name              string
-	URL               string
+	url               string
+	timeout           int
 	insecureTLS       bool
-	timeout           float64
 	sourceTags        []string
 	startAbsolute     int
 	startRelative     interface{}
@@ -90,43 +88,46 @@ func init() {
 			err         error
 		)
 
-		connector := &KairosdbConnector{
-			name:              name,
-			insecureTLS:       true,
-			timeout:           kairosdbDefaultTimeout,
-			sourceTags:        nil,
-			startAbsolute:     0, // Note: Must be > 0 because of config.GetInt() behavior
-			startRelative:     nil,
-			endAbsolute:       0, // Note: Must be > 0 because of config.GetInt() behavior
-			endRelative:       nil,
-			defaultAggregator: nil,
-			aggregators:       nil,
-			series:            make(map[string]map[string]kairosdbSeriesEntry),
+		c := &KairosdbConnector{
+			name:    name,
+			timeout: kairosdbDefaultTimeout,
+			series:  make(map[string]map[string]kairosdbSeriesEntry),
 		}
 
-		if connector.URL, err = config.GetString(settings, "url", true); err != nil {
+		if c.url, err = config.GetString(settings, "url", true); err != nil {
 			return nil, err
 		}
 
-		if connector.sourceTags, err = config.GetStringSlice(settings, "source_tags", false); err != nil {
+		if c.timeout, err = config.GetInt(settings, "timeout", false); err != nil {
+			return nil, err
+		}
+		if c.timeout <= 0 {
+			c.timeout = kairosdbDefaultTimeout
+		}
+
+		if c.insecureTLS, err = config.GetBool(settings, "allow_insecure_tls", false); err != nil {
 			return nil, err
 		}
 
-		if connector.startAbsolute, err = config.GetInt(settings, "start_absolute", false); err != nil {
-			return nil, err
-		}
-		if connector.endAbsolute, err = config.GetInt(settings, "end_absolute", false); err != nil {
+		if c.sourceTags, err = config.GetStringSlice(settings, "source_tags", false); err != nil {
 			return nil, err
 		}
 
-		if connector.startRelative, err = config.GetJsonObj(settings, "start_relative", false); err != nil {
+		if c.startAbsolute, err = config.GetInt(settings, "start_absolute", false); err != nil {
 			return nil, err
 		}
-		if connector.endRelative, err = config.GetJsonObj(settings, "end_relative", false); err != nil {
+		if c.endAbsolute, err = config.GetInt(settings, "end_absolute", false); err != nil {
 			return nil, err
 		}
 
-		if connector.defaultAggregator, err = config.GetJsonObj(settings, "default_aggregator", false); err != nil {
+		if c.startRelative, err = config.GetJsonObj(settings, "start_relative", false); err != nil {
+			return nil, err
+		}
+		if c.endRelative, err = config.GetJsonObj(settings, "end_relative", false); err != nil {
+			return nil, err
+		}
+
+		if c.defaultAggregator, err = config.GetJsonObj(settings, "default_aggregator", false); err != nil {
 			return nil, err
 		}
 
@@ -134,41 +135,28 @@ func init() {
 			return nil, err
 		}
 
-		connector.aggregators = compileAggregatorPatterns(aggregators, connector.name)
+		c.aggregators = compileAggregatorPatterns(aggregators, c.name)
 
-		if connector.insecureTLS, err = config.GetBool(settings, "allow_insecure_tls", false); err != nil {
-			return nil, err
+		if c.startAbsolute > 0 && c.startRelative != nil {
+			return nil, fmt.Errorf("kairosdb[%s]: start_absolute/start_relative are mutually exclusive", c.name)
+		}
+		if c.endAbsolute > 0 && c.endRelative != nil {
+			return nil, fmt.Errorf("kairosdb[%s]: end_absolute/end_relative are mutually exclusive", c.name)
 		}
 
-		if connector.timeout, err = config.GetFloat(settings, "timeout", false); err != nil {
-			return nil, err
+		// Enforce startRelative defaults
+		if c.startAbsolute <= 0 && c.startRelative == nil {
+			c.startRelative = map[string]interface{}{"value": 3, "unit": "months"}
 		}
 
-		if connector.startAbsolute > 0 && connector.startRelative != nil {
-			return nil, fmt.Errorf("kairosdb[%s]: start_absolute/start_relative are mutually exclusive", connector.name)
-		}
-		if connector.endAbsolute > 0 && connector.endRelative != nil {
-			return nil, fmt.Errorf("kairosdb[%s]: end_absolute/end_relative are mutually exclusive", connector.name)
+		// Enforce sourceTags defaults
+		if c.sourceTags == nil {
+			c.sourceTags = []string{"host", "server", "device"}
 		}
 
-		// Enforce startRelative default
-		if connector.startAbsolute <= 0 && connector.startRelative == nil {
-			connector.startRelative = map[string]interface{}{"value": 3, "unit": "months"}
-		}
-
-		// Enforce sourceTags default
-		if connector.sourceTags == nil {
-			connector.sourceTags = []string{"host", "server", "device"}
-		}
-
-		// Enforce minimal timeout value bound
-		if connector.timeout <= 0 {
-			connector.timeout = kairosdbDefaultTimeout
-		}
-
-		version, version_array, err := kairosdbGetVersion(connector)
+		version, version_array, err := kairosdbGetVersion(c)
 		if err != nil {
-			return nil, fmt.Errorf("kairosdb[%s]: unable to get KairosDB version: %s", connector.name, err)
+			return nil, fmt.Errorf("kairosdb[%s]: unable to get KairosDB version: %s", c.name, err)
 		}
 
 		if version_array[0] < 1 {
@@ -176,239 +164,197 @@ func init() {
 				if version_array[1] < 9 || (version_array[1] == 9 && version_array[2] < 4) {
 					return nil, fmt.Errorf(
 						"kairosdb[%s]: only KairosDB version 0.9.4 and greater are supported (%s detected)",
-						connector.name,
+						c.name,
 						version,
 					)
 				}
 			}
 		}
 
-		return connector, nil
+		return c, nil
 	}
 }
 
 // GetName returns the name of the current connector.
-func (connector *KairosdbConnector) GetName() string {
-	return connector.name
+func (c *KairosdbConnector) GetName() string {
+	return c.name
 }
 
 // GetPlots retrieves time series data from provider based on a query and a time interval.
-func (connector *KairosdbConnector) GetPlots(query *plot.Query) ([]plot.Series, error) {
-	var resultSeries []plot.Series
+func (c *KairosdbConnector) GetPlots(query *plot.Query) ([]*plot.Series, error) {
+	var (
+		jsonResponse map[string][]metricQueryResponse
+		results      []*plot.Series
+	)
 
 	if len(query.Series) == 0 {
-		return nil, fmt.Errorf("kairosdb[%s]: requested series list is empty", connector.name)
+		return nil, fmt.Errorf("kairosdb[%s]: requested series list is empty", c.name)
 	}
 
-	JSONquery, err := kairosdbBuildJSONQuery(query, connector.series)
+	jsonQuery, err := kairosdbBuildJSONQuery(query, c.series)
 	if err != nil {
-		return nil, fmt.Errorf("kairosdb[%s]: unable to build or marshal JSON query: %s", connector.name, err)
+		return nil, fmt.Errorf("kairosdb[%s]: unable to build or marshal JSON query: %s", c.name, err)
 	}
 
-	httpTransport := &http.Transport{
-		Dial: (&net.Dialer{
-			DualStack: true,
-			Timeout:   time.Duration(connector.timeout) * time.Second,
-		}).Dial,
-	}
+	client := utils.NewHTTPClient(c.timeout, c.insecureTLS)
 
-	if connector.insecureTLS {
-		httpTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	}
+	logger.Log(logger.LevelDebug, "connector", "kairosdb[%s]: API Call to %s: %s", c.name,
+		strings.TrimSuffix(c.url, "/")+kairosdbURLQueryMetric,
+		string(jsonQuery))
 
-	httpClient := http.Client{Transport: httpTransport}
-
-	logger.Log(logger.LevelDebug, "connector", "kairosdb[%s]: API Call to %s: %s", connector.name,
-		strings.TrimSuffix(connector.URL, "/")+kairosdbURLQueryMetric,
-		string(JSONquery))
-
-	request, err := http.NewRequest(
-		"POST",
-		strings.TrimSuffix(connector.URL, "/")+kairosdbURLQueryMetric,
-		bytes.NewBuffer(JSONquery),
-	)
+	r, err := http.NewRequest("POST", strings.TrimSuffix(c.url, "/")+kairosdbURLQueryMetric, bytes.NewBuffer(jsonQuery))
 	if err != nil {
-		return nil, fmt.Errorf("kairosdb[%s]: unable to set up HTTP request: %s", connector.name, err)
+		return nil, fmt.Errorf("kairosdb[%s]: unable to set up HTTP request: %s", c.name, err)
 	}
 
-	request.Header.Add("User-Agent", "Facette")
-	request.Header.Add("X-Requested-With", "KairosDBConnector")
-	request.Header.Set("Content-Type", "application/json")
+	r.Header.Add("User-Agent", "Facette")
+	r.Header.Add("X-Requested-With", "KairosDBConnector")
+	r.Header.Set("Content-Type", "application/json")
 
-	response, err := httpClient.Do(request)
+	rsp, err := client.Do(r)
 	if err != nil {
-		return nil, fmt.Errorf("kairosdb[%s]: unable to perform HTTP request: %s", connector.name, err)
+		return nil, fmt.Errorf("kairosdb[%s]: unable to perform HTTP request: %s", c.name, err)
 	}
-	defer response.Body.Close()
+	defer rsp.Body.Close()
 
-	if err = kairosdbCheckBackendResponse(response); err != nil {
-		return nil, fmt.Errorf("kairosdb[%s]: invalid HTTP backend response: %s", connector.name, err)
+	if err = kairosdbCheckBackendResponse(rsp); err != nil {
+		return nil, fmt.Errorf("kairosdb[%s]: invalid HTTP backend response: %s", c.name, err)
 	}
 
-	data, err := ioutil.ReadAll(response.Body)
+	data, err := ioutil.ReadAll(rsp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("kairosdb[%s]: unable to read HTTP response body: %s", connector.name, err)
+		return nil, fmt.Errorf("kairosdb[%s]: unable to read HTTP response body: %s", c.name, err)
 	}
 
-	var JSONresponse map[string][]MetricsQueryResponse
-	if err = json.Unmarshal(data, &JSONresponse); err != nil {
-		return nil, fmt.Errorf("kairosdb[%s]: unable to unmarshal JSON data: %s", connector.name, err)
+	if err = json.Unmarshal(data, &jsonResponse); err != nil {
+		return nil, fmt.Errorf("kairosdb[%s]: unable to unmarshal JSON data: %s", c.name, err)
 	}
 
-	if resultSeries, err = kairosdbExtractPlots(query, connector.series, JSONresponse["queries"]); err != nil {
-		return nil, fmt.Errorf(
-			"kairosdb[%s]: unable to extract plot values from backend response: %s",
-			connector.name,
-			err,
-		)
+	if results, err = kairosdbExtractPlots(query, c.series, jsonResponse["queries"]); err != nil {
+		return nil, fmt.Errorf("kairosdb[%s]: unable to extract plot values from backend response: %s", c.name, err)
 	}
 
-	return resultSeries, nil
+	return results, nil
 }
 
 // Refresh triggers a full connector data update.
-func (connector *KairosdbConnector) Refresh(originName string, outputChan chan<- *catalog.Record) error {
+func (c *KairosdbConnector) Refresh(originName string, outputChan chan<- *catalog.Record) error {
 	var (
-		JSONmetrics map[string][]string
-		JSONquery   map[string][]map[string][]struct {
+		jsonMetrics map[string][]string
+		jsonQuery   map[string][]map[string][]struct {
 			Name string              `json:"name"`
 			Tags map[string][]string `json:"tags"`
 		}
 	)
 
-	httpTransport := &http.Transport{
-		Dial: (&net.Dialer{
-			DualStack: true,
-			Timeout:   time.Duration(connector.timeout) * time.Second,
-		}).Dial,
-	}
+	client := utils.NewHTTPClient(c.timeout, c.insecureTLS)
 
-	if connector.insecureTLS {
-		httpTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	}
-
-	httpClient := http.Client{Transport: httpTransport}
-
-	request, err := http.NewRequest("GET", strings.TrimSuffix(connector.URL, "/")+kairosdbURLMetricNames, nil)
+	r, err := http.NewRequest("GET", strings.TrimSuffix(c.url, "/")+kairosdbURLMetricNames, nil)
 	if err != nil {
-		return fmt.Errorf("kairosdb[%s]: unable to set up HTTP request: %s", connector.name, err)
+		return fmt.Errorf("kairosdb[%s]: unable to set up HTTP request: %s", c.name, err)
 	}
 
-	request.Header.Add("User-Agent", "Facette")
-	request.Header.Add("X-Requested-With", "KairosDBConnector")
+	r.Header.Add("User-Agent", "Facette")
+	r.Header.Add("X-Requested-With", "KairosDBConnector")
 
-	response, err := httpClient.Do(request)
+	rsp, err := client.Do(r)
 	if err != nil {
-		return fmt.Errorf("kairosdb[%s]: unable to perform HTTP request: %s", connector.name, err)
+		return fmt.Errorf("kairosdb[%s]: unable to perform HTTP request: %s", c.name, err)
 	}
-	defer response.Body.Close()
+	defer rsp.Body.Close()
 
-	if err = kairosdbCheckBackendResponse(response); err != nil {
-		return fmt.Errorf("kairosdb[%s]: invalid HTTP backend response: %s", connector.name, err)
+	if err = kairosdbCheckBackendResponse(rsp); err != nil {
+		return fmt.Errorf("kairosdb[%s]: invalid HTTP backend response: %s", c.name, err)
 	}
 
-	data, err := ioutil.ReadAll(response.Body)
+	data, err := ioutil.ReadAll(rsp.Body)
 	if err != nil {
-		return fmt.Errorf("kairosdb[%s]: unable to read HTTP response body: %s", connector.name, err)
+		return fmt.Errorf("kairosdb[%s]: unable to read HTTP response body: %s", c.name, err)
 	}
-	if err = json.Unmarshal(data, &JSONmetrics); err != nil {
-		return fmt.Errorf("kairosdb[%s]: unable to unmarshal JSON data: %s", connector.name, err)
+	if err = json.Unmarshal(data, &jsonMetrics); err != nil {
+		return fmt.Errorf("kairosdb[%s]: unable to unmarshal JSON data: %s", c.name, err)
 	}
 
 	metrics := make([]map[string]string, 0)
-	for _, m := range JSONmetrics["results"] {
+	for _, m := range jsonMetrics["results"] {
 		metrics = append(metrics, map[string]string{"name": m})
 	}
 
 	query := map[string]interface{}{"metrics": metrics}
 
-	if connector.startAbsolute > 0 {
-		query["start_absolute"] = connector.startAbsolute
+	if c.startAbsolute > 0 {
+		query["start_absolute"] = c.startAbsolute
 	} else {
-		query["start_relative"] = connector.startRelative
+		query["start_relative"] = c.startRelative
 	}
 
-	if connector.endAbsolute > 0 {
-		query["end_absolute"] = connector.endAbsolute
+	if c.endAbsolute > 0 {
+		query["end_absolute"] = c.endAbsolute
 	}
 
-	if connector.endRelative != nil {
-		query["end_relative"] = connector.endRelative
+	if c.endRelative != nil {
+		query["end_relative"] = c.endRelative
 	}
 
 	jsonData, err := json.Marshal(query)
 	if err != nil {
-		return fmt.Errorf("kairosdb[%s]: unable to marshal JSON data: %s", connector.name, err)
+		return fmt.Errorf("kairosdb[%s]: unable to marshal JSON data: %s", c.name, err)
 	}
 
-	logger.Log(
-		logger.LevelDebug,
-		"connector",
-		"kairosdb[%s]: API Call to %s: %s",
-		connector.name,
-		strings.TrimSuffix(connector.URL, "/")+kairosdbURLMetricsTags,
-		string(jsonData),
-	)
+	logger.Log(logger.LevelDebug, "connector", "kairosdb[%s]: API Call to %s: %s", c.name,
+		strings.TrimSuffix(c.url, "/")+kairosdbURLMetricTags, string(jsonData))
 
-	request, err = http.NewRequest(
-		"POST",
-		strings.TrimSuffix(connector.URL, "/")+kairosdbURLMetricsTags,
-		bytes.NewBuffer(jsonData),
-	)
-
+	r, err = http.NewRequest("POST", strings.TrimSuffix(c.url, "/")+kairosdbURLMetricTags, bytes.NewBuffer(jsonData))
 	if err != nil {
-		return fmt.Errorf("kairosdb[%s]: unable to set up HTTP request: %s", connector.name, err)
+		return fmt.Errorf("kairosdb[%s]: unable to set up HTTP request: %s", c.name, err)
 	}
 
-	request.Header.Add("User-Agent", "Facette")
-	request.Header.Add("X-Requested-With", "KairosDBConnector")
-	request.Header.Set("Content-Type", "application/json")
+	r.Header.Add("User-Agent", "Facette")
+	r.Header.Add("X-Requested-With", "KairosDBConnector")
+	r.Header.Set("Content-Type", "application/json")
 
-	response, err = httpClient.Do(request)
+	rsp, err = client.Do(r)
 	if err != nil {
-		return fmt.Errorf("kairosdb[%s]: unable to perform HTTP request: %s", connector.name, err)
+		return fmt.Errorf("kairosdb[%s]: unable to perform HTTP request: %s", c.name, err)
 	}
-	defer response.Body.Close()
+	defer rsp.Body.Close()
 
-	if err = kairosdbCheckBackendResponse(response); err != nil {
-		return fmt.Errorf("kairosdb[%s]: invalid HTTP backend response: %s", connector.name, err)
+	if err = kairosdbCheckBackendResponse(rsp); err != nil {
+		return fmt.Errorf("kairosdb[%s]: invalid HTTP backend response: %s", c.name, err)
 	}
 
-	data, err = ioutil.ReadAll(response.Body)
+	data, err = ioutil.ReadAll(rsp.Body)
 	if err != nil {
-		return fmt.Errorf("kairosdb[%s]: unable to read HTTP response body: %s", connector.name, err)
+		return fmt.Errorf("kairosdb[%s]: unable to read HTTP response body: %s", c.name, err)
 	}
 
-	logger.Log(
-		logger.LevelDebug,
-		"connector", "kairosdb[%s]: API Response from %s: %s", connector.name,
-		strings.TrimSuffix(connector.URL, "/")+kairosdbURLMetricsTags,
-		string(data),
-	)
+	logger.Log(logger.LevelDebug, "connector", "kairosdb[%s]: API Response from %s: %s", c.name,
+		strings.TrimSuffix(c.url, "/")+kairosdbURLMetricTags, string(data))
 
-	if err = json.Unmarshal(data, &JSONquery); err != nil {
-		return fmt.Errorf("kairosdb[%s]: unable to unmarshal JSON data: %s", connector.name, err)
+	if err = json.Unmarshal(data, &jsonQuery); err != nil {
+		return fmt.Errorf("kairosdb[%s]: unable to unmarshal JSON data: %s", c.name, err)
 	}
 
-	for _, q := range JSONquery["queries"] {
+	for _, q := range jsonQuery["queries"] {
 		for _, r := range q["results"] {
 			metricName := r.Name
-			aggregator := matchAggregatorPattern(connector.aggregators, metricName)
+
+			aggregator := matchAggregatorPattern(c.aggregators, metricName)
 			if aggregator == nil {
-				aggregator = connector.defaultAggregator
+				aggregator = c.defaultAggregator
 			}
 
-			for _, t := range connector.sourceTags {
+			for _, t := range c.sourceTags {
 				if _, ok := r.Tags[t]; !ok {
 					continue
 				}
 
 				for _, sourceName := range r.Tags[t] {
-					if _, ok := connector.series[sourceName]; !ok {
-						connector.series[sourceName] = make(map[string]kairosdbSeriesEntry)
+					if _, ok := c.series[sourceName]; !ok {
+						c.series[sourceName] = make(map[string]kairosdbSeriesEntry)
 					}
 
-					connector.series[sourceName][metricName] = kairosdbSeriesEntry{
+					c.series[sourceName][metricName] = kairosdbSeriesEntry{
 						tag:        t,
 						source:     sourceName,
 						metric:     metricName,
@@ -419,20 +365,14 @@ func (connector *KairosdbConnector) Refresh(originName string, outputChan chan<-
 						Origin:    originName,
 						Source:    sourceName,
 						Metric:    metricName,
-						Connector: connector,
+						Connector: c,
 					}
 				}
 
 				if aggregator != nil {
 					a, _ := json.Marshal(aggregator)
-					logger.Log(
-						logger.LevelInfo,
-						"connector",
-						"kairosdb[%s]: `%s' applied to `%s'",
-						connector.name,
-						string(a),
-						metricName,
-					)
+					logger.Log(logger.LevelInfo, "connector", "kairosdb[%s]: `%s' applied to `%s'", c.name, string(a),
+						metricName)
 				}
 
 				break
@@ -450,7 +390,7 @@ func kairosdbBuildJSONQuery(query *plot.Query,
 
 	for _, series := range query.Series {
 		entry := kairosdbSeries[series.Source][series.Metric]
-		m := MetricsQueryEntry{
+		m := metricQueryEntry{
 			Name: entry.metric,
 			Tags: map[string][]string{entry.tag: []string{entry.source}},
 		}
@@ -474,8 +414,9 @@ func kairosdbBuildJSONQuery(query *plot.Query,
 }
 
 func kairosdbExtractPlots(query *plot.Query, kairosdbSeries map[string]map[string]kairosdbSeriesEntry,
-	kairosdbPlots []MetricsQueryResponse) ([]plot.Series, error) {
-	var resultSeries []plot.Series
+	kairosdbPlots []metricQueryResponse) ([]*plot.Series, error) {
+
+	var results []*plot.Series
 
 	for _, kairosdbPlot := range kairosdbPlots {
 		target := ""
@@ -504,83 +445,71 @@ func kairosdbExtractPlots(query *plot.Query, kairosdbSeries map[string]map[strin
 			return nil, fmt.Errorf("no plot target found")
 		}
 
-		series := plot.Series{
-			Name:    target,
-			Summary: make(map[string]plot.Value),
+		series := &plot.Series{
+			Name: target,
 		}
 
 		for _, plotPoint := range kairosdbPlot.Results[0].Values {
-			series.Plots = append(
-				series.Plots,
-				plot.Plot{Value: plot.Value(plotPoint[1]), Time: time.Unix(int64(plotPoint[0]/1000), 0)},
-			)
+			series.Plots = append(series.Plots, plot.Plot{
+				Time:  time.Unix(int64(plotPoint[0]/1000), 0),
+				Value: plot.Value(plotPoint[1]),
+			})
 		}
 
-		resultSeries = append(resultSeries, series)
+		results = append(results, series)
 	}
 
-	return resultSeries, nil
+	return results, nil
 }
 
-func kairosdbCheckBackendResponse(response *http.Response) error {
-	if response.StatusCode != 200 {
-		return fmt.Errorf("got HTTP status code %d, expected 200", response.StatusCode)
+func kairosdbCheckBackendResponse(r *http.Response) error {
+	if r.StatusCode != 200 {
+		return fmt.Errorf("got HTTP status code %d, expected 200", r.StatusCode)
 	}
 
-	if utils.HTTPGetContentType(response) != "application/json" {
-		return fmt.Errorf("got HTTP content type `%s', expected `application/json'", response.Header["Content-Type"])
+	if utils.HTTPGetContentType(r) != "application/json" {
+		return fmt.Errorf("got HTTP content type `%s', expected `application/json'", r.Header["Content-Type"])
 	}
 
 	return nil
 }
 
-func kairosdbGetVersion(connector *KairosdbConnector) (string, [3]int, error) {
+func kairosdbGetVersion(c *KairosdbConnector) (string, [3]int, error) {
 	var (
 		array       [3]int
-		versionJSON map[string]string
+		jsonVersion map[string]string
 	)
 
-	httpTransport := &http.Transport{
-		Dial: (&net.Dialer{
-			DualStack: true,
-			Timeout:   time.Duration(connector.timeout) * time.Second,
-		}).Dial,
-	}
+	client := utils.NewHTTPClient(c.timeout, c.insecureTLS)
 
-	if connector.insecureTLS {
-		httpTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	}
-
-	httpClient := http.Client{Transport: httpTransport}
-
-	request, err := http.NewRequest("GET", strings.TrimSuffix(connector.URL, "/")+kairosdbURLVersion, nil)
+	r, err := http.NewRequest("GET", strings.TrimSuffix(c.url, "/")+kairosdbURLVersion, nil)
 	if err != nil {
 		return "", array, fmt.Errorf("unable to set up HTTP request: %s", err)
 	}
 
-	request.Header.Add("User-Agent", "Facette")
-	request.Header.Add("X-Requested-With", "KairosDBConnector")
+	r.Header.Add("User-Agent", "Facette")
+	r.Header.Add("X-Requested-With", "KairosDBConnector")
 
-	response, err := httpClient.Do(request)
+	rsp, err := client.Do(r)
 	if err != nil {
 		return "", array, fmt.Errorf("unable to perform HTTP request: %s", err)
 	}
-	defer response.Body.Close()
+	defer rsp.Body.Close()
 
-	if err = kairosdbCheckBackendResponse(response); err != nil {
+	if err = kairosdbCheckBackendResponse(rsp); err != nil {
 		return "", array, fmt.Errorf("invalid HTTP backend response: %s", err)
 	}
 
-	data, err := ioutil.ReadAll(response.Body)
+	data, err := ioutil.ReadAll(rsp.Body)
 	if err != nil {
 		return "", array, fmt.Errorf("unable to read HTTP response body: %s", err)
 	}
 
-	if err := json.Unmarshal(data, &versionJSON); err != nil {
+	if err := json.Unmarshal(data, &jsonVersion); err != nil {
 		return "", array, fmt.Errorf("unable to unmarshal JSON data: %s", err)
 	}
 
-	if v, ok := versionJSON["version"]; ok {
+	if v, ok := jsonVersion["version"]; ok {
 		re, _ := regexp.Compile(`^KairosDB (\d+)\.(\d+)\.(\d+)`) // {"version": "KairosDB 0.9.4-6.20140730155353"}
 
 		submatch := re.FindStringSubmatch(v)
@@ -623,22 +552,23 @@ func compileAggregatorPatterns(aggregators interface{}, connector string) []metr
 	}
 
 	list := aggregators.([]interface{})
-	res := make([]metricAggregator, 0)
+	out := make([]metricAggregator, 0)
 
 	for _, a := range list {
 		aggregator := a.(map[string]interface{})
 
 		if re, err = regexp.Compile(aggregator["metric"].(string)); err != nil {
-			logger.Log(logger.LevelWarning, "connector", "kairosdb[%s]: can't compile `%s', skipping",
-				connector, aggregator["metric"].(string))
+			logger.Log(logger.LevelWarning, "connector", "kairosdb[%s]: can't compile `%s', skipping", connector,
+				aggregator["metric"].(string))
 			continue
 		}
 
-		res = append(
-			res,
-			metricAggregator{pattern: aggregator["metric"].(string), re: re, hook: aggregator["aggregator"]},
-		)
+		out = append(out, metricAggregator{
+			pattern: aggregator["metric"].(string),
+			re:      re,
+			hook:    aggregator["aggregator"],
+		})
 	}
 
-	return res
+	return out
 }

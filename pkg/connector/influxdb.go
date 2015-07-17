@@ -95,73 +95,72 @@ func (connector *InfluxDBConnector) GetName() string {
 }
 
 // GetPlots retrieves time series data from provider based on a query and a time interval.
-func (connector *InfluxDBConnector) GetPlots(query *plot.Query) ([]plot.Series, error) {
-	seriesLength := len(query.Series)
-	if seriesLength == 0 {
+func (connector *InfluxDBConnector) GetPlots(query *plot.Query) ([]*plot.Series, error) {
+	l := len(query.Series)
+	if l == 0 {
 		return nil, fmt.Errorf("influxdb[%s]: requested series list is empty", connector.name)
 	}
 
-	metricsNames := make([]string, seriesLength)
-	columnsNames := make([]string, seriesLength)
+	metrics := make([]string, l)
+	columns := make([]string, l)
 	for i, series := range query.Series {
-		metricsNames[i] = strconv.Quote(connector.series[series.Source][series.Metric][0])
-		columnsNames[i] = strconv.Quote(connector.series[series.Source][series.Metric][1])
+		metrics[i] = strconv.Quote(connector.series[series.Source][series.Metric][0])
+		columns[i] = strconv.Quote(connector.series[series.Source][series.Metric][1])
 	}
 
 	influxdbQuery := fmt.Sprintf(
 		"select %s from %s where time > %ds and time < %ds order asc",
-		strings.Join(columnsNames, ","),
-		strings.Join(metricsNames, ","),
+		strings.Join(columns, ","),
+		strings.Join(metrics, ","),
 		query.StartTime.Unix(),
 		query.EndTime.Unix(),
 	)
 
-	queryResult, err := connector.client.Query(influxdbQuery, "s")
+	q, err := connector.client.Query(influxdbQuery, "s")
 	if err != nil {
 		return nil, fmt.Errorf("influxdb[%s]: unable to perform query: %s", connector.name, err)
 	}
 
-	resultSeries := make([]plot.Series, 0)
+	results := make([]*plot.Series, 0)
 
 	seriesMap := make(map[string]*plot.Series)
 
-	for _, influxdbSeries := range queryResult {
-		name := influxdbSeries.GetName()
-		columns := influxdbSeries.GetColumns()[2:]
+	step := int(query.EndTime.Sub(query.StartTime) / time.Duration(query.Sample))
+
+	for _, r := range q {
+		name := r.GetName()
+		columns := r.GetColumns()[2:]
 
 		for i := range columns {
 			seriesMap[name+"\x1e"+columns[i]] = &plot.Series{
-				Summary: make(map[string]plot.Value),
-				Step:    int(query.EndTime.Sub(query.StartTime) / time.Duration(query.Sample)),
+				Step: step,
 			}
 		}
 
-		for _, point := range influxdbSeries.GetPoints() {
+		for _, point := range r.GetPoints() {
 			for i := 0; i < len(columns); i++ {
-				seriesKey := name + "\x1e" + columns[i]
-				seriesMap[seriesKey].Plots = append(seriesMap[seriesKey].Plots, plot.Plot{
-					Value: plot.Value(point[i+2].(float64)),
+				key := name + "\x1e" + columns[i]
+				seriesMap[key].Plots = append(seriesMap[key].Plots, plot.Plot{
 					Time:  time.Unix(int64(point[0].(float64)), 0),
+					Value: plot.Value(point[i+2].(float64)),
 				})
 			}
 		}
 	}
 
-	for _, series := range query.Series {
-		seriesKey := connector.series[series.Source][series.Metric][0] + "\x1e" +
-			connector.series[series.Source][series.Metric][1]
-
-		if _, ok := seriesMap[seriesKey]; !ok {
+	for _, s := range query.Series {
+		key := connector.series[s.Source][s.Metric][0] + "\x1e" + connector.series[s.Source][s.Metric][1]
+		if _, ok := seriesMap[key]; !ok {
 			continue
 		}
 
-		seriesEntry := *seriesMap[seriesKey]
-		seriesEntry.Name = series.Name
+		entry := seriesMap[key]
+		entry.Name = s.Name
 
-		resultSeries = append(resultSeries, seriesEntry)
+		results = append(results, entry)
 	}
 
-	return resultSeries, nil
+	return results, nil
 }
 
 // Refresh triggers a full connector data update.

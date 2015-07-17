@@ -12,7 +12,7 @@ import (
 // Connector represents the main interface of a connector handler.
 type Connector interface {
 	GetName() string
-	GetPlots(query *plot.Query) ([]plot.Series, error)
+	GetPlots(query *plot.Query) ([]*plot.Series, error)
 	Refresh(string, chan<- *catalog.Record) error
 }
 
@@ -55,20 +55,18 @@ func compilePattern(pattern string) (*regexp.Regexp, error) {
 }
 
 func matchSeriesPattern(re *regexp.Regexp, series string) ([2]string, error) {
-	var sourceName, metricName string
+	var source, metric string
 
-	submatch := re.FindStringSubmatch(series)
-	if len(submatch) == 0 {
+	m := re.FindStringSubmatch(series)
+	if len(m) == 0 {
 		return [2]string{}, fmt.Errorf("series `%s' does not match pattern", series)
 	}
 
 	if re.SubexpNames()[1] == "source" {
-		sourceName = submatch[1]
-		metricName = submatch[2]
+		source, metric = m[1], m[2]
 	} else {
-		sourceName = submatch[2]
-		metricName = submatch[1]
+		source, metric = m[2], m[1]
 	}
 
-	return [2]string{sourceName, metricName}, nil
+	return [2]string{source, metric}, nil
 }

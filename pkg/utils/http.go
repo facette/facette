@@ -1,8 +1,11 @@
 package utils
 
 import (
+	"crypto/tls"
+	"net"
 	"net/http"
 	"strings"
+	"time"
 )
 
 // HTTPGetContentType returns the HTTP request `Content-Type' header value.
@@ -43,4 +46,20 @@ func HTTPGetURLBase(request *http.Request) string {
 	base += "://" + request.Host
 
 	return base
+}
+
+// NewHTTPClient returns a new HTTP client instance.
+func NewHTTPClient(timeout int, insecureTLS bool) *http.Client {
+	t := &http.Transport{
+		Dial: (&net.Dialer{
+			DualStack: true,
+			Timeout:   time.Duration(timeout) * time.Second,
+		}).Dial,
+	}
+
+	if insecureTLS {
+		t.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	}
+
+	return &http.Client{Transport: t}
 }

@@ -314,7 +314,7 @@ func executeQueries(queries map[string]*providerQuery) (map[string][]plot.Series
 
 			plotSeries[providerQuery.queryMap[plotsIndex].seriesName] = append(
 				plotSeries[providerQuery.queryMap[plotsIndex].seriesName],
-				plotsItem,
+				*plotsItem,
 			)
 		}
 	}
