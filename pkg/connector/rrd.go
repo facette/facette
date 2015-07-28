@@ -83,12 +83,6 @@ func (c *RRDConnector) GetPlots(query *plot.Query) ([]*plot.Series, error) {
 		return nil, fmt.Errorf("rrd[%s]: requested series list is empty", c.name)
 	}
 
-	graph := rrd.NewGrapher()
-
-	if c.daemon != "" {
-		graph.SetDaemon(c.daemon)
-	}
-
 	xport = rrd.NewExporter()
 
 	if c.daemon != "" {
@@ -99,9 +93,6 @@ func (c *RRDConnector) GetPlots(query *plot.Query) ([]*plot.Series, error) {
 
 	for _, s := range query.Series {
 		filePath := strings.Replace(c.metrics[s.Source][s.Metric].FilePath, ":", "\\:", -1)
-
-		graph.Def(s.Name+"-def0", filePath, c.metrics[s.Source][s.Metric].Dataset, c.metrics[s.Source][s.Metric].Cf)
-		graph.CDef(s.Name, s.Name+"-def0")
 
 		// Set plots request
 		xport.Def(s.Name+"-def0", filePath, c.metrics[s.Source][s.Metric].Dataset, c.metrics[s.Source][s.Metric].Cf)
