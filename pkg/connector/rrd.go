@@ -49,6 +49,10 @@ func init() {
 		if c.path, err = config.GetString(settings, "path", true); err != nil {
 			return nil, err
 		}
+		c.path = strings.TrimRight(c.path, "/")
+		if c.path == "" {
+			c.path = "."
+		}
 
 		if c.daemon, err = config.GetString(settings, "daemon", false); err != nil {
 			return nil, err
@@ -156,7 +160,7 @@ func (c *RRDConnector) Refresh(originName string, outputChan chan<- *catalog.Rec
 		}
 
 		// Get pattern matches
-		m, err := matchSeriesPattern(c.re, filePath[len(c.path)+1:])
+		m, err := matchSeriesPattern(c.re, strings.TrimPrefix(filePath, c.path+"/"))
 		if err != nil {
 			logger.Log(logger.LevelInfo, "connector", "rrd[%s]: file `%s' does not match pattern, ignoring", c.name,
 				filePath)
