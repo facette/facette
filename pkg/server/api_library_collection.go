@@ -143,7 +143,7 @@ func (server *Server) serveCollection(writer http.ResponseWriter, request *http.
 		}
 
 		// Store collection data
-		err := server.Library.StoreItem(collectionTemp.Collection, library.LibraryItemCollection)
+		err := server.Library.StoreItem(collectionTemp.Collection, library.LibraryItemCollection, server.Config.ForeignUUID)
 		if response, status := server.parseError(writer, request, err); status != http.StatusOK {
 			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, response, status)

@@ -101,7 +101,7 @@ func (server *Server) serveUnit(writer http.ResponseWriter, request *http.Reques
 		}
 
 		// Store unit data
-		err := server.Library.StoreItem(unit, library.LibraryItemUnit)
+		err := server.Library.StoreItem(unit, library.LibraryItemUnit, server.Config.ForeignUUID)
 		if response, status := server.parseError(writer, request, err); status != http.StatusOK {
 			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, response, status)

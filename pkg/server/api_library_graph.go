@@ -109,7 +109,7 @@ func (server *Server) serveGraph(writer http.ResponseWriter, request *http.Reque
 		}
 
 		// Store graph item
-		err := server.Library.StoreItem(graph, library.LibraryItemGraph)
+		err := server.Library.StoreItem(graph, library.LibraryItemGraph, server.Config.ForeignUUID)
 		if response, status := server.parseError(writer, request, err); status != http.StatusOK {
 			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, response, status)

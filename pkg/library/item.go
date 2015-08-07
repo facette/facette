@@ -268,7 +268,7 @@ func (library *Library) LoadItem(id string, itemType int) error {
 }
 
 // StoreItem stores an item into the library.
-func (library *Library) StoreItem(item interface{}, itemType int) error {
+func (library *Library) StoreItem(item interface{}, itemType int, foreignIdAllowd bool) error {
 	var itemStruct *Item
 
 	switch itemType {
@@ -299,9 +299,13 @@ func (library *Library) StoreItem(item interface{}, itemType int) error {
 		}
 
 		itemStruct.ID = uuidTemp.String()
-	} else if !library.ItemExists(itemStruct.ID, itemType) {
-		return os.ErrNotExist
 	}
+        if library.ItemExists(itemStruct.ID, itemType) {
+                return os.ErrExist
+        } else if !foreignIdAllowd {
+                return os.ErrNotExist
+        }
+
 
 	// Check for name field presence/duplicates
 	if itemStruct.Name == "" {

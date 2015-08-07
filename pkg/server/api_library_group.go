@@ -113,7 +113,7 @@ func (server *Server) serveGroup(writer http.ResponseWriter, request *http.Reque
 		}
 
 		// Store group data
-		err := server.Library.StoreItem(group, groupType)
+		err := server.Library.StoreItem(group, groupType, server.Config.ForeignUUID)
 		if response, status := server.parseError(writer, request, err); status != http.StatusOK {
 			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, response, status)
