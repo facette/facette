@@ -98,6 +98,10 @@ func (server *Server) serveGraph(writer http.ResponseWriter, request *http.Reque
 			server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 			return
 		}
+		// perhaps unmarshalling overwrites ID provided by URL, IMHO this is an API PUT bug
+		// if request.Method == "PUT" {
+		//	graph.ID = graphID
+		// }
 
 		// Check for graph type consistency (either a graph or an instance but not both)
 		if !graph.Template && (graph.Link != "" || len(graph.Attributes) > 0) &&
@@ -109,7 +113,7 @@ func (server *Server) serveGraph(writer http.ResponseWriter, request *http.Reque
 		}
 
 		// Store graph item
-		err := server.Library.StoreItem(graph, library.LibraryItemGraph, server.Config.ForeignUUID)
+		err := server.Library.StoreItem(graph, library.LibraryItemGraph, request.Method, server.Config.ForeignUUID)
 		if response, status := server.parseError(writer, request, err); status != http.StatusOK {
 			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, response, status)

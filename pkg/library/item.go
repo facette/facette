@@ -268,7 +268,7 @@ func (library *Library) LoadItem(id string, itemType int) error {
 }
 
 // StoreItem stores an item into the library.
-func (library *Library) StoreItem(item interface{}, itemType int, foreignIdAllowd bool) error {
+func (library *Library) StoreItem(item interface{}, itemType int, requestMethod string, foreignIdAllowd bool) error {
 	var itemStruct *Item
 
 	switch itemType {
@@ -300,12 +300,47 @@ func (library *Library) StoreItem(item interface{}, itemType int, foreignIdAllow
 
 		itemStruct.ID = uuidTemp.String()
 	}
-        if library.ItemExists(itemStruct.ID, itemType) {
-                return os.ErrExist
-        } else if !foreignIdAllowd {
-                return os.ErrNotExist
-        }
 
+	switch requestMethod {
+	case "POST":
+		/*
+				POST: /api/v1/library/itemType
+
+			        . is 404 a meaningful return?
+
+			            ID  |        Foreign        |
+			                +-------+---------------+
+			                | false |     true      |
+			                |       +-------+-------+
+			                |       | false |  true | <-- ItemExists
+			          +-----+-------+-------+-------+
+			          | set |  404  |  201  |  409  |
+			          | ""  |  201  |  201  | (409) | <-- AutoGenerate
+
+			          Default --^-- original behavior
+		*/
+
+		if library.ItemExists(itemStruct.ID, itemType) {
+			return os.ErrExist
+		} else if !foreignIdAllowd {
+			return os.ErrNotExist
+		}
+
+	case "PUT":
+		/*
+				PUT: /api/v1/library/itemType/0b89d3ea-72da-5247-9ef2-65ed36182faf
+
+			        . itemStruct.ID always applied
+			        . perhaps unmarshalling overwrotes ID provided by URL, IMHO this is an API bug
+		*/
+
+		if !library.ItemExists(itemStruct.ID, itemType) {
+			return os.ErrNotExist
+		}
+
+		// default:
+		//	return os.ErrInvalid
+	}
 
 	// Check for name field presence/duplicates
 	if itemStruct.Name == "" {

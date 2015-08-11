@@ -99,9 +99,13 @@ func (server *Server) serveScale(writer http.ResponseWriter, request *http.Reque
 			server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 			return
 		}
+		// perhaps unmarshalling overwrites ID provided by URL, IMHO this is an API PUT bug
+		// if request.Method == "PUT" {
+		//	scale.ID = scaleID
+		// }
 
 		// Store scale data
-		err := server.Library.StoreItem(scale, library.LibraryItemScale, server.Config.ForeignUUID)
+		err := server.Library.StoreItem(scale, library.LibraryItemScale, request.Method, server.Config.ForeignUUID)
 		if response, status := server.parseError(writer, request, err); status != http.StatusOK {
 			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, response, status)
