@@ -42,6 +42,7 @@ type Config struct {
 	ProvidersDir     string                     `json:"providers_dir"`
 	PidFile          string                     `json:"pid_file"`
 	URLPrefix        string                     `json:"url_prefix"`
+	ForeignUUID      bool                       `json:"foreign_uuid"`
 	ReadOnly         bool                       `json:"read_only"`
 	HideBuildDetails bool                       `json:"hide_build_details"`
 	Providers        map[string]*ProviderConfig `json:"-"`

@@ -111,9 +111,13 @@ func (server *Server) serveGroup(writer http.ResponseWriter, request *http.Reque
 			server.serveResponse(writer, serverResponse{mesgResourceInvalid}, http.StatusBadRequest)
 			return
 		}
+		// perhaps unmarshalling overwrites ID provided by URL, IMHO this is an API PUT bug
+		// if request.Method == "PUT" {
+		//	group.ID = groupID
+		// }
 
 		// Store group data
-		err := server.Library.StoreItem(group, groupType)
+		err := server.Library.StoreItem(group, groupType, request.Method, server.Config.ForeignUUID)
 		if response, status := server.parseError(writer, request, err); status != http.StatusOK {
 			logger.Log(logger.LevelError, "server", "%s", err)
 			server.serveResponse(writer, response, status)
