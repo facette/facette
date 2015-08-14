@@ -44,8 +44,15 @@ func (library *Library) DeleteItem(id string, itemType int) error {
 		return os.ErrNotExist
 	}
 
-	// Delete sub-collections
 	if itemType == LibraryItemCollection {
+		// Remove reference from parent
+		item, _ := library.GetItem(id, itemType)
+		parent := item.(*Collection).Parent
+
+		i := parent.IndexOfChild(id)
+		parent.Children = append(parent.Children[:i], parent.Children[i+1:]...)
+
+		// Delete sub-collections
 		for _, child := range library.Collections[id].Children {
 			library.DeleteItem(child.ID, LibraryItemCollection)
 		}
