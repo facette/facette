@@ -56,16 +56,16 @@ func newFilterChain(filters []*config.ProviderFilterConfig, output chan *catalog
 
 	go func(chain filterChain) {
 		for record := range chain.Input {
+			// Keep a copy of original names
+			record.OriginalOrigin = record.Origin
+			record.OriginalSource = record.Source
+			record.OriginalMetric = record.Metric
+
 			// Forward record if no rule defined
 			if len(chain.rules) == 0 {
 				chain.output <- record
 				continue
 			}
-
-			// Keep a copy of original names
-			record.OriginalOrigin = record.Origin
-			record.OriginalSource = record.Source
-			record.OriginalMetric = record.Metric
 
 			for _, rule := range chain.rules {
 				if (rule.Target == "origin" || rule.Target == "any") && !rule.PatternRegexp.MatchString(record.Origin) {
