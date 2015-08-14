@@ -96,6 +96,12 @@ func (c *RRDConnector) GetPlots(query *plot.Query) ([]*plot.Series, error) {
 	step := time.Duration(0)
 
 	for _, s := range query.Series {
+		if _, ok := c.metrics[s.Source]; !ok {
+			return nil, fmt.Errorf("rrd[%s]: unknown source `%s'", c.name, s.Source)
+		} else if _, ok := c.metrics[s.Source][s.Metric]; !ok {
+			return nil, fmt.Errorf("rrd[%s]: unknown metric `%s' for source `%s'", c.name, s.Metric, s.Source)
+		}
+
 		filePath := strings.Replace(c.metrics[s.Source][s.Metric].FilePath, ":", "\\:", -1)
 
 		// Set plots request
