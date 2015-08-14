@@ -49,8 +49,10 @@ func (library *Library) DeleteItem(id string, itemType int) error {
 		item, _ := library.GetItem(id, itemType)
 		parent := item.(*Collection).Parent
 
-		i := parent.IndexOfChild(id)
-		parent.Children = append(parent.Children[:i], parent.Children[i+1:]...)
+		if parent != nil {
+			i := parent.IndexOfChild(id)
+			parent.Children = append(parent.Children[:i], parent.Children[i+1:]...)
+		}
 
 		// Delete sub-collections
 		for _, child := range library.Collections[id].Children {
