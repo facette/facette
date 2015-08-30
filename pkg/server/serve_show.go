@@ -40,10 +40,12 @@ func (server *Server) serveShowGraph(writer http.ResponseWriter, request *http.R
 		ReadOnly  bool
 		Graph     *library.Graph
 		Request   *http.Request
+		Time      string
 		Range     string
 	}{
 		URLPrefix: server.Config.URLPrefix,
 		ReadOnly:  server.Config.ReadOnly,
+		Time:      request.FormValue("time"),
 		Range:     request.FormValue("range"),
 		Request:   request,
 	}

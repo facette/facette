@@ -63,7 +63,9 @@ function graphDraw(graph, postpone, delay, preview) {
     return $.Deferred(function ($deferred) {
         setTimeout(function () {
             var graphOpts,
-                query;
+                query,
+                location,
+                args;
 
             graph.find('.placeholder').text($.t('main.mesg_loading'));
 
@@ -109,6 +111,23 @@ function graphDraw(graph, postpone, delay, preview) {
                     graphOpts.constants = parseFloatList(graphOpts.constants);
                     break;
                 }
+            }
+
+            // Update URL on show
+            if (locationPath.startsWith(urlPrefix + '/show/')) {
+                location = String(window.location.pathname);
+
+                args = [];
+                if (graphOpts.time)
+                    args.push('time=' + graphOpts.time.replace('+', '%2B'));
+                if (graphOpts.range)
+                    args.push('range=' + graphOpts.range);
+
+                if (args.length > 0)
+                    location += '?' + args.join('&');
+
+                if (location != (window.location.pathname + window.location.search))
+                    history.replaceState(null, document.title, location);
             }
 
             // Set graph options
@@ -566,6 +585,7 @@ function graphHandleActions(e) {
         graphObj,
         delta,
         location,
+        args = [],
         options,
         range;
 
@@ -610,7 +630,18 @@ function graphHandleActions(e) {
 
         graphDraw($graph);
     } else if (e.target.href.endsWith('#embed')) {
-        window.open(urlPrefix + '/show/graphs/' + $(e.target).closest('[data-graph]').attr('data-graph'));
+        options = $graph.data('options');
+        if (options.time)
+            args.push('time=' + options.time.replace('+', '%2B'));
+        if (options.range)
+            args.push('range=' + options.range);
+
+        // Open embeddable graph
+        location = urlPrefix + '/show/graphs/' + $(e.target).closest('[data-graph]').attr('data-graph');
+        if (args.length > 0)
+            location += '?' + args.join('&');
+
+        window.open(location);
     } else if (e.target.href.endsWith('#export')) {
         graphExport($graph);
     } else if (e.target.href.endsWith('#set-range')) {
