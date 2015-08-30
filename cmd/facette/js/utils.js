@@ -80,7 +80,7 @@ function humanReadable(number, formatter) {
 }
 
 function parseFloatList(string) {
-    return $.map(string.split(','), function (x) { return parseFloat(x.trim()); })
+    return $.map(string.split(','), function (x) { return parseFloat(x.trim()); });
 }
 
 function rgbToHex(value) {
@@ -154,24 +154,24 @@ function timeToRange(duration) {
 }
 
 function getHighchartsSymbol(symbolText) {
-	var symbol;
-	switch (symbolText) {
-	    case 'circle':
-		symbol = '●';
-		break;
-	    case 'diamond':
-		symbol = '♦';
-		break;
-	    case 'square':
-		symbol = '■';
-		break;
-	    case 'triangle':
-		symbol = '▲';
-		break;
-	    case 'triangle-down':
-		symbol = '▼';
-		break;
-	}
-	return symbol
+    var symbol;
 
+    switch (symbolText) {
+    case 'circle':
+        symbol = '●';
+        break;
+    case 'diamond':
+        symbol = '♦';
+        break;
+    case 'square':
+        symbol = '■';
+        break;
+    case 'triangle':
+        symbol = '▲';
+        break;
+    case 'triangle-down':
+        symbol = '▼';
+        break;
+    }
+    return symbol;
 }

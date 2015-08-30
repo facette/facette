@@ -1676,7 +1676,7 @@ function adminGraphSetupTerminate() {
 
                 if ($step.data('attrs-timeout')) {
                     clearTimeout($step.data('attrs-timeout'));
-                    $step.removeData('attrs-timeout')
+                    $step.removeData('attrs-timeout');
                 }
 
                 $step.data('attrs-timeout', setTimeout(adminGraphUpdateAttrsList, 500));
@@ -1828,7 +1828,7 @@ function adminGraphSetupTerminate() {
             if (!graphId)
                 listSay('step-1-attrs', $.t('graph.mesg_no_template_selected'), 'info');
 
-            linkSource = getURLParams()['from'];
+            linkSource = getURLParams().from;
             if (linkSource) {
                 itemLoad(linkSource, 'graphs').pipe(function (data) {
                     inputMatch('graph').find(':input')

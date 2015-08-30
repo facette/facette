@@ -565,10 +565,10 @@ function graphGetSeriesIndexes(series) {
         indexes = [];
 
     ordered.sort(function (a, b) {
-        if (!a.summary || !b.summary || !a.summary['avg'] || !b.summary['avg'])
+        if (!a.summary || !b.summary || !a.summary.avg || !b.summary.avg)
             return 0;
 
-        return b.summary['avg'] - a.summary['avg'];
+        return b.summary.avg - a.summary.avg;
     });
 
     $.each(ordered, function (index, entry) {
