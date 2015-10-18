@@ -105,8 +105,8 @@ func (c *RRDConnector) GetPlots(query *plot.Query) ([]*plot.Series, error) {
 		filePath := strings.Replace(c.metrics[s.Source][s.Metric].FilePath, ":", "\\:", -1)
 
 		// Set plots request
-		xport.Def(s.Name+"-def0", filePath, c.metrics[s.Source][s.Metric].Dataset, c.metrics[s.Source][s.Metric].Cf)
-		xport.CDef(s.Name, s.Name+"-def0")
+		xport.Def(s.Name+"_def0", filePath, c.metrics[s.Source][s.Metric].Dataset, c.metrics[s.Source][s.Metric].Cf)
+		xport.CDef(s.Name, s.Name+"_def0")
 		xport.XportDef(s.Name, s.Name)
 
 		if c.metrics[s.Source][s.Metric].Step > step {
