@@ -433,7 +433,11 @@ function adminGraphAutoNameSeries(force) {
             origin: [],
             source: [],
             metric: {}
-        };
+        },
+        refs = [],
+        prefix,
+        prefixLen,
+        i;
 
     force = typeof force == 'boolean' ? force : false;
 
@@ -456,13 +460,11 @@ function adminGraphAutoNameSeries(force) {
         }
     });
 
-    $items.each(function () {
+    $items.each(function (i) {
         var $item = $(this),
             value,
-            fullName;
-
-        if ($item.data('renamed') && !force)
-            return;
+            fullName,
+            matchLen;
 
         value = adminGraphGetValue($item);
         fullName = value.origin+'/'+value.source+'/'+value.metric;
@@ -476,16 +478,42 @@ function adminGraphAutoNameSeries(force) {
         }
 
         if (refCounts.metric[fullName].count > 1) {
-            value.name = value.name + ' (' + (refCounts.metric[fullName].count -
-                refCounts.metric[fullName].current) + ')';
+            value.name += ' (' + (refCounts.metric[fullName].count - refCounts.metric[fullName].current) + ')';
             refCounts.metric[fullName].current--;
         }
 
-        if (force)
-            $item.data('renamed', false);
+        if (i === 0) {
+            prefix = value.name;
+            prefixLen = prefix.length;
+        } else {
+            matchLen = 0;
 
-        domFillItem($item, value);
+            while (++matchLen < prefixLen && matchLen < value.name.length) {
+                if (value.name.charAt(matchLen) != prefix.charAt(matchLen))
+                    break;
+            }
+
+            prefixLen = matchLen;
+        }
+
+        refs.push([$item, value]);
     });
+
+    // Substract trailing word characters
+    if (prefix && prefixLen)
+        prefixLen -= (prefix.substr(0, prefixLen).match(/\w+$/) || '').length;
+
+    for (i in refs) {
+        if (refs[i][0].data('renamed') && !force)
+            return;
+        else if (force)
+            refs[i][0].data('renamed', false);
+
+        if (prefixLen > 1 && refs.length > 1)
+            refs[i][1].name = refs[i][1].name.substr(prefixLen);
+
+        domFillItem(refs[i][0], refs[i][1]);
+    }
 }
 
 function adminGraphGetConsolidateLabel(type) {
