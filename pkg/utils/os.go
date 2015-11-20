@@ -3,6 +3,8 @@ package utils
 import (
 	"os"
 	"path/filepath"
+
+	"github.com/facette/facette/pkg/logger"
 )
 
 func walkDir(dirPath string, linkPath string, walkFunc filepath.WalkFunc) error {
@@ -17,7 +19,8 @@ func walkDir(dirPath string, linkPath string, walkFunc filepath.WalkFunc) error 
 		if mode == os.ModeSymlink {
 			realPath, err := filepath.EvalSymlinks(filePath)
 			if err != nil {
-				return err
+				logger.Log(logger.LevelWarning, "utils", "failed to resolve symlink %q: %v", filePath, err)
+				return nil
 			}
 
 			return walkDir(realPath, filePath, walkFunc)
