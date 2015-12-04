@@ -1,4 +1,4 @@
-facette (0.3.1-1) unstable; urgency=medium
+facette (0.3.0-2) unstable; urgency=medium
 
   * Fix control file dependencies
 
