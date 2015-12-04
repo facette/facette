@@ -1,3 +1,9 @@
+facette (0.3.1-1) unstable; urgency=medium
+
+  * Fix control file dependencies
+
+ -- Theral Mackey <tmackey@evernote.com>  Thu, 03 Dec 2015 16:50:23 -0800
+
 facette (0.3.0-1) unstable; urgency=medium
 
   * New upstream release

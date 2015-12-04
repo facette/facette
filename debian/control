@@ -3,8 +3,9 @@ Section: utils
 Priority: optional
 Maintainer: Vincent Batoufflet <vincent@batoufflet.info>
 Build-Depends: debhelper (>= 8.0.0), quilt, dh-golang,
- golang-go (>= 1.1),
+ golang-go (>= 1.2),
  librrd-dev (>= 1.4),
+ nodejs-legacy,
  node-less,
  node-uglify,
  pandoc,
