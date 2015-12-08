@@ -16,7 +16,7 @@
 {{ define "content" }}
 		<article class="frame" data-pane="graph-show" data-paneopts="id: {{ .Graph.ID }}">
 			<section class="scrollarea full">{{ template "template_graph" }}
-				<div data-graph="{{ .Graph.ID }}" data-graphopts="{{ if ne .Time "" }}time: {{ .Time }}; {{ end }}{{ if ne .Range "" }}range: {{ .Range }}; {{ end }}{{ if ne .Graph.Link "" }}linked: true; {{ end }}expand: false" id="graph-0"></div>
+				<div data-graph="{{ .Graph.ID }}" data-graphopts="{{ if ne .Time "" }}time: {{ .Time }}; {{ end }}{{ if ne .Range "" }}range: {{ .Range }}; {{ end }}{{ if ne .Refresh "" }}refresh_interval: {{ .Refresh }}; {{ end }}{{ if ne .Graph.Link "" }}linked: true; {{ end }}expand: false" id="graph-0"></div>
 			</section>
 		</article>
 {{ end }}

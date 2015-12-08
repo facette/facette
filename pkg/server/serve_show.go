@@ -42,11 +42,13 @@ func (server *Server) serveShowGraph(writer http.ResponseWriter, request *http.R
 		Request   *http.Request
 		Time      string
 		Range     string
+		Refresh   string
 	}{
 		URLPrefix: server.Config.URLPrefix,
 		ReadOnly:  server.Config.ReadOnly,
 		Time:      request.FormValue("time"),
 		Range:     request.FormValue("range"),
+		Refresh:   request.FormValue("refresh"),
 		Request:   request,
 	}
 

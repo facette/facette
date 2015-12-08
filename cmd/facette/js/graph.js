@@ -122,6 +122,8 @@ function graphDraw(graph, postpone, delay, preview) {
                     args.push('time=' + graphOpts.time.replace('+', '%2B'));
                 if (graphOpts.range)
                     args.push('range=' + graphOpts.range);
+                if (graphOpts.refresh_interval)
+                    args.push('refresh=' + graphOpts.refresh_interval);
 
                 if (args.length > 0)
                     location += '?' + args.join('&');
@@ -635,6 +637,8 @@ function graphHandleActions(e) {
             args.push('time=' + options.time.replace('+', '%2B'));
         if (options.range)
             args.push('range=' + options.range);
+        if (options.refresh_interval)
+            args.push('refresh=' + options.refresh_interval);
 
         // Open embeddable graph
         location = urlPrefix + '/show/graphs/' + $(e.target).closest('[data-graph]').attr('data-graph');
