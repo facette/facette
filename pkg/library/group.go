@@ -1,6 +1,9 @@
 package library
 
 import (
+	"sort"
+	"strings"
+
 	"github.com/facette/facette/pkg/logger"
 	"github.com/facette/facette/pkg/utils"
 )
@@ -45,6 +48,8 @@ func (library *Library) expandGroup(name string, groupType int, sourceName strin
 	result := []string{}
 
 	for _, entry := range group.Entries {
+		subResult := []string{}
+
 		if groupType == LibraryItemSourceGroup {
 			origin, err := library.Catalog.GetOrigin(entry.Origin)
 			if err != nil {
@@ -54,7 +59,7 @@ func (library *Library) expandGroup(name string, groupType int, sourceName strin
 
 			for _, source := range origin.GetSources() {
 				if utils.FilterMatch(entry.Pattern, source.Name) {
-					result = append(result, source.Name)
+					subResult = append(subResult, source.Name)
 				}
 			}
 		} else {
@@ -66,10 +71,18 @@ func (library *Library) expandGroup(name string, groupType int, sourceName strin
 
 			for _, metric := range source.GetMetrics() {
 				if utils.FilterMatch(entry.Pattern, metric.Name) {
-					result = append(result, metric.Name)
+					subResult = append(subResult, metric.Name)
 				}
 			}
 		}
+
+		// Preserve manual ordering if grouped with `Single' matching type
+		if strings.HasPrefix(entry.Pattern, "glob:") || strings.HasPrefix(entry.Pattern, "regexp:") {
+			sort.Strings(subResult)
+		}
+
+		// Merge all group items subresults
+		result = append(result, subResult...)
 	}
 
 	return result

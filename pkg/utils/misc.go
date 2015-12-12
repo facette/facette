@@ -21,6 +21,7 @@ func Clone(src, dst interface{}) {
 
 // FilterMatch checks a glob or a regexp pattern over a given value.
 func FilterMatch(pattern, value string) bool {
+	// TODO: move this function to the `library' package
 	if strings.HasPrefix(pattern, "glob:") {
 		// Remove slashes from pattern and value as `path.Match' does not handle them
 		pattern = strings.ToLower(strings.Replace(pattern, "/", "\x1e", -1))

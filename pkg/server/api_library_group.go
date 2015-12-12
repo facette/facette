@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"sort"
 	"strings"
 	"time"
 
@@ -250,7 +249,6 @@ func (server *Server) serveGroupExpand(writer http.ResponseWriter, request *http
 			item = append(item, entry)
 		}
 
-		sort.Sort(item)
 		response = append(response, item)
 	}
 
