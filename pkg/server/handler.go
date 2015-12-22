@@ -43,3 +43,8 @@ func (server *Server) serveStatic(writer http.ResponseWriter, request *http.Requ
 	// Handle static files
 	http.ServeFile(writer, request, path.Join(server.Config.BaseDir, request.URL.Path))
 }
+
+func init() {
+	// Register default MIME types
+	mime.AddExtensionType(".json", "application/json")
+}
