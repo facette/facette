@@ -16,6 +16,13 @@ UNAME := $(shell uname -s)
 
 GO ?= go
 
+# might apply to other BSDs
+ifeq ($(UNAME), NetBSD)
+SED = gsed
+else
+SED = sed
+endif
+
 GOOS ?= $(shell $(GO) env GOOS)
 GOARCH ?= $(shell $(GO) env GOARCH)
 
@@ -88,7 +95,12 @@ clean: clean-bin clean-doc clean-static clean-test clean-dist
 	@(test ! -d $(BUILD_DIR) || rmdir $(BUILD_DIR)) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
-build: build-bin build-doc build-static
+# NetBSD doesn't have pandoc packaged yet
+ifneq ($(UNAME), NetBSD)
+do_buid_docs = build-doc
+endif
+
+build: build-bin $(do_buid_docs) build-static
 
 .PHONY: install
 install: install-bin install-doc install-static
@@ -277,7 +289,7 @@ $(SCRIPT_EXTRA_OUTPUT): $(SCRIPT_EXTRA)
 $(MESG_OUTPUT): $(MESG_SRC)
 	@$(call mesg_start,static,Packing $(MESG_SRC) file...)
 	@install -d -m 0755 $(BUILD_DIR)/static && \
-		sed -e 's/^\s\+//g;s/\s\+$$//g' $(MESG_SRC) | sed -e ':a;N;s/\n//;ta' >$(MESG_OUTPUT) && \
+		$(SED) -e 's/^\s\+//g;s/\s\+$$//g' $(MESG_SRC) | $(SED) -e ':a;N;s/\n//;ta' >$(MESG_OUTPUT) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 $(STYLE_OUTPUT): lessc $(STYLE_SRC)
@@ -302,8 +314,8 @@ $(STYLE_EXTRA_OUTPUT): $(STYLE_EXTRA)
 		$(call mesg_ok) || $(call mesg_fail)
 
 $(TMPL_OUTPUT): $(TMPL_SRC)
-ifeq ($(UNAME), Darwin)
-	$(eval COPY_CMD=rsync -rR)
+ifneq ($(UNAME), Linux)
+	$(eval COPY_CMD=pax -rwpe)
 else
 	$(eval COPY_CMD=cp -r --parents)
 endif
@@ -337,7 +349,7 @@ devel-static: build-static
 		$(call mesg_ok) || $(call mesg_fail)
 	@$(call mesg_start,install,Copying static third-party development files...)
 	@(for ENTRY in $(SCRIPT_EXTRA:.js=.src.js); do \
-		cp $$ENTRY $(BUILD_DIR)/static/`basename $$ENTRY | sed -e 's@\.src\.js$$@.js@'`; \
+		cp $$ENTRY $(BUILD_DIR)/static/`basename $$ENTRY | $(SED) -e 's@\.src\.js$$@.js@'`; \
 	done) && $(call mesg_ok) || $(call mesg_fail)
 
 lint-static: jshint $(SCRIPT_OUTPUT)
