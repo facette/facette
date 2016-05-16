@@ -95,8 +95,8 @@ clean: clean-bin clean-doc clean-static clean-test clean-dist
 	@(test ! -d $(BUILD_DIR) || rmdir $(BUILD_DIR)) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
-# NetBSD doesn't have pandoc packaged yet
-ifneq ($(UNAME), NetBSD)
+# OpenBSD/NetBSD doesn't have pandoc packaged yet
+ifneq ($(filter (OpenBSD NetBSD), $(UNAME)),)
 do_buid_docs = build-doc
 endif
 
