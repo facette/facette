@@ -540,7 +540,7 @@ function adminGraphGetTemplatable(groups) {
         series,
         i, j;
 
-    regexp = /\{\{\s*\.([a-z0-9]+)\s*\}\}/i;
+    regexp = /\{\{\s*\.([a-z0-9_]+)\s*\}\}/i;
 
     for (i in groups) {
         for (j in groups[i].series) {
