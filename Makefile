@@ -130,10 +130,10 @@ $(BIN_OUTPUT): $(PKG_SRC) $(BIN_SRC) $(BUILD_DIR)/src/github.com/facette/facette
 	@$(call mesg_start,$(notdir $@),Building $(notdir $@)...)
 	@install -d -m 0755 $(dir $@) && $(GO) build \
 			-ldflags " \
-				-X main.version $(VERSION) \
-				-X main.buildDate '$(BUILD_DATE)' \
-				$(PKG_LIST:%=-X github.com/facette/facette/%.version $(VERSION)) \
-				$(PKG_LIST:%=-X github.com/facette/facette/%.buildDate '$(BUILD_DATE)') \
+				-X main.version=$(VERSION) \
+				-X main.buildDate='$(BUILD_DATE)' \
+				$(PKG_LIST:%=-X github.com/facette/facette/%.version=$(VERSION)) \
+				$(PKG_LIST:%=-X github.com/facette/facette/%.buildDate='$(BUILD_DATE)') \
 			" \
 			-tags "$(TAGS)" \
 			-o $@ cmd/$(notdir $@)/*.go && \

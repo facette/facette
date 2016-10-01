@@ -4,7 +4,7 @@ Installation
 Requirements
 ------------
 
- * Go language environment (>= 1.2)
+ * Go language environment (>= 1.5)
  * RRDtool library and development files (>= 1.4.0)
  * pkg-config helper tool
  * Node.js "npm" package manager
