@@ -441,8 +441,9 @@ func kairosdbExtractPlots(query *plot.Query, kairosdbSeries map[string]map[strin
 			}
 		}
 
+		// Skip series if target not found
 		if target == "" {
-			return nil, fmt.Errorf("no plot target found")
+			continue
 		}
 
 		series := &plot.Series{
