@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>
+<html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>
+<html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>
+<html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Angular Bootstrap - Date Time Picker Demo</title>
+    <base href="..">
+    <link type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+    <link type="text/css" href="https://cdn.rawgit.com/dalelotts/angular-bootstrap-datetimepicker/0.4.0/src/css/datetimepicker.css" rel="stylesheet">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="node_modules/moment/moment.js"></script>
+    <script type="text/javascript" src="node_modules/angular/angular.js"></script>
+    <script type="text/javascript" src="demo/demo-app.js"></script>
+    <script type="text/javascript" src="demo/demo-controller.js"></script>
+    <script type="text/javascript" src="src/dateTimeInput.js"></script>
+    <script type="text/javascript" src="https://cdn.rawgit.com/dalelotts/angular-bootstrap-datetimepicker/0.4.0/src/js/datetimepicker.js"></script>
+    <style>
+        .ng-dirty.ng-invalid {
+            background-color: red;
+        }
+    </style>
+</head>
+<body data-ng-app="demo">
+<div data-ng-controller="DemoController" class="container">
+    <p>You can configure this directive to accept input in any format understood by moment.js, however, when you leave
+        the field it will be displayed in
+        the specified format.</p>
+
+    <p>The background of the input box will be red whenever the input is an invalid date.</p>
+
+    <div class="form-group well">
+        <label>Please enter a date:
+            <input class="form-control"
+                   data-date-time-input="YYYY/MM/DD"
+                   data-ng-model="data.date1"
+                   data-model-type="milliseconds"/>
+        </label>
+        <p class="help-block">
+            Input format is 'YYYY/MM/DD' (and ISO 8601, which is always supported).
+            <br> Input parsing is strict (meaning input must match format exactly).
+            <br> Display format is YYYY/MM/DD.
+            <br> Stored as milliseconds: {{ data.date1 }}
+        </p>
+        <div class="alert alert-info" role="alert">
+            <strong>ISO 8601</strong> format is always supported. Try pasting "2016-01-02T17:29:19-06:00" into any
+            of the input boxes on this page.
+        </div>
+    </div>
+
+    <div class="form-group well">
+        <label>Please enter a date:
+            <input class="form-control"
+                   data-date-time-input="YYYY/MM/DD hh:mm A"
+                   data-ng-model="data.date2"
+                   data-date-formats="['YYYY/MM/DD', 'MMM DD YYYY']"
+            />
+        </label>
+        <p class="help-block">
+            Input format is 'YYYY/MM/DD hh:mm A', 'YYYY/MM/DD', or 'MMM DD YYYY' (and ISO 8601, which is always supported).
+            <br> Input parsing is strict (meaning input must exactly match one of input formats).
+            <br> Display format is 'YYYY/MM/DD hh:mm A'.
+            <br>Stored as a date: {{ data.date2 }}
+        </p>
+        <div class="alert alert-info" role="alert">
+            <strong>Try these</strong>
+
+            <ul>
+                <li>1970/10/10 01:00 pm</li>
+                <li>1970/10/10</li>
+                <li>Oct 18 1970</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Please enter a date:
+            <input class="form-control"
+                   data-date-time-input="YYYY/MMM/DD hh:mm A"
+                   data-ng-model="data.date3"
+                   data-date-parse-strict="false"
+            />
+        </label>
+        <p class="help-block">
+            Input format is 'YYYY/MMM/DD hh:mm A' ( note the MMM for month ).
+            <br> <strong>Input parsing is NOT strict</strong> (in this case, the moment parser is very, very forgiving - entering only
+            '1' will likely result in a valid date).
+            <br> Display format is 'YYYY/MMM/DD hh:mm A'.
+            <br>Stored as: {{ data.date3 }}
+        </p>
+        <div class="alert alert-info" role="alert">
+            <strong>Non-strict parsing</strong> is very forgiving and can result in some unexpected behavior.
+            <br> Try these values
+            <ul>
+                <li>1</li>
+                <li>oct</li>
+                <li>10/oct</li>
+                <li>oct 1970</li>
+                <li>1970/10/10 01:00 pm</li>
+            </ul>
+            <strong>We do not recommend using non-strict parsing</strong>
+        </div>
+    </div>
+
+    <div class="form-group well">
+            <div class="dropdown">
+                <a class="dropdown-toggle" id="dropdown1" role="button" data-toggle="dropdown" data-target="#"
+                   href="#">
+                    <div class="input-group">
+                        <input type="text" class="form-control"
+                               data-date-time-input="M/D/YYYY h:mm A"
+                               data-ng-model="data.dateDropDown">
+                        <span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+                    </div>
+                </a>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                    <datetimepicker data-ng-model="data.dateDropDown"
+                                    data-datetimepicker-config="{ dropdownSelector: '#dropdown1' }"></datetimepicker>
+                </ul>
+            </div>
+
+        <p class="help-block">
+            Input format is 'M/D/YYYY h:mm A'.
+            <br> Display format is 'M/D/YYYY h:mm A'.
+            <br>Stored as: {{ data.dateDropDown }}
+        </p>
+        <div class="alert alert-info" role="alert">
+            Works with the <strong><a href="https://github.com/dalelotts/angular-bootstrap-datetimepicker">angular-bootstrap-datetimepicker</a></strong>
+        </div>
+    </div>
+    <p>Any invalid dates will have a ng-invalid class assigned by Angular</p>
+</div>
+</body>
+</html>

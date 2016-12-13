@@ -1,0 +1,36 @@
+<form class="ngdialog-event" ng-click="hideDatetime($event)">
+	<tabset>
+		<tab active="!data.absolute" label="{{ 'label.graphs_time_relative' | translate }}" ng-click="switchAbsolute(data, false)"></tab>
+		<tab active="data.absolute" label="{{ 'label.graphs_time_absolute' | translate }}" ng-click="switchAbsolute(data, true)"></tab>
+	</tabset>
+
+	<div class="formblock" ng-show="!data.absolute">
+		<label>{{ 'label.graphs_time_reference' | translate }}</label>
+		<div class="datetimepicker-holder">
+			<input type="text" placeholder="default: now" date-time-input="YYYY-MM-DD HH:mm:ss" ng-click="toggleDatetime('time', true)" ng-model="data.time">
+			<datetimepicker on-set-time="toggleDatetime('time', false)" ng-model="data.time" ng-show="datetime.time"></datetimepicker>
+		</div>
+
+		<label>{{ 'label.range' | translate }}</label>
+		<input type="text" ng-model="data.range">
+	</div>
+
+	<div class="formblock" ng-show="data.absolute">
+		<label>{{ 'label.graphs_time_start' | translate }}</label>
+		<div class="datetimepicker-holder">
+			<input type="text" date-time-input="YYYY-MM-DD HH:mm:ss" ng-click="toggleDatetime('start', true)" ng-model="data.start">
+			<datetimepicker on-set-time="toggleDatetime('start', false)" ng-model="data.start" ng-show="datetime.start"></datetimepicker>
+		</div>
+
+		<label>{{ 'label.graphs_time_end' | translate }}</label>
+		<div class="datetimepicker-holder">
+			<input type="text" date-time-input="YYYY-MM-DD HH:mm:ss" ng-click="toggleDatetime('end', true)" ng-model="data.end">
+			<datetimepicker on-set-time="toggleDatetime('end', false)" ng-model="data.end" ng-show="datetime.end"></datetimepicker>
+		</div>
+	</div>
+
+	<div class="formblock actions">
+		<button class="cancel danger" type="button" ng-click="closeThisDialog()">{{ 'label.cancel' | translate }}</button>
+		<button class="validate" type="submit" ng-click="closeThisDialog(data)">{{ 'label.range_set' | translate }}</button>
+	</div>
+</form>

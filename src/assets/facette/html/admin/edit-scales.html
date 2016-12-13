@@ -1,0 +1,57 @@
+<ng-include src="'templates/admin/layout.html'" ng-include-replace="true"></ng-include>
+
+<article class="pane" ng-show="state == stateOK">
+	<header>
+		<h1>{{ 'label.admin_panel' | translate }} – {{ (id == 'add' ? 'label.scales_new' : 'label.scales_edit') | translate }}</h1>
+
+		<ng-include src="'templates/common/user-menu.html'" ng-include-replace="true"></ng-include>
+	</header>
+
+	<section>
+		<h1>{{ 'label.scales_definition' | translate }}</h1>
+
+		<columns>
+			<column class="half">
+				<form ng-entersubmit="save()">
+					<h2>{{ 'label.general_info' | translate }}</h2>
+
+					<label>{{ 'label.name' | translate }}
+						<span class="warn" ng-show="conflict"><span class="fa fa-warning"></span> {{ 'mesg.name_unique' | translate }}</span>
+						<span class="warn" ng-show="validated && !item.name"><span class="fa fa-warning"></span> {{ 'mesg.name_mandatory' | translate }}</span>
+					</label>
+					<input type="text" ng-class="{danger: conflict || validated && !item.name}" ng-model="item.name">
+
+					<label>{{ 'label.desc' | translate }}</label>
+					<textarea type="text" ng-model="item.description"></textarea>
+
+					<h2>{{ 'label.scales_params' | translate }}</h2>
+
+					<label>{{ 'label.value' | translate }}
+						<span class="warn" ng-show="validated && !item.value"><span class="fa fa-warning"></span> {{ 'mesg.value_mandatory' | translate }}</span>
+					</label>
+					<input type="number" step="any" ng-class="{danger: validated && !item.value}" ng-model="item.value">
+				</form>
+			</column>
+		</columns>
+	</section>
+
+	<footer>
+		<button class="extra" ng-click="reset()" ng-disabled="!modified"><span class="fa fa-undo"></span> {{ 'label.scales_reset' | translate }}</button>
+		<button class="danger" ng-click="cancel()">{{ 'label.cancel' | translate }}</button>
+		<button ng-click="save()">{{ 'label.scales_save' | translate }}</button>
+	</footer>
+</article>
+
+<article ng-show="state == stateError">
+	<header>
+		<h1>{{ 'label.admin_panel' | translate }} – {{ 'label.scales_edit' | translate }}</h1>
+	</header>
+
+	<section>
+		<message icon="times-circle" type="error">{{ 'mesg.items_not_found' | translate }}</message>
+	</section>
+
+	<footer>
+		<button ng-click="cancel(true)"><span class="fa fa-arrow-left"></span> {{ 'label.scales_back' | translate }}</button>
+	</footer>
+</article>

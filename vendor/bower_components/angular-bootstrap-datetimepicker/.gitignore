@@ -1,0 +1,16 @@
+*.csv
+*.dat
+*.gz
+*.iml
+*.log
+*.out
+*.pid
+*.seed
+.idea
+build
+lib-cov
+logs
+node_modules/*
+npm-debug.log
+pids
+results

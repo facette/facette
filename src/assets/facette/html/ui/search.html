@@ -1,0 +1,4 @@
+<div class="search" ng-class="{focus: hasFocus}">
+	<label class="fa fa-{{ icon || 'search' }}"></label>
+	<input placeholder="{{ placeholder }}" type="text" ng-blur="handleFocus($event)" ng-focus="handleFocus($event)" ng-keydown="handleKey($event)" ng-model="ngModel">
+</div>

@@ -1,0 +1,49 @@
+<ng-include src="'templates/browse/layout.html'" ng-include-replace="true"></ng-include>
+
+<article>
+	<header>
+		<h1>{{ title }}</h1>
+
+		<menu>
+			<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ id }}" icon="pencil" title="{{ 'label.' + section + '_edit' | translate }}" type="button"></menuitem>
+			<menuitem href="" icon="clock-o" title="{{ 'label.range_set' | translate }}" type="button" drop="true">
+				<menu>
+					<menuitem label="{{ range }}" type="button" ng-click="setRange(range)" ng-repeat="range in rangeValues"></menuitem>
+					<menuitem type="separator"></menuitem>
+					<menuitem label="{{ 'label.range_custom' | translate }}" type="button" ng-click="setRange('custom')"></menuitem>
+				</menu>
+			</menuitem>
+			<menuitem href="" icon="refresh" badge="{{ refreshInterval || '' }}" title="{{ 'label.graphs_refresh_set' | translate }}" type="button" ng-click="setRefresh()"></menuitem>
+			<menuitem href="" icon="columns" title="{{ 'label.page_grid_set' | translate }}" type="button" drop="true">
+				<menu>
+					<menuitem label="{{ 'label.page_grid_1' | translate }}" ng-click="setGrid(1)" type="button"></menuitem>
+					<menuitem label="{{ 'label.page_grid_2' | translate }}" ng-click="setGrid(2)" type="button"></menuitem>
+					<menuitem label="{{ 'label.page_grid_3' | translate }}" ng-click="setGrid(3)" type="button"></menuitem>
+				</menu>
+			</menuitem>
+			<menuitem href="" icon="print" title="{{ 'label.print_page' | translate }}" type="button" ng-click="print()"></menuitem>
+		</menu>
+
+		<ng-include src="'templates/common/user-menu.html'" ng-include-replace="true"></ng-include>
+
+		<search name="filter" icon="filter" placeholder="{{ 'label.items_filter' | translate }}" ng-model="form.filter" ng-if="section == 'collections'"></search>
+
+		<menu class="extra">
+			<menuitem href="" icon="toggle-off" label="{{ 'label.graphs_legends_show' | translate }}" type="button" ng-click="toggleLegends(true)" ng-show="!showLegends"></menuitem>
+			<menuitem href="" icon="toggle-on" label="{{ 'label.graphs_legends_show' | translate }}" type="button" ng-click="toggleLegends(false)" ng-show="showLegends"></menuitem>
+		</menu>
+	</header>
+
+	<section>
+		<message icon="info-circle" type="info" ng-if="state == stateOK && graphs.length === 0">{{ 'mesg.graphs_empty' | translate }}</message>
+		<message icon="info-circle" type="warning" ng-show="state == stateOK && graphs.length > 0 && noMatch">{{ 'mesg.no_search_match' | translate }} <a href="" ng-click="resetFilter()">{{ 'label.reset' | translate }}</a></message>
+		<message icon="times-circle" type="error" ng-show="state == stateError">{{ 'mesg.fetch_error' | translate }}</message>
+
+		<div class="grid grid{{ gridSize }}">
+			<div class="grid-item" ng-repeat="g in graphs" ng-if="graphs.length > 0">
+				<a id="graph{{ g.index }}"></a>
+				<graph graph-index="{{ g.index }}" graph-id="{{ g.id }}" graph-options="g.options" graph-attrs="g.attributes" ng-show="!g.hidden"></graph>
+			</div>
+		</div>
+	</section>
+</article>

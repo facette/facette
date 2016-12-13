@@ -1,0 +1,13 @@
+{
+  "name": "roboto-googlefont",
+  "homepage": "https://github.com/google-fonts-bower/roboto-bower",
+  "_release": "2bb62fd690",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "2bb62fd690f9e961b935845f627a3c22850a881b"
+  },
+  "_source": "git://github.com/google-fonts-bower/roboto-bower.git",
+  "_target": "*",
+  "_originalSource": "roboto-googlefont"
+}

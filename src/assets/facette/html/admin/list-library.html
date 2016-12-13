@@ -1,0 +1,61 @@
+<ng-include src="'templates/admin/layout.html'" ng-include-replace="true"></ng-include>
+
+<article>
+	<header>
+		<h1>{{ 'label.admin_panel' | translate }} – {{ 'label.' + section | translate }}</h1>
+
+		<menu>
+			<menuitem href="" icon="refresh" title="{{ 'label.list_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
+			<menuitem href="{{ ::baseURL }}admin/{{ section }}/add" icon="plus" title="{{ 'label.' + section + '_create' | translate }}" type="button" ng-if="section != 'collections' && section != 'graphs'"></menuitem>
+			<menuitem icon="plus" title="{{ 'label.' + section + '_create' | translate }}" type="button" drop="true" ng-if="section == 'collections' || section == 'graphs'">
+				<menu>
+					<menuitem href="{{ ::baseURL }}admin/{{ section }}/add" label="{{ 'label.' + section + '_create' | translate }}" type="button"></menuitem>
+					<menuitem href="{{ ::baseURL }}admin/{{ section }}/link" label="{{ 'label.items_create_linked' | translate }}" type="button"></menuitem>
+				</menu>
+			</menuitem>
+		</menu>
+
+		<ng-include src="'templates/common/user-menu.html'" ng-include-replace="true"></ng-include>
+
+		<search name="search" placeholder="{{ 'label.items_search' | translate }}" ng-model="form.search"></search>
+	</header>
+
+	<section ng-class="{hastab: section == 'collections' || section == 'graphs'}">
+		<div class="tabset" ng-if="section == 'collections' || section == 'graphs'">
+			<div class="tab" ng-class="{active: !templates}"><a href="{{ ::baseURL }}admin/{{ section }}/">{{ 'label.' + section | translate }}</a></div>
+			<div class="tab" ng-class="{active: templates}"><a href="{{ ::baseURL }}admin/{{ section }}/?templates=1">{{ 'label.templates' | translate }}</a></div>
+		</div>
+
+		<h1>{{ 'label.' + section + '_list' | translate }} <span class="count" ng-if="total">{{ total }}</span></h1>
+
+		<message icon="clock-o" type="placeholder" ng-show="state == stateLoading">{{ 'mesg.wait' | translate }}</message>
+		<message icon="info-circle" type="info" ng-show="state == stateOK && !form.search && items.length === 0">{{ 'mesg.' + section + '_empty' | translate }}</message>
+		<message icon="info-circle" type="warning" ng-show="state == stateOK && form.search && items.length === 0">{{ 'mesg.no_search_match' | translate }} <a href="" ng-click="reset()">{{ 'label.reset' | translate }}</a></message>
+		<message icon="times-circle" type="error" ng-show="state == stateError">{{ 'mesg.fetch_error' | translate }} <a href="" ng-click="refresh()">{{ 'label.retry' | translate }}</a></message>
+
+		<table class="list" ng-show="state == stateOK && items.length > 0">
+			<tbody>
+				<tr class="listitem" ng-repeat="entry in items">
+					<td class="listfield main">
+						<span class="name">{{ entry.name }} <span class="fa fa-link" ng-if="entry.link"></span></span>
+						<menu class="actions">
+							<menuitem href="" icon="info-circle" type="button" tooltip-data="entry" tooltip-formatter="formatBasicTooltip" tooltip-position="bottom"></menuitem>
+							<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ entry.id }}" icon="pencil" title="{{ 'label.' + section + '_edit' | translate }}" type="button"></menuitem>
+							<menuitem href="" icon="clone" title="{{ 'label.' + section + '_clone' | translate }}" type="button" ng-click="clone(entry)"></menuitem>
+							<menuitem href="{{ ::baseURL }}browse/{{ section }}/{{ entry.id }}" icon="arrow-circle-right" title="{{ 'label.' + section + '_goto' | translate }}" type="button" ng-if="!templates && (section == 'collections' || section == 'graphs')"></menuitem>
+						</menu>
+						<span class="description" ng-class="{placeholder: !entry.description}">{{ entry.description || ('mesg.no_desc' | translate) }}</span>
+					</td>
+					<td class="listfield date"><span>{{ 'mesg.last_update' | translate:{date: ((entry.modified || entry.created) | date:'medium')} }}</span></td>
+					<td class="listfield actions">
+						<menu>
+							<menuitem href="" icon="times-circle" title="{{ 'label.' + section + '_remove' | translate }}" type="button" ng-click="remove(entry)"></menuitem>
+						</menu>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<paging page="page" page-size="limit" total="total" paging-action="refresh(page)" hide-if-empty="true" show-prev-next="true"></paging>
+	</section>
+</article>

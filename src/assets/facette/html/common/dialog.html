@@ -1,0 +1,13 @@
+<form>
+	<div class="formblock" ng-if="data.type == 'confirm'">{{ data.message | translate:data.args }}</div>
+
+	<div class="formblock" ng-if="data.type == 'prompt'">
+		<label>{{ data.message | translate:data.args }} <span class="note" ng-if="data.note">{{ data.note | translate }}</span></label>
+		<input type="{{ data.inputType || 'text' }}" ng-model="data.value">
+	</div>
+
+	<div class="formblock actions">
+		<button class="cancel" type="button" ng-class="{danger: !data.danger}" ng-click="closeThisDialog()">{{ (data.labels.cancel || 'label.cancel') | translate }}</button>
+		<button class="validate" type="submit" ng-class="{danger: data.danger}" ng-click="closeThisDialog(data)">{{ (data.labels.validate || 'label.validate') | translate }}</button>
+	</div>
+</form>

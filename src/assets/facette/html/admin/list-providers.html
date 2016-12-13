@@ -1,0 +1,49 @@
+<ng-include src="'templates/admin/layout.html'" ng-include-replace="true"></ng-include>
+
+<article>
+	<header>
+		<h1>{{ 'label.admin_panel' | translate }} – {{ 'label.providers' | translate }}</h1>
+
+		<menu>
+			<menuitem href="" icon="refresh" title="{{ 'label.list_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
+			<menuitem href="{{ ::baseURL }}admin/{{ section }}/add" icon="plus" title="{{ 'label.providers_add' | translate }}" type="button"></menuitem>
+		</menu>
+
+		<ng-include src="'templates/common/user-menu.html'" ng-include-replace="true"></ng-include>
+
+		<search name="search" placeholder="{{ 'label.items_search' | translate }}" ng-model="search"></search>
+	</header>
+
+	<section>
+		<h1>{{ 'label.providers_list' | translate }} <span class="count" ng-if="total">{{ total }}</span></h1>
+
+		<message icon="clock-o" type="placeholder" ng-show="state == stateLoading">{{ 'mesg.wait' | translate }}</message>
+		<message icon="info-circle" type="info" ng-show="state == stateOK && !search && items.length === 0">{{ 'mesg.items_empty' | translate }}</message>
+		<message icon="info-circle" type="warning" ng-show="state == stateOK && search && items.length === 0">{{ 'mesg.no_search_match' | translate }} <a href="" ng-click="reset()">{{ 'label.reset' | translate }}</a></message>
+		<message icon="times-circle" type="error" ng-show="state == stateError">{{ 'mesg.fetch_error' | translate }} <a href="" ng-click="refresh()">{{ 'label.retry' | translate }}</a></message>
+
+		<table class="list" ng-show="state == stateOK && items.length > 0">
+			<tbody>
+				<tr class="listitem" ng-class="{disabled: !entry.enabled}" ng-repeat="entry in items">
+					<td class="listfield main togglable">
+						<span class="toggle fa" ng-class="{'fa-toggle-on': entry.enabled, 'fa-toggle-off': !entry.enabled}" ng-click="toggle(entry)"></span>
+						<span class="name">{{ entry.name }}</span>
+						<menu class="actions">
+							<menuitem href="" icon="info-circle" type="button" tooltip-data="entry" tooltip-formatter="formatBasicTooltip" tooltip-position="bottom"></menuitem>
+							<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ entry.id }}" icon="pencil" title="{{ 'label.items_edit' | translate }}" type="button"></menuitem>
+							<menuitem href="" icon="clone" title="{{ 'label.items_clone' | translate }}" type="button" ng-click="clone(entry)"></menuitem>
+							<menuitem href="{{ ::baseURL }}browse/{{ section }}/{{ entry.id }}" icon="arrow-circle-right" title="{{ 'label.items_goto' | translate }}" type="button" ng-if="section == 'collections' || section == 'graphs'"></menuitem>
+						</menu>
+						<span class="description" ng-class="{placeholder: !entry.description}">{{ entry.description || ('mesg.no_desc' | translate) }}</span>
+					</td>
+					<td class="listfield date"><span>{{ 'mesg.last_update' | translate:{date: ((entry.modified || entry.created) | date:'medium')} }}</span></td>
+					<td class="listfield actions">
+						<menu>
+							<menuitem href="" icon="times-circle" title="{{ 'label.items_remove' | translate }}" type="button" ng-click="remove(entry)"></menuitem>
+						</menu>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</section>
+</article>

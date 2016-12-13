@@ -1,0 +1,36 @@
+{
+  "name": "angular-paging",
+  "version": "2.2.2",
+  "homepage": "https://github.com/brantwills/Angular-Paging",
+  "description": "A directive to aid in paging large datasets while requiring the bare minimum of actual paging information",
+  "main": "dist/paging.js",
+  "keywords": [
+    "angular",
+    "paginate",
+    "pagination",
+    "paging",
+    "directive"
+  ],
+  "authors": [
+    "Brant Wills"
+  ],
+  "dependencies": {
+    "angular": ">=1.3.1 <1.6"
+  },
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test"
+  ],
+  "_release": "2.2.2",
+  "_resolution": {
+    "type": "version",
+    "tag": "v2.2.2",
+    "commit": "51bae38eea7638e0846547a7f31c8e6c200e5ca5"
+  },
+  "_source": "https://github.com/brantwills/Angular-Paging.git",
+  "_target": "^2.2.2",
+  "_originalSource": "angular-paging"
+}

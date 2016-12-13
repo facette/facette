@@ -1,0 +1,48 @@
+<h1>{{ 'label.providers_definition' | translate }}</h1>
+
+<columns>
+	<column class="half">
+		<h2>{{ 'label.connectors_settings' | translate }}</h2>
+
+		<label>{{ 'label.connectors_instance_url' | translate }}</label>
+		<input type="text" ng-model="item.settings.url">
+
+		<label>{{ 'label.connectors_timeout' | translate }}</label>
+		<input class="small" id="timeout" type="number" placeholder="10" ng-model="item.settings.timeout">
+
+		<label>{{ 'label.connectors_tls' | translate }}</label>
+		<input id="allow-insecure" type="checkbox" tabindex="0" ng-model="item.settings.allow_insecure_tls">
+		<label for="allow-insecure" tabindex="0">{{ 'label.connectors_allow_insecure' | translate }}</label>
+
+		<label>{{ 'label.connectors_influxdb_username' | translate }}</label>
+		<input type="text" ng-model="item.settings.username">
+
+		<label>{{ 'label.connectors_influxdb_password' | translate }}</label>
+		<input type="password" ng-model="item.settings.password">
+
+		<label>{{ 'label.connectors_influxdb_database' | translate }}</label>
+		<input type="text" ng-model="item.settings.database">
+
+		<label>{{ 'label.connectors_influxdb_match_type' | translate }}</label>
+		<input id="match-pattern" name="match" type="radio" value="pattern" ng-init="matchType = matchType || 'pattern'" ng-model="matchType">
+		<label for="match-pattern" tabindex="0">{{ 'label.connectors_influxdb_match_pattern' | translate }}</label>
+		<input id="match-mapping" name="match" type="radio" value="mapping" ng-model="matchType">
+		<label for="match-mapping" tabindex="0">{{ 'label.connectors_influxdb_match_mapping' | translate }}</label>
+
+		<div ng-if="matchType == 'pattern'">
+			<label>{{ 'label.connectors_match_pattern' | translate }}</label>
+			<input type="text" ng-model="item.settings.pattern">
+		</div>
+
+		<div ng-if="matchType == 'mapping'">
+			<label>{{ 'label.connectors_match_mapping_source' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
+			<input type="text" ng-list="," ng-model="item.settings.mapping.source">
+
+			<label>{{ 'label.connectors_match_mapping_metric' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
+			<input type="text" ng-list="," ng-model="item.settings.mapping.metric">
+
+			<label>{{ 'label.connectors_match_mapping_glue' | translate }}</label>
+			<input type="text" ng-model="item.settings.mapping.glue">
+		</div>
+	</column>
+</columns>

@@ -1,0 +1,11 @@
+header,
+footer,
+aside,
+.menu {
+	display: none;
+}
+
+article {
+	margin-left: 0;
+	padding: 2rem;
+}

@@ -1,0 +1,159 @@
+aside,
+aside header,
+aside nav > .toggle {
+	position: fixed;
+	width: 20rem;
+}
+
+aside {
+	background-color: #222;
+	bottom: 0;
+	color: #fff;
+	left: 0;
+	overflow-x: hidden;
+	overflow-y: auto;
+	padding-top: 3.5rem;
+	top: 0;
+}
+
+aside a {
+	text-decoration: none;
+}
+
+aside header {
+	background-color: #333;
+	box-sizing: border-box;
+	left: 0;
+	padding: 0 1rem;
+	top: 0;
+}
+
+aside header .logo {
+	display: inline-block;
+	line-height: 3.5rem;
+}
+
+aside header .logo img {
+	height: 32px;
+	vertical-align: middle;
+}
+
+aside header .menu {
+	list-style-type: none;
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+
+aside header .menuitem.button {
+	width: 3.5rem;
+}
+
+aside header .menuitem.button a:focus,
+aside header .menuitem.button:hover a {
+	background-color: #464646;
+}
+
+aside nav {
+	padding: 1rem 0 5rem;
+}
+
+aside nav .menu {
+	list-style-type: none;
+}
+
+aside nav .menuitem {
+	white-space: nowrap;
+}
+
+aside nav .menuitem.label {
+	letter-spacing: 0.1rem;
+	line-height: 2.5rem;
+	padding: 0 1rem;
+	text-transform: uppercase;
+}
+
+aside nav .menuitem.button,
+aside nav .treeitem {
+	line-height: 2rem;
+	margin: 0.2rem 0;
+}
+
+aside nav .menuitem.button .fa,
+aside nav .treeitem a .fa {
+	margin-right: 0.5rem;
+	width: 1.5rem;
+}
+
+aside nav .menuitem.button a,
+aside nav .treeitem a {
+	display: block;
+	overflow: hidden;
+	padding: 0 2rem;
+}
+
+aside nav .menuitem.button a:focus,
+aside nav .menuitem.button.active a:focus,
+aside nav .treeitem a:focus {
+	background-color: #464646;
+}
+
+aside nav .menuitem.button.active a,
+aside nav .menuitem.button:hover a,
+aside nav .treeitem a:hover {
+	background-color: #353535;
+}
+
+aside nav .menuitem.button.active a {
+	box-shadow: inset -0.35rem 0 0 #2980b9;
+}
+
+aside nav .menuitem.button a span,
+aside nav .treeitem .treelabel {
+	white-space: nowrap;
+}
+
+aside nav .placeholder {
+	color: #777;
+	padding: 0 1rem;
+}
+
+aside nav .placeholder .fa {
+	margin-right: 0.5rem;
+}
+
+aside nav .treeitem a > .fa {
+	line-height: 1.5rem;
+	position: relative;
+}
+
+aside nav .treeitem a .fa .extra {
+	bottom: 0;
+	font-size: 0.75rem;
+	position: absolute;
+	right: -1rem;
+	text-shadow:
+		0.15rem 0 0 #222,
+		0 0.15rem 0 #222,
+		-0.15rem 0 0 #222,
+		0 -0.15rem 0 #222;
+}
+
+aside nav .menuitem.button .content .label {
+	display: inline-block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	vertical-align: middle;
+	width: 100%;
+	width: calc(100% - 1.5rem);
+}
+
+aside nav > .toggle {
+	background-color: #2d2d2d;
+	bottom: 0;
+	left: 0;
+	line-height: 4rem;
+	position: fixed;
+	text-align: center;
+	width: 20rem;
+}
