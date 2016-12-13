@@ -1,0 +1,145 @@
+header {
+	height: 3.5rem;
+	line-height: 3.5rem;
+	z-index: 10;
+}
+
+header .menu {
+	list-style-type: none;
+}
+
+header .menuitem {
+	display: inline-block;
+}
+
+header .menuitem .fa {
+	font-size: 1.35rem;
+	vertical-align: middle;
+}
+
+header .menuitem.icon {
+	width: 3.5rem;
+}
+
+header .menuitem.button a {
+	display: block;
+	text-align: center;
+}
+
+header .menuitem .subcontent {
+	background-color: rgba(34, 34, 34, 0.98);
+	border-radius: 0.2rem;
+	box-sizing: border-box;
+	color: #fff;
+	display: none;
+	line-height: 1.65rem;
+	list-style-type: none;
+	padding: 0.35rem 0;
+	position: absolute;
+	z-index: 150;
+}
+
+header .menuitem .subcontent::before {
+	border: 0.75rem solid transparent;
+	border-bottom-color: rgba(34, 34, 34, 0.98);
+	bottom: 100%;
+	content: '';
+	left: 1rem;
+	position: absolute;
+}
+
+header .menuitem.left .subcontent {
+	right: 0;
+}
+
+header .menuitem.left .subcontent::before {
+	left: auto;
+	right: 1rem;
+}
+
+header .menuitem .subcontent .menuitem.button {
+	line-height: 2rem;
+}
+
+header .menuitem .subcontent .menuitem.button {
+	cursor: default;
+	display: block;
+	white-space: nowrap;
+}
+
+header .menuitem .subcontent .menuitem.button:hover,
+header .menuitem .subcontent .menuitem.button a:focus,
+header .menuitem .subcontent .menuitem.separator {
+	background-color: rgba(70, 70, 70, 0.98);
+}
+
+header .menuitem .subcontent .menuitem.button a {
+	padding: 0 1rem;
+	text-align: left;
+	text-decoration: none;
+}
+
+header .menuitem .subcontent .menuitem.separator {
+	display: block;
+	height: 1px;
+	margin: 0.35rem 0.65rem;
+}
+
+header .menuitem:hover > .subcontent,
+header .menuitem.focus > .subcontent {
+	display: block;
+}
+
+header.error {
+	background-color: #e74c3c;
+	color: #fff;
+	left: 20rem;
+	padding: 0 2rem;
+	position: fixed;
+	right: 0;
+	top: 0;
+	transform: translateY(-100%);
+	transition: transform 0.2s ease-in-out;
+	z-index: 100;
+}
+
+header.error.active {
+	transform: translateY(0);
+}
+
+header.error::after {
+	background-color: rgba(0, 0, 0, 0.2);
+	bottom: 0;
+	content: '';
+	display: block;
+	height: 0.25rem;
+	left: 0;
+	position: absolute;
+	transition: width 0s;
+	width: 100%;
+}
+
+header.error.active::after {
+	transition: width 3s ease-in-out;
+	width: 0;
+}
+
+header.error .content {
+	float: left;
+}
+
+header.error .content .fa {
+	font-size: 1.5rem;
+	margin-right: 0.35rem;
+	vertical-align: middle;
+}
+
+header.error .action {
+	cursor: pointer;
+	float: right;
+}
+
+header.error .action .fa {
+	font-size: 1.2rem;
+	margin-left: 2rem;
+}

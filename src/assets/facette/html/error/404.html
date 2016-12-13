@@ -1,0 +1,23 @@
+<aside>
+	<header>
+		<a class="logo" href="{{ ::baseURL }}">
+			<img src="assets/images/logo-nav.png" alt="Facette">
+		</a>
+	</header>
+
+	<nav>
+		<menu>
+			<menuitem href="{{ ::baseURL }}" icon="arrow-left" label="{{ 'label.goto_home' | translate }}" type="button"></menuitem>
+		</menu>
+	</nav>
+</aside>
+
+<article>
+	<header>
+		<h1>{{ 'label.error' | translate }}</h1>
+	</header>
+
+	<section>
+		<message icon="times-circle" type="error">{{ 'mesg.page_not_found' | translate }}</message>
+	</section>
+</article>

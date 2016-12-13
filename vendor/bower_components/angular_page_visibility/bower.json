@@ -1,0 +1,23 @@
+{
+  "name": "angular_page_visibility",
+  "version": "0.0.3",
+  "main": "./dist/page_visibility.min.js",
+  "authors": [
+    "Yang-Hsing Lin <yanghsing.lin@gmail.com>"
+  ],
+  "description": "angularjs interface of page visibility API",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "angular": "1.2.22",
+    "angular-mocks": "1.2.22",
+    "sinonjs": "~1.10.2"
+  }
+}

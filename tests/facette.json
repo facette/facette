@@ -1,7 +1,0 @@
-{
-	"bind": ":7778",
-	"base_dir": "",
-	"data_dir": "tests/data",
-	"pid_file": "tests/facette.pid",
-	"providers_dir": "../../tests/providers"
-}

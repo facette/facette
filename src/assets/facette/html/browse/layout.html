@@ -1,0 +1,34 @@
+<header class="error" ng-class="{active: errorActive}">
+	<div class="content"><span class="fa fa-exclamation-circle"></span> {{ 'mesg.error' | translate:{msg: error} }}</div>
+	<div class="action" ng-click="resetError()"><span class="fa fa-times"></span></div>
+</header>
+
+<aside>
+	<header>
+		<a class="logo" href="{{ ::baseURL }}">
+			<img src="assets/images/logo-nav.png" alt="Facette">
+		</a>
+
+		<menu>
+			<menuitem href="{{ ::baseURL }}admin/" icon="cog" type="button"></menuitem>
+		</menu>
+	</header>
+
+	<nav>
+		<menu>
+			<menuitem label="{{ 'label.browse' | translate }}" type="label"></menuitem>
+			<menuitem href="{{ ::baseURL }}browse/{{ parentID ? 'collections/' + parentID : '' }}" icon="arrow-left" label="{{ 'label.goto_parent' | translate }}" type="button" ng-if="section"></menuitem>
+			<menuitem ng-if="collections && collections.length > 0">
+				<div class="placeholder" ng-if="!collectionsLoaded">{{ 'mesg.wait' | translate }}</div>
+				<div class="placeholder" ng-if="collectionsLoaded && collections.length === 0 && graphs.length === 0"><span class="fa fa-info-circle"></span> {{ 'mesg.collections_empty' | translate }}</div>
+				<div ui-tree="" ng-show="collectionsLoaded">
+					<ul id="collections-tree" class="tree" ui-tree-nodes="" ng-model="collections">
+						<li class="treeitem" ui-tree-node="" ng-repeat="c in collections" ng-include="'templates/treeitem.html'"></li>
+					</ul>
+				</div>
+			</menuitem>
+			<menuitem href="{{ ::baseURL }}browse/{{ section }}/{{ id }}#graph{{ g.index }}" label="{{ g.title }}" type="button" ng-mouseenter="handleGraphFocus($event, g.index)" ng-mouseleave="handleGraphFocus($event, g.index)" ng-repeat="g in graphs" ng-show="!g.hidden"></menuitem>
+			<menuitem icon="info-circle" label="{{ 'mesg.collections_empty' | translate }}" ng-if="!graphs && (!collections || collections.length === 0)" type="placeholder"></menuitem>
+		</menu>
+	</nav>
+</aside>

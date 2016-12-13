@@ -1,0 +1,42 @@
+<ng-include src="'templates/admin/layout.html'" ng-include-replace="true"></ng-include>
+
+<article>
+	<header>
+		<h1>{{ 'label.admin_panel' | translate }} – {{ 'label.info' | translate }}</h1>
+
+		<ng-include src="'templates/common/user-menu.html'" ng-include-replace="true"></ng-include>
+	</header>
+
+	<section>
+		<h1>{{ 'label.build_info' | translate }}</h1>
+
+		<table class="list">
+			<tbody>
+				<tr class="listitem">
+					<th class="listfield heading">{{ 'label.version' | translate }}</th>
+					<td class="listfield main">{{ info.version }}</td>
+				</tr>
+				<tr class="listitem">
+					<th class="listfield heading">{{ 'label.build_date' | translate }}</th>
+					<td class="listfield main">{{ info.build_date }}</td>
+				</tr>
+				<tr class="listitem">
+					<th class="listfield heading">{{ 'label.build_hash' | translate }}</th>
+					<td class="listfield main">{{ info.build_hash }}</td>
+				</tr>
+				<tr class="listitem">
+					<th class="listfield heading">{{ 'label.compiler' | translate }}</th>
+					<td class="listfield main">{{ info.compiler }}</td>
+				</tr>
+				<tr class="listitem">
+					<th class="listfield heading">{{ 'label.drivers' | translate }}</th>
+					<td class="listfield main pre">{{ info.drivers.join('\n') }}</td>
+				</tr>
+				<tr class="listitem">
+					<th class="listfield heading">{{ 'label.connectors' | translate }}</th>
+					<td class="listfield main pre">{{ info.connectors.join('\n') }}</td>
+				</tr>
+			</tbody>
+		</table>
+	</section>
+</article>

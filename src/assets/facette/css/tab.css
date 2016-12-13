@@ -1,0 +1,38 @@
+.tabset {
+	background-color: #ecf0f1;
+	line-height: 3rem;
+}
+
+.tabset .tab {
+	color: #7f8c8d;
+	cursor: pointer;
+	display: inline-block;
+	user-select: none;
+}
+
+.tabset .tab a {
+	padding: 0 1.5rem;
+	display: block;
+	text-decoration: none;
+}
+
+.tabset .tab.active a {
+	background-color: #fff;
+	color: #2c3e50;
+}
+
+.tabset .tab a:focus {
+	background-color: #dee2e3;
+}
+
+section.hastab {
+	padding-top: 3rem;
+}
+
+section .tabset {
+	margin: -5rem -2rem 2rem;
+}
+
+.ngdialog-content .tabset {
+	margin: -2rem -2rem 1rem;
+}

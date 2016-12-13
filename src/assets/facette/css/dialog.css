@@ -1,0 +1,44 @@
+.ngdialog {
+	left: 0;
+	position: fixed;
+	right: 0;
+	text-align: center;
+	top: 0;
+	z-index: 200;
+}
+
+.ngdialog-overlay {
+	background-color: rgba(0, 0, 0, 0.35);
+	bottom: 0;
+	left: 0;
+	position: fixed;
+	right: 0;
+	top: 0;
+	z-index: 210;
+}
+
+.ngdialog-content {
+	background-color: #fff;
+	box-shadow: 0 0 1rem rgba(0, 0, 0, 0.5);
+	display: inline-block;
+	max-width: 35%;
+	min-width: 18rem;
+	padding: 2rem;
+	position: relative;
+	text-align: left;
+	z-index: 220;
+}
+
+.ngdialog-content .icon {
+	color: #7f8c8d;
+	font-size: 2.5rem;
+	margin: -0.2rem 0 0 -2.8rem;
+	position: absolute;
+	text-align: center;
+	width: 2rem;
+}
+
+.ngdialog-event {
+	margin: -2rem;
+	padding: 2rem;
+}

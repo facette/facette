@@ -1,0 +1,13 @@
+{
+	"name": "angular-inview",
+	"version": "2.0.0",
+	"main": "./angular-inview.js",
+	"dependencies": {
+		"angular": "~1"
+	},
+	"readmeFilename": "README.md",
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/thenikso/angular-inview.git"
+	}
+}

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html ng-app="facette">
+<head>
+	<meta charset="utf-8">
+	<title ng-bind="(title ? title + ' – ' : '' ) + 'Facette'">Facette</title>
+	<base href="/">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+	<link rel="stylesheet" href="assets/css/font-awesome.min.css">
+	<link rel="stylesheet" href="assets/css/style.min.css">
+	<link rel="stylesheet" href="assets/css/style.print.min.css" media="print">
+	<link rel="shortcut icon" href="assets/images/favicon.png">
+</head>
+<body>
+	<div class="loader" ng-if="!loaded">Loading…</div>
+
+	<ng-view ng-style="!loaded ? {visibility: 'hidden'} : {}"></ng-view>
+
+	<script src="assets/js/vendor.js"></script>
+	<script src="assets/js/facette.js"></script>
+</body>
+</html>

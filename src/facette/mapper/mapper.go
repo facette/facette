@@ -1,0 +1,121 @@
+package mapper
+
+import (
+	"database/sql/driver"
+	"encoding/json"
+	"fmt"
+	"reflect"
+)
+
+// Map represents an instance of keys mappings.
+//
+// All the function returning values associated with keys will return a fallback value if the key is not present in the
+// map or if the value can't be converted to the requested type.
+type Map map[string]interface{}
+
+// Has returns true if key is present in the mapping, false otherwise.
+func (m Map) Has(key string) bool {
+	_, ok := m[key]
+	return ok
+}
+
+// Value marshals the keys mapping for compatibility with SQL drivers.
+func (m Map) Value() (driver.Value, error) {
+	data, err := json.Marshal(m)
+	return data, err
+}
+
+// Scan unmarshals the keys mapping retrieved from SQL drivers.
+func (m *Map) Scan(v interface{}) error {
+	return json.Unmarshal(v.([]byte), m)
+}
+
+// GetBool returns the boolean value associated with a key.
+func (m Map) GetBool(key string, fallback bool) (bool, error) {
+	val, err := m.getKey(reflect.Bool, key, fallback)
+	return val.(bool), err
+}
+
+// GetFloat returns the floating-point number value associated with a key.
+func (m Map) GetFloat(key string, fallback float64) (float64, error) {
+	val, err := m.getKey(reflect.Float64, key, fallback)
+	return val.(float64), err
+}
+
+// GetInt returns the integer value associated with a key.
+func (m Map) GetInt(key string, fallback int64) (int64, error) {
+	val, err := m.getKey(reflect.Int64, key, fallback)
+	return val.(int64), err
+}
+
+// GetMap returns the map value associated with a key.
+func (m Map) GetMap(key string, fallback Map) (Map, error) {
+	val, err := m.getKey(reflect.Map, key, fallback)
+	if err != nil {
+		return fallback, err
+	}
+
+	result := make(Map)
+	switch val.(type) {
+	case Map:
+		for k, v := range val.(Map) {
+			result[k] = v
+		}
+
+	default:
+		for k, v := range val.(map[string]interface{}) {
+			result[fmt.Sprintf("%v", k)] = v
+		}
+	}
+
+	return result, nil
+}
+
+// GetString returns the string value associated with a key.
+func (m Map) GetString(key, fallback string) (string, error) {
+	val, err := m.getKey(reflect.String, key, fallback)
+	return val.(string), err
+}
+
+// GetStringSlice returns the string value associated with a key.
+func (m Map) GetStringSlice(key string, fallback []string) ([]string, error) {
+	out := []string{}
+
+	val, err := m.getKey(reflect.Slice, key, fallback)
+
+	rv := reflect.ValueOf(val)
+	count := rv.Len()
+	for i := 0; i < count; i++ {
+		out = append(out, fmt.Sprintf("%v", rv.Index(i).Interface()))
+	}
+
+	return out, err
+}
+
+// Merge merges the source map entries into the receiver map. If replace parameter is true, existing entries in the
+// receiver map will be replaced with entries from the source map.
+func (m *Map) Merge(source Map, replace bool) {
+	if *m == nil {
+		*m = make(Map)
+	}
+
+	for sourceKey, sourceValue := range source {
+		if _, ok := map[string]interface{}(*m)[sourceKey]; !ok || replace {
+			map[string]interface{}(*m)[sourceKey] = sourceValue
+		}
+	}
+}
+
+func (m Map) getKey(k reflect.Kind, key string, fallback interface{}) (interface{}, error) {
+	val, ok := m[key]
+	if !ok {
+		return fallback, nil
+	}
+
+	vk := reflect.ValueOf(val).Kind()
+	if vk != k {
+		return fallback, ErrInvalidType
+	}
+
+	return val, nil
+}

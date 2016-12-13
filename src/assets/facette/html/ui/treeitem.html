@@ -1,0 +1,9 @@
+<a class="treelabel" href="{{ c.href }}" title="{{ c.name }}">
+	<span class="toggle fa" ng-class="{'fa-folder': collapsed, 'fa-folder-open': !collapsed}" ng-click="$event.preventDefault(); c.children && c.children.length > 0 ? toggle(this) : ''">
+		<span class="fa fa-plus extra" ng-show="collapsed && c.children && c.children.length > 0"></span>
+	</span>
+	{{ c.name }}
+</a>
+<ul class="tree" ui-tree-nodes="" ng-model="c.children" ng-show="!collapsed">
+	<li class="treeitem" ui-tree-node="" ng-repeat="c in c.children" ng-include="'templates/treeitem.html'"></li>
+</ul>

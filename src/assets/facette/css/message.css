@@ -1,0 +1,50 @@
+.message {
+	border-radius: 0.2rem;
+	padding: 0.5rem 0.75rem;
+}
+
+section .message:first-child {
+	margin-top: 0;
+}
+
+.message.placeholder {
+	background-color: #ecf0f1;
+}
+
+.message.error {
+	background-color: #e74c3c;
+	color: #fff;
+}
+
+.message.warning {
+	background-color: #f1c40f;
+	color: #fff;
+}
+
+.message.success {
+	background-color: #2ecc71;
+	color: #fff
+}
+
+.message.info {
+	background-color: #3498db;
+	color: #fff;
+}
+
+.message .fa,
+.message .content {
+	vertical-align: middle;
+}
+
+.message .fa {
+	font-size: 1.35rem;
+	margin-right: 0.25rem;
+}
+
+.message .content {
+	display: inline-block;
+}
+
+.message .content a {
+	margin-left: 0.5rem;
+}

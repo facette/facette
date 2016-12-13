@@ -1,0 +1,77 @@
+<tabset>
+	<tab active="groupEdit" label="{{ 'label.group' | translate }}" ng-click="switchEdit(true, null)" ng-if="seriesTotal > 1 || groupItem.series[0].expansion !== undefined"></tab>
+	<tab active="!groupEdit" label="{{ 'label.series_paging' | translate:{current: seriesCurrent + 1, total: seriesTotal} }}" ng-click="switchEdit(false, null)"></tab>
+</tabset>
+
+<form>
+	<div class="formblock" ng-if="groupEdit && (seriesTotal > 1 || groupItem.series[0].expansion !== undefined)">
+		<columns>
+			<column>
+				<label>{{ 'label.name' | translate }}</label>
+				<input type="text" ng-model="groupItem.name" ng-if="seriesTotal > 1">
+				<input type="text" ng-model="groupItem.series[seriesCurrent].name" ng-if="seriesTotal == 1">
+			</column>
+
+			<column>
+				<label>{{ 'label.color' | translate }}</label>
+				<colorpicker position="left" value="groupItem.options.color"></colorpicker>
+			</column>
+		</columns>
+
+		<label>{{ 'label.scale' | translate }}</label>
+		<angucomplete-alt id="scale" pause="250" input-changed="changedCompletion" selected-object="selectScale" remote-api-handler="scaleValues" title-field="value" description-field="name" minlength="1" focus-first="true" match-class="highlight" override-suggestions="true" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
+
+		<label>{{ 'label.unit' | translate }}</label>
+		<angucomplete-alt id="unit" pause="250" input-changed="changedCompletion" selected-object="selectUnit" remote-api-handler="unitValues" title-field="label" description-field="name" minlength="1" focus-first="true" match-class="highlight" override-suggestions="true" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
+
+		<label>{{ 'label.series_operator' | translate }}</label>
+		<ui-select theme="selectize" ng-model="selectedOptions.group.operator">
+			<ui-select-match placeholder="{{ 'label.series_operator_select' | translate }}">
+				<span ng-bind="$select.selected.name"></span>
+			</ui-select-match>
+			<ui-select-choices repeat="o in (groupOperators | filter: $select.search)">
+				<span ng-bind="o.name"></span>
+			</ui-select-choices>
+		</ui-select>
+
+		<label>{{ 'label.series_consolidate' | translate }}</label>
+		<ui-select theme="selectize" ng-model="selectedOptions.group.consolidate">
+			<ui-select-match placeholder="{{ 'label.series_consolidate_select' | translate }}">
+				<span ng-bind="$select.selected.name"></span>
+			</ui-select-match>
+			<ui-select-choices repeat="c in (groupConsolidations | filter: $select.search)">
+				<span ng-bind="c.name"></span>
+			</ui-select-choices>
+		</ui-select>
+	</div>
+
+	<div class="formblock" ng-if="!groupEdit">
+		<columns>
+			<column>
+				<label>{{ 'label.name' | translate }}</label>
+				<input type="text" ng-model="groupItem.series[seriesCurrent].name">
+			</column>
+
+			<column>
+				<label>{{ 'label.color' | translate }}</label>
+				<colorpicker position="left" value="groupItem.series[seriesCurrent].options.color"></colorpicker>
+			</column>
+		</columns>
+
+		<label>{{ 'label.scale' | translate }}</label>
+		<angucomplete-alt id="scale" pause="250" input-changed="changedCompletion" selected-object="selectScale" remote-api-handler="scaleValues" title-field="value" description-field="name" minlength="1" focus-first="true" match-class="highlight" override-suggestions="true" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
+
+		<label>{{ 'label.unit' | translate }}</label>
+		<angucomplete-alt id="unit" pause="250" input-changed="changedCompletion" selected-object="selectUnit" remote-api-handler="unitValues" title-field="label" description-field="name" minlength="1" focus-first="true" match-class="highlight" override-suggestions="true" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
+	</div>
+
+	<div class="formblock actions">
+		<div class="switch" ng-if="!groupEdit">
+			<button type="button" ng-click="switchEdit(false, -1)" ng-disabled="seriesCurrent === 0"><span class="fa fa-chevron-left"></span></button>
+			<button type="button" ng-click="switchEdit(false, 1)" ng-disabled="seriesCurrent === (seriesTotal - 1)"><span class="fa fa-chevron-right"></span></button>
+		</div>
+
+		<button class="cancel danger" type="button" ng-click="closeThisDialog()">{{ 'label.cancel' | translate }}</button>
+		<button class="validate" type="submit" ng-click="closeThisDialog(groupItem)">{{ 'label.validate' | translate }}</button>
+	</div>
+</form>

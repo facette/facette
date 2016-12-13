@@ -1,0 +1,39 @@
+<ng-include src="'templates/admin/layout.html'" ng-include-replace="true"></ng-include>
+
+<article>
+	<header>
+		<h1>{{ 'label.admin_panel' | translate }} – {{ 'label.' + section | translate }}</h1>
+
+		<menu>
+			<menuitem href="" icon="refresh" title="{{ 'label.list_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
+		</menu>
+
+		<ng-include src="'templates/common/user-menu.html'" ng-include-replace="true"></ng-include>
+
+		<search name="search" placeholder="{{ 'label.items_search' | translate }}" ng-model="form.search"></search>
+	</header>
+
+	<section>
+		<h1>{{ 'label.' + section + '_list' | translate }} <span class="count" ng-if="total">{{ total }}</span></h1>
+
+		<message icon="clock-o" type="placeholder" ng-show="state == stateLoading">{{ 'mesg.wait' | translate }}</message>
+		<message icon="info-circle" type="info" ng-show="state == stateOK && !form.search && items.length === 0">{{ 'mesg.items_none' | translate }}</message>
+		<message icon="info-circle" type="warning" ng-show="state == stateOK && form.search && items.length === 0">{{ 'mesg.no_search_match' | translate }} <a href="" ng-click="reset()">{{ 'label.reset' | translate }}</a></message>
+		<message icon="times-circle" type="error" ng-show="state == stateError">{{ 'mesg.fetch_error' | translate }} <a href="" ng-click="refresh()">{{ 'label.retry' | translate }}</a></message>
+
+		<table class="list" ng-show="state == stateOK && items.length > 0">
+			<tbody>
+				<tr class="listitem" ng-repeat="name in items">
+					<td class="listfield main">
+						<span class="name">{{ name }}</span>
+						<menu class="actions">
+							<menuitem href="" icon="info-circle" type="button" tooltip-data="name" tooltip-formatter="formatCatalogTooltip" tooltip-position="bottom"></menuitem>
+						</menu>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<paging page="page" page-size="limit" total="total" paging-action="refresh(page)" hide-if-empty="true" show-prev-next="true"></paging>
+	</section>
+</article>

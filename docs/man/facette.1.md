@@ -1,10 +1,10 @@
 % FACETTE(1) facette
 % Vincent Batoufflet <vincent@batoufflet.info>, Marc Falzon <marc@falzon.me>
-% August 23, 2014
+% December 13, 2016
 
 # NAME
 
-Facette - Time series data visualization and graphing software
+Facette - Time series data visualization software
 
 # SYNOPSYS
 
@@ -12,24 +12,16 @@ facette [*options*]
 
 # DESCRIPTION
 
-Facette is a a web application to display time series data from various sources — such as collectd, Graphite or
-InfluxDB — on graphs.
+Facette is a web application to display time series data from various sources — such as collectd, Graphite, InfluxDB
+or KairosDB.
 
 # OPTIONS
 
 -c *file*
-:   Specify the application configuration file path (type: string, default: /etc/facette/facette.json).
+:   Specify the application configuration file path (default: /etc/facette/facette.conf).
 
 -h
 :   Display application help and exit.
-
--l *file*
-:   Specify the server log file (type: string, default: STDERR)
-
--L *level*
-:   Specify the server logging level (type: string, default: info).
-
-    Supported levels: error, warning, notice, info, debug.
 
 -V
 :   Display the application version and exit.
@@ -38,7 +30,7 @@ InfluxDB — on graphs.
 
 **facette** accepts the following signals:
 
-SIGINT, SIGTERM
+SIGINT, SIGQUIT, SIGTERM
 :   These signals cause **facette** to terminate.
 
 SIGUSR1

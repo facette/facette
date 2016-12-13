@@ -1,0 +1,20 @@
+<h1>{{ 'label.providers_definition' | translate }}</h1>
+
+<columns>
+	<column class="half">
+		<h2>{{ 'label.connectors_settings' | translate }}</h2>
+
+		<label>{{ 'label.connectors_instance_url' | translate }}</label>
+		<input type="text" ng-model="item.settings.url">
+
+		<label>{{ 'label.connectors_timeout' | translate }}</label>
+		<input class="small" id="timeout" type="number" placeholder="10" ng-model="item.settings.timeout">
+
+		<label>{{ 'label.connectors_tls' | translate }}</label>
+		<input id="allow-insecure" type="checkbox" tabindex="0" ng-model="item.settings.allow_insecure_tls">
+		<label for="allow-insecure">{{ 'label.connectors_allow_insecure' | translate }}</label>
+
+		<label>{{ 'label.connectors_match_pattern' | translate }}</label>
+		<input type="text" ng-model="item.settings.pattern">
+	</column>
+</columns>

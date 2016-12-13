@@ -1,0 +1,145 @@
+<ng-include src="'templates/admin/layout.html'" ng-include-replace="true"></ng-include>
+
+<article class="pane" ng-pane="" ng-show="state == stateOK">
+	<header>
+		<h1>{{ 'label.admin_panel' | translate }} – {{ (id == 'add' ? 'label.providers_new' : 'label.providers_edit') | translate }}</h1>
+
+		<ng-include src="'templates/common/user-menu.html'" ng-include-replace="true"></ng-include>
+	</header>
+
+	<section ng-step="1">
+		<h1>{{ 'label.providers_definition' | translate }}</h1>
+
+		<columns>
+			<column class="half">
+				<form ng-entersubmit="save()">
+					<h2>{{ 'label.general_info' | translate }}</h2>
+
+					<label>{{ 'label.name' | translate }}
+						<span class="warn" ng-show="conflict"><span class="fa fa-warning"></span> {{ 'mesg.name_unique' | translate }}</span>
+						<span class="warn" ng-show="validated && !item.name"><span class="fa fa-warning"></span> {{ 'mesg.name_mandatory' | translate }}</span>
+					</label>
+					<input type="text" ng-class="{danger: conflict || validated && !item.name}" ng-model="item.name">
+
+					<label>{{ 'label.desc' | translate }}</label>
+					<textarea type="text" ng-model="item.description"></textarea>
+
+					<h2>{{ 'label.providers_params' | translate }}</h2>
+
+					<label>{{ 'label.connectors_type' | translate }}</label>
+					<ui-select class="small" theme="selectize" ng-class="{danger: validated && !item.connector}" ng-model="item.connector">
+						<ui-select-match placeholder="{{ 'label.connectors_type_select' | translate }}">
+							<span ng-bind="$select.selected"></span>
+						</ui-select-match>
+						<ui-select-choices repeat="t in (connectorTypes | filter: $select.search)">
+							<span ng-bind="t"></span>
+						</ui-select-choices>
+					</ui-select>
+					<button type="button" ng-click="switch('settings')" ng-show="item.connector"><span class="fa fa-cog"></span> {{ 'label.connectors_configure' | translate }}</button>
+
+					<label>{{ 'label.refresh_interval' | translate }}</label>
+					<input class="small" type="number" ng-model="item.refresh_interval">
+
+					<label>{{ 'label.providers_priority' | translate }}</label>
+					<input class="small" type="number" ng-model="item.priority">
+
+					<label>{{ 'label.filters' | translate }}</label>
+					<button type="button" ng-click="switch('filters')"><span class="fa fa-cog"></span> {{ 'label.filters_manage' | translate }}</button>
+					<span class="note">{{ 'mesg.filters_count' | translate:{count: (item.filters.length || 0)} }}</span>
+				</form>
+			</column>
+		</columns>
+	</section>
+
+	<section ng-step="settings">
+		<ng-include src="'templates/admin/edit-providers-' + item.connector + '.html'" ng-if="item.connector"></ng-include>
+	</section>
+
+	<section ng-step="filters">
+		<h1>{{ 'label.providers_definition' | translate }}</h1>
+
+		<h2>{{ 'label.filters_list' | translate }}</h2>
+
+		<div class="formblock float">
+			<button ng-click="addFilter()"><span class="fa fa-plus"></span> {{ 'label.filters_add' | translate }}</button>
+		</div>
+
+		<message icon="info-circle" type="info" ng-show="item.filters.length === 0">{{ 'mesg.filters_empty' | translate }}</message>
+
+		<table class="list" ng-show="item.filters.length > 0">
+			<thead>
+				<tr class="listhead">
+					<th class="listfield heading"></th>
+					<th class="listfield heading">{{ 'label.filters_action' | translate }}</th>
+					<th class="listfield heading">{{ 'label.filters_target' | translate }}</th>
+					<th class="listfield heading">{{ 'label.filters_pattern' | translate }}</th>
+					<th class="listfield heading"></th>
+				</tr>
+			</thead>
+			<tbody as-sortable="listSortControl" ng-model="item.filters">
+				<tr class="listitem" as-sortable-item="" ng-repeat="f in item.filters">
+					<td class="listfield handle" as-sortable-item-handle=""><span class="fa fa-ellipsis-v"></span></td>
+					<td class="listfield action">
+						<ui-select theme="selectize" ng-model="f.action">
+							<ui-select-match placeholder="{{ 'label.filters_action_select' | translate }}">
+								<span ng-bind="$select.selected"></span>
+							</ui-select-match>
+							<ui-select-choices repeat="a in (filterActions | filter: $select.search)">
+								<span ng-bind="a"></span>
+							</ui-select-choices>
+						</ui-select>
+					</td>
+					<td class="listfield target">
+						<ui-select theme="selectize" ng-model="f.target">
+							<ui-select-match placeholder="{{ 'label.filters_target_select' | translate }}">
+								<span ng-bind="$select.selected"></span>
+							</ui-select-match>
+							<ui-select-choices repeat="t in (filterTargets | filter: $select.search)">
+								<span ng-bind="t"></span>
+							</ui-select-choices>
+						</ui-select>
+					</td>
+					<td class="listfield pattern">
+						<input type="text" ng-model="f.pattern">
+						<span ng-show="f.action == 'rewrite'"><span class="fa fa-arrow-right"></span> <input type="text" ng-model="f.into"></span>
+					</td>
+					<td class="listfield actions">
+						<menu>
+							<menuitem href="" icon="times-circle" title="{{ 'label.items_remove' | translate }}" type="button" ng-click="remove(item.filters, f)"></menuitem>
+						</menu>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</section>
+
+	<footer ng-switch="step">
+		<div ng-switch-when="settings">
+			<button class="danger" ng-click="providerResetSettings(); switch(1)">{{ 'label.cancel' | translate }}</button>
+			<button ng-click="switch(1)">{{ 'label.settings_validate' | translate }}</button>
+		</div>
+		<div ng-switch-when="filters">
+			<button class="danger" ng-click="providerResetFilters(); switch(1)">{{ 'label.cancel' | translate }}</button>
+			<button ng-click="switch(1)">{{ 'label.filters_validate' | translate }}</button>
+		</div>
+		<div ng-switch-default="">
+			<button class="extra" ng-click="reset()" ng-disabled="!modified"><span class="fa fa-undo"></span> {{ 'label.providers_reset' | translate }}</button>
+			<button class="danger" ng-click="cancel()">{{ 'label.cancel' | translate }}</button>
+			<button ng-click="save()">{{ 'label.providers_save' | translate }}</button>
+		</div>
+	</footer>
+</article>
+
+<article ng-show="state == stateError">
+	<header>
+		<h1>{{ 'label.admin_panel' | translate }} – {{ 'label.providers_edit' | translate }}</h1>
+	</header>
+
+	<section>
+		<message icon="times-circle" type="error">{{ 'mesg.items_not_found' | translate }}</message>
+	</section>
+
+	<footer>
+		<button ng-click="cancel(true)"><span class="fa fa-arrow-left"></span> {{ 'label.providers_back' | translate }}</button>
+	</footer>
+</article>

@@ -1,0 +1,18 @@
+<ng-include src="'templates/browse/layout.html'" ng-include-replace="true"></ng-include>
+
+<article>
+	<header>
+		<h1>{{ 'label.search' | translate }}</h1>
+
+		<ng-include src="'templates/common/user-menu.html'" ng-include-replace="true"></ng-include>
+	</header>
+
+	<section>
+		<div class="logo"><img src="assets/images/logo-main.png" alt="logo" height="80"></div>
+
+		<div class="search">
+			<angucomplete-alt id="search" pause="250" selected-object="searchSelect" remote-api-handler="searchHandler" title-field="value.name" description-field="value.description" minlength="1" focus-first="true" focus-in="focus = true" focus-out="focus = false" match-class="highlight" ng-class="{focus: focus}" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
+			<button><span class="fa fa-search"></span></button>
+		</div>
+	</section>
+</article>

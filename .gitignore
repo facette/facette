@@ -1,5 +1,3 @@
 build
-dist
-vendor/checkouts
-vendor/pkg
 node_modules
+bindata.go

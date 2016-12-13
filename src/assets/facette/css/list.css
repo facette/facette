@@ -1,0 +1,310 @@
+.list {
+	border-spacing: 0;
+	width: 100%;
+}
+
+.listhead,
+.listitem {
+	background-color: #fff;
+}
+
+.listhead .listfield.heading {
+	text-align: left;
+	text-transform: uppercase;
+}
+
+.listfield {
+	border-top: 1px solid #ecf0f1;
+	padding: 0.5rem 1rem;
+}
+
+.listitem:last-child .listfield {
+	border-bottom: 1px solid #ecf0f1;
+}
+
+.listfield.heading {
+	font-weight: 500;
+	text-align: right;
+	vertical-align: top;
+	white-space: pre;
+}
+
+.listfield.main,
+.listfield.pattern {
+	width: 100%;
+}
+
+.listfield.action,
+.listfield.target {
+	min-width: 10rem;
+}
+
+.listfield.pattern input[type=text] {
+	width: 45%;
+}
+
+.listfield.pattern .fa {
+	text-align: center;
+	width: 1.5rem;
+}
+
+.listfield.handle,
+.listfield.checkbox {
+	padding: 0.5rem;
+}
+
+.listfield.handle {
+	color: #95a5a6;
+}
+
+.listfield.checkbox {
+	color: #ecf0f1;
+    cursor: default;
+}
+
+.listfield.checkbox label::before {
+    margin-right: 0;
+}
+
+.listfield.pre {
+	white-space: pre;
+}
+
+.listitem.title {
+	background-color: transparent;
+}
+
+.listitem.title .listform {
+	float: right;
+}
+
+.listitem.title .listfield {
+	font-weight: normal;
+	text-align: left;
+	vertical-align: middle;
+}
+
+.listfield.main .toggle,
+.listfield.main .color,
+.listfield.main .name,
+.listfield.main .description,
+.listfield.main .actions {
+	float: left;
+}
+
+.listfield.main .description.list {
+	display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    font-size: 0.95rem;
+}
+
+.listfield.main .description.list .count {
+	background-color: #34495e;
+	border-radius: 1rem;
+	color: #fff;
+	font-size: 0.8rem;
+	margin-left: 0.5rem;
+	padding: 0 0.5rem;
+}
+
+.listfield.main .description.list .actions {
+	display: inline-block;
+	float: none;
+	visibility: hidden;
+}
+
+.listfield.main .description.list:hover .actions {
+	visibility: visible;
+}
+
+.listitem.active .listfield.main .description.list .actions,
+.listitem.locked .listfield.main .description.list .actions {
+	visibility: hidden !important;
+}
+
+.listfield.main .description .info {
+	text-transform: lowercase;
+}
+
+.listfield.main .description .info strong {
+	font-weight: 500;
+	text-transform: none;
+}
+
+.listfield.main .toggle {
+	cursor: pointer;
+	font-size: 1.25rem;
+	line-height: 1.5rem;
+	width: 2rem;
+}
+
+.listfield.main .color {
+	margin-right: 0.5rem;
+}
+
+.listfield.main .actions {
+	list-style-type: none;
+	margin-left: 0.75rem;
+}
+
+.listfield.main .actions .menuitem {
+	display: inline-block;
+	font-size: 1.1rem;
+	text-align: center;
+	width: 1.5rem;
+}
+
+.listfield.main .actions .menuitem .content {
+	cursor: pointer;
+}
+
+.listfield.main .description {
+	clear: left;
+	color: rgba(44, 62, 80, 0.65);
+}
+
+.listfield.main .description.list::before {
+	content: '›';
+	margin-right: 0.35rem;
+}
+
+.listfield.main .description.placeholder {
+	color: rgba(44, 62, 80, 0.25);
+}
+
+.listfield.main.togglable .description {
+	margin-left: 2rem;
+}
+
+.listfield.main .actions,
+.listfield.date span,
+.listfield.actions .menu {
+	color: #bdc3c7;
+	white-space: nowrap;
+}
+
+.listitem.locked {
+	pointer-events: none;
+}
+
+.listitem.disabled .listfield.main .toggle,
+.listitem.disabled .listfield.main .name,
+.listitem.disabled .listfield.main .description,
+.listitem.locked .listfield * {
+	opacity: 0.35;
+}
+
+.listfield.main .actions,
+.listfield.date > *,
+.listfield.actions > *,
+.listitem.active:hover .listfield.main > .actions,
+.listitem.active:hover .listfield.date > *,
+.listitem.active:hover .listfield.actions > * {
+	visibility: hidden;
+}
+
+.listitem:hover .listfield.main > .actions,
+.listitem:hover .listfield.date > *,
+.listitem:hover .listfield.actions > * {
+	visibility: visible;
+}
+
+.listitem.active,
+.listitem.selected {
+	background-color: #3498db;
+	color: #fff;
+}
+
+.listitem.active .listfield,
+.listitem.selected .listfield {
+	border-color: rgba(255, 255, 255, 0.25);
+}
+
+.listitem.active .listfield.handle,
+.listitem.selected .listfield.handle {
+	color: rgba(255, 255, 255, 0.5);
+}
+
+.listitem.active .listfield.main .description.list .count,
+.listitem.selected .listfield.main .description.list .count {
+	background-color: #fff;
+	color: #3498db;
+}
+
+.listitem.active .listfield.main .description,
+.listitem.selected .listfield.main .description {
+	color: rgba(255, 255, 255, 0.75);
+}
+
+.listitem.active label:focus::before,
+.listitem.selected label:focus::before,
+.listitem.active .listfield.main .actions,
+.listitem.selected .listfield.main .actions,
+.listitem.active .listfield.actions .menu,
+.listitem.selected .listfield.actions .menu {
+	color: rgba(255, 255, 255, 0.5);
+}
+
+.listfield.actions {
+	font-size: 1.25rem;
+	text-align: right;
+}
+
+.listfield.actions .menu {
+	list-style-type: none;
+}
+
+.listfield.actions .menuitem {
+	cursor: pointer;
+	display: inline-block;
+	text-align: center;
+	width: 1.5rem;
+}
+
+.listfield .actions a:hover,
+.listfield .actions a.active {
+	color: #7f8c8d;
+}
+
+.listitem.active .listfield .actions a:hover,
+.listitem.active .listfield .actions a.active,
+.listitem.selected .listfield .actions a:hover,
+.listitem.selected .listfield .actions a.active {
+	color: #fff;
+}
+
+.listfield .actions .tooltip.bottom {
+	left: -0.5rem;
+	transform: none;
+}
+
+.listfield .actions .tooltip.bottom::before {
+	left: 0.75rem;
+	margin-left: 0;
+}
+
+.keylist {
+	border-spacing: 0 0.35rem;
+	width: 100%;
+}
+
+.keylist .key {
+	min-width: 10rem;
+}
+
+.keylist input,
+.keylist .value {
+	width: 100%;
+}
+
+.keylist .key input {
+	border-bottom-right-radius: 0;
+	border-right: none;
+	border-top-right-radius: 0;
+}
+
+.keylist .value input {
+	border-bottom-left-radius: 0;
+	border-top-left-radius: 0;
+}

@@ -1,0 +1,424 @@
+.graph {
+	align-items: center;
+	background-color: #ecf0f1;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	position: relative;
+}
+
+.graph.frame {
+	min-height: 100%;
+}
+
+.graph:hover .graph-control,
+.graph.focus,
+.graph.folded:hover {
+	outline: 0.9rem solid #ecf0f1;
+	z-index: 1;
+}
+
+.graph.folded {
+	line-height: 3rem;
+}
+
+.graph.folded:hover,
+.graph.folded.focus {
+	outline-color: #dee2e3;
+}
+
+.graph.frame:hover .graph-control,
+.graph.preview:hover .graph-control {
+	outline: none;
+}
+
+.graph .message,
+.graph-container {
+	align-items: center;
+	display: flex;
+	flex-grow: 1;
+	justify-content: center;
+	width: 100%;
+}
+
+.graph .message {
+	color: #7f8c8d;
+	margin: 0;
+	padding: 0;
+}
+
+.graph .message.float {
+	background-color: rgba(236, 240, 241, 0.9);
+	font-size: 0.9rem;
+	left: 1rem;
+	line-height: 1.5rem;
+	padding: 0.5rem;
+	position: absolute;
+	top: 1rem;
+	width: auto;
+}
+
+.graph .message.clickable {
+	cursor: pointer;
+}
+
+.graph .message .fa {
+	font-size: 1.35rem;
+	margin-right: 0.35rem;
+}
+
+.graph-control {
+	align-items: center;
+	cursor: default;
+	display: none;
+	flex-direction: column;
+	overflow: hidden;
+	pointer-events: none;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	left: 0;
+}
+
+.graph:hover .graph-control {
+	display: flex;
+}
+
+.graph-fold,
+.graph-legend,
+.graph-step-backward,
+.graph-step-forward,
+.graph-menu {
+	background-color: #ecf0f1;
+	pointer-events: all;
+	text-align: center;
+}
+
+.graph-fold,
+.graph-legend,
+.graph-step-backward,
+.graph-step-forward {
+	cursor: pointer;
+}
+
+.graph-fold,
+.graph-legend {
+	font-size: 0.8rem;
+	line-height: 1.5rem;
+	min-width: 4rem;
+	text-align: center;
+}
+
+.graph-fold .fa,
+.graph-step-backward .fa,
+.graph-step-forward .fa {
+	display: block;
+}
+
+.graph-fold .fa,
+.graph-legend .fa {
+	display: inline-block;
+}
+
+.graph-fold {
+	border-radius: 0 0 0.25rem 0.25rem;
+}
+
+.grid2 .graph-fold,
+.grid3 .graph-fold {
+	border-bottom-left-radius: 0;
+	position: absolute;
+	left: 0;
+}
+
+.graph-legend {
+	border-radius: 0.25rem 0.25rem 0 0;
+	padding: 0 1rem;
+}
+
+.graph-legend .fa {
+	margin-right: 0.35rem;
+}
+
+.graph-step {
+	align-items: center;
+	justify-content: space-between;
+	display: flex;
+	flex-grow: 1;
+	width: 100%;
+}
+
+.graph-step-backward,
+.graph-step-forward {
+	font-size: 2rem;
+	line-height: 5rem;
+	transition: transform .2s ease-in-out;
+	width: 2.5rem;
+}
+
+.graph-step-backward {
+	border-radius: 0 0.2rem 0.2rem 0;
+	transform: translateX(-3rem);
+}
+
+.graph-step-forward {
+	border-radius: 0.2rem 0 0 0.2rem;
+	transform: translateX(3rem);
+}
+
+.graph-step-backward.active,
+.graph-step-forward.active,
+.graph-step-backward:hover,
+.graph-step-forward:hover {
+	transform: translateX(0);
+}
+
+.graph-menu {
+	border-bottom-left-radius: 0.2rem;
+	padding: 0 0 0.9rem 0.9rem;
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+
+.graph.frame .graph-menu {
+	padding: 0.5rem;
+}
+
+.graph-menu > .menuitem {
+	display: inline-block;
+	font-size: 1.1rem;
+	height: 1.5rem;
+	line-height: 1.5rem;
+	margin-left: 0.35rem;
+	position: relative;
+	vertical-align: middle;
+}
+
+.graph-menu > .menuitem.button:hover,
+.graph-menu > .menuitem.separator {
+	background-color: #bdc3c7;
+}
+
+.graph-menu > .menuitem:first-child {
+	margin-left: 0;
+}
+
+.graph-menu > .menuitem.button {
+	text-align: center;
+	width: 1.5rem;
+}
+
+.graph-menu > .menuitem.button[disabled] {
+	opacity: 0.35;
+	pointer-events: none;
+}
+
+.graph-menu > .menuitem.button:hover {
+	border-radius: 0.2rem;
+}
+
+.graph-menu > .menuitem.separator {
+	width: 1px;
+}
+
+.graph-menu > .menuitem .subcontent {
+	background-color: rgba(34, 34, 34, 0.98);
+	border-radius: 0.2rem;
+	box-sizing: border-box;
+	color: #fff;
+	display: none;
+	font-size: 0.9rem;
+	line-height: 1.65rem;
+	padding: 0.35rem 0;
+	position: absolute;
+	right: 0;
+	top: 100%;
+}
+
+.graph-menu > .menuitem:hover .subcontent {
+	display: block;
+}
+
+.graph-menu > .menuitem .subcontent .menu {
+	list-style-type: none;
+}
+
+.graph-menu > .menuitem .subcontent .menuitem.separator {
+	height: 1px;
+	margin: 0.35rem 0.65rem;
+}
+
+.graph-menu > .menuitem .subcontent .menuitem.button {
+	cursor: default;
+	padding: 0 1rem;
+	text-align: left;
+	white-space: nowrap;
+}
+
+.graph-menu > .menuitem .subcontent .menuitem.button:hover,
+.graph-menu > .menuitem .subcontent .menuitem.separator {
+	background-color: rgba(70, 70, 70, 0.98);
+}
+
+.graph-container {
+	background-color: #fff;
+	min-height: 20rem;
+}
+
+.graph.frame .graph-container {
+	overflow: auto;
+}
+
+.graph.empty .graph-container,
+.graph.error .graph-container,
+.graph.loading .graph-container {
+	background-color: transparent;
+}
+
+.graph.zooming .chart {
+	user-select: none;
+}
+
+.chart path,
+.chart line {
+	fill: none;
+}
+
+.chart-background {
+	fill: #fff;
+}
+
+.chart-line {
+	stroke-width: 1.5;
+}
+
+.chart-constant {
+	stroke: #d00;
+}
+
+.chart-axis,
+.chart-legend {
+	cursor: default;
+	user-select: none;
+}
+
+.chart-axis .domain,
+.chart-axis .tick line {
+	stroke: #aaa;
+}
+
+.chart-axis .tick text {
+	fill: #444;
+}
+
+.chart-axis-y path,
+.chart-axis-y line {
+	display: none;
+}
+
+.chart-title {
+	fill: #444;
+	font-size: 1.25rem;
+}
+
+.chart-subtitle,
+.chart-axis-legend {
+	fill: #777;
+	font-size: 0.9rem;
+}
+
+.chart-grid {
+	stroke: #eee;
+}
+
+.chart-cursor {
+	stroke: #aaa;
+}
+
+.chart-zoom {
+	fill: rgba(41, 128, 185, 0.35);
+	pointer-events: none;
+}
+
+.chart-legend {
+	font-size: 0.9rem;
+}
+
+.chart-legend-row.disabled {
+	opacity: 0.25;
+}
+
+.chart-legend-name,
+.chart-legend-key,
+.chart-legend-value {
+	dominant-baseline: middle;
+}
+
+.chart-legend-name,
+.chart-legend-value {
+	cursor: pointer;
+}
+
+.chart-legend-row.disabled .chart-legend-value {
+	cursor: default;
+}
+
+.chart-legend-key {
+	fill: #777;
+}
+
+.chart-tooltip {
+	background-color: rgba(34, 34, 34, 0.9);
+	border-radius: 0.2rem;
+	box-sizing: border-box;
+	color: #fff;
+	font-size: 0.9rem;
+	line-height: 1.5rem;
+	margin: 0 2rem;
+	padding: 0.35rem 0.65rem;
+	pointer-events: none;
+	position: absolute;
+	z-index: 150;
+}
+
+.chart-tooltip table {
+	border-spacing: 0 0.25rem;
+	white-space: nowrap;
+	width: 1px;
+}
+
+.chart-tooltip thead th {
+	color: #aaa;
+	font-weight: 500;
+}
+
+.chart-tooltip tbody {
+	text-align: right;
+}
+
+.chart-tooltip tbody th {
+	font-weight: normal;
+	text-align: left;
+	width: 100%;
+}
+
+.chart-tooltip tbody th,
+.chart-tooltip tbody td {
+	padding: 0 0.5rem;
+	white-space: nowrap;
+}
+
+.chart-tooltip tbody .null {
+	color: #aaa;
+}
+
+.chart-tooltip-color {
+	border-radius: 0.1rem;
+	display: inline-block;
+	height: 0.75rem;
+	margin-right: 0.5rem;
+	vertical-align: middle;
+	width: 0.75rem;
+}

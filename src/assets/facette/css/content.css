@@ -1,0 +1,270 @@
+.loader {
+	align-items: center;
+	background-color: #fff;
+	bottom: 0;
+	color: #95a5a6;
+	display: flex;
+	font-size: 1.25rem;
+	justify-content: center;
+	left: 0;
+	position: absolute;
+	right: 0;
+	top: 0;
+	z-index: 500;
+}
+
+article {
+	margin-left: 20rem;
+	padding: 5.5rem 2rem 2rem;
+	transition: margin-left 0.3s ease-in-out;
+}
+
+article header,
+article footer {
+	left: 20rem;
+	padding: 0 2rem;
+	position: fixed;
+	right: 0;
+	transition: left 0.3s ease-in-out;
+}
+
+article header {
+	background-color: #2980b9;
+	color: #fff;
+	top: 0;
+}
+
+article header h1,
+article header .menu {
+	float: left;
+}
+
+article header .menu.extra,
+article header .menu.user {
+	float: right;
+}
+
+article header .menu.user {
+	margin-right: -2rem;
+}
+
+article header h1 {
+	font-size: 1.4rem;
+	font-weight: 400;
+	margin-right: 0.5rem;
+}
+
+article header > .menu {
+	margin-left: 0.5rem;
+}
+
+article header > .menu > .menuitem.button {
+	cursor: pointer;
+	color: #5fa0cb;
+}
+
+article header > .menu > .menuitem.button .fa {
+	display: inline-block;
+	margin-right: 0.35rem;
+}
+
+article header > .menu > .menuitem.button.icon .fa {
+	margin-right: 0;
+	width: 2rem;
+}
+
+article header > .menu > .menuitem.button .badge {
+	background: #fff;
+	background-clip: padding-box;
+	border-radius: 1rem;
+	bottom: 0.5rem;
+	border: 0.15rem solid #2980b9;
+	box-sizing: border-box;
+	color: #2980b9;
+	font-size: 0.8rem;
+	line-height: normal;
+	max-width: 3rem;
+	overflow: hidden;
+	padding: 0 0.35rem;
+	position: absolute;
+	right: 0.25rem;
+	text-overflow: ellipsis;
+}
+
+article header > .menu > .menuitem.button:hover {
+	color: #fff;
+}
+
+article header > .menu > .menuitem.button > a {
+	padding: 0 0.65rem;
+}
+
+article header > .menu > .menuitem.button.icon > a {
+	padding: 0;
+}
+
+article header > .menu > .menuitem.button > a:focus,
+article header > .menu > .menuitem.button:hover > a,
+article header > .menu > .menuitem.button.focus > a {
+	background-color: #5fa0cb;
+	color: #fff;
+}
+
+article header > .menu > .menuitem.button > a:focus > .badge,
+article header > .menu > .menuitem.button:hover > a > .badge,
+article header > .menu > .menuitem.button.focus > a > .badge {
+	border-color: #5fa0cb;
+}
+
+article header .search {
+	background-color: #5fa0cb;
+	border-radius: 0.2rem;
+	color: #fff;
+	line-height: 2rem;
+	margin: 0.75rem 0 0.75rem 1rem;
+	padding: 0 0.5rem;
+}
+
+article header .search.focus {
+	background-color: #fff;
+	color: #2c3e50;
+}
+
+article header .search label,
+article header .search input {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+article header .search label {
+	text-align: center;
+	width: 1.5rem;
+}
+
+article header .search input {
+	background-color: transparent;
+	border: none;
+	width: 20rem;
+}
+
+article header .search input::placeholder {
+	opacity: 0;
+}
+
+article header .search.focus input::placeholder {
+	opacity: 1;
+}
+
+article header .search {
+	float: right;
+}
+
+article footer {
+	background-color: #ecf0f1;
+	bottom: 0;
+	height: 4rem;
+	left: 20rem;
+	line-height: 4rem;
+	text-align: right;
+}
+
+article footer .extra {
+	float: left;
+	margin: 1rem 0;
+}
+
+article h1,
+article h2,
+article h3,
+article p {
+	margin: 2rem 0;
+}
+
+article h1 {
+	font-size: 1.6rem;
+	font-weight: 400;
+}
+
+article h1:first-of-type,
+article h2:first-of-type {
+	margin-top: 0;
+}
+
+article h1 .count {
+	color: #95a5a6;
+	font-size: 1.4rem;
+	margin-left: 1rem;
+}
+
+article h2 {
+	font-size: 1.4rem;
+	font-weight: 400;
+}
+
+article h3 {
+	font-size: 1.2rem;
+	font-weight: 400;
+}
+
+article h3 .note {
+	color: #bdc3c7;
+	font-size: 0.8rem;
+}
+
+article h3 .note::before {
+	content: '(';
+}
+
+article h3 .note::after {
+	content: ')';
+}
+
+article section .logo,
+article section .search {
+	margin: 4rem 25%;
+	text-align: center;
+}
+
+article section .search {
+	position: relative;
+}
+
+article section .search input[type=text],
+article section .search button {
+	font-size: 1.25rem;
+}
+
+article section .search input[type=text] {
+	padding: 0.5rem 4rem 0.5rem 0.5rem;
+}
+
+article section .search button {
+	border-bottom-left-radius: 0;
+	border-top-left-radius: 0;
+	bottom: 0;
+	position: absolute;
+	right: 0;
+	text-align: center;
+	top: 0;
+	width: 3.5rem;
+}
+
+article section .search angucomplete-alt {
+	width: 100%;
+}
+
+article section .search angucomplete-alt.focus + button {
+	background-color: #5fa0cb;
+}
+
+article section .search angucomplete-alt .angucomplete-dropdown {
+	width: calc(100% - 3.5rem);
+}
+
+article .graph {
+	margin-bottom: 2rem;
+}
+
+.pane {
+	padding-bottom: 6rem;
+}

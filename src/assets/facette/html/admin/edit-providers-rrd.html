@@ -1,0 +1,16 @@
+<h1>{{ 'label.providers_definition' | translate }}</h1>
+
+<columns>
+	<column class="half">
+		<h2>{{ 'label.connectors_settings' | translate }}</h2>
+
+		<label>{{ 'label.connectors_rrd_path' | translate }}</label>
+		<input type="text" ng-model="item.settings.path">
+
+		<label>{{ 'label.connectors_rrd_daemon' | translate }}</label>
+		<input type="text" ng-model="item.settings.daemon">
+
+		<label>{{ 'label.connectors_match_pattern' | translate }}</label>
+		<input type="text" ng-model="item.settings.pattern">
+	</column>
+</columns>

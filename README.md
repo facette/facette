@@ -7,10 +7,10 @@ What is Facette?
 ----------------
 
 [Facette][0] is a web application to display time series data from various sources — such as [collectd][1],
-[Graphite][2] or [InfluxDB][5] — on graphs, designed to be easy to setup and to use. To learn more on its architecture,
-read [this page](http://docs.facette.io/architecture/).
+[Graphite][2], [InfluxDB][5] or [KairosDB][6] — on graphs, designed to be easy to setup and to use. To learn more on
+its architecture, read [this page](http://docs.facette.io/architecture/).
 
-The source code is available at [Github][3], licensed under the terms of the [BSD license][4].
+The source code is available at [Github][3] and licensed under the terms of the [BSD license][4].
 
 ![facette_sshot2](https://cloud.githubusercontent.com/assets/1122379/3489453/3a61f74e-052e-11e4-884e-ea781b93efdd.png)
 ![facette_sshot1](https://cloud.githubusercontent.com/assets/1122379/3489442/74b3b000-052d-11e4-812e-e462b8048ebd.png)
@@ -18,10 +18,9 @@ The source code is available at [Github][3], licensed under the terms of the [BS
 Installation
 ------------
 
-:warning: Facette is currently under development and is **not ready** for
-a production environment.
+:warning: Facette is currently under development and is **not ready** for a production environment.
 
-Please see [INSTALL](INSTALL) file for build instructions and installation procedures.
+Please see [INSTALL.md](INSTALL.md) file for build instructions and installation procedures.
 
 Contribution
 ------------
@@ -43,7 +42,8 @@ To make the things easier, we will ask for the following:
 
 [0]: https://facette.io/
 [1]: https://collectd.org/
-[2]: http://graphite.readthedocs.org/
+[2]: https://graphite.readthedocs.org/
 [3]: https://github.com/facette/facette
-[4]: http://opensource.org/licenses/BSD-3-Clause
+[4]: https://opensource.org/licenses/BSD-3-Clause
 [5]: https://influxdb.com/
+[6]: https://kairosdb.github.io/

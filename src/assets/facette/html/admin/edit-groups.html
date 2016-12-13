@@ -1,0 +1,110 @@
+<ng-include src="'templates/admin/layout.html'" ng-include-replace="true"></ng-include>
+
+<article ng-pane="" ng-show="state == stateOK">
+	<header>
+		<h1>{{ 'label.admin_panel' | translate }} – {{ (id == 'add' ? 'label.' + section + '_new' : 'label.' + section + '_edit') | translate }}</h1>
+
+		<ng-include src="'templates/common/user-menu.html'" ng-include-replace="true"></ng-include>
+	</header>
+
+	<section ng-step="1">
+		<h1>{{ 'label.groups_definition' | translate }}</h1>
+
+		<columns>
+			<column>
+				<h2>{{ 'label.patterns_list' | translate }}</h2>
+
+				<message icon="clock-o" type="placeholder" ng-show="state == stateLoading">{{ 'mesg.wait' | translate }}</message>
+				<message icon="info-circle" type="info" ng-show="state == stateOK && (!item.patterns || item.patterns.length === 0)">{{ 'mesg.patterns_empty' | translate }}</message>
+
+				<table class="list" ng-show="state == stateOK && item.patterns && item.patterns.length > 0">
+					<tbody as-sortable="listSortControl" ng-model="item.patterns">
+						<tr class="listitem" as-sortable-item="" ng-class="{active: pattern.index === $index, locked: pattern.index !== undefined && pattern.index !== $index}" ng-repeat="(idx, p) in item.patterns track by unique(idx, p)">
+							<td class="listfield handle" as-sortable-item-handle=""><span class="fa fa-ellipsis-v"></span></td>
+							<td class="listfield main">
+								<span class="name">{{ p }}</span>
+								<menu class="actions">
+									<menuitem href="" icon="pencil" title="{{ 'label.patterns_edit' | translate }}" type="button" ng-click="editPattern(p)"></menuitem>
+									<menuitem href="" icon="info-circle" title="{{ 'label.patterns_test' | translate }}" type="button" tooltip-data="p" tooltip-formatter="testPattern" tooltip-position="bottom" ng-if="p.indexOf('glob:') === 0 || p.indexOf('regexp:') === 0"></menuitem>
+								</menu>
+							</td>
+							<td class="listfield actions">
+								<menu>
+									<menuitem href="" icon="times-circle" title="{{ 'label.items_remove' | translate }}" type="button" ng-click="remove(item.patterns, p)"></menuitem>
+								</menu>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</column>
+
+			<column class="small">
+				<h2>{{ 'label.patterns_define' | translate }}</h2>
+
+				<div class="formblock">
+					<label>{{ 'label.patterns_type' | translate }}</label>
+					<ui-select theme="selectize" ng-model="pattern.type">
+						<ui-select-match placeholder="{{ 'label.patterns_type_select' | translate }}">
+							<span ng-bind="$select.selected.name"></span>
+						</ui-select-match>
+						<ui-select-choices repeat="t in (patternTypes | filter: $select.search)">
+							<span ng-bind="t.name"></span>
+						</ui-select-choices>
+					</ui-select>
+
+					<label>{{ 'label.patterns_value' | translate }}</label>
+					<angucomplete-alt id="value" pause="250" selected-object="selectPattern" remote-api-handler="patternValues" title-field="name" minlength="1" focus-first="true" match-class="highlight" ng-show="pattern.type.value == 1" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
+					<input type="text" ng-model="pattern.value" ng-show="pattern.type.value != 1">
+				</div>
+
+				<div class="formblock">
+					<button ng-click="setPattern()" ng-disabled="!pattern.value">{{ (pattern.index === undefined ? 'label.patterns_add' : 'label.patterns_update') | translate }}</button>
+					<button class="danger" ng-click="resetPattern()" ng-show="pattern.index !== undefined">{{ 'label.cancel' | translate }}</button>
+				</div>
+			</column>
+		</columns>
+	</section>
+
+	<section ng-step="2">
+		<h1>{{ 'label.groups_definition' | translate }}</h1>
+
+		<columns>
+			<column class="half">
+				<form ng-entersubmit="save()">
+					<h2>{{ 'label.general_info' | translate }}</h2>
+
+					<label>{{ 'label.name' | translate }}
+						<span class="warn" ng-show="conflict"><span class="fa fa-warning"></span> {{ 'mesg.name_unique' | translate }}</span>
+						<span class="warn" ng-show="validated && !item.name"><span class="fa fa-warning"></span> {{ 'mesg.name_mandatory' | translate }}</span>
+					</label>
+					<input type="text" ng-class="{danger: conflict || validated && !item.name}" ng-model="item.name">
+
+					<label>{{ 'label.desc' | translate }}</label>
+					<textarea type="text" ng-model="item.description"></textarea>
+				</form>
+			</column>
+		</columns>
+	</section>
+
+	<footer>
+		<button class="extra" ng-click="reset()" ng-disabled="!modified"><span class="fa fa-undo"></span> {{ 'label.groups_reset' | translate }}</button>
+		<button class="danger" ng-click="cancel()">{{ 'label.cancel' | translate }}</button>
+		<button ng-click="switch(step - 1)" ng-disabled="step == 1"><span class="fa fa-chevron-circle-left"></span> {{ 'label.prev' | translate }}</button>
+		<button ng-click="switch(step + 1)" ng-disabled="!item.patterns || item.patterns.length === 0 || step == 2">{{ 'label.next' | translate }} <span class="fa fa-chevron-circle-right"></span></button>
+		<button ng-click="save()" ng-disabled="step != 2">{{ 'label.groups_save' | translate }}</button>
+	</footer>
+</article>
+
+<article ng-show="state == stateError">
+	<header>
+		<h1>{{ 'label.admin_panel' | translate }} – {{ 'label.' + section + '_edit' | translate }}</h1>
+	</header>
+
+	<section>
+		<message icon="times-circle" type="error">{{ 'mesg.items_not_found' | translate }}</message>
+	</section>
+
+	<footer>
+		<button ng-click="cancel(true)"><span class="fa fa-arrow-left"></span> {{ 'label.' + section + '_back' | translate }}</button>
+	</footer>
+</article>

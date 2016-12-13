@@ -1,0 +1,45 @@
+<div class="graph" in-view="handleView($inview, $inviewInfo)" ng-class="{empty: empty, error: error, focus: focus, folded: folded, frame: options.frame, loading: loading, zooming: zooming}">
+	<message class="clickable" icon="eye-slash" ng-click="toggleFold(false)" ng-show="folded">{{ 'mesg.graphs_folded' | translate }}</a></message>
+
+	<div class="graph-control" ng-if="options.controls && !folded">
+		<div class="graph-fold" ng-if="!options.frame">
+			<div class="fa fa-chevron-up" ng-click="toggleFold(true)" ng-show="!folded"></div>
+		</div>
+
+		<menu class="graph-menu">
+			<menuitem href="{{ ::baseURL }}admin/graphs/{{ graphId }}" icon="pencil" title="{{ 'label.graphs_edit' | translate }}" type="button"></menuitem>
+			<menuitem type="separator"></menuitem>
+			<menuitem icon="clock-o" title="{{ 'label.range_modify' | translate }}" type="button">
+				<menu>
+					<menuitem label="{{ range }}" type="button" ng-click="setRange(range)" ng-repeat="range in rangeValues"></menuitem>
+					<menuitem type="separator"></menuitem>
+					<menuitem label="{{ 'label.range_custom' | translate }}" type="button" ng-click="setRange('custom')"></menuitem>
+				</menu>
+			</menuitem>
+			<menuitem icon="history" title="{{ 'label.range_reset' | translate }}" type="button" ng-click="reset()" ng-disabled="!modified"></menuitem>
+			<menuitem icon="refresh" title="{{ 'label.graphs_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
+			<menuitem icon="arrows-v" title="{{ 'label.range_propagate' | translate }}" type="button" ng-click="propagate()"></menuitem>
+			<menuitem icon="search-minus" title="{{ 'label.graphs_zoom_out' | translate }}" type="button" ng-click="zoom(false)"></menuitem>
+			<menuitem icon="search-plus" title="{{ 'label.graphs_zoom_in' | translate }}" type="button" ng-click="zoom(true)"></menuitem>
+			<menuitem type="separator"></menuitem>
+			<menuitem icon="download" title="{{ 'label.graphs_export' | translate }}" type="button" ng-click="export($event)" ng-disabled="error"></menuitem>
+			<menuitem href="{{ ::baseURL }}show/{{ options.embeddable_path }}" target="_blank" icon="window-maximize" title="{{ 'label.graphs_goto_embeddable' | translate }}" type="button" ng-if="!options.frame && options.embeddable_path"></menuitem>
+		</menu>
+
+		<div class="graph-step">
+			<div class="graph-step-backward fa fa-arrow-left" ng-click="moveStep(false)" ng-class="{active: stepActive == 'backward'}"></div>
+			<div class="graph-step-forward fa fa-arrow-right" ng-click="moveStep(true)" ng-class="{active: stepActive == 'forward'}"></div>
+		</div>
+
+		<div class="graph-legend" ng-show="!error">
+			<div ng-click="toggleLegend(true)" ng-show="!legendActive"><span class="fa fa-chevron-down"></span> {{ 'label.graphs_show_legend' | translate }}</div>
+			<div ng-click="toggleLegend(false)" ng-show="legendActive"><span class="fa fa-chevron-up"></span> {{ 'label.graphs_hide_legend' | translate }}</div>
+		</div>
+	</div>
+
+	<div class="graph-container" ng-if="!folded">
+		<message icon="clock-o" ng-class="{float: data}" ng-show="loading">{{ 'mesg.plots_fetch' | translate }}</message>
+		<message icon="info-circle" ng-show="empty">{{ 'mesg.plots_empty' | translate }}</a></message>
+		<message icon="times-circle" ng-show="error">{{ 'mesg.plots_error' | translate }}</a></message>
+	</div>
+</div>
