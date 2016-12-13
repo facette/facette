@@ -325,7 +325,7 @@ angular.module('facette.ui.graph', [])
 
         angular.extend($scope.options, {
             time: moment(startTime).add(delta).format(timeFormatRFC3339),
-            range: $scope.options.range.replace(/^-/, '')
+            range: ($scope.options.range || defaultTimeRange).replace(/^-/, '')
         });
     };
 
@@ -524,7 +524,7 @@ angular.module('facette.ui.graph', [])
     });
 
     // Set range values
-    $scope.rangeValues = graphRanges;
+    $scope.rangeValues = timeRanges;
 
     // Trigger first draw
     fetchData();
