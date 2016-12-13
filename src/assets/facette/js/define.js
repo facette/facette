@@ -70,7 +70,7 @@ var catalogSections = [
     graphStackModeNormal = 'normal',
     graphStackModePercent = 'percent',
 
-    graphRanges = [
+    timeRanges = [
         '1h',
         '3h',
         '1d',
@@ -80,6 +80,8 @@ var catalogSections = [
         '3mo',
         '1y'
     ],
+
+    defaultTimeRange = '-1h',
 
     graphSummaryBase = [
         'min',

@@ -13,7 +13,7 @@ app.controller('BrowseGraphController', function($rootScope, $routeParams, $scop
     };
 
     // Set range values
-    $scope.rangeValues = graphRanges;
+    $scope.rangeValues = timeRanges;
 
     // Register scope functions
     $scope.setRange = function(range) {
