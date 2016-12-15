@@ -101,15 +101,6 @@ app.factory('library', function($resource) {
             },
             transformRequest: apiTransformRequest
         },
-        parse: {
-            method: 'POST',
-            params: {
-                type: 'parse',
-                id: null
-            },
-            isArray: true,
-            transformRequest: apiTransformRequest
-        },
         search: {
             method: 'POST',
             params: {
