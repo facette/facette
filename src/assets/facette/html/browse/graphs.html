@@ -6,6 +6,7 @@
 
 		<menu>
 			<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ id }}" icon="pencil" title="{{ 'label.' + section + '_edit' | translate }}" type="button"></menuitem>
+			<menuitem href="" icon="refresh" title="{{ 'label.collections_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
 			<menuitem href="" icon="clock-o" title="{{ 'label.range_set' | translate }}" type="button" drop="true">
 				<menu>
 					<menuitem label="{{ range }}" type="button" ng-click="setRange(range)" ng-repeat="range in rangeValues"></menuitem>
@@ -13,7 +14,7 @@
 					<menuitem label="{{ 'label.range_custom' | translate }}" type="button" ng-click="setRange('custom')"></menuitem>
 				</menu>
 			</menuitem>
-			<menuitem href="" icon="refresh" badge="{{ refreshInterval || '' }}" title="{{ 'label.graphs_refresh_set' | translate }}" type="button" ng-click="setRefresh()"></menuitem>
+			<menuitem href="" icon="hourglass-half" badge="{{ refreshInterval || '' }}" title="{{ 'label.graphs_refresh_set' | translate }}" type="button" ng-click="setRefresh()"></menuitem>
 			<menuitem href="" icon="columns" title="{{ 'label.page_grid_set' | translate }}" type="button" drop="true">
 				<menu>
 					<menuitem label="{{ 'label.page_grid_1' | translate }}" ng-click="setGrid(1)" type="button"></menuitem>

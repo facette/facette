@@ -16,6 +16,10 @@ app.controller('BrowseGraphController', function($rootScope, $routeParams, $scop
     $scope.rangeValues = timeRanges;
 
     // Register scope functions
+    $scope.refresh = function() {
+        $rootScope.$emit('RefreshGraph');
+    };
+
     $scope.setRange = function(range) {
         if (range != 'custom') {
             $rootScope.$emit('ApplyGraphOptions', {range: '-' + range});
