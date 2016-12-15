@@ -1,17 +1,15 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"fmt"
 	"net/http"
 	"strings"
-	"text/template"
 	"time"
 
 	"facette/backend"
 	"facette/connector"
 	"facette/plot"
+	"facette/template"
 	"facette/timerange"
 
 	"github.com/facette/httputil"
@@ -92,7 +90,7 @@ func (w *httpWorker) httpHandlePlots(ctx context.Context, rw http.ResponseWriter
 
 		if err := expandGraphTemplate(req.Graph); err != nil {
 			w.log.Warning("%s", err)
-			httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidTemplate), http.StatusBadRequest)
+			httputil.WriteJSON(rw, httpBuildMessage(template.ErrInvalidTemplate), http.StatusBadRequest)
 			return
 		}
 	}
@@ -345,7 +343,7 @@ func expandGraphTemplate(graph *backend.Graph) error {
 	var err error
 
 	if title, ok := graph.Options["title"].(string); ok {
-		if graph.Options["title"], err = expandStringTemplate(title, graph.Attributes); err != nil {
+		if graph.Options["title"], err = template.Expand(title, graph.Attributes); err != nil {
 			return err
 		}
 	}
@@ -353,30 +351,17 @@ func expandGraphTemplate(graph *backend.Graph) error {
 	for i := range graph.Groups {
 		for j := range graph.Groups[i].Series {
 			series := &graph.Groups[i].Series[j]
-			if series.Name, err = expandStringTemplate(series.Name, graph.Attributes); err != nil {
+			if series.Name, err = template.Expand(series.Name, graph.Attributes); err != nil {
 				return err
-			} else if series.Origin, err = expandStringTemplate(series.Origin, graph.Attributes); err != nil {
+			} else if series.Origin, err = template.Expand(series.Origin, graph.Attributes); err != nil {
 				return err
-			} else if series.Source, err = expandStringTemplate(series.Source, graph.Attributes); err != nil {
+			} else if series.Source, err = template.Expand(series.Source, graph.Attributes); err != nil {
 				return err
-			} else if series.Metric, err = expandStringTemplate(series.Metric, graph.Attributes); err != nil {
+			} else if series.Metric, err = template.Expand(series.Metric, graph.Attributes); err != nil {
 				return err
 			}
 		}
 	}
 
 	return nil
-}
-
-func expandStringTemplate(input string, attrs map[string]interface{}) (string, error) {
-	buf := bytes.NewBuffer(nil)
-
-	tmpl, err := template.New("inline").Parse(input)
-	if err != nil {
-		return input, fmt.Errorf("failed to parse template: %s", err)
-	} else if err = tmpl.Execute(buf, attrs); err != nil {
-		return input, fmt.Errorf("failed to execute template: %s", err)
-	}
-
-	return buf.String(), nil
 }

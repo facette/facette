@@ -4,9 +4,10 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 
-	"github.com/facette/sliceutil"
-
 	"facette/mapper"
+	"facette/template"
+
+	"github.com/facette/sliceutil"
 )
 
 // Collection represents a library collection item instance.
@@ -99,7 +100,7 @@ func (c *Collection) Expand(attrs mapper.Map, backend *Backend) error {
 	var err error
 
 	if title, ok := c.Options["title"].(string); ok {
-		if c.Options["title"], err = expandStringTemplate(title, attrs); err != nil {
+		if c.Options["title"], err = template.Expand(title, attrs); err != nil {
 			return err
 		}
 	}
@@ -139,7 +140,7 @@ func (c *Collection) Expand(attrs mapper.Map, backend *Backend) error {
 				c.Entries[i].Options = mapper.Map{}
 			}
 
-			if c.Entries[i].Options["title"], err = expandStringTemplate(title, c.Entries[i].Attributes); err != nil {
+			if c.Entries[i].Options["title"], err = template.Expand(title, c.Entries[i].Attributes); err != nil {
 				return err
 			}
 		}
