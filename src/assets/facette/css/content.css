@@ -14,14 +14,14 @@
 }
 
 article {
-	margin-left: 20rem;
+	margin-left: 22rem;
 	padding: 5.5rem 2rem 2rem;
 	transition: margin-left 0.3s ease-in-out;
 }
 
 article header,
 article footer {
-	left: 20rem;
+	left: 22rem;
 	padding: 0 2rem;
 	position: fixed;
 	right: 0;
@@ -144,7 +144,7 @@ article header .search label {
 article header .search input {
 	background-color: transparent;
 	border: none;
-	width: 20rem;
+	width: 22rem;
 }
 
 article header .search input::placeholder {
@@ -163,7 +163,7 @@ article footer {
 	background-color: #ecf0f1;
 	bottom: 0;
 	height: 4rem;
-	left: 20rem;
+	left: 22rem;
 	line-height: 4rem;
 	text-align: right;
 }
