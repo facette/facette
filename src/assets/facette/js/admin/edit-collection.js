@@ -156,7 +156,13 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
         }
 
         if (!$scope.graphData[$scope.graph.id]) {
-            $scope.graphData[$scope.graph.id] = angular.copy($scope.graph);
+            var id = $scope.graph.id;
+
+            $scope.graphData[id] = angular.copy($scope.graph);
+
+            libraryAction.parse({id: id, type: 'graphs'}, function(data) {
+                $scope.graphData[id].templateKeys = data;
+            });
         }
 
         var graph = {
@@ -366,55 +372,6 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
                 }).$promise;
             };
 
-            $scope.collectionsList = function(term) {
-                var defer = $q.defer();
-
-                library.list({
-                    type: 'collections',
-                    fields: 'id,name,parent',
-                    filter: 'glob:*' + term + '*'
-                }).$promise.then(function(data) {
-                    var collections = {},
-                        assocs = {};
-
-                    angular.forEach(data, function(entry) {
-                        // Set parent association
-                        if (entry.parent) {
-                            if (!assocs[entry.parent]) {
-                                assocs[entry.parent] = [];
-                            }
-                            assocs[entry.parent].push(entry.id);
-                        }
-
-                        // Set result entry
-                        collections[entry.id] = entry;
-                    });
-
-                    // Clean up list from current children collections
-                    var stack = [$scope.id],
-                        cur = null;
-
-                    while (stack.length > 0) {
-                        cur = stack.shift();
-                        if (assocs[cur]) {
-                            stack = stack.concat(assocs[cur]);
-                        }
-                        delete collections[cur];
-                    }
-
-                    // Return cleaned up list
-                    var result = [];
-
-                    angular.forEach(collections, function(entry) {
-                        result.push(entry);
-                    });
-
-                    defer.resolve(result);
-                });
-
-                return defer.promise;
-            };
-
             $translate(['label.page_grid_1', 'label.page_grid_2', 'label.page_grid_3']).then(function(data) {
                 var gridSizes = [];
                 for (var i = 1; i <= 3; i++) {
@@ -440,17 +397,6 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
                 }
             };
 
-            // Resolve parent name
-            if ($scope.item.parent) {
-                library.get({
-                    type: 'collections',
-                    id: $scope.item.parent,
-                    fields: 'name'
-                }, function(data) {
-                    $scope.$broadcast('angucomplete-alt:changeInput', 'parent', data.name);
-                });
-            }
-
             // Trigger initial graph information retrieval
             fetchGraphs();
         } else {
@@ -461,6 +407,66 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
 
             // Select first field
             $scope.$applyAsync(function() { angular.element('.pane :input:visible:first').select(); });
+        }
+
+        $scope.collectionsList = function(term) {
+            var defer = $q.defer();
+
+            library.list({
+                type: 'collections',
+                fields: 'id,name,parent',
+                filter: 'glob:*' + term + '*'
+            }).$promise.then(function(data) {
+                var collections = {},
+                    assocs = {};
+
+                angular.forEach(data, function(entry) {
+                    // Set parent association
+                    if (entry.parent) {
+                        if (!assocs[entry.parent]) {
+                            assocs[entry.parent] = [];
+                        }
+                        assocs[entry.parent].push(entry.id);
+                    }
+
+                    // Set result entry
+                    collections[entry.id] = entry;
+                });
+
+                // Clean up list from current children collections
+                var stack = [$scope.id],
+                    cur = null;
+
+                while (stack.length > 0) {
+                    cur = stack.shift();
+                    if (assocs[cur]) {
+                        stack = stack.concat(assocs[cur]);
+                    }
+                    delete collections[cur];
+                }
+
+                // Return cleaned up list
+                var result = [];
+
+                angular.forEach(collections, function(entry) {
+                    result.push(entry);
+                });
+
+                defer.resolve(result);
+            });
+
+            return defer.promise;
+        };
+
+        // Resolve parent name
+        if ($scope.item.parent) {
+            library.get({
+                type: 'collections',
+                id: $scope.item.parent,
+                fields: 'name'
+            }, function(data) {
+                $scope.$broadcast('angucomplete-alt:changeInput', 'parent', data.name);
+            });
         }
     });
 });

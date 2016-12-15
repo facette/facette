@@ -222,6 +222,10 @@
 					<label>{{ 'label.templates_source' | translate }}</label>
 					<angucomplete-alt class="small" id="template" pause="250" selected-object="selectTemplate" remote-api-handler="templateSources" title-field="name" minlength="1" focus-first="true" match-class="highlight" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}" ng-class="{danger: validated && !item.link}"></angucomplete-alt>
 
+					<label>{{ 'label.collections_parent' | translate }}</label>
+					<angucomplete-alt class="small" id="parent" pause="250" selected-object="selectParent" remote-api-handler="collectionsList" title-field="name" minlength="1" focus-first="true" match-class="highlight" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
+					<button ng-click="removeParent()" ng-disabled="!item.parent">{{ 'label.remove' | translate }}</button>
+
 					<h2>{{ 'label.templates_attrs' | translate }}</h2>
 
 					<message icon="info-circle" type="info" ng-show="!item.link">{{ 'mesg.templates_empty' | translate }}</message>
