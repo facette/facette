@@ -6,13 +6,11 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"sort"
-	"text/template/parse"
 
 	"facette/backend"
+	"facette/template"
 
 	"github.com/facette/httputil"
-	"github.com/fatih/set"
 )
 
 type parseRequest struct {
@@ -83,42 +81,12 @@ func (w *httpWorker) httpHandleLibraryParse(ctx context.Context, rw http.Respons
 		return
 	}
 
-	result, err := libraryTemplateParse(data)
+	result, err := template.Parse(data)
 	if err != nil {
 		w.log.Error("failed to parse template data: %s", err)
-		httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidTemplate), http.StatusBadRequest)
+		httputil.WriteJSON(rw, httpBuildMessage(template.ErrInvalidTemplate), http.StatusBadRequest)
 		return
 	}
 
 	httputil.WriteJSON(rw, result, http.StatusOK)
-}
-
-func libraryTemplateParse(data string) ([]string, error) {
-	// Parse response for template keys
-	trees, err := parse.Parse("inline", data, "", "")
-	if err != nil {
-		return nil, err
-	}
-
-	keys := set.New()
-	for _, node := range trees["inline"].Root.Nodes {
-		if action, ok := node.(*parse.ActionNode); ok {
-			if len(action.Pipe.Cmds) != 1 {
-				continue
-			}
-
-			for _, arg := range action.Pipe.Cmds[0].Args {
-				if field, ok := arg.(*parse.FieldNode); ok {
-					for _, ident := range field.Ident {
-						keys.Add(ident)
-					}
-				}
-			}
-		}
-	}
-
-	result := set.StringSlice(keys)
-	sort.Strings(result)
-
-	return result, nil
 }

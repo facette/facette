@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
-	"text/template/parse"
 	"time"
 
 	"facette/backend"
+	"facette/template"
 
 	"github.com/facette/httputil"
 	"github.com/facette/jsonutil"
@@ -71,9 +71,9 @@ func (w *httpWorker) httpHandleBackendCreate(ctx context.Context, rw http.Respon
 		if reflect.Indirect(rv).FieldByName("Template").Bool() {
 			data, _ := json.Marshal(rv.Interface())
 
-			if _, err := parse.Parse("inline", string(data), "", ""); err != nil {
+			if _, err := template.Parse(string(data)); err != nil {
 				w.log.Error("failed to parse template: %s", err)
-				httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidTemplate), http.StatusBadRequest)
+				httputil.WriteJSON(rw, httpBuildMessage(template.ErrInvalidTemplate), http.StatusBadRequest)
 				return
 			}
 		}
@@ -367,9 +367,9 @@ func (w *httpWorker) httpHandleBackendUpdate(ctx context.Context, rw http.Respon
 		if reflect.Indirect(rv).FieldByName("Template").Bool() {
 			data, _ := json.Marshal(rv.Interface())
 
-			if _, err := parse.Parse("inline", string(data), "", ""); err != nil {
+			if _, err := template.Parse(string(data)); err != nil {
 				w.log.Error("failed to parse template: %s", err)
-				httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidTemplate), http.StatusBadRequest)
+				httputil.WriteJSON(rw, httpBuildMessage(template.ErrInvalidTemplate), http.StatusBadRequest)
 				return
 			}
 		}
