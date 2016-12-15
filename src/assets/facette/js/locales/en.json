@@ -292,7 +292,7 @@
     "mesg.page_unload": "All unsaved data will be lost! Do you confirm?",
     "mesg.patterns_empty": "No pattern defined",
     "mesg.plots_empty": "No data available",
-    "mesg.plots_error": "Unable to rerieve plots data",
+    "mesg.plots_error": "Unable to retrieve plots data",
     "mesg.plots_fetch": "Fetching plots data…",
     "mesg.scales_empty": "No scale defined",
     "mesg.series_empty": "No series defined",
