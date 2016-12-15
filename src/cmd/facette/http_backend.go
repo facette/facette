@@ -215,6 +215,13 @@ func (w *httpWorker) httpHandleBackendGet(ctx context.Context, rw http.ResponseW
 		collection := rv.Interface().(*backend.Collection)
 
 		if collection.Link != nil && len(collection.Attributes) > 0 {
+			// Apply current instance parent to linked template
+			if collection.Parent != nil {
+				collection.Link.Parent = collection.Parent
+				collection.Link.ParentID = collection.ParentID
+			}
+
+			// Expand linked template attributes
 			if err := collection.Link.Expand(collection.Attributes, w.service.backend); err != nil {
 				w.log.Warning("failed to expand template: %s", err)
 				httputil.WriteJSON(rw, httpBuildMessage(ErrUnhandledError), http.StatusInternalServerError)
@@ -226,6 +233,7 @@ func (w *httpWorker) httpHandleBackendGet(ctx context.Context, rw http.ResponseW
 			collection = rv.Interface().(*backend.Collection)
 			collection.Attributes = nil
 		} else {
+			// Merge template entries attributes
 			for _, entry := range collection.Entries {
 				entry.Attributes.Merge(collection.Attributes, true)
 			}
@@ -318,7 +326,18 @@ func (w *httpWorker) httpHandleBackendList(ctx context.Context, rw http.Response
 
 	n := reflect.Indirect(rv).Len()
 	for i := 0; i < n; i++ {
-		result = append(result, jsonutil.FilterStruct(reflect.Indirect(rv).Index(i).Interface(), fields))
+		if typ == "collections" && r.URL.Query().Get("expand") == "1" {
+			collection := reflect.Indirect(rv).Index(i).Interface().(backend.Collection)
+			if collection.Link != nil && len(collection.Link.Options) > 0 {
+				collection.Link.Options.Merge(collection.Options, true)
+				collection.Options = collection.Link.Options
+			}
+			collection.Expand(collection.Attributes, w.service.backend)
+
+			result = append(result, jsonutil.FilterStruct(collection, fields))
+		} else {
+			result = append(result, jsonutil.FilterStruct(reflect.Indirect(rv).Index(i).Interface(), fields))
+		}
 	}
 
 	rw.Header().Set("X-Total-Records", fmt.Sprintf("%d", count))
