@@ -454,8 +454,12 @@ angular.module('facette.ui.graph', [])
         $scope.chart.toggleCursor(time);
     });
 
-    $rootScope.$on('RedrawGraph', function(e) {
+    $rootScope.$on('RedrawGraph', function() {
         draw();
+    });
+
+    $rootScope.$on('RefreshGraph', function() {
+        fetchData();
     });
 
     $rootScope.$on('PauseGraphDraw', function(e, id, state) {

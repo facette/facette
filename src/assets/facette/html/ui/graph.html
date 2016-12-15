@@ -9,6 +9,7 @@
 		<menu class="graph-menu">
 			<menuitem href="{{ ::baseURL }}admin/graphs/{{ graphId }}" icon="pencil" title="{{ 'label.graphs_edit' | translate }}" type="button"></menuitem>
 			<menuitem type="separator"></menuitem>
+			<menuitem icon="refresh" title="{{ 'label.graphs_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
 			<menuitem icon="clock-o" title="{{ 'label.range_modify' | translate }}" type="button">
 				<menu>
 					<menuitem label="{{ range }}" type="button" ng-click="setRange(range)" ng-repeat="range in rangeValues"></menuitem>
@@ -17,7 +18,6 @@
 				</menu>
 			</menuitem>
 			<menuitem icon="history" title="{{ 'label.range_reset' | translate }}" type="button" ng-click="reset()" ng-disabled="!modified"></menuitem>
-			<menuitem icon="refresh" title="{{ 'label.graphs_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
 			<menuitem icon="arrows-v" title="{{ 'label.range_propagate' | translate }}" type="button" ng-click="propagate()"></menuitem>
 			<menuitem icon="search-minus" title="{{ 'label.graphs_zoom_out' | translate }}" type="button" ng-click="zoom(false)"></menuitem>
 			<menuitem icon="search-plus" title="{{ 'label.graphs_zoom_in' | translate }}" type="button" ng-click="zoom(true)"></menuitem>
