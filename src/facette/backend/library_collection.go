@@ -118,15 +118,17 @@ func (c *Collection) Expand(attrs mapper.Map, backend *Backend) error {
 		}
 	}
 
-	tx := backend.db.Begin()
-	defer tx.Commit()
+	if len(ids) > 0 {
+		tx := backend.db.Begin()
+		defer tx.Commit()
 
-	graphs := []Graph{}
-	tx.Select("id", "options").Where("id IN (?)", ids).Find(&graphs)
+		graphs := []Graph{}
+		tx.Select("id", "options").Where("id IN (?)", ids).Find(&graphs)
 
-	for _, graph := range graphs {
-		if title, ok := graph.Options["title"].(string); ok {
-			titles[graph.ID] = title
+		for _, graph := range graphs {
+			if title, ok := graph.Options["title"].(string); ok {
+				titles[graph.ID] = title
+			}
 		}
 	}
 
