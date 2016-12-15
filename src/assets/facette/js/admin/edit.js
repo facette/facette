@@ -187,8 +187,9 @@ app.factory('AdminEdit', function($location, $rootScope, $timeout, library, prov
                 if (callback) {
                     callback();
                 }
-            }, function() {
+            }, function(response) {
                 scope.state = stateError;
+                scope.notFound = response.status == 404;
             });
         }
     };
