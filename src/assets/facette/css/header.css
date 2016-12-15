@@ -93,7 +93,7 @@ header .menuitem.focus > .subcontent {
 header.error {
 	background-color: #e74c3c;
 	color: #fff;
-	left: 20rem;
+	left: 22rem;
 	padding: 0 2rem;
 	position: fixed;
 	right: 0;

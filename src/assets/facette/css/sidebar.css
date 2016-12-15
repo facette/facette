@@ -2,7 +2,7 @@ aside,
 aside header,
 aside nav > .toggle {
 	position: fixed;
-	width: 20rem;
+	width: 22rem;
 }
 
 aside {
@@ -113,6 +113,10 @@ aside nav .treeitem .treelabel {
 	white-space: nowrap;
 }
 
+aside nav .treeitem .treelabel {
+	text-overflow: ellipsis;
+}
+
 aside nav .placeholder {
 	color: #777;
 	padding: 0 1rem;
@@ -145,7 +149,6 @@ aside nav .menuitem.button .content .label {
 	text-overflow: ellipsis;
 	vertical-align: middle;
 	width: 100%;
-	width: calc(100% - 1.5rem);
 }
 
 aside nav > .toggle {
@@ -155,5 +158,5 @@ aside nav > .toggle {
 	line-height: 4rem;
 	position: fixed;
 	text-align: center;
-	width: 20rem;
+	width: 22rem;
 }
