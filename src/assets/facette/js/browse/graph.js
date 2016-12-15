@@ -77,44 +77,6 @@ app.controller('BrowseGraphController', function($rootScope, $routeParams, $scop
         $scope.form.filter = '';
     };
 
-    // Register watchers
-    $scope.$watch('collections', function(newValue, oldValue) {
-        if (angular.equals(newValue, oldValue)) {
-            return;
-        }
-
-        // Rerieve existing tree state
-        var state = storage.get('browse-collection_tree', 'state', {});
-
-        $timeout(function() {
-            var trees = angular.element('#collections-tree .tree'),
-                baseMargin = parseInt(trees.first().find('.treelabel').css('padding-left'), 10);
-
-            trees.each(function(index, item) {
-                var tree = angular.element(item);
-
-                tree.children('.treeitem').children('.treelabel').css({
-                    paddingLeft: parseInt(tree.closest('.treeitem').children('.treelabel')
-                        .css('padding-left'), 10) + baseMargin
-                });
-            });
-
-            // Restore tree state
-            if (state) {
-                angular.element('#collections-tree .treelabel').each(function(index, item) {
-                    var label = angular.element(item),
-                        href = label.attr('href');
-
-                    if (state[href.substr(href.lastIndexOf('/') + 1)] === true) {
-                        label.children('.toggle').trigger('click');
-                    }
-                });
-            }
-
-            $scope.collectionsLoaded = true;
-        }, 250);
-    });
-
     $scope.$watch('form.filter', function(newValue, oldValue) {
         if (angular.equals(newValue, oldValue)) {
             return;
@@ -172,27 +134,15 @@ app.controller('BrowseGraphController', function($rootScope, $routeParams, $scop
     });
 
     // Handle tree state save
-    function saveTreeState() {
-        var state = {};
-        angular.element('#collections-tree [collapsed]').each(function(index, item) {
-            var href = angular.element(item).children('.treelabel').attr('href'),
-                id = href.substr(href.lastIndexOf('/') + 1);
-
-            state[id] = item.getAttribute('collapsed') == 'false';
-        });
-
-        storage.set('browse-collection_tree', 'state', state);
-    }
-
-    $scope.$on('$locationChangeStart', saveTreeState);
-    angular.element($window).on('beforeunload', saveTreeState);
+    $scope.$on('$locationChangeStart', BrowseCollection.saveTreeState);
+    angular.element($window).on('beforeunload', BrowseCollection.saveTreeState);
 
     // Load collections and graphs data
     if ($scope.id) {
         var query = {
             type: $scope.section,
             id: $scope.id,
-            fields: 'id,name,entries.id,entries.options,entries.attributes,options,attributes'
+            fields: 'id,name,entries.id,entries.options,entries.attributes,options,attributes,parent'
         };
 
         // Always expand collections when browsing
