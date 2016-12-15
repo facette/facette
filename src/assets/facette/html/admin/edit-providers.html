@@ -136,7 +136,8 @@
 	</header>
 
 	<section>
-		<message icon="times-circle" type="error">{{ 'mesg.items_not_found' | translate }}</message>
+		<message icon="times-circle" type="error" ng-if="!notFound">{{ 'mesg.fetch_error' | translate }}</message>
+		<message icon="times-circle" type="error" ng-if="notFound">{{ 'mesg.items_not_found' | translate }}</message>
 	</section>
 
 	<footer>
