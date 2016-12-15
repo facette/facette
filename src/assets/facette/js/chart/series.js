@@ -43,4 +43,6 @@ chart.fn.toggleSeries = function(idx) {
     $$.drawAxis();
     $$.drawArea();
     $$.drawSeries();
+    $$.drawZoomRect();
+    $$.drawEventRect();
 };

@@ -238,6 +238,9 @@ angular.module('facette.ui.graph', [])
             $scope.data = null;
             $scope.loading = false;
             $scope.error = true;
+
+            // Remove old rendered graph
+            $element.find('.graph-container svg').remove();
         });
     }
 
