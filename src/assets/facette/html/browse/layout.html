@@ -18,7 +18,7 @@
 		<menu>
 			<menuitem label="{{ 'label.browse' | translate }}" type="label"></menuitem>
 			<menuitem href="{{ ::baseURL }}browse/{{ parentID ? 'collections/' + parentID : '' }}" icon="arrow-left" label="{{ 'label.goto_parent' | translate }}" type="button" ng-if="section"></menuitem>
-			<menuitem ng-if="collections && collections.length > 0">
+			<menuitem ng-if="collections && collections.length > 0 || !collectionsLoaded">
 				<div class="placeholder" ng-if="!collectionsLoaded">{{ 'mesg.wait' | translate }}</div>
 				<div class="placeholder" ng-if="collectionsLoaded && collections.length === 0 && graphs.length === 0"><span class="fa fa-info-circle"></span> {{ 'mesg.collections_empty' | translate }}</div>
 				<div ui-tree="" ng-show="collectionsLoaded">
