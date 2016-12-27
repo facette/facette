@@ -19,6 +19,10 @@ chart.fn.updateData = function() {
             keys = [];
 
         $$.config.series.forEach(function(series) {
+            if (!series.plots) {
+                return;
+            }
+
             series.plots.forEach(function(plot, idx) {
                 if (!stackData[idx]) {
                     stackData[idx] = {date: plot[0] * 1000};
