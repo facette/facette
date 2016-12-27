@@ -41,6 +41,9 @@ func (d pgsqlDriver) whereClause(column string, v interface{}) (string, interfac
 		} else if strings.HasPrefix(s, FilterRegexpPrefix) {
 			operator = "~"
 			v = "(?i)" + strings.TrimPrefix(s, FilterRegexpPrefix)
+		} else if s == "null" {
+			operator = "IS"
+			v = nil
 		}
 	}
 

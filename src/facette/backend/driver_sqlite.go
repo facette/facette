@@ -43,6 +43,9 @@ func (d sqliteDriver) whereClause(column string, v interface{}) (string, interfa
 		} else if strings.HasPrefix(s, FilterRegexpPrefix) {
 			operator = "REGEXP"
 			v = "(?i)" + strings.TrimPrefix(s, FilterRegexpPrefix)
+		} else if s == "null" {
+			operator = "IS"
+			v = nil
 		}
 	}
 
