@@ -20,7 +20,11 @@ type query struct {
 }
 
 func (q *query) appendArg(value interface{}) string {
-	q.args = append(q.args, q.db.driver.adaptValue(reflect.ValueOf(value)).Interface())
+	if value == nil {
+		q.args = append(q.args, nil)
+	} else {
+		q.args = append(q.args, q.db.driver.adaptValue(reflect.ValueOf(value)).Interface())
+	}
 	return q.db.driver.bindVar(len(q.args))
 }
 

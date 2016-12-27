@@ -61,6 +61,9 @@ func (d mysqlDriver) whereClause(column string, v interface{}) (string, interfac
 		} else if strings.HasPrefix(s, FilterRegexpPrefix) {
 			operator = "REGEXP"
 			v = strings.TrimPrefix(s, FilterRegexpPrefix)
+		} else if s == "null" {
+			operator = "IS"
+			v = nil
 		}
 	}
 
