@@ -49,6 +49,10 @@
 
 * Fix auto-match #245 #246
 
+### [@ferfabricio: Fernando Fabricio dos Santos](https://github.com/ferfabricio)
+
+* Update README #439
+
 ### [@fkeusch](https://github.com/fkeusch)
 
 * Add tabindex #311 #57
@@ -124,6 +128,10 @@
 
 * New callback handler, response translator, better template code format, and css fix #6
 * Fixed support for IE8 #13
+
+### [@nhim175: Thinh Pham](https://github.com/nhim175)
+
+* Adding support for IMEs #430
 
 ### [@peterjkirby: Peter Kirby](https://github.com/peterjkirby)
 

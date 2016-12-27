@@ -1,6 +1,6 @@
 /**
- * @license Angular UI Tree v2.22.1
- * (c) 2010-2016. https://github.com/angular-ui-tree/angular-ui-tree
+ * @license Angular UI Tree v2.22.5
+ * (c) 2010-2017. https://github.com/angular-ui-tree/angular-ui-tree
  * License: MIT
  */
 (function () {
@@ -631,7 +631,6 @@
               bindDragMoveEvents,
               unbindDragMoveEvents,
               keydownHandler,
-              outOfBounds,
               isHandleChild,
               el,
               isUiTreeRoot,
@@ -757,6 +756,7 @@
 
               //Check if it or it's parents has a 'data-nodrag' attribute
               el = angular.element(e.target);
+              isUiTreeRoot = el[0].attributes['ui-tree'];
               while (el && el[0] && el[0] !== element && !isUiTreeRoot) {
 
                 //Checking that I can access attributes.
@@ -823,7 +823,7 @@
 
               //Getting starting position of element being moved.
               pos = UiTreeHelper.positionStarted(eventObj, element);
-              placeElm.css('height', UiTreeHelper.height(element) + 'px');
+              placeElm.css('height', element.prop('offsetHeight') + 'px');
 
               //Creating drag element to represent node.
               dragElm = angular.element($window.document.createElement(scope.$parentNodesScope.$element.prop('tagName')))
@@ -1029,29 +1029,6 @@
                   dragElm[0].style.display = displayElm;
                 }
 
-                //This checks if angularUiTree attributes are found on element.
-                outOfBounds = !UiTreeHelper.elementIsTreeNodeHandle(targetElm) &&
-                    !UiTreeHelper.elementIsTreeNode(targetElm) &&
-                    !UiTreeHelper.elementIsTreeNodes(targetElm) &&
-                    !UiTreeHelper.elementIsTree(targetElm) &&
-                    !UiTreeHelper.elementIsPlaceholder(targetElm);
-
-                //Detect out of bounds condition, update drop target display, and prevent drop, also reset parent to source.
-                if (outOfBounds) {
-
-                  //Remove the placeholder.
-                  placeElm.remove();
-
-                  //If the target was an empty tree, replace the empty element placeholder.
-                  if (treeScope) {
-                    treeScope.resetEmptyElement();
-                    treeScope = null;
-                  }
-
-                  //Reset parent to source parent.
-                  dragInfo.resetParent();
-                }
-
                 //Assigning scope to target you are moving draggable over.
                 if (UiTreeHelper.elementIsTree(targetElm)) {
                   targetNode = targetElm.controller('uiTree').scope;
@@ -1071,16 +1048,16 @@
                 moveWithinTree =  (targetNode && targetNode.$treeScope && targetNode.$treeScope.$id && targetNode.$treeScope.$id === treeOfOrigin);
 
                 /* (jcarter) Notes to developers:
-                *  pos.dirAx is either 0 or 1
-                *  1 means horizontal movement is happening
-                *  0 means vertical movement is happening
-                */
+                 *  pos.dirAx is either 0 or 1
+                 *  1 means horizontal movement is happening
+                 *  0 means vertical movement is happening
+                 */
 
                 // Move nodes up and down in nesting level.
                 if (moveWithinTree && pos.dirAx) {
 
                   // increase horizontal level if previous sibling exists and is not collapsed
-                  // example 1.1.1 becomes 1.2 
+                  // example 1.1.1 becomes 1.2
                   if (pos.distX > 0) {
                     prev = dragInfo.prev();
                     if (prev && !prev.collapsed
@@ -1104,7 +1081,7 @@
                       }
                     }
                   }
-                } else { //Either in origin tree and moving horizontally OR you are moving within a new tree.  
+                } else { //Either in origin tree and moving horizontally OR you are moving within a new tree.
 
                   //Check it's new position.
                   isEmpty = false;
@@ -1174,6 +1151,7 @@
                       if (targetNode.collapsed) {
                         if (scope.expandOnHover === true || (angular.isNumber(scope.expandOnHover) && scope.expandOnHover === 0)) {
                           targetNode.collapsed = false;
+                          targetNode.$treeScope.$callbacks.toggle(false, targetNode);
                         } else if (scope.expandOnHover !== false && angular.isNumber(scope.expandOnHover) && scope.expandOnHover > 0) {
 
                           //Triggering expansion.
@@ -1185,6 +1163,7 @@
                             {
                               scope.$callbacks.expandTimeoutEnd();
                               targetNode.collapsed = false;
+                              targetNode.$treeScope.$callbacks.toggle(false, targetNode);
                             }, scope.expandOnHover);
                           }
                         }
@@ -1220,9 +1199,6 @@
                     } else if (!targetBefore && targetNode.accept(scope, targetNode.childNodesCount())) {
                       targetNode.$childNodesScope.$element.append(placeElm);
                       dragInfo.moveTo(targetNode.$childNodesScope, targetNode.childNodes(), targetNode.childNodesCount());
-                    } else {
-                      outOfBounds = true;
-                      dragInfo.resetParent();
                     }
                   }
                 }
@@ -1251,7 +1227,7 @@
 
                      //Promise resolved (or callback didn't return false)
                     .then(function (allowDrop) {
-                      if (allowDrop !== false && scope.$$allowNodeDrop && !outOfBounds) {
+                      if (allowDrop !== false && scope.$$allowNodeDrop) {
                         //Node drop accepted.
                         dragInfo.apply();
 
@@ -1389,6 +1365,7 @@
       }
     ]);
 })();
+
 (function () {
   'use strict';
 

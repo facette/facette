@@ -212,7 +212,7 @@ $scope.$broadcast('angucomplete-alt:changeInput', 'autocomplete-1', 'Hello!');
 ### Remote API Handler
 
 This is an example calling search API with POST.
-Pass this searchAPI function to the directive as remote-api-hander.
+Pass this searchAPI function to the directive as remote-api-handler.
 
 ```js
 $scope.searchAPI = function(userInputString, timeoutPromise) {

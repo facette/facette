@@ -1,13 +1,26 @@
 {
   "name": "roboto-googlefont",
-  "homepage": "https://github.com/google-fonts-bower/roboto-bower",
-  "_release": "2bb62fd690",
+  "license": "APACHE2",
+  "authors": [
+    "Christian Robertson"
+  ],
+  "homepage": "https://fonts.google.com/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/google-fonts-bower/roboto-bower.git"
+  },
+  "description": "Roboto font",
+  "keywords": [
+    "font",
+    "SANS_SERIF"
+  ],
+  "_release": "1f3d8e2976",
   "_resolution": {
     "type": "branch",
     "branch": "master",
-    "commit": "2bb62fd690f9e961b935845f627a3c22850a881b"
+    "commit": "1f3d8e2976b2070c58a955fb45372d634a6290e6"
   },
-  "_source": "git://github.com/google-fonts-bower/roboto-bower.git",
+  "_source": "https://github.com/google-fonts-bower/roboto-bower.git",
   "_target": "*",
   "_originalSource": "roboto-googlefont"
 }
