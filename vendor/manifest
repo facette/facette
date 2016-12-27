@@ -50,6 +50,12 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/facette/natsort",
+			"repository": "https://github.com/facette/natsort",
+			"revision": "3769c5fd310020fdd04779443fd9255c8cf04e34",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/facette/sliceutil",
 			"repository": "https://github.com/facette/sliceutil",
 			"revision": "74404cdf68c600d69de0e76eed89e50cd79236f1",

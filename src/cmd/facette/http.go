@@ -91,6 +91,8 @@ func (w *httpWorker) Run(wg *sync.WaitGroup) {
 		Post(w.httpHandleLibraryParse)
 	w.router.Endpoint(apiPrefix + "/library/search").
 		Post(w.httpHandleLibrarySearch)
+	w.router.Endpoint(apiPrefix + "/library/collections/tree").
+		Get(w.httpHandleLibraryCollectionTree)
 	w.router.Endpoint(apiPrefix + "/library/:type/").
 		Delete(w.httpHandleBackendDeleteAll).
 		Get(w.httpHandleBackendList).

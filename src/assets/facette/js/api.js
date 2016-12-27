@@ -68,6 +68,14 @@ app.factory('library', function($resource) {
             },
             transformRequest: apiTransformRequest
         },
+        collectionTree: {
+            method: 'GET',
+            params: {
+                type: 'collections',
+                id: 'tree'
+            },
+            isArray: true
+        },
         delete: {
             method: 'DELETE',
             params: {
