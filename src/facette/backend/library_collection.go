@@ -3,12 +3,22 @@ package backend
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"time"
 
 	"facette/mapper"
 	"facette/template"
 
 	"github.com/facette/sliceutil"
 )
+
+const collectionCacheTime = 30
+
+// collectionsCache stores parent relations between collections in order to prevent requesting data from database
+// upon each validation (see collectionCacheTime above)
+var collectionsCache struct {
+	updated time.Time
+	data    map[string]string
+}
 
 // Collection represents a library collection item instance.
 type Collection struct {
@@ -38,24 +48,28 @@ func (c Collection) Validate(backend *Backend) error {
 	}
 
 	// Get collections associations
-	tx := backend.db.Begin()
-	defer tx.Commit()
+	if collectionsCache.updated.Before(time.Now().Add(-1 * collectionCacheTime * time.Second)) {
+		tx := backend.db.Begin()
+		defer tx.Commit()
 
-	q := tx.Select("id", "parent").Where("parent IS NOT NULL").From(Collection{})
+		q := tx.Select("id", "parent").Where("parent IS NOT NULL").From(Collection{})
 
-	rows, err := q.Rows()
-	if err != nil {
-		return err
-	}
-	defer rows.Close()
-
-	collections := map[string]string{}
-	for rows.Next() {
-		var collection Collection
-		if err := q.Scan(rows, &collection).Error(); err != nil {
+		rows, err := q.Rows()
+		if err != nil {
 			return err
 		}
-		collections[collection.ID] = collection.ParentID
+		defer rows.Close()
+
+		collectionsCache.data = map[string]string{}
+		for rows.Next() {
+			var collection Collection
+			if err := q.Scan(rows, &collection).Error(); err != nil {
+				return err
+			}
+			collectionsCache.data[collection.ID] = collection.ParentID
+		}
+
+		collectionsCache.updated = time.Now()
 	}
 
 	// Loop through collections for conflicting parenting
@@ -63,13 +77,16 @@ func (c Collection) Validate(backend *Backend) error {
 	for {
 		var ok bool
 
-		parent, ok = collections[parent]
+		parent, ok = collectionsCache.data[parent]
 		if !ok {
 			break
 		} else if parent == c.ID {
 			return ErrInvalidParent
 		}
 	}
+
+	// Update cache entry for current collection
+	collectionsCache.data[c.ID] = c.ParentID
 
 	return nil
 }
