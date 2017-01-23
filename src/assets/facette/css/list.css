@@ -92,6 +92,10 @@
 	float: left;
 }
 
+.listfield.main .description {
+    min-height: 1.5rem;
+}
+
 .listfield.main .description.list {
 	display: flex;
     flex-direction: row;
@@ -130,6 +134,10 @@
 .listfield.main .description .info strong {
 	font-weight: 500;
 	text-transform: none;
+}
+
+.listfield.main .description .attrinfo + .attrinfo::before {
+	content: ', ';
 }
 
 .listfield.main .toggle {
