@@ -49,7 +49,9 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
                     });
                 });
 
-                if (series.source.startsWith(groupPrefix) || series.metric.startsWith(groupPrefix)) {
+                if (series.template) {
+                    return;
+                } else if (series.source.startsWith(groupPrefix) || series.metric.startsWith(groupPrefix)) {
                     series.expansion = expandQuery.length;
                     expandQuery.push([series.origin, series.source, series.metric]);
                 }
@@ -119,11 +121,17 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
         // Parse series for attribute names
         angular.forEach(item.groups, function(group) {
             angular.forEach(group.series, function(series) {
-                keys = keys.concat((
+                var subkeys = (
                     series.origin + '\x1e' +
                     series.source + '\x1e' +
                     series.metric
-                ).matchAll(templateRegexp));
+                ).matchAll(templateRegexp);
+
+                if (subkeys.length > 0) {
+                    series.template = true;
+                }
+
+                keys = keys.concat(subkeys);
             });
         });
 
@@ -204,6 +212,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
                 delete series.autoname;
                 delete series.expanded;
                 delete series.expansion;
+                delete series.template;
             });
         });
     };
@@ -801,6 +810,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
             $scope.$applyAsync(function() { angular.element('#origin_value').focus(); });
 
             // Trigger initial group information retrieval
+            updateTemplate();
             fetchGroups();
         } else {
             $scope.templateSources = function(term) {
