@@ -240,7 +240,7 @@ app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope
     $rootScope.setError = function(content) {
         $rootScope.error = content;
         $rootScope.errorActive = true;
-        $timeout(function() { $rootScope.resetError(); }, 3000);
+        $timeout(function() { $rootScope.resetError(); }, 5000);
     };
 
     $rootScope.resetError = function() {
