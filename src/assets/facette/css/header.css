@@ -120,7 +120,7 @@ header.error::after {
 }
 
 header.error.active::after {
-	transition: width 3s ease-in-out;
+	transition: width 5s ease-in-out;
 	width: 0;
 }
 
