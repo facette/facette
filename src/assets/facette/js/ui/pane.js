@@ -1,6 +1,6 @@
 angular.module('facette.ui.pane', [])
 
-.directive('ngPane', function($rootScope) {
+.directive('ngPane', function() {
     return {
         restrict: 'A',
         scope: {},
@@ -9,15 +9,14 @@ angular.module('facette.ui.pane', [])
 })
 
 .controller('PaneController', function($scope, $rootScope, $element) {
-    $rootScope.step = null;
     $rootScope.steps = {};
 
     // Define scope functions
     $rootScope.switch = function(step) {
-        var element = angular.element('[ng-step="' + step + '"]').show();
-        element.siblings('[ng-step]').hide();
+        var element = angular.element('[ng-pane-step="' + step + '"]').show();
+        element.siblings('[ng-pane-step]').hide();
 
-        $rootScope.step = $scope.$parent.step = step;
+        $scope.$parent.step = step;
     };
 
     // Add class on pane element
@@ -27,13 +26,13 @@ angular.module('facette.ui.pane', [])
     $scope.$evalAsync(function() { $rootScope.switch(1); });
 })
 
-.directive('ngStep', function($rootScope) {
+.directive('ngPaneStep', function($rootScope) {
     return {
         require: '^ngPane',
         restrict: 'A',
         scope: {},
         link: function(scope, element, attrs) {
-            $rootScope.steps[attrs.ngStep] = element;
+            $rootScope.steps[attrs.ngPaneStep] = element;
         }
     };
 });

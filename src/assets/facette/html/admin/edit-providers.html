@@ -7,7 +7,7 @@
 		<ng-include src="'templates/common/user-menu.html'" ng-include-replace="true"></ng-include>
 	</header>
 
-	<section ng-step="1">
+	<section ng-pane-step="1">
 		<h1>{{ 'label.providers_definition' | translate }}</h1>
 
 		<columns>
@@ -51,11 +51,11 @@
 		</columns>
 	</section>
 
-	<section ng-step="settings">
+	<section ng-pane-step="settings">
 		<ng-include src="'templates/admin/edit-providers-' + item.connector + '.html'" ng-if="item.connector"></ng-include>
 	</section>
 
-	<section ng-step="filters">
+	<section ng-pane-step="filters">
 		<h1>{{ 'label.providers_definition' | translate }}</h1>
 
 		<h2>{{ 'label.filters_list' | translate }}</h2>
