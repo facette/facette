@@ -30,6 +30,10 @@ func (g Graph) Validate(backend *Backend) error {
 		return ErrExtraAttributes
 	}
 
+	if !authorizedAliasChars.MatchString(g.Alias) {
+		return ErrInvalidAlias
+	}
+
 	return nil
 }
 

@@ -40,6 +40,10 @@ func (c Collection) Validate(backend *Backend) error {
 		return err
 	}
 
+	if !authorizedAliasChars.MatchString(c.Alias) {
+		return ErrInvalidAlias
+	}
+
 	// Check for parent identifier
 	if c.ParentID == "" {
 		return nil
