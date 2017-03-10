@@ -57,6 +57,10 @@ func (w *httpWorker) httpHandleBackendCreate(ctx context.Context, rw http.Respon
 		}
 
 		reflect.Indirect(rv).FieldByName("ID").SetString("")
+
+		if w.service.backend.IsAliasable(rv.Interface()) {
+			reflect.Indirect(rv).FieldByName("Alias").SetString("")
+		}
 	}
 
 	// Fill item with data received from request
