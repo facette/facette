@@ -11,6 +11,8 @@ var (
 	ErrExtraAttributes = errors.New("extraneous attributes")
 	// ErrInvalidName represents an invalid name error.
 	ErrInvalidName = errors.New("invalid name")
+	// ErrInvalidAlias represents an invalid alias error.
+	ErrInvalidAlias = errors.New("invalid alias")
 	// ErrInvalidParent represents an invalid parent error.
 	ErrInvalidParent = errors.New("invalid parent")
 	// ErrInvalidScale represents an invalid scale value error.

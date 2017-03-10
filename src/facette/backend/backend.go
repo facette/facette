@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"reflect"
+	"regexp"
 	"strings"
 
 	"facette/orm"
@@ -20,12 +21,20 @@ const (
 	FilterRegexpPrefix = "regexp:"
 )
 
+var (
+	authorizedAliasChars *regexp.Regexp
+)
+
 // Backend represents a backend instance.
 type Backend struct {
 	config *forge.Section
 	log    *logger.Logger
 	driver sqlDriver
 	db     *orm.DB
+}
+
+func init() {
+	authorizedAliasChars = regexp.MustCompile("^[A-Za-z0-9\\-_]+$")
 }
 
 // NewBackend creates a new instance of a backend.
