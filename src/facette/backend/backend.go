@@ -132,14 +132,42 @@ func (b *Backend) Reset(v interface{}) error {
 }
 
 // Get fetches an item from the backend database.
-func (b *Backend) Get(id string, v interface{}) error {
+func (b *Backend) Get(term string, v interface{}) error {
+	// This method accepts either a backend item ID (UUID) or an 'alias' for some items types,
+	// such as graphs or collections.
+
+	rt := reflect.TypeOf(v)
+	rv := reflect.New(reflect.MakeSlice(reflect.SliceOf(rt), 0, 0).Type())
+
 	tx := b.db.Begin()
 	defer tx.Commit()
 
-	if err := tx.Where("id = ?", id).Find(v).Error(); err == sql.ErrNoRows {
+	if b.IsAliasable(v) {
+		tx.Where("id = ? OR alias = ?", term, term)
+	} else {
+		tx.Where("id = ?", term)
+	}
+
+	if err := tx.Find(rv.Interface()).Error(); err == sql.ErrNoRows {
 		return ErrItemNotExist
 	} else if err != nil {
 		return err
+	}
+
+	ri := reflect.ValueOf(v).Elem()
+	if reflect.Indirect(rv).Len() == 2 {
+		// In case of a backend search returning 2 results
+		// (i.e. one with ID='<UUID>' and another with Alias='<UUID>'), the record with ID='<UUID>'
+		// has the precedence.
+
+		item := reflect.Indirect(rv).Index(0)
+		if reflect.Indirect(item).FieldByName("ID").String() == term {
+			ri.Set(item.Elem())
+		} else {
+			ri.Set(reflect.Indirect(rv).Index(1).Elem())
+		}
+	} else {
+		ri.Set(reflect.Indirect(rv).Index(0).Elem())
 	}
 
 	return nil
