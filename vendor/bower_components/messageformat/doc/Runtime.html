@@ -40,7 +40,7 @@
 
     
 
-    <h4 class="name" id="Runtime"><span class="type-signature"></span>new Runtime<span class="signature">(locale<span class="signature-attributes">opt</span>, pluralFunc<span class="signature-attributes">opt</span>, formatters<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Runtime"><span class="type-signature"></span>new Runtime<span class="signature">(mf)</span><span class="type-signature"></span></h4>
 
     
 
@@ -72,8 +72,6 @@
         <th>Type</th>
 
         
-        <th>Attributes</th>
-        
 
         
 
@@ -86,99 +84,23 @@
 
         <tr>
             
-                <td class="name"><code>locale</code></td>
+                <td class="name"><code>mf</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type"><a href="MessageFormat.html">MessageFormat</a></span>
 
 
             
             </td>
 
             
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
 
             
 
-            <td class="description last"><p>The parsed locale</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>pluralFunc</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>Pluralization function for the locale</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>formatters</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;function()></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last"><p>Optional custom formatting functions</p></td>
+            <td class="description last"><p>A MessageFormat instance</p></td>
         </tr>
 
     
@@ -219,7 +141,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messageformat.js.html">messageformat.js</a>, <a href="messageformat.js.html#line213">line 213</a>
+        <a href="runtime.js.html">runtime.js</a>, <a href="runtime.js.html#line11">line 11</a>
     </li></ul></dd>
     
 
@@ -259,162 +181,6 @@
     
 
     
-        <h3 class="subsection-title">Members</h3>
-
-        
-            
-<h4 class="name" id="fmt"><span class="type-signature"></span>fmt<span class="type-signature"> :Object.&lt;string, function()></span></h4>
-
-
-
-
-<div class="description">
-    <p>Custom formatting functions called by <code>{var, fn[, args]*}</code> syntax</p>
-<p> For examples, see <a href="MessageFormat.formatters.html">MessageFormat.formatters</a></p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Object.&lt;string, function()></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messageformat.js.html">messageformat.js</a>, <a href="messageformat.js.html#line229">line 229</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-    <dt class="tag-see">See:</dt>
-    <dd class="tag-see">
-        <ul>
-            <li><a href="MessageFormat.formatters.html">MessageFormat.formatters</a></li>
-        </ul>
-    </dd>
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-            
-<h4 class="name" id="pluralFuncs"><span class="type-signature"></span>pluralFuncs<span class="type-signature"> :Object.&lt;string, function()></span></h4>
-
-
-
-
-<div class="description">
-    <p>Pluralization functions included in compiled output</p>
-</div>
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Object.&lt;string, function()></span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messageformat.js.html">messageformat.js</a>, <a href="messageformat.js.html#line219">line 219</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-        
-    
 
     
         <h3 class="subsection-title">Methods</h3>
@@ -424,7 +190,7 @@
 
     
 
-    <h4 class="name" id="number"><span class="type-signature"></span>number<span class="signature">(value, offset<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="number"><span class="type-signature"></span>number<span class="signature">(value, name, offset<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {number|string}</span></h4>
 
     
 
@@ -432,6 +198,8 @@
 
 <div class="description">
     <p>Utility function for <code>#</code> in plural rules</p>
+<p> Will throw an Error if <code>value</code> has a non-numeric value and <code>offset</code> is
+ non-zero or <a href="MessageFormat.html#setStrictNumberSign">MessageFormat#setStrictNumberSign</a> is set.</p>
 </div>
 
 
@@ -500,6 +268,41 @@
             
 
             <td class="description last"><p>The value to operate on</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>The name of the argument, used for error reporting</p></td>
         </tr>
 
     
@@ -579,7 +382,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messageformat.js.html">messageformat.js</a>, <a href="messageformat.js.html#line241">line 241</a>
+        <a href="runtime.js.html">runtime.js</a>, <a href="runtime.js.html#line19">line 19</a>
     </li></ul></dd>
     
 
@@ -602,6 +405,31 @@
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>The result of applying the offset to the input value</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">number</span>
+|
+
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -846,7 +674,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messageformat.js.html">messageformat.js</a>, <a href="messageformat.js.html#line254">line 254</a>
+        <a href="runtime.js.html">runtime.js</a>, <a href="runtime.js.html#line71">line 71</a>
     </li></ul></dd>
     
 
@@ -1022,7 +850,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messageformat.js.html">messageformat.js</a>, <a href="messageformat.js.html#line267">line 267</a>
+        <a href="runtime.js.html">runtime.js</a>, <a href="runtime.js.html#line86">line 86</a>
     </li></ul></dd>
     
 
@@ -1075,14 +903,20 @@
 
     
 
-    <h4 class="name" id="toString"><span class="type-signature"></span>toString<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="setStrictNumber"><span class="type-signature"></span>setStrictNumber<span class="signature">(enable<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Custom stringifier</p>
+    <p>Set how strictly the number method parses its input.</p>
+<p> According to the ICU MessageFormat spec, <code>#</code> can only be used to replace a
+ number input of a <code>plural</code> statement. By default, messageformat.js does not
+ throw a runtime error if you use non-numeric argument with a <code>plural</code> rule,
+ unless rule also includes a non-zero <code>offset</code>.</p>
+<p> This is called by <a href="MessageFormat.html#setStrictNumberSign">MessageFormat#setStrictNumberSign</a> to follow the
+ stricter ICU MessageFormat spec.</p>
 </div>
 
 
@@ -1091,6 +925,75 @@
 
 
 
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>enable</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -1126,7 +1029,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="messageformat.js.html">messageformat.js</a>, <a href="messageformat.js.html#line304">line 304</a>
+        <a href="runtime.js.html">runtime.js</a>, <a href="runtime.js.html#line57">line 57</a>
     </li></ul></dd>
     
 
@@ -1151,39 +1054,6 @@
 
 
 
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>var mf = new MessageFormat('en');
-console.log(mf.runtime.toString())
-> var pluralFuncs = {
->   en: function (n, ord) {
->     var s = String(n).split('.'), v0 = !s[1], t0 = Number(s[0]) == n,
->         n10 = t0 &amp;&amp; s[0].slice(-1), n100 = t0 &amp;&amp; s[0].slice(-2);
->     if (ord) return (n10 == 1 &amp;&amp; n100 != 11) ? 'one'
->         : (n10 == 2 &amp;&amp; n100 != 12) ? 'two'
->         : (n10 == 3 &amp;&amp; n100 != 13) ? 'few'
->         : 'other';
->     return (n == 1 &amp;&amp; v0) ? 'one' : 'other';
->   }
-> };
-> var fmt = {};
-> var number = function (value, offset) {
->   if (isNaN(value)) throw new Error("'" + value + "' isn't a number.");
->   return value - (offset || 0);
-> };
-> var plural = function (value, offset, lcfunc, data, isOrdinal) {
->   if ({}.hasOwnProperty.call(data, value)) return data[value]();
->   if (offset) value -= offset;
->   var key = lcfunc(value, isOrdinal);
->   if (key in data) return data[key]();
->   return data.other();
-> };
-> var select = function (value, data) {
->   if ({}.hasOwnProperty.call(data, value)) return data[value]();
->   return data.other()
-> };</code></pre>
-
-
 
         
     
@@ -1201,13 +1071,13 @@ console.log(mf.runtime.toString())
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="MessageFormat.html">MessageFormat</a></li><li><a href="Runtime.html">Runtime</a></li></ul><h3>Namespaces</h3><ul><li><a href="MessageFormat.formatters.html">formatters</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Compiler.html">Compiler</a></li><li><a href="MessageFormat.html">MessageFormat</a></li><li><a href="Runtime.html">Runtime</a></li></ul><h3>Namespaces</h3><ul><li><a href="MessageFormat.formatters.html">formatters</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Sat Feb 20 2016 18:21:44 GMT+0200 (EET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Tue Sep 27 2016 00:30:24 GMT+0300 (EEST)
 </footer>
 
 <script> prettyPrint(); </script>

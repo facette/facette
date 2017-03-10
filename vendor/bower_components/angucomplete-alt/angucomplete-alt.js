@@ -481,8 +481,8 @@
         params.timeout = httpCanceller.promise;
         httpCallInProgress = true;
         $http.get(url, params)
-          .success(httpSuccessCallbackGen(str))
-          .error(httpErrorCallback)
+          .then(httpSuccessCallbackGen(str))
+          .catch(httpErrorCallback)
           .finally(function(){httpCallInProgress=false;});
       }
 

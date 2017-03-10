@@ -6,8 +6,6 @@
 [![github tag](https://img.shields.io/github/tag/likeastore/ngDialog.svg)](https://github.com/likeastore/ngDialog/tags)
 [![Download Count](https://img.shields.io/npm/dm/ng-dialog.svg)](http://www.npmjs.com/package/ng-dialog)
 [![Code Climate](https://codeclimate.com/github/likeastore/ngDialog/badges/gpa.svg)](https://codeclimate.com/github/likeastore/ngDialog)
-[![Issue Stats](http://issuestats.com/github/likeastore/ngdialog/badge/pr?style=flat)](http://issuestats.com/github/likeastore/ngDialog)
-[![Issue Stats](http://issuestats.com/github/likeastore/ngdialog/badge/issue?style=flat)](http://issuestats.com/github/likeastore/ngDialog)
 
 > Modal dialogs and popups provider for [AngularJS](http://angularjs.org/) applications.
 
@@ -31,8 +29,14 @@ npm install ng-dialog
 
 ## Usage
 
-You need only to include ``ngDialog.js``,  ``ngDialog.css`` and  ``ngDialog-theme-default.css`` (as minimal setup) to your project and then you can start using the ``ngDialog`` provider in your directives, controllers and services. 
+You need only to include ``ngDialog.js``,  ``ngDialog.css`` and  ``ngDialog-theme-default.css`` (as minimal setup) to your project and then you can start using the ``ngDialog`` provider in your directives, controllers and services.  For example:
+
+    <link rel="stylesheet" href="lib/ng-dialog/css/ngDialog.min.css">
+    <link rel="stylesheet" href="lib/ng-dialog/css/ngDialog-theme-default.min.css">
+    <script src="lib/ng-dialog/js/ngDialog.min.js"></script>
+
 Define the className to be the ``ngDialog-theme-default``. 
+
 For example in controllers:
 
 ```javascript
@@ -50,6 +54,15 @@ app.controller('MainCtrl', function ($scope, ngDialog) {
 Your help is appreciated! If you've found a bug or if something is not clear, please raise an issue.
 
 Ideally, if you've found an issue, you will submit a PR that meets our [contributor guidelines][contributor-guidelines].
+
+### Running Tests
+
+```bash
+git clone git@github.com:likeastore/ngDialog.git
+cd ngDialog
+npm i
+npm run test
+```
 
 ## API
 
