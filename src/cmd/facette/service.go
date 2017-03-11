@@ -6,14 +6,12 @@ import (
 	"facette/worker"
 	"fmt"
 
-	"github.com/brettlangdon/forge"
 	"github.com/facette/logger"
 )
 
 // Service represents a service struct.
 type Service struct {
-	config *forge.Section
-
+	config   *config
 	log      *logger.Logger
 	backend  *backend.Backend
 	poller   *pollerWorker
@@ -23,10 +21,9 @@ type Service struct {
 }
 
 // NewService returns a new service instance.
-func NewService(config *forge.Section) *Service {
+func NewService(config *config) *Service {
 	return &Service{
-		config: config,
-
+		config:   config,
 		searcher: catalog.NewSearcher(),
 		workers:  worker.NewPool(),
 	}
@@ -37,24 +34,14 @@ func (s *Service) Run() error {
 	var err error
 
 	// Initialize logger
-	logPath, _ := s.config.GetString("log_path")
-	logLevel, _ := s.config.GetString("log_level")
-
-	s.log, err = logger.NewLogger(logger.FileConfig{Level: logLevel, Path: logPath})
+	s.log, err = logger.NewLogger(logger.FileConfig{Level: s.config.LogLevel, Path: s.config.LogPath})
 	if err != nil {
 		return err
 	}
 
 	s.log.Info("service started")
 
-	// Initialize backend
-	backendConfig, err := s.config.GetSection("backend")
-	if err != nil {
-		s.log.Error("failed to get backend configuration: %s", err)
-		return err
-	}
-
-	s.backend, err = backend.NewBackend(backendConfig, s.log.Context("backend"))
+	s.backend, err = backend.NewBackend(s.config.Backend, s.log.Context("backend"))
 	if err != nil {
 		s.log.Error("failed to initialize backend: %s", err)
 		return nil

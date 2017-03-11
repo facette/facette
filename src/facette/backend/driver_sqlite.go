@@ -6,23 +6,26 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/brettlangdon/forge"
+	"github.com/pkg/errors"
+
+	"facette/mapper"
+)
+
+const (
+	defaultSqliteDriverPath = "data.db"
 )
 
 // sqliteDriver implements the backend database driver interface for SQLite 3.
-type sqliteDriver struct{}
+type sqliteDriver struct {
+	path string
+}
 
 func (d sqliteDriver) name() string {
 	return "sqlite3"
 }
 
-func (d sqliteDriver) buildDSN(config *forge.Section) (string, error) {
-	path, err := config.GetString("path")
-	if err != nil {
-		return "", err
-	}
-
-	return path, nil
+func (d sqliteDriver) DSN() string {
+	return d.path
 }
 
 func (d sqliteDriver) whereClause(column string, v interface{}) (string, interface{}) {
@@ -53,7 +56,16 @@ func (d sqliteDriver) whereClause(column string, v interface{}) (string, interfa
 }
 
 func init() {
-	drivers["sqlite"] = func() sqlDriver {
-		return sqliteDriver{}
+	drivers["sqlite"] = func(settings *mapper.Map) (sqlDriver, error) {
+		var (
+			d   = sqliteDriver{}
+			err error
+		)
+
+		if d.path, err = settings.GetString("path", defaultSqliteDriverPath); err != nil {
+			return nil, errors.Wrap(err, "sqlite setting `path'")
+		}
+
+		return d, nil
 	}
 }

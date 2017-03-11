@@ -5,29 +5,29 @@ package backend
 import "testing"
 
 func Test_MySQL_Provider(t *testing.T) {
-	execTestProvider(mysqlConfig, t)
+	execTestProvider(&mysqlConfig, t)
 }
 
 func Test_MySQL_Collection(t *testing.T) {
-	execTestCollection(mysqlConfig, t)
+	execTestCollection(&mysqlConfig, t)
 }
 
 func Test_MySQL_Graph(t *testing.T) {
-	execTestGraph(mysqlConfig, t)
+	execTestGraph(&mysqlConfig, t)
 }
 
 func Test_MySQL_SourceGroup(t *testing.T) {
-	execTestSourceGroup(mysqlConfig, t)
+	execTestSourceGroup(&mysqlConfig, t)
 }
 
 func Test_MySQL_MetricGroup(t *testing.T) {
-	execTestMetricGroup(mysqlConfig, t)
+	execTestMetricGroup(&mysqlConfig, t)
 }
 
 func Test_MySQL_Scale(t *testing.T) {
-	execTestScale(mysqlConfig, t)
+	execTestScale(&mysqlConfig, t)
 }
 
 func Test_MySQL_Unit(t *testing.T) {
-	execTestUnit(mysqlConfig, t)
+	execTestUnit(&mysqlConfig, t)
 }

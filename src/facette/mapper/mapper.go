@@ -13,6 +13,11 @@ import (
 // map or if the value can't be converted to the requested type.
 type Map map[string]interface{}
 
+// Set sets the mapping key k to the value v.
+func (m Map) Set(k string, v interface{}) {
+	m[k] = v
+}
+
 // Has returns true if key is present in the mapping, false otherwise.
 func (m Map) Has(key string) bool {
 	_, ok := m[key]
@@ -33,19 +38,41 @@ func (m *Map) Scan(v interface{}) error {
 // GetBool returns the boolean value associated with a key.
 func (m Map) GetBool(key string, fallback bool) (bool, error) {
 	val, err := m.getKey(reflect.Bool, key, fallback)
+	if err != nil {
+		return fallback, err
+	}
+
 	return val.(bool), err
 }
 
 // GetFloat returns the floating-point number value associated with a key.
 func (m Map) GetFloat(key string, fallback float64) (float64, error) {
 	val, err := m.getKey(reflect.Float64, key, fallback)
+	if err != nil {
+		return fallback, err
+	}
+
 	return val.(float64), err
 }
 
-// GetInt returns the integer value associated with a key.
-func (m Map) GetInt(key string, fallback int64) (int64, error) {
+// GetInt64 returns the 64-bit integer value associated with a key.
+func (m Map) GetInt64(key string, fallback int64) (int64, error) {
 	val, err := m.getKey(reflect.Int64, key, fallback)
+	if err != nil {
+		return fallback, err
+	}
+
 	return val.(int64), err
+}
+
+// GetInt returns the integer value associated with a key.
+func (m Map) GetInt(key string, fallback int) (int, error) {
+	val, err := m.getKey(reflect.Int, key, fallback)
+	if err != nil {
+		return fallback, err
+	}
+
+	return val.(int), err
 }
 
 // GetMap returns the map value associated with a key.
@@ -74,6 +101,10 @@ func (m Map) GetMap(key string, fallback Map) (Map, error) {
 // GetString returns the string value associated with a key.
 func (m Map) GetString(key, fallback string) (string, error) {
 	val, err := m.getKey(reflect.String, key, fallback)
+	if err != nil {
+		return fallback, err
+	}
+
 	return val.(string), err
 }
 
@@ -107,6 +138,10 @@ func (m *Map) Merge(source Map, replace bool) {
 }
 
 func (m Map) getKey(k reflect.Kind, key string, fallback interface{}) (interface{}, error) {
+	if m == nil {
+		return fallback, nil
+	}
+
 	val, ok := m[key]
 	if !ok {
 		return fallback, nil
@@ -114,7 +149,7 @@ func (m Map) getKey(k reflect.Kind, key string, fallback interface{}) (interface
 
 	vk := reflect.ValueOf(val).Kind()
 	if vk != k {
-		return fallback, ErrInvalidType
+		return nil, ErrInvalidType
 	}
 
 	return val, nil

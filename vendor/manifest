@@ -20,12 +20,6 @@
 			"branch": "master"
 		},
 		{
-			"importpath": "github.com/brettlangdon/forge",
-			"repository": "https://github.com/brettlangdon/forge",
-			"revision": "eec119e2c248aaf770997b018f5141e95daf9c80",
-			"branch": "master"
-		},
-		{
 			"importpath": "github.com/facette/httproute",
 			"repository": "https://github.com/facette/httproute",
 			"revision": "b8c8e362dca7df7e77ce5fef136040ccde33aa15",
@@ -139,6 +133,12 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/pkg/errors",
+			"repository": "https://github.com/pkg/errors",
+			"revision": "bfd5150e4e41705ded2129ec33379de1cb90b513",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/tylerb/graceful",
 			"repository": "https://github.com/tylerb/graceful",
 			"revision": "4df1190835320af7076dfcf27b3d071fd3612caf",
@@ -162,6 +162,12 @@
 			"revision": "6cdc0daab091c43fc46193327e0047b4f883c613",
 			"branch": "master",
 			"path": "/context"
+		},
+		{
+			"importpath": "gopkg.in/yaml.v2",
+			"repository": "https://gopkg.in/yaml.v2",
+			"revision": "a3f3340b5840cee44f372bddb5880fcbc419b46a",
+			"branch": "v2"
 		}
 	]
 }

@@ -6,43 +6,40 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/brettlangdon/forge"
+	"github.com/pkg/errors"
+
+	"facette/mapper"
+)
+
+const (
+	defaultMysqlDriverHostName = "localhost"
+	defaultMysqlDriverHostPort = 3306
+	defaultMysqlDriverUser     = "facette"
+	defaultMysqlDriverDatabase = "facette"
 )
 
 // mysqlDriver implements the backend database driver interface for MySQL.
-type mysqlDriver struct{}
+type mysqlDriver struct {
+	hostName string
+	hostPort int
+	user     string
+	password string
+	database string
+}
 
 func (d mysqlDriver) name() string {
 	return "mysql"
 }
 
-func (d mysqlDriver) buildDSN(config *forge.Section) (string, error) {
-	database, err := config.GetString("dbname")
-	if err != nil {
-		return "", err
-	}
-
-	host, err := config.GetString("host")
-	if err != nil {
-		return "", err
-	}
-
-	port, err := config.GetInteger("port")
-	if err != nil {
-		return "", err
-	}
-
-	user, err := config.GetString("user")
-	if err != nil {
-		return "", err
-	}
-
-	password, err := config.GetString("password")
-	if err != nil {
-		return "", err
-	}
-
-	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?interpolateParams=true", user, password, host, port, database), nil
+func (d mysqlDriver) DSN() string {
+	return fmt.Sprintf(
+		"%s:%s@tcp(%s:%d)/%s?interpolateParams=true",
+		d.user,
+		d.password,
+		d.hostName,
+		d.hostPort,
+		d.database,
+	)
 }
 
 func (d mysqlDriver) whereClause(column string, v interface{}) (string, interface{}) {
@@ -71,7 +68,32 @@ func (d mysqlDriver) whereClause(column string, v interface{}) (string, interfac
 }
 
 func init() {
-	drivers["mysql"] = func() sqlDriver {
-		return mysqlDriver{}
+	drivers["mysql"] = func(settings *mapper.Map) (sqlDriver, error) {
+		var (
+			d   = mysqlDriver{}
+			err error
+		)
+
+		if d.hostName, err = settings.GetString("host", defaultMysqlDriverHostName); err != nil {
+			return nil, errors.Wrap(err, "mysql setting `host'")
+		}
+
+		if d.hostPort, err = settings.GetInt("port", defaultMysqlDriverHostPort); err != nil {
+			return nil, errors.Wrap(err, "mysql setting `port'")
+		}
+
+		if d.user, err = settings.GetString("user", defaultMysqlDriverUser); err != nil {
+			return nil, errors.Wrap(err, "mysql setting `user'")
+		}
+
+		if d.password, err = settings.GetString("password", ""); err != nil || d.password == "" {
+			return nil, errors.Wrap(err, "mysql setting `password'")
+		}
+
+		if d.database, err = settings.GetString("dbname", defaultMysqlDriverDatabase); err != nil {
+			return nil, errors.Wrap(err, "mysql setting `dbname'")
+		}
+
+		return d, nil
 	}
 }

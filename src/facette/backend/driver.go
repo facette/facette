@@ -3,15 +3,15 @@ package backend
 import (
 	"sort"
 
-	"github.com/brettlangdon/forge"
+	"facette/mapper"
 )
 
-var drivers = make(map[string]func() sqlDriver)
+var drivers = make(map[string]func(*mapper.Map) (sqlDriver, error))
 
 // sqlDriver represents the backend database driver interface.
 type sqlDriver interface {
 	name() string
-	buildDSN(*forge.Section) (string, error)
+	DSN() string
 	whereClause(string, interface{}) (string, interface{})
 }
 

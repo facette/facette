@@ -13,8 +13,6 @@ import (
 
 	"facette/backend"
 	"facette/connector"
-
-	"github.com/brettlangdon/forge"
 )
 
 var (
@@ -29,7 +27,7 @@ var (
 
 func main() {
 	var (
-		config  *forge.Section
+		config  *config
 		service *Service
 		sigChan chan os.Signal
 		err     error

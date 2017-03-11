@@ -33,7 +33,7 @@ type graphitePlot struct {
 type graphiteConnector struct {
 	name          string
 	url           string
-	timeout       int64
+	timeout       int
 	allowInsecure bool
 	pattern       *regexp.Regexp
 	client        *http.Client

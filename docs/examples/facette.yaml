@@ -1,0 +1,34 @@
+---
+listen: localhost:12003
+
+graceful_timeout: 30
+
+log_path: ""
+log_level: info
+
+backend:
+  ### SQLite
+  driver: sqlite
+  path: data.db
+
+  ### PostgreSQL
+  #driver: pgsql
+  #host: localhost
+  #port: 5432
+  #dbname: facette
+  #user: facette
+  #password: ********
+
+  ### MySQL
+  #driver: mysql
+  #host: localhost
+  #port: 3306
+  #dbname: facette
+  #user: facette
+  #password: ********
+
+frontend:
+  enabled: true
+  assets_dir: assets
+
+# vim: ft=yaml ts=2 sw=2 et
