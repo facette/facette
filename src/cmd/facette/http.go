@@ -20,10 +20,10 @@ type httpWorker struct {
 	sync.Mutex
 	worker.CommonWorker
 
-	listenAddr      string
-	timeout         int
-	disableFrontend bool
-	assetsDir       string
+	listenAddr     string
+	timeout        int
+	enableFrontend bool
+	assetsDir      string
 
 	service *Service
 	log     *logger.Logger
@@ -33,13 +33,13 @@ type httpWorker struct {
 
 func newHTTPWorker(s *Service) *httpWorker {
 	return &httpWorker{
-		service:         s,
-		log:             s.log.Context("http"),
-		router:          httproute.NewRouter(),
-		listenAddr:      s.config.Listen,
-		timeout:         s.config.GracefulTimeout,
-		disableFrontend: !s.config.Frontend.Enabled,
-		assetsDir:       s.config.Frontend.AssetsDir,
+		service:        s,
+		log:            s.log.Context("http"),
+		router:         httproute.NewRouter(),
+		listenAddr:     s.config.Listen,
+		timeout:        s.config.GracefulTimeout,
+		enableFrontend: s.config.Frontend.Enabled,
+		assetsDir:      s.config.Frontend.AssetsDir,
 	}
 }
 
