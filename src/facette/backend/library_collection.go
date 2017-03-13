@@ -40,7 +40,7 @@ func (c Collection) Validate(backend *Backend) error {
 		return err
 	}
 
-	if !authorizedAliasChars.MatchString(c.Alias) {
+	if c.Alias != "" && !authorizedAliasChars.MatchString(c.Alias) {
 		return ErrInvalidAlias
 	}
 
