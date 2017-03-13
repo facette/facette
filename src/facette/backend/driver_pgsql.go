@@ -12,16 +12,16 @@ import (
 )
 
 const (
-	defaultPgsqlDriverHostName = "localhost"
-	defaultPgsqlDriverHostPort = 5432
+	defaultPgsqlDriverHost     = "localhost"
+	defaultPgsqlDriverPort     = 5432
 	defaultPgsqlDriverUser     = "facette"
 	defaultPgsqlDriverDatabase = "facette"
 )
 
 // pgsqlDriver implements the backend database driver interface for PostgreSQL.
 type pgsqlDriver struct {
-	hostName string
-	hostPort int
+	host     string
+	port     int
 	user     string
 	password string
 	database string
@@ -34,8 +34,8 @@ func (d pgsqlDriver) name() string {
 func (d pgsqlDriver) DSN() string {
 	return fmt.Sprintf(
 		"%s=%v %s=%v %s=%v %s=%v %s=%v",
-		"host", d.hostName,
-		"port", d.hostPort,
+		"host", d.host,
+		"port", d.port,
 		"user", d.user,
 		"password", d.password,
 		"dbname", d.database,
@@ -74,24 +74,24 @@ func init() {
 			err error
 		)
 
-		if d.hostName, err = settings.GetString("host", defaultPgsqlDriverHostName); err != nil {
-			return nil, errors.Wrap(err, "pgsql setting `host'")
+		if d.host, err = settings.GetString("host", defaultPgsqlDriverHost); err != nil {
+			return nil, errors.Wrap(err, "pgsql setting 'host'")
 		}
 
-		if d.hostPort, err = settings.GetInt("port", defaultPgsqlDriverHostPort); err != nil {
-			return nil, errors.Wrap(err, "pgsql setting `port'")
+		if d.port, err = settings.GetInt("port", defaultPgsqlDriverPort); err != nil {
+			return nil, errors.Wrap(err, "pgsql setting 'port'")
 		}
 
 		if d.user, err = settings.GetString("user", defaultPgsqlDriverUser); err != nil {
-			return nil, errors.Wrap(err, "pgsql setting `user'")
+			return nil, errors.Wrap(err, "pgsql setting 'user'")
 		}
 
 		if d.password, err = settings.GetString("password", ""); err != nil || d.password == "" {
-			return nil, errors.Wrap(err, "pgsql setting `password'")
+			return nil, errors.Wrap(err, "pgsql setting 'password'")
 		}
 
 		if d.database, err = settings.GetString("dbname", defaultPgsqlDriverDatabase); err != nil {
-			return nil, errors.Wrap(err, "pgsql setting `dbname'")
+			return nil, errors.Wrap(err, "pgsql setting 'dbname'")
 		}
 
 		return d, nil

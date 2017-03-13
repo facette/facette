@@ -63,7 +63,7 @@ func init() {
 		)
 
 		if d.path, err = settings.GetString("path", defaultSqliteDriverPath); err != nil {
-			return nil, errors.Wrap(err, "sqlite setting `path'")
+			return nil, errors.Wrap(err, "sqlite setting 'path'")
 		}
 
 		return d, nil

@@ -12,16 +12,16 @@ import (
 )
 
 const (
-	defaultMysqlDriverHostName = "localhost"
-	defaultMysqlDriverHostPort = 3306
+	defaultMysqlDriverHost     = "localhost"
+	defaultMysqlDriverPort     = 3306
 	defaultMysqlDriverUser     = "facette"
 	defaultMysqlDriverDatabase = "facette"
 )
 
 // mysqlDriver implements the backend database driver interface for MySQL.
 type mysqlDriver struct {
-	hostName string
-	hostPort int
+	host     string
+	port     int
 	user     string
 	password string
 	database string
@@ -36,8 +36,8 @@ func (d mysqlDriver) DSN() string {
 		"%s:%s@tcp(%s:%d)/%s?interpolateParams=true",
 		d.user,
 		d.password,
-		d.hostName,
-		d.hostPort,
+		d.host,
+		d.port,
 		d.database,
 	)
 }
@@ -74,24 +74,24 @@ func init() {
 			err error
 		)
 
-		if d.hostName, err = settings.GetString("host", defaultMysqlDriverHostName); err != nil {
-			return nil, errors.Wrap(err, "mysql setting `host'")
+		if d.host, err = settings.GetString("host", defaultMysqlDriverHost); err != nil {
+			return nil, errors.Wrap(err, "mysql setting 'host'")
 		}
 
-		if d.hostPort, err = settings.GetInt("port", defaultMysqlDriverHostPort); err != nil {
-			return nil, errors.Wrap(err, "mysql setting `port'")
+		if d.port, err = settings.GetInt("port", defaultMysqlDriverPort); err != nil {
+			return nil, errors.Wrap(err, "mysql setting 'port'")
 		}
 
 		if d.user, err = settings.GetString("user", defaultMysqlDriverUser); err != nil {
-			return nil, errors.Wrap(err, "mysql setting `user'")
+			return nil, errors.Wrap(err, "mysql setting 'user'")
 		}
 
 		if d.password, err = settings.GetString("password", ""); err != nil || d.password == "" {
-			return nil, errors.Wrap(err, "mysql setting `password'")
+			return nil, errors.Wrap(err, "mysql setting 'password'")
 		}
 
 		if d.database, err = settings.GetString("dbname", defaultMysqlDriverDatabase); err != nil {
-			return nil, errors.Wrap(err, "mysql setting `dbname'")
+			return nil, errors.Wrap(err, "mysql setting 'dbname'")
 		}
 
 		return d, nil
