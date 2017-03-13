@@ -29,7 +29,7 @@ const (
 type facetteConnector struct {
 	name          string
 	url           string
-	timeout       int64
+	timeout       int
 	allowInsecure bool
 	client        *http.Client
 }

@@ -91,7 +91,7 @@ type kairosdbConnector struct {
 	url           string
 	aggregators   []string
 	sourceTags    []string
-	timeout       int64
+	timeout       int
 	allowInsecure bool
 	client        *http.Client
 	metrics       map[string]map[string]*kairosdbMetric

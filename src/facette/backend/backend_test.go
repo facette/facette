@@ -11,71 +11,73 @@ import (
 
 	"facette/mapper"
 
-	"github.com/brettlangdon/forge"
+	"github.com/facette/logger"
 )
 
 var (
 	dateCreated  time.Time
-	mysqlConfig  *forge.Section
-	pgsqlConfig  *forge.Section
-	sqliteConfig *forge.Section
+	mysqlConfig  mapper.Map
+	pgsqlConfig  mapper.Map
+	sqliteConfig mapper.Map
 )
 
 func init() {
 	dateCreated = time.Now().UTC().Round(time.Second)
 
 	// MySQL
-	mysqlConfig = forge.NewSection().AddSection("mysql")
+	mysqlConfig = mapper.Map{"driver": "mysql"}
 
 	if v := os.Getenv("TEST_MYSQL_DBNAME"); v != "" {
-		mysqlConfig.SetString("dbname", v)
+		mysqlConfig.Set("dbname", v)
 	}
 	if v := os.Getenv("TEST_MYSQL_HOST"); v != "" {
-		mysqlConfig.SetString("host", v)
+		mysqlConfig.Set("host", v)
 	}
 	if v := os.Getenv("TEST_MYSQL_PORT"); v != "" {
 		i, err := strconv.ParseInt(v, 10, 64)
 		if err != nil {
 			log.Fatalf("failed to convert port to integer: %s", err)
 		}
-		mysqlConfig.SetInteger("port", i)
+		mysqlConfig.Set("port", i)
 	}
 	if v := os.Getenv("TEST_MYSQL_USER"); v != "" {
-		mysqlConfig.SetString("user", v)
+		mysqlConfig.Set("user", v)
 	}
 	if v := os.Getenv("TEST_MYSQL_PASSWORD"); v != "" {
-		mysqlConfig.SetString("password", v)
+		mysqlConfig.Set("password", v)
 	}
 
 	// PostgreSQL
-	pgsqlConfig = forge.NewSection().AddSection("pgsql")
-	pgsqlConfig.SetString("sslmode", "disable")
+	pgsqlConfig = mapper.Map{
+		"driver":  "pgsql",
+		"sslmode": "disable",
+	}
 
 	if v := os.Getenv("TEST_PGSQL_DBNAME"); v != "" {
-		pgsqlConfig.SetString("dbname", v)
+		pgsqlConfig.Set("dbname", v)
 	}
 	if v := os.Getenv("TEST_PGSQL_HOST"); v != "" {
-		pgsqlConfig.SetString("host", v)
+		pgsqlConfig.Set("host", v)
 	}
 	if v := os.Getenv("TEST_PGSQL_PORT"); v != "" {
 		i, err := strconv.ParseInt(v, 10, 64)
 		if err != nil {
 			log.Fatalf("failed to convert port to integer: %s", err)
 		}
-		pgsqlConfig.SetInteger("port", i)
+		pgsqlConfig.Set("port", i)
 	}
 	if v := os.Getenv("TEST_PGSQL_USER"); v != "" {
-		pgsqlConfig.SetString("user", v)
+		pgsqlConfig.Set("user", v)
 	}
 	if v := os.Getenv("TEST_PGSQL_PASSWORD"); v != "" {
-		pgsqlConfig.SetString("password", v)
+		pgsqlConfig.Set("password", v)
 	}
 
 	// SQLite
-	sqliteConfig = forge.NewSection().AddSection("pgsql")
+	sqliteConfig = mapper.Map{"driver": "sqlite"}
 
 	if v := os.Getenv("TEST_SQLITE_PATH"); v != "" {
-		sqliteConfig.SetString("path", v)
+		sqliteConfig.Set("path", v)
 	} else {
 		tmpFile, err := ioutil.TempFile("", "facette")
 		if err != nil {
@@ -83,12 +85,17 @@ func init() {
 		}
 		defer os.Remove(tmpFile.Name())
 
-		sqliteConfig.SetString("path", tmpFile.Name())
+		sqliteConfig.Set("path", tmpFile.Name())
 	}
 }
 
-func execTestProvider(config *forge.Section, t *testing.T) {
-	b, err := NewBackend(config)
+func execTestProvider(config *mapper.Map, t *testing.T) {
+	var (
+		desc        = "A great provider description"
+		descUpdated = "A great provider description (updated)"
+	)
+
+	b, err := NewBackend(config, logger.NewLogger(logger.FileConfig{Level: flagLogLevel}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -99,9 +106,9 @@ func execTestProvider(config *forge.Section, t *testing.T) {
 			Item: Item{
 				ID:          "00000000-0000-0000-0000-000000000000",
 				Name:        "provider1",
-				Description: "A great provider description",
+				Description: &desc,
 				Created:     dateCreated,
-				Modified:    dateCreated,
+				Modified:    &dateCreated,
 			},
 			Connector: "a",
 			Settings: mapper.Map{
@@ -113,9 +120,9 @@ func execTestProvider(config *forge.Section, t *testing.T) {
 			Item: Item{
 				ID:          "00000000-0000-0000-0000-000000000001",
 				Name:        "provider2",
-				Description: "A great provider description",
+				Description: &desc,
 				Created:     dateCreated,
-				Modified:    dateCreated,
+				Modified:    &dateCreated,
 			},
 			Connector: "b",
 			Settings: mapper.Map{
@@ -133,9 +140,9 @@ func execTestProvider(config *forge.Section, t *testing.T) {
 			Item: Item{
 				ID:          "00000000-0000-0000-0000-000000000002",
 				Name:        "provider3-test",
-				Description: "A great provider description",
+				Description: &desc,
 				Created:     dateCreated,
-				Modified:    dateCreated,
+				Modified:    &dateCreated,
 			},
 			Connector: "a",
 			Settings: mapper.Map{
@@ -146,7 +153,7 @@ func execTestProvider(config *forge.Section, t *testing.T) {
 		Item: Item{
 			ID:          "00000000-0000-0000-0000-000000000000",
 			Name:        "provider1",
-			Description: "A great provider description (updated)",
+			Description: &descUpdated,
 			Created:     dateCreated,
 		},
 		Connector: "a",
@@ -157,8 +164,14 @@ func execTestProvider(config *forge.Section, t *testing.T) {
 	}, t)
 }
 
-func execTestCollection(config *forge.Section, t *testing.T) {
-	b, err := NewBackend(config)
+func execTestCollection(config *mapper.Map, t *testing.T) {
+	var (
+		desc         = "A great collection description"
+		descUpdated  = "A great collection description (updated)"
+		descTemplate = "A great collection description for {{ .source )}"
+	)
+
+	b, err := NewBackend(config, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -169,9 +182,9 @@ func execTestCollection(config *forge.Section, t *testing.T) {
 			Item: Item{
 				ID:          "00000000-0000-0000-0000-000000000000",
 				Name:        "collection1",
-				Description: "A great collection description",
+				Description: &desc,
 				Created:     dateCreated,
-				Modified:    dateCreated,
+				Modified:    &dateCreated,
 			},
 			Entries: []CollectionEntry{
 				{
@@ -190,9 +203,9 @@ func execTestCollection(config *forge.Section, t *testing.T) {
 			Item: Item{
 				ID:          "00000000-0000-0000-0000-000000000001",
 				Name:        "collection2",
-				Description: "A great collection description",
+				Description: &desc,
 				Created:     dateCreated,
-				Modified:    dateCreated,
+				Modified:    &dateCreated,
 			},
 			Entries: []CollectionEntry{
 				{
@@ -211,9 +224,9 @@ func execTestCollection(config *forge.Section, t *testing.T) {
 			Item: Item{
 				ID:          "00000000-0000-0000-0000-000000000002",
 				Name:        "collection_tmpl1",
-				Description: "A collection description for {{ .source )}",
+				Description: &descTemplate,
 				Created:     dateCreated,
-				Modified:    dateCreated,
+				Modified:    &dateCreated,
 			},
 			Entries: []CollectionEntry{
 				{
@@ -233,15 +246,15 @@ func execTestCollection(config *forge.Section, t *testing.T) {
 				ID:       "00000000-0000-0000-0000-000000000003",
 				Name:     "collection_tmpl1-1",
 				Created:  dateCreated,
-				Modified: dateCreated,
+				Modified: &dateCreated,
 			},
 			Link: &Collection{
 				Item: Item{
 					ID:          "00000000-0000-0000-0000-000000000001",
 					Name:        "collection2",
-					Description: "A great collection description",
+					Description: &desc,
 					Created:     dateCreated,
-					Modified:    dateCreated,
+					Modified:    &dateCreated,
 				},
 				Entries: []CollectionEntry{
 					{
@@ -265,7 +278,7 @@ func execTestCollection(config *forge.Section, t *testing.T) {
 		Item: Item{
 			ID:          "00000000-0000-0000-0000-000000000000",
 			Name:        "collection1",
-			Description: "A great collection description (updated)",
+			Description: &descUpdated,
 			Created:     dateCreated,
 		},
 		Entries: []CollectionEntry{
@@ -283,8 +296,14 @@ func execTestCollection(config *forge.Section, t *testing.T) {
 	}, t)
 }
 
-func execTestGraph(config *forge.Section, t *testing.T) {
-	b, err := NewBackend(config)
+func execTestGraph(config *mapper.Map, t *testing.T) {
+	var (
+		desc         = "A great graph description"
+		descUpdated  = "A great graph description (updated)"
+		descTemplate = "A great graph description for {{ .source )}"
+	)
+
+	b, err := NewBackend(config, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -295,9 +314,9 @@ func execTestGraph(config *forge.Section, t *testing.T) {
 			Item: Item{
 				ID:          "00000000-0000-0000-0000-000000000000",
 				Name:        "graph1",
-				Description: "A great graph description",
+				Description: &desc,
 				Created:     dateCreated,
-				Modified:    dateCreated,
+				Modified:    &dateCreated,
 			},
 			Groups: []SeriesGroup{
 				{
@@ -315,9 +334,9 @@ func execTestGraph(config *forge.Section, t *testing.T) {
 			Item: Item{
 				ID:          "00000000-0000-0000-0000-000000000001",
 				Name:        "graph2",
-				Description: "A great graph description",
+				Description: &desc,
 				Created:     dateCreated,
-				Modified:    dateCreated,
+				Modified:    &dateCreated,
 			},
 			Groups: []SeriesGroup{
 				{
@@ -335,9 +354,9 @@ func execTestGraph(config *forge.Section, t *testing.T) {
 			Item: Item{
 				ID:          "00000000-0000-0000-0000-000000000002",
 				Name:        "graph_tmpl1",
-				Description: "A graph description for {{ .source )}",
+				Description: &descTemplate,
 				Created:     dateCreated,
-				Modified:    dateCreated,
+				Modified:    &dateCreated,
 			},
 			Groups: []SeriesGroup{
 				{
@@ -356,15 +375,15 @@ func execTestGraph(config *forge.Section, t *testing.T) {
 				ID:       "00000000-0000-0000-0000-000000000003",
 				Name:     "graph_tmpl1-1",
 				Created:  dateCreated,
-				Modified: dateCreated,
+				Modified: &dateCreated,
 			},
 			Link: &Graph{
 				Item: Item{
 					ID:          "00000000-0000-0000-0000-000000000001",
 					Name:        "graph2",
-					Description: "A great graph description",
+					Description: &desc,
 					Created:     dateCreated,
-					Modified:    dateCreated,
+					Modified:    &dateCreated,
 				},
 				Groups: []SeriesGroup{
 					{
@@ -387,7 +406,7 @@ func execTestGraph(config *forge.Section, t *testing.T) {
 		Item: Item{
 			ID:          "00000000-0000-0000-0000-000000000000",
 			Name:        "graph1",
-			Description: "A great graph description (updated)",
+			Description: &descUpdated,
 			Created:     dateCreated,
 		},
 		Groups: []SeriesGroup{
@@ -405,8 +424,13 @@ func execTestGraph(config *forge.Section, t *testing.T) {
 	}, t)
 }
 
-func execTestSourceGroup(config *forge.Section, t *testing.T) {
-	b, err := NewBackend(config)
+func execTestSourceGroup(config *mapper.Map, t *testing.T) {
+	var (
+		desc        = "A great sourcegroup description"
+		descUpdated = "A great sourcegroup description (updated)"
+	)
+
+	b, err := NewBackend(config, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -417,9 +441,9 @@ func execTestSourceGroup(config *forge.Section, t *testing.T) {
 			Item: Item{
 				ID:          "00000000-0000-0000-0000-000000000000",
 				Name:        "sourcegroup1",
-				Description: "A great sourcegroup description",
+				Description: &desc,
 				Created:     dateCreated,
-				Modified:    dateCreated,
+				Modified:    &dateCreated,
 			},
 			Patterns: []string{"glob:host*.example.net"},
 		},
@@ -427,9 +451,9 @@ func execTestSourceGroup(config *forge.Section, t *testing.T) {
 			Item: Item{
 				ID:          "00000000-0000-0000-0000-000000000001",
 				Name:        "sourcegroup2",
-				Description: "A great sourcegroup description",
+				Description: &desc,
 				Created:     dateCreated,
-				Modified:    dateCreated,
+				Modified:    &dateCreated,
 			},
 			Patterns: []string{"host2.example.net"},
 		},
@@ -437,9 +461,9 @@ func execTestSourceGroup(config *forge.Section, t *testing.T) {
 			Item: Item{
 				ID:          "00000000-0000-0000-0000-000000000002",
 				Name:        "sourcegroup3-test",
-				Description: "A great sourcegroup description",
+				Description: &desc,
 				Created:     dateCreated,
-				Modified:    dateCreated,
+				Modified:    &dateCreated,
 			},
 			Patterns: []string{"host3.example.net"},
 		},
@@ -447,15 +471,20 @@ func execTestSourceGroup(config *forge.Section, t *testing.T) {
 		Item: Item{
 			ID:          "00000000-0000-0000-0000-000000000000",
 			Name:        "sourcegroup1",
-			Description: "A great sourcegroup description (updated)",
+			Description: &descUpdated,
 			Created:     dateCreated,
 		},
 		Patterns: []string{"glob:host*.example.net"},
 	}, t)
 }
 
-func execTestMetricGroup(config *forge.Section, t *testing.T) {
-	b, err := NewBackend(config)
+func execTestMetricGroup(config *mapper.Map, t *testing.T) {
+	var (
+		desc        = "A great metricgroup description"
+		descUpdated = "A great metricgroup description (updated)"
+	)
+
+	b, err := NewBackend(config, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -466,9 +495,9 @@ func execTestMetricGroup(config *forge.Section, t *testing.T) {
 			Item: Item{
 				ID:          "00000000-0000-0000-0000-000000000000",
 				Name:        "metricgroup1",
-				Description: "A great metricgroup description",
+				Description: &desc,
 				Created:     dateCreated,
-				Modified:    dateCreated,
+				Modified:    &dateCreated,
 			},
 			Patterns: []string{"glob:metric1.*"},
 		},
@@ -476,9 +505,9 @@ func execTestMetricGroup(config *forge.Section, t *testing.T) {
 			Item: Item{
 				ID:          "00000000-0000-0000-0000-000000000001",
 				Name:        "metricgroup2",
-				Description: "A great metricgroup description",
+				Description: &desc,
 				Created:     dateCreated,
-				Modified:    dateCreated,
+				Modified:    &dateCreated,
 			},
 			Patterns: []string{"metric2"},
 		},
@@ -486,9 +515,9 @@ func execTestMetricGroup(config *forge.Section, t *testing.T) {
 			Item: Item{
 				ID:          "00000000-0000-0000-0000-000000000002",
 				Name:        "metricgroup3-test",
-				Description: "A great metricgroup description",
+				Description: &desc,
 				Created:     dateCreated,
-				Modified:    dateCreated,
+				Modified:    &dateCreated,
 			},
 			Patterns: []string{"metric3"},
 		},
@@ -496,15 +525,20 @@ func execTestMetricGroup(config *forge.Section, t *testing.T) {
 		Item: Item{
 			ID:          "00000000-0000-0000-0000-000000000000",
 			Name:        "metricgroup1",
-			Description: "A great metricgroup description (updated)",
+			Description: &descUpdated,
 			Created:     dateCreated,
 		},
 		Patterns: []string{"glob:metric1.*"},
 	}, t)
 }
 
-func execTestScale(config *forge.Section, t *testing.T) {
-	b, err := NewBackend(config)
+func execTestScale(config *mapper.Map, t *testing.T) {
+	var (
+		desc        = "A great scale description"
+		descUpdated = "A great scale description (updated)"
+	)
+
+	b, err := NewBackend(config, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -515,9 +549,9 @@ func execTestScale(config *forge.Section, t *testing.T) {
 			Item: Item{
 				ID:          "00000000-0000-0000-0000-000000000000",
 				Name:        "scale1",
-				Description: "A great scale description",
+				Description: &desc,
 				Created:     dateCreated,
-				Modified:    dateCreated,
+				Modified:    &dateCreated,
 			},
 			Value: 0.123,
 		},
@@ -525,9 +559,9 @@ func execTestScale(config *forge.Section, t *testing.T) {
 			Item: Item{
 				ID:          "00000000-0000-0000-0000-000000000001",
 				Name:        "scale2",
-				Description: "A great scale description",
+				Description: &desc,
 				Created:     dateCreated,
-				Modified:    dateCreated,
+				Modified:    &dateCreated,
 			},
 			Value: 0.456,
 		},
@@ -535,9 +569,9 @@ func execTestScale(config *forge.Section, t *testing.T) {
 			Item: Item{
 				ID:          "00000000-0000-0000-0000-000000000002",
 				Name:        "scale3-test",
-				Description: "A great scale description",
+				Description: &desc,
 				Created:     dateCreated,
-				Modified:    dateCreated,
+				Modified:    &dateCreated,
 			},
 			Value: 0.789,
 		},
@@ -545,15 +579,20 @@ func execTestScale(config *forge.Section, t *testing.T) {
 		Item: Item{
 			ID:          "00000000-0000-0000-0000-000000000000",
 			Name:        "scale1",
-			Description: "A great scale description (updated)",
+			Description: &descUpdated,
 			Created:     dateCreated,
 		},
 		Value: 0.1234,
 	}, t)
 }
 
-func execTestUnit(config *forge.Section, t *testing.T) {
-	b, err := NewBackend(config)
+func execTestUnit(config *mapper.Map, t *testing.T) {
+	var (
+		desc        = "A great unit description"
+		descUpdated = "A great unit description (updated)"
+	)
+
+	b, err := NewBackend(config, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -564,9 +603,9 @@ func execTestUnit(config *forge.Section, t *testing.T) {
 			Item: Item{
 				ID:          "00000000-0000-0000-0000-000000000000",
 				Name:        "unit1",
-				Description: "A great unit description",
+				Description: &desc,
 				Created:     dateCreated,
-				Modified:    dateCreated,
+				Modified:    &dateCreated,
 			},
 			Label: "a",
 		},
@@ -574,9 +613,9 @@ func execTestUnit(config *forge.Section, t *testing.T) {
 			Item: Item{
 				ID:          "00000000-0000-0000-0000-000000000001",
 				Name:        "unit2",
-				Description: "A great unit description",
+				Description: &desc,
 				Created:     dateCreated,
-				Modified:    dateCreated,
+				Modified:    &dateCreated,
 			},
 			Label: "b",
 		},
@@ -584,9 +623,9 @@ func execTestUnit(config *forge.Section, t *testing.T) {
 			Item: Item{
 				ID:          "00000000-0000-0000-0000-000000000002",
 				Name:        "unit3-test",
-				Description: "A great unit description",
+				Description: &desc,
 				Created:     dateCreated,
-				Modified:    dateCreated,
+				Modified:    &dateCreated,
 			},
 			Label: "c",
 		},
@@ -594,7 +633,7 @@ func execTestUnit(config *forge.Section, t *testing.T) {
 		Item: Item{
 			ID:          "00000000-0000-0000-0000-000000000000",
 			Name:        "unit1",
-			Description: "A great unit description (updated)",
+			Description: &descUpdated,
 			Created:     dateCreated,
 		},
 		Label: "d",

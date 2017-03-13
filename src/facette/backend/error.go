@@ -27,6 +27,8 @@ var (
 	ErrMissingBackendConfig = errors.New("missing backend configuration")
 	// ErrMultipleBackendConfig represents a multiple backend configurations error.
 	ErrMultipleBackendConfig = errors.New("too many backend configurations")
+	// ErrInvalidBackendConfig represents an invalid backend configuration error.
+	ErrInvalidBackendConfig = errors.New("invalid backend configuration")
 	// ErrResourceConflict represents a backend resource conflict error.
 	ErrResourceConflict = errors.New("a resource conflict occurred")
 	// ErrResourceMissingDependency represents a backend resource missing dependency error.

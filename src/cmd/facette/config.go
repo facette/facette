@@ -1,42 +1,52 @@
 package main
 
-import "github.com/brettlangdon/forge"
+import (
+	"facette/mapper"
+	"facette/yamlutil"
+)
 
-func initConfig(path string) (*forge.Section, error) {
+const (
+	defaultListen            = "localhost:12003"
+	defaultLogPath           = ""
+	defaultLogLevel          = "info"
+	defaultGracefulTimeout   = 30
+	defaultFrontendEnabled   = true
+	defaultFrontendAssetsDir = "assets"
+)
+
+type frontendConfig struct {
+	Enabled   bool   `yaml:"enabled"`
+	AssetsDir string `yaml:"assets_dir"`
+}
+
+type config struct {
+	Listen          string         `yaml:"listen"`
+	LogPath         string         `yaml:"log_path"`
+	LogLevel        string         `yaml:"log_level"`
+	GracefulTimeout int            `yaml:"graceful_timeout"`
+	Frontend        frontendConfig `yaml:"frontend"`
+	Backend         *mapper.Map    `yaml:"backend,omitempty"`
+}
+
+func initConfig(path string) (*config, error) {
 	var (
-		config *forge.Section
-		err    error
+		config = config{
+			Listen:          defaultListen,
+			GracefulTimeout: defaultGracefulTimeout,
+			LogPath:         defaultLogPath,
+			LogLevel:        defaultLogLevel,
+			Frontend: frontendConfig{
+				Enabled:   defaultFrontendEnabled,
+				AssetsDir: defaultFrontendAssetsDir,
+			},
+		}
 	)
 
 	if path != "" {
-		config, err = forge.ParseFile(path)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		config = forge.NewSection()
-	}
-
-	root := forge.NewSection()
-	root.SetString("listen", "localhost:12003")
-	root.SetInteger("graceful_timeout", 30)
-	root.SetString("log_path", "")
-	root.SetString("log_level", "info")
-
-	frontend := root.AddSection("frontend")
-	frontend.SetBoolean("enabled", true)
-	frontend.SetString("assets_dir", "assets")
-
-	backend := root.AddSection("backend")
-	if section, err := config.GetSection("backend"); err == nil && len(section.Keys()) == 0 {
-		backend.AddSection("sqlite")
-	}
-
-	if len(config.Keys()) > 0 {
-		if err = root.Merge(config); err != nil {
+		if err := yamlutil.UnmarshalFile(path, &config); err != nil {
 			return nil, err
 		}
 	}
 
-	return root, nil
+	return &config, nil
 }

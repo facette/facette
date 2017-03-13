@@ -9,7 +9,6 @@ import (
 
 	"facette/worker"
 
-	"github.com/brettlangdon/forge"
 	"github.com/facette/httproute"
 	"github.com/facette/logger"
 	"github.com/tylerb/graceful"
@@ -21,10 +20,10 @@ type httpWorker struct {
 	sync.Mutex
 	worker.CommonWorker
 
-	listenAddr      string
-	timeout         int64
-	disableFrontend bool
-	assetsDir       string
+	listenAddr     string
+	timeout        int
+	enableFrontend bool
+	assetsDir      string
 
 	service *Service
 	log     *logger.Logger
@@ -34,34 +33,14 @@ type httpWorker struct {
 
 func newHTTPWorker(s *Service) *httpWorker {
 	return &httpWorker{
-		service: s,
-		log:     s.log.Context("http"),
-		router:  httproute.NewRouter(),
+		service:        s,
+		log:            s.log.Context("http"),
+		router:         httproute.NewRouter(),
+		listenAddr:     s.config.Listen,
+		timeout:        s.config.GracefulTimeout,
+		enableFrontend: s.config.Frontend.Enabled,
+		assetsDir:      s.config.Frontend.AssetsDir,
 	}
-}
-
-func (w *httpWorker) Init() error {
-	var err error
-
-	w.listenAddr, err = w.service.config.GetString("listen")
-	if err != nil {
-		return err
-	}
-
-	w.timeout, err = w.service.config.GetInteger("graceful_timeout")
-	if err != nil {
-		return err
-	}
-
-	if value, err := w.service.config.Resolve("frontend.enabled"); err == nil && value.GetType() == forge.BOOLEAN {
-		w.disableFrontend = !value.GetValue().(bool)
-	}
-
-	if value, err := w.service.config.Resolve("frontend.assets_dir"); err == nil {
-		w.assetsDir = value.GetValue().(string)
-	}
-
-	return nil
 }
 
 func (w *httpWorker) Run(wg *sync.WaitGroup) {

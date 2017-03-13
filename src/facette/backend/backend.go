@@ -7,11 +7,12 @@ import (
 	"regexp"
 	"strings"
 
+	"facette/mapper"
 	"facette/orm"
 
-	"github.com/brettlangdon/forge"
 	"github.com/facette/logger"
 	"github.com/facette/sliceutil"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -27,7 +28,7 @@ var (
 
 // Backend represents a backend instance.
 type Backend struct {
-	config *forge.Section
+	config *mapper.Map
 	log    *logger.Logger
 	driver sqlDriver
 	db     *orm.DB
@@ -38,11 +39,14 @@ func init() {
 }
 
 // NewBackend creates a new instance of a backend.
-func NewBackend(config *forge.Section, log *logger.Logger) (*Backend, error) {
-	// Initialize configuration
-	driver, err := initConfig(config)
-	if err != nil {
-		return nil, err
+func NewBackend(settings *mapper.Map, log *logger.Logger) (*Backend, error) {
+	if settings == nil {
+		return nil, ErrMissingBackendConfig
+	}
+
+	driver, err := settings.GetString("driver", "")
+	if err != nil || driver == "" {
+		return nil, errors.Wrapf(fmt.Errorf("no driver specified"), "%s", ErrInvalidBackendConfig)
 	}
 
 	// Get database driver instance
@@ -50,22 +54,20 @@ func NewBackend(config *forge.Section, log *logger.Logger) (*Backend, error) {
 		return nil, ErrUnsupportedDriver
 	}
 
-	drv := drivers[driver]()
-
-	// Open database connection
-	dsn, err := drv.buildDSN(config)
+	drv, err := drivers[driver](settings)
 	if err != nil {
-		return nil, fmt.Errorf("failed to build DSN: %s", err)
+		return nil, errors.Wrapf(err, "%s", ErrInvalidBackendConfig)
 	}
 
 	log.Debug("connecting using %q driver", driver)
 
-	db, err := orm.Open(drv.name(), dsn)
+	// Open database connection
+	db, err := orm.Open(drv.name(), drv.DSN())
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %s", err)
 	}
 
-	// TODO: make it configurable?
+	// TODO: make it configurable
 	db.SetLogger(log.Logger(logger.LevelDebug))
 
 	// Initialize database schema
@@ -82,7 +84,6 @@ func NewBackend(config *forge.Section, log *logger.Logger) (*Backend, error) {
 	}
 
 	return &Backend{
-		config: config,
 		log:    log,
 		driver: drv,
 		db:     db,

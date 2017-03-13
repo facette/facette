@@ -8,7 +8,7 @@ import (
 	"facette/plot"
 )
 
-const connectorDefaultTimeout int64 = 10
+const connectorDefaultTimeout int = 10
 
 var (
 	version string
