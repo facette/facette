@@ -157,7 +157,8 @@ app.controller('BrowseGraphController', function($rootScope, $routeParams, $scop
             $rootScope.setTitle([title]);
 
             // Set grid size
-            $scope.gridSize = storage.get('browse-grid', $scope.section + '-' + $scope.id, data.options.grid_size || 1);
+            $scope.gridSize = storage.get('browse-grid', $scope.section + '-' + $scope.id,
+                data.options && data.options.grid_size ? data.options.grid_size : 1);
             if ($scope.gridSize < 1 || $scope.gridSize > 3) {
                 $scope.gridSize = 1;
             }
