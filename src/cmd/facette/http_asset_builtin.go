@@ -18,7 +18,7 @@ func (w *httpWorker) httpHandleAsset(ctx context.Context, rw http.ResponseWriter
 	var ct string
 
 	// Stop handling assets if frontend is disabled
-	if w.disableFrontend {
+	if !w.enableFrontend {
 		rw.WriteHeader(http.StatusForbidden)
 		return
 	}
