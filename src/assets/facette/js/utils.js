@@ -44,5 +44,5 @@ function slugify(input) {
 }
 
 function parseFloatList(input) {
-    return $.map(input, function (x) { return parseFloat(x.trim()); });
+    return $.map(input, function (x) { return parseFloat(x); });
 }
