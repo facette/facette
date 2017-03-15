@@ -16,7 +16,8 @@ angular.module('facette.ui.pane', [])
         var element = angular.element('[ng-pane-step="' + step + '"]').show();
         element.siblings('[ng-pane-step]').hide();
 
-        $scope.$parent.step = step;
+        // Update step in both parent and root scopes (needed for main step change detection)
+        $rootScope.step = $scope.$parent.step = step;
     };
 
     // Add class on pane element
