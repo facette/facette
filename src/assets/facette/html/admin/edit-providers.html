@@ -64,7 +64,7 @@
 			<button ng-click="addFilter()"><span class="fa fa-plus"></span> {{ 'label.filters_add' | translate }}</button>
 		</div>
 
-		<message icon="info-circle" type="info" ng-show="item.filters.length === 0">{{ 'mesg.filters_empty' | translate }}</message>
+		<message icon="info-circle" type="info" ng-show="!item.filters || item.filters.length === 0">{{ 'mesg.filters_empty' | translate }}</message>
 
 		<table class="list" ng-show="item.filters.length > 0">
 			<thead>
