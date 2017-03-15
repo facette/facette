@@ -325,7 +325,7 @@ func (b *Backend) Count(v interface{}, filters map[string]interface{}) (int, err
 	return count, b.db.From(v).Count(&count).Error()
 }
 
-// IsAliasable return whether or not the argument is an aliasable backend item.
+// IsAliasable returns whether or not the argument is an aliasable backend item.
 func (b *Backend) IsAliasable(v interface{}) bool {
 	return reflect.Indirect(reflect.ValueOf(v)).FieldByName("Alias").IsValid()
 }

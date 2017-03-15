@@ -95,30 +95,12 @@ func (c Collection) Validate(backend *Backend) error {
 	return nil
 }
 
-// CollectionEntryList represents a list of library collection entries.
-type CollectionEntryList []CollectionEntry
-
-// Value marshals the collection entries for compatibility with SQL drivers.
-func (l CollectionEntryList) Value() (driver.Value, error) {
-	data, err := json.Marshal(l)
-	return data, err
-}
-
-// Scan unmarshals the collection entries retrieved from SQL drivers.
-func (l *CollectionEntryList) Scan(v interface{}) error {
-	return json.Unmarshal(v.([]byte), l)
-}
-
-// CollectionEntry represents a library collection entry instance.
-type CollectionEntry struct {
-	ID         string     `json:"id"`
-	Attributes mapper.Map `json:"attributes,omitempty"`
-	Options    mapper.Map `json:"options,omitempty"`
-}
-
 // Expand expands the collection template with attributes passed as parameter.
 func (c *Collection) Expand(attrs mapper.Map, backend *Backend) error {
 	var err error
+
+	c.Attributes.Merge(attrs, true)
+	c.Template = false
 
 	if title, ok := c.Options["title"].(string); ok {
 		if c.Options["title"], err = template.Expand(title, attrs); err != nil {
@@ -126,10 +108,7 @@ func (c *Collection) Expand(attrs mapper.Map, backend *Backend) error {
 		}
 	}
 
-	c.Attributes.Merge(attrs, true)
-	c.Template = false
-
-	// Fecth graph entries titles
+	// Fetch graph entries titles
 	titles := map[string]string{}
 
 	ids := []interface{}{}
@@ -147,8 +126,8 @@ func (c *Collection) Expand(attrs mapper.Map, backend *Backend) error {
 		tx.Select("id", "options").Where("id IN (?)", ids).Find(&graphs)
 
 		for _, graph := range graphs {
-			if title, ok := graph.Options["title"].(string); ok {
-				titles[graph.ID] = title
+			if graph.Options.Has("title") {
+				titles[graph.ID], _ = graph.Options.GetString("title", "")
 			}
 		}
 	}
@@ -170,4 +149,25 @@ func (c *Collection) Expand(attrs mapper.Map, backend *Backend) error {
 	}
 
 	return nil
+}
+
+// CollectionEntryList represents a list of library collection entries.
+type CollectionEntryList []CollectionEntry
+
+// Value marshals the collection entries for compatibility with SQL drivers.
+func (l CollectionEntryList) Value() (driver.Value, error) {
+	data, err := json.Marshal(l)
+	return data, err
+}
+
+// Scan unmarshals the collection entries retrieved from SQL drivers.
+func (l *CollectionEntryList) Scan(v interface{}) error {
+	return json.Unmarshal(v.([]byte), l)
+}
+
+// CollectionEntry represents a library collection entry instance.
+type CollectionEntry struct {
+	ID         string     `json:"id"`
+	Attributes mapper.Map `json:"attributes,omitempty"`
+	Options    mapper.Map `json:"options,omitempty"`
 }

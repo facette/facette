@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"facette/mapper"
+	"facette/template"
 )
 
 // Graph represents a library graph item instance.
@@ -32,6 +33,36 @@ func (g Graph) Validate(backend *Backend) error {
 
 	if g.Alias != "" && !authorizedAliasChars.MatchString(g.Alias) {
 		return ErrInvalidAlias
+	}
+
+	return nil
+}
+
+// Expand expands the graph template with attributes passed as parameter.
+func (g *Graph) Expand(attrs mapper.Map) error {
+	var err error
+
+	g.Template = false
+
+	if title, ok := g.Options["title"].(string); ok {
+		if g.Options["title"], err = template.Expand(title, attrs); err != nil {
+			return err
+		}
+	}
+
+	for i := range g.Groups {
+		for j := range g.Groups[i].Series {
+			series := &g.Groups[i].Series[j]
+			if series.Name, err = template.Expand(series.Name, attrs); err != nil {
+				return err
+			} else if series.Origin, err = template.Expand(series.Origin, attrs); err != nil {
+				return err
+			} else if series.Source, err = template.Expand(series.Source, attrs); err != nil {
+				return err
+			} else if series.Metric, err = template.Expand(series.Metric, attrs); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil

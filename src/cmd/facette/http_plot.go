@@ -73,6 +73,12 @@ func (w *httpWorker) httpHandlePlots(ctx context.Context, rw http.ResponseWriter
 
 	// Expand graph template if linked
 	if req.Graph.LinkID != "" || req.Graph.ID == "" && len(req.Graph.Attributes) > 0 || len(req.Attributes) > 0 {
+		// Back up template attributes for later expansion
+		attrs := req.Graph.Attributes
+		if len(req.Attributes) > 0 {
+			attrs.Merge(req.Attributes, true)
+		}
+
 		if req.Graph.LinkID != "" {
 			if err := w.service.backend.Get(req.Graph.LinkID, req.Graph); err == backend.ErrItemNotExist {
 				httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
@@ -84,11 +90,7 @@ func (w *httpWorker) httpHandlePlots(ctx context.Context, rw http.ResponseWriter
 			}
 		}
 
-		if len(req.Attributes) > 0 {
-			req.Graph.Attributes.Merge(req.Attributes, true)
-		}
-
-		if err := expandGraphTemplate(req.Graph); err != nil {
+		if err := req.Graph.Expand(attrs); err != nil {
 			w.log.Warning("%s", err)
 			httputil.WriteJSON(rw, httpBuildMessage(template.ErrInvalidTemplate), http.StatusBadRequest)
 			return
@@ -130,7 +132,7 @@ func (w *httpWorker) httpHandlePlots(ctx context.Context, rw http.ResponseWriter
 	}
 
 	// Execute plots request
-	result := plot.Response{
+	plots := plot.Response{
 		Start:   req.startTime.Format(time.RFC3339),
 		End:     req.endTime.Format(time.RFC3339),
 		Series:  w.executeRequest(req),
@@ -138,15 +140,15 @@ func (w *httpWorker) httpHandlePlots(ctx context.Context, rw http.ResponseWriter
 	}
 
 	// Set fallback title to graph name if none provided
-	if result.Options == nil {
-		result.Options = make(map[string]interface{})
+	if plots.Options == nil {
+		plots.Options = make(map[string]interface{})
 	}
 
-	if _, ok := result.Options["title"]; !ok {
-		result.Options["title"] = req.Graph.Name
+	if _, ok := plots.Options["title"]; !ok {
+		plots.Options["title"] = req.Graph.Name
 	}
 
-	httputil.WriteJSON(rw, result, http.StatusOK)
+	httputil.WriteJSON(rw, plots, http.StatusOK)
 }
 
 func (w *httpWorker) executeRequest(req *plotRequest) []plot.SeriesResponse {
@@ -337,31 +339,4 @@ func (w *httpWorker) dispatchQueries(req *plotRequest) []plotQuery {
 	}
 
 	return result
-}
-
-func expandGraphTemplate(graph *backend.Graph) error {
-	var err error
-
-	if title, ok := graph.Options["title"].(string); ok {
-		if graph.Options["title"], err = template.Expand(title, graph.Attributes); err != nil {
-			return err
-		}
-	}
-
-	for i := range graph.Groups {
-		for j := range graph.Groups[i].Series {
-			series := &graph.Groups[i].Series[j]
-			if series.Name, err = template.Expand(series.Name, graph.Attributes); err != nil {
-				return err
-			} else if series.Origin, err = template.Expand(series.Origin, graph.Attributes); err != nil {
-				return err
-			} else if series.Source, err = template.Expand(series.Source, graph.Attributes); err != nil {
-				return err
-			} else if series.Metric, err = template.Expand(series.Metric, graph.Attributes); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
 }
