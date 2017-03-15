@@ -180,6 +180,16 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
             if (data.template) {
                 delete data.attributes;
             }
+
+            if (data.options) {
+                if (data.options.constants) {
+                    data.options.constants = parseFloatList(data.options.constants);
+                }
+
+                if (data.options.percentiles) {
+                    data.options.percentiles = parseFloatList(data.options.percentiles);
+                }
+            }
         }, function(item) {
             if ($scope.linked && !item.link) {
                 return false;

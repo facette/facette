@@ -70,10 +70,10 @@
 					<input class="small" type="number" placeholder="{{ graphData[optionsEdit.id].options.sample }}" ng-model="entryOptions.sample">
 
 					<label>{{ 'label.graphs_constants' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
-					<input class="small" type="text" placeholder="{{ graphData[optionsEdit.id].options.constants }}" ng-model="entryOptions.constants">
+					<input class="small" type="text" placeholder="{{ graphData[optionsEdit.id].options.constants.join(',') }}" ng-list="," ng-model="entryOptions.constants">
 
 					<label>{{ 'label.graphs_percentiles' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
-					<input class="small" type="text" placeholder="{{ graphData[optionsEdit.id].options.percentiles }}" ng-model="entryOptions.percentiles">
+					<input class="small" type="text" placeholder="{{ graphData[optionsEdit.id].options.percentiles.join(',') }}" ng-list="," ng-model="entryOptions.percentiles">
 
 					<label>{{ 'label.refresh_interval' | translate }} <span class="note">{{ 'label.refresh_interval_unit' | translate }}</span></label>
 					<input class="small" type="number" placeholder="{{ graphData[optionsEdit.id].options.refresh_interval }}" ng-model="entryOptions.refresh_interval">

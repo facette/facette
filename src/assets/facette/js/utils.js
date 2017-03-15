@@ -42,3 +42,7 @@ function slugify(input) {
         .replace(/[^\w ]+/g, '')
         .replace(/ +/g, '-');
 }
+
+function parseFloatList(input) {
+    return $.map(input, function (x) { return parseFloat(x.trim()); });
+}

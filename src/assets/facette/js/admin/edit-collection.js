@@ -119,6 +119,16 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
                         delete entry.attributes[key];
                     }
                 });
+
+                if (entry.options) {
+                    if (entry.options.constants) {
+                        entry.options.constants = parseFloatList(entry.options.constants);
+                    }
+
+                    if (entry.options.percentiles) {
+                        entry.options.percentiles = parseFloatList(entry.options.percentiles);
+                    }
+                }
             });
 
             angular.forEach(data.attributes, function(value, key) {
