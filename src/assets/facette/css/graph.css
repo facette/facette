@@ -219,6 +219,10 @@
 	border-radius: 0.2rem;
 }
 
+.graph-menu > .menuitem.button a {
+	text-decoration: none;
+}
+
 .graph-menu > .menuitem.separator {
 	width: 1px;
 }
