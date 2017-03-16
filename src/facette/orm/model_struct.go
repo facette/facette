@@ -13,8 +13,13 @@ type tabler interface {
 	TableName() string
 }
 
+type stackItem struct {
+	typ   reflect.Type
+	index int
+}
+
 func parseStruct(rt reflect.Type, value interface{}, db *DB) error {
-	var cur reflect.Type
+	var cur stackItem
 
 	if rt.Kind() != reflect.Struct {
 		return ErrInvalidStruct
@@ -36,17 +41,17 @@ func parseStruct(rt reflect.Type, value interface{}, db *DB) error {
 	}
 
 	// Parse value for fields
-	stack := []reflect.Type{rt}
+	stack := []stackItem{{rt, 0}}
 	for len(stack) > 0 {
 		cur, stack = stack[0], stack[1:]
 
-		if cur.Kind() == reflect.Ptr {
-			cur = cur.Elem()
+		if cur.typ.Kind() == reflect.Ptr {
+			cur.typ = cur.typ.Elem()
 		}
 
-		n := cur.NumField()
+		n := cur.typ.NumField()
 		for i := 0; i < n; i++ {
-			cf := cur.Field(i)
+			cf := cur.typ.Field(i)
 
 			ct := cf.Type
 			for ct.Kind() == reflect.Ptr {
@@ -55,7 +60,7 @@ func parseStruct(rt reflect.Type, value interface{}, db *DB) error {
 
 			// Check for embedded struct
 			if cf.Anonymous {
-				stack = append(stack, ct)
+				stack = append(stack, stackItem{ct, i})
 				continue
 			}
 
@@ -85,7 +90,8 @@ func parseStruct(rt reflect.Type, value interface{}, db *DB) error {
 				f.scanner = true
 			}
 
-			m.fields = append(m.fields, f)
+			m.fields = append(m.fields[:cur.index], append([]*field{f}, m.fields[cur.index:]...)...)
+			cur.index++
 		}
 	}
 
