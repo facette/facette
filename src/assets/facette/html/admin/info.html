@@ -12,19 +12,19 @@
 
 		<table class="list">
 			<tbody>
-				<tr class="listitem">
+				<tr class="listitem" ng-if="info.version">
 					<th class="listfield heading">{{ 'label.version' | translate }}</th>
 					<td class="listfield main">{{ info.version }}</td>
 				</tr>
-				<tr class="listitem">
+				<tr class="listitem" ng-if="info.build_date">
 					<th class="listfield heading">{{ 'label.build_date' | translate }}</th>
 					<td class="listfield main">{{ info.build_date }}</td>
 				</tr>
-				<tr class="listitem">
+				<tr class="listitem" ng-if="info.build_hash">
 					<th class="listfield heading">{{ 'label.build_hash' | translate }}</th>
 					<td class="listfield main">{{ info.build_hash }}</td>
 				</tr>
-				<tr class="listitem">
+				<tr class="listitem" ng-if="info.compiler">
 					<th class="listfield heading">{{ 'label.compiler' | translate }}</th>
 					<td class="listfield main">{{ info.compiler }}</td>
 				</tr>

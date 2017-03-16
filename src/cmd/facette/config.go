@@ -12,6 +12,7 @@ const (
 	defaultGracefulTimeout   = 30
 	defaultFrontendEnabled   = true
 	defaultFrontendAssetsDir = "assets"
+	defaultHideBuildDetails  = false
 )
 
 type frontendConfig struct {
@@ -20,12 +21,13 @@ type frontendConfig struct {
 }
 
 type config struct {
-	Listen          string         `yaml:"listen"`
-	LogPath         string         `yaml:"log_path"`
-	LogLevel        string         `yaml:"log_level"`
-	GracefulTimeout int            `yaml:"graceful_timeout"`
-	Frontend        frontendConfig `yaml:"frontend"`
-	Backend         *mapper.Map    `yaml:"backend,omitempty"`
+	Listen           string         `yaml:"listen"`
+	LogPath          string         `yaml:"log_path"`
+	LogLevel         string         `yaml:"log_level"`
+	GracefulTimeout  int            `yaml:"graceful_timeout"`
+	Frontend         frontendConfig `yaml:"frontend"`
+	Backend          *mapper.Map    `yaml:"backend,omitempty"`
+	HideBuildDetails bool           `yaml:"hide_build_details"`
 }
 
 func initConfig(path string) (*config, error) {
@@ -39,6 +41,7 @@ func initConfig(path string) (*config, error) {
 				Enabled:   defaultFrontendEnabled,
 				AssetsDir: defaultFrontendAssetsDir,
 			},
+			HideBuildDetails: defaultHideBuildDetails,
 		}
 	)
 
