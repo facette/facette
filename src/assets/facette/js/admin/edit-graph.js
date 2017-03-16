@@ -245,7 +245,8 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
     };
 
     $scope.selectSeries = function(data) {
-        if (!data || !data.originalObject || typeof data.originalObject == 'object' && !data.originalObject.value) {
+        if (!data || !data.originalObject || typeof data.originalObject == 'object' && !data.originalObject.value ||
+                typeof data.originalObject == 'string' && !$scope.seriesTemplate[this.id]) {
             return;
         }
 
