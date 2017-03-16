@@ -20,11 +20,6 @@ type httpWorker struct {
 	sync.Mutex
 	worker.CommonWorker
 
-	listenAddr     string
-	timeout        int
-	enableFrontend bool
-	assetsDir      string
-
 	service *Service
 	log     *logger.Logger
 	router  *httproute.Router
@@ -33,13 +28,9 @@ type httpWorker struct {
 
 func newHTTPWorker(s *Service) *httpWorker {
 	return &httpWorker{
-		service:        s,
-		log:            s.log.Context("http"),
-		router:         httproute.NewRouter(),
-		listenAddr:     s.config.Listen,
-		timeout:        s.config.GracefulTimeout,
-		enableFrontend: s.config.Frontend.Enabled,
-		assetsDir:      s.config.Frontend.AssetsDir,
+		service: s,
+		log:     s.log.Context("http"),
+		router:  httproute.NewRouter(),
 	}
 }
 
@@ -107,14 +98,14 @@ func (w *httpWorker) Run(wg *sync.WaitGroup) {
 		Get(w.httpHandleAsset)
 
 	// Start router
-	w.log.Info("listening on %q", w.listenAddr)
+	w.log.Info("listening on %q", w.service.config.Listen)
 
 	netProto := "tcp"
-	if strings.HasPrefix(w.listenAddr, ".") || strings.HasPrefix(w.listenAddr, "/") {
+	if strings.HasPrefix(w.service.config.Listen, ".") || strings.HasPrefix(w.service.config.Listen, "/") {
 		netProto = "unix"
 	}
 
-	listener, err := net.Listen(netProto, w.listenAddr)
+	listener, err := net.Listen(netProto, w.service.config.Listen)
 	if err != nil {
 		w.log.Error("failed to listen: %s", err)
 		return
@@ -123,11 +114,11 @@ func (w *httpWorker) Run(wg *sync.WaitGroup) {
 	w.Lock()
 	w.server = &graceful.Server{
 		Server: &http.Server{
-			Addr:    w.listenAddr,
+			Addr:    w.service.config.Listen,
 			Handler: w.router,
 		},
 		NoSignalHandling: true,
-		Timeout:          time.Duration(w.timeout) * time.Second,
+		Timeout:          time.Duration(w.service.config.GracefulTimeout) * time.Second,
 	}
 	w.Unlock()
 

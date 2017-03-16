@@ -16,7 +16,7 @@ const (
 
 func (w *httpWorker) httpHandleAsset(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
 	// Stop handling assets if frontend is disabled
-	if !w.enableFrontend {
+	if !w.service.config.Frontend.Enabled {
 		rw.WriteHeader(http.StatusForbidden)
 		return
 	}
@@ -27,7 +27,7 @@ func (w *httpWorker) httpHandleAsset(ctx context.Context, rw http.ResponseWriter
 		filePath = httpDefaultPath
 	}
 
-	filePath = filepath.Join(w.assetsDir, filePath)
+	filePath = filepath.Join(w.service.config.Frontend.AssetsDir, filePath)
 
 	// Check for existing asset file
 	if fi, err := os.Stat(filePath); err != nil {
