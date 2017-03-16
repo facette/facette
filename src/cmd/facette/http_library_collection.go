@@ -69,13 +69,17 @@ func (w *httpWorker) httpHandleLibraryCollectionTree(ctx context.Context, rw htt
 			}
 
 			tree[c.ParentID].Children = append(tree[c.ParentID].Children, tree[c.ID])
+
+			if c.ParentID == filters["parent"] {
+				tree[c.ID].Parent = ""
+			}
 		}
 	}
 
 	// Only keep top-level collections for result
 	result := libraryCollectionTreeList{}
 	for _, c := range tree {
-		if c.Parent == "" {
+		if c.Parent == "" && c.ID != filters["parent"] {
 			result = append(result, c)
 			sort.Sort(c.Children)
 		}
