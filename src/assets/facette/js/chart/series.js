@@ -38,11 +38,15 @@ chart.fn.toggleSeries = function(idx) {
     var $$ = this;
 
     $$.config.series[idx].disabled = !$$.config.series[idx].disabled;
+    $$.redraw();
+};
 
-    $$.updateData();
-    $$.drawAxis();
-    $$.drawArea();
-    $$.drawSeries();
-    $$.drawZoomRect();
-    $$.drawEventRect();
+chart.fn.selectSeries = function(idx) {
+    var $$ = this;
+
+    $$.config.series.forEach(function(entry, i) {
+        entry.disabled = i !== idx;
+    });
+
+    $$.redraw();
 };

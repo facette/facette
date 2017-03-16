@@ -18,11 +18,19 @@ chart.fn.drawLegend = function() {
 
     // Loop through series
     function toggleLegendSeries(idx) {
-        // Toggle series display
-        $$.toggleSeries(idx);
-
         var parent = d3.select(this.parentNode);
-        parent.classed('disabled', !parent.classed('disabled'));
+
+        // Toggle series display
+        if (d3.event.shiftKey) {
+            $$.selectSeries(idx);
+
+            d3.select(this.parentNode.parentNode).selectAll('.chart-legend-row').classed('disabled', true);
+            parent.classed('disabled', false);
+        } else {
+            $$.toggleSeries(idx);
+
+            parent.classed('disabled', !parent.classed('disabled'));
+        }
     }
 
     function toggleLegendYLine(data) {

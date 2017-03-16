@@ -45,3 +45,14 @@ chart.update = function(config) {
 chart.get = function(element) {
     return element._chart;
 };
+
+chart.fn.redraw = function() {
+    var $$ = this;
+
+    $$.updateData();
+    $$.drawAxis();
+    $$.drawArea();
+    $$.drawSeries();
+    $$.drawZoomRect();
+    $$.drawEventRect();
+};
