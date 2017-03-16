@@ -40,6 +40,7 @@ angular.module('facette.ui.graph', [])
     $scope.folded = typeof $scope.options.folded == 'boolean' ? $scope.options.folded : false;
     $scope.legendActive = false;
     $scope.zooming = false;
+    $scope.exportLinks = {};
 
     var elementLeft = $element.offset().left,
         elementWidth = $element.width();
@@ -252,13 +253,13 @@ angular.module('facette.ui.graph', [])
     }
 
     function resetLink() {
-        if (!$scope.exportLink) {
+        if (!$scope.exportLinks) {
             return;
         }
 
-        $scope.exportLink
-            .removeAttr('download')
-            .removeAttr('href');
+        angular.forEach($scope.exportLinks, function(link) {
+            link.removeAttr('download').removeAttr('href');
+        });
     }
 
     function registerNextDraw() {
@@ -277,43 +278,88 @@ angular.module('facette.ui.graph', [])
     }
 
     // Define scope functions
-    $scope.export = function(e) {
+    $scope.export = function(e, type) {
         if (!$scope.chart) {
             return;
         }
 
-        $scope.exportLink = angular.element(e.target).closest('a');
-        if ($scope.exportLink.attr('href')) {
+        $scope.exportLinks[type] = angular.element(e.target).closest('a');
+        if ($scope.exportLinks[type].attr('href')) {
             return;
         }
 
-        var data = $scope.chart.getSVG(),
-            canvas = document.createElement('canvas'),
-            context;
+        switch (type) {
+        case 'png':
+            var data = $scope.chart.getSVG(),
+                canvas = document.createElement('canvas'),
+                context;
 
-        canvas.setAttribute('width', $scope.chart.svg.attr('width'));
-        canvas.setAttribute('height', $scope.chart.svg.attr('height'));
+            canvas.setAttribute('width', $scope.chart.svg.attr('width'));
+            canvas.setAttribute('height', $scope.chart.svg.attr('height'));
 
-        if (!canvas.getContext || !(context = canvas.getContext('2d'))) {
-            console.error('Your browser doesn’t support mandatory Canvas feature');
-            return;
-        }
+            if (!canvas.getContext || !(context = canvas.getContext('2d'))) {
+                console.error('Your browser doesn’t support mandatory Canvas feature');
+                return;
+            }
 
-        var image = new Image();
-        image.onload = function() {
+            var image = new Image();
+
+            image.onload = function() {
+                var name = slugify($scope.chart.config.title) +
+                    '_' + moment($scope.data.start).format(timeFormatFilename) +
+                    '_' + moment($scope.data.end).format(timeFormatFilename) +
+                    '.png';
+
+                context.drawImage(image, 0, 0);
+
+                $scope.exportLinks[type]
+                    .attr('download', name)
+                    .attr('href', canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream'))
+                    .get(0).click();
+            };
+
+            image.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(data)));
+
+            break;
+
+        case 'summary_csv':
+        case 'summary_json':
             var name = slugify($scope.chart.config.title) +
                 '_' + moment($scope.data.start).format(timeFormatFilename) +
                 '_' + moment($scope.data.end).format(timeFormatFilename) +
-                '.png';
+                '_' + type.replace('_', '.');
 
-            context.drawImage(image, 0, 0);
+            var data;
+            if (type == 'summary_csv') {
+                var summary = '';
+                angular.forEach($scope.data.series, function(series, idx) {
+                    var keys = Object.keys(series.summary);
 
-            $scope.exportLink
+                    if (idx === 0) {
+                        summary += 'name,' + keys.join(',') + '\n';
+                    }
+
+                    summary += '"' + series.name + '",' +
+                        keys.map(function (x) { return series.summary[x]; }).join(',') + '\n';
+                });
+
+                data = 'data:text/csv;charset=utf-8,' + encodeURIComponent(summary);
+            } else {
+                var summary = {};
+                angular.forEach($scope.data.series, function(series) {
+                    summary[series.name] = series.summary;
+                });
+
+                data = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(summary, null, '\t'));
+            }
+
+            $scope.exportLinks[type]
                 .attr('download', name)
-                .attr('href', canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream'))
+                .attr('href', data)
                 .get(0).click();
-        };
-        image.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(data)));
+
+            break;
+        }
     };
 
     $scope.moveStep = function(forward) {
