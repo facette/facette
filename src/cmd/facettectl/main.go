@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	defaultAddress = "localhost:12003"
+	defaultAddress = "http://localhost:12003"
 	defaultTimeout = "30"
 )
 
