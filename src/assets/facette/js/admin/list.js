@@ -44,7 +44,18 @@ app.controller('AdminListController', function($q, $rootScope, $routeParams, $sc
         };
 
         if ($scope.form.search) {
-            query.filter = 'glob:*' + $scope.form.search + '*';
+            var parts = [];
+            angular.forEach($scope.form.search.split(' '), function(part) {
+                if (part.startsWith('origin:')) {
+                    query.origin = part.substr(7);
+                } else if (part.startsWith('source:')) {
+                    query.source = part.substr(7);
+                } else {
+                    parts.push(part);
+                }
+            });
+
+            query.filter = 'glob:*' + parts.join(' ') + '*';
         }
 
         if (factory !== catalog) {
