@@ -26,7 +26,13 @@ type backendType struct {
 	reflectType reflect.Type
 }
 
+type collectionRef struct {
+	ID       string
+	Children []collectionRef
+}
+
 var (
+	// Backend types are listed according to their restoration order
 	backendTypes = []string{
 		"units",
 		"scales",
@@ -134,6 +140,10 @@ func execBackupRestore(input string, merge bool) {
 				path = "library/" + path
 			}
 
+			if verbose {
+				fmt.Printf("restoring library item %s\n", h.Name)
+			}
+
 			// Register item into library
 			req, err := http.NewRequest("PUT", fmt.Sprintf("%s/api/v1/%s", upstreamAddress, path), tr)
 			if err != nil {
@@ -152,17 +162,27 @@ func execBackupRestore(input string, merge bool) {
 			defer resp.Body.Close()
 
 			if resp.StatusCode < 200 || resp.StatusCode > 299 {
-				printError("unable to restore %q item, returned: %s", path, resp.Status)
+				var msg backendError
+				httputil.BindJSON(resp, &msg)
+				printError("unable to restore %q item, returned: %s (%s)", path, msg.Message, resp.Status)
 			}
 		}
 	}
 }
 
 func dumpBackupType(w *tar.Writer, name string) error {
-	var extra string
+	var params string
+
+	// IMPORTANT:
+	// Templates and parent collections *MUST* be dumped first in order to be restored first
+	// to preserve backend items relationships.
 
 	if name == "collections" {
-		extra = "?sort=parent"
+		// Dump only collection templates since they are not included in the collections tree dump
+		params = "?kind=template"
+	} else if name == "graphs" {
+		// Sort graphs by link (null first) to ensure templates are restored before template their instances
+		params = "?sort=link"
 	}
 
 	ba, _ := backendAttrs[name]
@@ -170,7 +190,7 @@ func dumpBackupType(w *tar.Writer, name string) error {
 	// Create new HTTP request
 	hc := httputil.NewClient(time.Duration(upstreamTimeout)*time.Second, true, false)
 
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/%s%s%s", upstreamAddress, ba.prefix, name, extra), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/%s%s%s", upstreamAddress, ba.prefix, name, params), nil)
 	if err != nil {
 		return err
 	}
@@ -196,6 +216,46 @@ func dumpBackupType(w *tar.Writer, name string) error {
 	rv := reflect.New(reflect.MakeSlice(reflect.SliceOf(ba.reflectType), 0, 0).Type())
 	if err := httputil.BindJSON(resp, rv.Interface()); err != nil {
 		return fmt.Errorf("failed to unmarshal JSON: %s", err)
+	}
+
+	if name == "collections" {
+		var (
+			root []collectionRef
+			cur  []collectionRef
+		)
+
+		req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/library/collections/tree", upstreamAddress), nil)
+		if err != nil {
+			return err
+		}
+
+		req.Header.Add("User-Agent", "facettectl/"+version)
+
+		resp, err := hc.Do(req)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+
+		if err := httputil.BindJSON(resp, &root); err != nil {
+			return fmt.Errorf("failed to unmarshal JSON: %s", err)
+		}
+
+		item := rv.Elem()
+
+		stack := [][]collectionRef{root}
+		for len(stack) > 0 {
+			cur, stack = stack[0], stack[1:]
+
+			for _, c := range cur {
+				item = reflect.Append(item, reflect.ValueOf(backend.Collection{Item: backend.Item{ID: c.ID}}))
+				if len(c.Children) > 0 {
+					stack = append(stack, c.Children)
+				}
+			}
+		}
+
+		rv.Elem().Set(item)
 	}
 
 	n := reflect.Indirect(rv).Len()

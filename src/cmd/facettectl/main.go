@@ -20,6 +20,8 @@ var (
 
 	upstreamAddress string
 	upstreamTimeout int
+
+	verbose bool
 )
 
 func main() {
@@ -29,6 +31,7 @@ func main() {
 	// Global
 	flagAddress := app.Flag("address", "Set upstream socket address.").Short('a').Default(defaultAddress).String()
 	flagTimeout := app.Flag("timeout", "Set upstream connection timeout.").Short('t').Default(defaultTimeout).Int()
+	flagVerbose := app.Flag("verbose", "Run in verbose mode.").Short('v').Bool()
 
 	// Version
 	version := app.Command("version", "Display version and support information.")
@@ -48,6 +51,8 @@ func main() {
 
 	upstreamAddress = *flagAddress
 	upstreamTimeout = *flagTimeout
+
+	verbose = *flagVerbose
 
 	switch command {
 	case version.FullCommand():
