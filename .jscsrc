@@ -1,0 +1,12 @@
+{
+    "preset": "jquery",
+    "maximumLineLength": 120,
+    "requireEarlyReturn": true,
+    "requirePaddingNewLinesBeforeLineComments": {
+        "allExcept": "firstAfterCurly"
+    },
+    "requireSpacesInsideBrackets": false,
+    "requireSpacesInsideObjectBrackets": false,
+    "requireSpacesInsideParentheses": false,
+    "validateQuoteMarks": false
+}

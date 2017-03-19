@@ -329,9 +329,11 @@ angular.module('facette.ui.graph', [])
                 '_' + moment($scope.data.end).format(timeFormatFilename) +
                 '_' + type.replace('_', '.');
 
-            var data;
+            var hrefData,
+                summary;
+
             if (type == 'summary_csv') {
-                var summary = '';
+                summary = '';
                 angular.forEach($scope.data.series, function(series, idx) {
                     var keys = Object.keys(series.summary);
 
@@ -340,22 +342,22 @@ angular.module('facette.ui.graph', [])
                     }
 
                     summary += '"' + series.name + '",' +
-                        keys.map(function (x) { return series.summary[x]; }).join(',') + '\n';
+                        keys.map(function(x) { return series.summary[x]; }).join(',') + '\n';
                 });
 
-                data = 'data:text/csv;charset=utf-8,' + encodeURIComponent(summary);
+                hrefData = 'data:text/csv;charset=utf-8,' + encodeURIComponent(summary);
             } else {
-                var summary = {};
+                summary = {};
                 angular.forEach($scope.data.series, function(series) {
                     summary[series.name] = series.summary;
                 });
 
-                data = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(summary, null, '\t'));
+                hrefData = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(summary, null, '\t'));
             }
 
             $scope.exportLinks[type]
                 .attr('download', name)
-                .attr('href', data)
+                .attr('href', hrefData)
                 .get(0).click();
 
             break;
