@@ -14,7 +14,7 @@ Below are some of the most common ways to include jQuery.
 #### Script tag
 
 ```html
-<script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 ```
 
 #### Babel

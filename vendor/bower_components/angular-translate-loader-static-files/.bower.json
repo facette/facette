@@ -17,6 +17,6 @@
     "commit": "ffc810472148358ffdccd8ffc90f5c068cb3b310"
   },
   "_source": "https://github.com/PascalPrecht/bower-angular-translate-loader-static-files.git",
-  "_target": "^2.15.1",
+  "_target": "2.15.1",
   "_originalSource": "angular-translate-loader-static-files"
 }

@@ -20,6 +20,6 @@
     "commit": "7d1089d52729d3e9eae3765417ea4d99573afb36"
   },
   "_source": "https://github.com/buberdds/angular-bootstrap-colorpicker.git",
-  "_target": "^3.0.25",
+  "_target": "3.0.25",
   "_originalSource": "angular-bootstrap-colorpicker"
 }

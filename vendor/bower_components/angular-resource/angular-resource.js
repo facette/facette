@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v1.6.2
+ * @license AngularJS v1.6.3
  * (c) 2010-2017 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -179,7 +179,7 @@ function shallowClearAndCopy(src, dst) {
  *     set `transformResponse` to an empty array: `transformResponse: []`
  *   - **`cache`** – `{boolean|Cache}` – If true, a default $http cache will be used to cache the
  *     GET request, otherwise if a cache instance built with
- *     {@link ng.$cacheFactory $cacheFactory}, this cache will be used for
+ *     {@link ng.$cacheFactory $cacheFactory} is supplied, this cache will be used for
  *     caching.
  *   - **`timeout`** – `{number}` – timeout in milliseconds.<br />
  *     **Note:** In contrast to {@link ng.$http#usage $http.config}, {@link ng.$q promises} are
@@ -434,6 +434,7 @@ function shallowClearAndCopy(src, dst) {
  *
  */
 angular.module('ngResource', ['ng']).
+  info({ angularVersion: '1.6.3' }).
   provider('$resource', function ResourceProvider() {
     var PROTOCOL_AND_IPV6_REGEX = /^https?:\/\/\[[^\]]*][^/]*/;
 

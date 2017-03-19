@@ -28,6 +28,6 @@
     "commit": "d945ab07514c1472edaaaa2ebdcfb11d0f3cec93"
   },
   "_source": "https://github.com/mz026/angular_page_visibility.git",
-  "_target": "^0.0.4",
+  "_target": "0.0.4",
   "_originalSource": "angular-page-visibility"
 }

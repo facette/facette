@@ -38,6 +38,6 @@
     "commit": "922edc4f6fa1caeb1ebae23f009ff70c1a9602f6"
   },
   "_source": "https://github.com/ghiden/angucomplete-alt.git",
-  "_target": "^3.0.0",
+  "_target": "3.0.0",
   "_originalSource": "angucomplete-alt"
 }

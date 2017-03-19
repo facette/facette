@@ -139,6 +139,7 @@
                         var options = $dialog.data('$ngDialogOptions');
                         var id = $dialog.attr('id');
                         var scope = scopes[id];
+                        privateMethods.deactivate($dialog);
 
                         if (!scope) {
                             // Already closed
@@ -194,6 +195,11 @@
                         if (!openIdStack.length) {
                             $elements.body.unbind('keydown', privateMethods.onDocumentKeydown);
                             keydownIsBound = false;
+                        }
+
+                        if (dialogsCount == 0)
+                        {
+                            closeByDocumentHandler = undefined;
                         }
                     },
 
