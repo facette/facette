@@ -144,7 +144,12 @@ article header .search label {
 article header .search input {
 	background-color: transparent;
 	border: none;
+	color: #fff;
 	width: 22rem;
+}
+
+article header .search.focus input {
+	color: #2c3e50;
 }
 
 article header .search input::placeholder {
