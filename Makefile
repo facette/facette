@@ -22,7 +22,7 @@ GOLINT ?= golint
 GOLINT_ARGS =
 
 NPM ?= npm
-NPM_ARGS = --loglevel silent
+NPM_ARGS =
 
 GULP ?= node_modules/.bin/gulp
 GULP_ARGS = --no-color
