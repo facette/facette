@@ -1,0 +1,12 @@
+[Unit]
+Description=Facette
+Documentation=http://docs.facette.io/
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/facette -c /etc/facette/facette.yaml -L info
+User=facette
+
+[Install]
+WantedBy=multi-user.target
