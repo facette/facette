@@ -1,0 +1,5 @@
+docs/examples/facette.json  etc/facette
+usr/bin/facettectl          usr/sbin
+usr/bin/facette             usr/sbin
+usr/share/facette/static    usr/share/facette
+usr/share/facette/template  usr/share/facette

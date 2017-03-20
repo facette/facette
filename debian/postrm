@@ -1,0 +1,37 @@
+#!/bin/sh
+# postrm script for facette
+
+set -e
+
+unset_perms() {
+    dpkg-statoverride --remove "$1" 1>/dev/null 2>&1 || true
+}
+
+case "$1" in
+    remove)
+        unset_perms /etc/facette
+        unset_perms /etc/facette/facette.json
+        unset_perms /etc/facette/providers
+        unset_perms /var/lib/facette
+        unset_perms /var/log/facette
+
+        deluser --quiet facette 1>/dev/null 2>&1 || true
+        ;;
+
+    purge)
+        rm -rf /var/lib/facette
+        rm -rf /etc/facette
+        ;;
+
+    upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+        ;;
+
+    *)
+        echo "postrm called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0

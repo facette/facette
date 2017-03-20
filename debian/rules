@@ -1,0 +1,20 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+# This has to be exported to make some magic below work.
+export DH_OPTIONS
+
+%:
+	dh $@ --with=quilt,golang
+
+override_dh_auto_install:
+	 $(MAKE) PREFIX=$(CURDIR)/debian/tmp/usr install
+
+override_dh_auto_clean:
+	 $(MAKE) clean
+
+override_dh_installinit:
+	dh_installinit --name=facette

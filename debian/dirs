@@ -1,0 +1,3 @@
+etc/facette/providers
+var/lib/facette
+var/log/facette

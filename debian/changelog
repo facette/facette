@@ -1,0 +1,65 @@
+facette (0.3.0-2) unstable; urgency=medium
+
+  * Fix control file dependencies
+
+ -- Theral Mackey <tmackey@evernote.com>  Thu, 03 Dec 2015 16:50:23 -0800
+
+facette (0.3.0-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Vincent Batoufflet <vincent@batoufflet.info>  Tue, 07 Jul 2015 06:56:09 +0200
+
+facette (0.2.3-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Vincent Batoufflet <vincent@batoufflet.info>  Mon, 15 Dec 2014 13:57:12 +0100
+
+facette (0.2.2-2) unstable; urgency=medium
+
+  * Fix default configuration for `base_dir` setting
+
+ -- Vincent Batoufflet <vincent@batoufflet.info>  Sun, 16 Nov 2014 12:58:25 +0100
+
+facette (0.2.2-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Vincent Batoufflet <vincent@batoufflet.info>  Sun, 16 Nov 2014 11:19:13 +0100
+
+facette (0.2.1-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Vincent Batoufflet <vincent@batoufflet.info>  Mon, 13 Oct 2014 13:26:22 +0200
+
+facette (0.2.0-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Vincent Batoufflet <vincent@batoufflet.info>  Wed, 10 Sep 2014 22:49:33 +0200
+
+facette (0.1.2-2) unstable; urgency=medium
+
+  * Add missing `mime-support` package dependency
+
+ -- Vincent Batoufflet <vincent@batoufflet.info>  Sat, 02 Aug 2014 08:30:18 +0200
+
+facette (0.1.2-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Vincent Batoufflet <vincent@batoufflet.info>  Fri, 01 Aug 2014 14:47:20 +0200
+
+facette (0.1.1-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Vincent Batoufflet <vincent@batoufflet.info>  Sat, 12 Jul 2014 17:10:39 +0200
+
+facette (0.1.0-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Vincent Batoufflet <vincent@batoufflet.info>  Tue, 01 Jul 2014 17:47:15 +0200

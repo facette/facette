@@ -1,0 +1,36 @@
+#!/bin/sh
+# postinst script for facette
+
+set -e
+
+set_perms() {
+    if ! dpkg-statoverride --list "$4" >/dev/null; then
+        dpkg-statoverride --update --add "$@"
+    fi
+}
+
+case "$1" in
+    configure)
+        if ! getent passwd facette > /dev/null; then
+            adduser --quiet --system --group --no-create-home facette
+        fi
+
+        set_perms facette facette 0755 /etc/facette
+        set_perms facette facette 0644 /etc/facette/facette.json
+        set_perms facette facette 0755 /etc/facette/providers
+        set_perms facette facette 0755 /var/lib/facette
+        set_perms facette facette 0755 /var/log/facette
+        ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+        ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0
