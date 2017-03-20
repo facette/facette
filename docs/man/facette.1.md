@@ -18,7 +18,7 @@ or KairosDB.
 # OPTIONS
 
 -c *file*
-:   Specify the application configuration file path (default: /etc/facette/facette.conf).
+:   Specify the application configuration file path (default: /etc/facette/facette.yaml).
 
 -h
 :   Display application help and exit.

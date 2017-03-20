@@ -33,7 +33,7 @@ func main() {
 		err     error
 	)
 
-	flag.StringVar(&flagConfig, "c", "/etc/facette/facette.conf", "configuration file path")
+	flag.StringVar(&flagConfig, "c", "/etc/facette/facette.yaml", "configuration file path")
 	flag.BoolVar(&flagHelp, "h", false, "display this help")
 	flag.BoolVar(&flagVersion, "V", false, "display version and support information")
 	flag.Usage = func() { printUsage(os.Stderr); os.Exit(1) }
