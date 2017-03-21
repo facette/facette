@@ -116,7 +116,9 @@ func (b bucket) Consolidate(consolidation int) Plot {
 }
 
 // Normalize aligns multiple plot series on a common time step, consolidates plots samples if necessary.
-func Normalize(series []Series, startTime, endTime time.Time, sample int, consolidation int) ([]Series, error) {
+func Normalize(series []Series, startTime, endTime time.Time, sample int, consolidation int,
+	interpolate bool) ([]Series, error) {
+
 	if sample <= 0 {
 		return nil, ErrInvalidSample
 	}
@@ -184,19 +186,21 @@ func Normalize(series []Series, startTime, endTime time.Time, sample int, consol
 		for j := range buckets[i] {
 			result[i].Plots[j] = buckets[i][j].Consolidate(consolidation)
 
-			// Keep reference of last and next known plots
-			if lastKnown != -1 {
-				result[i].Plots[j].prev = &result[i].Plots[lastKnown]
-			}
-
-			if !result[i].Plots[j].Value.IsNaN() {
+			if interpolate {
+				// Keep reference of last and next known plots
 				if lastKnown != -1 {
-					for k := lastKnown; k < j; k++ {
-						result[i].Plots[k].next = &result[i].Plots[j]
-					}
+					result[i].Plots[j].prev = &result[i].Plots[lastKnown]
 				}
 
-				lastKnown = j
+				if !result[i].Plots[j].Value.IsNaN() {
+					if lastKnown != -1 {
+						for k := lastKnown; k < j; k++ {
+							result[i].Plots[k].next = &result[i].Plots[j]
+						}
+					}
+
+					lastKnown = j
+				}
 			}
 
 			// Stop if only one series is being normalized (no need to align times)
@@ -210,6 +214,10 @@ func Normalize(series []Series, startTime, endTime time.Time, sample int, consol
 		}
 
 		// Interpolate missing points
+		if !interpolate {
+			continue
+		}
+
 		for j, plot := range result[i].Plots {
 			if !plot.Value.IsNaN() || plot.prev == nil || plot.next == nil {
 				continue

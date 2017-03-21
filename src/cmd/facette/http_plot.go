@@ -192,6 +192,7 @@ func (w *httpWorker) executeRequest(req *plotRequest) []plot.SeriesResponse {
 	for i, group := range req.Graph.Groups {
 		var (
 			consolidate int
+			interpolate bool
 			err         error
 		)
 
@@ -212,14 +213,19 @@ func (w *httpWorker) executeRequest(req *plotRequest) []plot.SeriesResponse {
 			goto finalize
 		}
 
-		// Get group consolidation mode option
+		// Get group consolidation mode and interpolation options
 		consolidate = plot.ConsolidateAverage
 		if v, ok := group.Options["consolidate"].(int); ok {
 			consolidate = v
 		}
 
+		interpolate = true
+		if v, ok := group.Options["interpolate"].(bool); ok {
+			interpolate = v
+		}
+
 		// Normalize series and apply operations
-		data[i], err = plot.Normalize(data[i], req.startTime, req.endTime, req.Sample, consolidate)
+		data[i], err = plot.Normalize(data[i], req.startTime, req.endTime, req.Sample, consolidate, interpolate)
 		if err != nil {
 			w.log.Error("failed to normalize series: %s", err)
 			continue
