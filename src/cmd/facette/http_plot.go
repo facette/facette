@@ -154,9 +154,11 @@ func (w *httpWorker) httpHandlePlots(ctx context.Context, rw http.ResponseWriter
 func (w *httpWorker) executeRequest(req *plotRequest) []plot.SeriesResponse {
 	// Expand groups series
 	for i, group := range req.Graph.Groups {
+		expandedSeries := []backend.Series{}
 		for _, series := range group.Series {
-			req.Graph.Groups[i].Series = w.expandSeries(series, true)
+			expandedSeries = append(expandedSeries, w.expandSeries(series, true)...)
 		}
+		req.Graph.Groups[i].Series = expandedSeries
 	}
 
 	// Dispatch plot queries among providers
