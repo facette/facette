@@ -252,6 +252,7 @@ func (c *kairosdbConnector) Refresh(output chan<- *catalog.Record) chan error {
 // Plots retrieves the time series data according to the query parameters and a time interval.
 func (c *kairosdbConnector) Plots(q *plot.Query) ([]plot.Series, error) {
 	step := q.EndTime.Sub(q.StartTime) / time.Duration(q.Sample)
+	sampling := step.Nanoseconds() / 1000000
 
 	pq := kairosdbQuery{
 		StartAbsolute: q.StartTime.Unix() * 1000,
@@ -274,8 +275,8 @@ func (c *kairosdbConnector) Plots(q *plot.Query) ([]plot.Series, error) {
 			Aggregators: []kairosdbQueryAggregator{{
 				Name: c.metrics[s.Source][s.Metric].aggregator,
 				Sampling: kairosdbQuerySampling{
-					Value: int64(step.Seconds()),
-					Unit:  "seconds",
+					Value: sampling,
+					Unit:  "milliseconds",
 				}},
 			},
 		})
