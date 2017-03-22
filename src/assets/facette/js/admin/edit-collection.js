@@ -424,6 +424,7 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
 
             library.list({
                 type: 'collections',
+                kind: 'raw',
                 fields: 'id,name,parent',
                 filter: 'glob:*' + term + '*'
             }).$promise.then(function(data) {
