@@ -27,17 +27,11 @@ type httpWorker struct {
 }
 
 func newHTTPWorker(s *Service) *httpWorker {
-	return &httpWorker{
+	w := &httpWorker{
 		service: s,
 		log:     s.log.Context("http"),
 		router:  httproute.NewRouter(),
 	}
-}
-
-func (w *httpWorker) Run(wg *sync.WaitGroup) {
-	defer wg.Done()
-
-	w.log.Debug("worker started")
 
 	// Initialize HTTP router
 	w.router.Use(w.httpHandleLogger)
@@ -99,6 +93,14 @@ func (w *httpWorker) Run(wg *sync.WaitGroup) {
 
 	w.router.Endpoint("/*").
 		Get(w.httpHandleAsset)
+
+	return w
+}
+
+func (w *httpWorker) Run(wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	w.log.Debug("worker started")
 
 	// Start router
 	w.log.Info("listening on %q", w.service.config.Listen)
