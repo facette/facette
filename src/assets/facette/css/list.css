@@ -103,6 +103,10 @@
     font-size: 0.95rem;
 }
 
+.listfield.main .description .fa {
+	margin-right: 0.25rem;
+}
+
 .listfield.main .description.list .count {
 	background-color: #34495e;
 	border-radius: 1rem;
@@ -163,6 +167,11 @@
 	width: 1.5rem;
 }
 
+.listfield.main .actions .menuitem[disabled] {
+	opacity: 0.35;
+	pointer-events: none;
+}
+
 .listfield.main .actions .menuitem .content {
 	cursor: pointer;
 }
@@ -200,7 +209,7 @@
 .listitem.disabled .listfield.main .name,
 .listitem.disabled .listfield.main .description,
 .listitem.locked .listfield * {
-	opacity: 0.35;
+	opacity: 0.5;
 }
 
 .listfield.main .actions,

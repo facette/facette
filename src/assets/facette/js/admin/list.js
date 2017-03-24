@@ -1,5 +1,5 @@
 app.controller('AdminListController', function($q, $rootScope, $routeParams, $scope, $timeout, $translate, library,
-    catalog, providers) {
+    catalog, providers, providersAction) {
 
     var factory;
 
@@ -162,6 +162,13 @@ app.controller('AdminListController', function($q, $rootScope, $routeParams, $sc
         });
 
         return defer.promise;
+    };
+
+    $scope.refreshProvider = function(entry) {
+        providersAction.refresh({id: entry.id}, function() {
+            entry.refreshing = true;
+            $timeout(function() { entry.refreshing = false; }, 3000);
+        });
     };
 
     // Register watchers

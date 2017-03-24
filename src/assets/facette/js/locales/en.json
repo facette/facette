@@ -186,6 +186,7 @@
     "label.providers_priority": "Priority",
     "label.providers_reset": "Reset provider",
     "label.providers_save": "Save provider",
+    "label.providers_refreshing": "Refreshing…",
     "label.range": "Time range",
     "label.range_alt": "Time range:",
     "label.range_custom": "Custom…",

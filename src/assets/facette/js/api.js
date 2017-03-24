@@ -189,3 +189,17 @@ app.factory('providers', function($resource) {
         }
     });
 });
+
+app.factory('providersAction', function($resource) {
+    return $resource('api/v1/providers/:id/:action', {
+        action: '@action'
+    }, {
+        refresh: {
+            method: 'POST',
+            params: {
+                id: '@id',
+                action: 'refresh'
+            }
+        }
+    });
+});

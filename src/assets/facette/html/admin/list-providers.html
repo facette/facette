@@ -29,12 +29,14 @@
 						<span class="toggle fa" ng-class="{'fa-toggle-on': entry.enabled, 'fa-toggle-off': !entry.enabled}" ng-click="toggle(entry)"></span>
 						<span class="name">{{ entry.name }}</span>
 						<menu class="actions">
-							<menuitem href="" icon="info-circle" type="button" tooltip-data="entry" tooltip-formatter="formatBasicTooltip" tooltip-position="bottom"></menuitem>
+							<menuitem icon="info-circle" type="button" tooltip-data="entry" tooltip-formatter="formatBasicTooltip" tooltip-position="bottom"></menuitem>
 							<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ entry.id }}" icon="pencil" title="{{ 'label.items_edit' | translate }}" type="button"></menuitem>
-							<menuitem href="" icon="clone" title="{{ 'label.items_clone' | translate }}" type="button" ng-click="clone(entry)"></menuitem>
+							<menuitem icon="clone" title="{{ 'label.items_clone' | translate }}" type="button" ng-click="clone(entry)"></menuitem>
 							<menuitem href="{{ ::baseURL }}browse/{{ section }}/{{ entry.id }}" icon="arrow-circle-right" title="{{ 'label.items_goto' | translate }}" type="button" ng-if="section == 'collections' || section == 'graphs'"></menuitem>
+							<menuitem icon="refresh" title="{{ 'label.providers_refresh' | translate }}" type="button" ng-click="refreshProvider(entry)" ng-disabled="entry.refreshing" ng-show="entry.enabled"></menuitem>
 						</menu>
-						<span class="description" ng-class="{placeholder: !entry.description}">{{ entry.description || ('mesg.no_desc' | translate) }}</span>
+						<span class="description" ng-class="{placeholder: !entry.description}" ng-show="!entry.refreshing">{{ entry.description || ('mesg.no_desc' | translate) }}</span>
+						<span class="description" ng-show="entry.refreshing"><span class="fa fa-refresh fa-spin"></span> {{ 'label.providers_refreshing' | translate }}</span>
 					</td>
 					<td class="listfield date"><span>{{ 'mesg.last_update' | translate:{date: ((entry.modified || entry.created) | date:'medium')} }}</span></td>
 					<td class="listfield actions">
