@@ -22,6 +22,9 @@ type frontendConfig struct {
 
 type config struct {
 	Listen           string         `yaml:"listen"`
+	SocketMode       string         `yaml:"socket_mode"`
+	SocketUser       string         `yaml:"socket_user"`
+	SocketGroup      string         `yaml:"socket_group"`
 	LogPath          string         `yaml:"log_path"`
 	LogLevel         string         `yaml:"log_level"`
 	GracefulTimeout  int            `yaml:"graceful_timeout"`

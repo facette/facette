@@ -3,6 +3,9 @@ package main
 import (
 	"net"
 	"net/http"
+	"os"
+	"os/user"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -106,20 +109,66 @@ func (w *httpWorker) Run(wg *sync.WaitGroup) {
 	w.log.Info("listening on %q", w.service.config.Listen)
 
 	netProto := "tcp"
-	if strings.HasPrefix(w.service.config.Listen, ".") || strings.HasPrefix(w.service.config.Listen, "/") {
+	netAddr := w.service.config.Listen
+
+	if strings.HasPrefix(netAddr, "unix:") {
 		netProto = "unix"
+		netAddr = strings.TrimPrefix(netAddr, "unix:")
+
 	}
 
-	listener, err := net.Listen(netProto, w.service.config.Listen)
+	listener, err := net.Listen(netProto, netAddr)
 	if err != nil {
 		w.log.Error("failed to listen: %s", err)
 		return
+	}
+	defer listener.Close()
+
+	if netProto == "unix" {
+		socketUID := os.Getuid()
+		if w.service.config.SocketUser != "" {
+			user, err := user.Lookup(w.service.config.SocketUser)
+			if err != nil {
+				w.log.Error("failed to change socket ownership: %s", err)
+				return
+			}
+			socketUID, _ = strconv.Atoi(user.Uid)
+		}
+
+		socketGID := os.Getgid()
+		if w.service.config.SocketGroup != "" {
+			group, err := user.LookupGroup(w.service.config.SocketGroup)
+			if err != nil {
+				w.log.Error("failed to change socket ownership: %s", err)
+				return
+			}
+			socketGID, _ = strconv.Atoi(group.Gid)
+		}
+
+		if err := os.Chown(netAddr, socketUID, socketGID); err != nil {
+			w.log.Error("failed to change socket ownership: %s", err)
+			return
+		}
+
+		if w.service.config.SocketMode != "" {
+			mode, err := strconv.ParseUint(w.service.config.SocketMode, 8, 32)
+			if err != nil {
+				w.log.Error("failed to change socket permissions: invalid socket mode")
+				return
+			}
+
+			err = os.Chmod(netAddr, os.FileMode(mode))
+			if err != nil {
+				w.log.Error("failed to change socket permissions: %s", err)
+				return
+			}
+		}
 	}
 
 	w.Lock()
 	w.server = &graceful.Server{
 		Server: &http.Server{
-			Addr:    w.service.config.Listen,
+			Addr:    netAddr,
 			Handler: w.router,
 		},
 		NoSignalHandling: true,

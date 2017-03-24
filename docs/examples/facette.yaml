@@ -1,5 +1,9 @@
 ---
 listen: localhost:12003
+#listen: unix:/var/run/facette.sock
+#socket_mode: 644
+#socket_user: facette
+#socket_group: facette
 
 graceful_timeout: 30
 
