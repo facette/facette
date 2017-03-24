@@ -15,6 +15,7 @@ import (
 	"facette/mapper"
 	"facette/plot"
 
+	"github.com/facette/logger"
 	influxdb "github.com/influxdata/influxdb/client/v2"
 	"github.com/influxdata/influxdb/influxql"
 )
@@ -46,7 +47,7 @@ type influxdbConnector struct {
 }
 
 func init() {
-	connectors["influxdb"] = func(name string, settings mapper.Map) (Connector, error) {
+	connectors["influxdb"] = func(name string, settings mapper.Map, log *logger.Logger) (Connector, error) {
 		var err error
 
 		c := &influxdbConnector{
@@ -153,158 +154,146 @@ func (c *influxdbConnector) Name() string {
 }
 
 // Refresh triggers the connector data refresh.
-func (c *influxdbConnector) Refresh(output chan<- *catalog.Record) chan error {
-	errChan := make(chan error)
+func (c *influxdbConnector) Refresh(output chan<- *catalog.Record) error {
+	// Query backend for sample rows (used to detect numerical values)
+	columnsMap := make(map[string][]string, 0)
 
-	go func() {
-		// Query backend for sample rows (used to detect numerical values)
-		columnsMap := make(map[string][]string, 0)
+	q := influxdb.Query{
+		Command:  "select * from /.*/ limit 1",
+		Database: c.database,
+	}
 
-		q := influxdb.Query{
-			Command:  "select * from /.*/ limit 1",
-			Database: c.database,
+	response, err := c.client.Query(q)
+	if err != nil {
+		return fmt.Errorf("failed to fetch sample rows: %s", err)
+	} else if response.Error() != nil {
+		return fmt.Errorf("failed to fetch sample rows: %s", response.Error())
+	}
+
+	if len(response.Results) != 1 {
+		return fmt.Errorf("failed to retrieve sample rows: expected 1 result but got %d", len(response.Results))
+	} else if response.Results[0].Err != "" {
+		return fmt.Errorf("failed to retrieve sample rows: %s", response.Results[0].Err)
+	}
+
+	for _, s := range response.Results[0].Series {
+		if len(s.Values) == 0 {
+			continue
 		}
 
-		response, err := c.client.Query(q)
-		if err != nil {
-			errChan <- fmt.Errorf("failed to fetch sample rows: %s", err)
-			return
-		} else if response.Error() != nil {
-			errChan <- fmt.Errorf("failed to fetch sample rows: %s", response.Error())
-			return
+		if _, ok := columnsMap[s.Name]; !ok {
+			columnsMap[s.Name] = make([]string, 0)
 		}
 
-		if len(response.Results) != 1 {
-			errChan <- fmt.Errorf("failed to retrieve sample rows: expected 1 result but got %d", len(response.Results))
-			return
-		} else if response.Results[0].Err != "" {
-			errChan <- fmt.Errorf("failed to retrieve sample rows: %s", response.Results[0].Err)
-			return
-		}
-
-		for _, s := range response.Results[0].Series {
-			if len(s.Values) == 0 {
+		for i, v := range s.Values[0] {
+			if _, ok := v.(json.Number); !ok {
 				continue
 			}
 
-			if _, ok := columnsMap[s.Name]; !ok {
-				columnsMap[s.Name] = make([]string, 0)
-			}
+			columnsMap[s.Name] = append(columnsMap[s.Name], s.Columns[i])
+		}
+	}
 
-			for i, v := range s.Values[0] {
-				if _, ok := v.(json.Number); !ok {
-					continue
+	if c.pattern != nil { // Pattern-based mapping
+		for series, metricColumns := range columnsMap {
+			for _, metric := range metricColumns {
+				// FIXME: we should return the matchPattern() error to the caller via the eventChan
+				seriesMatch, _ := matchPattern(c.pattern, series)
+
+				if _, ok := c.mapping.maps[seriesMatch[0]]; !ok {
+					c.mapping.maps[seriesMatch[0]] = make(map[string]influxDBMapEntry)
 				}
 
-				columnsMap[s.Name] = append(columnsMap[s.Name], s.Columns[i])
+				c.mapping.maps[seriesMatch[0]][seriesMatch[1]+c.mapping.glue+metric] = influxDBMapEntry{
+					terms:  map[string]string{"": seriesMatch[0] + c.mapping.glue + seriesMatch[1]},
+					column: metric,
+				}
+
+				// Send record to catalog
+				output <- &catalog.Record{
+					Origin:    c.name,
+					Source:    seriesMatch[0],
+					Metric:    seriesMatch[1] + c.mapping.glue + metric,
+					Connector: c,
+				}
 			}
 		}
+	} else { // Column-based mapping
+		// Query backend for series list
+		q = influxdb.Query{
+			Command:  "show series",
+			Database: c.database,
+		}
 
-		if c.pattern != nil { // Pattern-based mapping
-			for series, metricColumns := range columnsMap {
-				for _, metric := range metricColumns {
-					// FIXME: we should return the matchPattern() error to the caller via the eventChan
-					seriesMatch, _ := matchPattern(c.pattern, series)
+		response, err = c.client.Query(q)
+		if err != nil {
+			return fmt.Errorf("failed to fetch series: %s", err)
+		} else if response.Error() != nil {
+			return fmt.Errorf("failed to fetch series: %s", response.Error())
+		}
 
-					if _, ok := c.mapping.maps[seriesMatch[0]]; !ok {
-						c.mapping.maps[seriesMatch[0]] = make(map[string]influxDBMapEntry)
+		if len(response.Results) != 1 {
+			return fmt.Errorf("failed to retrieve series: expected 1 result but got %d", len(response.Results))
+		} else if response.Results[0].Err != "" {
+			return fmt.Errorf("failed to retrieve series: %s", response.Results[0].Err)
+		}
+
+		// Parse results for sources and metrics
+		for _, s := range response.Results[0].Series {
+			for i := range s.Values {
+				seriesColumns := mapSeriesColumns(s.Values[i][0].(string))
+
+				var parts []string
+
+				terms := make(map[string]string)
+
+				// Map source
+				for _, item := range c.mapping.source {
+					term, part := mapKey(seriesColumns, item)
+					if part != "" {
+						terms[term] = part
+						parts = append(parts, part)
 					}
+				}
+				sourceName := strings.Join(parts, c.mapping.glue)
 
-					c.mapping.maps[seriesMatch[0]][seriesMatch[1]+c.mapping.glue+metric] = influxDBMapEntry{
-						terms:  map[string]string{"": seriesMatch[0] + c.mapping.glue + seriesMatch[1]},
-						column: metric,
+				// Map metric
+				parts = []string{}
+				for _, item := range c.mapping.metric {
+					term, part := mapKey(seriesColumns, item)
+					if part != "" {
+						terms[term] = part
+						parts = append(parts, part)
+					}
+				}
+				metricName := strings.Join(parts, c.mapping.glue)
+
+				terms[""] = seriesColumns["name"]
+
+				// Initialize metric mapping terms if needed
+				if _, ok := c.mapping.maps[sourceName]; !ok {
+					c.mapping.maps[sourceName] = make(map[string]influxDBMapEntry)
+				}
+
+				for _, col := range columnsMap[seriesColumns["name"]] {
+					c.mapping.maps[sourceName][metricName+c.mapping.glue+col] = influxDBMapEntry{
+						column: col,
+						terms:  terms,
 					}
 
 					// Send record to catalog
 					output <- &catalog.Record{
 						Origin:    c.name,
-						Source:    seriesMatch[0],
-						Metric:    seriesMatch[1] + c.mapping.glue + metric,
+						Source:    sourceName,
+						Metric:    metricName + c.mapping.glue + col,
 						Connector: c,
 					}
 				}
 			}
-		} else { // Column-based mapping
-			// Query backend for series list
-			q = influxdb.Query{
-				Command:  "show series",
-				Database: c.database,
-			}
-
-			response, err = c.client.Query(q)
-			if err != nil {
-				errChan <- fmt.Errorf("failed to fetch series: %s", err)
-				return
-			} else if response.Error() != nil {
-				errChan <- fmt.Errorf("failed to fetch series: %s", response.Error())
-				return
-			}
-
-			if len(response.Results) != 1 {
-				errChan <- fmt.Errorf("failed to retrieve series: expected 1 result but got %d", len(response.Results))
-				return
-			} else if response.Results[0].Err != "" {
-				errChan <- fmt.Errorf("failed to retrieve series: %s", response.Results[0].Err)
-				return
-			}
-
-			// Parse results for sources and metrics
-			for _, s := range response.Results[0].Series {
-				for i := range s.Values {
-					seriesColumns := mapSeriesColumns(s.Values[i][0].(string))
-
-					var parts []string
-
-					terms := make(map[string]string)
-
-					// Map source
-					for _, item := range c.mapping.source {
-						term, part := mapKey(seriesColumns, item)
-						if part != "" {
-							terms[term] = part
-							parts = append(parts, part)
-						}
-					}
-					sourceName := strings.Join(parts, c.mapping.glue)
-
-					// Map metric
-					parts = []string{}
-					for _, item := range c.mapping.metric {
-						term, part := mapKey(seriesColumns, item)
-						if part != "" {
-							terms[term] = part
-							parts = append(parts, part)
-						}
-					}
-					metricName := strings.Join(parts, c.mapping.glue)
-
-					terms[""] = seriesColumns["name"]
-
-					// Initialize metric mapping terms if needed
-					if _, ok := c.mapping.maps[sourceName]; !ok {
-						c.mapping.maps[sourceName] = make(map[string]influxDBMapEntry)
-					}
-
-					for _, col := range columnsMap[seriesColumns["name"]] {
-						c.mapping.maps[sourceName][metricName+c.mapping.glue+col] = influxDBMapEntry{
-							column: col,
-							terms:  terms,
-						}
-
-						// Send record to catalog
-						output <- &catalog.Record{
-							Origin:    c.name,
-							Source:    sourceName,
-							Metric:    metricName + c.mapping.glue + col,
-							Connector: c,
-						}
-					}
-				}
-			}
 		}
-	}()
+	}
 
-	return errChan
+	return nil
 }
 
 // Plots retrieves the time series data according to the query parameters and a time interval.

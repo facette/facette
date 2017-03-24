@@ -16,6 +16,7 @@ import (
 	"facette/plot"
 
 	"github.com/facette/httputil"
+	"github.com/facette/logger"
 	"github.com/fatih/set"
 )
 
@@ -98,7 +99,7 @@ type kairosdbConnector struct {
 }
 
 func init() {
-	connectors["kairosdb"] = func(name string, settings mapper.Map) (Connector, error) {
+	connectors["kairosdb"] = func(name string, settings mapper.Map, log *logger.Logger) (Connector, error) {
 		var err error
 
 		c := &kairosdbConnector{
@@ -148,105 +149,94 @@ func (c *kairosdbConnector) Name() string {
 }
 
 // Refresh triggers the connector data refresh.
-func (c *kairosdbConnector) Refresh(output chan<- *catalog.Record) chan error {
-	errChan := make(chan error)
-
+func (c *kairosdbConnector) Refresh(output chan<- *catalog.Record) error {
 	// Prepare source tags set (used for tags filtering)
 	tags := set.New()
 	for _, t := range c.sourceTags {
 		tags.Add(t)
 	}
 
-	go func() {
-		req, err := http.NewRequest("GET", c.url+kairosdbURLMetricNames, nil)
-		if err != nil {
-			errChan <- fmt.Errorf("unable to set up HTTP request: %s", err)
-			return
-		}
+	req, err := http.NewRequest("GET", c.url+kairosdbURLMetricNames, nil)
+	if err != nil {
+		return fmt.Errorf("unable to set up HTTP request: %s", err)
+	}
 
-		// Retrieve metrics list
-		resp, err := c.client.Do(req)
-		if err != nil {
-			errChan <- fmt.Errorf("unable to perform HTTP request: %s", err)
-			return
-		}
-		defer resp.Body.Close()
+	// Retrieve metrics list
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("unable to perform HTTP request: %s", err)
+	}
+	defer resp.Body.Close()
 
-		mr := kairosdbMetricResponse{}
-		if err := httputil.BindJSON(resp, &mr); err != nil {
-			errChan <- fmt.Errorf("unable to unmarshal JSON data: %s", err)
-			return
-		}
+	mr := kairosdbMetricResponse{}
+	if err := httputil.BindJSON(resp, &mr); err != nil {
+		return fmt.Errorf("unable to unmarshal JSON data: %s", err)
+	}
 
-		// Retrieve metrics associated tags
-		tq := kairosdbQuery{Metrics: []kairosdbQueryMetric{}}
-		for _, metric := range mr.Results {
-			tq.Metrics = append(tq.Metrics, kairosdbQueryMetric{Name: metric})
-		}
+	// Retrieve metrics associated tags
+	tq := kairosdbQuery{Metrics: []kairosdbQueryMetric{}}
+	for _, metric := range mr.Results {
+		tq.Metrics = append(tq.Metrics, kairosdbQueryMetric{Name: metric})
+	}
 
-		body, err := json.Marshal(tq)
-		if err != nil {
-			errChan <- fmt.Errorf("unable to marshal tags request: %s", err)
-			return
-		}
+	body, err := json.Marshal(tq)
+	if err != nil {
+		return fmt.Errorf("unable to marshal tags request: %s", err)
+	}
 
-		req, err = http.NewRequest("POST", c.url+kairosdbURLMetricTags, bytes.NewReader(body))
-		if err != nil {
-			errChan <- fmt.Errorf("unable to set up HTTP request: %s", err)
-			return
-		}
+	req, err = http.NewRequest("POST", c.url+kairosdbURLMetricTags, bytes.NewReader(body))
+	if err != nil {
+		return fmt.Errorf("unable to set up HTTP request: %s", err)
+	}
 
-		req.Header.Add("User-Agent", "facette/"+version)
-		req.Header.Set("Content-Type", "application/json")
+	req.Header.Add("User-Agent", "facette/"+version)
+	req.Header.Set("Content-Type", "application/json")
 
-		resp, err = c.client.Do(req)
-		if err != nil {
-			errChan <- fmt.Errorf("unable to perform HTTP request: %s", err)
-			return
-		}
-		defer resp.Body.Close()
+	resp, err = c.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("unable to perform HTTP request: %s", err)
+	}
+	defer resp.Body.Close()
 
-		tr := kairosdbResponse{}
-		if err := httputil.BindJSON(resp, &tr); err != nil {
-			errChan <- fmt.Errorf("unable to unmarshal JSON data: %s", err)
-			return
-		}
+	tr := kairosdbResponse{}
+	if err := httputil.BindJSON(resp, &tr); err != nil {
+		return fmt.Errorf("unable to unmarshal JSON data: %s", err)
+	}
 
-		for _, q := range tr.Queries {
-			for _, r := range q.Results {
-				for key, values := range r.Tags {
-					if !tags.Has(key) {
-						continue
-					}
+	for _, q := range tr.Queries {
+		for _, r := range q.Results {
+			for key, values := range r.Tags {
+				if !tags.Has(key) {
+					continue
+				}
 
-					for _, aggr := range c.aggregators {
-						metric := r.Name + "/" + aggr
+				for _, aggr := range c.aggregators {
+					metric := r.Name + "/" + aggr
 
-						for _, value := range values {
-							if _, ok := c.metrics[value]; !ok {
-								c.metrics[value] = make(map[string]*kairosdbMetric)
-							}
+					for _, value := range values {
+						if _, ok := c.metrics[value]; !ok {
+							c.metrics[value] = make(map[string]*kairosdbMetric)
+						}
 
-							c.metrics[value][metric] = &kairosdbMetric{
-								metric:     r.Name,
-								aggregator: aggr,
-								tag:        [2]string{key, value},
-							}
+						c.metrics[value][metric] = &kairosdbMetric{
+							metric:     r.Name,
+							aggregator: aggr,
+							tag:        [2]string{key, value},
+						}
 
-							output <- &catalog.Record{
-								Origin:    c.name,
-								Source:    value,
-								Metric:    metric,
-								Connector: c,
-							}
+						output <- &catalog.Record{
+							Origin:    c.name,
+							Source:    value,
+							Metric:    metric,
+							Connector: c,
 						}
 					}
 				}
 			}
 		}
-	}()
+	}
 
-	return errChan
+	return nil
 }
 
 // Plots retrieves the time series data according to the query parameters and a time interval.

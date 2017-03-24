@@ -43,7 +43,7 @@ func matchPattern(re *regexp.Regexp, input string) ([2]string, error) {
 
 	m := re.FindStringSubmatch(input)
 	if len(m) == 0 {
-		return result, fmt.Errorf("series %q does not match pattern", input)
+		return result, fmt.Errorf("string %q does not match %q pattern", input, re.String())
 	}
 
 	if re.SubexpNames()[1] == PatternKeywordSource {

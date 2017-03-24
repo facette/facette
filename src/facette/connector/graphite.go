@@ -12,11 +12,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/facette/httputil"
-
 	"facette/catalog"
 	"facette/mapper"
 	"facette/plot"
+
+	"github.com/facette/httputil"
+	"github.com/facette/logger"
 )
 
 const (
@@ -41,7 +42,7 @@ type graphiteConnector struct {
 }
 
 func init() {
-	connectors["graphite"] = func(name string, settings mapper.Map) (Connector, error) {
+	connectors["graphite"] = func(name string, settings mapper.Map, log *logger.Logger) (Connector, error) {
 		var err error
 
 		c := &graphiteConnector{
@@ -95,69 +96,60 @@ func (c *graphiteConnector) Name() string {
 }
 
 // Refresh triggers the connector data refresh.
-func (c *graphiteConnector) Refresh(output chan<- *catalog.Record) chan error {
-	errChan := make(chan error)
+func (c *graphiteConnector) Refresh(output chan<- *catalog.Record) error {
+	var series []string
 
-	go func() {
-		var series []string
+	req, err := http.NewRequest("GET", strings.TrimSuffix(c.url, "/")+graphiteURLMetrics, nil)
+	if err != nil {
+		return fmt.Errorf("unable to set up HTTP request: %s", err)
+	}
 
-		req, err := http.NewRequest("GET", strings.TrimSuffix(c.url, "/")+graphiteURLMetrics, nil)
-		if err != nil {
-			errChan <- fmt.Errorf("unable to set up HTTP request: %s", err)
-			return
+	req.Header.Add("User-Agent", "facette/"+version)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("unable to perform HTTP request: %s", err)
+	}
+	defer resp.Body.Close()
+
+	// Parse backend response
+	if err = graphiteCheckBackendResponse(resp); err != nil {
+		return fmt.Errorf("invalid HTTP backend response: %s", err)
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("unable to read HTTP response body: %s", err)
+	}
+
+	if err = json.Unmarshal(data, &series); err != nil {
+		return fmt.Errorf("unable to unmarshal JSON data: %s", err)
+	}
+
+	for _, s := range series {
+		var sourceName, metricName string
+
+		// FIXME: we should return the matchPattern() error to the caller via the eventChan
+		seriesMatch, _ := matchPattern(c.pattern, s)
+
+		sourceName, metricName = seriesMatch[0], seriesMatch[1]
+
+		if _, ok := c.series[sourceName]; !ok {
+			c.series[sourceName] = make(map[string]string)
 		}
 
-		req.Header.Add("User-Agent", "facette/"+version)
-		req.Header.Set("Content-Type", "application/json")
+		c.series[sourceName][metricName] = s
 
-		resp, err := c.client.Do(req)
-		if err != nil {
-			errChan <- fmt.Errorf("unable to perform HTTP request: %s", err)
-			return
+		output <- &catalog.Record{
+			Origin:    c.name,
+			Source:    sourceName,
+			Metric:    metricName,
+			Connector: c,
 		}
-		defer resp.Body.Close()
+	}
 
-		// Parse backend response
-		if err = graphiteCheckBackendResponse(resp); err != nil {
-			errChan <- fmt.Errorf("invalid HTTP backend response: %s", err)
-			return
-		}
-
-		data, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			errChan <- fmt.Errorf("unable to read HTTP response body: %s", err)
-			return
-		}
-
-		if err = json.Unmarshal(data, &series); err != nil {
-			errChan <- fmt.Errorf("unable to unmarshal JSON data: %s", err)
-			return
-		}
-
-		for _, s := range series {
-			var sourceName, metricName string
-
-			// FIXME: we should return the matchPattern() error to the caller via the eventChan
-			seriesMatch, _ := matchPattern(c.pattern, s)
-
-			sourceName, metricName = seriesMatch[0], seriesMatch[1]
-
-			if _, ok := c.series[sourceName]; !ok {
-				c.series[sourceName] = make(map[string]string)
-			}
-
-			c.series[sourceName][metricName] = s
-
-			output <- &catalog.Record{
-				Origin:    c.name,
-				Source:    sourceName,
-				Metric:    metricName,
-				Connector: c,
-			}
-		}
-	}()
-
-	return errChan
+	return nil
 }
 
 // Plots retrieves the time series data according to the query parameters and a time interval.

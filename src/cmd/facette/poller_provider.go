@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -19,18 +20,20 @@ const (
 type providerWorker struct {
 	worker.CommonWorker
 
-	poller    *pollerWorker
-	provider  *backend.Provider
-	connector connector.Connector
-	catalog   *catalog.Catalog
-	filters   *catalog.FilterChain
-	cmdChan   chan int
-	wg        *sync.WaitGroup
+	poller     *pollerWorker
+	provider   *backend.Provider
+	connector  connector.Connector
+	catalog    *catalog.Catalog
+	filters    *catalog.FilterChain
+	refreshing bool
+	cmdChan    chan int
+	wg         *sync.WaitGroup
 }
 
 func newProviderWorker(poller *pollerWorker, prov *backend.Provider) (*providerWorker, error) {
 	// Initialize provider connector handler
-	c, err := connector.NewConnector(prov.Connector, prov.Name, prov.Settings)
+	c, err := connector.NewConnector(prov.Connector, prov.Name, prov.Settings,
+		poller.log.Context(fmt.Sprintf("poller[%s]", prov.Name)))
 	if err != nil {
 		return nil, err
 	}
@@ -85,10 +88,13 @@ func (w *providerWorker) Run(wg *sync.WaitGroup) {
 				w.poller.log.Debug("refreshing %q provider", w.provider.Name)
 
 				go func() {
-					errChan := w.connector.Refresh(w.filters.Input)
-					for err := range errChan {
+					w.refreshing = true
+
+					if err := w.connector.Refresh(w.filters.Input); err != nil {
 						w.poller.log.Error("provider %q encountered an error: %s", w.provider.Name, err)
 					}
+
+					w.refreshing = false
 				}()
 
 			case providerCmdShutdown:
@@ -128,6 +134,11 @@ func (w *providerWorker) Shutdown() {
 }
 
 func (w *providerWorker) Refresh() {
+	if w.refreshing {
+		fmt.Println("nope!")
+		return
+	}
+
 	// Trigger provider refresh
 	w.cmdChan <- providerCmdRefresh
 }

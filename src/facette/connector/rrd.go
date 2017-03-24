@@ -5,15 +5,16 @@ package connector
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
 
 	"facette/catalog"
 	"facette/mapper"
-	"facette/osutil"
 	"facette/plot"
 
+	"github.com/facette/logger"
 	"github.com/fatih/set"
 	"github.com/ziutek/rrd"
 )
@@ -32,15 +33,17 @@ type rrdConnector struct {
 	daemon  string
 	pattern *regexp.Regexp
 	metrics map[string]map[string]*rrdMetric
+	log     *logger.Logger
 }
 
 func init() {
-	connectors["rrd"] = func(name string, settings mapper.Map) (Connector, error) {
+	connectors["rrd"] = func(name string, settings mapper.Map, log *logger.Logger) (Connector, error) {
 		var err error
 
 		c := &rrdConnector{
 			name:    name,
 			metrics: make(map[string]map[string]*rrdMetric),
+			log:     log,
 		}
 
 		// Get connector handler settings
@@ -75,11 +78,12 @@ func (c *rrdConnector) Name() string {
 }
 
 // Refresh triggers the connector data refresh.
-func (c *rrdConnector) Refresh(output chan<- *catalog.Record) chan error {
+func (c *rrdConnector) Refresh(output chan<- *catalog.Record) error {
 	// Search for files and parse their path for source/metric pairs
 	walkFunc := func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			return err
+			c.log.Error("%s", err)
+			return nil
 		}
 
 		// Skip non-files
@@ -91,7 +95,8 @@ func (c *rrdConnector) Refresh(output chan<- *catalog.Record) chan error {
 		// Get matching pattern elements
 		m, err := matchPattern(c.pattern, strings.TrimPrefix(path, c.path+"/"))
 		if err != nil {
-			return err
+			c.log.Error("%s", err)
+			return nil
 		}
 
 		source, metric := m[0], m[1]
@@ -103,7 +108,8 @@ func (c *rrdConnector) Refresh(output chan<- *catalog.Record) chan error {
 		// Extract information from .rrd file
 		rinfo, err := rrd.Info(path)
 		if err != nil {
-			return err
+			c.log.Error("failed to extract info: %s", err)
+			return nil
 		}
 
 		// Extract consolidation functions list
@@ -117,10 +123,6 @@ func (c *rrdConnector) Refresh(output chan<- *catalog.Record) chan error {
 		}
 
 		// Parse RRD information for indexes
-		if _, ok := rinfo["ds.index"]; !ok {
-			return nil
-		}
-
 		indexes, ok := rinfo["ds.index"].(map[string]interface{})
 		if !ok {
 			return nil
@@ -149,7 +151,7 @@ func (c *rrdConnector) Refresh(output chan<- *catalog.Record) chan error {
 		return nil
 	}
 
-	return osutil.Walk(c.path, walkFunc)
+	return c.walk(c.path, "", walkFunc)
 }
 
 // Plots retrieves the time series data according to the query parameters and a time interval.
@@ -216,4 +218,37 @@ func (c *rrdConnector) Plots(q *plot.Query) ([]plot.Series, error) {
 	data.FreeValues()
 
 	return result, nil
+}
+
+func (c *rrdConnector) walk(root, originalRoot string, walkFunc filepath.WalkFunc) error {
+	if _, err := os.Stat(root); err != nil {
+		c.log.Error("%s", err)
+		return nil
+	}
+
+	// Walk root directory
+	return filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			c.log.Error("%s", err)
+			return nil
+		}
+
+		mode := info.Mode() & os.ModeType
+		if mode == os.ModeSymlink {
+			// Follow symbolic link if evaluation succeeds
+			realPath, err := filepath.EvalSymlinks(path)
+			if err != nil {
+				c.log.Error("%s", err)
+				return nil
+			}
+
+			return c.walk(realPath, path, walkFunc)
+		}
+
+		if originalRoot != "" {
+			path = originalRoot + strings.TrimPrefix(path, root)
+		}
+
+		return walkFunc(path, info, err)
+	})
 }

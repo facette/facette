@@ -6,6 +6,8 @@ import (
 	"facette/catalog"
 	"facette/mapper"
 	"facette/plot"
+
+	"github.com/facette/logger"
 )
 
 const connectorDefaultTimeout int = 10
@@ -13,25 +15,25 @@ const connectorDefaultTimeout int = 10
 var (
 	version string
 
-	connectors = make(map[string]func(string, mapper.Map) (Connector, error))
+	connectors = make(map[string]func(string, mapper.Map, *logger.Logger) (Connector, error))
 )
 
 // Connector represents a connector handler interface.
 type Connector interface {
 	Name() string
-	Refresh(chan<- *catalog.Record) chan error
+	Refresh(chan<- *catalog.Record) error
 	Plots(*plot.Query) ([]plot.Series, error)
 }
 
 // NewConnector creates a new instance of a connector handler.
-func NewConnector(typ string, name string, settings mapper.Map) (Connector, error) {
+func NewConnector(typ string, name string, settings mapper.Map, log *logger.Logger) (Connector, error) {
 	// Check for existing connector handler
 	if _, ok := connectors[typ]; !ok {
 		return nil, ErrUnsupportedConnector
 	}
 
 	// Return new connector handler instance
-	return connectors[typ](name, settings)
+	return connectors[typ](name, settings, log)
 }
 
 // Connectors returns the list of supported connectors.

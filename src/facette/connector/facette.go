@@ -18,6 +18,7 @@ import (
 	"facette/timerange"
 
 	"github.com/facette/httputil"
+	"github.com/facette/logger"
 )
 
 const (
@@ -35,7 +36,7 @@ type facetteConnector struct {
 }
 
 func init() {
-	connectors["facette"] = func(name string, settings mapper.Map) (Connector, error) {
+	connectors["facette"] = func(name string, settings mapper.Map, log *logger.Logger) (Connector, error) {
 		var err error
 
 		c := &facetteConnector{name: name}
@@ -74,47 +75,41 @@ func (c *facetteConnector) Name() string {
 }
 
 // Refresh triggers the connector data refresh.
-func (c *facetteConnector) Refresh(output chan<- *catalog.Record) chan error {
-	errChan := make(chan error)
+func (c *facetteConnector) Refresh(output chan<- *catalog.Record) error {
+	// Create new HTTP request
+	req, err := http.NewRequest("GET", c.url+facetteURLCatalog, nil)
+	if err != nil {
+		return fmt.Errorf("unable to set up HTTP request: %s", err)
+	}
 
-	go func() {
-		// Create new HTTP request
-		req, err := http.NewRequest("GET", c.url+facetteURLCatalog, nil)
-		if err != nil {
-			errChan <- fmt.Errorf("unable to set up HTTP request: %s", err)
-			return
-		}
+	req.Header.Add("User-Agent", "facette/"+version)
 
-		req.Header.Add("User-Agent", "facette/"+version)
+	// Retrieve data from upstream catalog
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return fmt.Errorf("unable to perform HTTP request: %s", err)
+	}
+	defer resp.Body.Close()
 
-		// Retrieve data from upstream catalog
-		resp, err := c.client.Do(req)
-		if err != nil {
-			errChan <- fmt.Errorf("unable to perform HTTP request: %s", err)
-		}
-		defer resp.Body.Close()
+	result := make(map[string]map[string][]string)
+	if err := httputil.BindJSON(resp, &result); err != nil {
+		return fmt.Errorf("unable to unmarshal JSON data: %s", err)
+	}
 
-		result := make(map[string]map[string][]string)
-		if err := httputil.BindJSON(resp, &result); err != nil {
-			errChan <- fmt.Errorf("unable to unmarshal JSON data: %s", err)
-			return
-		}
-
-		for origin, sources := range result {
-			for source, metrics := range sources {
-				for _, metric := range metrics {
-					output <- &catalog.Record{
-						Origin:    origin,
-						Source:    source,
-						Metric:    metric,
-						Connector: c,
-					}
+	for origin, sources := range result {
+		for source, metrics := range sources {
+			for _, metric := range metrics {
+				output <- &catalog.Record{
+					Origin:    origin,
+					Source:    source,
+					Metric:    metric,
+					Connector: c,
 				}
 			}
 		}
-	}()
+	}
 
-	return errChan
+	return nil
 }
 
 // Plots retrieves the time series data according to the query parameters and a time interval.
