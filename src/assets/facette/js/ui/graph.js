@@ -31,6 +31,7 @@ angular.module('facette.ui.graph', [])
 
     $scope.loading = false;
     $scope.empty = false;
+    $scope.partial = false;
     $scope.error = false;
     $scope.modified = false;
     $scope.paused = false;
@@ -132,6 +133,10 @@ angular.module('facette.ui.graph', [])
 
         // Append series to chart
         angular.forEach($scope.data.series, function(series) {
+            if (series.plots === null) {
+                $scope.partial = true;
+            }
+
             var entry = {
                 name: series.name,
                 plots: series.plots,
@@ -167,6 +172,7 @@ angular.module('facette.ui.graph', [])
 
         $scope.loading = true;
         $scope.empty = false;
+        $scope.partial = false;
         $scope.error = false;
         $scope.summary = {};
 
@@ -238,6 +244,7 @@ angular.module('facette.ui.graph', [])
         }, function() {
             $scope.data = null;
             $scope.loading = false;
+            $scope.partial = false;
             $scope.error = true;
 
             // Remove old rendered graph

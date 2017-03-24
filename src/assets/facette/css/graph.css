@@ -52,10 +52,19 @@
 	font-size: 0.9rem;
 	left: 1rem;
 	line-height: 1.5rem;
-	padding: 0.5rem;
+	padding: 0.5rem 1rem;
 	position: absolute;
 	top: 1rem;
 	width: auto;
+}
+
+.graph .message.warning.float {
+	background-color: transparent;
+	color: rgba(241, 196, 15, 0.9);
+}
+
+.graph .message.float .fa {
+	margin-right: 0.5rem;
 }
 
 .graph .message.clickable {
