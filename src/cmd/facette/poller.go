@@ -68,7 +68,6 @@ func (w *pollerWorker) StartProvider(prov backend.Provider) {
 	defer w.Unlock()
 
 	if !prov.Enabled {
-		w.providers[prov.ID] = nil
 		return
 	}
 
@@ -115,8 +114,17 @@ func (w *pollerWorker) StopProvider(prov backend.Provider, update bool) {
 	}
 }
 
-func (w *pollerWorker) Refresh() {
+func (w *pollerWorker) RefreshAll() {
 	for _, prov := range w.providers {
 		go (*prov).Refresh()
+	}
+}
+
+func (w *pollerWorker) Refresh(prov backend.Provider) {
+	w.Lock()
+	defer w.Unlock()
+
+	if pw, ok := w.providers[prov.ID]; ok {
+		go pw.Refresh()
 	}
 }

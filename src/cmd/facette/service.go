@@ -91,5 +91,5 @@ func (s *Service) Refresh() {
 	s.log.Info("received refresh signal, broadcasting")
 
 	// Trigger poller providers refresh
-	s.poller.Refresh()
+	s.poller.RefreshAll()
 }

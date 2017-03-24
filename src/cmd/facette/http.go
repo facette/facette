@@ -88,6 +88,9 @@ func (w *httpWorker) Run(wg *sync.WaitGroup) {
 		Patch(w.httpHandleBackendUpdate).
 		Put(w.httpHandleBackendUpdate)
 
+	w.router.Endpoint(apiPrefix + "/providers/:id/refresh").
+		Post(w.httpHandleProviderRefresh)
+
 	w.router.Endpoint(apiPrefix + "/").
 		Get(w.httpHandleInfo)
 
