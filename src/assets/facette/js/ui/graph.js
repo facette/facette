@@ -44,6 +44,7 @@ angular.module('facette.ui.graph', [])
     $scope.exportLinks = {};
 
     var elementLeft = $element.offset().left,
+        elementTop = $element.offset().top,
         elementWidth = $element.width();
 
     function applyOptions(options) {
@@ -562,13 +563,17 @@ angular.module('facette.ui.graph', [])
             return;
         }
 
-        if (elementLeft === undefined || elementWidth === undefined) {
-            elementLeft = $element.offset().left;
+        if (elementLeft === undefined || elementTop === undefined || elementWidth === undefined) {
+            var elementOffset = $element.offset();
+
+            elementLeft = elementOffset.left;
+            elementTop = elementOffset.top;
             elementWidth = $element.width();
         }
 
         var changed = false,
             relX = e.pageX - elementLeft,
+            relY = e.pageY - elementTop,
             delta = graphPadding * 2;
 
         if (!$scope.stepActive && relX <= delta) {
@@ -579,6 +584,14 @@ angular.module('facette.ui.graph', [])
             changed = true;
         } else if ($scope.stepActive !== null && relX > delta && relX < elementWidth - delta) {
             $scope.stepActive = null;
+            changed = true;
+        }
+
+        if (!$scope.foldActive && relY <= delta) {
+            $scope.foldActive = true;
+            changed = true;
+        } else if ($scope.foldActive && relY > delta) {
+            $scope.foldActive = false;
             changed = true;
         }
 

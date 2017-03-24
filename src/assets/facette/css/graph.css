@@ -132,6 +132,13 @@
 
 .graph-fold {
 	border-radius: 0 0 0.25rem 0.25rem;
+	transform: translateY(-1.5rem);
+	transition: transform .2s ease-in-out;
+}
+
+.graph-fold.active,
+.graph-fold:hover {
+	transform: translateY(0);
 }
 
 .grid2 .graph-fold,

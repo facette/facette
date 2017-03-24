@@ -2,7 +2,7 @@
 	<message class="clickable" icon="eye-slash" ng-click="toggleFold(false)" ng-show="folded">{{ 'mesg.graphs_folded' | translate }}</a></message>
 
 	<div class="graph-control" ng-if="options.controls && !folded">
-		<div class="graph-fold" ng-if="!options.frame">
+		<div class="graph-fold" ng-class="{active: foldActive}" ng-if="!options.frame">
 			<div class="fa fa-chevron-up" ng-click="toggleFold(true)" ng-show="!folded"></div>
 		</div>
 
