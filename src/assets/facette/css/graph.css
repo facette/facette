@@ -265,9 +265,13 @@
 
 .graph-menu > .menuitem .subcontent .menuitem.button {
 	cursor: default;
-	padding: 0 1rem;
 	text-align: left;
 	white-space: nowrap;
+}
+
+.graph-menu > .menuitem .subcontent .menuitem.button a {
+	display: block;
+	padding: 0 1rem;
 }
 
 .graph-menu > .menuitem .subcontent .menuitem.button:hover,
