@@ -30,6 +30,9 @@ chart.fn.getSVG = function() {
     node.setAttribute('version', '1.1');
     node.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
 
+    // Remove UI-related nodes
+    d3.select(node).selectAll('.chart-cursor, .chart-event, .chart-zoom').remove();
+
     chart.utils.inlineStyles(node);
 
     return node.outerHTML;

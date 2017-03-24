@@ -54,6 +54,7 @@ chart.fn.drawEventRect = function() {
         rectHeight = $$.height - ($$.titleGroup ? $$.titleGroup.node().getBBox().height : 0) - 2 * $$.config.padding;
 
     $$.areaGroup.append('rect')
+        .attr('class', 'chart-event')
         .attr('fill', 'transparent')
         .attr('width', rectWidth)
         .attr('height', rectHeight)
