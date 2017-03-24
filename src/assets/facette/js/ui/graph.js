@@ -567,15 +567,17 @@ angular.module('facette.ui.graph', [])
             elementWidth = $element.width();
         }
 
-        var changed = false;
+        var changed = false,
+            relX = e.pageX - elementLeft,
+            delta = graphPadding * 2;
 
-        if (e.pageX - elementLeft <= graphPadding * 2) {
+        if (!$scope.stepActive && relX <= delta) {
             $scope.stepActive = 'backward';
             changed = true;
-        } else if (e.pageX - elementLeft >= elementWidth - graphPadding * 2) {
+        } else if (!$scope.stepActive && relX >= elementWidth - delta) {
             $scope.stepActive = 'forward';
             changed = true;
-        } else if ($scope.stepActive !== null) {
+        } else if ($scope.stepActive !== null && relX > delta && relX < elementWidth - delta) {
             $scope.stepActive = null;
             changed = true;
         }
