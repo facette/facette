@@ -10,7 +10,7 @@
 
 		<ng-include src="'templates/common/user-menu.html'" ng-include-replace="true"></ng-include>
 
-		<search name="search" placeholder="{{ 'label.items_search' | translate }}" ng-model="form.search"></search>
+		<search name="search" placeholder="{{ 'label.' + section + '_search' | translate }}" ng-model="form.search"></search>
 	</header>
 
 	<section>

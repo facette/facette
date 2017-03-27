@@ -85,10 +85,10 @@ app.controller('AdminListController', function($q, $rootScope, $routeParams, $sc
     $scope.clone = function(item) {
         $rootScope.showModal({
             type: dialogTypePrompt,
-            message: 'label.items_name',
+            message: 'label.' + $scope.section + '_name',
             value: item.name + ' (clone)',
             labels: {
-                validate: 'label.items_clone'
+                validate: 'label.' + $scope.section + '_clone'
             }
         }, function(data) {
             if (data === undefined) {
@@ -114,7 +114,7 @@ app.controller('AdminListController', function($q, $rootScope, $routeParams, $sc
                 name: item.name
             },
             labels: {
-                validate: 'label.items_remove'
+                validate: 'label.' + $scope.section + '_remove'
             },
             danger: true
         }, function(data) {

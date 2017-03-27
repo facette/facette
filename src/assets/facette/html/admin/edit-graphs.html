@@ -55,7 +55,7 @@
 								<menu>
 									<menuitem href="" icon="caret-square-o-down" title="{{ 'label.groups_expand' | translate }}" type="button" ng-click="expandGroup(g, true)" ng-show="g.series.length == 1 && g.series[0].expansion !== undefined"></menuitem>
 									<menuitem href="" icon="caret-square-o-up" title="{{ 'label.groups_collapse' | translate }}" type="button" ng-click="expandGroup(g, false)" ng-show="g.series.length == 1 && g.series[0].expanded !== undefined"></menuitem>
-									<menuitem href="" icon="times-circle" title="{{ 'label.items_remove' | translate }}" type="button" ng-click="remove(item.groups, g)"></menuitem>
+									<menuitem href="" icon="times-circle" title="{{ 'label.groups_remove' | translate }}" type="button" ng-click="remove(item.groups, g)"></menuitem>
 								</menu>
 							</td>
 						</tr>

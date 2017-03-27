@@ -11,7 +11,7 @@
 
 		<ng-include src="'templates/common/user-menu.html'" ng-include-replace="true"></ng-include>
 
-		<search name="search" placeholder="{{ 'label.items_search' | translate }}" ng-model="search"></search>
+		<search name="search" placeholder="{{ 'label.' + section + '_search' | translate }}" ng-model="search"></search>
 	</header>
 
 	<section>
@@ -30,9 +30,9 @@
 						<span class="name">{{ entry.name }}</span>
 						<menu class="actions">
 							<menuitem icon="info-circle" type="button" tooltip-data="entry" tooltip-formatter="formatBasicTooltip" tooltip-position="bottom"></menuitem>
-							<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ entry.id }}" icon="pencil" title="{{ 'label.items_edit' | translate }}" type="button"></menuitem>
-							<menuitem icon="clone" title="{{ 'label.items_clone' | translate }}" type="button" ng-click="clone(entry)"></menuitem>
-							<menuitem href="{{ ::baseURL }}browse/{{ section }}/{{ entry.id }}" icon="arrow-circle-right" title="{{ 'label.items_goto' | translate }}" type="button" ng-if="section == 'collections' || section == 'graphs'"></menuitem>
+							<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ entry.id }}" icon="pencil" title="{{ 'label.' + section + '_edit' | translate }}" type="button"></menuitem>
+							<menuitem icon="clone" title="{{ 'label.' + section + '_clone' | translate }}" type="button" ng-click="clone(entry)"></menuitem>
+							<menuitem href="{{ ::baseURL }}browse/{{ section }}/{{ entry.id }}" icon="arrow-circle-right" title="{{ 'label.' + section + '_goto' | translate }}" type="button" ng-if="section == 'collections' || section == 'graphs'"></menuitem>
 							<menuitem icon="refresh" title="{{ 'label.providers_refresh' | translate }}" type="button" ng-click="refreshProvider(entry)" ng-disabled="entry.refreshing" ng-show="entry.enabled"></menuitem>
 						</menu>
 						<span class="description" ng-class="{placeholder: !entry.description}" ng-show="!entry.refreshing">{{ entry.description || ('mesg.no_desc' | translate) }}</span>
@@ -41,7 +41,7 @@
 					<td class="listfield date"><span>{{ 'mesg.last_update' | translate:{date: ((entry.modified || entry.created) | date:'medium')} }}</span></td>
 					<td class="listfield actions">
 						<menu>
-							<menuitem href="" icon="times-circle" title="{{ 'label.items_remove' | translate }}" type="button" ng-click="remove(entry)"></menuitem>
+							<menuitem href="" icon="times-circle" title="{{ 'label.' + section + '_remove' | translate }}" type="button" ng-click="remove(entry)"></menuitem>
 						</menu>
 					</td>
 				</tr>
