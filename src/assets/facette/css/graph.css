@@ -59,8 +59,9 @@
 }
 
 .graph .message.warning.float {
-	background-color: transparent;
-	color: rgba(241, 196, 15, 0.9);
+	background-color: #f1c40f;
+	color: #fff;
+	opacity: 0.98;
 }
 
 .graph .message.float .fa {
