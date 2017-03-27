@@ -76,6 +76,12 @@ func (m *model) mapSettings(field *field, tag string) {
 		case "foreign_key":
 			field.foreignKey = value
 
+		case "on_delete":
+			field.foreignOnDelete = value
+
+		case "on_update":
+			field.foreignOnUpdate = value
+
 		case "index":
 			field.indexes = []string{}
 			for _, part := range strings.Split(value, ",") {
@@ -148,22 +154,24 @@ func newModel(value interface{}, db *DB) (*model, error) {
 }
 
 type field struct {
-	name          string
-	fieldName     string
-	sqlType       string
-	ignore        bool
-	scanner       bool
-	properties    []string
-	primaryKey    bool
-	foreignKey    string
-	foreignField  *field
-	indexes       []string
-	nullable      bool
-	autoIncrement bool
-	hasMany       bool
-	value         reflect.Value
-	typ           reflect.Type
-	model         *model
+	name            string
+	fieldName       string
+	sqlType         string
+	ignore          bool
+	scanner         bool
+	properties      []string
+	primaryKey      bool
+	foreignKey      string
+	foreignField    *field
+	foreignOnDelete string
+	foreignOnUpdate string
+	indexes         []string
+	nullable        bool
+	autoIncrement   bool
+	hasMany         bool
+	value           reflect.Value
+	typ             reflect.Type
+	model           *model
 }
 
 func (f *field) columnDef() string {
@@ -173,9 +181,11 @@ func (f *field) columnDef() string {
 	props := f.properties
 	if f.foreignField != nil {
 		props = append(props, fmt.Sprintf(
-			"REFERENCES %s (%s) ON UPDATE CASCADE ON DELETE CASCADE",
+			"REFERENCES %s (%s) ON DELETE %s ON UPDATE %s",
 			f.model.db.driver.QuoteName(f.foreignField.model.name),
 			f.model.db.driver.QuoteName(f.foreignField.name),
+			f.foreignOnDelete,
+			f.foreignOnUpdate,
 		))
 	}
 

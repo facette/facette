@@ -29,7 +29,7 @@ type Collection struct {
 	Attributes mapper.Map          `json:"attributes,omitempty"`
 	Alias      string              `orm:"type:varchar(128);unique" json:"alias,omitempty"`
 	Options    mapper.Map          `json:"options,omitempty"`
-	Parent     *Collection         `orm:"type:varchar(36);foreign_key:ID" json:"-"`
+	Parent     *Collection         `orm:"type:varchar(36);foreign_key:ID;on_delete:SET NULL;on_update:SET NULL" json:"-"`
 	ParentID   string              `orm:"-" json:"parent,omitempty"`
 	Template   bool                `orm:"not_null;default:false" json:"template"`
 }

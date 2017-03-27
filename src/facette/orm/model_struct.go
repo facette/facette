@@ -85,6 +85,15 @@ func parseStruct(rt reflect.Type, value interface{}, db *DB) error {
 				f.name = FormatName(cf.Name)
 			}
 
+			if f.foreignKey != "" {
+				if f.foreignOnDelete == "" {
+					f.foreignOnDelete = "CASCADE"
+				}
+				if f.foreignOnUpdate == "" {
+					f.foreignOnUpdate = "CASCADE"
+				}
+			}
+
 			// Check if value implements scanner
 			if _, ok := reflect.New(ct).Interface().(sql.Scanner); ok {
 				f.scanner = true
