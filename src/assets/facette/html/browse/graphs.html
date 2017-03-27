@@ -1,10 +1,10 @@
 <ng-include src="'templates/browse/layout.html'" ng-include-replace="true"></ng-include>
 
-<article>
+<article class="with-actions">
 	<header>
-		<h1>{{ title }}</h1>
+		<h1 title="{{ title }}">{{ title }}</h1>
 
-		<menu>
+		<menu class="main expand">
 			<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ id }}" icon="pencil" title="{{ 'label.' + section + '_edit' | translate }}" type="button"></menuitem>
 			<menuitem href="" icon="refresh" title="{{ 'label.collections_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
 			<menuitem href="" icon="clock-o" title="{{ 'label.range_set' | translate }}" type="button" drop="true">
@@ -22,17 +22,16 @@
 					<menuitem label="{{ 'label.page_grid_3' | translate }}" ng-click="setGrid(3)" type="button"></menuitem>
 				</menu>
 			</menuitem>
-			<menuitem href="" icon="print" title="{{ 'label.print_page' | translate }}" type="button" ng-click="print()"></menuitem>
 		</menu>
 
-		<ng-include src="'templates/common/user-menu.html'" ng-include-replace="true"></ng-include>
-
-		<search name="filter" icon="filter" placeholder="{{ 'label.items_filter' | translate }}" ng-model="form.filter" ng-if="section == 'collections'"></search>
-
-		<menu class="extra">
+		<menu>
 			<menuitem href="" icon="toggle-off" label="{{ 'label.graphs_legends_show' | translate }}" type="button" ng-click="toggleLegends(true)" ng-show="!showLegends"></menuitem>
 			<menuitem href="" icon="toggle-on" label="{{ 'label.graphs_legends_show' | translate }}" type="button" ng-click="toggleLegends(false)" ng-show="showLegends"></menuitem>
 		</menu>
+
+		<search name="filter" icon="filter" placeholder="{{ 'label.items_filter' | translate }}" ng-model="form.filter" ng-if="section == 'collections'"></search>
+
+		<ng-include src="'templates/common/extra-menu.html'" ng-include-replace="true"></ng-include>
 	</header>
 
 	<section>

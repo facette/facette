@@ -59,11 +59,11 @@
 
 .listfield.checkbox {
 	color: #ecf0f1;
-    cursor: default;
+	cursor: default;
 }
 
 .listfield.checkbox label::before {
-    margin-right: 0;
+	margin-right: 0;
 }
 
 .listfield.pre {
@@ -93,14 +93,14 @@
 }
 
 .listfield.main .description {
-    min-height: 1.5rem;
+	min-height: 1.5rem;
 }
 
 .listfield.main .description.list {
 	display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    font-size: 0.95rem;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	font-size: 0.95rem;
 }
 
 .listfield.main .description .fa {
@@ -195,7 +195,7 @@
 }
 
 .listfield.main .actions,
-.listfield.date span,
+.listfield.date,
 .listfield.actions .menu {
 	color: #bdc3c7;
 	white-space: nowrap;
@@ -324,4 +324,20 @@
 .keylist .value input {
 	border-bottom-left-radius: 0;
 	border-top-left-radius: 0;
+}
+
+@media screen and (max-width: 768px) {
+	.listfield.main .actions,
+	.listfield.actions .menu {
+		white-space: normal;
+	}
+
+	.listfield.main,
+	.listfield.pattern {
+		width: auto;
+	}
+
+	.listfield.date {
+		display: none;
+	}
 }

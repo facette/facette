@@ -236,6 +236,11 @@ app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope
         }
     };
 
+    // Handle sidebar toggle
+    $rootScope.toggleSidebar = function() {
+        $rootScope.sidebarOpen = !$rootScope.sidebarOpen;
+    };
+
     // Handle error message
     $rootScope.setError = function(content) {
         $rootScope.error = content;

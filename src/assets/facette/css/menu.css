@@ -13,7 +13,7 @@
 	padding: 0.5rem 1rem;
 	position: absolute;
 	text-align: left;
-	z-index: 150;
+	z-index: 200;
 }
 
 .tooltip::before {

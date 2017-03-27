@@ -405,7 +405,7 @@
 	padding: 0.35rem 0.65rem;
 	pointer-events: none;
 	position: absolute;
-	z-index: 150;
+	z-index: 200;
 }
 
 .chart-tooltip table {
@@ -446,4 +446,12 @@
 	margin-right: 0.5rem;
 	vertical-align: middle;
 	width: 0.75rem;
+}
+
+@media screen and (max-width: 1024px) {
+	.graph-fold {
+		border-bottom-left-radius: 0;
+		left: 0;
+		position: absolute;
+	}
 }

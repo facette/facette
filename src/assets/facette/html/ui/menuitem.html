@@ -1,6 +1,6 @@
 <li class="menuitem" ng-class="{active: type == 'button' && (active || focus), '{{ type }}': type, icon: icon && !label, drop: drop}">
-	<a class="content" tabindex="0" title="{{ title }}" target="{{ target }}" ng-href="{{ href }}" ng-class='{active: tooltipActive}' ng-mouseenter="toggleTooltip($event)" ng-mouseleave="toggleTooltip($event)" ng-blur="handleFocus($event)" ng-focus="handleFocus($event)" ng-keypress="handleKey($event)" ng-if="type == 'button'">
-		<span class="fa fa-{{ icon }}" ng-if="icon"></span>
+	<a class="content" tabindex="0" target="{{ target }}" ng-href="{{ href }}" ng-class='{active: tooltipActive}' ng-mouseenter="toggleTooltip($event)" ng-mouseleave="toggleTooltip($event)" ng-blur="handleFocus($event)" ng-focus="handleFocus($event)" ng-keypress="handleKey($event)" ng-if="type == 'button'">
+		<span class="fa fa-{{ icon }}" title="{{ title }}" ng-if="icon"></span>
 		<span class="badge" ng-if="badge">{{ badge }}</span>
 		<span class="label" title="{{ label }}" ng-if="label">{{ label }}</span>
 	</a>

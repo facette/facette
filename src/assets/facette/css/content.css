@@ -16,46 +16,53 @@
 article {
 	margin-left: 22rem;
 	padding: 5.5rem 2rem 2rem;
-	transition: margin-left 0.3s ease-in-out;
+	transition: margin-left .3s ease-in-out;
+}
+
+aside.open + article {
+	margin-left: 0;
 }
 
 article header,
 article footer {
 	left: 22rem;
-	padding: 0 2rem;
 	position: fixed;
 	right: 0;
-	transition: left 0.3s ease-in-out;
+	transition: left .3s ease-in-out;
+}
+
+aside.open + article header,
+aside.open + article footer {
+	left: 0;
 }
 
 article header {
 	background-color: #2980b9;
+	display: flex;
 	color: #fff;
 	top: 0;
 }
 
-article header h1,
-article header .menu {
-	float: left;
-}
-
-article header .menu.extra,
-article header .menu.user {
-	float: right;
-}
-
-article header .menu.user {
-	margin-right: -2rem;
+aside.open + article header {
+	left: 3.5rem;
 }
 
 article header h1 {
 	font-size: 1.4rem;
 	font-weight: 400;
-	margin-right: 0.5rem;
+	margin: 0;
+	overflow: hidden;
+	padding: 0 2rem;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+article header > .expand {
+	flex: 1;
 }
 
 article header > .menu {
-	margin-left: 0.5rem;
+	white-space: nowrap;
 }
 
 article header > .menu > .menuitem.button {
@@ -121,7 +128,7 @@ article header .search {
 	border-radius: 0.2rem;
 	color: #fff;
 	line-height: 2rem;
-	margin: 0.75rem 0 0.75rem 1rem;
+	margin: 0.75rem 1rem;
 	padding: 0 0.5rem;
 }
 
@@ -160,16 +167,12 @@ article header .search.focus input::placeholder {
 	opacity: 1;
 }
 
-article header .search {
-	float: right;
-}
-
 article footer {
 	background-color: #ecf0f1;
 	bottom: 0;
 	height: 4rem;
-	left: 22rem;
 	line-height: 4rem;
+	padding: 0 2rem;
 	text-align: right;
 }
 
@@ -272,4 +275,74 @@ article .graph {
 
 .pane {
 	padding-bottom: 6rem;
+}
+
+@media screen and (max-width: 1024px) {
+	article.with-actions {
+		margin-left: 25.5rem;
+	}
+
+	article header h1 {
+		flex: 1;
+	}
+
+	article header .menu.main {
+		background-color: #ecf0f1;
+		border-bottom-right-radius: 0.2rem;
+		flex: none;
+		margin: 0;
+		position: absolute;
+		top: 3.5rem;
+		white-space: normal;
+		width: 3.5rem;
+	}
+
+	article header > .menu.main > .menuitem.button > a {
+		color: #2c3e50;
+	}
+
+	article header > .menu.main > .menuitem.button > a:focus,
+	article header > .menu.main > .menuitem.button:hover > a,
+	article header > .menu.main > .menuitem.button.focus > a {
+		background-color: #bdc3c7;
+	}
+
+	article header > .menu.main > .menuitem.button:last-child > a:focus,
+	article header > .menu.main > .menuitem.button:last-child:hover > a,
+	article header > .menu.main > .menuitem.button.focus:last-child > a {
+		border-bottom-right-radius: 0.2rem;
+	}
+
+	article header .search {
+		display: none;
+	}
+}
+
+@media screen and (max-width: 768px) {
+	article {
+		margin-left: 0;
+	}
+
+	aside.open + article,
+	article.with-actions {
+		margin-left: 3.5rem;
+	}
+
+	article header,
+	aside.open + article header {
+		left: 3.5rem;
+	}
+
+	article header .menu.main {
+		transform: translate(-3.5rem);
+	}
+
+	article footer {
+		left: 0;
+	}
+
+	article section .logo,
+	article section .search {
+		margin: 4rem 1rem;
+	}
 }

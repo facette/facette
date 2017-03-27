@@ -1,21 +1,21 @@
 .as-sortable-item {
-    touch-action: none;
+	touch-action: none;
 }
 
 .as-sortable-item-handle {
-    cursor: grab;
+	cursor: grab;
 }
 
 .as-sortable-drag {
-    position: absolute;
-    pointer-events: none;
-    z-index: 100;
+	position: absolute;
+	pointer-events: none;
+	z-index: 100;
 }
 
 .as-sortable-hidden {
-    display: none;
+	display: none;
 }
 
 .as-sortable-un-selectable {
-    user-select: none;
+	user-select: none;
 }

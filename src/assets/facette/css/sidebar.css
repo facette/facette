@@ -10,10 +10,16 @@ aside {
 	bottom: 0;
 	color: #fff;
 	left: 0;
-	overflow-x: hidden;
-	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
 	padding-top: 3.5rem;
 	top: 0;
+	transition: transform .3s ease-in-out;
+	z-index: 100;
+}
+
+aside.open {
+	transform: translate(-22rem);
 }
 
 aside a {
@@ -23,14 +29,15 @@ aside a {
 aside header {
 	background-color: #333;
 	box-sizing: border-box;
+	display: flex;
 	left: 0;
-	padding: 0 1rem;
 	top: 0;
 }
 
 aside header .logo {
-	display: inline-block;
+	flex: 1;
 	line-height: 3.5rem;
+	padding: 0 1rem;
 }
 
 aside header .logo img {
@@ -39,13 +46,13 @@ aside header .logo img {
 }
 
 aside header .menu {
+	background-color: inherit;
 	list-style-type: none;
-	position: absolute;
-	right: 0;
-	top: 0;
+	transition: transform .3s ease-in-out;
 }
 
 aside header .menuitem.button {
+	cursor: pointer;
 	width: 3.5rem;
 }
 
@@ -54,7 +61,13 @@ aside header .menuitem.button:hover a {
 	background-color: #464646;
 }
 
+aside.open header .menu {
+	transform: translate(3.5rem);
+}
+
 aside nav {
+	flex: 1;
+	overflow-y: auto;
 	padding: 1rem 0 5rem;
 }
 
@@ -159,4 +172,23 @@ aside nav > .toggle {
 	position: fixed;
 	text-align: center;
 	width: 22rem;
+}
+
+@media screen and (max-width: 768px) {
+	aside {
+		transform: translate(-22rem);
+	}
+
+	aside.open {
+		position: absolute;
+		transform: translate(0);
+	}
+
+	aside header .menu {
+		transform: translate(3.5rem);
+	}
+
+	aside.open header .menu {
+		transform: translate(0);
+	}
 }

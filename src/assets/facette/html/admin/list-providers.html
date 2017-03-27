@@ -1,15 +1,15 @@
 <ng-include src="'templates/admin/layout.html'" ng-include-replace="true"></ng-include>
 
-<article>
+<article class="with-actions">
 	<header>
 		<h1>{{ 'label.admin_panel' | translate }} – {{ 'label.providers' | translate }}</h1>
 
-		<menu>
+		<menu class="main expand">
 			<menuitem href="" icon="refresh" title="{{ 'label.list_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
 			<menuitem href="{{ ::baseURL }}admin/{{ section }}/add" icon="plus" title="{{ 'label.providers_add' | translate }}" type="button"></menuitem>
 		</menu>
 
-		<ng-include src="'templates/common/user-menu.html'" ng-include-replace="true"></ng-include>
+		<ng-include src="'templates/common/extra-menu.html'" ng-include-replace="true"></ng-include>
 
 		<search name="search" placeholder="{{ 'label.' + section + '_search' | translate }}" ng-model="search"></search>
 	</header>
@@ -38,7 +38,9 @@
 						<span class="description" ng-class="{placeholder: !entry.description}" ng-show="!entry.refreshing">{{ entry.description || ('mesg.no_desc' | translate) }}</span>
 						<span class="description" ng-show="entry.refreshing"><span class="fa fa-refresh fa-spin"></span> {{ 'label.providers_refreshing' | translate }}</span>
 					</td>
-					<td class="listfield date"><span>{{ 'mesg.last_update' | translate:{date: ((entry.modified || entry.created) | date:'medium')} }}</span></td>
+					<td class="listfield date">
+						<span>{{ 'mesg.last_update' | translate }} <span class="value">{{ (entry.modified || entry.created) | date:'medium' }}</span></span>
+					</td>
 					<td class="listfield actions">
 						<menu>
 							<menuitem href="" icon="times-circle" title="{{ 'label.' + section + '_remove' | translate }}" type="button" ng-click="remove(entry)"></menuitem>

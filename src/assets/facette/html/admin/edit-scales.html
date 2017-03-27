@@ -2,9 +2,9 @@
 
 <article class="pane" ng-show="state == stateOK">
 	<header>
-		<h1>{{ 'label.admin_panel' | translate }} – {{ (id == 'add' ? 'label.scales_new' : 'label.scales_edit') | translate }}</h1>
+		<h1 class="expand">{{ 'label.admin_panel' | translate }} – {{ (id == 'add' ? 'label.scales_new' : 'label.scales_edit') | translate }}</h1>
 
-		<ng-include src="'templates/common/user-menu.html'" ng-include-replace="true"></ng-include>
+		<ng-include src="'templates/common/extra-menu.html'" ng-include-replace="true"></ng-include>
 	</header>
 
 	<section>

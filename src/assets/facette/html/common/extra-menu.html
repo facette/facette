@@ -1,6 +1,8 @@
-<menu class="user">
+<menu class="extra">
 	<menuitem class="left" href="" icon="ellipsis-v" type="button" drop="true">
 		<menu>
+			<menuitem label="{{ 'label.print_page' | translate }}" type="button" ng-click="print()" ng-if="print"></menuitem>
+			<menuitem type="separator" ng-if="print"></menuitem>
 			<menuitem label="{{ 'label.reset_local_prefs' | translate }}" ng-click="resetLocalPrefs()" type="button"></menuitem>
 		</menu>
 	</menuitem>

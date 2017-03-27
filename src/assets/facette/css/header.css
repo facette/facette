@@ -36,7 +36,7 @@ header .menuitem .subcontent {
 	list-style-type: none;
 	padding: 0.35rem 0;
 	position: absolute;
-	z-index: 150;
+	z-index: 200;
 }
 
 header .menuitem .subcontent::before {
@@ -99,8 +99,8 @@ header.error {
 	right: 0;
 	top: 0;
 	transform: translateY(-100%);
-	transition: transform 0.2s ease-in-out;
-	z-index: 100;
+	transition: transform .2s ease-in-out;
+	z-index: 210;
 }
 
 header.error.active {
@@ -143,3 +143,35 @@ header.error .action .fa {
 	font-size: 1.2rem;
 	margin-left: 2rem;
 }
+
+@media screen and (max-width: 768px) {
+	header.error {
+		left: 0;
+	}
+}
+
+@media screen and (max-width: 1024px) {
+	header > .menu > .menuitem > .content > .fa {
+		margin-right: 0 !important;
+		text-align: center;
+		width: 2rem;
+	}
+
+	header > .menu > .menuitem > .content > .label {
+		display: none;
+	}
+
+	header > .menu.main > .menuitem > .subcontent {
+		left: 100%;
+		top: 0;
+	}
+
+	header > .menu.main > .menuitem > .subcontent::before {
+		border-bottom-color: transparent;
+		border-right-color: rgba(34, 34, 34, 0.98);
+		bottom: auto;
+		left: -1.45rem;
+		top: 1rem;
+	}
+}
+

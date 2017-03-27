@@ -1,14 +1,14 @@
 <ng-include src="'templates/admin/layout.html'" ng-include-replace="true"></ng-include>
 
-<article>
+<article class="with-actions">
 	<header>
 		<h1>{{ 'label.admin_panel' | translate }} – {{ 'label.' + section | translate }}</h1>
 
-		<menu>
+		<menu class="main expand">
 			<menuitem href="" icon="refresh" title="{{ 'label.list_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
 		</menu>
 
-		<ng-include src="'templates/common/user-menu.html'" ng-include-replace="true"></ng-include>
+		<ng-include src="'templates/common/extra-menu.html'" ng-include-replace="true"></ng-include>
 
 		<search name="search" placeholder="{{ 'label.' + section + '_search' | translate }}" ng-model="form.search"></search>
 	</header>

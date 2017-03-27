@@ -341,7 +341,7 @@ angucomplete-alt,
 	position: absolute;
 	right: 0;
 	top: 100%;
-	z-index: 150;
+	z-index: 200;
 }
 
 .angucomplete-dropdown,
@@ -451,7 +451,7 @@ label .note::after {
 .colorpicker {
 	position: absolute;
 	user-select: none;
-	z-index: 200;
+	z-index: 210;
 }
 
 .colorpicker .dropdown-menu {
@@ -498,7 +498,7 @@ label .note::after {
 .colorpicker colorpicker-saturation i {
 	display: block;
 	position: absolute;
-	z-index: 10;
+	z-index: 220;
 }
 
 .colorpicker colorpicker-hue {
