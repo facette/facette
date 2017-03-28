@@ -148,9 +148,11 @@ app.config(function($httpProvider, $locationProvider, $resourceProvider, $routeP
             prefix: '/assets/js/locales/',
             suffix: '.json'
         })
-        .registerAvailableLanguageKeys(['en'], {'en_*': 'en'})
-        .determinePreferredLanguage()
-        .fallbackLanguage('en');
+        .registerAvailableLanguageKeys(['en'], {
+            'en_*': 'en',
+            '*': 'en'
+        })
+        .determinePreferredLanguage();
 
     // Set up tree defaults
     treeConfig.defaultCollapsed = true;
