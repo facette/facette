@@ -5,5 +5,5 @@
 # Enable/Disable facette
 ENABLED=false
 
-# Options for facette
-OPTIONS="-c /etc/facette/facette.json -l /var/log/facette/facette.log"
+# Arguments for facette daemon
+DAEMON_ARGS=""

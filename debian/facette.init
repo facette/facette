@@ -1,100 +1,44 @@
 #!/bin/sh
+# kFreeBSD do not accept scripts as interpreters, using #!/bin/sh and sourcing.
+if [ true != "$INIT_D_SCRIPT_SOURCED" ] ; then
+    set "$0" "$@"; INIT_D_SCRIPT_SOURCED=true . /lib/init/init-d-script
+fi
 ### BEGIN INIT INFO
 # Provides:          facette
-# Required-Start:    $network $remote_fs $syslog
-# Required-Stop:     $network $remote_fs $syslog
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: start and stop Facette front-end
-# Description:       Facette is a graphing web front-end
+# Short-Description: time series data visualization software
+# Description:       time series data visualization software
 ### END INIT INFO
 
-# Author: Vincent Batoufflet <vincent@batoufflet.info>
+# Author: Development Team <dev@facette.io>
 
-PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="facette server"
-NAME=facette
-DAEMON=/usr/sbin/facette
-PIDFILE=/var/run/$NAME/$NAME.pid
-SCRIPTNAME=/etc/init.d/$NAME
-USER=facette
-GROUP=facette
+NAME="facette"
+DESC="$NAME"
 
-[ -x $DAEMON ] || exit 0
+[ -e /etc/default/$NAME ] && . /etc/default/$NAME
 
-ENABLED=false
-OPTIONS=""
+DAEMON="/usr/bin/$NAME"
 
-[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+PIDDIR="/var/run/$NAME"
+PIDFILE="$PIDDIR/$NAME.pid"
 
-. /lib/init/vars.sh
-. /lib/lsb/init-functions
+[ ! -d "$PIDDIR" ] && install -d 0755 -o facette -g facette $PIDDIR
 
-[ -d $(dirname $PIDFILE) ] || install -d -o $USER -g $GROUP -m 0755 $(dirname $PIDFILE)
+do_start_cmd_override() {
+    if [ "$ENABLED" != "true" ]; then
+        log_warning_msg "Not starting, disabled via /etc/default/$NAME"
+        exit 0
+    fi
 
-do_start() {
-    start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --chuid $USER:$GROUP \
-        --test >/dev/null || return 1
-    start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --chuid $USER:$GROUP \
-        --background -- $OPTIONS || return 2
+    start-stop-daemon --start --quiet --background --chuid facette:facette --pidfile $PIDFILE \
+        --make-pidfile --name $NAME --exec $DAEMON --test >/dev/null \
+        || return 1
+    start-stop-daemon --start --quiet --background --chuid facette:facette --pidfile $PIDFILE \
+        --make-pidfile --name $NAME --exec $DAEMON -- $DAEMON_ARGS \
+        || return 2
 }
 
-do_stop() {
-    start-stop-daemon --stop --quiet --pidfile $PIDFILE --retry=TERM/30/KILL/5 --name $(basename $DAEMON)
-    RETVAL="$?"
-    [ "$RETVAL" = 2 ] && return 2
-    start-stop-daemon --stop --quiet --pidfile $PIDFILE --oknodo --retry=0/30/KILL/5 --exec $DAEMON
-    [ "$?" = 2 ] && return 2
-    rm -f $PIDFILE
-    return "$RETVAL"
-}
-
-case "$1" in
-    start)
-        if [ "$ENABLED" != "true" ]; then
-            log_warning_msg "Not starting $DESC, disabled via /etc/default/$NAME"
-            exit 0
-        fi
-
-        log_daemon_msg "Starting $DESC" "$NAME"
-        do_start
-        case "$?" in
-            0|1) log_end_msg 0 ;;
-            2) log_end_msg 1 ;;
-        esac
-        ;;
-    stop)
-        log_daemon_msg "Stopping $DESC" "$NAME"
-        do_stop
-        case "$?" in
-            0|1) log_end_msg 0 ;;
-            2) log_end_msg 1 ;;
-        esac
-        ;;
-    status)
-        status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
-        ;;
-    restart|force-reload)
-        log_daemon_msg "Restarting $DESC" "$NAME"
-        do_stop
-        case "$?" in
-            0|1)
-                do_start
-                case "$?" in
-                    0) log_end_msg 0 ;;
-                    1) log_end_msg 1 ;;
-                    *) log_end_msg 1 ;;
-                esac
-                ;;
-            *)
-                log_end_msg 1
-                ;;
-        esac
-        ;;
-    *)
-        echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload}" >&2
-        exit 3
-        ;;
-esac
-
-:
+# vim: ft=sh ts=4 sw=4 et

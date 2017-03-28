@@ -5,8 +5,9 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/facette -c /etc/facette/facette.yaml -L info
+ExecStart=/usr/bin/facette
 User=facette
+Group=facette
 
 [Install]
 WantedBy=multi-user.target

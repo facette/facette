@@ -1,19 +1,17 @@
 Source: facette
 Section: utils
 Priority: optional
-Maintainer: Vincent Batoufflet <vincent@batoufflet.info>
-Build-Depends: debhelper (>= 8.0.0), quilt, dh-golang,
- golang-go (>= 1.5),
+Maintainer: Development Team <dev@facette.io>
+Build-Depends:
+ debhelper (>= 9), dh-systemd,
  librrd-dev (>= 1.4),
- nodejs-legacy,
- node-less,
- node-uglify,
  pandoc,
-Standards-Version: 3.9.3
-Homepage: https://github.com/facette/facette
+Standards-Version: 3.9.5
+Homepage: https://facette.io/
 
 Package: facette
 Architecture: any
-Depends: adduser, mime-support, ${shlibs:Depends}, ${misc:Depends}
-Description: graphing web front-end
- Facette is a graphing web front-end for RRD files.
+Depends: adduser, ${shlibs:Depends}, ${misc:Depends}
+Description: time series data visualization software
+ Facette is a web application to visualize time series data from various
+ sources such as collectd, Graphite, InfluxDB or KairosDB.

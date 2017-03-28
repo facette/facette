@@ -1,20 +1,18 @@
 #!/usr/bin/make -f
-# -*- makefile -*-
 
-# Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
-
-# This has to be exported to make some magic below work.
-export DH_OPTIONS
+DPKG_EXPORT_BUILDFLAGS = 1
+include /usr/share/dpkg/default.mk
 
 %:
-	dh $@ --with=quilt,golang
+	dh $@ --with=systemd
+
+override_dh_auto_build:
+	@#noop
+
+ifneq (,$(findstring nocheck,$(DEB_BUILD_OPTIONS)))
+override_dh_auto_test:
+	# tests disabled by request
+endif
 
 override_dh_auto_install:
-	 $(MAKE) PREFIX=$(CURDIR)/debian/tmp/usr install
-
-override_dh_auto_clean:
-	 $(MAKE) clean
-
-override_dh_installinit:
-	dh_installinit --name=facette
+	$(MAKE) PREFIX=$(CURDIR)/debian/tmp/usr install
