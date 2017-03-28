@@ -45,12 +45,12 @@ clean: clean-bin
 
 clean-depends:
 	@$(call mesg_start,clean,Removing build dependencies...)
-	@rm -rf node_modules/ && \
+	@rm -rf node_modules && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 clean-bin:
 	@$(call mesg_start,clean,Removing build data...)
-	@rm -rf build/ src/cmd/facette/bindata.go && \
+	@rm -rf build src/cmd/facette/bindata.go && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 build: build-bin build-assets build-docs
@@ -101,8 +101,7 @@ build-assets:
 build-docs:
 	@for man in $(MAN_LIST); do \
 		$(call mesg_start,docs,Generating $$man manual page...); \
-		install -d -m 0755 $(BUILD_DIR)/man && \
-		$(PANDOC) $(PANDOC_ARGS) docs/man/$$man.md >$(BUILD_DIR)/man/$$man && \
+		install -d -m 0755 $(BUILD_DIR)/man && $(PANDOC) $(PANDOC_ARGS) docs/man/$$man.md >$(BUILD_DIR)/man/$$man && \
 			$(call mesg_ok) || $(call mesg_fail); \
 	done
 
@@ -113,12 +112,21 @@ test-bin: build-dir
 	@(cd $(BUILD_DIR) && $(GB) test -v) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
-install: install-bin
+install: install-bin install-assets install-docs
 
 install-bin: build-bin
 	@$(call mesg_start,install,Installing binaries...)
-	@install -d -m 0755 $(PREFIX)/bin && \
-		install -m 0755 $(BUILD_DIR)/bin/* $(PREFIX)/bin/ && \
+	@install -d -m 0755 $(PREFIX)/bin && install -m 0755 $(BUILD_DIR)/bin/* $(PREFIX)/bin/ && \
+		$(call mesg_ok) || $(call mesg_fail)
+
+install-assets: build-assets
+	@$(call mesg_start,install,Installing assets...)
+	@install -d -m 0755 $(PREFIX)/share/facette && cp -r $(BUILD_DIR)/assets $(PREFIX)/share/facette/ && \
+		$(call mesg_ok) || $(call mesg_fail)
+
+install-docs: build-docs
+	@$(call mesg_start,install,Installing manual pages...)
+	@install -d -m 0755 $(PREFIX)/share/man/man1 && cp -r $(BUILD_DIR)/man/* $(PREFIX)/share/man/man1 && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 lint: lint-bin lint-assets
