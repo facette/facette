@@ -4,6 +4,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
     $scope.section = 'graphs';
     $scope.id = $routeParams.id;
     $scope.linked = $scope.id == 'link';
+    $scope.tab = 0;
 
     $scope.seriesTemplate = {};
 
@@ -639,6 +640,21 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
 
     $scope.validateOptionsClose = function() {
         return !$scope.completing;
+    };
+
+    $scope.switchTab = function(idx) {
+        $scope.tab = idx;
+
+        if (idx == 1) {
+            library.list({
+                type: 'graphs',
+                kind: 'raw',
+                link: $scope.id,
+                fields: 'id,name'
+            }, function(data) {
+                $scope.instances = data;
+            });
+        }
     };
 
     // Register watchers

@@ -7,161 +7,97 @@
 		<ng-include src="'templates/common/extra-menu.html'" ng-include-replace="true"></ng-include>
 	</header>
 
-	<section ng-pane-step="1">
-		<h1>{{ 'label.collections_definition' | translate }}</h1>
+	<section class="hastab" ng-if="id != 'add' && item.template">
+		<div class="tabset">
+			<div class="tab" ng-class="{active: tab === 0}" ng-click="switchTab(0)"><span>{{ 'label.items_properties' | translate }}</span></div>
+			<div class="tab" ng-class="{active: tab == 1}" ng-click="switchTab(1)"><span>{{ 'label.templates_instances' | translate }}</span></div>
+		</div>
+	</section>
 
-		<columns>
-			<column>
-				<h2>{{ 'label.graphs_list' | translate }}</h2>
+	<div ng-show="tab === 0">
+		<section ng-pane-step="1">
+			<h1>{{ 'label.collections_definition' | translate }}</h1>
 
-				<message icon="clock-o" type="placeholder" ng-show="state == stateLoading">{{ 'mesg.wait' | translate }}</message>
-				<message icon="info-circle" type="info" ng-show="state == stateOK && (!item.entries || item.entries.length === 0)">{{ 'mesg.graphs_empty' | translate }}</message>
+			<columns>
+				<column>
+					<h2>{{ 'label.graphs_list' | translate }}</h2>
 
-				<table class="list" ng-show="state == stateOK && item.entries && item.entries.length > 0">
-					<tbody as-sortable="listSortControl" ng-model="item.entries">
-						<tr class="listitem" as-sortable-item="" ng-class="{active: graph.index === $index || optionsEdit === e || attrsEdit === e, disabled: e.options && e.options.enabled === false, locked: graph.index !== undefined && graph.index !== $index || optionsEdit && optionsEdit !== e || attrsEdit && attrsEdit !== e}" ng-repeat="e in item.entries">
-							<td class="listfield handle" as-sortable-item-handle=""><span class="fa fa-ellipsis-v"></span></td>
-							<td class="listfield main togglable">
-								<span class="toggle fa" ng-class="{'fa-toggle-on': !e.options || e.options.enabled === true || e.options.enabled === undefined, 'fa-toggle-off': e.options && e.options.enabled === false}" ng-click="toggleGraph(e)"></span>
-								<span class="name">{{ graphData[e.id].name || e.id }} <span class="note error" ng-if="graphFetched && !graphData[e.id]"><span class="fa fa-warning"></span> {{ 'mesg.items_not_found' | translate }}</span></span>
-								<menu class="actions">
-									<menuitem href="" icon="cog" title="{{ 'label.options_manage' | translate }}" type="button" ng-click="editOptions(e)"></menuitem>
-									<menuitem href="" icon="file-code-o" title="{{ 'label.templates_attrs_manage' | translate }}" type="button" ng-click="editAttrs(e, false)" ng-if="graphData[e.id] && graphData[e.id].template"></menuitem>
-									<menuitem href="{{ ::baseURL }}admin/graphs/{{ e.id }}" icon="pencil" title="{{ 'label.graphs_edit' | translate }}" type="button" ng-click="editGraph(e)"></menuitem>
-								</menu>
-								<div class="description">
-									<span class="info" ng-if="graphData[e.id] && graphData[e.id].template && e.attributes">
-										<span class="attrinfo" ng-repeat="k in graphData[e.id].templateKeys" ng-if="e.attributes[k]">{{ k }}: <strong>{{ e.attributes[k] }}</strong></span>
-									</span>
-								</div>
-							</td>
-							<td class="listfield actions">
-								<menu>
-									<menuitem href="" icon="times-circle" title="{{ 'label.graphs_remove' | translate }}" type="button" ng-click="remove(item.entries, e)"></menuitem>
-								</menu>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</column>
+					<message icon="clock-o" type="placeholder" ng-show="state == stateLoading">{{ 'mesg.wait' | translate }}</message>
+					<message icon="info-circle" type="info" ng-show="state == stateOK && (!item.entries || item.entries.length === 0)">{{ 'mesg.graphs_empty' | translate }}</message>
 
-			<column class="small" ng-if="!optionsEdit && !attrsEdit">
-				<h2>{{ 'label.graphs_define' | translate }}</h2>
-
-				<div class="formblock">
-					<label>{{ 'label.graph' | translate }}</label>
-					<angucomplete-alt id="graph" pause="250" selected-object="selectGraph" remote-api-handler="graphsList" title-field="name" minlength="1" focus-first="true" match-class="highlight" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
-				</div>
-
-				<div class="formblock">
-					<button ng-click="setGraph()" ng-disabled="!graph.id">{{ (graph.index === undefined ? 'label.graphs_add' : 'label.graphs_update') | translate }}</button>
-					<button ng-click="resetGraph()" ng-show="graph.index !== undefined">{{ 'label.cancel' | translate }}</button>
-				</div>
-			</column>
-
-			<column class="half" ng-if="optionsEdit">
-				<h2>{{ 'label.graphs_options' | translate }}</h2>
-
-				<div class="formblock">
-					<label>{{ 'label.range' | translate }}</label>
-					<input class="small" type="text" placeholder="{{ graphData[optionsEdit.id].options.range }}" ng-model="entryOptions.range">
-
-					<label>{{ 'label.graphs_sample' | translate }}</label>
-					<input class="small" type="number" placeholder="{{ graphData[optionsEdit.id].options.sample }}" ng-model="entryOptions.sample">
-
-					<label>{{ 'label.graphs_constants' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
-					<input class="small" type="text" placeholder="{{ graphData[optionsEdit.id].options.constants.join(',') }}" ng-list="," ng-model="entryOptions.constants">
-
-					<label>{{ 'label.graphs_percentiles' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
-					<input class="small" type="text" placeholder="{{ graphData[optionsEdit.id].options.percentiles.join(',') }}" ng-list="," ng-model="entryOptions.percentiles">
-
-					<label>{{ 'label.refresh_interval' | translate }} <span class="note">{{ 'label.refresh_interval_unit' | translate }}</span></label>
-					<input class="small" type="number" placeholder="{{ graphData[optionsEdit.id].options.refresh_interval }}" ng-model="entryOptions.refresh_interval">
-
-					<label>{{ 'label.graphs_misc' | translate }}</label>
-					<input id="fold" type="checkbox" tabindex="0" ng-model="entryOptions.folded">
-					<label for="fold">{{ 'label.graphs_fold' | translate }}</label>
-				</div>
-
-				<div class="formblock">
-					<button class="danger" ng-click="editOptions(null)">{{ 'label.cancel' | translate }}</button>
-					<button ng-click="setOptions()">{{ 'label.ok' | translate }}</button>
-				</div>
-			</column>
-
-			<column class="half" ng-if="attrsEdit">
-				<h2>{{ 'label.templates_attrs' | translate }}</h2>
-
-				<div class="formblock">
-					<table class="keylist">
-						<tbody>
-							<tr ng-repeat="(key, _) in entryAttrs">
-								<td class="key"><input type="text" disabled="disabled" ng-model="key"></td>
-								<td class="value"><input type="text" ng-model="entryAttrs[key]"></td>
+					<table class="list" ng-show="state == stateOK && item.entries && item.entries.length > 0">
+						<tbody as-sortable="listSortControl" ng-model="item.entries">
+							<tr class="listitem" as-sortable-item="" ng-class="{active: graph.index === $index || optionsEdit === e || attrsEdit === e, disabled: e.options && e.options.enabled === false, locked: graph.index !== undefined && graph.index !== $index || optionsEdit && optionsEdit !== e || attrsEdit && attrsEdit !== e}" ng-repeat="e in item.entries">
+								<td class="listfield handle" as-sortable-item-handle=""><span class="fa fa-ellipsis-v"></span></td>
+								<td class="listfield main togglable">
+									<span class="toggle fa" ng-class="{'fa-toggle-on': !e.options || e.options.enabled === true || e.options.enabled === undefined, 'fa-toggle-off': e.options && e.options.enabled === false}" ng-click="toggleGraph(e)"></span>
+									<span class="name">{{ graphData[e.id].name || e.id }} <span class="note error" ng-if="graphFetched && !graphData[e.id]"><span class="fa fa-warning"></span> {{ 'mesg.items_not_found' | translate }}</span></span>
+									<menu class="actions">
+										<menuitem href="" icon="cog" title="{{ 'label.options_manage' | translate }}" type="button" ng-click="editOptions(e)"></menuitem>
+										<menuitem href="" icon="file-code-o" title="{{ 'label.templates_attrs_manage' | translate }}" type="button" ng-click="editAttrs(e, false)" ng-if="graphData[e.id] && graphData[e.id].template"></menuitem>
+										<menuitem href="{{ ::baseURL }}admin/graphs/{{ e.id }}" icon="pencil" title="{{ 'label.graphs_edit' | translate }}" type="button" ng-click="editGraph(e)"></menuitem>
+									</menu>
+									<div class="description">
+										<span class="info" ng-if="graphData[e.id] && graphData[e.id].template && e.attributes">
+											<span class="attrinfo" ng-repeat="k in graphData[e.id].templateKeys" ng-if="e.attributes[k]">{{ k }}: <strong>{{ e.attributes[k] }}</strong></span>
+										</span>
+									</div>
+								</td>
+								<td class="listfield actions">
+									<menu>
+										<menuitem href="" icon="times-circle" title="{{ 'label.graphs_remove' | translate }}" type="button" ng-click="remove(item.entries, e)"></menuitem>
+									</menu>
+								</td>
 							</tr>
 						</tbody>
 					</table>
-				</div>
+				</column>
 
-				<div class="formblock">
-					<button class="danger" ng-click="editAttrs(null, false)">{{ 'label.cancel' | translate }}</button>
-					<button ng-click="setAttrs()">{{ 'label.ok' | translate }}</button>
-				</div>
-			</column>
-		</columns>
-	</section>
-
-	<section ng-pane-step="2">
-		<h1>{{ 'label.collections_definition' | translate }}</h1>
-
-		<columns>
-			<column class="half">
-				<form ng-entersubmit="save()">
-					<h2>{{ 'label.general_info' | translate }}</h2>
+				<column class="small" ng-if="!optionsEdit && !attrsEdit">
+					<h2>{{ 'label.graphs_define' | translate }}</h2>
 
 					<div class="formblock">
-						<label>{{ 'label.name' | translate }}
-							<span class="warn" ng-show="conflict"><span class="fa fa-warning"></span> Name attribute should be unique!</span>
-							<span class="warn" ng-show="validated && !item.name"><span class="fa fa-warning"></span> Name attribute is mandatory!</span>
-						</label>
-						<input type="text" ng-class="{danger: conflict || validated && !item.name}" ng-model="item.name">
-
-						<label>{{ 'label.desc' | translate }}</label>
-						<textarea type="text" ng-model="item.description"></textarea>
+						<label>{{ 'label.graph' | translate }}</label>
+						<angucomplete-alt id="graph" pause="250" selected-object="selectGraph" remote-api-handler="graphsList" title-field="name" minlength="1" focus-first="true" match-class="highlight" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
 					</div>
-
-					<h2>{{ 'label.collections_params' | translate }}</h2>
 
 					<div class="formblock">
-						<label>{{ 'label.title' | translate }}</label>
-						<input type="text" ng-model="item.options.title">
+						<button ng-click="setGraph()" ng-disabled="!graph.id">{{ (graph.index === undefined ? 'label.graphs_add' : 'label.graphs_update') | translate }}</button>
+						<button ng-click="resetGraph()" ng-show="graph.index !== undefined">{{ 'label.cancel' | translate }}</button>
+					</div>
+				</column>
 
-						<label>{{ 'label.alias' | translate }}</label>
-						<input type="text" ng-model="item.alias">
+				<column class="half" ng-if="optionsEdit">
+					<h2>{{ 'label.graphs_options' | translate }}</h2>
 
-						<label>{{ 'label.collections_grid_size' | translate }}</label>
-						<ui-select class="small" theme="selectize" ng-model="selectedOptions.grid_size">
-							<ui-select-match placeholder="{{ 'label.collections_grid_size_select' | translate }}">
-								<span ng-bind="$select.selected.name"></span>
-							</ui-select-match>
-							<ui-select-choices repeat="s in (collectionsGridSizes | filter: $select.search)">
-								<span ng-bind="s.name"></span>
-							</ui-select-choices>
-						</ui-select>
+					<div class="formblock">
+						<label>{{ 'label.range' | translate }}</label>
+						<input class="small" type="text" placeholder="{{ graphData[optionsEdit.id].options.range }}" ng-model="entryOptions.range">
 
-						<label>{{ 'label.collections_parent' | translate }}</label>
-						<angucomplete-alt class="small" id="parent" pause="250" selected-object="selectParent" remote-api-handler="collectionsList" title-field="name" minlength="1" focus-first="true" match-class="highlight" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
-						<button ng-click="removeParent()" ng-disabled="!item.parent">{{ 'label.remove' | translate }}</button>
+						<label>{{ 'label.graphs_sample' | translate }}</label>
+						<input class="small" type="number" placeholder="{{ graphData[optionsEdit.id].options.sample }}" ng-model="entryOptions.sample">
+
+						<label>{{ 'label.graphs_constants' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
+						<input class="small" type="text" placeholder="{{ graphData[optionsEdit.id].options.constants.join(',') }}" ng-list="," ng-model="entryOptions.constants">
+
+						<label>{{ 'label.graphs_percentiles' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
+						<input class="small" type="text" placeholder="{{ graphData[optionsEdit.id].options.percentiles.join(',') }}" ng-list="," ng-model="entryOptions.percentiles">
+
+						<label>{{ 'label.refresh_interval' | translate }} <span class="note">{{ 'label.refresh_interval_unit' | translate }}</span></label>
+						<input class="small" type="number" placeholder="{{ graphData[optionsEdit.id].options.refresh_interval }}" ng-model="entryOptions.refresh_interval">
+
+						<label>{{ 'label.graphs_misc' | translate }}</label>
+						<input id="fold" type="checkbox" tabindex="0" ng-model="entryOptions.folded">
+						<label for="fold">{{ 'label.graphs_fold' | translate }}</label>
 					</div>
 
-					<div class="formblock" ng-if="hasTemplate">
-						<button ng-click="editAttrs(item, true)"><span class="fa fa-file-code-o"></span> {{ 'label.templates_attrs_manage' | translate }}</button>
+					<div class="formblock">
+						<button class="danger" ng-click="editOptions(null)">{{ 'label.cancel' | translate }}</button>
+						<button ng-click="setOptions()">{{ 'label.ok' | translate }}</button>
 					</div>
-				</form>
-			</column>
+				</column>
 
-			<column class="half" ng-if="attrsEdit">
-				<form ng-entersubmit="setAttrs()">
+				<column class="half" ng-if="attrsEdit">
 					<h2>{{ 'label.templates_attrs' | translate }}</h2>
 
 					<div class="formblock">
@@ -177,21 +113,120 @@
 
 					<div class="formblock">
 						<button class="danger" ng-click="editAttrs(null, false)">{{ 'label.cancel' | translate }}</button>
-						<button ng-click="setAttrs(true)">{{ 'label.ok' | translate }}</button>
+						<button ng-click="setAttrs()">{{ 'label.ok' | translate }}</button>
 					</div>
-				</form>
-			</column>
-		</columns>
-	</section>
+				</column>
+			</columns>
+		</section>
 
-	<footer>
-		<button class="extra" ng-click="reset()" ng-disabled="!modified" ng-if="id != 'add'"><span class="fa fa-undo"></span> {{ 'label.collections_reset' | translate }}</button>
-		<button class="danger" ng-click="cancel()">{{ 'label.cancel' | translate }}</button>
-		<button ng-click="switch(step - 1)" ng-disabled="step == 1"><span class="fa fa-chevron-circle-left"></span> {{ 'label.prev' | translate }}</button>
-		<button ng-click="switch(step + 1)" ng-disabled="step == 2 || graph.index || optionsEdit">{{ 'label.next' | translate }} <span class="fa fa-chevron-circle-right"></span></button>
-		<button ng-click="save()" ng-disabled="step != 2 || attrsEdit" ng-show="!item.template">{{ 'label.collections_save' | translate }}</button>
-		<button ng-click="save()" ng-disabled="step != 2 || attrsEdit" ng-show="item.template">{{ 'label.templates_save' | translate }}</button>
-	</footer>
+		<section ng-pane-step="2">
+			<h1>{{ 'label.collections_definition' | translate }}</h1>
+
+			<columns>
+				<column class="half">
+					<form ng-entersubmit="save()">
+						<h2>{{ 'label.general_info' | translate }}</h2>
+
+						<div class="formblock">
+							<label>{{ 'label.name' | translate }}
+								<span class="warn" ng-show="conflict"><span class="fa fa-warning"></span> Name attribute should be unique!</span>
+								<span class="warn" ng-show="validated && !item.name"><span class="fa fa-warning"></span> Name attribute is mandatory!</span>
+							</label>
+							<input type="text" ng-class="{danger: conflict || validated && !item.name}" ng-model="item.name">
+
+							<label>{{ 'label.desc' | translate }}</label>
+							<textarea type="text" ng-model="item.description"></textarea>
+						</div>
+
+						<h2>{{ 'label.collections_params' | translate }}</h2>
+
+						<div class="formblock">
+							<label>{{ 'label.title' | translate }}</label>
+							<input type="text" ng-model="item.options.title">
+
+							<label>{{ 'label.alias' | translate }}</label>
+							<input type="text" ng-model="item.alias">
+
+							<label>{{ 'label.collections_grid_size' | translate }}</label>
+							<ui-select class="small" theme="selectize" ng-model="selectedOptions.grid_size">
+								<ui-select-match placeholder="{{ 'label.collections_grid_size_select' | translate }}">
+									<span ng-bind="$select.selected.name"></span>
+								</ui-select-match>
+								<ui-select-choices repeat="s in (collectionsGridSizes | filter: $select.search)">
+									<span ng-bind="s.name"></span>
+								</ui-select-choices>
+							</ui-select>
+
+							<label>{{ 'label.collections_parent' | translate }}</label>
+							<angucomplete-alt class="small" id="parent" pause="250" selected-object="selectParent" remote-api-handler="collectionsList" title-field="name" minlength="1" focus-first="true" match-class="highlight" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
+							<button ng-click="removeParent()" ng-disabled="!item.parent">{{ 'label.remove' | translate }}</button>
+						</div>
+
+						<div class="formblock" ng-if="hasTemplate">
+							<button ng-click="editAttrs(item, true)"><span class="fa fa-file-code-o"></span> {{ 'label.templates_attrs_manage' | translate }}</button>
+						</div>
+					</form>
+				</column>
+
+				<column class="half" ng-if="attrsEdit">
+					<form ng-entersubmit="setAttrs()">
+						<h2>{{ 'label.templates_attrs' | translate }}</h2>
+
+						<div class="formblock">
+							<table class="keylist">
+								<tbody>
+									<tr ng-repeat="(key, _) in entryAttrs">
+										<td class="key"><input type="text" disabled="disabled" ng-model="key"></td>
+										<td class="value"><input type="text" ng-model="entryAttrs[key]"></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+
+						<div class="formblock">
+							<button class="danger" ng-click="editAttrs(null, false)">{{ 'label.cancel' | translate }}</button>
+							<button ng-click="setAttrs(true)">{{ 'label.ok' | translate }}</button>
+						</div>
+					</form>
+				</column>
+			</columns>
+		</section>
+
+		<footer>
+			<button class="extra" ng-click="reset()" ng-disabled="!modified" ng-if="id != 'add'"><span class="fa fa-undo"></span> {{ 'label.collections_reset' | translate }}</button>
+			<button class="danger" ng-click="cancel()">{{ 'label.cancel' | translate }}</button>
+			<button ng-click="switch(step - 1)" ng-disabled="step == 1"><span class="fa fa-chevron-circle-left"></span> {{ 'label.prev' | translate }}</button>
+			<button ng-click="switch(step + 1)" ng-disabled="step == 2 || graph.index || optionsEdit">{{ 'label.next' | translate }} <span class="fa fa-chevron-circle-right"></span></button>
+			<button ng-click="save()" ng-disabled="step != 2 || attrsEdit" ng-show="!item.template">{{ 'label.collections_save' | translate }}</button>
+			<button ng-click="save()" ng-disabled="step != 2 || attrsEdit" ng-show="item.template">{{ 'label.templates_save' | translate }}</button>
+		</footer>
+	</div>
+
+	<div ng-show="tab == 1">
+		<section>
+			<h1>{{ 'label.templates_instances' | translate }}</h1>
+
+			<message icon="clock-o" type="placeholder" ng-show="!instances">{{ 'mesg.wait' | translate }}</message>
+			<message icon="info-circle" type="info" ng-show="instances.length === 0">{{ 'mesg.templates_no_instance' | translate }}</message>
+
+			<table class="list" ng-if="instances.length > 0">
+				<tbody>
+					<tr class="listitem" ng-repeat="i in instances">
+						<td class="listfield main">
+							<span class="name">{{ i.name }}</span>
+							<menu class="actions">
+								<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ i.id }}" icon="pencil" title="{{ 'label.' + section + '_edit' | translate }}" type="button"></menuitem>
+								<menuitem href="{{ ::baseURL }}browse/{{ section }}/{{ i.id }}" icon="arrow-circle-right" title="{{ 'label.' + section + '_goto' | translate }}" type="button"></menuitem>
+							</menu>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</section>
+
+		<footer>
+			<button ng-click="switchTab(0)">{{ 'label.go_back' | translate }}</button>
+		</footer>
 </article>
 
 <article ng-pane="" ng-if="linked" ng-show="state == stateOK">

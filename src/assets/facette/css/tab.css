@@ -10,15 +10,21 @@
 	user-select: none;
 }
 
-.tabset .tab a {
+.tabset .tab[disabled] {
+	opacity: 0.35;
+	pointer-events: none;
+}
+
+.tabset .tab.active {
+	background-color: #fff;
+	color: #2c3e50;
+}
+
+.tabset .tab a,
+.tabset .tab span {
 	padding: 0 1.5rem;
 	display: block;
 	text-decoration: none;
-}
-
-.tabset .tab.active a {
-	background-color: #fff;
-	color: #2c3e50;
 }
 
 .tabset .tab a:focus {

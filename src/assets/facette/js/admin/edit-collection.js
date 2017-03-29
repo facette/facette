@@ -4,6 +4,7 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
     $scope.section = 'collections';
     $scope.id = $routeParams.id;
     $scope.linked = $scope.id == 'link';
+    $scope.tab = 0;
 
     $scope.graphFetched = false;
     $scope.graphData = {};
@@ -310,6 +311,21 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
         }
 
         $scope.item.link = data.originalObject.id;
+    };
+
+    $scope.switchTab = function(idx) {
+        $scope.tab = idx;
+
+        if (idx == 1) {
+            library.list({
+                type: 'collections',
+                kind: 'raw',
+                link: $scope.id,
+                fields: 'id,name'
+            }, function(data) {
+                $scope.instances = data;
+            });
+        }
     };
 
     // Register watchers
