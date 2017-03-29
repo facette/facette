@@ -403,10 +403,17 @@ func (w *httpWorker) httpHandleBackendUpdate(ctx context.Context, rw http.Respon
 	}
 
 	// Set minimal fields values
-	now := time.Now().UTC()
-
 	reflect.Indirect(rv).FieldByName("ID").SetString(id)
-	reflect.Indirect(rv).FieldByName("Modified").Set(reflect.ValueOf(&now))
+
+	date := reflect.Indirect(rv).FieldByName("Created")
+	if v := date.Interface().(time.Time); v.IsZero() {
+		date.Set(reflect.ValueOf(time.Now().UTC()))
+	} else {
+		date = reflect.Indirect(rv).FieldByName("Modified")
+		if v := date.Interface().(time.Time); v.IsZero() {
+			date.Set(reflect.ValueOf(time.Now().UTC()))
+		}
+	}
 
 	// Update item in backend
 	if err := w.service.backend.Add(rv.Interface()); err != nil {
