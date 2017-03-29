@@ -159,7 +159,7 @@ app.config(function($httpProvider, $locationProvider, $resourceProvider, $routeP
 });
 
 app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope, $timeout, $translate, $window,
-    ngDialog) {
+    ngDialog, storage) {
 
     $rootScope.baseURL = $browser.baseHref();
     $rootScope.title = null;
@@ -239,8 +239,11 @@ app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope
     };
 
     // Handle sidebar toggle
+    $rootScope.sidebarCollapse = storage.get('global-sidebar', 'collapsed', false);
+
     $rootScope.toggleSidebar = function() {
-        $rootScope.sidebarOpen = !$rootScope.sidebarOpen;
+        $rootScope.sidebarCollapse = !$rootScope.sidebarCollapse;
+        storage.set('global-sidebar', 'collapsed', $rootScope.sidebarCollapse);
     };
 
     // Handle error message

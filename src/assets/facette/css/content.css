@@ -13,13 +13,17 @@
 	z-index: 500;
 }
 
+.loading * {
+	transition: none !important
+}
+
 article {
 	margin-left: 22rem;
 	padding: 5.5rem 2rem 2rem;
 	transition: margin-left .3s ease-in-out;
 }
 
-aside.open + article {
+aside.collapse + article {
 	margin-left: 0;
 }
 
@@ -31,8 +35,8 @@ article footer {
 	transition: left .3s ease-in-out;
 }
 
-aside.open + article header,
-aside.open + article footer {
+aside.collapse + article header,
+aside.collapse + article footer {
 	left: 0;
 }
 
@@ -43,7 +47,7 @@ article header {
 	top: 0;
 }
 
-aside.open + article header {
+aside.collapse + article header {
 	left: 3.5rem;
 }
 
@@ -323,13 +327,13 @@ article .graph {
 		margin-left: 0;
 	}
 
-	aside.open + article,
+	aside.collapse + article,
 	article.with-actions {
 		margin-left: 3.5rem;
 	}
 
 	article header,
-	aside.open + article header {
+	aside.collapse + article header {
 		left: 3.5rem;
 	}
 

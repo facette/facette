@@ -18,7 +18,7 @@ aside {
 	z-index: 100;
 }
 
-aside.open {
+aside.collapse {
 	transform: translate(-22rem);
 }
 
@@ -61,7 +61,7 @@ aside header .menuitem.button:hover a {
 	background-color: #464646;
 }
 
-aside.open header .menu {
+aside.collapse header .menu {
 	transform: translate(3.5rem);
 }
 
@@ -179,7 +179,7 @@ aside nav > .toggle {
 		transform: translate(-22rem);
 	}
 
-	aside.open {
+	aside.collapse {
 		position: absolute;
 		transform: translate(0);
 	}
@@ -188,7 +188,7 @@ aside nav > .toggle {
 		transform: translate(3.5rem);
 	}
 
-	aside.open header .menu {
+	aside.collapse header .menu {
 		transform: translate(0);
 	}
 }
