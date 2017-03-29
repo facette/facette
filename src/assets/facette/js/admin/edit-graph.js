@@ -96,6 +96,8 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
     function updateItemData() {
         var data = angular.copy($scope.item);
         $scope.cleanProperties(data);
+        data.attributes = $scope.item.attributes;
+
         $scope.itemData = data;
     }
 
@@ -176,11 +178,6 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
 
     $scope.save = function() {
         AdminEdit.save($scope, function(data) {
-            // Remove template test attributes from final item
-            if (data.template) {
-                delete data.attributes;
-            }
-
             if (data.options) {
                 if (data.options.constants) {
                     data.options.constants = parseFloatList(data.options.constants);
@@ -214,6 +211,10 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
     };
 
     $scope.cleanProperties = function(data) {
+        if (!$scope.linked) {
+            delete data.attributes;
+        }
+
         // Remove UI-specific properties
         angular.forEach(data.groups, function(group) {
             delete group.selected;
