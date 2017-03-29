@@ -36,7 +36,7 @@
 	</section>
 
 	<footer>
-		<button class="extra" ng-click="reset()" ng-disabled="!modified"><span class="fa fa-undo"></span> {{ 'label.scales_reset' | translate }}</button>
+		<button class="extra" ng-click="reset()" ng-disabled="!modified" ng-if="id != 'add'"><span class="fa fa-undo"></span> {{ 'label.scales_reset' | translate }}</button>
 		<button class="danger" ng-click="cancel()">{{ 'label.cancel' | translate }}</button>
 		<button ng-click="save()">{{ 'label.scales_save' | translate }}</button>
 	</footer>

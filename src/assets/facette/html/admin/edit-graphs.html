@@ -213,7 +213,7 @@
 	</section>
 
 	<footer>
-		<button class="extra" ng-click="reset()" ng-disabled="!modified"><span class="fa fa-undo"></span> {{ 'label.graphs_reset' | translate }}</button>
+		<button class="extra" ng-click="reset()" ng-disabled="!modified" ng-if="id != 'add'"><span class="fa fa-undo"></span> {{ 'label.graphs_reset' | translate }}</button>
 		<button class="danger" ng-click="cancel()">{{ 'label.cancel' | translate }}</button>
 		<button ng-click="switch(step - 1)" ng-disabled="step == 1"><span class="fa fa-chevron-circle-left"></span> {{ 'label.prev' | translate }}</button>
 		<button ng-click="switch(step + 1)" ng-disabled="!item.groups || item.groups.length === 0 || step == 2">{{ 'label.next' | translate }} <span class="fa fa-chevron-circle-right"></span></button>
@@ -272,7 +272,7 @@
 	</section>
 
 	<footer>
-		<button class="extra" ng-click="reset()" ng-disabled="!modified"><span class="fa fa-undo"></span> {{ 'label.graphs_reset' | translate }}</button>
+		<button class="extra" ng-click="reset()" ng-disabled="!modified" ng-if="id != 'link'"><span class="fa fa-undo"></span> {{ 'label.graphs_reset' | translate }}</button>
 		<button class="danger" ng-click="cancel()">{{ 'label.cancel' | translate }}</button>
 		<button ng-click="save()" ng-disabled="!item.name || !item.link">{{ 'label.graphs_save' | translate }}</button>
 	</footer>
