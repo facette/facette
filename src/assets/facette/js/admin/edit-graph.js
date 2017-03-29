@@ -713,8 +713,24 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
                     return;
                 }
 
-                // Trigger initial graph preview update
                 updateTemplate();
+
+                // Fetch example attributes from first template instance
+                if ($scope.item.template && $scope.id != 'add') {
+                    library.list({
+                        type: 'graphs',
+                        kind: 'raw',
+                        link: $scope.id,
+                        fields: 'attributes',
+                        limit: 1
+                    }, function(data) {
+                        if (data) {
+                            $scope.item.attributes = data[0].attributes;
+                        }
+                    });
+                }
+
+                // Trigger initial graph preview update
                 updateItemData();
             });
 
