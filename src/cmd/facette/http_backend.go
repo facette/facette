@@ -282,9 +282,13 @@ func (w *httpWorker) httpHandleBackendList(ctx context.Context, rw http.Response
 			return
 		}
 
+		if v := r.URL.Query().Get("link"); v != "" {
+			filters["link"] = v
+		}
+
 		if typ == "collections" {
-			if p := r.URL.Query().Get("parent"); p != "" {
-				filters["parent"] = p
+			if v := r.URL.Query().Get("parent"); v != "" {
+				filters["parent"] = v
 			}
 		}
 	}
