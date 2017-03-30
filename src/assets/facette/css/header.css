@@ -5,11 +5,21 @@ header {
 }
 
 header .menu {
+	display: flex;
 	list-style-type: none;
 }
 
-header .menuitem {
-	display: inline-block;
+header .menu a {
+	text-decoration: none;
+}
+
+header .menuitem.icon {
+	width: 3.5rem;
+}
+
+header .menuitem.button > .content {
+	display: block;
+	text-align: center;
 }
 
 header .menuitem .fa {
@@ -17,29 +27,21 @@ header .menuitem .fa {
 	vertical-align: middle;
 }
 
-header .menuitem.icon {
-	width: 3.5rem;
-}
-
-header .menuitem.button a {
-	display: block;
-	text-align: center;
-}
-
-header .menuitem .subcontent {
+header .menuitem > .subcontent {
 	background-color: rgba(34, 34, 34, 0.98);
 	border-radius: 0.2rem;
 	box-sizing: border-box;
 	color: #fff;
+	cursor: default;
 	display: none;
-	line-height: 1.65rem;
+	line-height: 2rem;
 	list-style-type: none;
 	padding: 0.35rem 0;
 	position: absolute;
 	z-index: 200;
 }
 
-header .menuitem .subcontent::before {
+header .menuitem > .subcontent::before {
 	border: 0.75rem solid transparent;
 	border-bottom-color: rgba(34, 34, 34, 0.98);
 	bottom: 100%;
@@ -48,51 +50,60 @@ header .menuitem .subcontent::before {
 	position: absolute;
 }
 
-header .menuitem.left .subcontent {
-	right: 0;
-}
-
-header .menuitem.left .subcontent::before {
-	left: auto;
-	right: 1rem;
-}
-
-header .menuitem .subcontent .menuitem.button {
-	line-height: 2rem;
-}
-
-header .menuitem .subcontent .menuitem.button {
-	cursor: default;
-	display: block;
-	white-space: nowrap;
-}
-
-header .menuitem .subcontent .menuitem.button:hover,
-header .menuitem .subcontent .menuitem.button a:focus,
-header .menuitem .subcontent .menuitem.separator {
-	background-color: rgba(70, 70, 70, 0.98);
-}
-
-header .menuitem .subcontent .menuitem.button a {
-	padding: 0 1rem;
-	text-align: left;
-	text-decoration: none;
-}
-
-header .menuitem .subcontent .menuitem.separator {
-	display: block;
-	height: 1px;
-	margin: 0.35rem 0.65rem;
-}
-
 header .menuitem:hover > .subcontent,
 header .menuitem.focus > .subcontent {
 	display: block;
 }
 
+header .menuitem.left > .subcontent {
+	right: 0;
+}
+
+header .menuitem.left > .subcontent::before {
+	left: auto;
+	right: 1rem;
+}
+
+header .menuitem > .subcontent > .menu {
+	flex-direction: column;
+}
+
+header .menuitem > .subcontent .menuitem.button {
+	cursor: pointer;
+}
+
+header .menuitem > .subcontent .menuitem.button > .content {
+	align-items: center;
+	display: flex;
+	padding: 0 1rem;
+	text-align: left;
+}
+
+header .menuitem > .subcontent .menuitem.button .label {
+	flex: 1;
+	white-space: nowrap;
+}
+
+header .menuitem > .subcontent .menu.icons > .menuitem.button .label:first-child {
+	margin-left: 2rem;
+}
+
+header .menuitem > .subcontent .menuitem.separator {
+	display: block;
+	height: 1px;
+	margin: 0.35rem 0.65rem;
+}
+
+header .menuitem > .subcontent .menuitem.button:hover,
+header .menuitem > .subcontent .menuitem.button a:focus,
+header .menuitem > .subcontent .menuitem.separator {
+	background-color: rgba(70, 70, 70, 0.98);
+}
+
 header.error {
 	background-color: #e74c3c;
 	color: #fff;
+	display: flex;
 	left: 22rem;
 	padding: 0 2rem;
 	position: fixed;
@@ -124,22 +135,21 @@ header.error.active::after {
 	width: 0;
 }
 
-header.error .content {
-	float: left;
+header.error > .content {
+	flex: 1;
 }
 
-header.error .content .fa {
+header.error > .icon > .fa {
 	font-size: 1.5rem;
-	margin-right: 0.35rem;
+	margin-right: 0.65rem;
 	vertical-align: middle;
 }
 
-header.error .action {
+header.error > .action {
 	cursor: pointer;
-	float: right;
 }
 
-header.error .action .fa {
+header.error > .action > .fa {
 	font-size: 1.2rem;
 	margin-left: 2rem;
 }
@@ -151,10 +161,8 @@ header.error .action .fa {
 }
 
 @media screen and (max-width: 1024px) {
-	header > .menu > .menuitem > .content > .fa {
-		margin-right: 0 !important;
-		text-align: center;
-		width: 2rem;
+	header .menu.main {
+		flex-direction: column;
 	}
 
 	header > .menu > .menuitem > .content > .label {
@@ -174,4 +182,3 @@ header.error .action .fa {
 		top: 1rem;
 	}
 }
-

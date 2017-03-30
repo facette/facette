@@ -18,8 +18,8 @@
 }
 
 article {
-	margin-left: 22rem;
-	padding: 5.5rem 2rem 2rem;
+	margin: 3.5rem 0 0 22rem;
+	padding: 2rem;
 	transition: margin-left .3s ease-in-out;
 }
 
