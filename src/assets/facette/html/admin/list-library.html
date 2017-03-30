@@ -15,9 +15,9 @@
 			</menuitem>
 		</menu>
 
-		<ng-include src="'templates/common/extra-menu.html'" ng-include-replace="true"></ng-include>
-
 		<search name="search" placeholder="{{ 'label.' + section + '_search' | translate }}" ng-model="form.search"></search>
+
+		<ng-include src="'templates/common/extra-menu.html'" ng-include-replace="true"></ng-include>
 	</header>
 
 	<section ng-class="{hastab: section == 'collections' || section == 'graphs'}">
