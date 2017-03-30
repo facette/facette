@@ -76,6 +76,16 @@ app.factory('library', function($resource) {
             },
             isArray: true
         },
+        count: {
+            method: 'HEAD',
+            params: {
+                type: '@type',
+                id: null
+            },
+            interceptor: {
+                response: apiInterceptList
+            }
+        },
         delete: {
             method: 'DELETE',
             params: {

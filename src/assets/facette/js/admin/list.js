@@ -29,6 +29,33 @@ app.controller('AdminListController', function($q, $rootScope, $routeParams, $sc
     // Set page title
     $rootScope.setTitle(['label.' + $scope.section, 'label.admin_panel']);
 
+    // Define helper functions
+    function remove(item, message, args) {
+        args = args || {};
+        args.name = item.name;
+
+        $rootScope.showModal({
+            type: dialogTypeConfirm,
+            message: message,
+            args: args,
+            labels: {
+                validate: 'label.' + $scope.section + '_remove'
+            },
+            danger: true
+        }, function(data) {
+            if (data === undefined) {
+                return;
+            }
+
+            factory.delete({
+                type: $scope.section,
+                id: item.id
+            }, function() {
+                $scope.refresh();
+            });
+        });
+    }
+
     // Define scope functions
     $scope.refresh = function(page) {
         var query;
@@ -107,28 +134,24 @@ app.controller('AdminListController', function($q, $rootScope, $routeParams, $sc
     };
 
     $scope.remove = function(item) {
-        $rootScope.showModal({
-            type: dialogTypeConfirm,
-            message: 'mesg.items_remove',
-            args: {
-                name: item.name
-            },
-            labels: {
-                validate: 'label.' + $scope.section + '_remove'
-            },
-            danger: true
-        }, function(data) {
-            if (data === undefined) {
-                return;
-            }
-
-            factory.delete({
+        if ($scope.templates) {
+            factory.count({
                 type: $scope.section,
-                id: item.id
-            }, function() {
-                $scope.refresh();
+                kind: 'raw',
+                link: item.id,
+                fields: 'id'
+            }, function(data, headers) {
+                var count = parseInt(headers('X-Total-Records'), 10);
+
+                if (count > 0) {
+                    remove(item, 'mesg.templates_remove', {count: count});
+                } else {
+                    remove(item, 'mesg.items_remove');
+                }
             });
-        });
+        } else {
+            remove(item, 'mesg.items_remove');
+        }
     };
 
     $scope.toggle = function(entry) {
