@@ -314,6 +314,7 @@ app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope
     });
 
     $rootScope.$on("$routeChangeSuccess", function() {
+        $rootScope.inAdmin = $location.path().startsWith('/admin');
         $rootScope.preventUnload(false);
     });
 

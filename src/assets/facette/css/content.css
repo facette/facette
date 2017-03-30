@@ -13,7 +13,7 @@
 	z-index: 500;
 }
 
-.loading * {
+.idle * {
 	transition: none !important
 }
 
@@ -32,7 +32,8 @@ article footer {
 	left: 22rem;
 	position: fixed;
 	right: 0;
-	transition: left .3s ease-in-out;
+	transition: left .3s ease-in-out,
+	            padding .3s ease-in-out;
 }
 
 aside.collapse + article header,
@@ -48,7 +49,7 @@ article header {
 }
 
 aside.collapse + article header {
-	left: 3.5rem;
+	padding-left: 3.5rem;
 }
 
 article header h1 {
@@ -72,6 +73,10 @@ article header > .menu {
 article header > .menu > .menuitem.button {
 	cursor: pointer;
 	color: #5fa0cb;
+}
+
+article header > .menu.extra > .menuitem.button {
+	color: #fff;
 }
 
 article header > .menu > .menuitem.button .fa {

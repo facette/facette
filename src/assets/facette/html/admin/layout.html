@@ -11,13 +11,13 @@
 		</a>
 
 		<menu>
-			<menuitem href="{{ ::baseURL }}" icon="arrow-left" type="button"></menuitem>
 			<menuitem icon="bars" type="button" ng-click="toggleSidebar()"></menuitem>
 		</menu>
 	</header>
 
 	<nav>
 		<menu>
+			<menuitem href="{{ ::baseURL }}" icon="arrow-left" label="{{ 'label.goto_home' | translate }}" type="button"></menuitem>
 			<menuitem label="{{ 'label.library' | translate }}" type="label"></menuitem>
 			<menuitem href="{{ ::baseURL }}admin/collections/" icon="th" label="{{ 'label.collections' | translate }}" type="button"></menuitem>
 			<menuitem href="{{ ::baseURL }}admin/graphs/" icon="area-chart" label="{{ 'label.graphs' | translate }}" type="button"></menuitem>

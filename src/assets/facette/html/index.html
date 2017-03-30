@@ -13,7 +13,7 @@
 <body>
 	<div class="loader" ng-if="!loaded">Loading…</div>
 
-	<ng-view ng-class="{loading: !loaded}" ng-style="!loaded ? {visibility: 'hidden'} : {}"></ng-view>
+	<ng-view ng-class="{idle: !loaded}" ng-style="!loaded ? {visibility: 'hidden'} : {}"></ng-view>
 
 	<script src="assets/js/vendor.js"></script>
 	<script src="assets/js/facette.js"></script>

@@ -1,5 +1,6 @@
 {
     "label.admin_panel": "Administration panel",
+    "label.admin_panel_exit": "Exit administration panel",
     "label.alias": "Alias",
     "label.browse": "Browse",
     "label.build_date": "Build date",
@@ -303,7 +304,6 @@
     "mesg.items_none": "No item found",
     "mesg.items_not_found": "Item not found",
     "mesg.items_remove": "You are about to remove the “{name}” item! Are you sure?",
-    "mesg.templates_remove": "You are about to remove the “{name}” template having {count} instance(s) linked to it! Are you sure?",
     "mesg.items_reset": "You are about to reset the item to its previous state! Are you sure?",
     "mesg.label_mandatory": "Label should not be blank!",
     "mesg.last_update": "Last updated on",
@@ -325,6 +325,7 @@
     "mesg.templates_empty": "No template selected",
     "mesg.templates_no_instance": "No instance found",
     "mesg.templates_no_key": "No template key found",
+    "mesg.templates_remove": "You are about to remove the “{name}” template having {count} instance(s) linked to it! Are you sure?",
     "mesg.units_empty": "No unit defined",
     "mesg.value_mandatory": "Value should not be blank!",
     "mesg.wait": "Please wait…"

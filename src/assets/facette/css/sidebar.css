@@ -62,7 +62,13 @@ aside header .menuitem.button:hover a {
 }
 
 aside.collapse header .menu {
+	background-color: #2980b9;
 	transform: translate(3.5rem);
+}
+
+aside.collapse header .menuitem.button a:focus,
+aside.collapse header .menuitem.button:hover a {
+	background-color: #5fa0cb;
 }
 
 aside nav {
