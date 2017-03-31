@@ -406,11 +406,11 @@ func (w *httpWorker) httpHandleBackendUpdate(ctx context.Context, rw http.Respon
 	reflect.Indirect(rv).FieldByName("ID").SetString(id)
 
 	date := reflect.Indirect(rv).FieldByName("Created")
-	if v := date.Interface().(time.Time); v.IsZero() {
+	if v, ok := date.Interface().(time.Time); ok && v.IsZero() {
 		date.Set(reflect.ValueOf(time.Now().UTC()))
 	} else {
 		date = reflect.Indirect(rv).FieldByName("Modified")
-		if v := date.Interface().(time.Time); v.IsZero() {
+		if v, ok := date.Interface().(time.Time); ok && v.IsZero() {
 			date.Set(reflect.ValueOf(time.Now().UTC()))
 		}
 	}
