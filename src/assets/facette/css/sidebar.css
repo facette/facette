@@ -182,19 +182,6 @@ aside nav > .toggle {
 
 @media screen and (max-width: 768px) {
 	aside {
-		transform: translate(-22rem);
-	}
-
-	aside.collapse {
 		position: absolute;
-		transform: translate(0);
-	}
-
-	aside header .menu {
-		transform: translate(3.5rem);
-	}
-
-	aside.collapse header .menu {
-		transform: translate(0);
 	}
 }
