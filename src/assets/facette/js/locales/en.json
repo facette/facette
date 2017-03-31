@@ -196,6 +196,7 @@
     "label.providers_priority": "Priority",
     "label.providers_refresh": "Refresh provider",
     "label.providers_refreshing": "Refreshing…",
+    "label.providers_remove": "Remove provider",
     "label.providers_reset": "Reset provider",
     "label.providers_save": "Save provider",
     "label.providers_search": "Search for providers…",
