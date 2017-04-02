@@ -2,6 +2,11 @@
 	position: relative;
 }
 
+.tooltip-wrapper {
+	position: fixed;
+	z-index: 200;
+}
+
 .tooltip {
 	background-color: rgba(34, 34, 34, 0.98);
 	border-radius: 0.2rem;
@@ -9,11 +14,9 @@
 	color: #fff;
 	display: none;
 	font-size: 0.9rem;
-	list-style-type: none;
 	padding: 0.5rem 1rem;
 	position: absolute;
 	text-align: left;
-	z-index: 200;
 }
 
 .tooltip::before {

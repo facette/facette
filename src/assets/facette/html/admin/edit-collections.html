@@ -18,42 +18,50 @@
 		<section ng-pane-step="1">
 			<h1>{{ 'label.collections_definition' | translate }}</h1>
 
-			<columns>
-				<column>
+			<columns ng-class="{split: optionsEdit || attrsEdit}">
+				<column class="main">
 					<h2>{{ 'label.graphs_list' | translate }}</h2>
 
 					<message icon="clock-o" type="placeholder" ng-show="state == stateLoading">{{ 'mesg.wait' | translate }}</message>
 					<message icon="info-circle" type="info" ng-show="state == stateOK && (!item.entries || item.entries.length === 0)">{{ 'mesg.graphs_empty' | translate }}</message>
 
-					<table class="list" ng-show="state == stateOK && item.entries && item.entries.length > 0">
-						<tbody as-sortable="listSortControl" ng-model="item.entries">
-							<tr class="listitem" as-sortable-item="" ng-class="{active: graph.index === $index || optionsEdit === e || attrsEdit === e, disabled: e.options && e.options.enabled === false, locked: graph.index !== undefined && graph.index !== $index || optionsEdit && optionsEdit !== e || attrsEdit && attrsEdit !== e}" ng-repeat="e in item.entries">
-								<td class="listfield handle" as-sortable-item-handle=""><span class="fa fa-ellipsis-v"></span></td>
-								<td class="listfield main togglable">
+					<list ng-show="state == stateOK && item.entries && item.entries.length > 0">
+						<div as-sortable="listSortControl" ng-model="item.entries">
+							<listrow as-sortable-item="" ng-class="{active: graph.index === $index || optionsEdit === e || attrsEdit === e, disabled: e.options && e.options.enabled === false, locked: graph.index !== undefined && graph.index !== $index || optionsEdit && optionsEdit !== e || attrsEdit && attrsEdit !== e}" ng-repeat="e in item.entries">
+								<listcolumn class="handle">
+									<span as-sortable-item-handle="" class="fa fa-ellipsis-v"></span>
+								</listcolumn>
+								<listcolumn class="toggle">
 									<span class="toggle fa" ng-class="{'fa-toggle-on': !e.options || e.options.enabled === true || e.options.enabled === undefined, 'fa-toggle-off': e.options && e.options.enabled === false}" ng-click="toggleGraph(e)"></span>
-									<span class="name">{{ graphData[e.id].name || e.id }} <span class="note error" ng-if="graphFetched && !graphData[e.id]"><span class="fa fa-warning"></span> {{ 'mesg.items_not_found' | translate }}</span></span>
-									<menu class="actions">
-										<menuitem href="" icon="cog" title="{{ 'label.options_manage' | translate }}" type="button" ng-click="editOptions(e)"></menuitem>
-										<menuitem href="" icon="file-code-o" title="{{ 'label.templates_attrs_manage' | translate }}" type="button" ng-click="editAttrs(e, false)" ng-if="graphData[e.id] && graphData[e.id].template"></menuitem>
-										<menuitem href="{{ ::baseURL }}admin/graphs/{{ e.id }}" icon="pencil" title="{{ 'label.graphs_edit' | translate }}" type="button" ng-click="editGraph(e)"></menuitem>
-									</menu>
-									<div class="description">
-										<span class="info" ng-if="graphData[e.id] && graphData[e.id].template && e.attributes">
-											<span class="attrinfo" ng-repeat="k in graphData[e.id].templateKeys" ng-if="e.attributes[k]">{{ k }}: <strong>{{ e.attributes[k] }}</strong></span>
-										</span>
+								</listcolumn>
+								<listcolumn class="main expand">
+									<div class="row">
+										<div class="name">{{ graphData[e.id].name || e.id }} <span class="note error" ng-if="graphFetched && !graphData[e.id]"><span class="fa fa-warning"></span> {{ 'mesg.items_not_found' | translate }}</span></div>
+										<div class="actions">
+											<menu>
+												<menuitem href="" icon="cog" title="{{ 'label.options_manage' | translate }}" type="button" ng-click="editOptions(e)"></menuitem>
+												<menuitem href="" icon="file-code-o" title="{{ 'label.templates_attrs_manage' | translate }}" type="button" ng-click="editAttrs(e, false)" ng-if="graphData[e.id] && graphData[e.id].template"></menuitem>
+												<menuitem href="{{ ::baseURL }}admin/graphs/{{ e.id }}" icon="pencil" title="{{ 'label.graphs_edit' | translate }}" type="button" ng-click="editGraph(e)"></menuitem>
+											</menu>
+										</div>
 									</div>
-								</td>
-								<td class="listfield actions">
+									<div class="description">
+										<div class="info" ng-if="graphData[e.id] && graphData[e.id].template && e.attributes">
+											<span class="attrinfo" ng-repeat="k in graphData[e.id].templateKeys" ng-if="e.attributes[k]">{{ k }}: <strong>{{ e.attributes[k] }}</strong></span>
+										</div>
+									</div>
+								</listcolumn>
+								<listcolumn class="actions">
 									<menu>
 										<menuitem href="" icon="times-circle" title="{{ 'label.graphs_remove' | translate }}" type="button" ng-click="remove(item.entries, e)"></menuitem>
 									</menu>
-								</td>
-							</tr>
-						</tbody>
-					</table>
+								</listcolumn>
+							</listrow>
+						</div>
+					</list>
 				</column>
 
-				<column class="small" ng-if="!optionsEdit && !attrsEdit">
+				<column class="side" ng-if="!optionsEdit && !attrsEdit">
 					<h2>{{ 'label.graphs_define' | translate }}</h2>
 
 					<div class="formblock">
@@ -67,7 +75,7 @@
 					</div>
 				</column>
 
-				<column class="half" ng-if="optionsEdit">
+				<column class="side" ng-if="optionsEdit">
 					<h2>{{ 'label.graphs_options' | translate }}</h2>
 
 					<div class="formblock">
@@ -97,7 +105,7 @@
 					</div>
 				</column>
 
-				<column class="half" ng-if="attrsEdit">
+				<column class="side" ng-if="attrsEdit">
 					<h2>{{ 'label.templates_attrs' | translate }}</h2>
 
 					<div class="formblock">
@@ -122,8 +130,8 @@
 		<section ng-pane-step="2">
 			<h1>{{ 'label.collections_definition' | translate }}</h1>
 
-			<columns>
-				<column class="half">
+			<columns class="split">
+				<column class="main">
 					<form ng-entersubmit="save()">
 						<h2>{{ 'label.general_info' | translate }}</h2>
 
@@ -168,7 +176,7 @@
 					</form>
 				</column>
 
-				<column class="half" ng-if="attrsEdit">
+				<column class="side" ng-if="attrsEdit">
 					<form ng-entersubmit="setAttrs()">
 						<h2>{{ 'label.templates_attrs' | translate }}</h2>
 
@@ -209,19 +217,21 @@
 			<message icon="clock-o" type="placeholder" ng-show="!instances">{{ 'mesg.wait' | translate }}</message>
 			<message icon="info-circle" type="info" ng-show="instances.length === 0">{{ 'mesg.templates_no_instance' | translate }}</message>
 
-			<table class="list" ng-if="instances.length > 0">
-				<tbody>
-					<tr class="listitem" ng-repeat="i in instances">
-						<td class="listfield main">
-							<span class="name">{{ i.name }}</span>
-							<menu class="actions">
-								<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ i.id }}" icon="pencil" title="{{ 'label.' + section + '_edit' | translate }}" type="button"></menuitem>
-								<menuitem href="{{ ::baseURL }}browse/{{ section }}/{{ i.id }}" icon="arrow-circle-right" title="{{ 'label.' + section + '_goto' | translate }}" type="button"></menuitem>
-							</menu>
-						</td>
-					</tr>
-				</tbody>
-			</table>
+			<list ng-if="instances.length > 0">
+				<listrow ng-repeat="i in instances">
+					<listcolumn class="main">
+						<div class="row">
+							<div class="name">{{ i.name }}</div>
+							<div class="actions">
+								<menu>
+									<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ i.id }}" icon="pencil" title="{{ 'label.' + section + '_edit' | translate }}" type="button"></menuitem>
+									<menuitem href="{{ ::baseURL }}browse/{{ section }}/{{ i.id }}" icon="arrow-circle-right" title="{{ 'label.' + section + '_goto' | translate }}" type="button"></menuitem>
+								</menu>
+							</div>
+						</div>
+					</listcolumn>
+				</listrow>
+			</list>
 		</section>
 
 		<footer>
@@ -242,7 +252,7 @@
 		<h1>{{ 'label.collections_definition' | translate }}</h1>
 
 		<columns>
-			<column class="half">
+			<column class="main">
 				<form ng-entersubmit="save()">
 					<h2>{{ 'label.general_info' | translate }}</h2>
 					<label>{{ 'label.name' | translate }}

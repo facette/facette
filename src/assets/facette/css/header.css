@@ -6,7 +6,6 @@ header {
 
 header .menu {
 	display: flex;
-	list-style-type: none;
 }
 
 header .menu a {
@@ -35,7 +34,6 @@ header .menuitem > .subcontent {
 	cursor: default;
 	display: none;
 	line-height: 2rem;
-	list-style-type: none;
 	padding: 0.35rem 0;
 	position: absolute;
 	z-index: 200;

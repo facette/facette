@@ -11,34 +11,40 @@
 		<h1>{{ 'label.groups_definition' | translate }}</h1>
 
 		<columns>
-			<column>
+			<column class="main">
 				<h2>{{ 'label.patterns_list' | translate }}</h2>
 
 				<message icon="clock-o" type="placeholder" ng-show="state == stateLoading">{{ 'mesg.wait' | translate }}</message>
 				<message icon="info-circle" type="info" ng-show="state == stateOK && (!item.patterns || item.patterns.length === 0)">{{ 'mesg.patterns_empty' | translate }}</message>
 
-				<table class="list" ng-show="state == stateOK && item.patterns && item.patterns.length > 0">
-					<tbody as-sortable="listSortControl" ng-model="item.patterns">
-						<tr class="listitem" as-sortable-item="" ng-class="{active: pattern.index === $index, locked: pattern.index !== undefined && pattern.index !== $index}" ng-repeat="(idx, p) in item.patterns track by unique(idx, p)">
-							<td class="listfield handle" as-sortable-item-handle=""><span class="fa fa-ellipsis-v"></span></td>
-							<td class="listfield main">
-								<span class="name">{{ p }}</span>
-								<menu class="actions">
-									<menuitem href="" icon="pencil" title="{{ 'label.patterns_edit' | translate }}" type="button" ng-click="editPattern(p)"></menuitem>
-									<menuitem href="" icon="info-circle" title="{{ 'label.patterns_test' | translate }}" type="button" tooltip-data="p" tooltip-formatter="testPattern" tooltip-position="bottom" ng-if="p.indexOf('glob:') === 0 || p.indexOf('regexp:') === 0"></menuitem>
-								</menu>
-							</td>
-							<td class="listfield actions">
+				<list ng-show="state == stateOK && item.patterns && item.patterns.length > 0">
+					<div as-sortable="listSortControl" ng-model="item.patterns">
+						<listrow as-sortable-item="" ng-class="{active: pattern.index === $index, locked: pattern.index !== undefined && pattern.index !== $index}" ng-repeat="(idx, p) in item.patterns track by unique(idx, p)">
+							<listcolumn class="handle">
+								<span as-sortable-item-handle="" class="fa fa-ellipsis-v"></span>
+							</listcolumn>
+							<listcolumn class="main expand">
+								<div class="row">
+									<div class="name">{{ p }}</div>
+									<div class="actions">
+										<menu>
+											<menuitem href="" icon="pencil" title="{{ 'label.patterns_edit' | translate }}" type="button" ng-click="editPattern(p)"></menuitem>
+											<menuitem href="" icon="info-circle" title="{{ 'label.patterns_test' | translate }}" type="button" tooltip-data="p" tooltip-formatter="testPattern" tooltip-position="bottom" ng-if="p.indexOf('glob:') === 0 || p.indexOf('regexp:') === 0"></menuitem>
+										</menu>
+									</div>
+								</div>
+							</listcolumn>
+							<listcolumn class="actions">
 								<menu>
 									<menuitem href="" icon="times-circle" title="{{ 'label.patterns_remove' | translate }}" type="button" ng-click="remove(item.patterns, p)"></menuitem>
 								</menu>
-							</td>
-						</tr>
-					</tbody>
-				</table>
+							</listcolumn>
+						</listrow>
+					</div>
+				</list>
 			</column>
 
-			<column class="small">
+			<column class="side">
 				<h2>{{ 'label.patterns_define' | translate }}</h2>
 
 				<div class="formblock">
@@ -69,7 +75,7 @@
 		<h1>{{ 'label.groups_definition' | translate }}</h1>
 
 		<columns>
-			<column class="half">
+			<column class="main">
 				<form ng-entersubmit="save()">
 					<h2>{{ 'label.general_info' | translate }}</h2>
 

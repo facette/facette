@@ -256,14 +256,11 @@
 	position: absolute;
 	right: 0;
 	top: 100%;
+	z-index: 200;
 }
 
 .graph-menu > .menuitem:hover .subcontent {
 	display: block;
-}
-
-.graph-menu > .menuitem .subcontent .menu {
-	list-style-type: none;
 }
 
 .graph-menu > .menuitem .subcontent .menuitem.separator {

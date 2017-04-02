@@ -150,10 +150,15 @@ button {
 	color: #fff;
 	cursor: pointer;
 	padding: 0 0.5rem;
+	white-space: nowrap;
 }
 
-button .fa {
-	margin: 0 0.35rem;
+button .fa:first-child {
+	margin-right: 0.35rem;
+}
+
+button .fa:last-child {
+	margin-left: 0.35rem;
 }
 
 button .fa-chevron-circle-left {
@@ -220,11 +225,6 @@ textarea {
 
 .formblock:last-child {
 	margin-bottom: 0;
-}
-
-h2 + .formblock.float {
-	margin-top: -3rem;
-	float: right;
 }
 
 .formblock.actions {

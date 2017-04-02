@@ -10,6 +10,7 @@ var app = angular.module('facette', [
     'facette.ui.form',
     'facette.ui.graph',
     'facette.ui.include',
+    'facette.ui.list',
     'facette.ui.menu',
     'facette.ui.message',
     'facette.ui.pane',

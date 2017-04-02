@@ -21,18 +21,20 @@
 		<message icon="info-circle" type="warning" ng-show="state == stateOK && form.search && items.length === 0">{{ 'mesg.no_search_match' | translate }} <a href="" ng-click="reset()">{{ 'label.reset' | translate }}</a></message>
 		<message icon="times-circle" type="error" ng-show="state == stateError">{{ 'mesg.fetch_error' | translate }} <a href="" ng-click="refresh()">{{ 'label.retry' | translate }}</a></message>
 
-		<table class="list" ng-show="state == stateOK && items.length > 0">
-			<tbody>
-				<tr class="listitem" ng-repeat="name in items">
-					<td class="listfield main">
-						<span class="name">{{ name }}</span>
-						<menu class="actions">
-							<menuitem href="" icon="info-circle" type="button" tooltip-data="name" tooltip-formatter="formatCatalogTooltip" tooltip-position="bottom"></menuitem>
-						</menu>
-					</td>
-				</tr>
-			</tbody>
-		</table>
+		<list ng-show="state == stateOK && items.length > 0">
+			<listrow ng-repeat="name in items">
+				<listcolumn class="main">
+					<div class="row">
+						<div class="name">{{ name }}</div>
+						<div class="actions">
+							<menu>
+								<menuitem href="" icon="info-circle" type="button" tooltip-data="name" tooltip-formatter="formatCatalogTooltip" tooltip-position="bottom"></menuitem>
+							</menu>
+						</div>
+					</div>
+				</listcolumn>
+			</listrow>
+		</list>
 
 		<paging page="page" page-size="limit" total="total" paging-action="refresh(page)" hide-if-empty="true" show-prev-next="true"></paging>
 	</section>

@@ -11,7 +11,7 @@
 		<h1>{{ 'label.providers_definition' | translate }}</h1>
 
 		<columns>
-			<column class="half">
+			<column class="main">
 				<form ng-entersubmit="save()">
 					<h2>{{ 'label.general_info' | translate }}</h2>
 
@@ -58,28 +58,32 @@
 	<section ng-pane-step="filters">
 		<h1>{{ 'label.providers_definition' | translate }}</h1>
 
-		<h2>{{ 'label.filters_list' | translate }}</h2>
+		<div class="titlerow">
+			<h2>{{ 'label.filters_list' | translate }}</h2>
 
-		<div class="formblock float">
-			<button ng-click="addFilter()"><span class="fa fa-plus"></span> {{ 'label.filters_add' | translate }}</button>
+			<div class="formblock">
+				<button ng-click="addFilter()"><span class="fa fa-plus"></span> {{ 'label.filters_add' | translate }}</button>
+			</div>
 		</div>
 
 		<message icon="info-circle" type="info" ng-show="!item.filters || item.filters.length === 0">{{ 'mesg.filters_empty' | translate }}</message>
 
 		<table class="list" ng-show="item.filters.length > 0">
 			<thead>
-				<tr class="listhead">
-					<th class="listfield heading"></th>
-					<th class="listfield heading">{{ 'label.filters_action' | translate }}</th>
-					<th class="listfield heading">{{ 'label.filters_target' | translate }}</th>
-					<th class="listfield heading">{{ 'label.filters_pattern' | translate }}</th>
-					<th class="listfield heading"></th>
+				<tr class="listrow">
+					<th class="listcolumn heading"></th>
+					<th class="listcolumn action heading">{{ 'label.filters_action' | translate }}</th>
+					<th class="listcolumn target heading">{{ 'label.filters_target' | translate }}</th>
+					<th class="listcolumn pattern heading">{{ 'label.filters_pattern' | translate }}</th>
+					<th class="listcolumn heading"></th>
 				</tr>
 			</thead>
 			<tbody as-sortable="listSortControl" ng-model="item.filters">
-				<tr class="listitem" as-sortable-item="" ng-repeat="f in item.filters">
-					<td class="listfield handle" as-sortable-item-handle=""><span class="fa fa-ellipsis-v"></span></td>
-					<td class="listfield action">
+				<tr class="listrow" as-sortable-item="" ng-repeat="f in item.filters">
+					<td class="listcolumn handle">
+						<span as-sortable-item-handle="" class="fa fa-ellipsis-v"></span>
+					</td>
+					<td class="listcolumn action">
 						<ui-select theme="selectize" ng-model="f.action">
 							<ui-select-match placeholder="{{ 'label.filters_action_select' | translate }}">
 								<span ng-bind="$select.selected"></span>
@@ -89,7 +93,7 @@
 							</ui-select-choices>
 						</ui-select>
 					</td>
-					<td class="listfield target">
+					<td class="listcolumn target">
 						<ui-select theme="selectize" ng-model="f.target">
 							<ui-select-match placeholder="{{ 'label.filters_target_select' | translate }}">
 								<span ng-bind="$select.selected"></span>
@@ -99,11 +103,14 @@
 							</ui-select-choices>
 						</ui-select>
 					</td>
-					<td class="listfield pattern">
-						<input type="text" ng-model="f.pattern">
-						<span ng-show="f.action == 'rewrite'"><span class="fa fa-arrow-right"></span> <input type="text" ng-model="f.into"></span>
+					<td class="listcolumn pattern expand">
+						<div class="row">
+							<input type="text" ng-model="f.pattern">
+							<span class="fa fa-arrow-right" ng-show="f.action == 'rewrite'"></span>
+							<input type="text" ng-model="f.into" ng-show="f.action == 'rewrite'">
+						</div>
 					</td>
-					<td class="listfield actions">
+					<td class="listcolumn actions">
 						<menu>
 							<menuitem href="" icon="times-circle" title="{{ 'label.filters_remove' | translate }}" type="button" ng-click="remove(item.filters, f)"></menuitem>
 						</menu>

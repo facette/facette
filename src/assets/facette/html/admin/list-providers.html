@@ -22,32 +22,36 @@
 		<message icon="info-circle" type="warning" ng-show="state == stateOK && search && items.length === 0">{{ 'mesg.no_search_match' | translate }} <a href="" ng-click="reset()">{{ 'label.reset' | translate }}</a></message>
 		<message icon="times-circle" type="error" ng-show="state == stateError">{{ 'mesg.fetch_error' | translate }} <a href="" ng-click="refresh()">{{ 'label.retry' | translate }}</a></message>
 
-		<table class="list" ng-show="state == stateOK && items.length > 0">
-			<tbody>
-				<tr class="listitem" ng-class="{disabled: !entry.enabled}" ng-repeat="entry in items">
-					<td class="listfield main togglable">
-						<span class="toggle fa" ng-class="{'fa-toggle-on': entry.enabled, 'fa-toggle-off': !entry.enabled}" ng-click="toggle(entry)"></span>
-						<span class="name">{{ entry.name }}</span>
-						<menu class="actions">
-							<menuitem icon="info-circle" type="button" tooltip-data="entry" tooltip-formatter="formatBasicTooltip" tooltip-position="bottom"></menuitem>
-							<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ entry.id }}" icon="pencil" title="{{ 'label.' + section + '_edit' | translate }}" type="button"></menuitem>
-							<menuitem icon="clone" title="{{ 'label.' + section + '_clone' | translate }}" type="button" ng-click="clone(entry)"></menuitem>
-							<menuitem href="{{ ::baseURL }}browse/{{ section }}/{{ entry.id }}" icon="arrow-circle-right" title="{{ 'label.' + section + '_goto' | translate }}" type="button" ng-if="section == 'collections' || section == 'graphs'"></menuitem>
-							<menuitem icon="refresh" title="{{ 'label.providers_refresh' | translate }}" type="button" ng-click="refreshProvider(entry)" ng-disabled="entry.refreshing" ng-show="entry.enabled"></menuitem>
-						</menu>
-						<span class="description" ng-class="{placeholder: !entry.description}" ng-show="!entry.refreshing">{{ entry.description || ('mesg.no_desc' | translate) }}</span>
-						<span class="description" ng-show="entry.refreshing"><span class="fa fa-refresh fa-spin"></span> {{ 'label.providers_refreshing' | translate }}</span>
-					</td>
-					<td class="listfield date">
-						<span>{{ 'mesg.last_update' | translate }} <span class="value">{{ (entry.modified || entry.created) | date:'medium' }}</span></span>
-					</td>
-					<td class="listfield actions">
-						<menu>
-							<menuitem href="" icon="times-circle" title="{{ 'label.' + section + '_remove' | translate }}" type="button" ng-click="remove(entry)"></menuitem>
-						</menu>
-					</td>
-				</tr>
-			</tbody>
-		</table>
+		<list ng-show="state == stateOK && items.length > 0">
+			<listrow ng-class="{disabled: !i.enabled}" ng-repeat="i in items">
+				<listcolumn class="toggle">
+					<span class="toggle fa" ng-class="{'fa-toggle-on': i.enabled, 'fa-toggle-off': !i.enabled}" ng-click="toggle(i)"></span>
+				</listcolumn>
+				<listcolumn class="main">
+					<div class="row">
+						<div class="name">{{ i.name }}</div>
+						<div class="actions">
+							<menu>
+								<menuitem icon="info-circle" type="button" tooltip-data="i" tooltip-formatter="formatBasicTooltip" tooltip-position="bottom"></menuitem>
+								<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ i.id }}" icon="pencil" title="{{ 'label.' + section + '_edit' | translate }}" type="button"></menuitem>
+								<menuitem icon="clone" title="{{ 'label.' + section + '_clone' | translate }}" type="button" ng-click="clone(i)"></menuitem>
+								<menuitem href="{{ ::baseURL }}browse/{{ section }}/{{ i.id }}" icon="arrow-circle-right" title="{{ 'label.' + section + '_goto' | translate }}" type="button" ng-if="section == 'collections' || section == 'graphs'"></menuitem>
+								<menuitem icon="refresh" title="{{ 'label.providers_refresh' | translate }}" type="button" ng-click="refreshProvider(i)" ng-disabled="i.refreshing" ng-show="i.enabled"></menuitem>
+							</menu>
+						</div>
+					</div>
+					<div class="description" ng-class="{placeholder: !i.description}" ng-show="!i.refreshing">{{ i.description || ('mesg.no_desc' | translate) }}</div>
+					<div class="description" ng-show="i.refreshing"><span class="fa fa-refresh fa-spin"></span> {{ 'label.providers_refreshing' | translate }}</div>
+				</listcolumn>
+				<listcolumn class="date expand">
+					{{ 'mesg.last_update' | translate }} <span class="value">{{ (i.modified || i.created) | date:'medium' }}</span>
+				</listcolumn>
+				<listcolumn class="actions">
+					<menu>
+						<menuitem href="" icon="times-circle" title="{{ 'label.' + section + '_remove' | translate }}" type="button" ng-click="remove(i)"></menuitem>
+					</menu>
+				</listcolumn>
+			</listrow>
+		</list>
 	</section>
 </article>

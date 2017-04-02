@@ -1,302 +1,294 @@
-.list {
+.list,
+.listrow,
+.listrow .actions .menu,
+.listcolumn.main .row,
+.listcolumn.pattern .row {
+	display: flex;
+}
+
+table.list {
+	display: table;
 	border-spacing: 0;
 	width: 100%;
 }
 
-.listhead,
-.listitem {
-	background-color: #fff;
+.list {
+	flex-direction: column;
 }
 
-.listhead .listfield.heading {
-	text-align: left;
-	text-transform: uppercase;
-}
-
-.listfield {
+.list .as-sortable-placeholder,
+.listrow,
+table.list .listcolumn {
 	border-top: 1px solid #ecf0f1;
-	padding: 0.5rem 1rem;
+	box-sizing: border-box;
 }
 
-.listitem:last-child .listfield {
+table.list .listrow {
+	display: table-row;
+}
+
+.listrow:last-child,
+table.list .listrow:last-child .listcolumn {
 	border-bottom: 1px solid #ecf0f1;
 }
 
-.listfield.heading {
-	font-weight: 500;
-	text-align: right;
-	vertical-align: top;
-	white-space: pre;
+.listrow.active,
+.listrow.selected {
+	background-color: #3498db;
 }
 
-.listfield.main,
-.listfield.pattern {
+.listrow.active,
+.listrow.selected,
+.listrow.active .listcolumn.checkbox label,
+.listrow.selected .listcolumn.checkbox label {
+	color: #fff;
+}
+
+.listrow.active,
+.listrow.selected,
+.listrow.active + .listrow,
+.listrow.selected + .listrow {
+	border-top-color: #318ecc;
+}
+
+.listrow.active:last-child,
+.listrow.selected:last-child {
+	border-bottom-color: #318ecc;
+}
+
+.listrow.active,
+.listrow.locked {
+	pointer-events: none;
+}
+
+.listrow.disabled .listcolumn,
+.listrow.locked .listcolumn {
+	opacity: 0.35;
+}
+
+.listrow > .listcolumn {
+	padding: 0.5rem 1rem;
+}
+
+.listcolumn.expand {
+	flex: 1;
+}
+
+table.list .listcolumn.expand {
+	flex: none;
 	width: 100%;
 }
 
-.listfield.action,
-.listfield.target {
-	min-width: 10rem;
+.listcolumn.heading {
+	font-weight: 500;
+	text-align: right;
+	vertical-align: top;
+	white-space: nowrap;
 }
 
-.listfield.pattern input[type=text] {
-	width: 45%;
+thead .listcolumn.heading {
+	border: none !important;
+	text-align: left;
 }
 
-.listfield.pattern .fa {
-	text-align: center;
-	width: 1.5rem;
-}
-
-.listfield.handle,
-.listfield.checkbox {
-	padding: 0.5rem;
-}
-
-.listfield.handle {
-	color: #95a5a6;
-}
-
-.listfield.checkbox {
-	color: #ecf0f1;
-	cursor: default;
-}
-
-.listfield.checkbox label::before {
-	margin-right: 0;
-}
-
-.listfield.pre {
+.listcolumn.pre {
 	white-space: pre;
 }
 
-.listitem.title {
-	background-color: transparent;
+.listcolumn.handle,
+.listcolumn.toggle {
+	font-size: 1.25rem;
+	padding-right: 0;
 }
 
-.listitem.title .listform {
-	float: right;
+.listcolumn.handle {
+	padding: 0;
+	text-align: center;
 }
 
-.listitem.title .listfield {
-	font-weight: normal;
-	text-align: left;
-	vertical-align: middle;
+.listcolumn.handle .fa {
+	display: block;
+	line-height: 1.5rem;
+	padding: 0.5rem;
 }
 
-.listfield.main .toggle,
-.listfield.main .color,
-.listfield.main .name,
-.listfield.main .description,
-.listfield.main .actions {
-	float: left;
+.listcolumn.handle + .listcolumn,
+.listcolumn.checkbox + .listcolumn {
+	padding-left: 0.5rem;
 }
 
-.listfield.main .description {
-	min-height: 1.5rem;
-}
-
-.listfield.main .description.list {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: nowrap;
-	font-size: 0.95rem;
-}
-
-.listfield.main .description .fa {
-	margin-right: 0.25rem;
-}
-
-.listfield.main .description.list .count {
-	background-color: #34495e;
-	border-radius: 1rem;
-	color: #fff;
-	font-size: 0.8rem;
-	margin-left: 0.5rem;
-	padding: 0 0.5rem;
-}
-
-.listfield.main .description.list .actions {
-	display: inline-block;
-	float: none;
+.listrow.active .listcolumn.handle .fa,
+.listrow.locked .listcolumn.handle .fa {
 	visibility: hidden;
 }
 
-.listfield.main .description.list:hover .actions {
-	visibility: visible;
-}
-
-.listitem.active .listfield.main .description.list .actions,
-.listitem.locked .listfield.main .description.list .actions {
-	visibility: hidden !important;
-}
-
-.listfield.main .description .info {
-	text-transform: lowercase;
-}
-
-.listfield.main .description .info strong {
-	font-weight: 500;
-	text-transform: none;
-}
-
-.listfield.main .description .attrinfo + .attrinfo::before {
-	content: ', ';
-}
-
-.listfield.main .toggle {
+.listcolumn.toggle .fa {
 	cursor: pointer;
-	font-size: 1.25rem;
-	line-height: 1.5rem;
-	width: 2rem;
 }
 
-.listfield.main .color {
+.listcolumn.main {
+	overflow: hidden;
+}
+
+.listcolumn.main .color {
 	margin-right: 0.5rem;
 }
 
-.listfield.main .actions {
-	list-style-type: none;
-	margin-left: 0.75rem;
+.listcolumn.main .name,
+.listcolumn.main .description,
+.listcolumn.main .description .info {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
-.listfield.main .actions .menuitem {
-	display: inline-block;
+.listcolumn.main .name .fa {
+	margin-left: 0.25rem;
+}
+
+.listcolumn.main .actions {
+	margin-left: 0.75rem;
+	flex: 1;
+}
+
+.listcolumn.main .actions .menuitem {
 	font-size: 1.1rem;
 	text-align: center;
 	width: 1.5rem;
 }
 
-.listfield.main .actions .menuitem[disabled] {
+.listcolumn.main .actions .menuitem[disabled] {
 	opacity: 0.35;
 	pointer-events: none;
 }
 
-.listfield.main .actions .menuitem .content {
-	cursor: pointer;
+.listcolumn.main .description {
+	min-height: 1.5rem;
+	opacity: 0.5;
 }
 
-.listfield.main .description {
-	clear: left;
-	color: rgba(44, 62, 80, 0.65);
+.listcolumn.main .description .info {
+	text-transform: lowercase;
 }
 
-.listfield.main .description.list::before {
+.listcolumn.main .description.bullet .info::before {
 	content: '›';
 	margin-right: 0.35rem;
 }
 
-.listfield.main .description.placeholder {
-	color: rgba(44, 62, 80, 0.25);
+.listcolumn.main .description .info strong {
+	font-weight: 500;
+	text-transform: none;
 }
 
-.listfield.main.togglable .description {
-	margin-left: 2rem;
+.listcolumn.handle .fa,
+.listcolumn.main .description.placeholder {
+	opacity: 0.25;
 }
 
-.listfield.main .actions,
-.listfield.date,
-.listfield.actions .menu {
-	color: #bdc3c7;
-	white-space: nowrap;
+.listcolumn.date,
+.listrow .actions .menuitem .content,
+.listrow.active .listcolumn.main .description.placeholder,
+.listrow.selected .listcolumn.main .description.placeholder {
+	opacity: 0.35;
 }
 
-.listitem.locked {
-	pointer-events: none;
+.listrow.active .listcolumn.main .description,
+.listrow.selected .listcolumn.main .description,
+.listrow.active .listcolumn.date,
+.listrow.active .actions .menuitem .content,
+.listrow.selected .listcolumn.date,
+.listrow.selected .actions .menuitem .content,
+.listrow .actions .menuitem .content:hover,
+.listrow .actions .menuitem .content.active {
+	opacity: 0.65;
 }
 
-.listitem.disabled .listfield.main .toggle,
-.listitem.disabled .listfield.main .name,
-.listitem.disabled .listfield.main .description,
-.listitem.locked .listfield * {
-	opacity: 0.5;
-}
-
-.listfield.main .actions,
-.listfield.date > *,
-.listfield.actions > *,
-.listitem.active:hover .listfield.main > .actions,
-.listitem.active:hover .listfield.date > *,
-.listitem.active:hover .listfield.actions > * {
+.listcolumn.date,
+.listrow .actions .menu {
 	visibility: hidden;
 }
 
-.listitem:hover .listfield.main > .actions,
-.listitem:hover .listfield.date > *,
-.listitem:hover .listfield.actions > * {
+.listrow:hover .listcolumn.date,
+.listrow:hover .actions .menu {
 	visibility: visible;
 }
 
-.listitem.active,
-.listitem.selected {
-	background-color: #3498db;
-	color: #fff;
+.listcolumn.handle,
+.listcolumn.checkbox,
+.listcolumn.date,
+.listrow > .actions {
+	align-self: center;
 }
 
-.listitem.active .listfield,
-.listitem.selected .listfield {
-	border-color: rgba(255, 255, 255, 0.25);
+.listcolumn.checkbox {
+	text-align: center;
 }
 
-.listitem.active .listfield.handle,
-.listitem.selected .listfield.handle {
-	color: rgba(255, 255, 255, 0.5);
+.listcolumn.checkbox label {
+	color: #ecf0f1;
 }
 
-.listitem.active .listfield.main .description.list .count,
-.listitem.selected .listfield.main .description.list .count {
-	background-color: #fff;
-	color: #3498db;
+.listcolumn.checkbox input[type="checkbox"] + label::before {
+	margin-right: 0;
 }
 
-.listitem.active .listfield.main .description,
-.listitem.selected .listfield.main .description {
-	color: rgba(255, 255, 255, 0.75);
-}
-
-.listitem.active label:focus::before,
-.listitem.selected label:focus::before,
-.listitem.active .listfield.main .actions,
-.listitem.selected .listfield.main .actions,
-.listitem.active .listfield.actions .menu,
-.listitem.selected .listfield.actions .menu {
-	color: rgba(255, 255, 255, 0.5);
-}
-
-.listfield.actions {
-	font-size: 1.25rem;
+.listcolumn.date {
 	text-align: right;
 }
 
-.listfield.actions .menu {
-	list-style-type: none;
+.listcolumn.date {
+	white-space: nowrap;
 }
 
-.listfield.actions .menuitem {
-	cursor: pointer;
-	display: inline-block;
+.listcolumn.checkbox,
+.listcolumn.action,
+.listcolumn.target,
+.listcolumn.pattern {
+	padding: 0.5rem;
+}
+
+.listcolumn.action,
+.listcolumn.target {
+	min-width: 10rem;
+}
+
+.listcolumn.action {
+	padding-left: 0 !important;
+}
+
+.listcolumn.pattern input[type=text] {
+	margin: 0;
+}
+
+.listcolumn.pattern .fa {
+	align-self: center;
 	text-align: center;
-	width: 1.5rem;
+	width: 3.5rem;
 }
 
-.listfield .actions a:hover,
-.listfield .actions a.active {
-	color: #7f8c8d;
+.listrow > .actions {
+	font-size: 1.25rem;
 }
 
-.listitem.active .listfield .actions a:hover,
-.listitem.active .listfield .actions a.active,
-.listitem.selected .listfield .actions a:hover,
-.listitem.selected .listfield .actions a.active {
-	color: #fff;
+.listrow .actions .menuitem .content {
+	cursor: pointer;
 }
 
-.listfield .actions .tooltip.bottom {
+.listrow.active .actions .menuitem .content:hover,
+.listrow.active .actions .menuitem .content.active,
+.listrow.selected .actions .menuitem .content:hover,
+.listrow.selected .actions .menuitem .content.active {
+	opacity: 1;
+}
+
+.listrow .actions .tooltip.bottom {
 	left: -0.5rem;
 	transform: none;
+	white-space: nowrap;
 }
 
-.listfield .actions .tooltip.bottom::before {
+.listrow .actions .tooltip.bottom::before {
 	left: 0.75rem;
 	margin-left: 0;
 }
@@ -326,18 +318,36 @@
 	border-top-left-radius: 0;
 }
 
+@media screen and (max-width: 1024px) {
+	aside.expand + article .listcolumn.main {
+		flex: 1;
+	}
+
+	aside.expand + article .listcolumn.date {
+		display: none;
+	}
+}
+
+@media screen and (max-width: 876px) {
+	aside.expand + article .listrow .actions {
+		display: none;
+	}
+
+	aside.expand + article .listrow .actions .menu {
+		visibility: visible;
+	}
+
+	aside.expand + article .listrow:hover .actions {
+		display: block;
+	}
+}
+
 @media screen and (max-width: 768px) {
-	.listfield.main .actions,
-	.listfield.actions .menu {
-		white-space: normal;
+	.listcolumn.main {
+		flex: 1;
 	}
 
-	.listfield.main,
-	.listfield.pattern {
-		width: auto;
-	}
-
-	.listfield.date {
+	.listcolumn.date {
 		display: none;
 	}
 }

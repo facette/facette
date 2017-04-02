@@ -19,59 +19,69 @@
 			<h1>{{ 'label.graphs_definition' | translate }}</h1>
 
 			<columns>
-				<column>
-					<h2>{{ 'label.series_list' | translate }}</h2>
+				<column class="main">
+					<div class="titlerow">
+						<h2>{{ 'label.series_list' | translate }}</h2>
 
-					<div class="formblock float">
-						<button ng-click="mergeGroup(true)" ng-disabled="selected.length <= 1" ng-show="selectedGroup.length === 0 || selectedGroup.length != selected.length"><span class="fa fa-object-group"></span> {{ 'label.series_group' | translate }}</button>
-						<button ng-click="mergeGroup(false)" ng-show="selectedGroup.length > 0 && selectedGroup.length === selected.length"><span class="fa fa-object-ungroup"></span> {{ 'label.series_ungroup' | translate }}</button>
-						<button ng-click="autonameSeries(true)"><span class="fa fa-magic"></span> {{ 'label.series_autoname' | translate }}</button>
+						<div class="formblock">
+							<button ng-click="mergeGroup(true)" ng-disabled="selected.length <= 1" ng-show="selectedGroup.length === 0 || selectedGroup.length != selected.length"><span class="fa fa-object-group"></span> {{ 'label.series_group' | translate }}</button>
+							<button ng-click="mergeGroup(false)" ng-show="selectedGroup.length > 0 && selectedGroup.length === selected.length"><span class="fa fa-object-ungroup"></span> {{ 'label.series_ungroup' | translate }}</button>
+							<button ng-click="autonameSeries(true)"><span class="fa fa-magic"></span> {{ 'label.series_autoname' | translate }}</button>
+						</div>
 					</div>
 
 					<message icon="clock-o" type="placeholder" ng-show="state == stateLoading">{{ 'mesg.wait' | translate }}</message>
 					<message icon="info-circle" type="info" ng-show="state == stateOK && (!item.groups || item.groups.length === 0)">{{ 'mesg.series_empty' | translate }}</message>
 
-					<table class="list" ng-show="state == stateOK && item.groups && item.groups.length > 0">
-						<tbody as-sortable="listSortControl" ng-model="item.groups">
-							<tr class="listitem" as-sortable-item="" ng-class="{active: series.index[0] === $index, locked: series.index[0] !== undefined && series.index[0] !== $index, selected: g.selected}" ng-repeat="g in item.groups">
-								<td class="listfield handle" as-sortable-item-handle=""><span class="fa fa-ellipsis-v"></span></td>
-								<td class="listfield checkbox">
+					<list ng-show="state == stateOK && item.groups && item.groups.length > 0">
+						<div as-sortable="listSortControl" ng-model="item.groups">
+							<listrow as-sortable-item="" ng-class="{active: series.index[0] === $index, locked: series.index[0] !== undefined && series.index[0] !== $index, selected: g.selected}" ng-repeat="g in item.groups">
+								<listcolumn class="handle">
+									<span as-sortable-item-handle="" class="fa fa-ellipsis-v"></span>
+								</listcolumn>
+								<listcolumn class="checkbox">
 									<input id="item{{ $index }}" type="checkbox" ng-model="g.selected">
 									<label class="empty" for="item{{ $index }}" tabindex="0"></label>
-								</td>
-								<td class="listfield main">
-									<span class="color"><span class="fa fa-circle" ng-style="{color: getSeriesColor($index)}"></span></span>
-									<span class="name">{{ g.name || (g.series.length == 1 ? g.series[0].name : '&nbsp;') }}</span>
-									<menu class="actions">
-										<menuitem href="" icon="cog" title="{{ 'label.series_group_edit' | translate }}" type="button" ng-click="editGroup(g)"></menuitem>
-									</menu>
-									<div class="description list" ng-repeat="s in g.series track by $index">
-										<span class="info">
+								</listcolumn>
+								<listcolumn class="main expand">
+									<div class="row">
+										<div class="color"><span class="fa fa-circle" ng-style="{color: getSeriesColor($index)}"></span></div>
+										<div class="name">{{ g.name || (g.series.length == 1 ? g.series[0].name : '&nbsp;') }}</div>
+										<div class="actions">
+											<menu>
+												<menuitem href="" icon="cog" title="{{ 'label.series_group_edit' | translate }}" type="button" ng-click="editGroup(g)"></menuitem>
+											</menu>
+										</div>
+									</div>
+									<div class="row description bullet" ng-repeat="s in g.series track by $index">
+										<div class="info">
 											{{ 'label.name_alt' | translate }} <strong>{{ s.name }}</strong>,
 											{{ 'label.metric_alt' | translate }} <strong>{{ s.origin }}/{{ resolveGroup(s.source) }}/{{ resolveGroup(s.metric) }}</strong>
-										</span>
-										<span>
+										</div>
+										<div>
 											<span class="count" ng-show="s.expansion !== undefined">{{ expandData[s.expansion].length }}</span>
-										</span>
-										<menu class="actions">
-											<menuitem href="" icon="pencil" title="{{ 'label.series_edit' | translate }}" type="button" ng-click="editSeries(g, s)"></menuitem>
-											<menuitem href="" icon="times" title="{{ 'label.series_remove' | translate }}" type="button" ng-click="remove(g.series, s)"></menuitem>
-										</menu>
+										</div>
+										<div class="actions">
+											<menu>
+												<menuitem href="" icon="pencil" title="{{ 'label.series_edit' | translate }}" type="button" ng-click="editSeries(g, s)"></menuitem>
+												<menuitem href="" icon="times" title="{{ 'label.series_remove' | translate }}" type="button" ng-click="remove(g.series, s)"></menuitem>
+											</menu>
+										</div>
 									</div>
-								</td>
-								<td class="listfield actions">
+								</listcolumn>
+								<listcolumn class="actions">
 									<menu>
 										<menuitem href="" icon="caret-square-o-down" title="{{ 'label.groups_expand' | translate }}" type="button" ng-click="expandGroup(g, true)" ng-show="g.series.length == 1 && g.series[0].expansion !== undefined"></menuitem>
 										<menuitem href="" icon="caret-square-o-up" title="{{ 'label.groups_collapse' | translate }}" type="button" ng-click="expandGroup(g, false)" ng-show="g.series.length == 1 && g.series[0].expanded !== undefined"></menuitem>
 										<menuitem href="" icon="times-circle" title="{{ 'label.groups_remove' | translate }}" type="button" ng-click="remove(item.groups, g)"></menuitem>
 									</menu>
-								</td>
-							</tr>
-						</tbody>
-					</table>
+								</listcolumn>
+							</listrow>
+						</div>
+					</list>
 				</column>
 
-				<column class="small">
+				<column class="side">
 					<h2>{{ 'label.series_define' | translate }}</h2>
 
 					<div class="formblock">
@@ -96,8 +106,8 @@
 		<section ng-pane-step="2">
 			<h1>{{ 'label.graphs_definition' | translate }}</h1>
 
-			<columns>
-				<column class="half">
+			<columns class="split">
+				<column class="main">
 					<form ng-entersubmit="save()">
 						<h2>{{ 'label.general_info' | translate }}</h2>
 
@@ -122,7 +132,7 @@
 							<input type="text" ng-model="item.alias">
 
 							<columns>
-								<column class="half">
+								<column>
 									<label>{{ 'label.graphs_type' | translate }}</label>
 									<ui-select theme="selectize" ng-model="selectedOptions.main.type">
 										<ui-select-match placeholder="{{ 'label.graphs_type_select' | translate }}">
@@ -134,7 +144,7 @@
 									</ui-select>
 								</column>
 
-								<column class="half">
+								<column>
 									<label>{{ 'label.graphs_stack_mode' | translate }}</label>
 									<ui-select theme="selectize" ng-model="selectedOptions.main.stack_mode">
 										<ui-select-match placeholder="{{ 'label.graphs_stack_mode_select' | translate }}">
@@ -148,12 +158,12 @@
 							</columns>
 
 							<columns>
-								<column class="half">
+								<column>
 									<label>{{ 'label.graphs_yaxis_legend' | translate }}</label>
 									<input type="text" ng-model="item.options.yaxis_legend">
 								</column>
 
-								<column class="half">
+								<column>
 									<label>{{ 'label.graphs_yaxis_unit' | translate }}</label>
 									<input id="axis-unit-fixed" name="axis-unit" type="radio" value="fixed" ng-model="item.options.yaxis_unit">
 									<label for="axis-unit-fixed" tabindex="0">{{ 'label.graphs_yaxis_unit_fixed' | translate }}</label>
@@ -171,7 +181,7 @@
 					</form>
 				</column>
 
-				<column class="half" ng-if="!optionsEdit">
+				<column class="side" ng-if="!optionsEdit">
 					<h2>{{ 'label.graphs_preview' | translate }}</h2>
 
 					<graph class="preview" graph-data="itemData" graph-options="{controls: false}"></graph>
@@ -190,7 +200,7 @@
 					</div>
 				</column>
 
-				<column class="half" ng-if="optionsEdit">
+				<column class="side" ng-if="optionsEdit">
 					<form ng-entersubmit="setOptions()">
 						<h2>{{ 'label.graphs_options' | translate }}</h2>
 
@@ -223,8 +233,8 @@
 		<footer>
 			<button class="extra" ng-click="reset()" ng-disabled="!modified" ng-if="id != 'add'"><span class="fa fa-undo"></span> {{ 'label.graphs_reset' | translate }}</button>
 			<button class="danger" ng-click="cancel()">{{ 'label.cancel' | translate }}</button>
-			<button ng-click="switch(step - 1)" ng-disabled="step == 1"><span class="fa fa-chevron-circle-left"></span> {{ 'label.prev' | translate }}</button>
-			<button ng-click="switch(step + 1)" ng-disabled="!item.groups || item.groups.length === 0 || step == 2">{{ 'label.next' | translate }} <span class="fa fa-chevron-circle-right"></span></button>
+			<button ng-click="switch(step - 1)" ng-disabled="step == 1 || optionsEdit"><span class="fa fa-chevron-circle-left"></span> {{ 'label.prev' | translate }}</button>
+			<button ng-click="switch(step + 1)" ng-disabled="!item.groups || item.groups.length === 0 || step == 2 || optionsEdit">{{ 'label.next' | translate }} <span class="fa fa-chevron-circle-right"></span></button>
 			<button ng-click="save()" ng-disabled="step != 2 || optionsEdit" ng-show="!item.template">{{ 'label.graphs_save' | translate }}</button>
 			<button ng-click="save()" ng-disabled="step != 2 || optionsEdit" ng-show="item.template">{{ 'label.templates_save' | translate }}</button>
 		</footer>
@@ -237,19 +247,21 @@
 			<message icon="clock-o" type="placeholder" ng-show="!instances">{{ 'mesg.wait' | translate }}</message>
 			<message icon="info-circle" type="info" ng-show="instances.length === 0">{{ 'mesg.templates_no_instance' | translate }}</message>
 
-			<table class="list" ng-if="instances.length > 0">
-				<tbody>
-					<tr class="listitem" ng-repeat="i in instances">
-						<td class="listfield main">
-							<span class="name">{{ i.name }}</span>
-							<menu class="actions">
-								<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ i.id }}" icon="pencil" title="{{ 'label.' + section + '_edit' | translate }}" type="button"></menuitem>
-								<menuitem href="{{ ::baseURL }}browse/{{ section }}/{{ i.id }}" icon="arrow-circle-right" title="{{ 'label.' + section + '_goto' | translate }}" type="button"></menuitem>
-							</menu>
-						</td>
-					</tr>
-				</tbody>
-			</table>
+			<list ng-if="instances.length > 0">
+				<listrow ng-repeat="i in instances">
+					<listcolumn class="main">
+						<div class="row">
+							<div class="name">{{ i.name }}</div>
+							<div class="actions">
+								<menu>
+									<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ i.id }}" icon="pencil" title="{{ 'label.' + section + '_edit' | translate }}" type="button"></menuitem>
+									<menuitem href="{{ ::baseURL }}browse/{{ section }}/{{ i.id }}" icon="arrow-circle-right" title="{{ 'label.' + section + '_goto' | translate }}" type="button"></menuitem>
+								</menu>
+							</div>
+						</div>
+					</listcolumn>
+				</listrow>
+			</list>
 		</section>
 
 		<footer>
@@ -270,8 +282,8 @@
 	<section ng-pane-step="1">
 		<h1>{{ 'label.graphs_definition' | translate }}</h1>
 
-		<columns>
-			<column class="half">
+		<columns class="split">
+			<column class="main">
 				<form ng-entersubmit="save()">
 					<h2>{{ 'label.general_info' | translate }}</h2>
 					<label>{{ 'label.name' | translate }}
@@ -300,7 +312,7 @@
 				</form>
 			</column>
 
-			<column class="half">
+			<column class="side">
 				<h2>{{ 'label.graphs_preview' | translate }}</h2>
 				<graph class="preview" graph-data="itemData" graph-options="{controls: false}"></graph>
 			</column>

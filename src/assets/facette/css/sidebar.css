@@ -47,7 +47,6 @@ aside header .logo img {
 
 aside header .menu {
 	background-color: inherit;
-	list-style-type: none;
 	transition: transform .3s ease-in-out;
 }
 
@@ -75,10 +74,6 @@ aside nav {
 	flex: 1;
 	overflow-y: auto;
 	padding: 1rem 0 5rem;
-}
-
-aside nav .menu {
-	list-style-type: none;
 }
 
 aside nav .menuitem {

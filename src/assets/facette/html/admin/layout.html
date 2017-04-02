@@ -4,7 +4,7 @@
 	<div class="action" ng-click="resetError()"><span class="fa fa-times"></span></div>
 </header>
 
-<aside ng-class="{collapse: sidebarCollapse}">
+<aside ng-class="{collapse: sidebarCollapse, expand: !sidebarCollapse}">
 	<header>
 		<a class="logo" href="{{ ::baseURL }}admin/">
 			<img src="assets/images/logo-nav.png" alt="Facette">

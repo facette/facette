@@ -282,6 +282,25 @@ article .graph {
 	margin-bottom: 2rem;
 }
 
+article .titlerow {
+	align-items: center;
+	display: flex;
+	margin-bottom: 2rem;
+}
+
+article .titlerow h2 {
+	flex: 1;
+	margin: 0;
+}
+
+article .titlerow .formblock {
+	display: flex;
+}
+
+article .titlerow .formblock button {
+	margin: 0.175rem;
+}
+
 .pane {
 	padding-bottom: 6rem;
 }
@@ -327,7 +346,13 @@ article .graph {
 		border-bottom-right-radius: 0.2rem;
 	}
 
-	article header .search {
+	aside.expand + article header .search input {
+		width: 14rem;
+	}
+}
+
+@media screen and (max-width: 876px) {
+	aside.expand + article .titlerow h2 {
 		display: none;
 	}
 }
@@ -348,6 +373,10 @@ article .graph {
 	article header .menu.main {
 		left: auto;
 		transform: translate(-3.5rem);
+	}
+
+	article header .search input {
+		width: 14rem;
 	}
 
 	article footer {

@@ -1,29 +1,28 @@
 .columns {
 	display: flex;
-	flex-direction: row;
 	margin: 0 -1rem;
 }
 
 .columns .column {
 	box-sizing: border-box;
-	flex: auto;
 	padding: 0 1rem;
 }
 
-.columns .column:first-child {
-	border-left: none;
+.columns.split .column {
+	flex: 1 1 0;
 }
 
-.columns .column.half {
-	flex: none;
-	min-width: 50%;
-	width: 50%;
+.columns .column.main {
+	flex: 1;
+	overflow: hidden;
 }
 
-.columns .column.small {
-	flex: none;
-	min-width: 25%;
-	width: 25%;
+.columns .column.main:last-child {
+	max-width: 50%;
+}
+
+.columns .column.side {
+	min-width: 22rem;
 }
 
 section > .columns {
@@ -33,6 +32,10 @@ section > .columns {
 section > .columns > .column {
 	border-left: 1px solid #ecf0f1;
 	padding: 1rem 2rem;
+}
+
+section > .columns > .column:first-child {
+	border-left: none;
 }
 
 .grid2,
@@ -53,4 +56,10 @@ section > .columns > .column {
 
 .grid3 .grid-item {
 	width: 33.33%;
+}
+
+@media screen and (max-width: 876px) {
+	aside.expand + article section .columns .column.main:last-child {
+		max-width: none;
+	}
 }
