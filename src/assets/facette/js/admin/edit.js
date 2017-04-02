@@ -23,7 +23,8 @@ app.factory('AdminEdit', function($location, $rootScope, $timeout, library, prov
                 type: dialogTypeConfirm,
                 message: 'mesg.items_reset',
                 labels: {
-                    validate: 'label.' + scope.section + '_reset'
+                    validate: scope.section.endsWith('groups') ?
+                        'label.groups_reset' : 'label.' + scope.section + '_reset'
                 },
                 danger: true
             }, function(data) {
