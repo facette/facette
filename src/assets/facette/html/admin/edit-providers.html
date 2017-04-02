@@ -121,13 +121,8 @@
 	</section>
 
 	<footer ng-switch="step">
-		<div ng-switch-when="settings">
-			<button class="danger" ng-click="providerResetSettings(); switch(1)">{{ 'label.cancel' | translate }}</button>
-			<button ng-click="switch(1)">{{ 'label.settings_validate' | translate }}</button>
-		</div>
-		<div ng-switch-when="filters">
-			<button class="danger" ng-click="providerResetFilters(); switch(1)">{{ 'label.cancel' | translate }}</button>
-			<button ng-click="switch(1)">{{ 'label.filters_validate' | translate }}</button>
+		<div ng-switch-when="settings|filters" ng-switch-when-separator="|">
+			<button ng-click="switch(1)">{{ 'label.ok' | translate }}</button>
 		</div>
 		<div ng-switch-default="">
 			<button class="extra" ng-click="reset()" ng-disabled="!modified"><span class="fa fa-undo"></span> {{ 'label.providers_reset' | translate }}</button>
