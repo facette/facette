@@ -98,7 +98,7 @@ func libraryCollectionToTreeItem(collection *backend.Collection) *libraryCollect
 	}
 
 	// Use title as label if any or fallback to collection name
-	if title, ok := collection.Options["title"].(string); ok {
+	if title, ok := collection.Options["title"].(string); ok && title != "" {
 		entry.Label = title
 	} else {
 		entry.Label = collection.Name
