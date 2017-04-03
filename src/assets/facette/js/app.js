@@ -128,7 +128,7 @@ app.config(function($httpProvider, $locationProvider, $resourceProvider, $routeP
                 return response;
             },
             responseError: function(response) {
-                if (response.status >= 400) {
+                if (response.status >= 400 && response.status != 404) {
                     $rootScope.setError(response.data && response.data.message ?
                         response.data.message : 'an unhandled error has occurred');
                 }
