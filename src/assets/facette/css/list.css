@@ -318,6 +318,15 @@ thead .listcolumn.heading {
 	border-top-left-radius: 0;
 }
 
+table.list a {
+	color: #2980b9;
+}
+
+table.list a .fa:last-child {
+	margin-left: 0.25rem;
+	vertical-align: middle;
+}
+
 @media screen and (max-width: 1024px) {
 	aside.expand + article .listcolumn.main {
 		flex: 1;
