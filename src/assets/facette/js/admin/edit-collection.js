@@ -96,6 +96,10 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
 
             $scope.templateKeys = keys;
             $scope.item.template = keys.length > 0;
+
+            if ($scope.item.template) {
+                delete $scope.item.alias;
+            }
         }
     }
 

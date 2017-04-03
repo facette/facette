@@ -103,7 +103,7 @@ func (w *httpWorker) httpHandleBackendCreate(ctx context.Context, rw http.Respon
 		case backend.ErrResourceConflict:
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusConflict)
 
-		case backend.ErrEmptyGraph, backend.ErrEmptyGroup, backend.ErrExtraAttributes, backend.ErrInvalidName,
+		case backend.ErrEmptyGraph, backend.ErrEmptyGroup, backend.ErrIncompatibleAttributes, backend.ErrInvalidName,
 			backend.ErrInvalidAlias, backend.ErrInvalidParent, backend.ErrInvalidScale, backend.ErrInvalidUnit,
 			backend.ErrResourceMissingData:
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusBadRequest)
@@ -421,7 +421,7 @@ func (w *httpWorker) httpHandleBackendUpdate(ctx context.Context, rw http.Respon
 		case backend.ErrItemNotExist:
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
 
-		case backend.ErrEmptyGraph, backend.ErrEmptyGroup, backend.ErrExtraAttributes, backend.ErrInvalidName,
+		case backend.ErrEmptyGraph, backend.ErrEmptyGroup, backend.ErrIncompatibleAttributes, backend.ErrInvalidName,
 			backend.ErrInvalidAlias, backend.ErrInvalidParent, backend.ErrInvalidScale, backend.ErrInvalidUnit,
 			backend.ErrResourceMissingData:
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusBadRequest)

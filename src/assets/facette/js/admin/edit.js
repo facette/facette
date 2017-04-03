@@ -70,7 +70,7 @@ app.factory('AdminEdit', function($location, $rootScope, $timeout, library, prov
                 transform(data);
             }
 
-            scope.conflict = false;
+            scope.conflict = {name: false, alias: name};
             scope.validated = true;
 
             // Prepare item data
@@ -97,6 +97,8 @@ app.factory('AdminEdit', function($location, $rootScope, $timeout, library, prov
         },
 
         watch: function(scope, callback) {
+            scope.aliasable = scope.section == 'collections' || scope.section == 'graphs';
+
             scope.$watch('item', function(newValue, oldValue) {
                 if (scope.state != stateOK || angular.equals(newValue, oldValue)) {
                     return;
@@ -124,28 +126,46 @@ app.factory('AdminEdit', function($location, $rootScope, $timeout, library, prov
                     }
 
                     // Reset conflict flag on name reset
-                    if (!newValue.name) {
-                        scope.conflict = false;
+                    if (!newValue.name || newValue.name === scope.itemRef.name) {
+                        scope.conflict.name = false;
+                    }
+
+                    if (!newValue.alias || newValue.alias === scope.itemRef.alias) {
+                        scope.conflict.alias = false;
+                    }
+
+                    if (!oldValue) {
                         return;
                     }
 
-                    // Stop if named didn't change
-                    if (oldValue && newValue.name === oldValue.name || newValue.name === scope.itemRef.name) {
-                        return;
+                    // Check for name and/or alias conflicts
+                    if (newValue.name && newValue.name !== oldValue.name && newValue.name !== scope.itemRef.name) {
+                        (scope.section == 'providers' ? providers : library).list({
+                            type: scope.section,
+                            filter: newValue.name
+                        }, function(data) {
+                            scope.conflict.name = data.length > 0;
+                        });
                     }
 
-                    (scope.section == 'providers' ? providers : library).list({
-                        type: scope.section,
-                        filter: newValue.name
-                    }, function(data) {
-                        scope.conflict = data.length > 0;
-                    });
+                    if (scope.aliasable && newValue.alias && newValue.alias !== oldValue.alias &&
+                        newValue.alias !== scope.itemRef.alias) {
+
+                        library.getPeek({
+                            type: scope.section,
+                            id: newValue.alias
+                        }, function(data) {
+                            scope.conflict.alias = true;
+                        }, function(data) {
+                            scope.conflict.alias = false;
+                        });
+                    }
                 }, 500);
             }, true);
         },
 
         load: function(scope, callback) {
-            scope.conflict = false;
+            scope.conflict = {name: false, alias: false};
             scope.validated = false;
 
             // Set page title

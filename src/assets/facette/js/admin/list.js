@@ -135,7 +135,7 @@ app.controller('AdminListController', function($q, $rootScope, $routeParams, $sc
 
     $scope.remove = function(item) {
         if ($scope.templates) {
-            factory.count({
+            factory.listPeek({
                 type: $scope.section,
                 kind: 'raw',
                 link: item.id,

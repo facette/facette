@@ -137,10 +137,10 @@
 
 						<div class="formblock">
 							<label>{{ 'label.name' | translate }}
-								<span class="warn" ng-show="conflict"><span class="fa fa-warning"></span> Name attribute should be unique!</span>
-								<span class="warn" ng-show="validated && !item.name"><span class="fa fa-warning"></span> Name attribute is mandatory!</span>
+								<span class="warn" ng-show="conflict.name"><span class="fa fa-warning"></span> {{ 'mesg.name_unique' | translate }}</span>
+								<span class="warn" ng-show="validated && !item.name"><span class="fa fa-warning"></span> {{ 'mesg.name_mandatory' | translate }}</span>
 							</label>
-							<input type="text" ng-class="{danger: conflict || validated && !item.name}" ng-model="item.name">
+							<input type="text" ng-class="{danger: conflict.name || validated && !item.name}" ng-model="item.name">
 
 							<label>{{ 'label.desc' | translate }}</label>
 							<textarea type="text" ng-model="item.description"></textarea>
@@ -152,8 +152,10 @@
 							<label>{{ 'label.title' | translate }}</label>
 							<input type="text" ng-model="item.options.title">
 
-							<label>{{ 'label.alias' | translate }}</label>
-							<input type="text" ng-model="item.alias">
+							<label>{{ 'label.alias' | translate }}
+								<span class="warn" ng-show="conflict.alias"><span class="fa fa-warning"></span> {{ 'mesg.alias_unique' | translate }}</span>
+							</label>
+							<input type="text" ng-class="{danger: conflict.alias}" ng-model="item.alias" ng-disabled="item.template">
 
 							<label>{{ 'label.collections_grid_size' | translate }}</label>
 							<ui-select class="small" theme="selectize" ng-model="selectedOptions.grid_size">
@@ -255,11 +257,17 @@
 			<column class="main">
 				<form ng-entersubmit="save()">
 					<h2>{{ 'label.general_info' | translate }}</h2>
+
 					<label>{{ 'label.name' | translate }}
-						<span class="warn" ng-show="conflict"><span class="fa fa-warning"></span> Name attribute should be unique!</span>
-						<span class="warn" ng-show="validated && !item.name"><span class="fa fa-warning"></span> Name attribute is mandatory!</span>
+						<span class="warn" ng-show="conflict.name"><span class="fa fa-warning"></span> {{ 'mesg.name_unique' | translate }}</span>
+						<span class="warn" ng-show="validated && !item.name"><span class="fa fa-warning"></span> {{ 'mesg.name_mandatory' | translate }}</span>
 					</label>
-					<input type="text" ng-class="{danger: conflict || validated && !item.name}" ng-model="item.name">
+					<input type="text" ng-class="{danger: conflict.name || validated && !item.name}" ng-model="item.name">
+
+					<label>{{ 'label.alias' | translate }}
+						<span class="warn" ng-show="conflict.alias"><span class="fa fa-warning"></span> {{ 'mesg.alias_unique' | translate }}</span>
+					</label>
+					<input type="text" ng-class="{danger: conflict.alias}" ng-model="item.alias">
 
 					<label>{{ 'label.templates_source' | translate }}</label>
 					<angucomplete-alt class="small" id="template" pause="250" selected-object="selectTemplate" remote-api-handler="templateSources" title-field="name" minlength="1" focus-first="true" match-class="highlight" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}" ng-class="{danger: validated && !item.link}"></angucomplete-alt>

@@ -157,6 +157,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
 
             if (item.template) {
                 item.attributes = attrs;
+                delete item.alias;
             } else {
                 delete item.attributes;
             }

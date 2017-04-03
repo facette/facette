@@ -38,9 +38,9 @@ type Collection struct {
 func (c Collection) Validate(backend *Backend) error {
 	if err := c.Item.Validate(backend); err != nil {
 		return err
-	}
-
-	if c.Alias != "" && !authorizedAliasChars.MatchString(c.Alias) {
+	} else if c.Template && c.Alias != "" {
+		return ErrIncompatibleAttributes
+	} else if c.Alias != "" && !authorizedAliasChars.MatchString(c.Alias) {
 		return ErrInvalidAlias
 	}
 

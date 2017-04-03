@@ -27,11 +27,9 @@ func (g Graph) Validate(backend *Backend) error {
 		return err
 	} else if !g.Template && g.LinkID == "" && len(g.Groups) == 0 && len(g.Attributes) == 0 {
 		return ErrEmptyGraph
-	} else if g.Template && len(g.Attributes) > 0 {
-		return ErrExtraAttributes
-	}
-
-	if g.Alias != "" && !authorizedAliasChars.MatchString(g.Alias) {
+	} else if g.Template && (len(g.Attributes) > 0 || g.Alias != "") {
+		return ErrIncompatibleAttributes
+	} else if g.Alias != "" && !authorizedAliasChars.MatchString(g.Alias) {
 		return ErrInvalidAlias
 	}
 

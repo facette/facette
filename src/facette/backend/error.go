@@ -7,8 +7,8 @@ var (
 	ErrEmptyGraph = errors.New("empty graph")
 	// ErrEmptyGroup represents an invalid group error.
 	ErrEmptyGroup = errors.New("empty group")
-	// ErrExtraAttributes represents an extraneous attributes error.
-	ErrExtraAttributes = errors.New("extraneous attributes")
+	// ErrIncompatibleAttributes represents an incompatible attributes error.
+	ErrIncompatibleAttributes = errors.New("incompatible attributes")
 	// ErrInvalidName represents an invalid name error.
 	ErrInvalidName = errors.New("invalid name")
 	// ErrInvalidAlias represents an invalid alias error.

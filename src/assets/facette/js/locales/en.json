@@ -287,6 +287,7 @@
     "label.validate": "Validate",
     "label.value": "Value",
     "label.version": "Version",
+    "mesg.alias_unique": "Alias attribute should be unique!",
     "mesg.collections_empty": "No collection defined",
     "mesg.complete_found_template": "Template variables found",
     "mesg.complete_no_match": "No match found",

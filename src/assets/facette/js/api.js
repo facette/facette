@@ -76,16 +76,6 @@ app.factory('library', function($resource) {
             },
             isArray: true
         },
-        count: {
-            method: 'HEAD',
-            params: {
-                type: '@type',
-                id: null
-            },
-            interceptor: {
-                response: apiInterceptList
-            }
-        },
         delete: {
             method: 'DELETE',
             params: {
@@ -100,6 +90,13 @@ app.factory('library', function($resource) {
                 id: '@id'
             }
         },
+        getPeek: {
+            method: 'HEAD',
+            params: {
+                type: '@type',
+                id: '@id'
+            }
+        },
         list: {
             method: 'GET',
             params: {
@@ -107,6 +104,16 @@ app.factory('library', function($resource) {
                 id: null
             },
             isArray: true,
+            interceptor: {
+                response: apiInterceptList
+            }
+        },
+        listPeek: {
+            method: 'HEAD',
+            params: {
+                type: '@type',
+                id: null
+            },
             interceptor: {
                 response: apiInterceptList
             }
