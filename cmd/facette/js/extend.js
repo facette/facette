@@ -76,7 +76,7 @@ if (window.Highcharts) {
             cellLeft,
             columnKeys = ['min', 'avg', 'max', 'last'],
             groups = {},
-            tableLeft = chart.plotLeft,
+            tableLeft = chart.plotLeft + $(".scrollarea.full").scrollLeft(),
             tableTop = chart.plotTop + chart.plotHeight + GRAPH_SPACING_SIZE * 2.5,
             groupTimeout = {},
             groupEvent = function (e) {

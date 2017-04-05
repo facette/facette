@@ -466,8 +466,9 @@ function graphDraw(graph, postpone, delay, preview) {
                     if (graph.data('toggled-legend') && graphOpts.expand) {
                         $container.height($container.outerHeight() + highchartOpts.series.length *
                             GRAPH_LEGEND_ROW_HEIGHT);
+                        graph.height($container.height());
 
-                        graph.data('toggled-legend', false);
+                        graph.data('toggled-legend', true);
                     }
                 } else {
                     highchartOpts.chart.spacingBottom = GRAPH_SPACING_SIZE * 2;
@@ -475,6 +476,7 @@ function graphDraw(graph, postpone, delay, preview) {
                     if (graph.data('toggled-legend') && graphOpts.expand) {
                         $container.height($container.outerHeight() - highchartOpts.series.length *
                             GRAPH_LEGEND_ROW_HEIGHT);
+                        graph.height($container.height());
 
                         graph.data('toggled-legend', false);
                     }
@@ -738,6 +740,47 @@ function graphHandleActions(e) {
     e.preventDefault();
 }
 
+// Resize a graph to specified dimensions. Width and height need to be
+// specified as returned by getGraphSize (just graph dimensions without
+// legend offsets)
+function resizeGraph($graph, width, height) {
+    var $container = $graph.children('.graphcntr'),
+        graphObj = $container.highcharts(),
+        legend = getLegendSize($graph),
+        effHeight = height + legend.height;
+    $graph.width(width);
+    $graph.height(effHeight);
+    $container.height(effHeight);
+    $container.width(width);
+    if (graphObj) { // prevent errors if Obj isn't created due to page scrolling (out of visible area)
+        graphObj.setSize(width, effHeight);
+    }
+}
+
+// return the dimensions of a graph's legend, height of 0 if legend is collapsed
+function getLegendSize($graph) {
+    var $container = $graph.children('.graphcntr'),
+        graphObj = $container.highcharts();
+    if ($graph.data('toggled-legend')) {
+	return({ 'width' : $container.outerWidth(), 'height' : graphObj.series.length * GRAPH_LEGEND_ROW_HEIGHT});
+    } else {
+	return ({'width' : $container.outerWidth(), 'height' : 0});
+    }
+}
+
+
+function getCntrSize($graph) {
+    var $container = $graph.children('.graphcntr');
+    return({ 'width' : $container.outerWidth(), 'height' :$container.outerHeight()});
+}
+
+// return the dimensions of a graph without legend height
+function getGraphSize($graph) {
+    var cntr = getCntrSize($graph),
+        legend = getLegendSize($graph);
+    return ({ 'width' : cntr.width, 'height' : cntr.height - legend.height});
+}
+
 function graphHandleMouse(e) {
     var $target = $(e.target),
         $graph = $target.closest('[data-graph]'),
@@ -884,7 +927,52 @@ function graphSetupTerminate() {
         .on('mouseup mousedown mousemove mouseleave', '[data-graph]', graphHandleMouse)
         .on('mouseenter mouseleave', '.graphctrl .step, .graphctrl .actions', graphHandleMouse)
         .on('click', '[data-graph] a', graphHandleActions)
-        .on('click', '.graphlist a', graphHandleQueue);
+        .on('click', '.graphlist a', graphHandleQueue)
+        .on('change', '.size-slider', resizeAll)
+        .on('input', '.size-slider', updateSliderLabel);
+    $('.scrollarea.full').scroll(scrollHandler);
+}
+
+function scrollHandler() {
+    var scroll =  $('.scrollarea.full').scrollLeft(),
+        oldscroll = $('.scrollarea.full').attr("oldscroll") || 0,
+        scrolldiff = scroll - oldscroll,
+        width = $('.scrollarea.full').width();
+
+    $('.actions').css("right",($('[data-graph]').width() - scroll - width)  + "px");
+    $('.legend').css("left",scroll + Math.ceil(width/2)  + "px");
+    $('.highcharts-title').each(function() { $(this).attr("x", scroll + Math.ceil(width/2) )});
+    $('.highcharts-subtitle').each(function() { $(this).attr("x", scroll + Math.ceil(width/2) )});
+    $(".highcharts-table-group").each(function () { $(this).children().attr("x", function(idx,old){ return Math.ceil(parseInt(old, 10)+scrolldiff)} )})
+    $('.scrollarea.full').attr("oldscroll", scroll);
+
+}
+
+function updateSliderLabel() {
+    if (this.id == "width-slider")
+        $('#widthlabel').html(this.value + 'x');
+    else
+        $('#heightlabel').html(this.value + 'x');
+}
+    
+function resizeAll() {
+    var mode = this.id,
+        value = this.value,
+        oldvalue = this._oldvalue || 1;
+    $('[data-graph]').each(function() {
+        var dimensions = getGraphSize($(this)) ;
+
+        if ( mode == "width-slider") {
+            dimensions.width = (dimensions.width / oldvalue) * value;
+        } else {
+            dimensions.height = (dimensions.height / oldvalue) * value;
+        }
+        resizeGraph($(this), dimensions.width, dimensions.height);
+    });
+    this._oldvalue = value;
+    $(this).closest(".menu").toggle();
+    setTimeout(scrollHandler,500);
+
 }
 
 function graphUpdateOptions(graph, options) {
