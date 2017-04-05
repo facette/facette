@@ -1,5 +1,5 @@
 app.controller('BrowseGraphController', function($rootScope, $routeParams, $scope, $timeout, $window, browseCollection,
-    TimeRange, bulk, library, storage) {
+    bulk, library, storage, timeRange) {
 
     $scope.section = $routeParams.section;
     $scope.id = $routeParams.id;
@@ -112,7 +112,7 @@ app.controller('BrowseGraphController', function($rootScope, $routeParams, $scop
 
     // Attach events
     $rootScope.$on('PromptTimeRange', function(e, callback) {
-        TimeRange.prompt(callback);
+        timeRange.prompt(callback);
     });
 
     $scope.$on('GraphLoaded', function(e, idx, id) {

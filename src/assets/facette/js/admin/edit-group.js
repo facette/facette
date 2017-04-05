@@ -1,12 +1,12 @@
-app.controller('AdminEditGroupController', function($q, $route, $routeParams, $scope, $translate, AdminEdit, catalog) {
+app.controller('AdminEditGroupController', function($q, $route, $routeParams, $scope, $translate, adminEdit, catalog) {
     $scope.section = $route.current.$$route._type;
     $scope.id = $routeParams.id;
 
     // Define scope functions
-    $scope.cancel = function(force) { AdminEdit.cancel($scope, force); };
-    $scope.reset = function() { AdminEdit.reset($scope); };
-    $scope.save = function() { AdminEdit.save($scope); };
-    $scope.remove = function(list, entry) { AdminEdit.remove($scope, list, entry); };
+    $scope.cancel = function(force) { adminEdit.cancel($scope, force); };
+    $scope.reset = function() { adminEdit.reset($scope); };
+    $scope.save = function() { adminEdit.save($scope); };
+    $scope.remove = function(list, entry) { adminEdit.remove($scope, list, entry); };
 
     $scope.selectPattern = function(data) {
         if (!data || !data.originalObject || !data.originalObject.name) {
@@ -111,10 +111,10 @@ app.controller('AdminEditGroupController', function($q, $route, $routeParams, $s
     };
 
     // Register watchers
-    AdminEdit.watch($scope);
+    adminEdit.watch($scope);
 
     // Initialize scope
-    AdminEdit.load($scope, function() {
+    adminEdit.load($scope, function() {
         var type = $scope.section.replace(/groups$/, 's');
 
         $scope.patternTypes = [

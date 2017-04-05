@@ -1,4 +1,4 @@
-app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams, $scope, $timeout, AdminEdit, bulk,
+app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams, $scope, $timeout, adminEdit, bulk,
     catalog, expand, library, ngDialog) {
 
     $scope.section = 'graphs';
@@ -177,11 +177,11 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
     }
 
     // Define scope functions
-    $scope.cancel = function(force) { AdminEdit.cancel($scope, force); };
-    $scope.reset = function() { AdminEdit.reset($scope); fetchGroups(); updateItemData(); };
+    $scope.cancel = function(force) { adminEdit.cancel($scope, force); };
+    $scope.reset = function() { adminEdit.reset($scope); fetchGroups(); updateItemData(); };
 
     $scope.save = function() {
-        AdminEdit.save($scope, function(data) {
+        adminEdit.save($scope, function(data) {
             if (data.options) {
                 if (data.options.constants) {
                     data.options.constants = parseFloatList(data.options.constants);
@@ -201,7 +201,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
     };
 
     $scope.remove = function(list, entry) {
-        AdminEdit.remove($scope, list, entry);
+        adminEdit.remove($scope, list, entry);
 
         // Remove empty groups from list
         angular.forEach($scope.item.groups, function(group, idx) {
@@ -661,7 +661,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
     };
 
     // Register watchers
-    AdminEdit.watch($scope, function(newValue, oldValue) {
+    adminEdit.watch($scope, function(newValue, oldValue) {
         if ($scope.step == 2 && !$scope.linked) {
             updateTemplate();
             updateItemData();
@@ -709,7 +709,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
     }, true);
 
     // Initialize scope
-    AdminEdit.load($scope, function() {
+    adminEdit.load($scope, function() {
         if ($scope.item.link) {
             $scope.linked = true;
         }

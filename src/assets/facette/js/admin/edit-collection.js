@@ -1,4 +1,4 @@
-app.controller('AdminEditCollectionController', function($q, $routeParams, $scope, $timeout, $translate, AdminEdit,
+app.controller('AdminEditCollectionController', function($q, $routeParams, $scope, $timeout, $translate, adminEdit,
     bulk, library, libraryAction) {
 
     $scope.section = 'collections';
@@ -112,11 +112,11 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
     }
 
     // Define scope functions
-    $scope.cancel = function(force) { AdminEdit.cancel($scope, force); };
-    $scope.reset = function() { AdminEdit.reset($scope); fetchGraphs(); };
+    $scope.cancel = function(force) { adminEdit.cancel($scope, force); };
+    $scope.reset = function() { adminEdit.reset($scope); fetchGraphs(); };
 
     $scope.save = function() {
-        AdminEdit.save($scope, function(data) {
+        adminEdit.save($scope, function(data) {
             // Remove empty data from attributes
             angular.forEach(data.entries, function(entry) {
                 angular.forEach(entry.attributes, function(value, key) {
@@ -151,7 +151,7 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
     };
 
     $scope.remove = function(list, entry) {
-        AdminEdit.remove($scope, list, entry);
+        adminEdit.remove($scope, list, entry);
 
         // Update template status
         updateTemplate();
@@ -332,7 +332,7 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
     };
 
     // Register watchers
-    AdminEdit.watch($scope, function(newValue, oldValue) {
+    adminEdit.watch($scope, function(newValue, oldValue) {
         if ($scope.step == 2 && !$scope.linked) {
             updateTemplate();
         } else if ($scope.linked) {
@@ -371,7 +371,7 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
     }, true);
 
     // Initialize scope
-    AdminEdit.load($scope, function() {
+    adminEdit.load($scope, function() {
         if ($scope.item.link) {
             $scope.linked = true;
         }

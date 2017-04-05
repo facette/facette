@@ -1,4 +1,4 @@
-app.factory('TimeRange', function($timeout, ngDialog) {
+app.factory('timeRange', function($timeout, ngDialog) {
     return {
         prompt: function(callback) {
             // Handle custom range selection

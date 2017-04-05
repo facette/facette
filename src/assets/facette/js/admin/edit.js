@@ -1,4 +1,4 @@
-app.factory('AdminEdit', function($location, $rootScope, $timeout, library, providers) {
+app.factory('adminEdit', function($location, $rootScope, $timeout, library, providers) {
     return {
         cancel: function(scope, force) {
             force = typeof force == 'boolean' ? force : false;

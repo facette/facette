@@ -1,12 +1,12 @@
-app.controller('AdminEditProviderController', function($routeParams, $scope, AdminEdit, info) {
+app.controller('AdminEditProviderController', function($routeParams, $scope, adminEdit, info) {
     $scope.section = 'providers';
     $scope.id = $routeParams.id;
 
     // Define scope functions
-    $scope.cancel = function(force) { AdminEdit.cancel($scope, force); };
-    $scope.reset = function() { AdminEdit.reset($scope); };
-    $scope.save = function() { AdminEdit.save($scope, null, function(item) { return Boolean(item.connector); }); };
-    $scope.remove = function(list, entry) { AdminEdit.remove($scope, list, entry); };
+    $scope.cancel = function(force) { adminEdit.cancel($scope, force); };
+    $scope.reset = function() { adminEdit.reset($scope); };
+    $scope.save = function() { adminEdit.save($scope, null, function(item) { return Boolean(item.connector); }); };
+    $scope.remove = function(list, entry) { adminEdit.remove($scope, list, entry); };
 
     $scope.addFilter = function() {
         if (!$scope.item.filters) {
@@ -20,10 +20,10 @@ app.controller('AdminEditProviderController', function($routeParams, $scope, Adm
     };
 
     // Register watchers
-    AdminEdit.watch($scope);
+    adminEdit.watch($scope);
 
     // Initialize scope
-    AdminEdit.load($scope, function() {
+    adminEdit.load($scope, function() {
         // Select first field
         $scope.$applyAsync(function() { angular.element('.pane :input:visible:first').select(); });
 
