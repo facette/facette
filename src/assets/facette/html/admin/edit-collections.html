@@ -157,15 +157,24 @@
 							</label>
 							<input type="text" ng-class="{danger: conflict.alias}" ng-model="item.alias" ng-disabled="item.template">
 
-							<label>{{ 'label.collections_grid_size' | translate }}</label>
-							<ui-select class="small" theme="selectize" ng-model="selectedOptions.grid_size">
-								<ui-select-match placeholder="{{ 'label.collections_grid_size_select' | translate }}">
-									<span ng-bind="$select.selected.name"></span>
-								</ui-select-match>
-								<ui-select-choices repeat="s in (collectionsGridSizes | filter: $select.search)">
-									<span ng-bind="s.name"></span>
-								</ui-select-choices>
-							</ui-select>
+							<columns>
+								<column>
+									<label>{{ 'label.refresh_interval' | translate }}</label>
+									<input type="number" ng-model="item.options.refresh_interval">
+								</column>
+
+								<column>
+									<label>{{ 'label.collections_grid_size' | translate }}</label>
+									<ui-select theme="selectize" ng-model="selectedOptions.grid_size">
+										<ui-select-match placeholder="{{ 'label.collections_grid_size_select' | translate }}">
+											<span ng-bind="$select.selected.name"></span>
+										</ui-select-match>
+										<ui-select-choices repeat="s in (collectionsGridSizes | filter: $select.search)">
+											<span ng-bind="s.name"></span>
+										</ui-select-choices>
+									</ui-select>
+								</column>
+							</columns>
 
 							<label>{{ 'label.collections_parent' | translate }}</label>
 							<angucomplete-alt class="small" id="parent" pause="250" selected-object="selectParent" remote-api-handler="collectionsList" title-field="name" minlength="1" focus-first="true" match-class="highlight" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
