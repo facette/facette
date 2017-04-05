@@ -322,4 +322,25 @@ app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope
     $rootScope.$on('$translateLoadingEnd', function() {
         $rootScope.loaded = true;
     });
+
+    angular.element($window).on('resize', function() {
+        if ($rootScope.resizeTimeout) {
+            $timeout.cancel($rootScope.resizeTimeout);
+            $rootScope.resizeTimeout = null;
+        }
+
+        $rootScope.resizeTimeout = $timeout(function() {
+            if (angular.element($window).width() <= sidebarCollapseWith) {
+                if (!$rootScope.sidebarCollapse) {
+                    $rootScope.sidebarCollapse = true;
+                    $rootScope.sidebarCollapseAuto = true;
+                }
+            } else if ($rootScope.sidebarCollapseAuto && $rootScope.sidebarCollapse) {
+                $rootScope.sidebarCollapse = false;
+                $rootScope.sidebarCollapseAuto = false;
+            }
+        }, 500);
+    });
+
+    angular.element($window).trigger('resize');
 });

@@ -96,4 +96,6 @@ var catalogSections = [
     timeFormatFilename = 'YYYYMMDDHHmmss',
     timeFormatRFC3339 = 'YYYY-MM-DDTHH:mm:ss.SSSZ',
 
-    templateRegexp = /\{\{\s*\.([a-z0-9]+)\s*\}\}/i;
+    templateRegexp = /\{\{\s*\.([a-z0-9]+)\s*\}\}/i,
+
+    sidebarCollapseWith = 768;
