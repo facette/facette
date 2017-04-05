@@ -1,4 +1,4 @@
-app.controller('BrowseGraphController', function($rootScope, $routeParams, $scope, $timeout, $window, BrowseCollection,
+app.controller('BrowseGraphController', function($rootScope, $routeParams, $scope, $timeout, $window, browseCollection,
     TimeRange, bulk, library, storage) {
 
     $scope.section = $routeParams.section;
@@ -134,11 +134,14 @@ app.controller('BrowseGraphController', function($rootScope, $routeParams, $scop
     });
 
     // Handle tree state save
-    $scope.$on('$locationChangeStart', BrowseCollection.saveTreeState);
-    angular.element($window).on('beforeunload', BrowseCollection.saveTreeState);
+    $scope.$on('$locationChangeStart', browseCollection.saveTreeState);
+    angular.element($window).on('beforeunload', browseCollection.saveTreeState);
 
     // Load collections and graphs data
     if ($scope.id) {
+        // Get global options if present as query params
+        var globalOptions = browseCollection.getGlobalOptions($scope);
+
         var query = {
             type: $scope.section,
             id: $scope.id,
@@ -163,6 +166,12 @@ app.controller('BrowseGraphController', function($rootScope, $routeParams, $scop
                 $scope.gridSize = 1;
             }
 
+            // Set default refresh interval
+            if (!$scope.refreshInterval) {
+                $scope.refreshInterval = data.options && data.options.refresh_interval ?
+                    data.options.refresh_interval : null;
+            }
+
             // Get graphs state for folding restore
             var graphsState = storage.get('browse-graph_state', $scope.section + '_' + $scope.id, {});
 
@@ -181,9 +190,14 @@ app.controller('BrowseGraphController', function($rootScope, $routeParams, $scop
                     var graph = {
                         index: idx,
                         id: entry.id,
-                        options: entry.options || {},
+                        options: angular.extend(entry.options || {}, globalOptions),
                         hidden: false
                     };
+
+                    // Set refresh interval if any (useful when defined in collection)
+                    if ($scope.refreshInterval) {
+                        graph.options.refresh_interval = $scope.refreshInterval;
+                    }
 
                     var state = graphsState[idx + '_' + entry.id];
                     if (state && typeof state.folded == 'boolean') {
@@ -242,17 +256,11 @@ app.controller('BrowseGraphController', function($rootScope, $routeParams, $scop
                 $scope.graphs = [{
                     index: 0,
                     id: $scope.id,
-                    options: {
-                        embeddable_path: 'graphs/' + $scope.id
-                    },
+                    options: angular.extend({embeddable_path: 'graphs/' + $scope.id}, globalOptions),
                     hidden: false,
                     title: title
                 }];
             }
-
-            // Set default refresh interval
-            $scope.refreshInterval = data.options && data.options.refresh_interval ?
-                data.options.refresh_interval : null;
 
             $scope.state = stateOK;
         }, function() {
@@ -261,5 +269,5 @@ app.controller('BrowseGraphController', function($rootScope, $routeParams, $scop
     }
 
     // Load collections tree
-    BrowseCollection.injectTree($scope);
+    browseCollection.injectTree($scope);
 });

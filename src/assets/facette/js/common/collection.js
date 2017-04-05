@@ -1,5 +1,30 @@
-app.factory('BrowseCollection', function($timeout, library, storage) {
+app.factory('browseCollection', function($routeParams, $timeout, library, storage) {
     return {
+        getGlobalOptions: function(scope) {
+            var options = {};
+
+            angular.forEach($routeParams, function(value, key) {
+                switch (key) {
+                case 'range':
+                case 'time':
+                    options[key] = value;
+                    if (scope) {
+                        scope[key] = options[key];
+                    }
+                    break;
+
+                case 'refresh':
+                    options.refresh_interval = parseInt(value, 10);
+                    if (scope) {
+                        scope.refreshInterval = options.refresh_interval;
+                    }
+                    break;
+                }
+            });
+
+            return options;
+        },
+
         injectTree: function(scope) {
             function applyState(base) {
                 base = base || angular.element('#collections-tree');
@@ -29,6 +54,7 @@ app.factory('BrowseCollection', function($timeout, library, storage) {
                 scope.$applyAsync(function() { applyState(); });
             });
         },
+
         saveTreeState: function() {
             var state = storage.get('browse-collection_tree', 'state', {});
             angular.element('#collections-tree [collapsed]').each(function(index, item) {

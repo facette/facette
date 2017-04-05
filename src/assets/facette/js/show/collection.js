@@ -1,16 +1,20 @@
-app.controller('ShowCollectionController', function($rootScope, $routeParams, $scope, library) {
+app.controller('ShowCollectionController', function($rootScope, $routeParams, $scope, browseCollection, library) {
     $scope.id = $routeParams.id;
     $scope.index = $routeParams.index;
-
-    // Set root scope loaded (no '$includeContentLoaded' event triggered on 'show' route)
-    $rootScope.loaded = true;
 
     library.get({
         type: 'collections',
         id: $scope.id,
-        fields: 'entries.id,entries.attributes',
+        fields: 'entries.id,entries.attributes,options',
         expand: 1
     }, function(data) {
-        $scope.graph = data.entries[$scope.index] || {};
+        var graph = data.entries[$scope.index] || {};
+        graph.options = angular.extend(graph.options || {}, browseCollection.getGlobalOptions(null));
+        graph.options.frame = true;
+
+        $scope.graph = graph;
+
+        // Set root scope loaded (no '$includeContentLoaded' event triggered on 'show' route)
+        $rootScope.loaded = true;
     });
 });

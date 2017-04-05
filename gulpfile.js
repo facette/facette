@@ -51,6 +51,7 @@ var config = {
             'src/assets/facette/js/storage.js',
             'src/assets/facette/js/ui/*.js',
             'src/assets/facette/js/error.js',
+            'src/assets/facette/js/common/*.js',
             'src/assets/facette/js/browse/*.js',
             'src/assets/facette/js/show/*.js',
             'src/assets/facette/js/admin/*.js'

@@ -1,5 +1,4 @@
-app.controller('BrowseSearchController', function($location, $scope, $window, BrowseCollection, libraryAction) {
-
+app.controller('BrowseSearchController', function($location, $scope, $window, browseCollection, libraryAction) {
     $scope.collections = {};
     $scope.collectionsLoaded = false;
 
@@ -20,9 +19,9 @@ app.controller('BrowseSearchController', function($location, $scope, $window, Br
     };
 
     // Handle tree state save
-    $scope.$on('$locationChangeStart', BrowseCollection.saveTreeState);
-    angular.element($window).on('beforeunload', BrowseCollection.saveTreeState);
+    $scope.$on('$locationChangeStart', browseCollection.saveTreeState);
+    angular.element($window).on('beforeunload', browseCollection.saveTreeState);
 
     // Load collections tree
-    BrowseCollection.injectTree($scope);
+    browseCollection.injectTree($scope);
 });
