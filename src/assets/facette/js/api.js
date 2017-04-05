@@ -43,7 +43,7 @@ app.factory('expand', function($resource) {
             method: 'POST',
             isArray: true,
             transformRequest: apiTransformRequest
-        },
+        }
     });
 });
 

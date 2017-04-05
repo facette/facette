@@ -2,6 +2,7 @@
     "preset": "jquery",
     "maximumLineLength": 120,
     "requireEarlyReturn": true,
+    "requireCamelCaseOrUpperCaseIdentifiers": false,
     "requirePaddingNewLinesBeforeLineComments": {
         "allExcept": "firstAfterCurly"
     },

@@ -253,7 +253,6 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
             return;
         }
 
-
         if (main) {
             $scope.entryAttrs = angular.copy($scope.item.attributes || {});
 

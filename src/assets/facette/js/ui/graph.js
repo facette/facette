@@ -166,7 +166,9 @@ angular.module('facette.ui.graph', [])
     function fetchData() {
         if ($scope.paused || $scope.folded) {
             return;
-        } else if (!$scope.inView || !$rootScope.hasFocus) {
+        }
+
+	if (!$scope.inView || !$rootScope.hasFocus) {
             $scope.deferred = true;
             return;
         }

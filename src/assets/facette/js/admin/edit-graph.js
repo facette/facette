@@ -52,7 +52,9 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
 
                 if (series.template) {
                     return;
-                } else if (series.source.startsWith(groupPrefix) || series.metric.startsWith(groupPrefix)) {
+                }
+
+		if (series.source.startsWith(groupPrefix) || series.metric.startsWith(groupPrefix)) {
                     series.expansion = expandQuery.length;
                     expandQuery.push([series.origin, series.source, series.metric]);
                 }

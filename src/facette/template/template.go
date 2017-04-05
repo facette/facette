@@ -9,6 +9,7 @@ import (
 	"github.com/fatih/set"
 )
 
+// Expand parses a given string replacing template keys with attributes values.
 func Expand(data string, attrs map[string]interface{}) (string, error) {
 	buf := bytes.NewBuffer(nil)
 
@@ -29,6 +30,7 @@ func Expand(data string, attrs map[string]interface{}) (string, error) {
 			for _, arg := range action.Pipe.Cmds[0].Args {
 				if field, ok := arg.(*parse.FieldNode); ok {
 					if len(field.Ident) == 1 {
+						// Replace template key with attribute value
 						if v, ok := attrs[field.Ident[0]]; ok && v != nil {
 							buf.WriteString(fmt.Sprintf("%v", v))
 						}
@@ -43,6 +45,7 @@ func Expand(data string, attrs map[string]interface{}) (string, error) {
 	return buf.String(), nil
 }
 
+// Parse parses a given string, returning the list of template keys.
 func Parse(data string) ([]string, error) {
 	// Parse response for template keys
 	trees, err := parse.Parse("inline", data, "", "")
@@ -60,6 +63,7 @@ func Parse(data string) ([]string, error) {
 			for _, arg := range action.Pipe.Cmds[0].Args {
 				if field, ok := arg.(*parse.FieldNode); ok {
 					if len(field.Ident) == 1 {
+						// Found a new key, add it to the results list
 						keys.Add(field.Ident[0])
 					} else {
 						return nil, ErrInvalidTemplate
