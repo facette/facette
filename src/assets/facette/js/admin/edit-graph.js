@@ -180,7 +180,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
     $scope.cancel = function(force) { adminEdit.cancel($scope, force); };
     $scope.reset = function() { adminEdit.reset($scope); fetchGroups(); updateItemData(); };
 
-    $scope.save = function() {
+    $scope.save = function(go) {
         adminEdit.save($scope, function(data) {
             if (data.options) {
                 if (data.options.constants) {
@@ -197,7 +197,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
             }
 
             return true;
-        });
+        }, go);
     };
 
     $scope.remove = function(list, entry) {

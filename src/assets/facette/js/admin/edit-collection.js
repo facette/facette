@@ -115,7 +115,7 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
     $scope.cancel = function(force) { adminEdit.cancel($scope, force); };
     $scope.reset = function() { adminEdit.reset($scope); fetchGraphs(); };
 
-    $scope.save = function() {
+    $scope.save = function(go) {
         adminEdit.save($scope, function(data) {
             // Remove empty data from attributes
             angular.forEach(data.entries, function(entry) {
@@ -147,7 +147,7 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
             }
 
             return true;
-        });
+        }, go);
     };
 
     $scope.remove = function(list, entry) {

@@ -239,6 +239,15 @@ app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope
         }
     };
 
+    // Handle alt modifier
+    $rootScope.handleAlt = function(e) {
+        if (e.which != 18) {
+            return;
+        }
+
+        $rootScope.altMode = e.type == 'keydown';
+    };
+
     // Handle sidebar toggle
     $rootScope.sidebarCollapse = storage.get('global-sidebar', 'collapsed', false);
 

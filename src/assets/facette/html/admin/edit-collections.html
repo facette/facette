@@ -216,7 +216,8 @@
 			<button class="danger" ng-click="cancel()">{{ 'label.cancel' | translate }}</button>
 			<button ng-click="switch(step - 1)" ng-disabled="step == 1"><span class="fa fa-chevron-circle-left"></span> {{ 'label.prev' | translate }}</button>
 			<button ng-click="switch(step + 1)" ng-disabled="step == 2 || graph.index || optionsEdit">{{ 'label.next' | translate }} <span class="fa fa-chevron-circle-right"></span></button>
-			<button ng-click="save()" ng-disabled="step != 2 || attrsEdit" ng-show="!item.template">{{ 'label.collections_save' | translate }}</button>
+			<button ng-click="save()" ng-disabled="step != 2 || attrsEdit" ng-show="!item.template && !altMode">{{ 'label.collections_save' | translate }}</button>
+			<button ng-click="save(true)" ng-disabled="step != 2 || attrsEdit" ng-show="!item.template && altMode">{{ 'label.save_go' | translate }}</button>
 			<button ng-click="save()" ng-disabled="step != 2 || attrsEdit" ng-show="item.template">{{ 'label.templates_save' | translate }}</button>
 		</footer>
 	</div>
@@ -307,7 +308,8 @@
 	<footer>
 		<button class="extra" ng-click="reset()" ng-disabled="!modified" ng-if="id != 'link'"><span class="fa fa-undo"></span> {{ 'label.collections_reset' | translate }}</button>
 		<button class="danger" ng-click="cancel()">{{ 'label.cancel' | translate }}</button>
-		<button ng-click="save()" ng-disabled="!item.name || !item.link">{{ 'label.collections_save' | translate }}</button>
+		<button ng-click="save()" ng-disabled="!item.name || !item.link" ng-show="!altMode">{{ 'label.collections_save' | translate }}</button>
+		<button ng-click="save(true)" ng-disabled="!item.name || !item.link" ng-show="altMode">{{ 'label.save_go' | translate }}</button>
 	</footer>
 </article>
 

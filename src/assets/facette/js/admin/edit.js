@@ -40,7 +40,9 @@ app.factory('adminEdit', function($location, $rootScope, $timeout, library, prov
             });
         },
 
-        save: function(scope, transform, validate) {
+        save: function(scope, transform, validate, go) {
+            go = typeof go == 'boolean' ? go : false;
+
             if (!scope.item.name || validate && !validate(scope.item)) {
                 scope.validated = true;
                 return;
@@ -53,7 +55,11 @@ app.factory('adminEdit', function($location, $rootScope, $timeout, library, prov
 
             // Skip save is no change applied
             if (!scope.modified) {
-                $location.path('admin/' + scope.section + '/').search(locSearch);
+                if (go) {
+                    $location.path('browse/' + scope.section + '/' + scope.id).search(locSearch);
+                } else {
+                    $location.path('admin/' + scope.section + '/').search(locSearch);
+                }
                 return;
             }
 
@@ -83,7 +89,12 @@ app.factory('adminEdit', function($location, $rootScope, $timeout, library, prov
                 }
 
                 $rootScope.preventUnload(false);
-                $location.path('admin/' + scope.section + '/').search(locSearch);
+
+                if (go) {
+                    $location.path('browse/' + scope.section + '/' + scope.id).search(locSearch);
+                } else {
+                    $location.path('admin/' + scope.section + '/').search(locSearch);
+                }
             });
         },
 

@@ -213,6 +213,7 @@
     "label.reset": "Reset",
     "label.reset_local_prefs": "Reset local preferences",
     "label.retry": "Retry",
+    "label.save_go": "Save and Go",
     "label.scale": "Scale",
     "label.scales": "Scales",
     "label.scales_back": "Back to scales",
