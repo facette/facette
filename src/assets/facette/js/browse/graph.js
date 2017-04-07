@@ -8,6 +8,11 @@ app.controller('BrowseGraphController', function($rootScope, $routeParams, $scop
     $scope.collectionsLoaded = false;
     $scope.graphs = [];
 
+    $scope.startTime = null;
+    $scope.endTime = null;
+    $scope.time = null;
+    $scope.range = null;
+
     $scope.form = {
         filter: ''
     };
@@ -26,11 +31,24 @@ app.controller('BrowseGraphController', function($rootScope, $routeParams, $scop
             return;
         }
 
-        $rootScope.$emit('PromptTimeRange', function(time, range) {
+        $rootScope.$emit('PromptTimeRange', function(startTime, endTime, time, range) {
+            $scope.startTime = startTime;
+            $scope.endTime = endTime;
             $scope.time = time;
             $scope.range = range;
 
-            $rootScope.$emit('ApplyGraphOptions', {time: time, range: range});
+            $rootScope.$emit('ApplyGraphOptions', startTime && endTime ? {
+                start_time: startTime,
+                end_time: endTime
+            } : {
+                time: time,
+                range: range
+            });
+        }, {
+            start: $scope.startTime,
+            end: $scope.endTime,
+            time: $scope.time,
+            range: $scope.range
         });
     };
 
@@ -111,8 +129,12 @@ app.controller('BrowseGraphController', function($rootScope, $routeParams, $scop
     });
 
     // Attach events
-    $rootScope.$on('PromptTimeRange', function(e, callback) {
-        timeRange.prompt(callback);
+    var unregisterPromptTimerange = $rootScope.$on('PromptTimeRange', function(e, callback, data) {
+        timeRange.prompt(callback, data);
+    });
+
+    $scope.$on('$destroy', function() {
+        unregisterPromptTimerange();
     });
 
     $scope.$on('GraphLoaded', function(e, idx, id) {

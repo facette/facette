@@ -15,7 +15,6 @@ import (
 	"facette/catalog"
 	"facette/mapper"
 	"facette/plot"
-	"facette/timerange"
 
 	"github.com/facette/httputil"
 	"github.com/facette/logger"
@@ -116,9 +115,9 @@ func (c *facetteConnector) Refresh(output chan<- *catalog.Record) error {
 func (c *facetteConnector) Plots(q *plot.Query) ([]plot.Series, error) {
 	// Convert query into a Facette plot request
 	body, err := json.Marshal(plot.Request{
-		Time:   q.StartTime,
-		Range:  timerange.FromDuration(q.EndTime.Sub(q.StartTime)),
-		Sample: q.Sample,
+		StartTime: q.StartTime,
+		EndTime:   q.EndTime,
+		Sample:    q.Sample,
 		Graph: &backend.Graph{
 			Item: backend.Item{
 				Name: "facette",

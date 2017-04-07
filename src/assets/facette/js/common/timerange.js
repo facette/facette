@@ -1,6 +1,6 @@
 app.factory('timeRange', function($timeout, ngDialog) {
     return {
-        prompt: function(callback) {
+        prompt: function(callback, data) {
             // Handle custom range selection
             ngDialog.open({
                 template: 'templates/common/timerange.html',
@@ -13,9 +13,7 @@ app.factory('timeRange', function($timeout, ngDialog) {
                         };
                     }
 
-                    $scope.data = {
-                        absolute: false
-                    };
+                    $scope.data = {};
 
                     $scope.switchAbsolute = function(data, state) {
                         data.absolute = state;
@@ -38,6 +36,12 @@ app.factory('timeRange', function($timeout, ngDialog) {
                     };
 
                     resetDatetime();
+
+                    angular.forEach(data, function(value, key) {
+                        $scope.data[key] = value;
+                    });
+
+                    $scope.data.absolute = Boolean($scope.data.start || $scope.data.end);
                 },
                 showClose: false
             }).closePromise.then(function(scope) {
@@ -48,9 +52,9 @@ app.factory('timeRange', function($timeout, ngDialog) {
                 }
 
                 if (scope.value.absolute) {
-                    callback(scope.value.start, timeToRange(moment(scope.value.end).diff(scope.value.start)));
+                    callback(scope.value.start, scope.value.end, null, null);
                 } else {
-                    callback(scope.value.time, scope.value.range);
+                    callback(null, null, scope.value.time, scope.value.range);
                 }
             });
         }

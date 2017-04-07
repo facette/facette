@@ -19,12 +19,6 @@ const (
 	defaultTimeRange = "-1h"
 )
 
-type plotRequest struct {
-	plot.Request
-	startTime time.Time
-	endTime   time.Time
-}
-
 type plotQuery struct {
 	query     plot.Query
 	queryMap  [][2]int
@@ -43,7 +37,7 @@ func (w *httpWorker) httpHandlePlots(ctx context.Context, rw http.ResponseWriter
 	}
 
 	// Get plot request from received data
-	req := &plotRequest{}
+	req := &plot.Request{}
 	if err := httputil.BindJSON(r, req); err != nil {
 		w.log.Error("unable to unmarshal JSON data: %s", err)
 		httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidParameter), http.StatusBadRequest)
@@ -97,33 +91,40 @@ func (w *httpWorker) httpHandlePlots(ctx context.Context, rw http.ResponseWriter
 		}
 	}
 
-	// Initialize request time boundaries and range
-	if req.Time.IsZero() {
-		req.Time = time.Now().UTC()
-	}
+	// Set request time boundaries and range
+	// * both start and end time must be provided, or none
+	// * range can't be specified if start and end are
+	if req.StartTime.IsZero() && req.EndTime.IsZero() {
+		if req.Time.IsZero() {
+			req.Time = time.Now().UTC()
+		}
 
-	if req.Range == "" {
-		if value, ok := req.Graph.Options["range"].(string); ok {
-			req.Range = value
+		if req.Range == "" {
+			if value, ok := req.Graph.Options["range"].(string); ok {
+				req.Range = value
+			} else {
+				req.Range = defaultTimeRange
+			}
+		}
+
+		if strings.HasPrefix(req.Range, "-") {
+			req.EndTime = req.Time
+			if req.StartTime, err = timerange.Apply(req.Time, req.Range); err != nil {
+				w.log.Warning("unable to apply time range: %s", err)
+				httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidParameter), http.StatusBadRequest)
+				return
+			}
 		} else {
-			req.Range = defaultTimeRange
+			req.StartTime = req.Time
+			if req.EndTime, err = timerange.Apply(req.Time, req.Range); err != nil {
+				w.log.Warning("unable to apply time range: %s", err)
+				httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidParameter), http.StatusBadRequest)
+				return
+			}
 		}
-	}
-
-	if strings.HasPrefix(req.Range, "-") {
-		req.endTime = req.Time
-		if req.startTime, err = timerange.Apply(req.Time, req.Range); err != nil {
-			w.log.Warning("unable to apply time range: %s", err)
-			httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidParameter), http.StatusBadRequest)
-			return
-		}
-	} else {
-		req.startTime = req.Time
-		if req.endTime, err = timerange.Apply(req.Time, req.Range); err != nil {
-			w.log.Warning("unable to apply time range: %s", err)
-			httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidParameter), http.StatusBadRequest)
-			return
-		}
+	} else if (req.StartTime.IsZero() || req.EndTime.IsZero()) || req.Range != "" {
+		httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidTimerange), http.StatusBadRequest)
+		return
 	}
 
 	// Set default plot sample if none provided
@@ -133,8 +134,8 @@ func (w *httpWorker) httpHandlePlots(ctx context.Context, rw http.ResponseWriter
 
 	// Execute plots request
 	plots := plot.Response{
-		Start:   req.startTime.Format(time.RFC3339),
-		End:     req.endTime.Format(time.RFC3339),
+		Start:   req.StartTime.Format(time.RFC3339),
+		End:     req.EndTime.Format(time.RFC3339),
 		Series:  w.executeRequest(req),
 		Options: req.Graph.Options,
 	}
@@ -151,7 +152,7 @@ func (w *httpWorker) httpHandlePlots(ctx context.Context, rw http.ResponseWriter
 	httputil.WriteJSON(rw, plots, http.StatusOK)
 }
 
-func (w *httpWorker) executeRequest(req *plotRequest) []plot.SeriesResponse {
+func (w *httpWorker) executeRequest(req *plot.Request) []plot.SeriesResponse {
 	// Expand groups series
 	for i, group := range req.Graph.Groups {
 		expandedSeries := []backend.Series{}
@@ -225,7 +226,7 @@ func (w *httpWorker) executeRequest(req *plotRequest) []plot.SeriesResponse {
 		}
 
 		// Normalize series and apply operations
-		data[i], err = plot.Normalize(data[i], req.startTime, req.endTime, req.Sample, consolidate, interpolate)
+		data[i], err = plot.Normalize(data[i], req.StartTime, req.EndTime, req.Sample, consolidate, interpolate)
 		if err != nil {
 			w.log.Error("failed to normalize series: %s", err)
 			continue
@@ -296,7 +297,7 @@ func (w *httpWorker) executeRequest(req *plotRequest) []plot.SeriesResponse {
 	return result
 }
 
-func (w *httpWorker) dispatchQueries(req *plotRequest) []plotQuery {
+func (w *httpWorker) dispatchQueries(req *plot.Request) []plotQuery {
 	providers := make(map[string]*plotQuery)
 
 	for i, group := range req.Graph.Groups {
@@ -320,8 +321,8 @@ func (w *httpWorker) dispatchQueries(req *plotRequest) []plotQuery {
 			if _, ok := providers[provName]; !ok {
 				providers[provName] = &plotQuery{
 					query: plot.Query{
-						StartTime: req.startTime,
-						EndTime:   req.endTime,
+						StartTime: req.StartTime,
+						EndTime:   req.EndTime,
 						Sample:    req.Sample,
 						Series:    []plot.QuerySeries{},
 					},

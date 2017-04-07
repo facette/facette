@@ -29,6 +29,11 @@ angular.module('facette.ui.graph', [])
 
     $scope.optionsRef = angular.copy($scope.options);
 
+    $scope.startTime = null;
+    $scope.endTime = null;
+    $scope.time = null;
+    $scope.range = null;
+
     $scope.loading = false;
     $scope.empty = false;
     $scope.partial = false;
@@ -49,6 +54,14 @@ angular.module('facette.ui.graph', [])
 
     function applyOptions(options) {
         angular.extend($scope.options, options);
+
+        if (options.start_time || options.end_time) {
+            delete $scope.options.time;
+            delete $scope.options.range;
+        } else if (options.time || options.range) {
+            delete $scope.options.start_time;
+            delete $scope.options.end_time;
+        }
     }
 
     function draw() {
@@ -179,13 +192,13 @@ angular.module('facette.ui.graph', [])
         $scope.error = false;
         $scope.summary = {};
 
-        var query = {
-            range: $scope.options.range
-        };
+        var query = {};
 
-        if ($scope.options.time) {
-            query.time = $scope.options.time;
-        }
+        angular.forEach(['start_time', 'end_time', 'time', 'range'], function(key) {
+            if ($scope.options[key]) {
+                query[key] = $scope.options[key];
+            }
+        });
 
         if ($scope.graphId) {
             query.id = $scope.graphId;
@@ -411,11 +424,24 @@ angular.module('facette.ui.graph', [])
             return;
         }
 
-        $rootScope.$emit('PromptTimeRange', function(time, range) {
+        $rootScope.$emit('PromptTimeRange', function(startTime, endTime, time, range) {
+            $scope.startTime = startTime;
+            $scope.endTime = endTime;
             $scope.time = time;
             $scope.range = range;
 
-            applyOptions({time: time, range: range});
+            applyOptions(startTime && endTime ? {
+                start_time: startTime,
+                end_time: endTime
+            } : {
+                time: time,
+                range: range
+            });
+        }, {
+            start: $scope.startTime,
+            end: $scope.endTime,
+            time: $scope.time,
+            range: $scope.range
         });
     };
 
@@ -495,35 +521,29 @@ angular.module('facette.ui.graph', [])
     $scope.$watch('graphData', updateGraph, true);
 
     // Attach events
-    $scope.$on('$destroy', function() {
-        // Cancel existing refresh if any
-        if ($scope.timeout) {
-            $timeout.cancel($scope.timeout);
-            $scope.timeout = null;
-        }
-    });
+    var unregisterCallbacks = [];
 
-    $rootScope.$on('ApplyGraphOptions', function(e, options) {
+    unregisterCallbacks.push($rootScope.$on('ApplyGraphOptions', function(e, options) {
         applyOptions(options);
-    });
+    }));
 
-    $rootScope.$on('PropagateCursorPosition', function(e, time, origScope) {
+    unregisterCallbacks.push($rootScope.$on('PropagateCursorPosition', function(e, time, origScope) {
         if (!$scope.chart || $scope === origScope) {
             return;
         }
 
         $scope.chart.toggleCursor(time);
-    });
+    }));
 
-    $rootScope.$on('RedrawGraph', function() {
+    unregisterCallbacks.push($rootScope.$on('RedrawGraph', function() {
         draw();
-    });
+    }));
 
-    $rootScope.$on('RefreshGraph', function() {
+    unregisterCallbacks.push($rootScope.$on('RefreshGraph', function() {
         fetchData();
-    });
+    }));
 
-    $rootScope.$on('PauseGraphDraw', function(e, id, state) {
+    unregisterCallbacks.push($rootScope.$on('PauseGraphDraw', function(e, id, state) {
         if (id !== $scope.graphId) {
             return;
         }
@@ -534,14 +554,26 @@ angular.module('facette.ui.graph', [])
         }
 
         $scope.paused = state;
-    });
+    }));
 
-    $rootScope.$on('ToggleGraphLegend', function(e, idx, id, state) {
+    unregisterCallbacks.push($rootScope.$on('ToggleGraphLegend', function(e, idx, id, state) {
         if (idx && idx !== $scope.graphIndex || id && id !== $scope.graphId) {
             return;
         }
 
         $scope.toggleLegend(state);
+    }));
+
+    $scope.$on('$destroy', function() {
+        // Cancel existing refresh if any
+        if ($scope.timeout) {
+            $timeout.cancel($scope.timeout);
+            $scope.timeout = null;
+        }
+
+        angular.forEach(unregisterCallbacks, function(callback) {
+            callback();
+        });
     });
 
     $pageVisibility.$on('pageFocused', function(e) {
