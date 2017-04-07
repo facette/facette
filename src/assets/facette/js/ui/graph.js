@@ -181,7 +181,7 @@ angular.module('facette.ui.graph', [])
             return;
         }
 
-	if (!$scope.inView || !$rootScope.hasFocus) {
+        if (!$scope.inView || !$rootScope.hasFocus) {
             $scope.deferred = true;
             return;
         }
