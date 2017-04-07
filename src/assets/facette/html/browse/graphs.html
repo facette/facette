@@ -6,10 +6,8 @@
 
 		<menu class="main expand">
 			<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ id }}" icon="pencil" title="{{ 'label.' + section + '_edit' | translate }}" type="button"></menuitem>
-			<menuitem href="" icon="refresh" badge="{{ refreshInterval || '' }}" title="{{ 'label.' + section + '_refresh' | translate }}" type="button" ng-click="refresh()">
+			<menuitem href="" icon="refresh" badge="{{ refreshInterval || '' }}" title="{{ 'label.' + section + '_refresh' | translate }}" type="button" drop="true" ng-click="refresh()">
 				<menu>
-					<menuitem label="{{ 'label.' + section + '_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
-					<menuitem type="separator"></menuitem>
 					<menuitem label="{{ 'label.graphs_refresh_set_alt' | translate }}" type="button" ng-click="setRefresh()"></menuitem>
 				</menu>
 			</menuitem>
