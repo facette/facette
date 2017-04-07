@@ -320,6 +320,10 @@
 	stroke: #d00;
 }
 
+.chart-series.fade {
+	opacity: 0.15;
+}
+
 .chart-axis,
 .chart-legend {
 	cursor: default;

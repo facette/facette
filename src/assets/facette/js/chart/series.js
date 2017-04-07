@@ -9,6 +9,7 @@ chart.fn.drawSeries = function() {
 
     var series = data.enter()
         .insert('g', 'line.chart-cursor')
+        .attr('chart-id', function(a, i) { return i; })
         .attr('class', 'chart-series');
 
     if ($$.config.type == 'area') {
@@ -39,4 +40,11 @@ chart.fn.toggleSeries = function(idx, state) {
 
     $$.config.series[idx].disabled = typeof state == 'boolean' ? state : !$$.config.series[idx].disabled;
     $$.redraw();
+};
+
+chart.fn.highlightSeries = function(idx, state) {
+    var $$ = this;
+
+    state = typeof state == 'boolean' ? state : false;
+    $$.areaGroup.selectAll('.chart-series').classed('fade', state ? function(a, i) { return i !== idx; } : false);
 };

@@ -17,7 +17,7 @@ chart.fn.drawLegend = function() {
         .attr('transform', 'translate(' + legendLeft + ',' + legendTop + ')');
 
     // Loop through series
-    function toggleLegendSeries(idx) {
+    function toggleSeries(idx) {
         var parent = d3.select(this.parentNode),
             disabled = parent.classed('disabled');
 
@@ -50,6 +50,10 @@ chart.fn.drawLegend = function() {
                 .classed('enabled', disabled)
                 .classed('disabled', !disabled);
         }
+    }
+
+    function highlightSeries(idx) {
+        $$.highlightSeries(idx, d3.event.type == 'mouseenter');
     }
 
     function toggleLegendYLine(data) {
@@ -127,7 +131,9 @@ chart.fn.drawLegend = function() {
             .attr('x', legendLineHeight)
             .attr('y', legendLineHeight / 2)
             .text(entry.name)
-            .on('click', toggleLegendSeries);
+            .on('click', toggleSeries)
+            .on('mouseenter', highlightSeries)
+            .on('mouseleave', highlightSeries);
 
         // Update column left position
         elementBBox = element.node().getBBox();
