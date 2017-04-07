@@ -39,7 +39,7 @@ function timeToRange(duration) {
 
 function slugify(input) {
     return input.toLowerCase()
-        .replace(/[^\w ]+/g, '')
+        .replace(/[^\w\- ]+/g, '')
         .replace(/ +/g, '-');
 }
 
