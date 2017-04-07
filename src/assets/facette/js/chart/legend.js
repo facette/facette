@@ -96,7 +96,7 @@ chart.fn.drawLegend = function() {
 
     series.forEach(function(entry, idx) {
         legendRows[idx] = $$.legendGroup.append('g')
-            .attr('class', 'chart-legend-row enabled')
+            .attr('class', 'chart-legend-row')
             .attr('transform', 'translate(0,' + (idx * legendLineHeight) + ')')
             .classed('disabled', entry.disabled || false);
 
@@ -106,8 +106,20 @@ chart.fn.drawLegend = function() {
             .attr('height', legendLineHeight * 0.5)
             .attr('rx', 2)
             .attr('ry', 2)
-            .attr('y', legendLineHeight * 0.25)
+            .attr('y', legendLineHeight * 0.1875)
             .attr('fill', series[idx].color);
+
+        if (!entry.plots) {
+            legendRows[idx].classed('error', true);
+
+            legendRows[idx].append('text')
+                .attr('class', 'chart-legend-icon')
+                .attr('x', legendLineHeight * 0.125)
+                .attr('y', legendLineHeight / 1.65)
+                .text('\uf00d');
+        } else {
+            legendRows[idx].classed('enabled', true);
+        }
 
         element = legendRows[idx].append('text')
             .datum(idx)

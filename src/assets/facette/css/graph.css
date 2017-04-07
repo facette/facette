@@ -368,8 +368,24 @@
 	font-size: 0.9rem;
 }
 
-.chart-legend-row.disabled {
+.chart-legend-row.disabled,
+.chart-legend-row.error {
 	opacity: 0.25;
+}
+
+.chart-legend-row.error {
+	pointer-events: none;
+}
+
+.chart-legend-icon {
+	fill: #fff;
+	font-family: FontAwesome;
+	font-size: inherit;
+	font-style: normal;
+	font-weight: normal;
+	text-rendering: auto;
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-font-smoothing: antialiased;
 }
 
 .chart-legend-name,
@@ -383,7 +399,8 @@
 	cursor: pointer;
 }
 
-.chart-legend-row.disabled .chart-legend-value {
+.chart-legend-row.disabled .chart-legend-value,
+.chart-legend-row.error .chart-legend-name {
 	cursor: default;
 }
 

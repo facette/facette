@@ -31,6 +31,7 @@ func (s *Series) Summarize(percentiles []float64) {
 
 	min = Value(math.NaN())
 	max = Value(math.NaN())
+	current = Value(math.NaN())
 
 	for i := range s.Plots {
 		if !s.Plots[i].Value.IsNaN() {
