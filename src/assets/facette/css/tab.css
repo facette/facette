@@ -1,9 +1,11 @@
 .tabset {
-	background-color: #ecf0f1;
-	line-height: 3rem;
+	background-color: #e6eaeb;
+	line-height: 2.5rem;
+	padding: 0.5rem 0.5rem 0;
 }
 
 .tabset .tab {
+	border-radius: 0.2rem 0.2rem 0 0;
 	color: #7f8c8d;
 	cursor: pointer;
 	display: inline-block;
@@ -28,7 +30,7 @@
 }
 
 .tabset .tab a:focus {
-	background-color: #dee2e3;
+	background-color: #d9ddde;
 }
 
 section.hastab {
