@@ -411,7 +411,8 @@
 	width: 1px;
 }
 
-.chart-tooltip thead th {
+.chart-tooltip thead th,
+.chart-tooltip tbody th.total {
 	color: #aaa;
 	font-weight: 500;
 }
@@ -434,6 +435,10 @@
 
 .chart-tooltip tbody .null {
 	color: #aaa;
+}
+
+.chart-tooltip tbody th.total {
+	text-align: right;
 }
 
 .chart-tooltip-color {

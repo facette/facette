@@ -33,6 +33,8 @@ chart.fn.updateTooltip = function(data) {
     $$.tooltipDate.text($$.config.tooltip.date.format ? $$.config.tooltip.date.format(data.date) : data.date);
     $$.tooltipBody.selectAll('*').remove();
 
+    var total = 0;
+
     data.values.forEach(function(entry, idx) {
         var row = $$.tooltipBody.append('tr'),
             cell = row.append('th');
@@ -46,8 +48,21 @@ chart.fn.updateTooltip = function(data) {
 
         var isNull = entry.value === undefined || entry.value === null;
 
+        if (!isNull) {
+            total += entry.value[1];
+        }
+
         row.append('td')
             .classed('null', isNull)
             .text(isNull ? 'null' : $$.config.axis.y.tick.format(entry.value[1]));
     });
+
+    var row = $$.tooltipBody.append('tr');
+
+    row.append('th')
+        .attr('class', 'total')
+        .text('Total');
+
+    row.append('td')
+        .text($$.config.axis.y.tick.format(total));
 };
