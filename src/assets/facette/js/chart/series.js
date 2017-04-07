@@ -34,19 +34,9 @@ chart.fn.drawSeries = function() {
     });
 };
 
-chart.fn.toggleSeries = function(idx) {
+chart.fn.toggleSeries = function(idx, state) {
     var $$ = this;
 
-    $$.config.series[idx].disabled = !$$.config.series[idx].disabled;
-    $$.redraw();
-};
-
-chart.fn.selectSeries = function(idx) {
-    var $$ = this;
-
-    $$.config.series.forEach(function(entry, i) {
-        entry.disabled = i !== idx;
-    });
-
+    $$.config.series[idx].disabled = typeof state == 'boolean' ? state : !$$.config.series[idx].disabled;
     $$.redraw();
 };

@@ -18,18 +18,37 @@ chart.fn.drawLegend = function() {
 
     // Loop through series
     function toggleLegendSeries(idx) {
-        var parent = d3.select(this.parentNode);
+        var parent = d3.select(this.parentNode),
+            disabled = parent.classed('disabled');
 
         // Toggle series display
         if (d3.event.shiftKey) {
-            $$.selectSeries(idx);
+            var legend = d3.select(this.parentNode.parentNode);
 
-            d3.select(this.parentNode.parentNode).selectAll('.chart-legend-row').classed('disabled', true);
-            parent.classed('disabled', false);
+            if (
+                !disabled && legend.selectAll('.chart-legend-row.enabled').nodes().length == 1 ||
+                disabled && legend.selectAll('.chart-legend-row.disabled').nodes().length == 1
+            ) {
+                disabled = !disabled;
+            }
+
+            $$.config.series.forEach(function(series, i) {
+                $$.toggleSeries(i, i === idx ? disabled : !disabled);
+            });
+
+            legend.selectAll('.chart-legend-row')
+                .classed('enabled', disabled)
+                .classed('disabled', !disabled);
+
+            parent
+                .classed('enabled', !disabled)
+                .classed('disabled', disabled);
         } else {
             $$.toggleSeries(idx);
 
-            parent.classed('disabled', !parent.classed('disabled'));
+            parent
+                .classed('enabled', disabled)
+                .classed('disabled', !disabled);
         }
     }
 
@@ -77,7 +96,7 @@ chart.fn.drawLegend = function() {
 
     series.forEach(function(entry, idx) {
         legendRows[idx] = $$.legendGroup.append('g')
-            .attr('class', 'chart-legend-row')
+            .attr('class', 'chart-legend-row enabled')
             .attr('transform', 'translate(0,' + (idx * legendLineHeight) + ')')
             .classed('disabled', entry.disabled || false);
 
