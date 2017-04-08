@@ -9,10 +9,12 @@ var (
 	ErrEmptyGroup = errors.New("empty group")
 	// ErrIncompatibleAttributes represents an incompatible attributes error.
 	ErrIncompatibleAttributes = errors.New("incompatible attributes")
-	// ErrInvalidName represents an invalid name error.
-	ErrInvalidName = errors.New("invalid name")
 	// ErrInvalidAlias represents an invalid alias error.
 	ErrInvalidAlias = errors.New("invalid alias")
+	// ErrInvalidID represents an invalid identifier error.
+	ErrInvalidID = errors.New("invalid identifier")
+	// ErrInvalidName represents an invalid name error.
+	ErrInvalidName = errors.New("invalid name")
 	// ErrInvalidParent represents an invalid parent error.
 	ErrInvalidParent = errors.New("invalid parent")
 	// ErrInvalidScale represents an invalid scale value error.

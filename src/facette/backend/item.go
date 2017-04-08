@@ -1,6 +1,10 @@
 package backend
 
-import "time"
+import (
+	"time"
+
+	"github.com/hashicorp/go-uuid"
+)
 
 // Validator represents an item validator interface.
 type Validator interface {
@@ -18,7 +22,9 @@ type Item struct {
 
 // Validate checks whether or not the item instance is valid.
 func (i *Item) Validate(backend *Backend) error {
-	if i.Name == "" {
+	if _, err := uuid.ParseUUID(i.ID); err != nil {
+		return ErrInvalidID
+	} else if i.Name == "" {
 		return ErrInvalidName
 	}
 
