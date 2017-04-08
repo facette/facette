@@ -17,6 +17,21 @@ import (
 	"github.com/facette/httputil"
 )
 
+type libraryCommand struct {
+	Enable bool
+
+	Dump struct {
+		Enable bool
+		Output string `names:"-o, --ouput" usage:"dump output file path"`
+	} `usage:"dump data from library" expand:"1"`
+
+	Restore struct {
+		Enable bool
+		Input  string `names:"-i, --input" usage:"dump input file path"`
+		Merge  bool   `names:"-m, --merge" usage:"merge data with existing library"`
+	} `usage:"restore data from dump to library" expand:"1"`
+}
+
 type backendError struct {
 	Message string `json:"message"`
 }
@@ -54,7 +69,8 @@ var (
 	}
 )
 
-func execBackupDump(output string) {
+func execLibraryDump() {
+	output := cmd.Library.Dump.Output
 	if output == "" {
 		output = fmt.Sprintf("facette-%s.tar.gz", time.Now().Format("200601021504"))
 	}
@@ -74,15 +90,19 @@ func execBackupDump(output string) {
 
 	// Loop through backend types and dump data
 	for _, name := range backendTypes {
-		if err := dumpBackupType(tw, name); err != nil {
+		if err := dumpLibraryType(tw, name); err != nil {
 			printError("%s", err)
 		}
 	}
+
+	if !cmd.Quiet {
+		fmt.Println("OK")
+	}
 }
 
-func execBackupRestore(input string, merge bool) {
+func execLibraryRestore() {
 	// Open archive file for data retrieval
-	fd, err := os.OpenFile(input, os.O_RDONLY, 0444)
+	fd, err := os.OpenFile(cmd.Library.Restore.Input, os.O_RDONLY, 0444)
 	if err != nil {
 		printError("%s", err)
 		return
@@ -98,16 +118,20 @@ func execBackupRestore(input string, merge bool) {
 	tr := tar.NewReader(gzr)
 
 	// Create new HTTP request
-	hc := httputil.NewClient(time.Duration(upstreamTimeout)*time.Second, true, false)
+	hc := httputil.NewClient(time.Duration(cmd.Timeout)*time.Second, true, false)
 
-	if !merge {
+	if !cmd.Library.Restore.Merge {
 		for _, typ := range backendTypes {
+			if !cmd.Quiet {
+				fmt.Printf("purging %s...\n", typ)
+			}
+
 			path := typ
 			if typ != "providers" {
 				path = "library/" + path
 			}
 
-			req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/api/v1/%s/", upstreamAddress, path), nil)
+			req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/api/v1/%s/", cmd.Address, path), nil)
 			if err != nil {
 				printError("%s", err)
 				continue
@@ -140,12 +164,12 @@ func execBackupRestore(input string, merge bool) {
 				path = "library/" + path
 			}
 
-			if verbose {
-				fmt.Printf("restoring library item %s\n", h.Name)
+			if !cmd.Quiet {
+				fmt.Printf("restoring library item %q...\n", h.Name)
 			}
 
 			// Register item into library
-			req, err := http.NewRequest("PUT", fmt.Sprintf("%s/api/v1/%s", upstreamAddress, path), tr)
+			req, err := http.NewRequest("PUT", fmt.Sprintf("%s/api/v1/%s", cmd.Address, path), tr)
 			if err != nil {
 				printError("%s", err)
 				return
@@ -168,9 +192,13 @@ func execBackupRestore(input string, merge bool) {
 			}
 		}
 	}
+
+	if !cmd.Quiet {
+		fmt.Println("OK")
+	}
 }
 
-func dumpBackupType(w *tar.Writer, name string) error {
+func dumpLibraryType(w *tar.Writer, name string) error {
 	var params string
 
 	// IMPORTANT:
@@ -188,9 +216,9 @@ func dumpBackupType(w *tar.Writer, name string) error {
 	ba, _ := backendAttrs[name]
 
 	// Create new HTTP request
-	hc := httputil.NewClient(time.Duration(upstreamTimeout)*time.Second, true, false)
+	hc := httputil.NewClient(time.Duration(cmd.Timeout)*time.Second, true, false)
 
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/%s%s%s", upstreamAddress, ba.prefix, name, params), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/%s%s%s", cmd.Address, ba.prefix, name, params), nil)
 	if err != nil {
 		return err
 	}
@@ -224,7 +252,7 @@ func dumpBackupType(w *tar.Writer, name string) error {
 			cur  []collectionRef
 		)
 
-		req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/library/collections/tree", upstreamAddress), nil)
+		req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/library/collections/tree", cmd.Address), nil)
 		if err != nil {
 			return err
 		}
@@ -267,7 +295,7 @@ func dumpBackupType(w *tar.Writer, name string) error {
 		id := v.FieldByName("ID").String()
 
 		// Retrieve item data from library
-		req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/%s%s/%s", upstreamAddress, ba.prefix, name, id), nil)
+		req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/%s%s/%s", cmd.Address, ba.prefix, name, id), nil)
 		if err != nil {
 			return fmt.Errorf("failed to create request: %s", err)
 		}

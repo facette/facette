@@ -3,66 +3,67 @@ package main
 import (
 	"fmt"
 	"os"
-	"path/filepath"
+	"strings"
 
-	"github.com/alecthomas/kingpin"
+	"github.com/cosiner/flag"
 )
 
-const (
-	defaultAddress = "http://localhost:12003"
-	defaultTimeout = "30"
-)
+type command struct {
+	Address string `names:"-a, --address" usage:"upstream socket address" default:"http://localhost:12003"`
+	Help    bool   `names:"-h, --help" usage:"display this help and exit"`
+	Timeout int    `names:"-t, --timeout" usage:"upstream connection timeout" default:"30"`
+	Version bool   `names:"-V, --version" usage:"display version information and exit"`
+	Quiet   bool   `names:"-q, --quiet" usage:"run in quiet mode"`
+
+	Library libraryCommand
+}
+
+func (*command) Metadata() map[string]flag.Flag {
+	return map[string]flag.Flag{
+		"": {
+			Usage: "Facette control utility",
+		},
+		"library": {
+			Usage: "manage library operations",
+		},
+	}
+}
 
 var (
 	version   string
 	buildDate string
 	buildHash string
 
-	upstreamAddress string
-	upstreamTimeout int
-
-	verbose bool
+	cmd command
 )
 
 func main() {
-	app := kingpin.New(filepath.Base(os.Args[0]), "Facette control utility.")
-	app.HelpFlag.Short('h')
+	flagSet := flag.NewFlagSet(flag.Flag{}).ErrHandling(0)
+	flagSet.StructFlags(&cmd)
 
-	// Global
-	flagAddress := app.Flag("address", "Set upstream socket address.").Short('a').Default(defaultAddress).String()
-	flagTimeout := app.Flag("timeout", "Set upstream connection timeout.").Short('t').Default(defaultTimeout).Int()
-	flagVerbose := app.Flag("verbose", "Run in verbose mode.").Short('v').Bool()
+	if err := flagSet.Parse(os.Args...); err != nil {
+		fmt.Printf("Error: %s\n", err)
+		flagSet.Help(false)
+		os.Exit(1)
+	}
 
-	// Version
-	version := app.Command("version", "Display version and support information.")
+	// Add default scheme to address if none provided
+	if !strings.HasPrefix(cmd.Address, "http://") && !strings.HasPrefix(cmd.Address, "https://") {
+		cmd.Address = "http://" + cmd.Address
+	}
 
-	// Backend
-	library := app.Command("library", "Manage library operations.")
-
-	libraryDump := library.Command("dump", "Dump data from library.")
-	libraryDumpOutput := libraryDump.Flag("output", "Set dump output file path.").Short('o').String()
-
-	libraryRestore := library.Command("restore", "Restore data from dump into library.")
-	libraryRestoreInput := libraryRestore.Flag("input", "Set dump input file path.").Short('i').Required().String()
-	libraryRestoreMerge := libraryRestore.Flag("merge", "Merge data with existing library.").Short('m').Bool()
-
-	// Parse command-line
-	command := kingpin.MustParse(app.Parse(os.Args[1:]))
-
-	upstreamAddress = *flagAddress
-	upstreamTimeout = *flagTimeout
-
-	verbose = *flagVerbose
-
-	switch command {
-	case version.FullCommand():
+	if cmd.Version {
 		execVersion()
-
-	case libraryDump.FullCommand():
-		execBackupDump(*libraryDumpOutput)
-
-	case libraryRestore.FullCommand():
-		execBackupRestore(*libraryRestoreInput, *libraryRestoreMerge)
+		os.Exit(0)
+	} else if cmd.Library.Dump.Enable {
+		execLibraryDump()
+	} else if cmd.Library.Restore.Enable {
+		execLibraryRestore()
+	} else if cmd.Library.Enable {
+		library, _ := flagSet.FindSubset("library")
+		library.Help(false)
+	} else {
+		flagSet.Help(false)
 	}
 }
 

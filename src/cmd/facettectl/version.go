@@ -30,9 +30,9 @@ func execVersion() {
 	fmt.Println("")
 
 	// Create new HTTP request
-	hc := httputil.NewClient(time.Duration(upstreamTimeout)*time.Second, true, false)
+	hc := httputil.NewClient(time.Duration(cmd.Timeout)*time.Second, true, false)
 
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/", upstreamAddress), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/", cmd.Address), nil)
 	if err != nil {
 		die("%s", err)
 	}
@@ -40,6 +40,8 @@ func execVersion() {
 	req.Header.Add("User-Agent", "facettectl/"+version)
 
 	// Retrieve items list from backend
+	fmt.Println("Server:")
+
 	resp, err := hc.Do(req)
 	if err != nil {
 		die("%s", err)
@@ -56,7 +58,6 @@ func execVersion() {
 		die("%s", err)
 	}
 
-	fmt.Println("Server:")
 	fmt.Printf("   Version:     %s\n", info.Version)
 	fmt.Printf("   Build date:  %s\n", info.BuildDate)
 	fmt.Printf("   Build hash:  %s\n", info.BuildHash)

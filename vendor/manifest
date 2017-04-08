@@ -2,21 +2,9 @@
 	"version": 0,
 	"dependencies": [
 		{
-			"importpath": "github.com/alecthomas/kingpin",
-			"repository": "https://github.com/alecthomas/kingpin",
-			"revision": "e64c31bcea9c96687d383aff82c3b844264f84ee",
-			"branch": "master"
-		},
-		{
-			"importpath": "github.com/alecthomas/template",
-			"repository": "https://github.com/alecthomas/template",
-			"revision": "a0175ee3bccc567396460bf5acd36800cb10c49c",
-			"branch": "master"
-		},
-		{
-			"importpath": "github.com/alecthomas/units",
-			"repository": "https://github.com/alecthomas/units",
-			"revision": "2efee857e7cfd4f3d0138cc3cbb1b4966962b93a",
+			"importpath": "github.com/cosiner/flag",
+			"repository": "https://github.com/cosiner/flag",
+			"revision": "46d5fc1f3ad582bc923a2a0819ff128a63b37171",
 			"branch": "master"
 		},
 		{

@@ -1,28 +1,39 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"io"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"runtime"
 	"strings"
 	"syscall"
 
 	"facette/backend"
 	"facette/connector"
+
+	"github.com/cosiner/flag"
 )
+
+type command struct {
+	Config  string `names:"-c, --config" usage:"configuration file path" default:"/etc/facette/facette.yaml"`
+	Help    bool   `names:"-h, --help" usage:"display this help and exit"`
+	Version bool   `names:"-V, --version" usage:"display version information and exit"`
+}
+
+func (*command) Metadata() map[string]flag.Flag {
+	return map[string]flag.Flag{
+		"": {
+			Usage: "Time series data visualization software",
+		},
+	}
+}
 
 var (
 	version   string
 	buildDate string
 	buildHash string
 
-	flagConfig  string
-	flagHelp    bool
-	flagVersion bool
+	cmd command
 )
 
 func main() {
@@ -33,22 +44,22 @@ func main() {
 		err     error
 	)
 
-	flag.StringVar(&flagConfig, "c", "/etc/facette/facette.yaml", "configuration file path")
-	flag.BoolVar(&flagHelp, "h", false, "display this help")
-	flag.BoolVar(&flagVersion, "V", false, "display version and support information")
-	flag.Usage = func() { printUsage(os.Stderr); os.Exit(1) }
-	flag.Parse()
+	flagSet := flag.NewFlagSet(flag.Flag{}).ErrHandling(0)
+	flagSet.StructFlags(&cmd)
 
-	if flagHelp {
-		printUsage(os.Stdout)
-		os.Exit(0)
-	} else if flagVersion {
+	if err := flagSet.Parse(os.Args...); err != nil {
+		fmt.Printf("Error: %s\n", err)
+		flagSet.Help(false)
+		os.Exit(1)
+	}
+
+	if cmd.Version {
 		printVersion()
 		os.Exit(0)
 	}
 
 	// Load service configuration
-	config, err = initConfig(flagConfig)
+	config, err = initConfig(cmd.Config)
 	if err != nil {
 		goto end
 	}
@@ -79,17 +90,6 @@ end:
 		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 		os.Exit(1)
 	}
-}
-
-func printUsage(w io.Writer) {
-	fmt.Fprintf(w, "Usage: %s [OPTIONS]", filepath.Base(os.Args[0]))
-	fmt.Fprint(w, "\n\nOptions:\n")
-
-	flag.VisitAll(func(f *flag.Flag) {
-		if !strings.HasPrefix(f.Name, "httptest.") {
-			fmt.Fprintf(w, "   -%s  %s\n", f.Name, f.Usage)
-		}
-	})
 }
 
 func printVersion() {
