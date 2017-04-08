@@ -41,16 +41,14 @@ mesg_fail = (echo "result: $(shell tty -s && tput setaf 1)fail$(shell tty -s && 
 
 all: build
 
-clean: clean-bin
+clean:
+	@$(call mesg_start,clean,Removing build data...)
+	@rm -rf $(BUILD_DIR) src/cmd/facette/bindata.go && \
+		$(call mesg_ok) || $(call mesg_fail)
 
 clean-depends:
 	@$(call mesg_start,clean,Removing build dependencies...)
 	@rm -rf node_modules && \
-		$(call mesg_ok) || $(call mesg_fail)
-
-clean-bin:
-	@$(call mesg_start,clean,Removing build data...)
-	@rm -rf build src/cmd/facette/bindata.go && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 build: build-bin build-assets build-docs
