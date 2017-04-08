@@ -164,11 +164,23 @@ thead .listcolumn.heading {
 
 .listcolumn.main .description {
 	min-height: 1.5rem;
-	opacity: 0.5;
 }
 
 .listcolumn.main .description .info {
+	opacity: 0.5;
 	text-transform: lowercase;
+}
+
+.listcolumn.main .description .count {
+	background-color: #2c3e50;
+	border-radius: 1rem;
+	color: #fff;
+	font-size: 0.8rem;
+	line-height: normal;
+	margin-left: 0.75rem;
+	text-align: center;
+	min-width: 1.5rem;
+	display: inline-block;
 }
 
 .listcolumn.main .description.bullet .info::before {
@@ -239,6 +251,10 @@ thead .listcolumn.heading {
 
 .listcolumn.date {
 	white-space: nowrap;
+}
+
+.listcolumn.actions .menuitem {
+	width: 2rem;
 }
 
 .listcolumn.checkbox,
