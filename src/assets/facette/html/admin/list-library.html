@@ -1,6 +1,6 @@
 <ng-include src="'templates/admin/layout.html'" ng-include-replace="true"></ng-include>
 
-<article class="with-actions">
+<article class="with-actions" ng-class="{hastab: section == 'collections' || section == 'graphs'}">
 	<header>
 		<h1>{{ 'label.admin_panel' | translate }} – {{ 'label.' + section | translate }}</h1>
 
@@ -20,12 +20,12 @@
 		<ng-include src="'templates/common/extra-menu.html'" ng-include-replace="true"></ng-include>
 	</header>
 
-	<section ng-class="{hastab: section == 'collections' || section == 'graphs'}">
-		<div class="tabset" ng-if="section == 'collections' || section == 'graphs'">
-			<div class="tab" ng-class="{active: !templates}"><a href="{{ ::baseURL }}admin/{{ section }}/">{{ 'label.' + section | translate }}</a></div>
-			<div class="tab" ng-class="{active: templates}"><a href="{{ ::baseURL }}admin/{{ section }}/?templates=1">{{ 'label.templates' | translate }}</a></div>
-		</div>
+	<tabset ng-if="section == 'collections' || section == 'graphs'">
+		<tab active="!templates" label="{{ 'label.' + section | translate }}" href="{{ ::baseURL }}admin/{{ section }}/"></tab>
+		<tab active="templates" label="{{ 'label.templates' | translate }}" href="{{ ::baseURL }}admin/{{ section }}/?templates=1"></tab>
+	</tabset>
 
+	<section>
 		<h1>{{ 'label.' + section + '_list' | translate }} <span class="count" ng-if="total">{{ total }}</span></h1>
 
 		<message icon="clock-o" type="placeholder" ng-show="state == stateLoading">{{ 'mesg.wait' | translate }}</message>

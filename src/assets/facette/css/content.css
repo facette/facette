@@ -322,13 +322,18 @@ article .titlerow .formblock button {
 	article header .menu.main {
 		background-color: #e6eaeb;
 		border-bottom-right-radius: 0.2rem;
+		bottom: 0;
 		flex: none;
 		left: 0;
 		margin: 0;
-		position: absolute;
+		position: fixed;
 		top: 3.5rem;
 		white-space: normal;
 		width: 3.5rem;
+	}
+
+	article.hastab header .menu.main {
+		padding-top: 3rem;
 	}
 
 	article header > .menu.main > .menuitem.button > a {

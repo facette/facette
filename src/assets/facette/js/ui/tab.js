@@ -34,8 +34,8 @@ angular.module('facette.ui.tab', [])
         replace: true,
         scope: {
             active: '=?',
-            href: '@',
-            label: '@'
+            label: '@',
+            href: '@'
         },
         link: function(scope, element, attrs, controller) {
             // Watch for active state changes

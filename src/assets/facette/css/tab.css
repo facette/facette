@@ -33,12 +33,8 @@
 	background-color: #d9ddde;
 }
 
-section.hastab {
-	padding-top: 3rem;
-}
-
-section .tabset {
-	margin: -5rem -2rem 2rem;
+article > .tabset {
+	margin: -2rem -2rem 2rem;
 }
 
 .ngdialog-content .tabset {

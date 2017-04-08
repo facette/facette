@@ -1,18 +1,16 @@
 <ng-include src="'templates/admin/layout.html'" ng-include-replace="true"></ng-include>
 
-<article ng-pane="" ng-if="!linked" ng-show="state == stateOK">
+<article ng-class="{hastab: id != 'add' && item.template}" ng-pane="" ng-show="state == stateOK" ng-if="!linked">
 	<header>
 		<h1 class="expand">{{ 'label.admin_panel' | translate }} – {{ (id == 'add' ? 'label.collections_new' : 'label.collections_edit') | translate }}</h1>
 
 		<ng-include src="'templates/common/extra-menu.html'" ng-include-replace="true"></ng-include>
 	</header>
 
-	<section class="hastab" ng-if="id != 'add' && item.template">
-		<div class="tabset">
-			<div class="tab" ng-class="{active: tab === 0}" ng-click="switchTab(0)"><span>{{ 'label.items_properties' | translate }}</span></div>
-			<div class="tab" ng-class="{active: tab == 1}" ng-click="switchTab(1)"><span>{{ 'label.templates_instances' | translate }}</span></div>
-		</div>
-	</section>
+	<tabset ng-if="id != 'add' && item.template">
+		<tab active="tab === 0" label="{{ 'label.items_properties' | translate }}" ng-click="switchTab(0)"></tab>
+		<tab active="tab == 1" label="{{ 'label.templates_instances' | translate }}" ng-click="switchTab(1)"></tab>
+	</tabset>
 
 	<div ng-show="tab === 0">
 		<section ng-pane-step="1">
@@ -251,7 +249,7 @@
 		</footer>
 </article>
 
-<article ng-pane="" ng-if="linked" ng-show="state == stateOK">
+<article ng-pane="" ng-show="state == stateOK" ng-if="linked">
 	<header>
 		<h1>{{ 'label.admin_panel' | translate }} – {{ (id == 'link' ? 'label.collections_new' : 'label.collections_edit') | translate }}</h1>
 
