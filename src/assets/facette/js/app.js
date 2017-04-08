@@ -149,8 +149,9 @@ app.config(function($httpProvider, $locationProvider, $resourceProvider, $routeP
             prefix: '/assets/js/locales/',
             suffix: '.json'
         })
-        .registerAvailableLanguageKeys(['en'], {
+        .registerAvailableLanguageKeys(['en', 'fr'], {
             'en_*': 'en',
+            'fr_*': 'fr',
             '*': 'en'
         })
         .determinePreferredLanguage();

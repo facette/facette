@@ -250,7 +250,7 @@ gulp.task('update-locale', function() {
         config.files.html
     ]))
         .pipe(translateextract({
-            lang: ['en'],
+            lang: ['en', 'fr'],
             suffix: '.json',
             dest: 'src/assets/facette/js/locales',
             nullEmpty: true,
