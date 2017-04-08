@@ -1,5 +1,4 @@
 // Copyright (C) 2016 Yasuhiro Matsumoto <mattn.jp@gmail.com>.
-// TODO: add "Gimpl do foo" team?
 //
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file.
@@ -358,7 +357,7 @@ func (c *SQLiteConn) RegisterAggregator(name string, impl interface{}, pure bool
 	if pure {
 		opts |= C.SQLITE_DETERMINISTIC
 	}
-	rv := sqlite3_create_function(c.db, cname, C.int(stepNArgs), C.int(opts), newHandle(c, &ai), nil, C.stepTrampoline, C.doneTrampoline)
+	rv := sqlite3CreateFunction(c.db, cname, C.int(stepNArgs), C.int(opts), newHandle(c, &ai), nil, C.stepTrampoline, C.doneTrampoline)
 	if rv != C.SQLITE_OK {
 		return c.lastError()
 	}

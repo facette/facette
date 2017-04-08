@@ -14,7 +14,7 @@ import (
 
 	"github.com/facette/httproute"
 	"github.com/facette/logger"
-	"github.com/tylerb/graceful"
+	"gopkg.in/tylerb/graceful.v1"
 )
 
 const apiPrefix = "/api/v1"

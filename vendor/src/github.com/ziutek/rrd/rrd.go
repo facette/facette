@@ -149,6 +149,9 @@ func (u *Updater) Update(args ...interface{}) error {
 		return err
 	} else if len(u.args) != 0 {
 		err := u.update(u.args)
+		for _, a := range u.args {
+			a.Free()
+		}
 		u.args = nil
 		return err
 	}
