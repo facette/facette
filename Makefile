@@ -141,7 +141,7 @@ lint-assets:
 	@BUILD_DIR=$(BUILD_DIR) $(GULP) $(GULP_ARGS) lint && \
 		$(call mesg_ok) || $(call mesg_fail)
 
-update-locale:
+update-locales:
 	@$(call mesg_start,locale,Updating locale files...)
-	@BUILD_DIR=$(BUILD_DIR) $(GULP) $(GULP_ARGS) update-locale >/dev/null && \
+	@BUILD_DIR=$(BUILD_DIR) $(GULP) $(GULP_ARGS) update-locales >/dev/null && \
 		$(call mesg_ok) || $(call mesg_fail)
