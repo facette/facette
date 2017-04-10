@@ -321,6 +321,7 @@
     "mesg.plots_error": "Unable to retrieve plots data",
     "mesg.plots_fetch": "Fetching plots data…",
     "mesg.plots_partial": "Missing plots data",
+    "mesg.saved": "Changes saved",
     "mesg.scales_empty": "No scale defined",
     "mesg.series_empty": "No series defined",
     "mesg.sourcegroups_empty": "No source group defined",

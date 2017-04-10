@@ -66,6 +66,7 @@ var config = {
             'src/assets/facette/css/header.css',
             'src/assets/facette/css/sidebar.css',
             'src/assets/facette/css/content.css',
+            'src/assets/facette/css/notify.css',
             'src/assets/facette/css/tab.css',
             'src/assets/facette/css/message.css',
             'src/assets/facette/css/column.css',

@@ -13,6 +13,7 @@ var app = angular.module('facette', [
     'facette.ui.list',
     'facette.ui.menu',
     'facette.ui.message',
+    'facette.ui.notify',
     'facette.ui.pane',
     'facette.ui.search',
     'facette.ui.tab',
@@ -129,8 +130,8 @@ app.config(function($httpProvider, $locationProvider, $resourceProvider, $routeP
             },
             responseError: function(response) {
                 if (response.status >= 400 && response.status != 404) {
-                    $rootScope.setError(response.data && response.data.message ?
-                        response.data.message : 'an unhandled error has occurred');
+                    $rootScope.$emit('Notify', response.data && response.data.message ?
+                        response.data.message : 'an unhandled error has occurred', {type: 'error'});
                 }
 
                 return $q.reject(response);
@@ -256,20 +257,6 @@ app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope
         $rootScope.sidebarCollapse = !$rootScope.sidebarCollapse;
         storage.set('global-sidebar', 'collapsed', $rootScope.sidebarCollapse);
     };
-
-    // Handle error message
-    $rootScope.setError = function(content) {
-        $rootScope.error = content;
-        $rootScope.errorActive = true;
-        $timeout(function() { $rootScope.resetError(); }, 5000);
-    };
-
-    $rootScope.resetError = function() {
-        $rootScope.errorActive = false;
-        $timeout(function() { $rootScope.error = null; }, 250);
-    };
-
-    $rootScope.resetError();
 
     // Handle local preferences reset
     $rootScope.resetLocalPrefs = function() {

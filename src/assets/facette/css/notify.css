@@ -1,0 +1,74 @@
+.notify {
+	align-items: center;
+	background-color: #2980b9;
+	color: #fff;
+	display: flex;
+	height: 3.5rem;
+	left: 22rem;
+	padding: 0 2rem;
+	position: fixed;
+	right: 0;
+	top: 0;
+	transform: translateY(-100%);
+	transition: left .3s ease-in-out,
+	            transform .2s ease-in-out;
+	z-index: 210;
+}
+
+.notify.success {
+	background-color: #2ecc71;
+}
+
+.notify.error {
+	background-color: #e74c3c;
+}
+
+.notify.full {
+	left: 0;
+}
+
+.notify.active {
+	transform: translateY(0);
+}
+
+.notify::after {
+	background-color: rgba(0, 0, 0, 0.2);
+	bottom: 0;
+	content: '';
+	display: block;
+	height: 0.25rem;
+	left: 0;
+	position: absolute;
+	transition: width 0s;
+	width: 100%;
+}
+
+.notify.active::after {
+	transition: width 5s ease-in-out;
+	width: 0;
+}
+
+.notify > .content {
+	flex: 1;
+}
+
+.notify > .icon > .fa {
+	font-size: 1.5rem;
+	margin-right: 0.65rem;
+	vertical-align: middle;
+}
+
+.notify > .action {
+	cursor: pointer;
+}
+
+.notify > .action > .fa {
+	font-size: 1.2rem;
+	margin-left: 2rem;
+}
+
+@media screen and (max-width: 768px) {
+	.notify {
+		left: 0;
+	}
+}

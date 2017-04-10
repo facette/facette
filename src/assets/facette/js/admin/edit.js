@@ -1,4 +1,4 @@
-app.factory('adminEdit', function($location, $rootScope, $timeout, library, providers) {
+app.factory('adminEdit', function($location, $rootScope, $timeout, $translate, library, providers) {
     return {
         cancel: function(scope, force) {
             force = typeof force == 'boolean' ? force : false;
@@ -53,16 +53,6 @@ app.factory('adminEdit', function($location, $rootScope, $timeout, library, prov
                 locSearch.templates = 1;
             }
 
-            // Skip save is no change applied
-            if (!scope.modified) {
-                if (go) {
-                    $location.path('browse/' + scope.section + '/' + scope.id).search(locSearch);
-                } else {
-                    $location.path('admin/' + scope.section + '/').search(locSearch);
-                }
-                return;
-            }
-
             var data = angular.extend({type: scope.section}, scope.item);
             if (scope.id != 'add' && scope.id != 'link') {
                 data.id = scope.id;
@@ -95,6 +85,12 @@ app.factory('adminEdit', function($location, $rootScope, $timeout, library, prov
                 } else {
                     $location.path('admin/' + scope.section + '/').search(locSearch);
                 }
+
+                scope.$applyAsync(function() {
+                    $translate(['mesg.saved']).then(function(data) {
+                        $rootScope.$emit('Notify', data['mesg.saved'], {type: 'success', icon: 'check-circle'});
+                    });
+                });
             });
         },
 

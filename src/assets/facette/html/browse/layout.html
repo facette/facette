@@ -1,8 +1,4 @@
-<header class="error" ng-class="{active: errorActive, full: sidebarCollapse}">
-	<div class="icon"><span class="fa fa-exclamation-circle"></span></div>
-	<div class="content">{{ 'mesg.error' | translate:{msg: error} }}</div>
-	<div class="action" ng-click="resetError()"><span class="fa fa-times"></span></div>
-</header>
+<notify ng-class="{full: sidebarCollapse}"></notify>
 
 <aside ng-class="{collapse: sidebarCollapse, expand: !sidebarCollapse}">
 	<header>

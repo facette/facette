@@ -1,0 +1,6 @@
+<div class="notify{{ type ? ' ' + type : '' }}{{ active ? ' active' : '' }}">
+	<div class="icon"><span class="fa fa-{{ icon || 'exclamation-circle' }}"></span></div>
+	<div class="content" ng-show="type == 'error'">{{ 'mesg.error' | translate:{msg: message} }}</div>
+	<div class="content" ng-show="type != 'error'">{{ message }}</div>
+	<div class="action" ng-click="reset()"><span class="fa fa-times"></span></div>
+</div>
