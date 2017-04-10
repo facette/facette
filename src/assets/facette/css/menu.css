@@ -81,7 +81,8 @@
 	top: 50%;
 }
 
-.tooltip span {
+.tooltip .label {
 	color: #777;
-	margin-right: 0.5rem;
+	font-weight: 500;
+	padding-right: 0.5rem;
 }

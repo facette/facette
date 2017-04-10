@@ -90,7 +90,7 @@ app.controller('AdminListController', function($q, $rootScope, $routeParams, $sc
 
             if ($scope.section == 'collections' || $scope.section == 'graphs') {
                 query.kind = $routeParams.templates ? 'template' : 'raw';
-                query.fields += ',link';
+                query.fields += ',link,alias';
             } else if ($scope.section == 'providers') {
                 query.fields += ',enabled';
             }
@@ -167,8 +167,13 @@ app.controller('AdminListController', function($q, $rootScope, $routeParams, $sc
     $scope.formatBasicTooltip = function(entry) {
         var defer = $q.defer();
 
-        $translate(['label.identifier']).then(function(data) {
-            defer.resolve('<span>' + data['label.identifier'] + '</span> ' + entry.id);
+        $translate(['label.identifier', 'label.alias']).then(function(data) {
+            var content = '<tr><th class="label">' + data['label.identifier'] + '</th><td>' + entry.id + '</td></tr>';
+            if (entry.alias) {
+                content += '<tr><th class="label">' + data['label.alias'] + '</th><td>' + entry.alias + '</td></tr>';
+            }
+
+            defer.resolve('<table>' + content + '</table>');
         });
 
         return defer.promise;
@@ -181,7 +186,8 @@ app.controller('AdminListController', function($q, $rootScope, $routeParams, $sc
             $translate(['label.providers']),
             catalog.get({type: $scope.section, name: name}).$promise
         ]).then(function(data) {
-            defer.resolve('<span>' + data[0]['label.providers'] + '</span> ' + data[1].providers.join(', '));
+            defer.resolve('<span class="label">' + data[0]['label.providers'] + '</span> ' +
+                data[1].providers.join(', '));
         });
 
         return defer.promise;
