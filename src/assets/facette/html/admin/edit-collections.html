@@ -34,7 +34,8 @@
 								</listcolumn>
 								<listcolumn class="main expand">
 									<div class="row">
-										<div class="name">{{ graphData[e.id].name || e.id }} <span class="note error" ng-if="graphFetched && !graphData[e.id]"><span class="fa fa-warning"></span> {{ 'mesg.items_not_found' | translate }}</span></div>
+										<div class="name">{{ graphData[e.id].name || e.id }}</div>
+										<div class="note error" ng-if="graphFetched && !graphData[e.id]"><span class="fa fa-warning"></span> {{ 'mesg.items_not_found' | translate }}</div>
 										<div class="actions">
 											<menu>
 												<menuitem href="" icon="cog" title="{{ 'label.options_manage' | translate }}" type="button" ng-click="editOptions(e)"></menuitem>

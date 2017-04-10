@@ -146,6 +146,10 @@ thead .listcolumn.heading {
 	margin-left: 0.25rem;
 }
 
+.listcolumn.main .note {
+	white-space: nowrap;
+}
+
 .listcolumn.main .actions {
 	margin-left: 0.75rem;
 	flex: 1;
