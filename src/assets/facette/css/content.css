@@ -324,16 +324,17 @@ article .titlerow .formblock button {
 		border-bottom-right-radius: 0.2rem;
 		bottom: 0;
 		flex: none;
-		left: 0;
+		left: 22rem;
 		margin: 0;
 		position: fixed;
 		top: 3.5rem;
+		transition: left .3s ease-in-out;
 		white-space: normal;
 		width: 3.5rem;
 	}
 
-	article.hastab header .menu.main {
-		padding-top: 3rem;
+	aside.collapse + article header .menu.main {
+		left: 0;
 	}
 
 	article header > .menu.main > .menuitem.button > a {
@@ -367,6 +368,10 @@ article .titlerow .formblock button {
 
 	aside.expand + article header .search input {
 		width: 14rem;
+	}
+
+	article.hastab > .tabset {
+		padding-left: 0;
 	}
 }
 

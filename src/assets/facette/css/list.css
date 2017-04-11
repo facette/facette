@@ -168,10 +168,10 @@ thead .listcolumn.heading {
 
 .listcolumn.main .description {
 	min-height: 1.5rem;
+	opacity: 0.5;
 }
 
 .listcolumn.main .description .info {
-	opacity: 0.5;
 	text-transform: lowercase;
 }
 

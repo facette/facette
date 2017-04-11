@@ -1,5 +1,6 @@
 .tabset {
 	background-color: #e6eaeb;
+	display: flex;
 	line-height: 2.5rem;
 	padding: 0.5rem 0.5rem 0;
 }
