@@ -101,6 +101,11 @@ input[type=radio] + label {
 	margin: 0 1rem 0 0;
 }
 
+.ui-select-container + input[type=checkbox] + label,
+.ui-select-container + input[type=radio] + label {
+	margin-top: 0.5rem;
+}
+
 input[type=checkbox] + label.empty {
 	margin: 0;
 }
