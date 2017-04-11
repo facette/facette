@@ -39,6 +39,8 @@ chart.fn.updateTooltip = function(data) {
         var row = $$.tooltipBody.append('tr'),
             cell = row.append('th');
 
+        row.classed('disabled', $$.config.series[idx].disabled);
+
         cell.append('span')
             .attr('class', 'chart-tooltip-color')
             .style('background-color', $$.config.series[idx].color);

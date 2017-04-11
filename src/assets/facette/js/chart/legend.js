@@ -53,6 +53,10 @@ chart.fn.drawLegend = function() {
     }
 
     function highlightSeries(idx) {
+        if (d3.select(this.parentNode).classed('disabled')) {
+            return;
+        }
+
         $$.highlightSeries(idx, d3.event.type == 'mouseenter');
     }
 
@@ -93,16 +97,11 @@ chart.fn.drawLegend = function() {
         return graphSummaryBase.indexOf(a) == -1;
     };
 
-    var series = $$.config.series;
-    if ($$.config.stack) {
-        series.reverse();
-    }
-
-    series.forEach(function(entry, idx) {
+    $$.config.series.forEach(function(series, idx) {
         legendRows[idx] = $$.legendGroup.append('g')
             .attr('class', 'chart-legend-row')
             .attr('transform', 'translate(0,' + (idx * legendLineHeight) + ')')
-            .classed('disabled', entry.disabled || false);
+            .classed('disabled', series.disabled || false);
 
         legendRows[idx].append('rect')
             .attr('class', 'chart-legend-color')
@@ -111,9 +110,9 @@ chart.fn.drawLegend = function() {
             .attr('rx', 2)
             .attr('ry', 2)
             .attr('y', legendLineHeight * 0.1875)
-            .attr('fill', series[idx].color);
+            .attr('fill', series.color);
 
-        if (!entry.plots) {
+        if (!series.plots) {
             legendRows[idx].classed('error', true);
 
             legendRows[idx].append('text')
@@ -130,7 +129,7 @@ chart.fn.drawLegend = function() {
             .attr('class', 'chart-legend-name')
             .attr('x', legendLineHeight)
             .attr('y', legendLineHeight / 2)
-            .text(entry.name)
+            .text(series.name)
             .on('click', toggleSeries)
             .on('mouseenter', highlightSeries)
             .on('mouseleave', highlightSeries);
@@ -140,12 +139,12 @@ chart.fn.drawLegend = function() {
         columnLeft = Math.max(columnLeft, elementBBox.x + elementBBox.width + legendLineHeight);
 
         // Stop if no summary data
-        if (!entry.summary) {
+        if (!series.summary) {
             return;
         }
 
         // Retrieve legend keys
-        var keys = Object.keys(entry.summary);
+        var keys = Object.keys(series.summary);
         keys.sort();
         keys = graphSummaryBase.concat(keys.filter(filterKeys));
 

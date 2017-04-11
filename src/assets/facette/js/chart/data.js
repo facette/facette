@@ -1,10 +1,6 @@
 chart.fn.updateData = function() {
     var $$ = this;
 
-    if ($$.config.stack) {
-        $$.config.series.reverse();
-    }
-
     // Map data set coordinates
     $$.dataSet = $$.config.series.map(function(series) {
         if (!series.plots || series.disabled) {
@@ -45,6 +41,10 @@ chart.fn.updateData = function() {
 
         $$.stack = d3.stack()
             .keys(keys);
+
+        if ($$.config.stack) {
+            $$.stack.order(d3.stackOrderReverse);
+        }
 
         var stackSet = new Array($$.dataSet.length).fill([]);
 

@@ -324,6 +324,11 @@
 	opacity: 0.15;
 }
 
+.chart-series.fade .chart-area,
+.chart-series.highlight .chart-area {
+	visibility: hidden;
+}
+
 .chart-axis,
 .chart-legend {
 	cursor: default;
@@ -373,7 +378,8 @@
 }
 
 .chart-legend-row.disabled,
-.chart-legend-row.error {
+.chart-legend-row.error,
+.chart-tooltip tbody tr.disabled {
 	opacity: 0.25;
 }
 
