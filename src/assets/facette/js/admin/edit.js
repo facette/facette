@@ -72,7 +72,7 @@ app.factory('adminEdit', function($location, $rootScope, $timeout, $translate, l
             // Prepare item data
             var factory = scope.section == 'providers' ? providers : library;
 
-            (scope.id != 'add' && scope.id != 'link' ? factory.update : factory.append)(data, function() {
+            (scope.id != 'add' && scope.id != 'link' ? factory.update : factory.append)(data, function(_, header) {
                 if (scope.itemTimeout) {
                     $timeout.cancel(scope.itemTimeout);
                     scope.itemTimeout = null;
@@ -81,16 +81,22 @@ app.factory('adminEdit', function($location, $rootScope, $timeout, $translate, l
                 $rootScope.preventUnload(false);
 
                 if (go) {
-                    $location.path('browse/' + scope.section + '/' + scope.id).search(locSearch);
+                    var id = scope.id;
+                    if (scope.id == 'add' || scope.id == 'link') {
+                        var location = header('Location');
+                        id = location.substr(location.lastIndexOf('/') + 1);
+                    }
+
+                    $location.path('browse/' + scope.section + '/' + id).search(locSearch);
                 } else {
                     $location.path('admin/' + scope.section + '/').search(locSearch);
                 }
 
-                scope.$applyAsync(function() {
+                $timeout(function() {
                     $translate(['mesg.saved']).then(function(data) {
                         $rootScope.$emit('Notify', data['mesg.saved'], {type: 'success', icon: 'check-circle'});
                     });
-                });
+                }, 500);
             });
         },
 

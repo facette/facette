@@ -99,7 +99,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
     function updateItemData() {
         var data = angular.copy($scope.item);
         $scope.cleanProperties(data);
-        data.attributes = $scope.item.attributes;
+        data.attributes = angular.copy($scope.item.attributes);
 
         $scope.itemData = data;
     }
@@ -743,7 +743,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
                         fields: 'attributes',
                         limit: 1
                     }, function(data) {
-                        if (data) {
+                        if (data && data.length > 0) {
                             $scope.item.attributes = data[0].attributes;
                         }
                     });
