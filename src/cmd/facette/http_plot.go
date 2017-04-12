@@ -55,10 +55,6 @@ func (w *httpWorker) httpHandlePlots(ctx context.Context, rw http.ResponseWriter
 			w.log.Error("failed to fetch item: %s", err)
 			httputil.WriteJSON(rw, httpBuildMessage(ErrUnhandledError), http.StatusInternalServerError)
 			return
-		} else if req.Graph.Template && len(req.Attributes) == 0 {
-			w.log.Debug("requested item %s is a template, skipping", req.ID)
-			httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidParameter), http.StatusBadRequest)
-			return
 		}
 	} else if req.Graph == nil {
 		httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidParameter), http.StatusBadRequest)
