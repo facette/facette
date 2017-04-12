@@ -131,81 +131,77 @@
 
 			<columns class="split">
 				<column class="main">
-					<form ng-entersubmit="save()">
-						<h2>{{ 'label.general_info' | translate }}</h2>
+					<h2>{{ 'label.general_info' | translate }}</h2>
 
-						<div class="formblock">
-							<label>{{ 'label.name' | translate }}
-								<span class="warn" ng-show="conflict.name"><span class="fa fa-warning"></span> {{ 'mesg.name_unique' | translate }}</span>
-								<span class="warn" ng-show="validated && !item.name"><span class="fa fa-warning"></span> {{ 'mesg.name_mandatory' | translate }}</span>
-							</label>
-							<input type="text" ng-class="{danger: conflict.name || validated && !item.name}" ng-model="item.name">
+					<div class="formblock">
+						<label>{{ 'label.name' | translate }}
+							<span class="warn" ng-show="conflict.name"><span class="fa fa-warning"></span> {{ 'mesg.name_unique' | translate }}</span>
+							<span class="warn" ng-show="validated && !item.name"><span class="fa fa-warning"></span> {{ 'mesg.name_mandatory' | translate }}</span>
+						</label>
+						<input type="text" ng-class="{danger: conflict.name || validated && !item.name}" ng-model="item.name">
 
-							<label>{{ 'label.desc' | translate }}</label>
-							<textarea type="text" ng-model="item.description"></textarea>
-						</div>
+						<label>{{ 'label.desc' | translate }}</label>
+						<textarea type="text" ng-model="item.description"></textarea>
+					</div>
 
-						<h2>{{ 'label.collections_params' | translate }}</h2>
+					<h2>{{ 'label.collections_params' | translate }}</h2>
 
-						<div class="formblock">
-							<label>{{ 'label.title' | translate }}</label>
-							<input type="text" ng-model="item.options.title">
+					<div class="formblock">
+						<label>{{ 'label.title' | translate }}</label>
+						<input type="text" ng-model="item.options.title">
 
-							<label>{{ 'label.alias' | translate }}
-								<span class="warn" ng-show="conflict.alias"><span class="fa fa-warning"></span> {{ 'mesg.alias_unique' | translate }}</span>
-							</label>
-							<input type="text" ng-class="{danger: conflict.alias}" ng-model="item.alias" ng-disabled="item.template">
+						<label>{{ 'label.alias' | translate }}
+							<span class="warn" ng-show="conflict.alias"><span class="fa fa-warning"></span> {{ 'mesg.alias_unique' | translate }}</span>
+						</label>
+						<input type="text" ng-class="{danger: conflict.alias}" ng-model="item.alias" ng-disabled="item.template">
 
-							<columns>
-								<column>
-									<label>{{ 'label.refresh_interval' | translate }}</label>
-									<input type="number" ng-model="item.options.refresh_interval">
-								</column>
+						<columns>
+							<column>
+								<label>{{ 'label.refresh_interval' | translate }}</label>
+								<input type="number" ng-model="item.options.refresh_interval">
+							</column>
 
-								<column>
-									<label>{{ 'label.collections_grid_size' | translate }}</label>
-									<ui-select theme="selectize" ng-model="selectedOptions.grid_size">
-										<ui-select-match placeholder="{{ 'label.collections_grid_size_select' | translate }}">
-											<span ng-bind="$select.selected.name"></span>
-										</ui-select-match>
-										<ui-select-choices repeat="s in (collectionsGridSizes | filter: $select.search)">
-											<span ng-bind="s.name"></span>
-										</ui-select-choices>
-									</ui-select>
-								</column>
-							</columns>
+							<column>
+								<label>{{ 'label.collections_grid_size' | translate }}</label>
+								<ui-select theme="selectize" ng-model="selectedOptions.grid_size">
+									<ui-select-match placeholder="{{ 'label.collections_grid_size_select' | translate }}">
+										<span ng-bind="$select.selected.name"></span>
+									</ui-select-match>
+									<ui-select-choices repeat="s in (collectionsGridSizes | filter: $select.search)">
+										<span ng-bind="s.name"></span>
+									</ui-select-choices>
+								</ui-select>
+							</column>
+						</columns>
 
-							<label>{{ 'label.collections_parent' | translate }}</label>
-							<angucomplete-alt class="small" id="parent" pause="250" selected-object="selectParent" remote-api-handler="collectionsList" title-field="name" minlength="1" focus-first="true" match-class="highlight" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
-							<button ng-click="removeParent()" ng-disabled="!item.parent">{{ 'label.remove' | translate }}</button>
-						</div>
+						<label>{{ 'label.collections_parent' | translate }}</label>
+						<angucomplete-alt class="small" id="parent" pause="250" selected-object="selectParent" remote-api-handler="collectionsList" title-field="name" minlength="1" focus-first="true" match-class="highlight" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
+						<button ng-click="removeParent()" ng-disabled="!item.parent">{{ 'label.remove' | translate }}</button>
+					</div>
 
-						<div class="formblock" ng-if="hasTemplate">
-							<button ng-click="editAttrs(item, true)"><span class="fa fa-file-code-o"></span> {{ 'label.templates_attrs_manage' | translate }}</button>
-						</div>
-					</form>
+					<div class="formblock" ng-if="hasTemplate">
+						<button ng-click="editAttrs(item, true)"><span class="fa fa-file-code-o"></span> {{ 'label.templates_attrs_manage' | translate }}</button>
+					</div>
 				</column>
 
 				<column class="side" ng-if="attrsEdit">
-					<form ng-entersubmit="setAttrs()">
-						<h2>{{ 'label.templates_attrs' | translate }}</h2>
+					<h2>{{ 'label.templates_attrs' | translate }}</h2>
 
-						<div class="formblock">
-							<table class="keylist">
-								<tbody>
-									<tr ng-repeat="(key, _) in entryAttrs">
-										<td class="key"><input type="text" disabled="disabled" ng-model="key"></td>
-										<td class="value"><input type="text" ng-model="entryAttrs[key]"></td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
+					<div class="formblock">
+						<table class="keylist">
+							<tbody>
+								<tr ng-repeat="(key, _) in entryAttrs">
+									<td class="key"><input type="text" disabled="disabled" ng-model="key"></td>
+									<td class="value"><input type="text" ng-model="entryAttrs[key]"></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
 
-						<div class="formblock">
-							<button class="danger" ng-click="editAttrs(null, false)">{{ 'label.cancel' | translate }}</button>
-							<button ng-click="setAttrs(true)">{{ 'label.ok' | translate }}</button>
-						</div>
-					</form>
+					<div class="formblock">
+						<button class="danger" ng-click="editAttrs(null, false)">{{ 'label.cancel' | translate }}</button>
+						<button ng-click="setAttrs(true)">{{ 'label.ok' | translate }}</button>
+					</div>
 				</column>
 			</columns>
 		</section>
@@ -264,42 +260,40 @@
 
 		<columns>
 			<column class="main">
-				<form ng-entersubmit="save()">
-					<h2>{{ 'label.general_info' | translate }}</h2>
+				<h2>{{ 'label.general_info' | translate }}</h2>
 
-					<label>{{ 'label.name' | translate }}
-						<span class="warn" ng-show="conflict.name"><span class="fa fa-warning"></span> {{ 'mesg.name_unique' | translate }}</span>
-						<span class="warn" ng-show="validated && !item.name"><span class="fa fa-warning"></span> {{ 'mesg.name_mandatory' | translate }}</span>
-					</label>
-					<input type="text" ng-class="{danger: conflict.name || validated && !item.name}" ng-model="item.name">
+				<label>{{ 'label.name' | translate }}
+					<span class="warn" ng-show="conflict.name"><span class="fa fa-warning"></span> {{ 'mesg.name_unique' | translate }}</span>
+					<span class="warn" ng-show="validated && !item.name"><span class="fa fa-warning"></span> {{ 'mesg.name_mandatory' | translate }}</span>
+				</label>
+				<input type="text" ng-class="{danger: conflict.name || validated && !item.name}" ng-model="item.name">
 
-					<label>{{ 'label.alias' | translate }}
-						<span class="warn" ng-show="conflict.alias"><span class="fa fa-warning"></span> {{ 'mesg.alias_unique' | translate }}</span>
-					</label>
-					<input type="text" ng-class="{danger: conflict.alias}" ng-model="item.alias">
+				<label>{{ 'label.alias' | translate }}
+					<span class="warn" ng-show="conflict.alias"><span class="fa fa-warning"></span> {{ 'mesg.alias_unique' | translate }}</span>
+				</label>
+				<input type="text" ng-class="{danger: conflict.alias}" ng-model="item.alias">
 
-					<label>{{ 'label.templates_source' | translate }}</label>
-					<angucomplete-alt class="small" id="template" pause="250" selected-object="selectTemplate" remote-api-handler="templateSources" title-field="name" minlength="1" focus-first="true" match-class="highlight" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}" ng-class="{danger: validated && !item.link}"></angucomplete-alt>
+				<label>{{ 'label.templates_source' | translate }}</label>
+				<angucomplete-alt class="small" id="template" pause="250" selected-object="selectTemplate" remote-api-handler="templateSources" title-field="name" minlength="1" focus-first="true" match-class="highlight" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}" ng-class="{danger: validated && !item.link}"></angucomplete-alt>
 
-					<label>{{ 'label.collections_parent' | translate }}</label>
-					<angucomplete-alt class="small" id="parent" pause="250" selected-object="selectParent" remote-api-handler="collectionsList" title-field="name" minlength="1" focus-first="true" match-class="highlight" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
-					<button ng-click="removeParent()" ng-disabled="!item.parent">{{ 'label.remove' | translate }}</button>
+				<label>{{ 'label.collections_parent' | translate }}</label>
+				<angucomplete-alt class="small" id="parent" pause="250" selected-object="selectParent" remote-api-handler="collectionsList" title-field="name" minlength="1" focus-first="true" match-class="highlight" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
+				<button ng-click="removeParent()" ng-disabled="!item.parent">{{ 'label.remove' | translate }}</button>
 
-					<h2>{{ 'label.templates_attrs' | translate }}</h2>
+				<h2>{{ 'label.templates_attrs' | translate }}</h2>
 
-					<message icon="info-circle" type="info" ng-show="!item.link">{{ 'mesg.templates_empty' | translate }}</message>
-					<message icon="clock-o" type="placeholder" ng-show="item.link && templateKeys === undefined">{{ 'mesg.wait' | translate }}</message>
-					<message icon="exclamation-circle" type="warning" ng-show="item.link && templateKeys && templateKeys.length === 0">{{ 'mesg.templates_no_key' | translate }}</message>
+				<message icon="info-circle" type="info" ng-show="!item.link">{{ 'mesg.templates_empty' | translate }}</message>
+				<message icon="clock-o" type="placeholder" ng-show="item.link && templateKeys === undefined">{{ 'mesg.wait' | translate }}</message>
+				<message icon="exclamation-circle" type="warning" ng-show="item.link && templateKeys && templateKeys.length === 0">{{ 'mesg.templates_no_key' | translate }}</message>
 
-					<table class="keylist" ng-show="templateKeys">
-						<tbody>
-							<tr ng-repeat="key in templateKeys">
-								<td class="key"><input type="text" disabled="disabled" ng-model="key"></td>
-								<td class="value"><input type="text" ng-model="item.attributes[key]"></td>
-							</tr>
-						</tbody>
-					</table>
-				</form>
+				<table class="keylist" ng-show="templateKeys">
+					<tbody>
+						<tr ng-repeat="key in templateKeys">
+							<td class="key"><input type="text" disabled="disabled" ng-model="key"></td>
+							<td class="value"><input type="text" ng-model="item.attributes[key]"></td>
+						</tr>
+					</tbody>
+				</table>
 			</column>
 		</columns>
 	</section>

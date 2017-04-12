@@ -12,25 +12,23 @@
 
 		<columns>
 			<column class="main">
-				<form ng-entersubmit="save()">
-					<h2>{{ 'label.general_info' | translate }}</h2>
+				<h2>{{ 'label.general_info' | translate }}</h2>
 
-					<label>{{ 'label.name' | translate }}
-						<span class="warn" ng-show="conflict.name"><span class="fa fa-warning"></span> {{ 'mesg.name_unique' | translate }}</span>
-						<span class="warn" ng-show="validated && !item.name"><span class="fa fa-warning"></span> {{ 'mesg.name_mandatory' | translate }}</span>
-					</label>
-					<input type="text" ng-class="{danger: conflict.name || validated && !item.name}" ng-model="item.name">
+				<label>{{ 'label.name' | translate }}
+					<span class="warn" ng-show="conflict.name"><span class="fa fa-warning"></span> {{ 'mesg.name_unique' | translate }}</span>
+					<span class="warn" ng-show="validated && !item.name"><span class="fa fa-warning"></span> {{ 'mesg.name_mandatory' | translate }}</span>
+				</label>
+				<input type="text" ng-class="{danger: conflict.name || validated && !item.name}" ng-model="item.name">
 
-					<label>{{ 'label.desc' | translate }}</label>
-					<textarea type="text" ng-model="item.description"></textarea>
+				<label>{{ 'label.desc' | translate }}</label>
+				<textarea type="text" ng-model="item.description"></textarea>
 
-					<h2>{{ 'label.units_params' | translate }}</h2>
+				<h2>{{ 'label.units_params' | translate }}</h2>
 
-					<label>{{ 'label.label' | translate }}
-						<span class="warn" ng-show="validated && !item.label"><span class="fa fa-warning"></span> {{ 'mesg.label_mandatory' | translate }}</span>
-					</label>
-					<input type="text" ng-class="{danger: validated && !item.label}" ng-model="item.label">
-				</form>
+				<label>{{ 'label.label' | translate }}
+					<span class="warn" ng-show="validated && !item.label"><span class="fa fa-warning"></span> {{ 'mesg.label_mandatory' | translate }}</span>
+				</label>
+				<input type="text" ng-class="{danger: validated && !item.label}" ng-model="item.label">
 			</column>
 		</columns>
 	</section>

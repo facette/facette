@@ -105,80 +105,78 @@
 			<h1>{{ 'label.graphs_definition' | translate }}</h1>
 
 			<columns class="split">
-				<column class="main">
-					<form ng-entersubmit="save()">
-						<h2>{{ 'label.general_info' | translate }}</h2>
+				<column class="main" ng-if="!optionsEdit">
+					<h2>{{ 'label.general_info' | translate }}</h2>
 
-						<div class="formblock">
-							<label>{{ 'label.name' | translate }}
-								<span class="warn" ng-show="conflict.name"><span class="fa fa-warning"></span> {{ 'mesg.name_unique' | translate }}</span>
-								<span class="warn" ng-show="validated && !item.name"><span class="fa fa-warning"></span> {{ 'mesg.name_mandatory' | translate }}</span>
-							</label>
-							<input type="text" ng-class="{danger: conflict.name || validated && !item.name}" ng-model="item.name">
+					<div class="formblock">
+						<label>{{ 'label.name' | translate }}
+							<span class="warn" ng-show="conflict.name"><span class="fa fa-warning"></span> {{ 'mesg.name_unique' | translate }}</span>
+							<span class="warn" ng-show="validated && !item.name"><span class="fa fa-warning"></span> {{ 'mesg.name_mandatory' | translate }}</span>
+						</label>
+						<input type="text" ng-class="{danger: conflict.name || validated && !item.name}" ng-model="item.name">
 
-							<label>{{ 'label.desc' | translate }}</label>
-							<textarea type="text" ng-model="item.description"></textarea>
-						</div>
+						<label>{{ 'label.desc' | translate }}</label>
+						<textarea type="text" ng-model="item.description"></textarea>
+					</div>
 
-						<h2>{{ 'label.graphs_params' | translate }}</h2>
+					<h2>{{ 'label.graphs_params' | translate }}</h2>
 
-						<div class="formblock">
-							<label>{{ 'label.title' | translate }}</label>
-							<input type="text" ng-model="item.options.title">
+					<div class="formblock">
+						<label>{{ 'label.title' | translate }}</label>
+						<input type="text" ng-model="item.options.title">
 
-							<label>{{ 'label.alias' | translate }}
-								<span class="warn" ng-show="conflict.alias"><span class="fa fa-warning"></span> {{ 'mesg.alias_unique' | translate }}</span>
-							</label>
-							<input type="text" ng-class="{danger: conflict.alias}" ng-model="item.alias" ng-disabled="item.template">
+						<label>{{ 'label.alias' | translate }}
+							<span class="warn" ng-show="conflict.alias"><span class="fa fa-warning"></span> {{ 'mesg.alias_unique' | translate }}</span>
+						</label>
+						<input type="text" ng-class="{danger: conflict.alias}" ng-model="item.alias" ng-disabled="item.template">
 
-							<columns>
-								<column>
-									<label>{{ 'label.graphs_type' | translate }}</label>
-									<ui-select theme="selectize" ng-model="selectedOptions.main.type">
-										<ui-select-match placeholder="{{ 'label.graphs_type_select' | translate }}">
-											<span ng-bind="$select.selected.name"></span>
-										</ui-select-match>
-										<ui-select-choices repeat="t in (graphTypes | filter: $select.search)">
-											<span ng-bind="t.name"></span>
-										</ui-select-choices>
-									</ui-select>
-								</column>
+						<columns>
+							<column>
+								<label>{{ 'label.graphs_type' | translate }}</label>
+								<ui-select theme="selectize" ng-model="selectedOptions.main.type">
+									<ui-select-match placeholder="{{ 'label.graphs_type_select' | translate }}">
+										<span ng-bind="$select.selected.name"></span>
+									</ui-select-match>
+									<ui-select-choices repeat="t in (graphTypes | filter: $select.search)">
+										<span ng-bind="t.name"></span>
+									</ui-select-choices>
+								</ui-select>
+							</column>
 
-								<column>
-									<label>{{ 'label.graphs_stack_mode' | translate }}</label>
-									<ui-select theme="selectize" ng-model="selectedOptions.main.stack_mode">
-										<ui-select-match placeholder="{{ 'label.graphs_stack_mode_select' | translate }}">
-											<span ng-bind="$select.selected.name"></span>
-										</ui-select-match>
-										<ui-select-choices repeat="t in (graphStackModes | filter: $select.search)">
-											<span ng-bind="t.name"></span>
-										</ui-select-choices>
-									</ui-select>
-								</column>
-							</columns>
+							<column>
+								<label>{{ 'label.graphs_stack_mode' | translate }}</label>
+								<ui-select theme="selectize" ng-model="selectedOptions.main.stack_mode">
+									<ui-select-match placeholder="{{ 'label.graphs_stack_mode_select' | translate }}">
+										<span ng-bind="$select.selected.name"></span>
+									</ui-select-match>
+									<ui-select-choices repeat="t in (graphStackModes | filter: $select.search)">
+										<span ng-bind="t.name"></span>
+									</ui-select-choices>
+								</ui-select>
+							</column>
+						</columns>
 
-							<columns>
-								<column>
-									<label>{{ 'label.graphs_yaxis_legend' | translate }}</label>
-									<input type="text" ng-model="item.options.yaxis_legend">
-								</column>
+						<columns>
+							<column>
+								<label>{{ 'label.graphs_yaxis_legend' | translate }}</label>
+								<input type="text" ng-model="item.options.yaxis_legend">
+							</column>
 
-								<column>
-									<label>{{ 'label.graphs_yaxis_unit' | translate }}</label>
-									<input id="axis-unit-fixed" name="axis-unit" type="radio" value="fixed" ng-model="item.options.yaxis_unit">
-									<label for="axis-unit-fixed" tabindex="0">{{ 'label.graphs_yaxis_unit_fixed' | translate }}</label>
-									<input id="axis-unit-metric" name="axis-unit" type="radio" value="metric" ng-model="item.options.yaxis_unit">
-									<label for="axis-unit-metric" tabindex="0">{{ 'label.graphs_yaxis_unit_metric' | translate }}</label>
-									<input id="axis-unit-binary" name="axis-unit" type="radio" value="binary" ng-model="item.options.yaxis_unit">
-									<label for="axis-unit-binary" tabindex="0">{{ 'label.graphs_yaxis_unit_binary' | translate }}</label>
-								</column>
-							</columns>
-						</div>
+							<column>
+								<label>{{ 'label.graphs_yaxis_unit' | translate }}</label>
+								<input id="axis-unit-fixed" name="axis-unit" type="radio" value="fixed" ng-model="item.options.yaxis_unit">
+								<label for="axis-unit-fixed" tabindex="0">{{ 'label.graphs_yaxis_unit_fixed' | translate }}</label>
+								<input id="axis-unit-metric" name="axis-unit" type="radio" value="metric" ng-model="item.options.yaxis_unit">
+								<label for="axis-unit-metric" tabindex="0">{{ 'label.graphs_yaxis_unit_metric' | translate }}</label>
+								<input id="axis-unit-binary" name="axis-unit" type="radio" value="binary" ng-model="item.options.yaxis_unit">
+								<label for="axis-unit-binary" tabindex="0">{{ 'label.graphs_yaxis_unit_binary' | translate }}</label>
+							</column>
+						</columns>
+					</div>
 
-						<div class="formblock">
-							<button ng-click="editOptions(true)"><span class="fa fa-cog"></span> {{ 'label.options_manage' | translate }}</button>
-						</div>
-					</form>
+					<div class="formblock">
+						<button ng-click="editOptions(true)"><span class="fa fa-cog"></span> {{ 'label.options_manage' | translate }}</button>
+					</div>
 				</column>
 
 				<column class="side" ng-if="!optionsEdit">
@@ -200,44 +198,44 @@
 					</div>
 				</column>
 
-				<column class="side" ng-if="optionsEdit">
+				<column class="main" ng-if="optionsEdit">
+					<h2>{{ 'label.graphs_options' | translate }}</h2>
+
 					<form ng-entersubmit="setOptions()">
-						<h2>{{ 'label.graphs_options' | translate }}</h2>
+						<label>{{ 'label.range' | translate }}</label>
+						<input class="small" type="text" placeholder="-1h" ng-model="options.range">
 
-						<div class="formblock">
-							<label>{{ 'label.range' | translate }}</label>
-							<input class="small" type="text" placeholder="-1h" ng-model="options.range">
+						<label>{{ 'label.graphs_sample' | translate }}</label>
+						<input class="small" type="number" placeholder="400" ng-model="options.sample">
 
-							<label>{{ 'label.graphs_sample' | translate }}</label>
-							<input class="small" type="number" placeholder="400" ng-model="options.sample">
+						<label>{{ 'label.graphs_constants' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
+						<input class="small" type="text" ng-list="," ng-model="options.constants">
 
-							<label>{{ 'label.graphs_constants' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
-							<input class="small" type="text" ng-list="," ng-model="options.constants">
+						<label>{{ 'label.graphs_percentiles' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
+						<input class="small" type="text" ng-list="," ng-model="options.percentiles">
 
-							<label>{{ 'label.graphs_percentiles' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
-							<input class="small" type="text" ng-list="," ng-model="options.percentiles">
-
-							<label>{{ 'label.refresh_interval' | translate }} <span class="note">{{ 'label.refresh_interval_unit' | translate }}</span></label>
-							<input class="small" type="number" ng-model="options.refresh_interval">
-						</div>
-
-						<div class="formblock">
-							<button class="danger" ng-click="editOptions(false)">{{ 'label.cancel' | translate }}</button>
-							<button ng-click="setOptions()">{{ 'label.ok' | translate }}</button>
-						</div>
+						<label>{{ 'label.refresh_interval' | translate }} <span class="note">{{ 'label.refresh_interval_unit' | translate }}</span></label>
+						<input class="small" type="number" ng-model="options.refresh_interval">
 					</form>
 				</column>
 			</columns>
 		</section>
 
 		<footer>
-			<button class="extra" ng-click="reset()" ng-disabled="!modified" ng-if="id != 'add'"><span class="fa fa-undo"></span> {{ 'label.graphs_reset' | translate }}</button>
-			<button class="danger" ng-click="cancel()">{{ 'label.cancel' | translate }}</button>
-			<button ng-click="switch(step - 1)" ng-disabled="step == 1 || optionsEdit"><span class="fa fa-chevron-circle-left"></span> {{ 'label.prev' | translate }}</button>
-			<button ng-click="switch(step + 1)" ng-disabled="!item.groups || item.groups.length === 0 || step == 2 || optionsEdit">{{ 'label.next' | translate }} <span class="fa fa-chevron-circle-right"></span></button>
-			<button ng-click="save()" ng-disabled="step != 2 || optionsEdit" ng-show="!item.template && !altMode">{{ 'label.graphs_save' | translate }}</button>
-			<button ng-click="save(true)" ng-disabled="step != 2 || optionsEdit" ng-show="!item.template && altMode">{{ 'label.save_go' | translate }}</button>
-			<button ng-click="save()" ng-disabled="step != 2 || optionsEdit" ng-show="item.template">{{ 'label.templates_save' | translate }}</button>
+			<div ng-if="!optionsEdit">
+				<button class="extra" ng-click="reset()" ng-disabled="!modified" ng-if="id != 'add'"><span class="fa fa-undo"></span> {{ 'label.graphs_reset' | translate }}</button>
+				<button class="danger" ng-click="cancel()">{{ 'label.cancel' | translate }}</button>
+				<button ng-click="switch(step - 1)" ng-disabled="step == 1 || optionsEdit"><span class="fa fa-chevron-circle-left"></span> {{ 'label.prev' | translate }}</button>
+				<button ng-click="switch(step + 1)" ng-disabled="!item.groups || item.groups.length === 0 || step == 2 || optionsEdit">{{ 'label.next' | translate }} <span class="fa fa-chevron-circle-right"></span></button>
+				<button ng-click="save()" ng-disabled="step != 2 || optionsEdit" ng-show="!item.template && !altMode">{{ 'label.graphs_save' | translate }}</button>
+				<button ng-click="save(true)" ng-disabled="step != 2 || optionsEdit" ng-show="!item.template && altMode">{{ 'label.save_go' | translate }}</button>
+				<button ng-click="save()" ng-disabled="step != 2 || optionsEdit" ng-show="item.template">{{ 'label.templates_save' | translate }}</button>
+			</div>
+
+			<div ng-if="optionsEdit">
+				<button class="danger" ng-click="editOptions(false)">{{ 'label.cancel' | translate }}</button>
+				<button ng-click="setOptions()">{{ 'label.ok' | translate }}</button>
+			</div>
 		</footer>
 	</div>
 
@@ -285,38 +283,36 @@
 
 		<columns class="split">
 			<column class="main">
-				<form ng-entersubmit="save()">
-					<h2>{{ 'label.general_info' | translate }}</h2>
+				<h2>{{ 'label.general_info' | translate }}</h2>
 
-					<label>{{ 'label.name' | translate }}
-						<span class="warn" ng-show="conflict.name"><span class="fa fa-warning"></span> {{ 'mesg.name_unique' | translate }}</span>
-						<span class="warn" ng-show="validated && !item.name"><span class="fa fa-warning"></span> {{ 'mesg.name_mandatory' | translate }}</span>
-					</label>
-					<input type="text" ng-class="{danger: conflict.name || validated && !item.name}" ng-model="item.name">
+				<label>{{ 'label.name' | translate }}
+					<span class="warn" ng-show="conflict.name"><span class="fa fa-warning"></span> {{ 'mesg.name_unique' | translate }}</span>
+					<span class="warn" ng-show="validated && !item.name"><span class="fa fa-warning"></span> {{ 'mesg.name_mandatory' | translate }}</span>
+				</label>
+				<input type="text" ng-class="{danger: conflict.name || validated && !item.name}" ng-model="item.name">
 
-					<label>{{ 'label.alias' | translate }}
-						<span class="warn" ng-show="conflict.alias"><span class="fa fa-warning"></span> {{ 'mesg.alias_unique' | translate }}</span>
-					</label>
-					<input type="text" ng-class="{danger: conflict.alias}" ng-model="item.alias">
+				<label>{{ 'label.alias' | translate }}
+					<span class="warn" ng-show="conflict.alias"><span class="fa fa-warning"></span> {{ 'mesg.alias_unique' | translate }}</span>
+				</label>
+				<input type="text" ng-class="{danger: conflict.alias}" ng-model="item.alias">
 
-					<label>{{ 'label.templates_source' | translate }}</label>
-					<angucomplete-alt class="small" id="template" pause="250" selected-object="selectTemplate" remote-api-handler="templateSources" title-field="name" minlength="1" focus-first="true" match-class="highlight" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}" ng-class="{danger: validated && !item.link}"></angucomplete-alt>
+				<label>{{ 'label.templates_source' | translate }}</label>
+				<angucomplete-alt class="small" id="template" pause="250" selected-object="selectTemplate" remote-api-handler="templateSources" title-field="name" minlength="1" focus-first="true" match-class="highlight" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}" ng-class="{danger: validated && !item.link}"></angucomplete-alt>
 
-					<h2>{{ 'label.templates_attrs' | translate }}</h2>
+				<h2>{{ 'label.templates_attrs' | translate }}</h2>
 
-					<message icon="info-circle" type="info" ng-show="!item.link">{{ 'mesg.templates_empty' | translate }}</message>
-					<message icon="clock-o" type="placeholder" ng-show="item.link && templateKeys === undefined">{{ 'mesg.wait' | translate }}</message>
-					<message icon="exclamation-circle" type="warning" ng-show="item.link && templateKeys && templateKeys.length === 0">{{ 'mesg.templates_no_key' | translate }}</message>
+				<message icon="info-circle" type="info" ng-show="!item.link">{{ 'mesg.templates_empty' | translate }}</message>
+				<message icon="clock-o" type="placeholder" ng-show="item.link && templateKeys === undefined">{{ 'mesg.wait' | translate }}</message>
+				<message icon="exclamation-circle" type="warning" ng-show="item.link && templateKeys && templateKeys.length === 0">{{ 'mesg.templates_no_key' | translate }}</message>
 
-					<table class="keylist" ng-show="templateKeys">
-						<tbody>
-							<tr ng-repeat="key in templateKeys">
-								<td class="key"><input type="text" disabled="disabled" ng-model="key"></td>
-								<td class="value"><input type="text" ng-model="item.attributes[key]"></td>
-							</tr>
-						</tbody>
-					</table>
-				</form>
+				<table class="keylist" ng-show="templateKeys">
+					<tbody>
+						<tr ng-repeat="key in templateKeys">
+							<td class="key"><input type="text" disabled="disabled" ng-model="key"></td>
+							<td class="value"><input type="text" ng-model="item.attributes[key]"></td>
+						</tr>
+					</tbody>
+				</table>
 			</column>
 
 			<column class="side">

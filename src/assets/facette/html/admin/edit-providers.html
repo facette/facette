@@ -12,41 +12,39 @@
 
 		<columns>
 			<column class="main">
-				<form ng-entersubmit="save()">
-					<h2>{{ 'label.general_info' | translate }}</h2>
+				<h2>{{ 'label.general_info' | translate }}</h2>
 
-					<label>{{ 'label.name' | translate }}
-						<span class="warn" ng-show="conflict.name"><span class="fa fa-warning"></span> {{ 'mesg.name_unique' | translate }}</span>
-						<span class="warn" ng-show="validated && !item.name"><span class="fa fa-warning"></span> {{ 'mesg.name_mandatory' | translate }}</span>
-					</label>
-					<input type="text" ng-class="{danger: conflict.name || validated && !item.name}" ng-model="item.name">
+				<label>{{ 'label.name' | translate }}
+					<span class="warn" ng-show="conflict.name"><span class="fa fa-warning"></span> {{ 'mesg.name_unique' | translate }}</span>
+					<span class="warn" ng-show="validated && !item.name"><span class="fa fa-warning"></span> {{ 'mesg.name_mandatory' | translate }}</span>
+				</label>
+				<input type="text" ng-class="{danger: conflict.name || validated && !item.name}" ng-model="item.name">
 
-					<label>{{ 'label.desc' | translate }}</label>
-					<textarea type="text" ng-model="item.description"></textarea>
+				<label>{{ 'label.desc' | translate }}</label>
+				<textarea type="text" ng-model="item.description"></textarea>
 
-					<h2>{{ 'label.providers_params' | translate }}</h2>
+				<h2>{{ 'label.providers_params' | translate }}</h2>
 
-					<label>{{ 'label.connectors_type' | translate }}</label>
-					<ui-select class="small" theme="selectize" ng-class="{danger: validated && !item.connector}" ng-model="item.connector">
-						<ui-select-match placeholder="{{ 'label.connectors_type_select' | translate }}">
-							<span ng-bind="$select.selected"></span>
-						</ui-select-match>
-						<ui-select-choices repeat="t in (connectorTypes | filter: $select.search)">
-							<span ng-bind="t"></span>
-						</ui-select-choices>
-					</ui-select>
-					<button type="button" ng-click="switch('settings')" ng-show="item.connector"><span class="fa fa-cog"></span> {{ 'label.connectors_configure' | translate }}</button>
+				<label>{{ 'label.connectors_type' | translate }}</label>
+				<ui-select class="small" theme="selectize" ng-class="{danger: validated && !item.connector}" ng-model="item.connector">
+					<ui-select-match placeholder="{{ 'label.connectors_type_select' | translate }}">
+						<span ng-bind="$select.selected"></span>
+					</ui-select-match>
+					<ui-select-choices repeat="t in (connectorTypes | filter: $select.search)">
+						<span ng-bind="t"></span>
+					</ui-select-choices>
+				</ui-select>
+				<button type="button" ng-click="switch('settings')" ng-show="item.connector"><span class="fa fa-cog"></span> {{ 'label.connectors_configure' | translate }}</button>
 
-					<label>{{ 'label.refresh_interval' | translate }}</label>
-					<input class="small" type="number" ng-model="item.refresh_interval">
+				<label>{{ 'label.refresh_interval' | translate }}</label>
+				<input class="small" type="number" ng-model="item.refresh_interval">
 
-					<label>{{ 'label.providers_priority' | translate }}</label>
-					<input class="small" type="number" ng-model="item.priority">
+				<label>{{ 'label.providers_priority' | translate }}</label>
+				<input class="small" type="number" ng-model="item.priority">
 
-					<label>{{ 'label.filters' | translate }}</label>
-					<button type="button" ng-click="switch('filters')"><span class="fa fa-cog"></span> {{ 'label.filters_manage' | translate }}</button>
-					<span class="note">{{ 'mesg.filters_count' | translate:{count: (item.filters.length || 0)} }}</span>
-				</form>
+				<label>{{ 'label.filters' | translate }}</label>
+				<button type="button" ng-click="switch('filters')"><span class="fa fa-cog"></span> {{ 'label.filters_manage' | translate }}</button>
+				<span class="note">{{ 'mesg.filters_count' | translate:{count: (item.filters.length || 0)} }}</span>
 			</column>
 		</columns>
 	</section>

@@ -35,7 +35,6 @@
 								<menuitem icon="info-circle" type="button" tooltip-data="i" tooltip-formatter="formatBasicTooltip" tooltip-position="bottom"></menuitem>
 								<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ i.id }}" icon="pencil" title="{{ 'label.' + section + '_edit' | translate }}" type="button"></menuitem>
 								<menuitem icon="clone" title="{{ 'label.' + section + '_clone' | translate }}" type="button" ng-click="clone(i)"></menuitem>
-								<menuitem href="{{ ::baseURL }}browse/{{ section }}/{{ i.id }}" icon="arrow-circle-right" title="{{ 'label.' + section + '_goto' | translate }}" type="button" ng-if="section == 'collections' || section == 'graphs'"></menuitem>
 								<menuitem icon="refresh" title="{{ 'label.providers_refresh' | translate }}" type="button" ng-click="refreshProvider(i)" ng-disabled="i.refreshing" ng-show="i.enabled"></menuitem>
 							</menu>
 						</div>

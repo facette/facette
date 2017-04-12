@@ -12,25 +12,23 @@
 
 		<columns>
 			<column class="main">
-				<form ng-entersubmit="save()">
-					<h2>{{ 'label.general_info' | translate }}</h2>
+				<h2>{{ 'label.general_info' | translate }}</h2>
 
-					<label>{{ 'label.name' | translate }}
-						<span class="warn" ng-show="conflict.name"><span class="fa fa-warning"></span> {{ 'mesg.name_unique' | translate }}</span>
-						<span class="warn" ng-show="validated && !item.name"><span class="fa fa-warning"></span> {{ 'mesg.name_mandatory' | translate }}</span>
-					</label>
-					<input type="text" ng-class="{danger: conflict.name || validated && !item.name}" ng-model="item.name">
+				<label>{{ 'label.name' | translate }}
+					<span class="warn" ng-show="conflict.name"><span class="fa fa-warning"></span> {{ 'mesg.name_unique' | translate }}</span>
+					<span class="warn" ng-show="validated && !item.name"><span class="fa fa-warning"></span> {{ 'mesg.name_mandatory' | translate }}</span>
+				</label>
+				<input type="text" ng-class="{danger: conflict.name || validated && !item.name}" ng-model="item.name">
 
-					<label>{{ 'label.desc' | translate }}</label>
-					<textarea type="text" ng-model="item.description"></textarea>
+				<label>{{ 'label.desc' | translate }}</label>
+				<textarea type="text" ng-model="item.description"></textarea>
 
-					<h2>{{ 'label.scales_params' | translate }}</h2>
+				<h2>{{ 'label.scales_params' | translate }}</h2>
 
-					<label>{{ 'label.value' | translate }}
-						<span class="warn" ng-show="validated && !item.value"><span class="fa fa-warning"></span> {{ 'mesg.value_mandatory' | translate }}</span>
-					</label>
-					<input type="number" step="any" ng-class="{danger: validated && !item.value}" ng-model="item.value">
-				</form>
+				<label>{{ 'label.value' | translate }}
+					<span class="warn" ng-show="validated && !item.value"><span class="fa fa-warning"></span> {{ 'mesg.value_mandatory' | translate }}</span>
+				</label>
+				<input type="number" step="any" ng-class="{danger: validated && !item.value}" ng-model="item.value">
 			</column>
 		</columns>
 	</section>
