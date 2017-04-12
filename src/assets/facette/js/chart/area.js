@@ -9,11 +9,13 @@ chart.fn.drawArea = function() {
     }
 
     $$.area = d3.area()
+        .defined(function(a) { return a.y1 !== null && a.y1 !== undefined; })
         .x(function(a) { return $$.xScale(a.x); })
         .y0(function(a) { return $$.yScale(a.y0 || 0); })
         .y1(function(a) { return $$.yScale(a.y1); });
 
     $$.line = d3.line()
+        .defined($$.area.defined())
         .x(function(a) { return $$.xScale(a.x); })
         .y(function(a) { return $$.yScale(a.y1); });
 
