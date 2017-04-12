@@ -174,6 +174,11 @@ app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope
 
     // Handle page title
     $rootScope.setTitle = function(parts) {
+        if (!parts) {
+            $rootScope.title = null;
+            return;
+        }
+
         $translate(parts).then(function(data) {
             var title = [];
 

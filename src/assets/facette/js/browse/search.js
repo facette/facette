@@ -1,6 +1,11 @@
-app.controller('BrowseSearchController', function($location, $scope, $window, browseCollection, libraryAction) {
+app.controller('BrowseSearchController', function($location, $rootScope, $scope, $window, browseCollection,
+    libraryAction) {
+
     $scope.collections = {};
     $scope.collectionsLoaded = false;
+
+    // Set page title
+    $rootScope.setTitle();
 
     // Register scope functions
     $scope.searchHandler = function(term) {
