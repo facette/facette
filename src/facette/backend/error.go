@@ -17,12 +17,8 @@ var (
 	ErrInvalidName = errors.New("invalid name")
 	// ErrInvalidParent represents an invalid parent error.
 	ErrInvalidParent = errors.New("invalid parent")
-	// ErrInvalidScale represents an invalid scale value error.
-	ErrInvalidScale = errors.New("invalid scale value")
 	// ErrInvalidSlice represents an invalid slice error.
 	ErrInvalidSlice = errors.New("invalid slice")
-	// ErrInvalidUnit represents an invalid unit label error.
-	ErrInvalidUnit = errors.New("invalid unit label")
 	// ErrItemNotExist represents a non-existent item error.
 	ErrItemNotExist = errors.New("item not found")
 	// ErrMissingBackendConfig represents a missing backend configuration error.

@@ -8,9 +8,7 @@ var catalogSections = [
         'collections',
         'graphs',
         'sourcegroups',
-        'metricgroups',
-        'scales',
-        'units'
+        'metricgroups'
     ],
 
     filterActions = [

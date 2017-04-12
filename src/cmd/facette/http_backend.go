@@ -23,8 +23,6 @@ var backendTypes = map[string]reflect.Type{
 	"graphs":       reflect.TypeOf(backend.Graph{}),
 	"sourcegroups": reflect.TypeOf(backend.SourceGroup{}),
 	"metricgroups": reflect.TypeOf(backend.MetricGroup{}),
-	"scales":       reflect.TypeOf(backend.Scale{}),
-	"units":        reflect.TypeOf(backend.Unit{}),
 }
 
 func (w *httpWorker) httpHandleBackendCreate(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
@@ -104,8 +102,7 @@ func (w *httpWorker) httpHandleBackendCreate(ctx context.Context, rw http.Respon
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusConflict)
 
 		case backend.ErrEmptyGraph, backend.ErrEmptyGroup, backend.ErrIncompatibleAttributes, backend.ErrInvalidName,
-			backend.ErrInvalidAlias, backend.ErrInvalidParent, backend.ErrInvalidScale, backend.ErrInvalidUnit,
-			backend.ErrResourceMissingData:
+			backend.ErrInvalidAlias, backend.ErrInvalidParent, backend.ErrResourceMissingData:
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusBadRequest)
 
 		case backend.ErrResourceMissingDependency:
@@ -422,8 +419,7 @@ func (w *httpWorker) httpHandleBackendUpdate(ctx context.Context, rw http.Respon
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
 
 		case backend.ErrEmptyGraph, backend.ErrEmptyGroup, backend.ErrIncompatibleAttributes, backend.ErrInvalidName,
-			backend.ErrInvalidAlias, backend.ErrInvalidParent, backend.ErrInvalidScale, backend.ErrInvalidUnit,
-			backend.ErrResourceMissingData:
+			backend.ErrInvalidAlias, backend.ErrInvalidParent, backend.ErrResourceMissingData:
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusBadRequest)
 
 		case backend.ErrResourceConflict, backend.ErrResourceMissingDependency:

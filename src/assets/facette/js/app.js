@@ -93,14 +93,6 @@ app.config(function($httpProvider, $locationProvider, $resourceProvider, $routeP
             controller: 'AdminEditGroupController',
             _type: 'metricgroups'
         })
-        .when('/admin/scales/:id', {
-            templateUrl: 'templates/admin/edit-scales.html',
-            controller: 'AdminEditScaleController'
-        })
-        .when('/admin/units/:id', {
-            templateUrl: 'templates/admin/edit-units.html',
-            controller: 'AdminEditUnitController'
-        })
         .when('/admin/providers/:id', {
             templateUrl: 'templates/admin/edit-providers.html',
             controller: 'AdminEditProviderController'

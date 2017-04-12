@@ -19,10 +19,7 @@
 		</columns>
 
 		<label>{{ 'label.scale' | translate }}</label>
-		<angucomplete-alt id="scale" pause="250" input-changed="changedCompletion" selected-object="selectScale" remote-api-handler="scaleValues" title-field="value" description-field="name" minlength="1" focus-first="true" match-class="highlight" override-suggestions="true" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
-
-		<label>{{ 'label.unit' | translate }}</label>
-		<angucomplete-alt id="unit" pause="250" input-changed="changedCompletion" selected-object="selectUnit" remote-api-handler="unitValues" title-field="label" description-field="name" minlength="1" focus-first="true" match-class="highlight" override-suggestions="true" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
+		<input type="number" step="any" ng-model="groupItem.options.scale">
 
 		<label>{{ 'label.series_operator' | translate }}</label>
 		<ui-select theme="selectize" ng-model="selectedOptions.group.operator">
@@ -64,10 +61,7 @@
 		</columns>
 
 		<label>{{ 'label.scale' | translate }}</label>
-		<angucomplete-alt id="scale" pause="250" input-changed="changedCompletion" selected-object="selectScale" remote-api-handler="scaleValues" title-field="value" description-field="name" minlength="1" focus-first="true" match-class="highlight" override-suggestions="true" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
-
-		<label>{{ 'label.unit' | translate }}</label>
-		<angucomplete-alt id="unit" pause="250" input-changed="changedCompletion" selected-object="selectUnit" remote-api-handler="unitValues" title-field="label" description-field="name" minlength="1" focus-first="true" match-class="highlight" override-suggestions="true" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
+		<input type="number" step="any" ng-model="groupItem.series[seriesCurrent].options.scale">
 	</div>
 
 	<div class="formblock actions">

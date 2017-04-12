@@ -380,16 +380,6 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
             }
 
             $timeout(function() {
-                var options = (isGroup ?
-                    $scope.groupItem.options : $scope.groupItem.series[$scope.seriesCurrent].options) || {};
-
-                if (options.scale) {
-                    $scope.$broadcast('angucomplete-alt:changeInput', 'scale', String(options.scale));
-                }
-                if (options.unit) {
-                    $scope.$broadcast('angucomplete-alt:changeInput', 'unit', options.unit);
-                }
-
                 angular.element('.ngdialog-content :input:visible:first').select();
             }, 50);
         };
@@ -798,14 +788,6 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
                     library.list({type: 'metricgroups', filter: 'glob:*' + term + '*'}).$promise,
                     catalog.list({type: 'metrics', filter: 'glob:*' + term + '*'}).$promise
                 ]);
-            };
-
-            $scope.scaleValues = function(term) {
-                return library.list({type: 'scales', fields: 'id,name,value', filter: 'glob:*' + term + '*'}).$promise;
-            };
-
-            $scope.unitValues = function(term) {
-                return library.list({type: 'units', fields: 'id,name,label', filter: 'glob:*' + term + '*'}).$promise;
             };
 
             $scope.groupOperators = [

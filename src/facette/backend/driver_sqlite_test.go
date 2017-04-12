@@ -23,11 +23,3 @@ func Test_SQLite_SourceGroup(t *testing.T) {
 func Test_SQLite_MetricGroup(t *testing.T) {
 	execTestMetricGroup(&sqliteConfig, t)
 }
-
-func Test_SQLite_Scale(t *testing.T) {
-	execTestScale(&sqliteConfig, t)
-}
-
-func Test_SQLite_Unit(t *testing.T) {
-	execTestUnit(&sqliteConfig, t)
-}

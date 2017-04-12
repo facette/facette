@@ -23,11 +23,3 @@ func Test_MySQL_SourceGroup(t *testing.T) {
 func Test_MySQL_MetricGroup(t *testing.T) {
 	execTestMetricGroup(&mysqlConfig, t)
 }
-
-func Test_MySQL_Scale(t *testing.T) {
-	execTestScale(&mysqlConfig, t)
-}
-
-func Test_MySQL_Unit(t *testing.T) {
-	execTestUnit(&mysqlConfig, t)
-}

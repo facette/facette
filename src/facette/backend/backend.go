@@ -73,8 +73,6 @@ func NewBackend(settings *mapper.Map, log *logger.Logger) (*Backend, error) {
 	// Initialize database schema
 	if err := db.Migrate(
 		Provider{},
-		Scale{},
-		Unit{},
 		SourceGroup{},
 		MetricGroup{},
 		Graph{},

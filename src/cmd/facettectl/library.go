@@ -49,23 +49,19 @@ type collectionRef struct {
 var (
 	// Backend types are listed according to their restoration order
 	backendTypes = []string{
-		"units",
-		"scales",
-		"metricgroups",
-		"sourcegroups",
-		"graphs",
 		"collections",
+		"graphs",
+		"sourcegroups",
+		"metricgroups",
 		"providers",
 	}
 
 	backendAttrs = map[string]backendType{
 		"collections":  {"library/", reflect.TypeOf(backend.Collection{})},
 		"graphs":       {"library/", reflect.TypeOf(backend.Graph{})},
+		"sourcegroups": {"library/", reflect.TypeOf(backend.SourceGroup{})},
 		"metricgroups": {"library/", reflect.TypeOf(backend.MetricGroup{})},
 		"providers":    {"", reflect.TypeOf(backend.Provider{})},
-		"scales":       {"library/", reflect.TypeOf(backend.Scale{})},
-		"sourcegroups": {"library/", reflect.TypeOf(backend.SourceGroup{})},
-		"units":        {"library/", reflect.TypeOf(backend.Unit{})},
 	}
 )
 

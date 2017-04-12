@@ -23,11 +23,3 @@ func Test_PostgreSQL_SourceGroup(t *testing.T) {
 func Test_PostgreSQL_MetricGroup(t *testing.T) {
 	execTestMetricGroup(&pgsqlConfig, t)
 }
-
-func Test_PostgreSQL_Scale(t *testing.T) {
-	execTestScale(&pgsqlConfig, t)
-}
-
-func Test_PostgreSQL_Unit(t *testing.T) {
-	execTestUnit(&pgsqlConfig, t)
-}

@@ -15,8 +15,6 @@ var libraryTypes = set.New(
 	"graphs",
 	"sourcegroups",
 	"metricgroups",
-	"scales",
-	"units",
 )
 
 func (w *httpWorker) httpHandleLibraryRoot(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
