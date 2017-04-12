@@ -14,8 +14,8 @@ import (
 type libraryCollectionTreeEntry struct {
 	ID       string                    `json:"id"`
 	Label    string                    `json:"label"`
-	Parent   string                    `json:"parent"`
-	Children libraryCollectionTreeList `json:"children"`
+	Parent   string                    `json:"parent,omitempty"`
+	Children libraryCollectionTreeList `json:"children,omitempty"`
 }
 
 type libraryCollectionTreeList []*libraryCollectionTreeEntry
