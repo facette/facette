@@ -1,5 +1,5 @@
-app.controller('AdminListController', function($q, $rootScope, $routeParams, $scope, $timeout, $translate, library,
-    catalog, providers, providersAction) {
+app.controller('AdminListController', function($location, $q, $rootScope, $routeParams, $scope, $timeout, $translate,
+    library, catalog, providers, providersAction) {
 
     var factory;
 
@@ -10,7 +10,7 @@ app.controller('AdminListController', function($q, $rootScope, $routeParams, $sc
         $routeParams.templates !== undefined;
 
     $scope.form = {
-        search: ''
+        search: $routeParams.search || ''
     };
 
     $scope.page = 1;
@@ -217,6 +217,7 @@ app.controller('AdminListController', function($q, $rootScope, $routeParams, $sc
 
         // Trigger search apply
         $scope.searchTimeout = $timeout(function() {
+            $location.skipReload().search('search', newValue || null).replace();
             $scope.refresh();
         }, 500);
     });

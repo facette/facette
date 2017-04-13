@@ -153,7 +153,7 @@ app.config(function($httpProvider, $locationProvider, $resourceProvider, $routeP
     treeConfig.defaultCollapsed = true;
 });
 
-app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope, $timeout, $translate, $window,
+app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope, $route, $timeout, $translate, $window,
     ngDialog, storage) {
 
     $rootScope.baseURL = $browser.baseHref();
@@ -261,6 +261,18 @@ app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope
         location.reload();
     };
 
+    // Extend location
+    $location.skipReload = function() {
+        var currentRoute = $route.current;
+
+        var unbind = $rootScope.$on('$locationChangeSuccess', function(e) {
+            $route.current = currentRoute;
+            unbind();
+        });
+
+        return $location;
+    };
+
     // Attach events
     $pageVisibility.$on('pageFocused', function(e) {
         $rootScope.hasFocus = true;
@@ -284,28 +296,30 @@ app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope
     });
 
     $rootScope.$on("$locationChangeStart", function(e) {
+        if (!$rootScope.preventedUnload) {
+            return;
+        }
+
         var path = $location.path(),
             search = $location.search();
 
-        if ($rootScope.preventedUnload) {
-            e.preventDefault();
+        e.preventDefault();
 
-            $rootScope.showModal({
-                type: dialogTypeConfirm,
-                message: unloadFunc(),
-                labels: {
-                    validate: 'label.leave_page'
-                },
-                danger: true
-            }, function(data) {
-                if (data === undefined) {
-                    return;
-                }
+        $rootScope.showModal({
+            type: dialogTypeConfirm,
+            message: unloadFunc(),
+            labels: {
+                validate: 'label.leave_page'
+            },
+            danger: true
+        }, function(data) {
+            if (data === undefined) {
+                return;
+            }
 
-                $rootScope.preventUnload(false);
-                $location.path(path).search(search);
-            });
-        }
+            $rootScope.preventUnload(false);
+            $location.path(path).search(search);
+        });
     });
 
     $rootScope.$on("$routeChangeSuccess", function() {
