@@ -225,74 +225,65 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
         }
     };
 
-    $scope.editOptions = function(entry) {
+    $scope.editGraphEntry = function(entry) {
         if (entry === null) {
-            $scope.optionsEdit = null;
+            $scope.graphEntryEdit = null;
             $scope.entryOptions = null;
+            $scope.entryAttrs = null;
             return;
         }
 
+        var entryAttrs = angular.copy(entry.attributes || {});
+        angular.forEach($scope.graphData[entry.id].templateKeys, function(key) {
+            if (!entryAttrs[key]) {
+                entryAttrs[key] = '';
+            }
+        });
+
         $scope.entryOptions = angular.copy(entry.options || {});
-        $scope.optionsEdit = entry;
+        $scope.entryAttrs = entryAttrs;
+        $scope.graphEntryEdit = entry;
     };
 
-    $scope.setOptions = function() {
-        var idx = $scope.item.entries.indexOf($scope.optionsEdit);
+    $scope.setGraphEntry = function() {
+        var idx = $scope.item.entries.indexOf($scope.graphEntryEdit);
         if (idx == -1) {
             return;
         }
 
-        $scope.item.entries[idx].options = angular.extend($scope.item.entries[idx].options || {}, $scope.entryOptions);
-        $scope.editOptions(null);
+        var entry = $scope.item.entries[idx];
+        entry.options = angular.extend(entry.options || {}, $scope.entryOptions);
+        entry.attributes = angular.extend(entry.attributes || {}, $scope.entryAttrs);
+
+        $scope.editGraphEntry(null);
     };
 
-    $scope.editAttrs = function(entry, main) {
+    $scope.editAttrs = function(entry) {
         if (entry === null) {
             $scope.attrsEdit = null;
             $scope.entryAttrs = null;
             return;
         }
 
-        if (main) {
-            $scope.entryAttrs = angular.copy($scope.item.attributes || {});
-
-            angular.forEach($scope.graphData, function(entry) {
-                angular.forEach(entry.templateKeys, function(key) {
-                    if (!$scope.entryAttrs[key]) {
-                        $scope.entryAttrs[key] = '';
-                    }
-                });
-            });
-        } else {
-            $scope.entryAttrs = angular.copy(entry.attributes || {});
-
-            angular.forEach($scope.graphData[entry.id].templateKeys, function(key) {
-                if (!$scope.entryAttrs[key]) {
-                    $scope.entryAttrs[key] = '';
+        var entryAttrs = angular.copy($scope.item.attributes || {});
+        angular.forEach($scope.graphData, function(entry) {
+            angular.forEach(entry.templateKeys, function(key) {
+                if (!entryAttrs[key]) {
+                    entryAttrs[key] = '';
                 }
             });
-        }
+        });
 
+        $scope.entryAttrs = entryAttrs;
         $scope.attrsEdit = entry;
 
         // Select first field
         $timeout(function() { angular.element('.pane .keylist .value:first :input').select(); }, 0);
     };
 
-    $scope.setAttrs = function(main) {
-        if (main) {
-            $scope.item.attributes = angular.copy($scope.entryAttrs);
-        } else {
-            var idx = $scope.item.entries.indexOf($scope.attrsEdit);
-            if (idx == -1) {
-                return;
-            }
-
-            $scope.item.entries[idx].attributes = angular.extend($scope.item.entries[idx].attributes || {},
-                $scope.entryAttrs);
-        }
-
-        $scope.editAttrs(null, main);
+    $scope.setAttrs = function() {
+        $scope.item.attributes = angular.copy($scope.entryAttrs);
+        $scope.editAttrs(null);
     };
 
     $scope.selectParent = function(data) {

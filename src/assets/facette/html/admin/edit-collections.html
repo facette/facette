@@ -16,7 +16,7 @@
 		<section ng-pane-step="1">
 			<h1>{{ 'label.collections_definition' | translate }}</h1>
 
-			<columns ng-class="{split: optionsEdit || attrsEdit}">
+			<columns ng-class="{split: graphEntryEdit}">
 				<column class="main">
 					<h2>{{ 'label.graphs_list' | translate }}</h2>
 
@@ -25,7 +25,7 @@
 
 					<list ng-show="state == stateOK && item.entries && item.entries.length > 0">
 						<div as-sortable="listSortControl" ng-model="item.entries">
-							<listrow as-sortable-item="" ng-class="{active: graph.index === $index || optionsEdit === e || attrsEdit === e, disabled: e.options && e.options.enabled === false, locked: graph.index !== undefined && graph.index !== $index || optionsEdit && optionsEdit !== e || attrsEdit && attrsEdit !== e}" ng-repeat="e in item.entries">
+							<listrow as-sortable-item="" ng-class="{active: graph.index === $index || graphEntryEdit === e, disabled: e.options && e.options.enabled === false, locked: graph.index !== undefined && graph.index !== $index || graphEntryEdit && graphEntryEdit !== e}" ng-repeat="e in item.entries">
 								<listcolumn class="handle">
 									<span as-sortable-item-handle="" class="fa fa-ellipsis-v"></span>
 								</listcolumn>
@@ -38,8 +38,7 @@
 										<div class="note error" ng-if="graphFetched && !graphData[e.id]"><span class="fa fa-warning"></span> {{ 'mesg.items_not_found' | translate }}</div>
 										<div class="actions">
 											<menu>
-												<menuitem href="" icon="cog" title="{{ 'label.options_manage' | translate }}" type="button" ng-click="editOptions(e)"></menuitem>
-												<menuitem href="" icon="file-code-o" title="{{ 'label.templates_attrs_manage' | translate }}" type="button" ng-click="editAttrs(e, false)" ng-if="graphData[e.id] && graphData[e.id].template"></menuitem>
+												<menuitem href="" icon="cog" title="{{ 'label.graphs_manage' | translate }}" type="button" ng-click="editGraphEntry(e)"></menuitem>
 												<menuitem href="{{ ::baseURL }}admin/graphs/{{ e.id }}" icon="pencil" title="{{ 'label.graphs_edit' | translate }}" type="button" ng-click="editGraph(e)"></menuitem>
 											</menu>
 										</div>
@@ -60,7 +59,7 @@
 					</list>
 				</column>
 
-				<column class="side" ng-if="!optionsEdit && !attrsEdit">
+				<column class="side" ng-if="!graphEntryEdit">
 					<h2>{{ 'label.graphs_define' | translate }}</h2>
 
 					<div class="formblock">
@@ -74,40 +73,10 @@
 					</div>
 				</column>
 
-				<column class="side" ng-if="optionsEdit">
-					<h2>{{ 'label.graphs_options' | translate }}</h2>
+				<column class="side" ng-if="graphEntryEdit">
+					<h2 ng-if="graphData[graphEntryEdit.id].template">{{ 'label.templates_attrs' | translate }}</h2>
 
-					<div class="formblock">
-						<label>{{ 'label.range' | translate }}</label>
-						<input class="small" type="text" placeholder="{{ graphData[optionsEdit.id].options.range }}" ng-model="entryOptions.range">
-
-						<label>{{ 'label.graphs_sample' | translate }}</label>
-						<input class="small" type="number" placeholder="{{ graphData[optionsEdit.id].options.sample }}" ng-model="entryOptions.sample">
-
-						<label>{{ 'label.graphs_constants' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
-						<input class="small" type="text" placeholder="{{ graphData[optionsEdit.id].options.constants.join(',') }}" ng-list="," ng-model="entryOptions.constants">
-
-						<label>{{ 'label.graphs_percentiles' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
-						<input class="small" type="text" placeholder="{{ graphData[optionsEdit.id].options.percentiles.join(',') }}" ng-list="," ng-model="entryOptions.percentiles">
-
-						<label>{{ 'label.refresh_interval' | translate }} <span class="note">{{ 'label.refresh_interval_unit' | translate }}</span></label>
-						<input class="small" type="number" placeholder="{{ graphData[optionsEdit.id].options.refresh_interval }}" ng-model="entryOptions.refresh_interval">
-
-						<label>{{ 'label.graphs_misc' | translate }}</label>
-						<input id="fold" type="checkbox" tabindex="0" ng-model="entryOptions.folded">
-						<label for="fold">{{ 'label.graphs_fold' | translate }}</label>
-					</div>
-
-					<div class="formblock">
-						<button class="danger" ng-click="editOptions(null)">{{ 'label.cancel' | translate }}</button>
-						<button ng-click="setOptions()">{{ 'label.ok' | translate }}</button>
-					</div>
-				</column>
-
-				<column class="side" ng-if="attrsEdit">
-					<h2>{{ 'label.templates_attrs' | translate }}</h2>
-
-					<div class="formblock">
+					<div class="formblock" ng-if="graphData[graphEntryEdit.id].template">
 						<table class="keylist">
 							<tbody>
 								<tr ng-repeat="(key, _) in entryAttrs">
@@ -118,9 +87,27 @@
 						</table>
 					</div>
 
+					<h2>{{ 'label.graphs_options' | translate }}</h2>
+
 					<div class="formblock">
-						<button class="danger" ng-click="editAttrs(null, false)">{{ 'label.cancel' | translate }}</button>
-						<button ng-click="setAttrs()">{{ 'label.ok' | translate }}</button>
+						<label>{{ 'label.range' | translate }}</label>
+						<input class="small" type="text" placeholder="{{ graphData[graphEntryEdit.id].options.range }}" ng-model="entryOptions.range">
+
+						<label>{{ 'label.graphs_sample' | translate }}</label>
+						<input class="small" type="number" placeholder="{{ graphData[graphEntryEdit.id].options.sample }}" ng-model="entryOptions.sample">
+
+						<label>{{ 'label.graphs_constants' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
+						<input class="small" type="text" placeholder="{{ graphData[graphEntryEdit.id].options.constants.join(',') }}" ng-list="," ng-model="entryOptions.constants">
+
+						<label>{{ 'label.graphs_percentiles' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
+						<input class="small" type="text" placeholder="{{ graphData[graphEntryEdit.id].options.percentiles.join(',') }}" ng-list="," ng-model="entryOptions.percentiles">
+
+						<label>{{ 'label.refresh_interval' | translate }} <span class="note">{{ 'label.refresh_interval_unit' | translate }}</span></label>
+						<input class="small" type="number" placeholder="{{ graphData[graphEntryEdit.id].options.refresh_interval }}" ng-model="entryOptions.refresh_interval">
+
+						<label>{{ 'label.graphs_misc' | translate }}</label>
+						<input id="fold" type="checkbox" tabindex="0" ng-model="entryOptions.folded">
+						<label for="fold">{{ 'label.graphs_fold' | translate }}</label>
 					</div>
 				</column>
 			</columns>
@@ -130,7 +117,7 @@
 			<h1>{{ 'label.collections_definition' | translate }}</h1>
 
 			<columns class="split">
-				<column class="main">
+				<column class="main" ng-if="!attrsEdit">
 					<h2>{{ 'label.general_info' | translate }}</h2>
 
 					<div class="formblock">
@@ -184,7 +171,7 @@
 					</div>
 				</column>
 
-				<column class="side" ng-if="attrsEdit">
+				<column class="main" ng-if="attrsEdit">
 					<h2>{{ 'label.templates_attrs' | translate }}</h2>
 
 					<div class="formblock">
@@ -197,23 +184,30 @@
 							</tbody>
 						</table>
 					</div>
-
-					<div class="formblock">
-						<button class="danger" ng-click="editAttrs(null, false)">{{ 'label.cancel' | translate }}</button>
-						<button ng-click="setAttrs(true)">{{ 'label.ok' | translate }}</button>
-					</div>
 				</column>
 			</columns>
 		</section>
 
 		<footer>
-			<button class="extra" ng-click="reset()" ng-disabled="!modified" ng-if="id != 'add'"><span class="fa fa-undo"></span> {{ 'label.collections_reset' | translate }}</button>
-			<button class="danger" ng-click="cancel()">{{ 'label.cancel' | translate }}</button>
-			<button ng-click="switch(step - 1)" ng-disabled="step == 1"><span class="fa fa-chevron-circle-left"></span> {{ 'label.prev' | translate }}</button>
-			<button ng-click="switch(step + 1)" ng-disabled="step == 2 || graph.index || optionsEdit">{{ 'label.next' | translate }} <span class="fa fa-chevron-circle-right"></span></button>
-			<button ng-click="save()" ng-disabled="step != 2 || attrsEdit" ng-show="!item.template && !altMode">{{ 'label.collections_save' | translate }}</button>
-			<button ng-click="save(true)" ng-disabled="step != 2 || attrsEdit" ng-show="!item.template && altMode">{{ 'label.save_go' | translate }}</button>
-			<button ng-click="save()" ng-disabled="step != 2 || attrsEdit" ng-show="item.template">{{ 'label.templates_save' | translate }}</button>
+			<div ng-show="graphEntryEdit">
+				<button class="danger" ng-click="editGraphEntry(null)">{{ 'label.cancel' | translate }}</button>
+				<button ng-click="setGraphEntry()">{{ 'label.ok' | translate }}</button>
+			</div>
+
+			<div ng-show="attrsEdit">
+				<button class="danger" ng-click="editAttrs(null)">{{ 'label.cancel' | translate }}</button>
+				<button ng-click="setAttrs()">{{ 'label.ok' | translate }}</button>
+			</div>
+
+			<div ng-show="!graphEntryEdit && !attrsEdit">
+				<button class="extra" ng-click="reset()" ng-disabled="!modified" ng-if="id != 'add'"><span class="fa fa-undo"></span> {{ 'label.collections_reset' | translate }}</button>
+				<button class="danger" ng-click="cancel()">{{ 'label.cancel' | translate }}</button>
+				<button ng-click="switch(step - 1)" ng-disabled="step == 1"><span class="fa fa-chevron-circle-left"></span> {{ 'label.prev' | translate }}</button>
+				<button ng-click="switch(step + 1)" ng-disabled="step == 2 || graph.index || graphEntryEdit">{{ 'label.next' | translate }} <span class="fa fa-chevron-circle-right"></span></button>
+				<button ng-click="save()" ng-disabled="step != 2" ng-show="!item.template && !altMode">{{ 'label.collections_save' | translate }}</button>
+				<button ng-click="save(true)" ng-disabled="step != 2" ng-show="!item.template && altMode">{{ 'label.save_go' | translate }}</button>
+				<button ng-click="save()" ng-disabled="step != 2" ng-show="item.template">{{ 'label.templates_save' | translate }}</button>
+			</div>
 		</footer>
 	</div>
 
