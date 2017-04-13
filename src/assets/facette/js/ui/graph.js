@@ -52,15 +52,31 @@ angular.module('facette.ui.graph', [])
         elementTop = $element.offset().top,
         elementWidth = $element.width();
 
-    function applyOptions(options) {
-        angular.extend($scope.options, options);
+    function applyOptions(options, force) {
+        force = typeof force == 'boolean' ? force : false;
+
+        var optionsOrig = angular.copy($scope.options),
+            optionsNew = angular.copy($scope.options);
+
+        angular.extend(optionsNew, options);
 
         if (options.start_time || options.end_time) {
-            delete $scope.options.time;
-            delete $scope.options.range;
+            delete optionsNew.time;
+            delete optionsNew.range;
         } else if (options.time || options.range) {
-            delete $scope.options.start_time;
-            delete $scope.options.end_time;
+            delete optionsNew.start_time;
+            delete optionsNew.end_time;
+        } else {
+            delete optionsNew.time;
+            delete optionsNew.range;
+            delete optionsNew.start_time;
+            delete optionsNew.end_time;
+        }
+
+        $scope.options = optionsNew;
+
+        if (angular.equals(optionsNew, optionsOrig) && force) {
+            updateGraph(optionsNew, null);
         }
     }
 
@@ -404,10 +420,19 @@ angular.module('facette.ui.graph', [])
     };
 
     $scope.propagate = function() {
-        $rootScope.$emit('ApplyGraphOptions', {
-            time: $scope.options.time,
-            range: $scope.options.range
-        });
+        var options = {};
+
+        if ($scope.options.start_time || $scope.options.end_time) {
+            options.start_time = $scope.options.start_time;
+            options.end_time = $scope.options.end_time;
+        } else if ($scope.options.time || $scope.options.range) {
+            options.time = $scope.options.time;
+            options.range = $scope.options.range;
+        } else {
+            options.start_time = options.end_time = options.time = options.range = null;
+        }
+
+        $rootScope.$emit('ApplyGraphOptions', options, true);
     };
 
     $scope.reset = function() {
@@ -523,8 +548,8 @@ angular.module('facette.ui.graph', [])
     // Attach events
     var unregisterCallbacks = [];
 
-    unregisterCallbacks.push($rootScope.$on('ApplyGraphOptions', function(e, options) {
-        applyOptions(options);
+    unregisterCallbacks.push($rootScope.$on('ApplyGraphOptions', function(e, options, force) {
+        applyOptions(options, force);
     }));
 
     unregisterCallbacks.push($rootScope.$on('PropagateCursorPosition', function(e, time, origScope) {
