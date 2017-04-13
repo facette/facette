@@ -52,7 +52,9 @@ app.controller('BrowseGraphController', function($rootScope, $routeParams, $scop
         });
     };
 
-    $scope.setRefresh = function() {
+    $scope.setRefresh = function(e) {
+        e.stopPropagation();
+
         $rootScope.showModal({
             type: dialogTypePrompt,
             message: 'label.graphs_refresh',
