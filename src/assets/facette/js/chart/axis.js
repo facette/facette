@@ -2,12 +2,12 @@ chart.fn.drawAxis = function() {
     var $$ = this;
 
     // Draw Y axis label if any
-    if ($$.config.axis.y.legend) {
+    if ($$.config.axis.y.label) {
         $$.yLegend = $$.mainGroup.append('text')
             .attr('class', 'chart-axis-legend')
             .attr('text-anchor', 'middle')
             .attr('transform', 'translate(0,' + ($$.height / 2) + ') rotate(-90)')
-            .text($$.config.axis.y.legend);
+            .text($$.config.axis.y.label);
     }
 
     // Draw Y axis

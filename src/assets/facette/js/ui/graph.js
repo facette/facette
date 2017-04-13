@@ -99,7 +99,7 @@ angular.module('facette.ui.graph', [])
                     }
                 },
                 y: {
-                    legend: $scope.data.options.yaxis_legend || null,
+                    label: $scope.data.options.yaxis_label || null,
                     tick: {
                         count: 3
                     }

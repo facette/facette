@@ -119,7 +119,7 @@
     "label.graphs_type": "Graph type",
     "label.graphs_type_select": "Select a graph type…",
     "label.graphs_update": "Update graph",
-    "label.graphs_yaxis_legend": "Y-Axis legend",
+    "label.graphs_yaxis_label": "Y-Axis label",
     "label.graphs_yaxis_unit": "Y-Axis unit",
     "label.graphs_yaxis_unit_binary": "Binary",
     "label.graphs_yaxis_unit_fixed": "Fixed",

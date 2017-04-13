@@ -119,7 +119,7 @@
     "label.graphs_type": "Type de graphique",
     "label.graphs_type_select": "Sélectionnez un type…",
     "label.graphs_update": "Mettre à jour",
-    "label.graphs_yaxis_legend": "Légende de l'ordonnée",
+    "label.graphs_yaxis_label": "Label de l'ordonnée",
     "label.graphs_yaxis_unit": "Unité de l'ordonnée",
     "label.graphs_yaxis_unit_binary": "Binaire",
     "label.graphs_yaxis_unit_fixed": "Fixe",
