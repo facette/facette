@@ -1,11 +1,9 @@
 .columns {
 	display: flex;
-	margin: 0 -1rem;
 }
 
-.columns .column {
-	box-sizing: border-box;
-	padding: 0 1rem;
+.columns .column + .column {
+	margin-left: 1rem;
 }
 
 .columns.split .column {

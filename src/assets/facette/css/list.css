@@ -338,11 +338,11 @@ thead .listcolumn.heading {
 	border-top-left-radius: 0;
 }
 
-table.list a {
+table.list a[rel=external] {
 	color: #2980b9;
 }
 
-table.list a .fa:last-child {
+table.list a[rel=external] .fa:last-child {
 	margin-left: 0.25rem;
 	vertical-align: middle;
 }
