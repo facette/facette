@@ -124,6 +124,11 @@ app.config(function($httpProvider, $locationProvider, $resourceProvider, $routeP
                 if (response.status >= 400 && response.status != 404) {
                     $rootScope.$emit('Notify', response.data && response.data.message ?
                         response.data.message : 'an unhandled error has occurred', {type: 'error'});
+
+                    if (response.status == 403) {
+                        // Force read-only recheck
+                        $rootScope.checkReadOnly();
+                    }
                 }
 
                 return $q.reject(response);
@@ -261,6 +266,19 @@ app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope
         location.reload();
     };
 
+    // Handle read-only instance
+    $rootScope.readOnly = false;
+
+    $rootScope.checkReadOnly = function() {
+        info.get(null, function(data) {
+            if (data.read_only) {
+                $rootScope.readOnly = true;
+            }
+        });
+    };
+
+    $rootScope.checkReadOnly();
+
     // Extend location
     $location.skipReload = function() {
         var currentRoute = $route.current;
@@ -351,13 +369,4 @@ app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope
     });
 
     angular.element($window).trigger('resize');
-
-    // Check whether instance is in read-only mode or not
-    $rootScope.readOnly = false;
-
-    info.get(null, function(data) {
-        if (data.read_only) {
-            $rootScope.readOnly = true;
-        }
-    });
 });
