@@ -35,7 +35,6 @@ aside header {
 }
 
 aside header .logo {
-	flex: 1;
 	line-height: 3.5rem;
 	padding: 0 1rem;
 }
@@ -47,6 +46,8 @@ aside header .logo img {
 
 aside header .menu {
 	background-color: inherit;
+	flex: 1;
+	justify-content: flex-end;
 	transition: transform .3s ease-in-out;
 }
 
