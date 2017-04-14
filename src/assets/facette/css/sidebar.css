@@ -71,9 +71,15 @@ aside.collapse header .menuitem.button:hover a {
 }
 
 aside nav {
+	display: flex;
 	flex: 1;
+	flex-direction: column;
 	overflow-y: auto;
 	padding: 1rem 0 5rem;
+}
+
+aside nav .menu {
+	flex: 1;
 }
 
 aside nav .menuitem {
@@ -173,6 +179,10 @@ aside nav > .toggle {
 	position: fixed;
 	text-align: center;
 	width: 22rem;
+}
+
+aside nav .message {
+	margin: 2rem 2rem -3rem;
 }
 
 @media screen and (max-width: 768px) {

@@ -294,6 +294,7 @@
     "mesg.plots_error": "Impossible de récupérer les données",
     "mesg.plots_fetch": "Récupération des données…",
     "mesg.plots_partial": "Données manquantes",
+    "mesg.read_only": "Instance en lecture seule",
     "mesg.saved": "Changements sauvegardés",
     "mesg.series_empty": "Aucune série définie",
     "mesg.sourcegroups_empty": "Aucun groupe de sources défini",

@@ -294,6 +294,7 @@
     "mesg.plots_error": "Unable to retrieve plots data",
     "mesg.plots_fetch": "Fetching plots data…",
     "mesg.plots_partial": "Missing plots data",
+    "mesg.read_only": "Instance is read-only",
     "mesg.saved": "Changes saved",
     "mesg.series_empty": "No series defined",
     "mesg.sourcegroups_empty": "No source group defined",

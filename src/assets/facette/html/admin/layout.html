@@ -27,5 +27,7 @@
 			<menuitem href="{{ ::baseURL }}admin/providers/" icon="plug" label="{{ 'label.providers' | translate }}" type="button"></menuitem>
 			<menuitem href="{{ ::baseURL }}admin/info/" icon="info-circle" label="{{ 'label.info' | translate }}" type="button"></menuitem>
 		</menu>
+
+		<message icon="exclamation-circle" type="warning" ng-show="readOnly">{{ 'mesg.read_only' | translate }}</message>
 	</nav>
 </aside>

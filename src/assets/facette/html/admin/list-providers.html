@@ -6,7 +6,7 @@
 
 		<menu class="main expand">
 			<menuitem href="" icon="refresh" title="{{ 'label.list_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
-			<menuitem href="{{ ::baseURL }}admin/{{ section }}/add" icon="plus" title="{{ 'label.providers_add' | translate }}" type="button"></menuitem>
+			<menuitem href="{{ ::baseURL }}admin/{{ section }}/add" icon="plus" title="{{ 'label.providers_add' | translate }}" type="button" ng-if="!readOnly"></menuitem>
 		</menu>
 
 		<search name="search" placeholder="{{ 'label.' + section + '_search' | translate }}" ng-model="search"></search>
@@ -24,7 +24,7 @@
 
 		<list ng-show="state == stateOK && items.length > 0">
 			<listrow ng-class="{disabled: !i.enabled}" ng-repeat="i in items">
-				<listcolumn class="toggle">
+				<listcolumn class="toggle" ng-if="!readOnly">
 					<span class="toggle fa" ng-class="{'fa-toggle-on': i.enabled, 'fa-toggle-off': !i.enabled}" ng-click="toggle(i)"></span>
 				</listcolumn>
 				<listcolumn class="main">
@@ -33,8 +33,8 @@
 						<div class="actions">
 							<menu>
 								<menuitem icon="info-circle" type="button" tooltip-data="i" tooltip-formatter="formatBasicTooltip" tooltip-position="bottom"></menuitem>
-								<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ i.id }}" icon="pencil" title="{{ 'label.' + section + '_edit' | translate }}" type="button"></menuitem>
-								<menuitem icon="clone" title="{{ 'label.' + section + '_clone' | translate }}" type="button" ng-click="clone(i)"></menuitem>
+								<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ i.id }}" icon="pencil" title="{{ 'label.' + section + '_edit' | translate }}" type="button" ng-if="!readOnly"></menuitem>
+								<menuitem icon="clone" title="{{ 'label.' + section + '_clone' | translate }}" type="button" ng-click="clone(i)" ng-if="!readOnly"></menuitem>
 								<menuitem icon="refresh" title="{{ 'label.providers_refresh' | translate }}" type="button" ng-click="refreshProvider(i)" ng-disabled="i.refreshing" ng-show="i.enabled"></menuitem>
 							</menu>
 						</div>
@@ -45,7 +45,7 @@
 				<listcolumn class="date expand">
 					{{ 'mesg.last_update' | translate }} <span class="value">{{ (i.modified || i.created) | date:'medium' }}</span>
 				</listcolumn>
-				<listcolumn class="actions">
+				<listcolumn class="actions" ng-if="!readOnly">
 					<menu>
 						<menuitem href="" icon="times-circle" title="{{ 'label.' + section + '_remove' | translate }}" type="button" ng-click="remove(i)"></menuitem>
 					</menu>

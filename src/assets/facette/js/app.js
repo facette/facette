@@ -154,7 +154,7 @@ app.config(function($httpProvider, $locationProvider, $resourceProvider, $routeP
 });
 
 app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope, $route, $timeout, $translate, $window,
-    ngDialog, storage) {
+    info, ngDialog, storage) {
 
     $rootScope.baseURL = $browser.baseHref();
     $rootScope.title = null;
@@ -351,4 +351,13 @@ app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope
     });
 
     angular.element($window).trigger('resize');
+
+    // Check whether instance is in read-only mode or not
+    $rootScope.readOnly = false;
+
+    info.get(null, function(data) {
+        if (data.read_only) {
+            $rootScope.readOnly = true;
+        }
+    });
 });

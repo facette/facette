@@ -29,8 +29,9 @@ type config struct {
 	LogLevel         string         `yaml:"log_level"`
 	GracefulTimeout  int            `yaml:"graceful_timeout"`
 	Frontend         frontendConfig `yaml:"frontend"`
-	Backend          *mapper.Map    `yaml:"backend,omitempty"`
+	Backend          *mapper.Map    `yaml:"backend"`
 	HideBuildDetails bool           `yaml:"hide_build_details"`
+	ReadOnly         bool           `yaml:"read_only"`
 }
 
 func initConfig(path string) (*config, error) {

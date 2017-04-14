@@ -19,6 +19,7 @@ type httpInfo struct {
 	Compiler   string   `json:"compiler,omitempty"`
 	Drivers    []string `json:"drivers"`
 	Connectors []string `json:"connectors"`
+	ReadOnly   bool     `json:"read_only,omitempty"`
 }
 
 func (w *httpWorker) httpHandleInfo(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
@@ -31,6 +32,7 @@ func (w *httpWorker) httpHandleInfo(ctx context.Context, rw http.ResponseWriter,
 		result = httpInfo{
 			Drivers:    backend.Drivers(),
 			Connectors: connector.Connectors(),
+			ReadOnly:   w.service.config.ReadOnly,
 		}
 	} else {
 		result = httpInfo{
@@ -40,6 +42,7 @@ func (w *httpWorker) httpHandleInfo(ctx context.Context, rw http.ResponseWriter,
 			Compiler:   fmt.Sprintf("%s (%s)", runtime.Version(), runtime.Compiler),
 			Drivers:    backend.Drivers(),
 			Connectors: connector.Connectors(),
+			ReadOnly:   w.service.config.ReadOnly,
 		}
 	}
 

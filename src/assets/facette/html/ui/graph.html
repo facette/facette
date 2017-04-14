@@ -7,8 +7,8 @@
 		</div>
 
 		<menu class="graph-menu">
-			<menuitem href="{{ ::baseURL }}admin/graphs/{{ graphId }}" icon="pencil" title="{{ 'label.graphs_edit' | translate }}" type="button"></menuitem>
-			<menuitem type="separator"></menuitem>
+			<menuitem href="{{ ::baseURL }}admin/graphs/{{ graphId }}" icon="pencil" title="{{ 'label.graphs_edit' | translate }}" type="button" ng-if="!$root.readOnly"></menuitem>
+			<menuitem type="separator" ng-if="!$root.readOnly"></menuitem>
 			<menuitem icon="refresh" title="{{ 'label.graphs_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
 			<menuitem icon="clock-o" title="{{ 'label.range_modify' | translate }}" type="button">
 				<menu>

@@ -37,4 +37,6 @@ frontend:
 
 hide_build_details: false
 
+read_only: false
+
 # vim: ts=2 sw=2 et

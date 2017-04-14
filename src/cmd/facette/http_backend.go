@@ -26,7 +26,10 @@ var backendTypes = map[string]reflect.Type{
 }
 
 func (w *httpWorker) httpHandleBackendCreate(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
-	if ct, _ := httputil.GetContentType(r); ct != "application/json" {
+	if w.service.config.ReadOnly {
+		httputil.WriteJSON(rw, httpBuildMessage(ErrReadOnly), http.StatusForbidden)
+		return
+	} else if ct, _ := httputil.GetContentType(r); ct != "application/json" {
 		httputil.WriteJSON(rw, httpBuildMessage(ErrUnsupportedType), http.StatusUnsupportedMediaType)
 		return
 	}
@@ -127,6 +130,11 @@ func (w *httpWorker) httpHandleBackendCreate(ctx context.Context, rw http.Respon
 }
 
 func (w *httpWorker) httpHandleBackendDelete(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+	if w.service.config.ReadOnly {
+		httputil.WriteJSON(rw, httpBuildMessage(ErrReadOnly), http.StatusForbidden)
+		return
+	}
+
 	typ := ctx.Value("type").(string)
 	id := ctx.Value("id").(string)
 
@@ -164,6 +172,11 @@ func (w *httpWorker) httpHandleBackendDelete(ctx context.Context, rw http.Respon
 }
 
 func (w *httpWorker) httpHandleBackendDeleteAll(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+	if w.service.config.ReadOnly {
+		httputil.WriteJSON(rw, httpBuildMessage(ErrReadOnly), http.StatusForbidden)
+		return
+	}
+
 	typ := ctx.Value("type").(string)
 
 	// Check backend item type
@@ -350,7 +363,10 @@ func (w *httpWorker) httpHandleBackendList(ctx context.Context, rw http.Response
 }
 
 func (w *httpWorker) httpHandleBackendUpdate(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
-	if ct, _ := httputil.GetContentType(r); ct != "application/json" {
+	if w.service.config.ReadOnly {
+		httputil.WriteJSON(rw, httpBuildMessage(ErrReadOnly), http.StatusForbidden)
+		return
+	} else if ct, _ := httputil.GetContentType(r); ct != "application/json" {
 		httputil.WriteJSON(rw, httpBuildMessage(ErrUnsupportedType), http.StatusUnsupportedMediaType)
 		return
 	}

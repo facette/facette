@@ -9,6 +9,8 @@ var (
 	ErrInvalidParameter = errors.New("invalid request parameter")
 	// ErrInvalidTimerange represents an invalid time range error.
 	ErrInvalidTimerange = errors.New("invalid time range")
+	// ErrReadOnly represents a read-only instance error.
+	ErrReadOnly = errors.New("read-only instance")
 	// ErrUnhandledError represents a service unhandled error.
 	ErrUnhandledError = errors.New("an unhandled error has occurred")
 	// ErrUnknownEndpoint represents an unknown endpoint error.
