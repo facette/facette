@@ -6,25 +6,24 @@ import (
 	"strings"
 
 	"github.com/cosiner/flag"
+	"github.com/mgutz/ansi"
 )
 
 type command struct {
-	Address string `names:"-a, --address" usage:"upstream socket address" default:"http://localhost:12003"`
-	Help    bool   `names:"-h, --help" usage:"display this help and exit"`
-	Timeout int    `names:"-t, --timeout" usage:"upstream connection timeout" default:"30"`
-	Version bool   `names:"-V, --version" usage:"display version information and exit"`
-	Quiet   bool   `names:"-q, --quiet" usage:"run in quiet mode"`
+	Address string `names:"-a, --address" usage:"Upstream socket address" default:"http://localhost:12003"`
+	Help    bool   `names:"-h, --help" usage:"Display this help and exit"`
+	Timeout int    `names:"-t, --timeout" usage:"Upstream connection timeout" default:"30"`
+	Version bool   `names:"-V, --version" usage:"Display version information and exit"`
+	Quiet   bool   `names:"-q, --quiet" usage:"Run in quiet mode"`
 
-	Library libraryCommand
+	Catalog catalogCommand `usage:"Manage catalog operations"`
+	Library libraryCommand `usage:"Manage library operations"`
 }
 
 func (*command) Metadata() map[string]flag.Flag {
 	return map[string]flag.Flag{
 		"": {
 			Usage: "Facette control utility",
-		},
-		"library": {
-			Usage: "manage library operations",
 		},
 	}
 }
@@ -34,11 +33,14 @@ var (
 	buildDate string
 	buildHash string
 
-	cmd command
+	cmd     command
+	flagSet *flag.FlagSet
 )
 
 func main() {
-	flagSet := flag.NewFlagSet(flag.Flag{}).ErrHandling(0)
+	var err error
+
+	flagSet = flag.NewFlagSet(flag.Flag{}).ErrHandling(0)
 	flagSet.StructFlags(&cmd)
 
 	if err := flagSet.Parse(os.Args...); err != nil {
@@ -55,15 +57,20 @@ func main() {
 	if cmd.Version {
 		execVersion()
 		os.Exit(0)
-	} else if cmd.Library.Dump.Enable {
-		execLibraryDump()
-	} else if cmd.Library.Restore.Enable {
-		execLibraryRestore()
+	} else if cmd.Catalog.Enable {
+		err = execCatalog()
 	} else if cmd.Library.Enable {
-		library, _ := flagSet.FindSubset("library")
-		library.Help(false)
+		err = execLibrary()
 	} else {
 		flagSet.Help(false)
+	}
+
+	if err != nil {
+		if err != errExecFailed {
+			die("%s", err)
+		}
+
+		os.Exit(1)
 	}
 }
 
@@ -73,5 +80,5 @@ func die(format string, v ...interface{}) {
 }
 
 func printError(format string, v ...interface{}) {
-	fmt.Fprintf(os.Stderr, "Error: %s\n", fmt.Sprintf(format, v...))
+	fmt.Fprintf(os.Stderr, ansi.Color("Error: %s\n", "red"), fmt.Sprintf(format, v...))
 }

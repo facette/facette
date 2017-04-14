@@ -6,15 +6,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
-	"reflect"
 	"strings"
 	"time"
 
 	"facette/backend"
 
-	"github.com/facette/httputil"
+	"github.com/mgutz/ansi"
+	"github.com/pkg/errors"
 )
 
 type libraryCommand struct {
@@ -22,23 +21,14 @@ type libraryCommand struct {
 
 	Dump struct {
 		Enable bool
-		Output string `names:"-o, --ouput" usage:"dump output file path"`
-	} `usage:"dump data from library" expand:"1"`
+		Output string `names:"-o, --ouput" usage:"Dump output file path"`
+	} `usage:"Dump data from library" expand:"1"`
 
 	Restore struct {
 		Enable bool
-		Input  string `names:"-i, --input" usage:"dump input file path"`
-		Merge  bool   `names:"-m, --merge" usage:"merge data with existing library"`
-	} `usage:"restore data from dump to library" expand:"1"`
-}
-
-type backendError struct {
-	Message string `json:"message"`
-}
-
-type backendType struct {
-	prefix      string
-	reflectType reflect.Type
+		Input  string `names:"-i, --input" usage:"Dump input file path"`
+		Merge  bool   `names:"-m, --merge" usage:"Merge data with existing library"`
+	} `usage:"Restore data from dump to library" expand:"1"`
 }
 
 type collectionRef struct {
@@ -55,17 +45,24 @@ var (
 		"metricgroups",
 		"providers",
 	}
-
-	backendAttrs = map[string]backendType{
-		"collections":  {"library/", reflect.TypeOf(backend.Collection{})},
-		"graphs":       {"library/", reflect.TypeOf(backend.Graph{})},
-		"sourcegroups": {"library/", reflect.TypeOf(backend.SourceGroup{})},
-		"metricgroups": {"library/", reflect.TypeOf(backend.MetricGroup{})},
-		"providers":    {"", reflect.TypeOf(backend.Provider{})},
-	}
 )
 
-func execLibraryDump() {
+func execLibrary() error {
+	if cmd.Library.Dump.Enable {
+		return execLibraryDump()
+	} else if cmd.Library.Restore.Enable {
+		return execLibraryRestore()
+	}
+
+	set, _ := flagSet.FindSubset("library")
+	set.Help(false)
+
+	return nil
+}
+
+func execLibraryDump() error {
+	var errored bool
+
 	output := cmd.Library.Dump.Output
 	if output == "" {
 		output = fmt.Sprintf("facette-%s.tar.gz", time.Now().Format("200601021504"))
@@ -74,7 +71,7 @@ func execLibraryDump() {
 	// Prepare output archive file for data dump
 	fd, err := os.OpenFile(output, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		die("failed to open archive: %s", err)
+		return errors.Wrap(err, "failed to open archive")
 	}
 	defer fd.Close()
 
@@ -85,66 +82,67 @@ func execLibraryDump() {
 	defer tw.Close()
 
 	// Loop through backend types and dump data
-	for _, name := range backendTypes {
-		if err := dumpLibraryType(tw, name); err != nil {
-			printError("%s", err)
+	for _, typ := range backendTypes {
+		if err := dumpLibraryType(tw, typ); err != nil {
+			printError("failed to dump %s: %s", typ, err)
+			errored = true
+			continue
 		}
 	}
 
 	if !cmd.Quiet {
-		fmt.Println("OK")
+		if errored {
+			fmt.Println(ansi.Color("FAIL", "red"))
+		} else {
+			fmt.Println(ansi.Color("OK", "green"))
+		}
 	}
+
+	if errored {
+		return errExecFailed
+	}
+
+	return nil
 }
 
-func execLibraryRestore() {
+func execLibraryRestore() error {
+	var errored bool
+
 	// Open archive file for data retrieval
 	fd, err := os.OpenFile(cmd.Library.Restore.Input, os.O_RDONLY, 0444)
 	if err != nil {
-		printError("%s", err)
-		return
+		return errors.Wrap(err, "failed to open archive")
 	}
 	defer fd.Close()
 
 	gzr, err := gzip.NewReader(fd)
 	if err != nil {
-		die("%s", err)
+		return errors.Wrap(err, "failed to create Gzip reader")
 	}
 	defer gzr.Close()
 
 	tr := tar.NewReader(gzr)
 
-	// Create new HTTP request
-	hc := httputil.NewClient(time.Duration(cmd.Timeout)*time.Second, true, false)
-
+	// Perform library cleanup if merging is not requested
 	if !cmd.Library.Restore.Merge {
 		for _, typ := range backendTypes {
 			if !cmd.Quiet {
 				fmt.Printf("purging %s...\n", typ)
 			}
 
-			path := typ
+			endpoint := "/" + typ
 			if typ != "providers" {
-				path = "library/" + path
+				endpoint = "/library" + endpoint
 			}
 
-			req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/api/v1/%s/", cmd.Address, path), nil)
-			if err != nil {
-				printError("%s", err)
+			if err := apiRequest("DELETE", endpoint, map[string]string{"X-Confirm-Action": "1"}, nil, nil); err != nil {
+				printError("failed to delete %s: %s", typ, err)
 				continue
 			}
-
-			req.Header.Add("User-Agent", "facettectl/"+version)
-			req.Header.Add("X-Confirm-Action", "1")
-
-			resp, err := hc.Do(req)
-			if err != nil {
-				printError("%s", err)
-				continue
-			}
-			defer resp.Body.Close()
 		}
 	}
 
+	// Restore items
 	for {
 		h, err := tr.Next()
 		if err == io.EOF {
@@ -155,181 +153,123 @@ func execLibraryRestore() {
 
 		switch h.Typeflag {
 		case tar.TypeReg, tar.TypeRegA:
-			path := h.Name
-			if path[:strings.LastIndex(path, "/")] != "providers" {
-				path = "library/" + path
+			endpoint := "/" + h.Name
+			if endpoint[:strings.LastIndex(endpoint, "/")] != "/providers" {
+				endpoint = "/library" + endpoint
 			}
 
 			if !cmd.Quiet {
-				fmt.Printf("restoring library item %q...\n", h.Name)
+				fmt.Printf("restoring %q library item...\n", h.Name)
 			}
 
-			// Register item into library
-			req, err := http.NewRequest("PUT", fmt.Sprintf("%s/api/v1/%s", cmd.Address, path), tr)
-			if err != nil {
+			if err := apiRequest("PUT", endpoint, nil, tr, nil); err != nil {
 				printError("%s", err)
-				return
-			}
-
-			req.Header.Add("Content-Type", "application/json")
-			req.Header.Add("User-Agent", "facettectl/"+version)
-
-			resp, err := hc.Do(req)
-			if err != nil {
-				printError("%s", err)
+				errored = true
 				continue
-			}
-			defer resp.Body.Close()
-
-			if resp.StatusCode < 200 || resp.StatusCode > 299 {
-				var msg backendError
-				httputil.BindJSON(resp, &msg)
-				printError("unable to restore %q item, returned: %s (%s)", path, msg.Message, resp.Status)
 			}
 		}
 	}
 
 	if !cmd.Quiet {
-		fmt.Println("OK")
+		if errored {
+			fmt.Println(ansi.Color("FAIL", "red"))
+		} else {
+			fmt.Println(ansi.Color("OK", "green"))
+		}
 	}
+
+	if errored {
+		return errExecFailed
+	}
+
+	return nil
 }
 
-func dumpLibraryType(w *tar.Writer, name string) error {
+func dumpLibraryType(w *tar.Writer, typ string) error {
 	var params string
 
 	// IMPORTANT:
 	// Templates and parent collections *MUST* be dumped first in order to be restored first
 	// to preserve backend items relationships.
 
-	if name == "collections" {
+	endpoint := "/" + typ
+	if typ != "providers" {
+		endpoint = "/library" + endpoint
+	}
+
+	if typ == "collections" {
 		// Dump only collection templates since they are not included in the collections tree dump
-		params = "?kind=template"
-	} else if name == "graphs" {
+		params = "&kind=template"
+	} else if typ == "graphs" {
 		// Sort graphs by link (null first) to ensure templates are restored before template their instances
-		params = "?sort=link"
+		params = "&sort=link"
 	}
 
-	ba, _ := backendAttrs[name]
-
-	// Create new HTTP request
-	hc := httputil.NewClient(time.Duration(cmd.Timeout)*time.Second, true, false)
-
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/%s%s%s", cmd.Address, ba.prefix, name, params), nil)
-	if err != nil {
-		return err
+	// Retrieve items list
+	items := []backend.Item{}
+	if err := apiRequest("GET", endpoint+"?fields=id,created,modified"+params, nil, nil, &items); err != nil {
+		return errors.Wrap(err, "failed to retrieve items")
 	}
 
-	req.Header.Add("User-Agent", "facettectl/"+version)
-
-	// Retrieve items list from library
-	resp, err := hc.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		var v backendError
-		if err := httputil.BindJSON(resp, &v); err != nil {
-			return fmt.Errorf("failed to unmarshal JSON: %s", err)
-		}
-
-		return fmt.Errorf("failed to list items: %s", v.Message)
-	}
-
-	rv := reflect.New(reflect.MakeSlice(reflect.SliceOf(ba.reflectType), 0, 0).Type())
-	if err := httputil.BindJSON(resp, rv.Interface()); err != nil {
-		return fmt.Errorf("failed to unmarshal JSON: %s", err)
-	}
-
-	if name == "collections" {
+	if typ == "collections" {
 		var (
 			root []collectionRef
 			cur  []collectionRef
 		)
 
-		req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/library/collections/tree", cmd.Address), nil)
-		if err != nil {
-			return err
+		if err := apiRequest("GET", endpoint+"/tree", nil, nil, &root); err != nil {
+			return errors.Wrap(err, "failed to retrieve collections tree")
 		}
-
-		req.Header.Add("User-Agent", "facettectl/"+version)
-
-		resp, err := hc.Do(req)
-		if err != nil {
-			return err
-		}
-		defer resp.Body.Close()
-
-		if err := httputil.BindJSON(resp, &root); err != nil {
-			return fmt.Errorf("failed to unmarshal JSON: %s", err)
-		}
-
-		item := rv.Elem()
 
 		stack := [][]collectionRef{root}
 		for len(stack) > 0 {
 			cur, stack = stack[0], stack[1:]
 
 			for _, c := range cur {
-				item = reflect.Append(item, reflect.ValueOf(backend.Collection{Item: backend.Item{ID: c.ID}}))
+				items = append(items, backend.Item{ID: c.ID})
 				if len(c.Children) > 0 {
 					stack = append(stack, c.Children)
 				}
 			}
 		}
-
-		rv.Elem().Set(item)
 	}
 
-	n := reflect.Indirect(rv).Len()
-	for i := 0; i < n; i++ {
-		var mt time.Time
+	for _, item := range items {
+		var (
+			v  interface{}
+			mt time.Time
+		)
 
-		v := reflect.Indirect(rv).Index(i)
-
-		id := v.FieldByName("ID").String()
-
-		// Retrieve item data from library
-		req, err := http.NewRequest("GET", fmt.Sprintf("%s/api/v1/%s%s/%s", cmd.Address, ba.prefix, name, id), nil)
-		if err != nil {
-			return fmt.Errorf("failed to create request: %s", err)
+		if !cmd.Quiet {
+			fmt.Printf("dumping %q library item...\n", item.ID)
 		}
 
-		req.Header.Add("User-Agent", "facettectl/"+version)
-
-		resp, err := hc.Do(req)
-		if err != nil {
-			return fmt.Errorf("failed to retrieve data: %s", err)
-		}
-		defer resp.Body.Close()
-
-		rv := reflect.New(ba.reflectType)
-		if err := httputil.BindJSON(resp, rv.Interface()); err != nil {
-			return fmt.Errorf("failed to unmarshal JSON: %s", err)
-		}
-
-		data, err := json.Marshal(rv.Interface())
-		if err != nil {
-			return fmt.Errorf("failed to marshal JSON: %s", err)
+		if err := apiRequest("GET", endpoint+"/"+item.ID, nil, nil, &v); err != nil {
+			printError("%s", err)
+			continue
 		}
 
 		// Get modification date or fall back to creation one
-		f := reflect.Indirect(rv).FieldByName("Modified")
-		if !reflect.DeepEqual(f.Interface(), reflect.Zero(f.Type()).Interface()) {
-			mt = *f.Interface().(*time.Time)
+		if item.Modified != nil {
+			mt = *item.Modified
 		} else {
-			mt = reflect.Indirect(rv).FieldByName("Created").Interface().(time.Time)
+			mt = item.Created
 		}
 
 		// Append data to archive
+		data, err := json.Marshal(v)
+		if err != nil {
+			printError("failed to marshal JSON: %s", err)
+			continue
+		}
+
 		if err = w.WriteHeader(&tar.Header{
-			Name:    name + "/" + id,
+			Name:    typ + "/" + item.ID,
 			Size:    int64(len(data)),
 			Mode:    0644,
 			ModTime: mt,
 		}); err != nil {
-			return fmt.Errorf("failed to append data: %s", err)
+			return errors.Wrap(err, "failed to append data")
 		}
 
 		w.Write(data)
