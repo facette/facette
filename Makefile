@@ -12,11 +12,11 @@ GO ?= go
 GOOS ?= $(shell $(GO) env GOOS)
 GOARCH ?= $(shell $(GO) env GOARCH)
 
-GB ?= gb
-
 BUILD_NAME = facette-$(GOOS)-$(GOARCH)
 BUILD_DIR = build/$(BUILD_NAME)
 BUILD_ENV ?= production
+
+export GOPATH = $(realpath $(BUILD_DIR)):$(realpath $(BUILD_DIR))/vendor
 
 GOLINT ?= golint
 GOLINT_ARGS =
@@ -31,7 +31,7 @@ PANDOC ?= pandoc
 PANDOC_ARGS = --standalone --to man
 
 BIN_LIST = $(patsubst src/cmd/%,%,$(wildcard src/cmd/*))
-PKG_LIST = $(patsubst src/%,%,$(wildcard src/cmd/*) $(filter-out src/cmd, $(wildcard src/facette/*)))
+PKG_LIST = $(patsubst src/%,%,$(wildcard src/facette/*))
 MAN_LIST = $(patsubst docs/man/%.md,%,$(wildcard docs/man/*.[0-9].md))
 
 mesg_start = echo "$(shell tty -s && tput setaf 4)$(1):$(shell tty -s && tput sgr0) $(2)"
@@ -60,7 +60,8 @@ build-depends:
 
 build-dir:
 	@$(call mesg_start,build,Preparing build directory...)
-	@(install -d -m 0755 $(BUILD_DIR) && cd $(BUILD_DIR) && ln -sf ../../src ../../vendor .) && \
+	@(install -d -m 0755 $(BUILD_DIR)/bin $(BUILD_DIR)/pkg $(BUILD_DIR)/vendor && \
+		(cd $(BUILD_DIR) && ln -sf ../../src .) && (cd $(BUILD_DIR)/vendor && ln -sf ../../../vendor/src ../pkg .)) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 ifneq ($(filter builtin_assets,$(BUILD_TAGS)),)
@@ -74,22 +75,18 @@ build-bin: build-dir build-assets
 else
 build-bin: build-dir
 endif
-	@$(call mesg_start,build,Building binaries...)
-	@(cd $(BUILD_DIR) && $(GB) build \
-		-tags "$(BUILD_TAGS)" \
-		-ldflags "-s -w \
-			-X main.version=$(VERSION) \
-			-X main.buildDate=$(BUILD_DATE) \
-			-X main.buildHash=$(BUILD_HASH) \
-		") && \
-		$(call mesg_ok) || $(call mesg_fail)
-ifneq ($(BUILD_TAGS),)
 	@for bin in $(BIN_LIST); do \
-		$(call mesg_start,build,Renaming $$bin binary...); \
-		mv -f $(BUILD_DIR)/bin/$$bin-$(subst $(NOOP) ,-,$(sort $(BUILD_TAGS))) $(BUILD_DIR)/bin/$$bin && \
+		$(call mesg_start,build,Building $$bin binary...); \
+		$(GO) build -i -v \
+			-tags "$(BUILD_TAGS)" \
+			-ldflags "-s -w \
+				-X main.version=$(VERSION) \
+				-X main.buildDate=$(BUILD_DATE) \
+				-X main.buildHash=$(BUILD_HASH) \
+			" \
+			-o $(BUILD_DIR)/bin/$$bin ./src/cmd/$$bin && \
 			$(call mesg_ok) || $(call mesg_fail); \
 	done
-endif
 
 build-assets:
 	@$(call mesg_start,build,Building assets...)
@@ -107,7 +104,7 @@ test: test-bin
 
 test-bin: build-dir
 	@$(call mesg_start,test,Testing packages...)
-	@(cd $(BUILD_DIR) && $(GB) test -v) && \
+	@(cd $(BUILD_DIR) && $(GO) test -v $(PKG_LIST)) && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 install: install-bin install-assets install-docs
@@ -130,7 +127,7 @@ install-docs: build-docs
 lint: lint-bin lint-assets
 
 lint-bin:
-	@for pkg in $(PKG_LIST); do \
+	@for pkg in $(PKG_LIST) $(BIN_LIST:%=cmd/%); do \
 		$(call mesg_start,lint,Checking $$pkg sources...); \
 		$(GOLINT) $(GOLINT_ARGS) ./src/$$pkg && \
 			$(call mesg_ok) || $(call mesg_fail); \
