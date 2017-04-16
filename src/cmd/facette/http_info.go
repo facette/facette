@@ -8,8 +8,8 @@ import (
 
 	"github.com/facette/httputil"
 
-	"facette/backend"
 	"facette/connector"
+	"facette/orm"
 )
 
 type httpInfo struct {
@@ -30,7 +30,7 @@ func (w *httpWorker) httpHandleInfo(ctx context.Context, rw http.ResponseWriter,
 	// Get service information
 	if w.service.config.HideBuildDetails {
 		result = httpInfo{
-			Drivers:    backend.Drivers(),
+			Drivers:    orm.Drivers(),
 			Connectors: connector.Connectors(),
 			ReadOnly:   w.service.config.ReadOnly,
 		}
@@ -40,7 +40,7 @@ func (w *httpWorker) httpHandleInfo(ctx context.Context, rw http.ResponseWriter,
 			BuildDate:  buildDate,
 			BuildHash:  buildHash,
 			Compiler:   fmt.Sprintf("%s (%s)", runtime.Version(), runtime.Compiler),
-			Drivers:    backend.Drivers(),
+			Drivers:    orm.Drivers(),
 			Connectors: connector.Connectors(),
 			ReadOnly:   w.service.config.ReadOnly,
 		}

@@ -35,6 +35,4 @@ var (
 	ErrResourceMissingData = errors.New("missing resource data")
 	// ErrUnknownColumn represents an unknown column error.
 	ErrUnknownColumn = errors.New("unknown column")
-	// ErrUnsupportedDriver represents an unsupported backend database driver error.
-	ErrUnsupportedDriver = errors.New("unsupported driver")
 )

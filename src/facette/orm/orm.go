@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+
+	"facette/mapper"
 )
 
 // TimeFormat represents the time format used for time values in the database.
@@ -27,15 +29,15 @@ type DB struct {
 }
 
 // Open initializes a new database connection.
-func Open(driver, dsn string) (*DB, error) {
+func Open(settings *mapper.Map) (*DB, error) {
 	// Initialize backend driver
-	drv := newDriver(driver)
-	if drv == nil {
-		return nil, ErrUnsupportedDriver
+	drv, err := newDriver(settings)
+	if err != nil {
+		return nil, err
 	}
 
 	// Open database connection
-	sqlDB, err := sql.Open(drv.name(), dsn)
+	sqlDB, err := sql.Open(drv.name(), drv.DSN())
 	if err != nil {
 		return nil, err
 	} else if err = sqlDB.Ping(); err != nil {

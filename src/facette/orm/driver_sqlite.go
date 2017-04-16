@@ -1,4 +1,4 @@
-// +build !disable_sqlite3
+// +build !disable_sqlite
 
 package orm
 
@@ -7,18 +7,32 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"strings"
 	"time"
+
+	"facette/mapper"
 
 	"github.com/facette/sliceutil"
 	sqlite3 "github.com/mattn/go-sqlite3"
+	"github.com/pkg/errors"
 )
 
-// sqlite3Driver implements the database driver interface for SQLite 3.
-type sqlite3Driver struct {
+const (
+	defaultSqliteDriverPath = "data.db"
+)
+
+// sqliteDriver implements the database driver interface for SQLite 3.
+type sqliteDriver struct {
 	commonDriver
+
+	path string
 }
 
-func (d sqlite3Driver) BooleanValue(value string) string {
+func (d sqliteDriver) DSN() string {
+	return d.path
+}
+
+func (d sqliteDriver) BooleanValue(value string) string {
 	if value == "true" {
 		return "1"
 	}
@@ -26,21 +40,51 @@ func (d sqlite3Driver) BooleanValue(value string) string {
 	return "0"
 }
 
-func (d sqlite3Driver) NowCall() string {
+func (d sqliteDriver) NowCall() string {
 	return "CURRENT_TIMESTAMP"
 }
 
-func (d sqlite3Driver) init() error {
+func (d sqliteDriver) WhereClause(column string, v interface{}) (string, interface{}) {
+	operator := "="
+	extra := ""
+
+	switch v.(type) {
+	case GlobModifier:
+		operator = "LIKE"
+		extra = " ESCAPE '\\'"
+
+		s := string(v.(GlobModifier))
+		s = strings.Replace(s, "%", "\\%", -1)
+		s = strings.Replace(s, "_", "\\_", -1)
+		s = strings.Replace(s, "*", "%", -1)
+
+		v = strings.Replace(s, "?", "_", -1)
+
+	case RegexpModifier:
+		operator = "REGEXP"
+		v = "(?i)" + string(v.(RegexpModifier))
+
+	case string:
+		if s := v.(string); s == "null" {
+			operator = "IS"
+			v = nil
+		}
+	}
+
+	return fmt.Sprintf("%s %s ?%s", column, operator, extra), v
+}
+
+func (d sqliteDriver) init() error {
 	// Enable "foreign_key" pragma
 	_, err := d.db.Raw("PRAGMA foreign_keys=ON").quiet().Result()
 	return err
 }
 
-func (d sqlite3Driver) name() string {
+func (d sqliteDriver) name() string {
 	return "sqlite3_ext"
 }
 
-func (d sqlite3Driver) hasTable(tableName string) bool {
+func (d sqliteDriver) hasTable(tableName string) bool {
 	var count int
 
 	d.db.From("sqlite_master").
@@ -52,7 +96,7 @@ func (d sqlite3Driver) hasTable(tableName string) bool {
 	return count > 0
 }
 
-func (d sqlite3Driver) hasColumn(tableName, columnName string) bool {
+func (d sqliteDriver) hasColumn(tableName, columnName string) bool {
 	rows, err := d.db.Raw(fmt.Sprintf("PRAGMA table_info(%s)", d.QuoteName(tableName))).quiet().Rows()
 	if err != nil {
 		return false
@@ -77,7 +121,7 @@ func (d sqlite3Driver) hasColumn(tableName, columnName string) bool {
 	return false
 }
 
-func (d sqlite3Driver) hasIndex(tableName, indexName string) bool {
+func (d sqliteDriver) hasIndex(tableName, indexName string) bool {
 	var count int
 
 	d.db.From("sqlite_master").
@@ -90,7 +134,7 @@ func (d sqlite3Driver) hasIndex(tableName, indexName string) bool {
 	return count > 0
 }
 
-func (d sqlite3Driver) typeOf(rv reflect.Value, autoIncrement bool) (string, error) {
+func (d sqliteDriver) typeOf(rv reflect.Value, autoIncrement bool) (string, error) {
 	switch rv.Kind() {
 	case reflect.Bool, reflect.Int8, reflect.Int16, reflect.Uint8, reflect.Int, reflect.Int32, reflect.Uint,
 		reflect.Uint16, reflect.Uint32, reflect.Int64, reflect.Uint64:
@@ -116,7 +160,7 @@ func (d sqlite3Driver) typeOf(rv reflect.Value, autoIncrement bool) (string, err
 	return "", ErrUnsupportedType
 }
 
-func (d sqlite3Driver) scanValue(dst, src reflect.Value) error {
+func (d sqliteDriver) scanValue(dst, src reflect.Value) error {
 	if dst.Kind() == reflect.Ptr {
 		dst.Set(reflect.New(dst.Type().Elem()))
 		dst = dst.Elem()
@@ -143,7 +187,7 @@ func (d sqlite3Driver) scanValue(dst, src reflect.Value) error {
 	return nil
 }
 
-func (d sqlite3Driver) normalizeError(err error) error {
+func (d sqliteDriver) normalizeError(err error) error {
 	if _, ok := err.(sqlite3.Error); !ok {
 		return err
 	}
@@ -171,5 +215,15 @@ func init() {
 		})
 	}
 
-	registerDriver("sqlite3", &sqlite3Driver{})
+	drivers["sqlite"] = func(settings *mapper.Map) (SQLDriver, error) {
+		var err error
+
+		d := &sqliteDriver{}
+
+		if d.path, err = settings.GetString("path", defaultSqliteDriverPath); err != nil {
+			return nil, errors.Wrap(err, "invalid \"path\" setting")
+		}
+
+		return d, nil
+	}
 }

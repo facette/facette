@@ -12,7 +12,6 @@ import (
 
 	"github.com/facette/logger"
 	"github.com/facette/sliceutil"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -30,7 +29,6 @@ var (
 type Backend struct {
 	config *mapper.Map
 	log    *logger.Logger
-	driver sqlDriver
 	db     *orm.DB
 }
 
@@ -44,25 +42,8 @@ func NewBackend(settings *mapper.Map, log *logger.Logger) (*Backend, error) {
 		return nil, ErrMissingBackendConfig
 	}
 
-	driver, err := settings.GetString("driver", "")
-	if err != nil || driver == "" {
-		return nil, errors.Wrapf(fmt.Errorf("no driver specified"), "%s", ErrInvalidBackendConfig)
-	}
-
-	// Get database driver instance
-	if _, ok := drivers[driver]; !ok {
-		return nil, ErrUnsupportedDriver
-	}
-
-	drv, err := drivers[driver](settings)
-	if err != nil {
-		return nil, errors.Wrapf(err, "%s", ErrInvalidBackendConfig)
-	}
-
-	log.Debug("connecting using %q driver", driver)
-
 	// Open database connection
-	db, err := orm.Open(drv.name(), drv.DSN())
+	db, err := orm.Open(settings)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %s", err)
 	}
@@ -82,9 +63,8 @@ func NewBackend(settings *mapper.Map, log *logger.Logger) (*Backend, error) {
 	}
 
 	return &Backend{
-		log:    log,
-		driver: drv,
-		db:     db,
+		log: log,
+		db:  db,
 	}, nil
 }
 
@@ -333,7 +313,15 @@ func (b *Backend) buildFilter(filters map[string]interface{}) (string, []interfa
 	args := []interface{}{}
 
 	for k, v := range filters {
-		clause, value := b.driver.whereClause(k, v)
+		if s, ok := v.(string); ok {
+			if strings.HasPrefix(s, FilterGlobPrefix) {
+				v = orm.GlobModifier(strings.TrimPrefix(s, FilterGlobPrefix))
+			} else if strings.HasPrefix(s, FilterRegexpPrefix) {
+				v = orm.RegexpModifier(strings.TrimPrefix(s, FilterRegexpPrefix))
+			}
+		}
+
+		clause, value := b.db.Driver().WhereClause(k, v)
 		parts = append(parts, clause)
 		args = append(args, value)
 	}

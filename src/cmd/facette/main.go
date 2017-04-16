@@ -8,8 +8,8 @@ import (
 	"strings"
 	"syscall"
 
-	"facette/backend"
 	"facette/connector"
+	"facette/orm"
 
 	"github.com/cosiner/flag"
 )
@@ -98,7 +98,7 @@ func printVersion() {
 	fmt.Printf("Build hash:  %s\n", buildHash)
 	fmt.Printf("Compiler:    %s (%s)\n", runtime.Version(), runtime.Compiler)
 
-	drivers := backend.Drivers()
+	drivers := orm.Drivers()
 	if len(drivers) == 0 {
 		drivers = append(drivers, "none")
 	}

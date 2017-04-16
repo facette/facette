@@ -1,4 +1,4 @@
-// +build !disable_postgres
+// +build !disable_pgsql
 
 package orm
 
@@ -6,31 +6,85 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 
+	"facette/mapper"
+
 	"github.com/lib/pq"
+	"github.com/pkg/errors"
 )
 
-// postgresDriver implements the database driver interface for PostgreSQL.
-type postgresDriver struct {
+const (
+	defaultPgsqlDriverHost   = "localhost"
+	defaultPgsqlDriverPort   = 5432
+	defaultPgsqlDriverUser   = "facette"
+	defaultPgsqlDriverDBName = "facette"
+)
+
+// pgsqlDriver implements the database driver interface for PostgreSQL.
+type pgsqlDriver struct {
 	commonDriver
-	dbName string
+
+	host     string
+	port     int
+	user     string
+	password string
+	dbName   string
 }
 
-func (d postgresDriver) LimitClause(offset, limit int) string {
+func (d pgsqlDriver) DSN() string {
+	return fmt.Sprintf(
+		"%s=%v %s=%v %s=%v %s=%v %s=%v",
+		"host", d.host,
+		"port", d.port,
+		"user", d.user,
+		"password", d.password,
+		"dbname", d.dbName,
+	)
+}
+
+func (d pgsqlDriver) WhereClause(column string, v interface{}) (string, interface{}) {
+	operator := "="
+	switch v.(type) {
+	case GlobModifier:
+		operator = "ILIKE"
+
+		s := string(v.(GlobModifier))
+		s = strings.Replace(s, "%", "\\%", -1)
+		s = strings.Replace(s, "_", "\\_", -1)
+		s = strings.Replace(s, "*", "%", -1)
+
+		v = strings.Replace(s, "?", "_", -1)
+
+	case RegexpModifier:
+		operator = "~"
+		v = "(?i)" + string(v.(RegexpModifier))
+
+	case string:
+		if s := v.(string); s == "null" {
+			operator = "IS"
+			v = nil
+		}
+	}
+
+	return fmt.Sprintf("%s %s ?", column, operator), v
+}
+
+func (d pgsqlDriver) LimitClause(offset, limit int) string {
 	return fmt.Sprintf("OFFSET %d LIMIT %d", offset, limit)
 }
 
-func (d *postgresDriver) init() error {
+func (d *pgsqlDriver) init() error {
 	// Get current database name
 	return d.db.Select("current_database()").quiet().Row().Scan(&d.dbName)
 }
 
-func (d postgresDriver) name() string {
+func (d pgsqlDriver) name() string {
 	return "postgres"
 }
 
-func (d postgresDriver) hasTable(tableName string) bool {
+func (d pgsqlDriver) hasTable(tableName string) bool {
 	var count int
 
 	d.db.From("information_schema.tables").
@@ -43,7 +97,7 @@ func (d postgresDriver) hasTable(tableName string) bool {
 	return count > 0
 }
 
-func (d postgresDriver) hasColumn(tableName, columnName string) bool {
+func (d pgsqlDriver) hasColumn(tableName, columnName string) bool {
 	var count int
 
 	d.db.From("information_schema.columns").
@@ -56,7 +110,7 @@ func (d postgresDriver) hasColumn(tableName, columnName string) bool {
 	return count > 0
 }
 
-func (d postgresDriver) hasIndex(tableName, indexName string) bool {
+func (d pgsqlDriver) hasIndex(tableName, indexName string) bool {
 	var count int
 
 	d.db.From("pg_indexes").
@@ -68,11 +122,11 @@ func (d postgresDriver) hasIndex(tableName, indexName string) bool {
 	return count > 0
 }
 
-func (d postgresDriver) bindVar(count int) string {
+func (d pgsqlDriver) bindVar(count int) string {
 	return fmt.Sprintf("$%d", count)
 }
 
-func (d postgresDriver) typeOf(rv reflect.Value, autoIncrement bool) (string, error) {
+func (d pgsqlDriver) typeOf(rv reflect.Value, autoIncrement bool) (string, error) {
 	switch rv.Kind() {
 	case reflect.Bool:
 		return "boolean", nil
@@ -115,11 +169,11 @@ func (d postgresDriver) typeOf(rv reflect.Value, autoIncrement bool) (string, er
 	return "", ErrUnsupportedType
 }
 
-func (d postgresDriver) returningSuffix(columnName string) string {
+func (d pgsqlDriver) returningSuffix(columnName string) string {
 	return " RETURNING " + d.QuoteName(columnName)
 }
 
-func (d postgresDriver) scanValue(dst, src reflect.Value) error {
+func (d pgsqlDriver) scanValue(dst, src reflect.Value) error {
 	if dst.Kind() == reflect.Ptr {
 		dst.Set(reflect.New(dst.Type().Elem()))
 		dst = dst.Elem()
@@ -156,7 +210,7 @@ func (d postgresDriver) scanValue(dst, src reflect.Value) error {
 	return nil
 }
 
-func (d postgresDriver) normalizeError(err error) error {
+func (d pgsqlDriver) normalizeError(err error) error {
 	if _, ok := err.(*pq.Error); !ok {
 		return err
 	}
@@ -176,5 +230,31 @@ func (d postgresDriver) normalizeError(err error) error {
 }
 
 func init() {
-	registerDriver("postgres", &postgresDriver{})
+	drivers["pgsql"] = func(settings *mapper.Map) (SQLDriver, error) {
+		var err error
+
+		d := &pgsqlDriver{}
+
+		if d.host, err = settings.GetString("host", defaultPgsqlDriverHost); err != nil {
+			return nil, errors.Wrap(err, "invalid \"host\" setting")
+		}
+
+		if d.port, err = settings.GetInt("port", defaultPgsqlDriverPort); err != nil {
+			return nil, errors.Wrap(err, "invalid \"port\" setting")
+		}
+
+		if d.user, err = settings.GetString("user", defaultPgsqlDriverUser); err != nil {
+			return nil, errors.Wrap(err, "invalid \"user\" setting")
+		}
+
+		if d.password, err = settings.GetString("password", ""); err != nil || d.password == "" {
+			return nil, errors.Wrap(err, "invalid \"password\" setting")
+		}
+
+		if d.dbName, err = settings.GetString("dbname", defaultPgsqlDriverDBName); err != nil {
+			return nil, errors.Wrap(err, "invalid \"dbname\" setting")
+		}
+
+		return d, nil
+	}
 }

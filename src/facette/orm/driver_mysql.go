@@ -6,19 +6,73 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 
+	"facette/mapper"
+
 	"github.com/go-sql-driver/mysql"
+	"github.com/pkg/errors"
+)
+
+const (
+	defaultMysqlDriverHost   = "localhost"
+	defaultMysqlDriverPort   = 3306
+	defaultMysqlDriverUser   = "facette"
+	defaultMysqlDriverDBName = "facette"
 )
 
 // mysqlDriver implements the database driver interface for MySQL.
 type mysqlDriver struct {
 	commonDriver
-	dbName string
+
+	host     string
+	port     int
+	user     string
+	password string
+	dbName   string
 }
 
 func (d mysqlDriver) QuoteName(name string) string {
 	return fmt.Sprintf("`%s`", name)
+}
+
+func (d mysqlDriver) DSN() string {
+	return fmt.Sprintf(
+		"%s:%s@tcp(%s:%d)/%s?interpolateParams=true",
+		d.user,
+		d.password,
+		d.host,
+		d.port,
+		d.dbName,
+	)
+}
+
+func (d mysqlDriver) WhereClause(column string, v interface{}) (string, interface{}) {
+	operator := "="
+
+	switch v.(type) {
+	case GlobModifier:
+		operator = "LIKE"
+
+		s := string(v.(GlobModifier))
+		s = strings.Replace(s, "%", "\\%", -1)
+		s = strings.Replace(s, "_", "\\_", -1)
+		s = strings.Replace(s, "*", "%", -1)
+
+		v = strings.Replace(s, "?", "_", -1)
+
+	case RegexpModifier:
+		operator = "REGEXP"
+
+	case string:
+		if s := v.(string); s == "null" {
+			operator = "IS"
+			v = nil
+		}
+	}
+
+	return fmt.Sprintf("%s %s ?", column, operator), v
 }
 
 func (d *mysqlDriver) init() error {
@@ -246,5 +300,31 @@ func (d mysqlDriver) normalizeError(err error) error {
 }
 
 func init() {
-	registerDriver("mysql", &mysqlDriver{})
+	drivers["mysql"] = func(settings *mapper.Map) (SQLDriver, error) {
+		var err error
+
+		d := &mysqlDriver{}
+
+		if d.host, err = settings.GetString("host", defaultMysqlDriverHost); err != nil {
+			return nil, errors.Wrap(err, "invalid \"host\" setting")
+		}
+
+		if d.port, err = settings.GetInt("port", defaultMysqlDriverPort); err != nil {
+			return nil, errors.Wrap(err, "invalid \"port\" setting")
+		}
+
+		if d.user, err = settings.GetString("user", defaultMysqlDriverUser); err != nil {
+			return nil, errors.Wrap(err, "invalid \"user\" setting")
+		}
+
+		if d.password, err = settings.GetString("password", ""); err != nil || d.password == "" {
+			return nil, errors.Wrap(err, "invalid \"password\" setting")
+		}
+
+		if d.dbName, err = settings.GetString("dbname", defaultMysqlDriverDBName); err != nil {
+			return nil, errors.Wrap(err, "invalid \"dbname\" setting")
+		}
+
+		return d, nil
+	}
 }

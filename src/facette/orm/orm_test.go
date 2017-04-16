@@ -8,9 +8,7 @@ import (
 	"testing"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/lib/pq"
-	_ "github.com/mattn/go-sqlite3"
+	"facette/mapper"
 )
 
 type Foo struct {
@@ -53,9 +51,9 @@ type Baz struct {
 	Value string
 }
 
-func testORM(driver, dsn string, t *testing.T, useTx bool) {
+func testORM(settings *mapper.Map, t *testing.T, useTx bool) {
 	// Open database
-	db, err := Open(driver, dsn)
+	db, err := Open(settings)
 	if err != nil {
 		t.Fatalf("failed to open database: %s", err)
 	}

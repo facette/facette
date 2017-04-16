@@ -3,16 +3,21 @@ package orm
 import (
 	"fmt"
 	"reflect"
+	"sort"
 	"time"
-)
 
-var drivers = map[string]SQLDriver{}
+	"facette/mapper"
+
+	"github.com/pkg/errors"
+)
 
 // SQLDriver represents the database driver interface.
 type SQLDriver interface {
+	DSN() string
 	QuoteName(string) string
 	BooleanValue(string) string
 	NowCall() string
+	WhereClause(string, interface{}) (string, interface{})
 	LimitClause(int, int) string
 
 	setDB(db *DB)
@@ -29,11 +34,17 @@ type SQLDriver interface {
 	normalizeError(error) error
 }
 
-func newDriver(name string) SQLDriver {
-	if value, ok := drivers[name]; ok {
-		return reflect.New(reflect.TypeOf(value).Elem()).Interface().(SQLDriver)
+func newDriver(settings *mapper.Map) (SQLDriver, error) {
+	driver, _ := settings.GetString("driver", "")
+	if driver == "" {
+		return nil, errors.Wrap(ErrUnsupportedDriver, "empty driver setting")
 	}
-	return nil
+
+	if v, ok := drivers[driver]; ok {
+		return v(settings)
+	}
+
+	return nil, ErrUnsupportedDriver
 }
 
 // commonDriver implements the common database driver interface methods.
@@ -51,6 +62,10 @@ func (d commonDriver) BooleanValue(value string) string {
 
 func (d commonDriver) NowCall() string {
 	return "now()"
+}
+
+func (d commonDriver) WhereClause(column string, v interface{}) (string, interface{}) {
+	return column + " = ?", v
 }
 
 func (d commonDriver) LimitClause(offset, limit int) string {
@@ -88,7 +103,16 @@ func (d commonDriver) scanValue(dst, src reflect.Value) error {
 	return nil
 }
 
-// registerDriver registers a new driver intance.
-func registerDriver(name string, driver SQLDriver) {
-	drivers[name] = driver
+var drivers = map[string]func(settings *mapper.Map) (SQLDriver, error){}
+
+// Drivers returns the list of supported backend drivers.
+func Drivers() []string {
+	list := []string{}
+	for name := range drivers {
+		list = append(list, name)
+	}
+
+	sort.Strings(list)
+
+	return list
 }

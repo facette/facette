@@ -10,8 +10,6 @@ import (
 	"time"
 
 	"facette/mapper"
-
-	"github.com/facette/logger"
 )
 
 var (
@@ -95,7 +93,7 @@ func execTestProvider(config *mapper.Map, t *testing.T) {
 		descUpdated = "A great provider description (updated)"
 	)
 
-	b, err := NewBackend(config, logger.NewLogger(logger.FileConfig{Level: flagLogLevel}))
+	b, err := NewBackend(config, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
