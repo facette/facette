@@ -75,8 +75,8 @@ build-bin: build-dir build-assets
 else
 build-bin: build-dir
 endif
-	@for bin in $(BIN_LIST); do \
-		$(call mesg_start,build,Building $$bin binary...); \
+	@$(call mesg_start,build,Building binaries...)
+	@(for bin in $(BIN_LIST); do \
 		$(GO) build -i -v \
 			-tags "$(BUILD_TAGS)" \
 			-ldflags "-s -w \
@@ -84,9 +84,8 @@ endif
 				-X main.buildDate=$(BUILD_DATE) \
 				-X main.buildHash=$(BUILD_HASH) \
 			" \
-			-o $(BUILD_DIR)/bin/$$bin ./src/cmd/$$bin && \
-			$(call mesg_ok) || $(call mesg_fail); \
-	done
+			-o $(BUILD_DIR)/bin/$$bin ./src/cmd/$$bin; \
+	done) && $(call mesg_ok) || $(call mesg_fail)
 
 build-assets:
 	@$(call mesg_start,build,Building assets...)
