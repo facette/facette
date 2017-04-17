@@ -1,4 +1,4 @@
-// +build !disable_rrd
+// +build !disable_connector_rrd
 
 package connector
 

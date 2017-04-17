@@ -1,4 +1,4 @@
-// +build !disable_kairosdb
+// +build !disable_connector_kairosdb
 
 package connector
 

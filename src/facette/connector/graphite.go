@@ -1,4 +1,4 @@
-// +build !disable_graphite
+// +build !disable_connector_graphite
 
 package connector
 

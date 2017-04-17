@@ -1,4 +1,4 @@
-// +build !disable_influxdb
+// +build !disable_connector_influxdb
 
 package connector
 

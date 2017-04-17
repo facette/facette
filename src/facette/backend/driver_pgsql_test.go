@@ -1,4 +1,4 @@
-// +build !disable_pgsql
+// +build !disable_backend_pgsql
 
 package backend
 

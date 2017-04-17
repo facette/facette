@@ -1,4 +1,4 @@
-// +build !disable_sqlite
+// +build !disable_backend_sqlite
 
 package orm
 

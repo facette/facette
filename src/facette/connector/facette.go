@@ -1,4 +1,4 @@
-// +build !disable_facette
+// +build !disable_connector_facette
 
 package connector
 

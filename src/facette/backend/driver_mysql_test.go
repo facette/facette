@@ -1,4 +1,4 @@
-// +build !disable_mysql
+// +build !disable_backend_mysql
 
 package backend
 
