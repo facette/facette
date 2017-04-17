@@ -230,7 +230,7 @@ func graphiteBuildQueryURL(query *plot.Query, graphiteSeries map[string]map[stri
 
 	for _, series := range query.Series {
 		queryURL += fmt.Sprintf(
-			"&target=alias(%s,\"%s\")",
+			"&target=alias(%s,%%22%s%%22)",
 			url.QueryEscape(graphiteSeries[series.Source][series.Metric]),
 			series.Name,
 		)
