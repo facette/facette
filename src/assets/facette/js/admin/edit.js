@@ -1,4 +1,4 @@
-app.factory('adminEdit', function($location, $rootScope, $timeout, $translate, library, providers) {
+app.factory('adminEdit', function($location, $rootScope, $timeout, $translate, adminHelpers) {
     return {
         cancel: function(scope, force) {
             force = typeof force == 'boolean' ? force : false;
@@ -70,7 +70,7 @@ app.factory('adminEdit', function($location, $rootScope, $timeout, $translate, l
             scope.validated = true;
 
             // Prepare item data
-            var factory = scope.section == 'providers' ? providers : library;
+            var factory = adminHelpers.getFactory(scope);
 
             (scope.id != 'add' && scope.id != 'link' ? factory.update : factory.append)(data, function(_, header) {
                 if (scope.itemTimeout) {
@@ -153,7 +153,7 @@ app.factory('adminEdit', function($location, $rootScope, $timeout, $translate, l
 
                     // Check for name and/or alias conflicts
                     if (newValue.name && newValue.name !== oldValue.name && newValue.name !== scope.itemRef.name) {
-                        (scope.section == 'providers' ? providers : library).list({
+                        adminHelpers.getFactory(scope).list({
                             type: scope.section,
                             filter: newValue.name
                         }, function(data) {
@@ -164,7 +164,7 @@ app.factory('adminEdit', function($location, $rootScope, $timeout, $translate, l
                     if (scope.aliasable && newValue.alias && newValue.alias !== oldValue.alias &&
                         newValue.alias !== scope.itemRef.alias) {
 
-                        library.getPeek({
+                        adminHelpers.getFactory(scope).getPeek({
                             type: scope.section,
                             id: newValue.alias
                         }, function(data) {
@@ -207,7 +207,7 @@ app.factory('adminEdit', function($location, $rootScope, $timeout, $translate, l
             // Load existing item
             scope.state = stateLoading;
 
-            (scope.section == 'providers' ? providers : library).get({
+            adminHelpers.getFactory(scope).get({
                 type: scope.section,
                 id: scope.id
             }, function(data) {

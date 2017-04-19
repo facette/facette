@@ -16,15 +16,7 @@ app.controller('AdminListController', function($location, $q, $rootScope, $route
     $scope.page = 1;
     $scope.limit = pagingLimit;
 
-    if (catalogSections.indexOf($scope.section) != -1) {
-        factory = catalog;
-    } else if (librarySections.indexOf($scope.section) != -1) {
-        factory = library;
-    } else if ($scope.section == 'providers') {
-        factory = providers;
-    } else {
-        return;
-    }
+    var factory = adminHelpers.getFactory($scope);
 
     // Set page title
     $rootScope.setTitle(['label.' + $scope.section, 'label.admin_panel']);

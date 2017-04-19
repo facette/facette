@@ -1,17 +1,4 @@
-var catalogSections = [
-        'origins',
-        'sources',
-        'metrics'
-    ],
-
-    librarySections = [
-        'collections',
-        'graphs',
-        'sourcegroups',
-        'metricgroups'
-    ],
-
-    filterActions = [
+var filterActions = [
         'discard',
         'rewrite',
         'sieve'
