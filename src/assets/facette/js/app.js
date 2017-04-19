@@ -60,42 +60,67 @@ app.config(function($httpProvider, $locationProvider, $resourceProvider, $routeP
             templateUrl: 'templates/admin/info.html',
             controller: 'AdminInfoController'
         })
-        .when('/admin/:section/', {
-            templateUrl: function(params) {
-                var category;
-                if (catalogSections.indexOf(params.section) != -1) {
-                    category = 'catalog';
-                } else if (librarySections.indexOf(params.section) != -1) {
-                    category = 'library';
-                } else {
-                    category = params.section;
-                }
-
-                return 'templates/admin/list-' + category + '.html';
-            },
-            controller: 'AdminListController'
+        .when('/admin/collections/', {
+            templateUrl: 'templates/admin/list-library.html',
+            controller: 'AdminListController',
+            _type: 'collections'
         })
         .when('/admin/collections/:id', {
             templateUrl: 'templates/admin/edit-collections.html',
             controller: 'AdminEditCollectionController'
         })
+        .when('/admin/graphs/', {
+            templateUrl: 'templates/admin/list-library.html',
+            controller: 'AdminListController',
+            _type: 'graphs'
+        })
         .when('/admin/graphs/:id', {
             templateUrl: 'templates/admin/edit-graphs.html',
             controller: 'AdminEditGraphController'
+        })
+        .when('/admin/sourcegroups/', {
+            templateUrl: 'templates/admin/list-library.html',
+            controller: 'AdminListController',
+            _type: 'sourcegroups'
         })
         .when('/admin/sourcegroups/:id', {
             templateUrl: 'templates/admin/edit-groups.html',
             controller: 'AdminEditGroupController',
             _type: 'sourcegroups'
         })
+        .when('/admin/metricgroups/', {
+            templateUrl: 'templates/admin/list-library.html',
+            controller: 'AdminListController',
+            _type: 'metricgroups'
+        })
         .when('/admin/metricgroups/:id', {
             templateUrl: 'templates/admin/edit-groups.html',
             controller: 'AdminEditGroupController',
             _type: 'metricgroups'
         })
+        .when('/admin/providers/', {
+            templateUrl: 'templates/admin/list-providers.html',
+            controller: 'AdminListController',
+            _type: 'providers'
+        })
         .when('/admin/providers/:id', {
             templateUrl: 'templates/admin/edit-providers.html',
             controller: 'AdminEditProviderController'
+        })
+        .when('/admin/origins/', {
+            templateUrl: 'templates/admin/list-catalog.html',
+            controller: 'AdminListController',
+            _type: 'origins'
+        })
+        .when('/admin/sources/', {
+            templateUrl: 'templates/admin/list-catalog.html',
+            controller: 'AdminListController',
+            _type: 'sources'
+        })
+        .when('/admin/metrics/', {
+            templateUrl: 'templates/admin/list-catalog.html',
+            controller: 'AdminListController',
+            _type: 'metrics'
         })
         .when('/admin/', {
             redirectTo: '/admin/collections/'
