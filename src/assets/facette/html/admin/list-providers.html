@@ -6,10 +6,10 @@
 
 		<menu class="main expand">
 			<menuitem href="" icon="refresh" title="{{ 'label.list_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
-			<menuitem href="{{ ::baseURL }}admin/{{ section }}/add" icon="plus" title="{{ 'label.providers_add' | translate }}" type="button" ng-if="!readOnly"></menuitem>
+			<menuitem href="{{ ::baseURL }}admin/providers/add" icon="plus" title="{{ 'label.providers_add' | translate }}" type="button" ng-if="!readOnly"></menuitem>
 		</menu>
 
-		<search name="search" placeholder="{{ 'label.' + section + '_search' | translate }}" ng-model="search"></search>
+		<search name="search" placeholder="{{ 'label.providers_search' | translate }}" ng-model="search"></search>
 
 		<ng-include src="'templates/common/extra-menu.html'" ng-include-replace="true"></ng-include>
 	</header>
@@ -33,8 +33,8 @@
 						<div class="actions">
 							<menu>
 								<menuitem icon="info-circle" type="button" tooltip-data="i" tooltip-formatter="formatBasicTooltip" tooltip-position="bottom"></menuitem>
-								<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ i.id }}" icon="pencil" title="{{ 'label.' + section + '_edit' | translate }}" type="button" ng-if="!readOnly"></menuitem>
-								<menuitem icon="clone" title="{{ 'label.' + section + '_clone' | translate }}" type="button" ng-click="clone(i)" ng-if="!readOnly"></menuitem>
+								<menuitem href="{{ ::baseURL }}admin/providers/{{ i.id }}" icon="pencil" title="{{ 'label.providers_edit' | translate }}" type="button" ng-if="!readOnly"></menuitem>
+								<menuitem icon="clone" title="{{ 'label.providers_clone' | translate }}" type="button" ng-click="clone(i)" ng-if="!readOnly"></menuitem>
 								<menuitem icon="refresh" title="{{ 'label.providers_refresh' | translate }}" type="button" ng-click="refreshProvider(i)" ng-disabled="i.refreshing" ng-show="i.enabled"></menuitem>
 							</menu>
 						</div>
