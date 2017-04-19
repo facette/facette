@@ -1,4 +1,41 @@
 app.factory('adminEdit', function($location, $rootScope, $timeout, $translate, adminHelpers) {
+    function confirmDelete(scope, item, message, args) {
+        args = args || {};
+        args.name = item.name;
+
+        $rootScope.showModal({
+            type: dialogTypeConfirm,
+            message: message,
+            args: args,
+            labels: {
+                validate: 'label.' + scope.section + '_delete'
+            },
+            danger: true
+        }, function(data) {
+            if (data === undefined) {
+                return;
+            }
+
+            adminHelpers.getFactory(scope).delete({
+                type: scope.section,
+                id: item.id
+            }, function() {
+                // Check if an item was being edited. If so, return to items list
+                if (scope.id) {
+                    var locSearch = {};
+                    if (scope.item && scope.item.template) {
+                        locSearch.templates = 1;
+                    }
+
+                    $location.path('admin/' + scope.section + '/').search(locSearch);
+                    return;
+                }
+
+                scope.refresh();
+            });
+        });
+    }
+
     return {
         cancel: function(scope, force) {
             force = typeof force == 'boolean' ? force : false;
@@ -15,6 +52,27 @@ app.factory('adminEdit', function($location, $rootScope, $timeout, $translate, a
             $location.path('admin/' + scope.section + '/').search(locSearch);
             if (force) {
                 $location.replace();
+            }
+        },
+
+        delete: function(scope, item) {
+            if (scope.templates) {
+                adminHelpers.getFactory(scope).listPeek({
+                    type: scope.section,
+                    kind: 'raw',
+                    link: item.id,
+                    fields: 'id'
+                }, function(data, headers) {
+                    var count = parseInt(headers('X-Total-Records'), 10);
+
+                    if (count > 0) {
+                        confirmDelete(scope, item, 'mesg.templates_delete', {count: count});
+                    } else {
+                        confirmDelete(scope, item, 'mesg.items_delete');
+                    }
+                });
+            } else {
+                confirmDelete(scope, item, 'mesg.items_delete');
             }
         },
 

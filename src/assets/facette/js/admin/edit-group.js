@@ -4,6 +4,7 @@ app.controller('AdminEditGroupController', function($q, $route, $routeParams, $s
 
     // Define scope functions
     $scope.cancel = function(force) { adminEdit.cancel($scope, force); };
+    $scope.delete = function() { adminEdit.delete($scope, {id: $scope.id, name: $scope.itemRef.name}); };
     $scope.reset = function() { adminEdit.reset($scope); };
     $scope.save = function() { adminEdit.save($scope); };
     $scope.remove = function(list, entry) { adminEdit.remove($scope, list, entry); };

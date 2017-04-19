@@ -124,7 +124,8 @@
 		</div>
 		<div ng-switch-default="">
 			<button class="extra" ng-click="reset()" ng-disabled="!modified"><span class="fa fa-undo"></span> {{ 'label.providers_reset' | translate }}</button>
-			<button class="danger" ng-click="cancel()">{{ 'label.cancel' | translate }}</button>
+			<button class="danger" ng-click="cancel()" ng-show="id == 'add' || !altMode">{{ 'label.cancel' | translate }}</button>
+			<button class="danger" ng-click="delete()" ng-show="id != 'add' && altMode"><span class="fa fa-trash-o"></span> {{ 'label.providers_delete' | translate }}</button>
 			<button ng-click="save()">{{ 'label.providers_save' | translate }}</button>
 		</div>
 	</footer>

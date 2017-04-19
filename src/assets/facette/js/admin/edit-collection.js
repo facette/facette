@@ -113,6 +113,7 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
 
     // Define scope functions
     $scope.cancel = function(force) { adminEdit.cancel($scope, force); };
+    $scope.delete = function() { adminEdit.delete($scope, {id: $scope.id, name: $scope.itemRef.name}); };
     $scope.reset = function() { adminEdit.reset($scope); fetchGraphs(); };
 
     $scope.save = function(go) {

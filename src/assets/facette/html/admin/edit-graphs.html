@@ -224,7 +224,8 @@
 		<footer>
 			<div ng-if="!optionsEdit">
 				<button class="extra" ng-click="reset()" ng-disabled="!modified" ng-if="id != 'add'"><span class="fa fa-undo"></span> {{ 'label.graphs_reset' | translate }}</button>
-				<button class="danger" ng-click="cancel()">{{ 'label.cancel' | translate }}</button>
+				<button class="danger" ng-click="cancel()" ng-show="id == 'add' || !altMode">{{ 'label.cancel' | translate }}</button>
+				<button class="danger" ng-click="delete()" ng-show="id != 'add' && altMode"><span class="fa fa-trash-o"></span> {{ 'label.graphs_delete' | translate }}</button>
 				<button ng-click="switch(step - 1)" ng-disabled="step == 1 || optionsEdit"><span class="fa fa-chevron-circle-left"></span> {{ 'label.prev' | translate }}</button>
 				<button ng-click="switch(step + 1)" ng-disabled="!item.groups || item.groups.length === 0 || step == 2 || optionsEdit">{{ 'label.next' | translate }} <span class="fa fa-chevron-circle-right"></span></button>
 				<button ng-click="save()" ng-disabled="step != 2 || optionsEdit" ng-show="!item.template && !altMode">{{ 'label.graphs_save' | translate }}</button>
@@ -324,7 +325,8 @@
 
 	<footer>
 		<button class="extra" ng-click="reset()" ng-disabled="!modified" ng-if="id != 'link'"><span class="fa fa-undo"></span> {{ 'label.graphs_reset' | translate }}</button>
-		<button class="danger" ng-click="cancel()">{{ 'label.cancel' | translate }}</button>
+		<button class="danger" ng-click="cancel()" ng-show="id == 'link' || !altMode">{{ 'label.cancel' | translate }}</button>
+		<button class="danger" ng-click="delete()" ng-show="id != 'link' && altMode"><span class="fa fa-trash-o"></span> {{ 'label.graphs_delete' | translate }}</button>
 		<button ng-click="save()" ng-disabled="!item.name || !item.link" ng-show="!altMode">{{ 'label.graphs_save' | translate }}</button>
 		<button ng-click="save(true)" ng-disabled="!item.name || !item.link" ng-show="altMode">{{ 'label.save_go' | translate }}</button>
 	</footer>

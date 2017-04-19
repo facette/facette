@@ -1,9 +1,7 @@
-app.controller('AdminListController', function($location, $q, $rootScope, $routeParams, $scope, $timeout, $translate,
-    library, catalog, providers, providersAction) {
+app.controller('AdminListController', function($location, $q, $rootScope, $route, $routeParams, $scope, $timeout,
+    $translate, adminEdit, adminHelpers, catalog, providersAction) {
 
-    var factory;
-
-    $scope.section = $routeParams.section;
+    $scope.section = $route.current.$$route._type;
     $scope.state = stateLoading;
     $scope.items = [];
     $scope.templates = ($scope.section == 'collections' || $scope.section == 'graphs') &&
@@ -20,33 +18,6 @@ app.controller('AdminListController', function($location, $q, $rootScope, $route
 
     // Set page title
     $rootScope.setTitle(['label.' + $scope.section, 'label.admin_panel']);
-
-    // Define helper functions
-    function remove(item, message, args) {
-        args = args || {};
-        args.name = item.name;
-
-        $rootScope.showModal({
-            type: dialogTypeConfirm,
-            message: message,
-            args: args,
-            labels: {
-                validate: 'label.' + $scope.section + '_remove'
-            },
-            danger: true
-        }, function(data) {
-            if (data === undefined) {
-                return;
-            }
-
-            factory.delete({
-                type: $scope.section,
-                id: item.id
-            }, function() {
-                $scope.refresh();
-            });
-        });
-    }
 
     // Define scope functions
     $scope.refresh = function(page) {
@@ -125,25 +96,8 @@ app.controller('AdminListController', function($location, $q, $rootScope, $route
         });
     };
 
-    $scope.remove = function(item) {
-        if ($scope.templates) {
-            factory.listPeek({
-                type: $scope.section,
-                kind: 'raw',
-                link: item.id,
-                fields: 'id'
-            }, function(data, headers) {
-                var count = parseInt(headers('X-Total-Records'), 10);
-
-                if (count > 0) {
-                    remove(item, 'mesg.templates_remove', {count: count});
-                } else {
-                    remove(item, 'mesg.items_remove');
-                }
-            });
-        } else {
-            remove(item, 'mesg.items_remove');
-        }
+    $scope.delete = function(item) {
+        adminEdit.delete($scope, item);
     };
 
     $scope.toggle = function(entry) {
