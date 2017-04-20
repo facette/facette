@@ -56,21 +56,25 @@ func (w *httpWorker) httpHandleCatalogType(ctx context.Context, rw http.Response
 	sort.Strings(result)
 
 	offset, err := httpGetIntParam(r, "offset")
-	if err != nil {
+	if err != nil || offset < 0 {
 		httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidParameter), http.StatusBadRequest)
 		return
 	}
 
-	limit, err := httpGetIntParam(r, "limit")
-	if err != nil {
-		httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidParameter), http.StatusBadRequest)
-		return
-	}
+	if offset < total {
+		limit, err := httpGetIntParam(r, "limit")
+		if err != nil || limit < 0 {
+			httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidParameter), http.StatusBadRequest)
+			return
+		}
 
-	if limit != 0 && total > offset+limit {
-		result = result[offset : offset+limit]
-	} else if offset > 0 {
-		result = result[offset:total]
+		if limit != 0 && total > offset+limit {
+			result = result[offset : offset+limit]
+		} else if offset > 0 {
+			result = result[offset:total]
+		}
+	} else {
+		result = []string{}
 	}
 
 	rw.Header().Set("X-Total-Records", fmt.Sprintf("%d", total))

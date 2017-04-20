@@ -307,13 +307,13 @@ func (w *httpWorker) httpHandleBackendList(ctx context.Context, rw http.Response
 	rv := reflect.New(reflect.MakeSlice(reflect.SliceOf(rt), 0, 0).Type())
 
 	offset, err := httpGetIntParam(r, "offset")
-	if err != nil {
+	if err != nil || offset < 0 {
 		httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidParameter), http.StatusBadRequest)
 		return
 	}
 
 	limit, err := httpGetIntParam(r, "limit")
-	if err != nil {
+	if err != nil || limit < 0 {
 		httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidParameter), http.StatusBadRequest)
 		return
 	}
