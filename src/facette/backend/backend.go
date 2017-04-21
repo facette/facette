@@ -33,7 +33,7 @@ type Backend struct {
 }
 
 func init() {
-	authorizedAliasChars = regexp.MustCompile("^[A-Za-z0-9\\-_]+$")
+	authorizedAliasChars = regexp.MustCompile("^[A-Za-z0-9\\-_\\.]+$")
 }
 
 // NewBackend creates a new instance of a backend.
