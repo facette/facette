@@ -2,6 +2,7 @@
 
 var fs = require('fs'),
     gulp = require('gulp'),
+    autoprefixer = require('gulp-autoprefixer'),
     chmod = require('gulp-chmod'),
     concat = require('gulp-concat'),
     environments = require('gulp-environments'),
@@ -12,7 +13,6 @@ var fs = require('fs'),
     jshint = require('gulp-jshint'),
     jsonminify = require('gulp-jsonminify'),
     merge = require('merge-stream'),
-    myth = require('gulp-myth'),
     rev = require('gulp-rev'),
     revDelete = require('gulp-rev-delete-original'),
     revReplace = require('gulp-rev-replace'),
@@ -190,7 +190,7 @@ gulp.task('build-styles',function() {
         gulp.src(config.files.style)
             .pipe(concat('style.css'))
             .pipe(header(config.banner + '\n', {pkg: config.pkg}))
-            .pipe(myth())
+            .pipe(autoprefixer())
             .pipe(environments.production(uglifycss()))
             .pipe(chmod(644))
             .pipe(gulp.dest(config.build_dir + '/assets/css')),
@@ -198,7 +198,7 @@ gulp.task('build-styles',function() {
         gulp.src(config.files.style_print)
             .pipe(concat('style-print.css'))
             .pipe(header(config.banner + '\n', {pkg: config.pkg}))
-            .pipe(myth())
+            .pipe(autoprefixer())
             .pipe(environments.production(uglifycss()))
             .pipe(chmod(644))
             .pipe(gulp.dest(config.build_dir + '/assets/css'))
