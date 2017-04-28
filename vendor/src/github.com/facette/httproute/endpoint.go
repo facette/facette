@@ -29,6 +29,11 @@ func newEndpoint(pattern string, rt *Router) *Endpoint {
 	}
 }
 
+// Any registers a handler for any method.
+func (e *Endpoint) Any(h Handler) *Endpoint {
+	return e.register("", h)
+}
+
 // Delete registers a 'DELETE' method handler.
 func (e *Endpoint) Delete(h Handler) *Endpoint {
 	return e.register("DELETE", h)
@@ -109,14 +114,19 @@ func (e *Endpoint) handle(ctx context.Context, rw http.ResponseWriter, r *http.R
 	// Check for requested method and handle defaults
 	handler, ok := e.handlers[r.Method]
 	if !ok {
-		switch r.Method {
-		case "HEAD":
-			handler, ok = e.handlers["GET"]
+		if _, ok = e.handlers[""]; ok {
+			// Use 'Any' handler
+			handler = e.handlers[""]
+		} else {
+			switch r.Method {
+			case "HEAD":
+				handler, ok = e.handlers["GET"]
 
-		case "OPTIONS":
-			rw.Header().Add("Allow", strings.Join(e.Methods(), ", "))
-			rw.WriteHeader(http.StatusNoContent)
-			return
+			case "OPTIONS":
+				rw.Header().Add("Allow", strings.Join(e.Methods(), ", "))
+				rw.WriteHeader(http.StatusNoContent)
+				return
+			}
 		}
 	}
 

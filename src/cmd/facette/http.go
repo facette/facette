@@ -94,7 +94,7 @@ func newHTTPWorker(s *Service) *httpWorker {
 		Get(w.httpHandleInfo)
 
 	w.router.Endpoint(w.prefix + "/*").
-		Get(httpHandleNotFound)
+		Any(httpHandleNotFound)
 
 	w.router.Endpoint("/*").
 		Get(w.httpHandleAsset)
