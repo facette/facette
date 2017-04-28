@@ -45,18 +45,14 @@ clean:
 	@$(call mesg_start,clean,Removing build data...)
 	@rm -rf $(BUILD_DIR) src/cmd/facette/bindata.go && \
 		$(call mesg_ok) || $(call mesg_fail)
+	@rmdir build 2>/dev/null || true
 
-clean-depends:
-	@$(call mesg_start,clean,Removing build dependencies...)
+clean-all: clean
+	@$(call mesg_start,clean,Removing assets build dependencies...)
 	@rm -rf node_modules && \
 		$(call mesg_ok) || $(call mesg_fail)
 
 build: build-bin build-assets build-docs
-
-build-depends:
-	@$(call mesg_start,build,Installing build dependencies...)
-	@$(NPM) $(NPM_ARGS) install >/dev/null && \
-		$(call mesg_ok) || $(call mesg_fail)
 
 build-dir:
 	@$(call mesg_start,build,Preparing build directory...)
@@ -87,7 +83,7 @@ endif
 			-o $(BUILD_DIR)/bin/$$bin ./src/cmd/$$bin || exit 1; \
 	done) && $(call mesg_ok) || $(call mesg_fail)
 
-build-assets:
+build-assets: node_modules
 	@$(call mesg_start,build,Building assets...)
 	@BUILD_DIR=$(BUILD_DIR) $(GULP) $(GULP_ARGS) build --env $(BUILD_ENV) >/dev/null && \
 		$(call mesg_ok) || $(call mesg_fail)
@@ -140,4 +136,9 @@ lint-assets:
 update-locales:
 	@$(call mesg_start,locale,Updating locale files...)
 	@BUILD_DIR=$(BUILD_DIR) $(GULP) $(GULP_ARGS) update-locales >/dev/null && \
+		$(call mesg_ok) || $(call mesg_fail)
+
+node_modules:
+	@$(call mesg_start,build,Retrieving assets build dependencies...)
+	@$(NPM) $(NPM_ARGS) install >/dev/null && \
 		$(call mesg_ok) || $(call mesg_fail)
