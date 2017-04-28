@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"runtime"
 
-	"github.com/facette/httputil"
-
 	"facette/connector"
-	"facette/orm"
+
+	"github.com/facette/httputil"
+	"github.com/facette/sqlstorage"
 )
 
 type httpInfo struct {
@@ -30,7 +30,7 @@ func (w *httpWorker) httpHandleInfo(ctx context.Context, rw http.ResponseWriter,
 	// Get service information
 	if w.service.config.HideBuildDetails {
 		result = httpInfo{
-			Drivers:    orm.Drivers(),
+			Drivers:    sqlstorage.Drivers(),
 			Connectors: connector.Connectors(),
 			ReadOnly:   w.service.config.ReadOnly,
 		}
@@ -40,7 +40,7 @@ func (w *httpWorker) httpHandleInfo(ctx context.Context, rw http.ResponseWriter,
 			BuildDate:  buildDate,
 			BuildHash:  buildHash,
 			Compiler:   fmt.Sprintf("%s (%s)", runtime.Version(), runtime.Compiler),
-			Drivers:    orm.Drivers(),
+			Drivers:    sqlstorage.Drivers(),
 			Connectors: connector.Connectors(),
 			ReadOnly:   w.service.config.ReadOnly,
 		}

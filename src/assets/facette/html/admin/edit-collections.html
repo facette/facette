@@ -34,18 +34,18 @@
 								</listcolumn>
 								<listcolumn class="main expand">
 									<div class="row">
-										<div class="name">{{ graphData[e.id].name || e.id }}</div>
-										<div class="note error" ng-if="graphFetched && !graphData[e.id]"><span class="fa fa-warning"></span> {{ 'mesg.items_not_found' | translate }}</div>
+										<div class="name">{{ graphData[e.graph].name || e.graph }}</div>
+										<div class="note error" ng-if="graphFetched && !graphData[e.graph]"><span class="fa fa-warning"></span> {{ 'mesg.items_not_found' | translate }}</div>
 										<div class="actions">
 											<menu>
 												<menuitem href="" icon="cog" title="{{ 'label.graphs_manage' | translate }}" type="button" ng-click="editGraphEntry(e)"></menuitem>
-												<menuitem href="{{ ::baseURL }}admin/graphs/{{ e.id }}" icon="pencil" title="{{ 'label.graphs_edit' | translate }}" type="button" ng-click="editGraph(e)"></menuitem>
+												<menuitem href="{{ ::baseURL }}admin/graphs/{{ e.graph }}" icon="pencil" title="{{ 'label.graphs_edit' | translate }}" type="button" ng-click="editGraph(e)"></menuitem>
 											</menu>
 										</div>
 									</div>
 									<div class="description">
-										<div class="info" ng-if="graphData[e.id] && graphData[e.id].template && e.attributes">
-											<span class="attrinfo" ng-repeat="k in graphData[e.id].templateKeys" ng-if="e.attributes[k]">{{ k }}: <strong>{{ e.attributes[k] }}</strong></span>
+										<div class="info" ng-if="graphData[e.graph] && graphData[e.graph].template && e.attributes">
+											<span class="attrinfo" ng-repeat="k in graphData[e.graph].templateKeys" ng-if="e.attributes[k]">{{ k }}: <strong>{{ e.attributes[k] }}</strong></span>
 										</div>
 									</div>
 								</listcolumn>

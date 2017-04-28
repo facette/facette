@@ -13,11 +13,11 @@ import (
 	"time"
 
 	"facette/catalog"
-	"facette/mapper"
 	"facette/plot"
 
 	"github.com/facette/httputil"
 	"github.com/facette/logger"
+	"github.com/facette/maputil"
 )
 
 const (
@@ -42,7 +42,7 @@ type graphiteConnector struct {
 }
 
 func init() {
-	connectors["graphite"] = func(name string, settings mapper.Map, log *logger.Logger) (Connector, error) {
+	connectors["graphite"] = func(name string, settings *maputil.Map, log *logger.Logger) (Connector, error) {
 		var err error
 
 		c := &graphiteConnector{
@@ -113,7 +113,7 @@ func (c *graphiteConnector) Refresh(output chan<- *catalog.Record) error {
 	}
 	defer resp.Body.Close()
 
-	// Parse backend response
+	// Parse back-end response
 	if err = graphiteCheckBackendResponse(resp); err != nil {
 		return fmt.Errorf("invalid HTTP backend response: %s", err)
 	}
@@ -168,7 +168,7 @@ func (c *graphiteConnector) Plots(q *plot.Query) ([]plot.Series, error) {
 		return nil, fmt.Errorf("graphite[%s]: unable to build query URL: %s", c.name, err)
 	}
 
-	// Request data from backend
+	// Request data from back-end
 	r, err := http.NewRequest("GET", strings.TrimSuffix(c.url, "/")+graphiteURLRender+"?"+queryURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("graphite[%s]: unable to set up HTTP request: %s", c.name, err)
@@ -183,7 +183,7 @@ func (c *graphiteConnector) Plots(q *plot.Query) ([]plot.Series, error) {
 	}
 	defer rsp.Body.Close()
 
-	// Parse backend response
+	// Parse back-end response
 	if err = graphiteCheckBackendResponse(rsp); err != nil {
 		return nil, fmt.Errorf("graphite[%s]: invalid HTTP backend response: %s", c.name, err)
 	}
@@ -199,7 +199,7 @@ func (c *graphiteConnector) Plots(q *plot.Query) ([]plot.Series, error) {
 
 	// Extract results from response
 	if results, err = graphiteExtractResult(plots); err != nil {
-		return nil, fmt.Errorf("graphite[%s]: unable to extract plot values from backend response: %s", c.name, err)
+		return nil, fmt.Errorf("graphite[%s]: unable to extract plot values from back-end response: %s", c.name, err)
 	}
 
 	return results, nil

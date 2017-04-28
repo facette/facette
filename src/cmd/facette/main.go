@@ -9,9 +9,9 @@ import (
 	"syscall"
 
 	"facette/connector"
-	"facette/orm"
 
 	"github.com/cosiner/flag"
+	"github.com/facette/sqlstorage"
 )
 
 type command struct {
@@ -98,7 +98,7 @@ func printVersion() {
 	fmt.Printf("Build hash:  %s\n", buildHash)
 	fmt.Printf("Compiler:    %s (%s)\n", runtime.Version(), runtime.Compiler)
 
-	drivers := orm.Drivers()
+	drivers := sqlstorage.Drivers()
 	if len(drivers) == 0 {
 		drivers = append(drivers, "none")
 	}

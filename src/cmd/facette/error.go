@@ -15,6 +15,4 @@ var (
 	ErrUnhandledError = errors.New("an unhandled error has occurred")
 	// ErrUnknownEndpoint represents an unknown endpoint error.
 	ErrUnknownEndpoint = errors.New("unknown endpoint")
-	// ErrUnsupportedType represents an unsupported content type error.
-	ErrUnsupportedType = errors.New("unsupported content type")
 )

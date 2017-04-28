@@ -1,9 +1,11 @@
 package main
 
 import (
-	"facette/mapper"
-	"facette/yamlutil"
 	"strings"
+
+	"facette/yamlutil"
+
+	"github.com/facette/maputil"
 )
 
 const (
@@ -32,7 +34,7 @@ type config struct {
 	LogPath          string         `yaml:"log_path"`
 	LogLevel         string         `yaml:"log_level"`
 	Frontend         frontendConfig `yaml:"frontend"`
-	Backend          *mapper.Map    `yaml:"backend"`
+	Backend          *maputil.Map   `yaml:"backend"`
 	HideBuildDetails bool           `yaml:"hide_build_details"`
 	ReadOnly         bool           `yaml:"read_only"`
 }

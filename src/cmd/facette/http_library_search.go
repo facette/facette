@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"reflect"
 
 	"facette/backend"
 
@@ -16,23 +15,15 @@ type searchRequest struct {
 	Terms map[string]interface{} `json:"terms"`
 }
 
-type searchRecord struct {
-	Type  string       `json:"type"`
-	Value backend.Item `json:"value"`
-}
-
 func (w *httpWorker) httpHandleLibrarySearch(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	// Check for request content type
-	if ct, _ := httputil.GetContentType(r); ct != "application/json" {
-		httputil.WriteJSON(rw, httpBuildMessage(ErrUnsupportedType), http.StatusUnsupportedMediaType)
-		return
-	}
-
 	// Get search request from received data
 	req := searchRequest{}
-	if err := httputil.BindJSON(r, &req); err != nil {
+	if err := httputil.BindJSON(r, &req); err == httputil.ErrInvalidContentType {
+		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusUnsupportedMediaType)
+		return
+	} else if err != nil {
 		w.log.Error("unable to unmarshal JSON data: %s", err)
 		httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidParameter), http.StatusBadRequest)
 		return
@@ -45,16 +36,15 @@ func (w *httpWorker) httpHandleLibrarySearch(ctx context.Context, rw http.Respon
 
 	// Get requested types for request or fallback to 'all'
 	if len(req.Types) == 0 {
-		for typ := range backendTypes {
+		for _, typ := range backendTypes {
 			req.Types = append(req.Types, typ)
 		}
 	}
 
 	types := []interface{}{}
 	for _, typ := range req.Types {
-		if rt, ok := backendTypes[typ]; ok {
-			rv := reflect.New(rt)
-			types = append(types, reflect.Indirect(rv).Interface())
+		if item, ok := w.httpBackendNewItem(typ); ok {
+			types = append(types, item)
 		}
 	}
 
@@ -72,20 +62,21 @@ func (w *httpWorker) httpHandleLibrarySearch(ctx context.Context, rw http.Respon
 
 	sort := httpGetListParam(r, "sort", []string{"name"})
 
+	// Apply back-end storage modifiers
+	for k, v := range req.Terms {
+		if s, ok := v.(string); ok {
+			req.Terms[k] = filterApplyModifier(s)
+		}
+	}
+
 	// Execute search request
-	items, count, err := w.service.backend.Search(types, req.Terms, sort, offset, limit)
+	result := []*backend.Item{}
+
+	count, err := w.service.backend.Storage().Search(types, &result, req.Terms, sort, offset, limit)
 	if err != nil {
 		w.log.Error("failed to perform search: %s", err)
 		httputil.WriteJSON(rw, httpBuildMessage(ErrUnhandledError), http.StatusInternalServerError)
 		return
-	}
-
-	result := []searchRecord{}
-	for _, entry := range items {
-		result = append(result, searchRecord{
-			Type:  entry.Type,
-			Value: entry.Item,
-		})
 	}
 
 	rw.Header().Set("X-Total-Records", fmt.Sprintf("%d", count))

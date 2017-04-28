@@ -4,7 +4,8 @@ import (
 	"time"
 
 	"facette/backend"
-	"facette/mapper"
+
+	"github.com/facette/maputil"
 )
 
 // Request represents a plot request instance.
@@ -16,5 +17,5 @@ type Request struct {
 	Sample     int            `json:"sample"`
 	ID         string         `json:"id"`
 	Graph      *backend.Graph `json:"graph"`
-	Attributes mapper.Map     `json:"attributes,omitempty"`
+	Attributes maputil.Map    `json:"attributes,omitempty"`
 }

@@ -213,7 +213,7 @@ app.controller('BrowseGraphController', function($rootScope, $routeParams, $scop
 
                     var graph = {
                         index: idx,
-                        id: entry.id,
+                        id: entry.graph,
                         options: angular.extend(entry.options || {}, globalOptions),
                         hidden: false
                     };
@@ -223,7 +223,7 @@ app.controller('BrowseGraphController', function($rootScope, $routeParams, $scop
                         graph.options.refresh_interval = $scope.refreshInterval;
                     }
 
-                    var state = graphsState[idx + '_' + entry.id];
+                    var state = graphsState[idx + '_' + entry.graph];
                     if (state && typeof state.folded == 'boolean') {
                         graph.options.folded = state.folded;
                     }
@@ -232,11 +232,11 @@ app.controller('BrowseGraphController', function($rootScope, $routeParams, $scop
                     if (entry.options && entry.options.title) {
                         graph.title = entry.options.title;
                     } else {
-                        if (!graphsResolve[entry.id]) {
-                            graphsResolve[entry.id] = [];
+                        if (!graphsResolve[entry.graph]) {
+                            graphsResolve[entry.graph] = [];
                         }
 
-                        graphsResolve[entry.id].push(graph);
+                        graphsResolve[entry.graph].push(graph);
                     }
 
                     graph.attributes = angular.extend({}, data.attributes, entry.attributes) || null;

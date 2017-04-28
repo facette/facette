@@ -19,7 +19,7 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
 
         angular.forEach($scope.item.entries, function(entry) {
             graphQuery.push({
-                endpoint: 'library/graphs/' + entry.id,
+                endpoint: 'library/graphs/' + entry.graph,
                 method: 'GET',
                 params: {fields: 'id,name,options,template'}
             });
@@ -182,7 +182,7 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
         }
 
         var graph = {
-            id: $scope.graph.id,
+            graph: $scope.graph.id,
             name: $scope.graph.name
         };
 
@@ -211,9 +211,9 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
             return;
         }
 
-        $scope.graph = angular.extend({index: idx}, $scope.graphData[entry.id]);
+        $scope.graph = angular.extend({index: idx}, $scope.graphData[entry.graph]);
 
-        $scope.$broadcast('angucomplete-alt:changeInput', 'graph', $scope.graphData[entry.id].name);
+        $scope.$broadcast('angucomplete-alt:changeInput', 'graph', $scope.graphData[entry.graph].name);
 
         $scope.$applyAsync(function() { angular.element('#graph_value').select(); });
     };
@@ -235,7 +235,7 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
         }
 
         var entryAttrs = angular.copy(entry.attributes || {});
-        angular.forEach($scope.graphData[entry.id].templateKeys, function(key) {
+        angular.forEach($scope.graphData[entry.graph].templateKeys, function(key) {
             if (!entryAttrs[key]) {
                 entryAttrs[key] = '';
             }

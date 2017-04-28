@@ -32,7 +32,7 @@ type providerWorker struct {
 
 func newProviderWorker(poller *pollerWorker, prov *backend.Provider) (*providerWorker, error) {
 	// Initialize provider connector handler
-	c, err := connector.NewConnector(prov.Connector, prov.Name, prov.Settings,
+	c, err := connector.NewConnector(prov.Connector, prov.Name, &prov.Settings,
 		poller.log.Context(fmt.Sprintf("poller[%s]", prov.Name)))
 	if err != nil {
 		return nil, err

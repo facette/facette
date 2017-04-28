@@ -7,6 +7,7 @@ import (
 	"facette/backend"
 
 	"github.com/facette/httputil"
+	"github.com/facette/sqlstorage"
 )
 
 func (w *httpWorker) httpHandleProviderRefresh(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
@@ -14,8 +15,8 @@ func (w *httpWorker) httpHandleProviderRefresh(ctx context.Context, rw http.Resp
 
 	provider := backend.Provider{}
 
-	// Request item from backend
-	if err := w.service.backend.Get(id, &provider); err == backend.ErrItemNotExist {
+	// Request item from back-end
+	if err := w.service.backend.Storage().Get("id", id, &provider); err == sqlstorage.ErrItemNotFound {
 		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
 		return
 	} else if err != nil {

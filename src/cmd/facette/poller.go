@@ -35,10 +35,11 @@ func (w *pollerWorker) Run(wg *sync.WaitGroup) {
 
 	w.log.Debug("worker started")
 
-	// Get providers list from backend
-	providers := []backend.Provider{}
+	// Get providers list from back-end
+	providers := []*backend.Provider{}
 
-	if _, err := w.service.backend.List(&providers, map[string]interface{}{"enabled": true}, nil, 0, 0); err != nil {
+	if _, err := w.service.backend.Storage().List(&providers, map[string]interface{}{"enabled": true},
+		nil, 0, 0); err != nil {
 		w.log.Error("failed to list providers: %s", err)
 		return
 	}
@@ -61,7 +62,7 @@ func (w *pollerWorker) Shutdown() {
 	w.CommonWorker.Shutdown()
 }
 
-func (w *pollerWorker) StartProvider(prov backend.Provider) {
+func (w *pollerWorker) StartProvider(prov *backend.Provider) {
 	var err error
 
 	w.Lock()
@@ -77,7 +78,7 @@ func (w *pollerWorker) StartProvider(prov backend.Provider) {
 	}
 
 	// Initialize new provider worker and perform initial refresh
-	w.providers[prov.ID], err = newProviderWorker(w, &prov)
+	w.providers[prov.ID], err = newProviderWorker(w, prov)
 	if err != nil {
 		w.log.Error("failed to start %q provider: %s", prov.Name, err)
 		return
@@ -89,7 +90,7 @@ func (w *pollerWorker) StartProvider(prov backend.Provider) {
 	w.providers[prov.ID].Refresh()
 }
 
-func (w *pollerWorker) StopProvider(prov backend.Provider, update bool) {
+func (w *pollerWorker) StopProvider(prov *backend.Provider, update bool) {
 	w.Lock()
 
 	if pw, ok := w.providers[prov.ID]; ok {

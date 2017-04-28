@@ -12,11 +12,11 @@ import (
 	"time"
 
 	"facette/catalog"
-	"facette/mapper"
 	"facette/plot"
 
 	"github.com/facette/httputil"
 	"github.com/facette/logger"
+	"github.com/facette/maputil"
 	"github.com/fatih/set"
 )
 
@@ -99,7 +99,7 @@ type kairosdbConnector struct {
 }
 
 func init() {
-	connectors["kairosdb"] = func(name string, settings mapper.Map, log *logger.Logger) (Connector, error) {
+	connectors["kairosdb"] = func(name string, settings *maputil.Map, log *logger.Logger) (Connector, error) {
 		var err error
 
 		c := &kairosdbConnector{

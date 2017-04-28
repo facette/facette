@@ -51,7 +51,7 @@ type FilterChain struct {
 }
 
 // NewFilterChain creates a new catalog filtering chain instance.
-func NewFilterChain(rules []backend.ProviderFilter) *FilterChain {
+func NewFilterChain(rules *backend.ProviderFilters) *FilterChain {
 	fc := &FilterChain{
 		Input:    make(chan *Record),
 		Output:   make(chan *Record),
@@ -60,7 +60,7 @@ func NewFilterChain(rules []backend.ProviderFilter) *FilterChain {
 	}
 
 	// Parse filter chain rules
-	for _, r := range rules {
+	for _, r := range *rules {
 		if r.Target == "" {
 			r.Target = TargetAny
 		}

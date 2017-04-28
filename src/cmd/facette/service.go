@@ -77,7 +77,7 @@ func (s *Service) Shutdown() {
 
 	s.log.Notice("received shutdown signal, stopping")
 
-	// Close backend
+	// Close back-end
 	if s.backend != nil {
 		s.backend.Close()
 	}

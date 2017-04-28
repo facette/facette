@@ -13,11 +13,11 @@ import (
 
 	"facette/backend"
 	"facette/catalog"
-	"facette/mapper"
 	"facette/plot"
 
 	"github.com/facette/httputil"
 	"github.com/facette/logger"
+	"github.com/facette/maputil"
 )
 
 const (
@@ -35,7 +35,7 @@ type facetteConnector struct {
 }
 
 func init() {
-	connectors["facette"] = func(name string, settings mapper.Map, log *logger.Logger) (Connector, error) {
+	connectors["facette"] = func(name string, settings *maputil.Map, log *logger.Logger) (Connector, error) {
 		var err error
 
 		c := &facetteConnector{name: name}
@@ -122,12 +122,12 @@ func (c *facetteConnector) Plots(q *plot.Query) ([]plot.Series, error) {
 			Item: backend.Item{
 				Name: "facette",
 			},
-			Groups: []backend.SeriesGroup{
+			Groups: backend.SeriesGroups{
 				{
-					Series: func(series []plot.QuerySeries) []backend.Series {
-						out := make([]backend.Series, len(series))
+					Series: func(series []plot.QuerySeries) []*backend.Series {
+						out := make([]*backend.Series, len(series))
 						for i, s := range series {
-							out[i] = backend.Series{
+							out[i] = &backend.Series{
 								Name:   fmt.Sprintf("series%d", i),
 								Origin: s.Origin,
 								Source: s.Source,

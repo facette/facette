@@ -76,7 +76,7 @@ app.controller('AdminListController', function($location, $q, $rootScope, $route
         $rootScope.showModal({
             type: dialogTypePrompt,
             message: 'label.' + $scope.section + '_name',
-            value: item.name + ' (clone)',
+            value: item.name + '-clone',
             labels: {
                 validate: 'label.' + $scope.section + '_clone'
             }

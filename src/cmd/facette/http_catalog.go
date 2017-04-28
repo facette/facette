@@ -7,7 +7,6 @@ import (
 	"reflect"
 	"sort"
 
-	"facette/backend"
 	"facette/catalog"
 
 	"github.com/facette/httputil"
@@ -18,10 +17,10 @@ func (w *httpWorker) httpHandleCatalogRoot(ctx context.Context, rw http.Response
 	defer r.Body.Close()
 
 	// Get item types list and information
-	result := httpTypeList{
-		httpTypeRecord{Name: "metrics", Count: len(w.httpCatalogSearch("metrics", "", r))},
-		httpTypeRecord{Name: "origins", Count: len(w.httpCatalogSearch("origins", "", r))},
-		httpTypeRecord{Name: "sources", Count: len(w.httpCatalogSearch("sources", "", r))},
+	result := map[string]int{
+		"origins": len(w.httpCatalogSearch("origins", "", r)),
+		"sources": len(w.httpCatalogSearch("sources", "", r)),
+		"metrics": len(w.httpCatalogSearch("metrics", "", r)),
 	}
 
 	httputil.WriteJSON(rw, result, http.StatusOK)
@@ -44,7 +43,7 @@ func (w *httpWorker) httpHandleCatalogType(ctx context.Context, rw http.Response
 	s := set.New()
 	for _, item := range search {
 		name := reflect.Indirect(reflect.ValueOf(item)).FieldByName("Name").String()
-		if filter == "" || backend.FilterMatch(filter, name) {
+		if filter == "" || filterMatch(filter, name) {
 			s.Add(name)
 		}
 	}
@@ -175,4 +174,42 @@ func (w *httpWorker) httpHandleCatalogEntry(ctx context.Context, rw http.Respons
 	}
 
 	httputil.WriteJSON(rw, result, http.StatusOK)
+}
+
+func (w *httpWorker) httpCatalogSearch(typ, name string, r *http.Request) []interface{} {
+	search := []interface{}{}
+
+	switch typ {
+	case "origins":
+		for _, o := range w.service.searcher.Origins(
+			name,
+			-1,
+		) {
+			search = append(search, o)
+		}
+
+	case "sources":
+		for _, s := range w.service.searcher.Sources(
+			r.URL.Query().Get("origin"),
+			name,
+			-1,
+		) {
+			search = append(search, s)
+		}
+
+	case "metrics":
+		for _, m := range w.service.searcher.Metrics(
+			r.URL.Query().Get("origin"),
+			r.URL.Query().Get("source"),
+			name,
+			-1,
+		) {
+			search = append(search, m)
+		}
+
+	default:
+		return nil
+	}
+
+	return search
 }

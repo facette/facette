@@ -13,6 +13,8 @@ log_path:
 log_level: info
 
 backend:
+  debug: false
+
   ### SQLite
   driver: sqlite
   path: data.db

@@ -34,15 +34,12 @@ func init() {
 func (w *httpWorker) httpHandleBulk(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	// Check for request content type
-	if ct, _ := httputil.GetContentType(r); ct != "application/json" {
-		httputil.WriteJSON(rw, httpBuildMessage(ErrUnsupportedType), http.StatusUnsupportedMediaType)
-		return
-	}
-
 	// Get search request from received data
 	req := bulkRequest{}
-	if err := httputil.BindJSON(r, &req); err != nil {
+	if err := httputil.BindJSON(r, &req); err == httputil.ErrInvalidContentType {
+		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusUnsupportedMediaType)
+		return
+	} else if err != nil {
 		w.log.Error("unable to unmarshal JSON data: %s", err)
 		httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidParameter), http.StatusBadRequest)
 		return

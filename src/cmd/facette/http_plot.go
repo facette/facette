@@ -9,10 +9,10 @@ import (
 	"facette/backend"
 	"facette/connector"
 	"facette/plot"
-	"facette/template"
 	"facette/timerange"
 
 	"github.com/facette/httputil"
+	"github.com/facette/sqlstorage"
 )
 
 const (
@@ -30,15 +30,12 @@ func (w *httpWorker) httpHandlePlots(ctx context.Context, rw http.ResponseWriter
 
 	defer r.Body.Close()
 
-	// Check for request content type
-	if ct, _ := httputil.GetContentType(r); ct != "application/json" {
-		httputil.WriteJSON(rw, httpBuildMessage(ErrUnsupportedType), http.StatusUnsupportedMediaType)
-		return
-	}
-
 	// Get plot request from received data
 	req := &plot.Request{}
-	if err := httputil.BindJSON(r, req); err != nil {
+	if err := httputil.BindJSON(r, req); err == httputil.ErrInvalidContentType {
+		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusUnsupportedMediaType)
+		return
+	} else if err != nil {
 		w.log.Error("unable to unmarshal JSON data: %s", err)
 		httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidParameter), http.StatusBadRequest)
 		return
@@ -46,9 +43,9 @@ func (w *httpWorker) httpHandlePlots(ctx context.Context, rw http.ResponseWriter
 
 	// Request item from backend
 	if req.ID != "" {
-		req.Graph = &backend.Graph{}
+		req.Graph = w.service.backend.NewGraph()
 
-		if err := w.service.backend.Get(req.ID, req.Graph); err == backend.ErrItemNotExist {
+		if err := w.service.backend.Storage().Get("id", req.ID, req.Graph); err == sqlstorage.ErrItemNotFound {
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
 			return
 		} else if err != nil {
@@ -62,29 +59,14 @@ func (w *httpWorker) httpHandlePlots(ctx context.Context, rw http.ResponseWriter
 	}
 
 	// Expand graph template if linked
-	if req.Graph.LinkID != "" || req.Graph.ID == "" && len(req.Graph.Attributes) > 0 || len(req.Attributes) > 0 {
-		// Back up template attributes for later expansion
-		attrs := req.Graph.Attributes
-		if len(req.Attributes) > 0 {
-			attrs.Merge(req.Attributes, true)
-		}
+	if req.Graph.Backend == nil {
+		req.Graph.Backend = w.service.backend
+	}
 
-		if req.Graph.LinkID != "" {
-			if err := w.service.backend.Get(req.Graph.LinkID, req.Graph); err == backend.ErrItemNotExist {
-				httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
-				return
-			} else if err != nil {
-				w.log.Error("failed to fetch linked item: %s", err)
-				httputil.WriteJSON(rw, httpBuildMessage(ErrUnhandledError), http.StatusInternalServerError)
-				return
-			}
-		}
-
-		if err := req.Graph.Expand(attrs); err != nil {
-			w.log.Warning("%s", err)
-			httputil.WriteJSON(rw, httpBuildMessage(template.ErrInvalidTemplate), http.StatusBadRequest)
-			return
-		}
+	if err := req.Graph.Expand(req.Attributes); err != nil {
+		w.log.Warning("%s", err)
+		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusInternalServerError)
+		return
 	}
 
 	// Set request time boundaries and range
@@ -150,12 +132,12 @@ func (w *httpWorker) httpHandlePlots(ctx context.Context, rw http.ResponseWriter
 
 func (w *httpWorker) executeRequest(req *plot.Request) []plot.SeriesResponse {
 	// Expand groups series
-	for i, group := range req.Graph.Groups {
-		expandedSeries := []backend.Series{}
+	for _, group := range req.Graph.Groups {
+		expandedSeries := []*backend.Series{}
 		for _, series := range group.Series {
 			expandedSeries = append(expandedSeries, w.expandSeries(series, true)...)
 		}
-		req.Graph.Groups[i].Series = expandedSeries
+		group.Series = expandedSeries
 	}
 
 	// Dispatch plot queries among providers
@@ -247,7 +229,7 @@ func (w *httpWorker) executeRequest(req *plot.Request) []plot.SeriesResponse {
 			}
 
 			// Set series name to group name
-			req.Graph.Groups[i].Series[0].Name = group.Name
+			group.Series[0].Name = group.Name
 
 			// Replace group series with operation result
 			data[i] = []plot.Series{series}

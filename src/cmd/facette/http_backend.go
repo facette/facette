@@ -7,65 +7,63 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
-	"time"
 
 	"facette/backend"
 	"facette/template"
 
 	"github.com/facette/httputil"
 	"github.com/facette/jsonutil"
-	uuid "github.com/hashicorp/go-uuid"
+	"github.com/facette/sqlstorage"
 )
 
-var backendTypes = map[string]reflect.Type{
-	"providers":    reflect.TypeOf(backend.Provider{}),
-	"collections":  reflect.TypeOf(backend.Collection{}),
-	"graphs":       reflect.TypeOf(backend.Graph{}),
-	"sourcegroups": reflect.TypeOf(backend.SourceGroup{}),
-	"metricgroups": reflect.TypeOf(backend.MetricGroup{}),
+var backendTypes = []string{
+	"providers",
+	"collections",
+	"graphs",
+	"sourcegroups",
+	"metricgroups",
 }
 
 func (w *httpWorker) httpHandleBackendCreate(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
 	if w.service.config.ReadOnly {
 		httputil.WriteJSON(rw, httpBuildMessage(ErrReadOnly), http.StatusForbidden)
 		return
-	} else if ct, _ := httputil.GetContentType(r); ct != "application/json" {
-		httputil.WriteJSON(rw, httpBuildMessage(ErrUnsupportedType), http.StatusUnsupportedMediaType)
-		return
 	}
 
 	typ := ctx.Value("type").(string)
 
-	// Get backend item type
-	rt, ok := backendTypes[typ]
+	// Initialize new back-end item
+	item, ok := w.httpBackendNewItem(typ)
 	if !ok {
 		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	rv := reflect.New(rt)
+	// Retrieve existing item data from back-end if inheriting
+	rv := reflect.ValueOf(item)
 
-	// Check for existing item properties inheritance
 	if id := r.URL.Query().Get("inherit"); id != "" {
-		err := w.service.backend.Get(id, rv.Interface())
-		if err == backend.ErrItemNotExist {
+		if err := w.service.backend.Storage().Get("id", id, rv.Interface()); err == sqlstorage.ErrItemNotFound {
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
 			return
 		} else if err != nil {
-			w.log.Error("failed to fetch item: %s", err)
+			w.log.Error("failed to fetch item for deletion: %s", err)
 			httputil.WriteJSON(rw, httpBuildMessage(ErrUnhandledError), http.StatusInternalServerError)
 			return
 		}
 
-		reflect.Indirect(rv).FieldByName("ID").SetString("")
-
-		if w.service.backend.IsAliasable(rv.Interface()) {
-			reflect.Indirect(rv).FieldByName("Alias").SetString("")
+		for _, name := range []string{"ID", "Created", "Modifed", "Alias"} {
+			if f := reflect.Indirect(rv).FieldByName(name); f.IsValid() {
+				f.Set(reflect.Zero(f.Type()))
+			}
 		}
 	}
 
 	// Fill item with data received from request
-	if err := httputil.BindJSON(r, rv.Interface()); err != nil {
+	if err := httputil.BindJSON(r, rv.Interface()); err == httputil.ErrInvalidContentType {
+		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusUnsupportedMediaType)
+		return
+	} else if err != nil {
 		w.log.Error("unable to unmarshal JSON data: %s", err)
 		httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidJSON), http.StatusBadRequest)
 		return
@@ -84,32 +82,20 @@ func (w *httpWorker) httpHandleBackendCreate(ctx context.Context, rw http.Respon
 		}
 	}
 
-	// Insert item into backend
-	id, err := uuid.GenerateUUID()
-	if err != nil {
-		w.log.Error("failed to generate identifier: %s", err)
-		httputil.WriteJSON(rw, httpBuildMessage(ErrUnhandledError), http.StatusInternalServerError)
-	}
-
-	reflect.Indirect(rv).FieldByName("ID").SetString(id)
-	reflect.Indirect(rv).FieldByName("Created").Set(reflect.ValueOf(time.Now().UTC()))
-
+	// Set provider enabled by default
 	if typ == "providers" {
-		// Set provider enabled by default
 		reflect.Indirect(rv).FieldByName("Enabled").SetBool(true)
 	}
 
-	if err := w.service.backend.Add(rv.Interface()); err != nil {
+	// Insert item into back-end
+	if err := w.service.backend.Storage().Create(rv.Interface()); err != nil {
 		switch err {
-		case backend.ErrResourceConflict:
+		case sqlstorage.ErrItemConflict:
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusConflict)
 
-		case backend.ErrEmptyGraph, backend.ErrEmptyGroup, backend.ErrIncompatibleAttributes, backend.ErrInvalidName,
-			backend.ErrInvalidAlias, backend.ErrInvalidParent, backend.ErrResourceMissingData:
+		case backend.ErrInvalidAlias, backend.ErrInvalidID, backend.ErrInvalidName, sqlstorage.ErrMissingField,
+			sqlstorage.ErrUnknownReference:
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusBadRequest)
-
-		case backend.ErrResourceMissingDependency:
-			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
 
 		default:
 			w.log.Error("failed to insert item: %s", err)
@@ -119,14 +105,135 @@ func (w *httpWorker) httpHandleBackendCreate(ctx context.Context, rw http.Respon
 		return
 	}
 
-	w.log.Debug("inserted %s item into backend", id)
+	id := reflect.Indirect(rv).FieldByName("ID").String()
 
-	// Start new provider on new registration
+	w.log.Debug("inserted %q item into backend", id)
+
+	// Start new provider upon creation
 	if typ == "providers" {
-		go w.service.poller.StartProvider(reflect.Indirect(rv).Interface().(backend.Provider))
+		go w.service.poller.StartProvider(rv.Interface().(*backend.Provider))
 	}
 
 	http.Redirect(rw, r, strings.TrimRight(r.URL.Path, "/")+"/"+id, http.StatusCreated)
+}
+
+func (w *httpWorker) httpHandleBackendGet(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+	typ := ctx.Value("type").(string)
+	id := ctx.Value("id").(string)
+
+	// Initialize new back-end item
+	item, ok := w.httpBackendNewItem(typ)
+	if !ok {
+		rw.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	// Request item from back-end
+	rv := reflect.ValueOf(item)
+
+	if err := w.service.backend.Storage().Get("id", id, rv.Interface()); err == sqlstorage.ErrItemNotFound {
+		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
+		return
+	} else if err != nil {
+		w.log.Error("failed to fetch item: %s", err)
+		httputil.WriteJSON(rw, httpBuildMessage(ErrUnhandledError), http.StatusInternalServerError)
+		return
+	}
+
+	// Handle collection expansion request
+	if typ == "collections" && r.URL.Query().Get("expand") == "1" {
+		c := rv.Interface().(*backend.Collection)
+		c.Expand(nil)
+	}
+
+	result := jsonutil.FilterStruct(rv.Interface(), httpGetListParam(r, "fields", nil))
+
+	httputil.WriteJSON(rw, result, http.StatusOK)
+}
+
+func (w *httpWorker) httpHandleBackendUpdate(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+	if w.service.config.ReadOnly {
+		httputil.WriteJSON(rw, httpBuildMessage(ErrReadOnly), http.StatusForbidden)
+		return
+	}
+
+	typ := ctx.Value("type").(string)
+	id := ctx.Value("id").(string)
+
+	// Initialize new back-end item
+	item, ok := w.httpBackendNewItem(typ)
+	if !ok {
+		rw.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	// Retrieve existing item data from back-end if patching
+	rv := reflect.ValueOf(item)
+
+	if r.Method == "PATCH" {
+		if err := w.service.backend.Storage().Get("id", id, rv.Interface()); err == sqlstorage.ErrItemNotFound {
+			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
+			return
+		} else if err != nil {
+			w.log.Error("failed to fetch item for deletion: %s", err)
+			httputil.WriteJSON(rw, httpBuildMessage(ErrUnhandledError), http.StatusInternalServerError)
+			return
+		}
+	} else {
+		reflect.Indirect(rv).FieldByName("ID").SetString(id)
+	}
+
+	// Fill item with data received from request
+	if err := httputil.BindJSON(r, rv.Interface()); err == httputil.ErrInvalidContentType {
+		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusUnsupportedMediaType)
+		return
+	} else if err != nil {
+		w.log.Error("unable to unmarshal JSON data: %s", err)
+		httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidJSON), http.StatusBadRequest)
+		return
+	}
+
+	// Parse body for template keys potential errors
+	if typ == "collections" || typ == "graphs" {
+		if reflect.Indirect(rv).FieldByName("Template").Bool() {
+			data, _ := json.Marshal(rv.Interface())
+
+			if _, err := template.Parse(string(data)); err != nil {
+				w.log.Error("failed to parse template: %s", err)
+				httputil.WriteJSON(rw, httpBuildMessage(template.ErrInvalidTemplate), http.StatusBadRequest)
+				return
+			}
+		}
+	}
+
+	// Update item in back-end
+	if err := w.service.backend.Storage().Update(rv.Interface()); err != nil {
+		switch err {
+		case sqlstorage.ErrItemConflict:
+			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusConflict)
+
+		case backend.ErrInvalidAlias, backend.ErrInvalidID, backend.ErrInvalidName, sqlstorage.ErrMissingField,
+			sqlstorage.ErrUnknownReference:
+			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusBadRequest)
+
+		default:
+			w.log.Error("failed to update item: %s", err)
+			httputil.WriteJSON(rw, httpBuildMessage(ErrUnhandledError), http.StatusInternalServerError)
+		}
+
+		return
+	}
+
+	w.log.Debug("updated %s item from back-end", id)
+
+	// Restart provider on update
+	if typ == "providers" {
+		if err := w.service.backend.Storage().Get("id", id, rv.Interface()); err == nil {
+			go w.service.poller.StopProvider(rv.Interface().(*backend.Provider), true)
+		}
+	}
+
+	rw.WriteHeader(http.StatusNoContent)
 }
 
 func (w *httpWorker) httpHandleBackendDelete(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
@@ -138,21 +245,28 @@ func (w *httpWorker) httpHandleBackendDelete(ctx context.Context, rw http.Respon
 	typ := ctx.Value("type").(string)
 	id := ctx.Value("id").(string)
 
-	// Get backend item type
-	rt, ok := backendTypes[typ]
+	// Initialize new back-end item
+	item, ok := w.httpBackendNewItem(typ)
 	if !ok {
 		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	rv := reflect.New(rt)
-	reflect.Indirect(rv).FieldByName("ID").SetString(id)
+	// Request item from back-end
+	rv := reflect.ValueOf(item)
 
-	// Delete item from backend
-	v := reflect.Indirect(rv).Interface()
+	if err := w.service.backend.Storage().Get("id", id, rv.Interface()); err == sqlstorage.ErrItemNotFound {
+		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
+		return
+	} else if err != nil {
+		w.log.Error("failed to fetch item for deletion: %s", err)
+		httputil.WriteJSON(rw, httpBuildMessage(ErrUnhandledError), http.StatusInternalServerError)
+		return
+	}
 
-	err := w.service.backend.Delete(v)
-	if err == backend.ErrItemNotExist {
+	// Delete item from back-end
+	err := w.service.backend.Storage().Delete(rv.Interface())
+	if err == sqlstorage.ErrItemNotFound {
 		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
 		return
 	} else if err != nil {
@@ -161,17 +275,19 @@ func (w *httpWorker) httpHandleBackendDelete(ctx context.Context, rw http.Respon
 		return
 	}
 
-	w.log.Debug("deleted %s item from backend", id)
+	w.log.Debug("deleted %s item from back-end", id)
 
-	// Stop provider on deletion
+	// Stop provider upon deletion
 	if typ == "providers" {
-		go w.service.poller.StopProvider(reflect.Indirect(rv).Interface().(backend.Provider), false)
+		go w.service.poller.StopProvider(rv.Interface().(*backend.Provider), false)
 	}
 
 	rw.WriteHeader(http.StatusNoContent)
 }
 
 func (w *httpWorker) httpHandleBackendDeleteAll(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+	var rv reflect.Value
+
 	if w.service.config.ReadOnly {
 		httputil.WriteJSON(rw, httpBuildMessage(ErrReadOnly), http.StatusForbidden)
 		return
@@ -179,8 +295,8 @@ func (w *httpWorker) httpHandleBackendDeleteAll(ctx context.Context, rw http.Res
 
 	typ := ctx.Value("type").(string)
 
-	// Check backend item type
-	rt, ok := backendTypes[typ]
+	// Initialize new back-end item
+	item, ok := w.httpBackendNewItem(typ)
 	if !ok {
 		rw.WriteHeader(http.StatusNotFound)
 		return
@@ -192,78 +308,41 @@ func (w *httpWorker) httpHandleBackendDeleteAll(ctx context.Context, rw http.Res
 		return
 	}
 
-	w.service.backend.Reset(reflect.New(rt).Interface())
+	// Request items list from back-end
+	if typ == "providers" {
+		rv = reflect.New(reflect.MakeSlice(reflect.SliceOf(reflect.TypeOf(item)), 0, 0).Type())
 
-	w.log.Debug("deleted %s from backend", typ)
-
-	rw.WriteHeader(http.StatusNoContent)
-}
-
-func (w *httpWorker) httpHandleBackendGet(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
-	typ := ctx.Value("type").(string)
-	id := ctx.Value("id").(string)
-
-	fields := httpGetListParam(r, "fields", nil)
-
-	// Get backend item type
-	rt, ok := backendTypes[typ]
-	if !ok {
-		rw.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	rv := reflect.New(rt)
-
-	// Request item from backend
-	if err := w.service.backend.Get(id, rv.Interface()); err == backend.ErrItemNotExist {
-		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
-		return
-	} else if err != nil {
-		w.log.Error("failed to fetch item: %s", err)
-		httputil.WriteJSON(rw, httpBuildMessage(ErrUnhandledError), http.StatusInternalServerError)
-		return
-	}
-
-	// Handle collection expansion request
-	if typ == "collections" && r.URL.Query().Get("expand") == "1" {
-		collection := rv.Interface().(*backend.Collection)
-
-		if collection.Link != nil && len(collection.Attributes) > 0 {
-			// Apply current instance parent to linked template
-			if collection.Parent != nil {
-				collection.Link.Parent = collection.Parent
-				collection.Link.ParentID = collection.ParentID
-			}
-
-			// Expand linked template attributes
-			if err := collection.Link.Expand(collection.Attributes, w.service.backend); err != nil {
-				w.log.Warning("failed to expand template: %s", err)
-				httputil.WriteJSON(rw, httpBuildMessage(ErrUnhandledError), http.StatusInternalServerError)
-				return
-			}
-
-			rv = reflect.ValueOf(collection.Link)
-
-			collection = rv.Interface().(*backend.Collection)
-			collection.Attributes = nil
-		} else {
-			// Merge template entries attributes
-			for _, entry := range collection.Entries {
-				entry.Attributes.Merge(collection.Attributes, true)
-			}
+		_, err := w.service.backend.Storage().List(rv.Interface(), nil, nil, 0, 0)
+		if err == sqlstorage.ErrUnknownColumn {
+			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusBadRequest)
+			return
+		} else if err != nil {
+			w.log.Error("failed to fetch items for deletion: %s", err)
+			httputil.WriteJSON(rw, httpBuildMessage(ErrUnhandledError), http.StatusInternalServerError)
+			return
 		}
 	}
 
-	result := jsonutil.FilterStruct(rv.Interface(), fields)
+	w.service.backend.Storage().Delete(reflect.ValueOf(item).Interface())
 
-	httputil.WriteJSON(rw, result, http.StatusOK)
+	w.log.Debug("deleted %s from back-end", typ)
+
+	// Stop provider upon deletion
+	if typ == "providers" {
+		for i, n := 0, reflect.Indirect(rv).Len(); i < n; i++ {
+			go w.service.poller.StopProvider(reflect.Indirect(rv).Index(i).Addr().Interface().(*backend.Provider),
+				false)
+		}
+	}
+
+	rw.WriteHeader(http.StatusNoContent)
 }
 
 func (w *httpWorker) httpHandleBackendList(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
 	typ := ctx.Value("type").(string)
 
-	// Check backend item type
-	rt, ok := backendTypes[typ]
+	// Initialize new back-end item
+	item, ok := w.httpBackendNewItem(typ)
 	if !ok {
 		rw.WriteHeader(http.StatusNotFound)
 		return
@@ -273,7 +352,7 @@ func (w *httpWorker) httpHandleBackendList(ctx context.Context, rw http.Response
 	filters := make(map[string]interface{})
 
 	if v := r.URL.Query().Get("filter"); v != "" {
-		filters["name"] = v
+		filters["name"] = filterApplyModifier(v)
 	}
 
 	if typ == "collections" || typ == "graphs" {
@@ -303,8 +382,8 @@ func (w *httpWorker) httpHandleBackendList(ctx context.Context, rw http.Response
 		}
 	}
 
-	// Request items list from backend
-	rv := reflect.New(reflect.MakeSlice(reflect.SliceOf(rt), 0, 0).Type())
+	// Request items list from back-end
+	rv := reflect.New(reflect.MakeSlice(reflect.SliceOf(reflect.TypeOf(item)), 0, 0).Type())
 
 	offset, err := httpGetIntParam(r, "offset")
 	if err != nil || offset < 0 {
@@ -320,12 +399,12 @@ func (w *httpWorker) httpHandleBackendList(ctx context.Context, rw http.Response
 
 	sort := httpGetListParam(r, "sort", []string{"name"})
 
-	count, err := w.service.backend.List(rv.Interface(), filters, sort, offset, limit)
-	if err == backend.ErrUnknownColumn {
-		httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidParameter), http.StatusBadRequest)
+	count, err := w.service.backend.Storage().List(rv.Interface(), filters, sort, offset, limit)
+	if err == sqlstorage.ErrUnknownColumn {
+		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusBadRequest)
 		return
 	} else if err != nil {
-		w.log.Error("failed to fetch list: %s", err)
+		w.log.Error("failed to fetch items: %s", err)
 		httputil.WriteJSON(rw, httpBuildMessage(ErrUnhandledError), http.StatusInternalServerError)
 		return
 	}
@@ -342,15 +421,10 @@ func (w *httpWorker) httpHandleBackendList(ctx context.Context, rw http.Response
 	// Fill items list
 	result := []map[string]interface{}{}
 
-	n := reflect.Indirect(rv).Len()
-	for i := 0; i < n; i++ {
+	for i, n := 0, reflect.Indirect(rv).Len(); i < n; i++ {
 		if typ == "collections" && r.URL.Query().Get("expand") == "1" {
-			collection := reflect.Indirect(rv).Index(i).Interface().(backend.Collection)
-			if collection.Link != nil && len(collection.Link.Options) > 0 {
-				collection.Link.Options.Merge(collection.Options, true)
-				collection.Options = collection.Link.Options
-			}
-			collection.Expand(collection.Attributes, w.service.backend)
+			collection := reflect.Indirect(rv).Index(i).Interface().(*backend.Collection)
+			collection.Expand(nil)
 
 			result = append(result, jsonutil.FilterStruct(collection, fields))
 		} else {
@@ -362,101 +436,24 @@ func (w *httpWorker) httpHandleBackendList(ctx context.Context, rw http.Response
 	httputil.WriteJSON(rw, result, http.StatusOK)
 }
 
-func (w *httpWorker) httpHandleBackendUpdate(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
-	if w.service.config.ReadOnly {
-		httputil.WriteJSON(rw, httpBuildMessage(ErrReadOnly), http.StatusForbidden)
-		return
-	} else if ct, _ := httputil.GetContentType(r); ct != "application/json" {
-		httputil.WriteJSON(rw, httpBuildMessage(ErrUnsupportedType), http.StatusUnsupportedMediaType)
-		return
+func (w *httpWorker) httpBackendNewItem(typ string) (interface{}, bool) {
+	switch typ {
+	case "providers":
+		return w.service.backend.NewProvider(), true
+
+	case "collections":
+		return w.service.backend.NewCollection(), true
+
+	case "graphs":
+		return w.service.backend.NewGraph(), true
+
+	case "sourcegroups":
+		return w.service.backend.NewSourceGroup(), true
+
+	case "metricgroups":
+		return w.service.backend.NewMetricGroup(), true
+
 	}
 
-	typ := ctx.Value("type").(string)
-	id := ctx.Value("id").(string)
-
-	// Get backend item type
-	rt, ok := backendTypes[typ]
-	if !ok {
-		rw.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	rv := reflect.New(rt)
-
-	// Retrieve existing element if patching
-	if r.Method == "PATCH" {
-		if err := w.service.backend.Get(id, rv.Interface()); err == backend.ErrItemNotExist {
-			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
-			return
-		} else if err != nil {
-			w.log.Error("failed to fetch item: %s", err)
-			httputil.WriteJSON(rw, httpBuildMessage(ErrUnhandledError), http.StatusInternalServerError)
-			return
-		}
-	}
-
-	// Fill item with data received from request
-	if err := httputil.BindJSON(r, rv.Interface()); err != nil {
-		w.log.Error("unable to unmarshal JSON data: %s", err)
-		httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidJSON), http.StatusBadRequest)
-		return
-	}
-
-	// Parse body for template keys potential errors
-	if typ == "collections" || typ == "graphs" {
-		if reflect.Indirect(rv).FieldByName("Template").Bool() {
-			data, _ := json.Marshal(rv.Interface())
-
-			if _, err := template.Parse(string(data)); err != nil {
-				w.log.Error("failed to parse template: %s", err)
-				httputil.WriteJSON(rw, httpBuildMessage(template.ErrInvalidTemplate), http.StatusBadRequest)
-				return
-			}
-		}
-	}
-
-	// Set minimal fields values
-	reflect.Indirect(rv).FieldByName("ID").SetString(id)
-
-	date := reflect.Indirect(rv).FieldByName("Created")
-	if v, ok := date.Interface().(time.Time); ok && v.IsZero() {
-		date.Set(reflect.ValueOf(time.Now().UTC()))
-	} else {
-		date = reflect.Indirect(rv).FieldByName("Modified")
-		if v, ok := date.Interface().(time.Time); ok && v.IsZero() {
-			date.Set(reflect.ValueOf(time.Now().UTC()))
-		}
-	}
-
-	// Update item in backend
-	if err := w.service.backend.Add(rv.Interface()); err != nil {
-		switch err {
-		case backend.ErrItemNotExist:
-			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
-
-		case backend.ErrEmptyGraph, backend.ErrEmptyGroup, backend.ErrIncompatibleAttributes, backend.ErrInvalidName,
-			backend.ErrInvalidAlias, backend.ErrInvalidParent, backend.ErrResourceMissingData:
-			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusBadRequest)
-
-		case backend.ErrResourceConflict, backend.ErrResourceMissingDependency:
-			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusConflict)
-
-		default:
-			w.log.Error("failed to update item: %s", err)
-			httputil.WriteJSON(rw, httpBuildMessage(ErrUnhandledError), http.StatusInternalServerError)
-		}
-
-		return
-	}
-
-	w.log.Debug("updated %s item from backend", id)
-
-	// Restart provider on update
-	if typ == "providers" {
-		if err := w.service.backend.Get(id, rv.Interface()); err == nil {
-			go w.service.poller.StopProvider(reflect.Indirect(rv).Interface().(backend.Provider), true)
-		}
-	}
-
-	rw.WriteHeader(http.StatusNoContent)
+	return nil, false
 }

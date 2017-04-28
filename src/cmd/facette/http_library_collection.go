@@ -48,29 +48,26 @@ func (w *httpWorker) httpHandleLibraryCollectionTree(ctx context.Context, rw htt
 
 	// Fetch non-template collections list
 	collections := []*backend.Collection{}
-	w.service.backend.List(&collections, filters, nil, 0, 0)
+	w.service.backend.Storage().List(&collections, filters, nil, 0, 0)
 
 	for _, c := range collections {
-		// Expand collection data
-		if c.Link != nil && len(c.Link.Options) > 0 {
-			c.Link.Options.Merge(c.Options, true)
-			c.Options = c.Link.Options
-		}
-		c.Expand(c.Attributes, w.service.backend)
+		c.Expand(nil)
 
 		// Fill collection tree
 		if _, ok := tree[c.ID]; !ok {
 			tree[c.ID] = libraryCollectionToTreeItem(c)
 		}
 
-		if c.ParentID != "" {
-			if _, ok := tree[c.ParentID]; !ok {
-				tree[c.ParentID] = libraryCollectionToTreeItem(c.Parent)
+		if c.HasParent() {
+			parentID := *c.ParentID
+
+			if _, ok := tree[parentID]; !ok {
+				tree[parentID] = libraryCollectionToTreeItem(c.Parent)
 			}
 
-			tree[c.ParentID].Children = append(tree[c.ParentID].Children, tree[c.ID])
+			tree[parentID].Children = append(tree[parentID].Children, tree[c.ID])
 
-			if c.ParentID == filters["parent"] {
+			if parentID == filters["parent"] {
 				tree[c.ID].Parent = ""
 			}
 		}
@@ -90,18 +87,21 @@ func (w *httpWorker) httpHandleLibraryCollectionTree(ctx context.Context, rw htt
 	httputil.WriteJSON(rw, result, http.StatusOK)
 }
 
-func libraryCollectionToTreeItem(collection *backend.Collection) *libraryCollectionTreeEntry {
+func libraryCollectionToTreeItem(c *backend.Collection) *libraryCollectionTreeEntry {
 	entry := &libraryCollectionTreeEntry{
-		ID:       collection.ID,
-		Parent:   collection.ParentID,
+		ID:       c.ID,
 		Children: libraryCollectionTreeList{},
 	}
 
+	if c.HasParent() {
+		entry.Parent = *c.ParentID
+	}
+
 	// Use title as label if any or fallback to collection name
-	if title, ok := collection.Options["title"].(string); ok && title != "" {
+	if title, ok := c.Options["title"].(string); ok && title != "" {
 		entry.Label = title
 	} else {
-		entry.Label = collection.Name
+		entry.Label = c.Name
 	}
 
 	return entry

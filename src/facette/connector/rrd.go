@@ -11,10 +11,10 @@ import (
 	"time"
 
 	"facette/catalog"
-	"facette/mapper"
 	"facette/plot"
 
 	"github.com/facette/logger"
+	"github.com/facette/maputil"
 	"github.com/fatih/set"
 	"github.com/ziutek/rrd"
 )
@@ -37,7 +37,7 @@ type rrdConnector struct {
 }
 
 func init() {
-	connectors["rrd"] = func(name string, settings mapper.Map, log *logger.Logger) (Connector, error) {
+	connectors["rrd"] = func(name string, settings *maputil.Map, log *logger.Logger) (Connector, error) {
 		var err error
 
 		c := &rrdConnector{
@@ -205,7 +205,7 @@ func (c *rrdConnector) Plots(q *plot.Query) ([]plot.Series, error) {
 		s := plot.Series{}
 
 		// FIXME: skip last garbage entry (see https://github.com/ziutek/rrd/pull/13)
-		for i := 0; i < data.RowCnt-1; i++ {
+		for i, n := 0, data.RowCnt-1; i < n; i++ {
 			s.Plots = append(s.Plots, plot.Plot{
 				Time:  q.StartTime.Add(data.Step * time.Duration(i)),
 				Value: plot.Value(data.ValueAt(idx, i)),

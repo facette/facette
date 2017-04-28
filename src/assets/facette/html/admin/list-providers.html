@@ -43,7 +43,7 @@
 					<div class="description" ng-show="i.refreshing"><span class="fa fa-refresh fa-spin"></span> {{ 'label.providers_refreshing' | translate }}</div>
 				</listcolumn>
 				<listcolumn class="date expand">
-					{{ 'mesg.last_update' | translate }} <span class="value">{{ (i.modified || i.created) | date:'medium' }}</span>
+					{{ 'mesg.last_update' | translate }} <span class="value">{{ i.modified | date:'medium' }}</span>
 				</listcolumn>
 				<listcolumn class="actions" ng-if="!readOnly">
 					<menu>

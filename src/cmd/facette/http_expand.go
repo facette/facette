@@ -18,15 +18,12 @@ type expandListEntry [3]string
 func (w *httpWorker) httpHandleExpand(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	// Check for request content type
-	if ct, _ := httputil.GetContentType(r); ct != "application/json" {
-		httputil.WriteJSON(rw, httpBuildMessage(ErrUnsupportedType), http.StatusUnsupportedMediaType)
-		return
-	}
-
 	// Get expand request from received data
 	list := []expandListEntry{}
-	if err := httputil.BindJSON(r, &list); err != nil {
+	if err := httputil.BindJSON(r, &list); err == httputil.ErrInvalidContentType {
+		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusUnsupportedMediaType)
+		return
+	} else if err != nil {
 		w.log.Error("unable to unmarshal JSON data: %s", err)
 		httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidJSON), http.StatusBadRequest)
 		return
@@ -35,7 +32,7 @@ func (w *httpWorker) httpHandleExpand(ctx context.Context, rw http.ResponseWrite
 	result := make([][]expandListEntry, len(list))
 
 	for i, entry := range list {
-		s := backend.Series{
+		s := &backend.Series{
 			Origin: entry[0],
 			Source: entry[1],
 			Metric: entry[2],
@@ -50,24 +47,24 @@ func (w *httpWorker) httpHandleExpand(ctx context.Context, rw http.ResponseWrite
 	httputil.WriteJSON(rw, result, http.StatusOK)
 }
 
-func (w *httpWorker) expandSeries(series backend.Series, existOnly bool) []backend.Series {
-	out := []backend.Series{}
+func (w *httpWorker) expandSeries(series *backend.Series, existOnly bool) []*backend.Series {
+	out := []*backend.Series{}
 
 	sourcesSet := set.New()
 	if strings.HasPrefix(series.Source, backend.GroupPrefix) {
 		id := strings.TrimPrefix(series.Source, backend.GroupPrefix)
 
-		// Request source group from backend
+		// Request source group from back-end
 		group := backend.SourceGroup{}
-		if err := w.service.backend.Get(id, &group); err != nil {
+		if err := w.service.backend.Storage().Get("id", id, &group); err != nil {
 			w.log.Warning("unable to expand %s source group: %s", id, err)
 			return nil
 		}
 
 		// Loop through sources checking for patterns matching
 		for _, s := range w.service.searcher.Sources(series.Origin, "", -1) {
-			for _, p := range group.Patterns {
-				if backend.FilterMatch(p, s.Name) {
+			for _, p := range *group.Patterns {
+				if filterMatch(p, s.Name) {
 					sourcesSet.Add(s.Name)
 				}
 			}
@@ -80,9 +77,9 @@ func (w *httpWorker) expandSeries(series backend.Series, existOnly bool) []backe
 	if strings.HasPrefix(series.Metric, backend.GroupPrefix) {
 		id := strings.TrimPrefix(series.Metric, backend.GroupPrefix)
 
-		// Request metric group from backend
+		// Request metric group from back-end
 		group := backend.MetricGroup{}
-		if err := w.service.backend.Get(id, &group); err != nil {
+		if err := w.service.backend.Storage().Get("id", id, &group); err != nil {
 			w.log.Warning("unable to expand %s metric group: %s", id, err)
 			return nil
 		}
@@ -94,8 +91,8 @@ func (w *httpWorker) expandSeries(series backend.Series, existOnly bool) []backe
 				continue
 			}
 
-			for _, p := range group.Patterns {
-				if backend.FilterMatch(p, m.Name) {
+			for _, p := range *group.Patterns {
+				if filterMatch(p, m.Name) {
 					metricsSet.Add(m.Name)
 				}
 			}
@@ -124,7 +121,7 @@ func (w *httpWorker) expandSeries(series backend.Series, existOnly bool) []backe
 				name = series.Name
 			}
 
-			out = append(out, backend.Series{
+			out = append(out, &backend.Series{
 				Name:    name,
 				Origin:  series.Origin,
 				Source:  source,

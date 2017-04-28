@@ -12,10 +12,10 @@ import (
 	"time"
 
 	"facette/catalog"
-	"facette/mapper"
 	"facette/plot"
 
 	"github.com/facette/logger"
+	"github.com/facette/maputil"
 	influxdb "github.com/influxdata/influxdb/client/v2"
 	"github.com/influxdata/influxdb/influxql"
 )
@@ -47,7 +47,7 @@ type influxdbConnector struct {
 }
 
 func init() {
-	connectors["influxdb"] = func(name string, settings mapper.Map, log *logger.Logger) (Connector, error) {
+	connectors["influxdb"] = func(name string, settings *maputil.Map, log *logger.Logger) (Connector, error) {
 		var err error
 
 		c := &influxdbConnector{
@@ -155,7 +155,7 @@ func (c *influxdbConnector) Name() string {
 
 // Refresh triggers the connector data refresh.
 func (c *influxdbConnector) Refresh(output chan<- *catalog.Record) error {
-	// Query backend for sample rows (used to detect numerical values)
+	// Query back-end for sample rows (used to detect numerical values)
 	columnsMap := make(map[string][]string, 0)
 
 	q := influxdb.Query{
@@ -219,7 +219,7 @@ func (c *influxdbConnector) Refresh(output chan<- *catalog.Record) error {
 			}
 		}
 	} else { // Column-based mapping
-		// Query backend for series list
+		// Query back-end for series list
 		q = influxdb.Query{
 			Command:  "show series",
 			Database: c.database,
@@ -356,7 +356,7 @@ func (c *influxdbConnector) Plots(q *plot.Query) ([]plot.Series, error) {
 		return nil, fmt.Errorf("failed to fetch plots: %s", response.Error())
 	}
 
-	// Parse results received from backend
+	// Parse results received from back-end
 	step := int(q.EndTime.Sub(q.StartTime) / time.Duration(q.Sample))
 
 	for i, r := range response.Results {

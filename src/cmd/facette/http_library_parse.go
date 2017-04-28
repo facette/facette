@@ -24,15 +24,12 @@ func (w *httpWorker) httpHandleLibraryParse(ctx context.Context, rw http.Respons
 
 	defer r.Body.Close()
 
-	// Check for request content type
-	if ct, _ := httputil.GetContentType(r); ct != "application/json" {
-		httputil.WriteJSON(rw, httpBuildMessage(ErrUnsupportedType), http.StatusUnsupportedMediaType)
-		return
-	}
-
 	// Get parse request from received data
 	req := &parseRequest{}
-	if err := httputil.BindJSON(r, req); err != nil {
+	if err := httputil.BindJSON(r, req); err == httputil.ErrInvalidContentType {
+		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusUnsupportedMediaType)
+		return
+	} else if err != nil {
 		w.log.Error("unable to unmarshal JSON data: %s", err)
 		httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidParameter), http.StatusBadRequest)
 		return
@@ -50,9 +47,9 @@ func (w *httpWorker) httpHandleLibraryParse(ctx context.Context, rw http.Respons
 
 		if req.Type == "collections" {
 			collection := backend.Collection{}
-			if err := w.service.backend.Get(req.ID, &collection); err == nil {
+			if err := w.service.backend.Storage().Get("id", req.ID, &collection); err == nil {
 				for _, entry := range collection.Entries {
-					paths = append(paths, w.prefix+"/library/graphs/"+entry.ID)
+					paths = append(paths, w.prefix+"/library/graphs/"+entry.GraphID)
 				}
 			}
 		}

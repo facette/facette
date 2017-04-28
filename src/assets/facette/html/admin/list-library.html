@@ -50,7 +50,7 @@
 					<div class="description" ng-class="{placeholder: !i.description}">{{ i.description || ('mesg.no_desc' | translate) }}</div>
 				</listcolumn>
 				<listcolumn class="date expand">
-					{{ 'mesg.last_update' | translate }} <span class="value">{{ (i.modified || i.created) | date:'medium' }}</span>
+					{{ 'mesg.last_update' | translate }} <span class="value">{{ i.modified | date:'medium' }}</span>
 				</listcolumn>
 				<listcolumn class="actions" ng-if="!readOnly">
 					<menu>

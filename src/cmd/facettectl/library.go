@@ -81,7 +81,7 @@ func execLibraryDump() error {
 	tw := tar.NewWriter(gzw)
 	defer tw.Close()
 
-	// Loop through backend types and dump data
+	// Loop through back-end types and dump data
 	for _, typ := range backendTypes {
 		if err := dumpLibraryType(tw, typ); err != nil {
 			printError("failed to dump %s: %s", typ, err)
@@ -190,7 +190,7 @@ func dumpLibraryType(w *tar.Writer, typ string) error {
 
 	// IMPORTANT:
 	// Templates and parent collections *MUST* be dumped first in order to be restored first
-	// to preserve backend items relationships.
+	// to preserve back-end items relationships.
 
 	endpoint := "/" + typ
 	if typ != "providers" {
@@ -235,10 +235,7 @@ func dumpLibraryType(w *tar.Writer, typ string) error {
 	}
 
 	for _, item := range items {
-		var (
-			v  interface{}
-			mt time.Time
-		)
+		var v interface{}
 
 		if !cmd.Quiet {
 			fmt.Printf("dumping %q library item...\n", item.ID)
@@ -247,13 +244,6 @@ func dumpLibraryType(w *tar.Writer, typ string) error {
 		if err := apiRequest("GET", endpoint+"/"+item.ID, nil, nil, &v); err != nil {
 			printError("%s", err)
 			continue
-		}
-
-		// Get modification date or fall back to creation one
-		if item.Modified != nil {
-			mt = *item.Modified
-		} else {
-			mt = item.Created
 		}
 
 		// Append data to archive
@@ -267,7 +257,7 @@ func dumpLibraryType(w *tar.Writer, typ string) error {
 			Name:    typ + "/" + item.ID,
 			Size:    int64(len(data)),
 			Mode:    0644,
-			ModTime: mt,
+			ModTime: item.Modified,
 		}); err != nil {
 			return errors.Wrap(err, "failed to append data")
 		}

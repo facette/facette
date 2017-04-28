@@ -32,6 +32,12 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/facette/maputil",
+			"repository": "https://github.com/facette/maputil",
+			"revision": "d02d4f3330e51e56e7902c23ec6dad5c5b8ed4a3",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/facette/natsort",
 			"repository": "https://github.com/facette/natsort",
 			"revision": "3769c5fd310020fdd04779443fd9255c8cf04e34",
@@ -41,6 +47,12 @@
 			"importpath": "github.com/facette/sliceutil",
 			"repository": "https://github.com/facette/sliceutil",
 			"revision": "74404cdf68c600d69de0e76eed89e50cd79236f1",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/facette/sqlstorage",
+			"repository": "https://github.com/facette/sqlstorage",
+			"revision": "3ccec57b59ac40d97c274915e8a17fc9f567850b",
 			"branch": "master"
 		},
 		{
@@ -95,6 +107,12 @@
 			"revision": "7c5ce27bb05ad7a917d1c1fc687b7dcaa375e8c7",
 			"branch": "master",
 			"path": "/pkg/escape"
+		},
+		{
+			"importpath": "github.com/jinzhu/gorm",
+			"repository": "https://github.com/jinzhu/gorm",
+			"revision": "717654b31c3d51348cb305684369c20a8387154b",
+			"branch": "master"
 		},
 		{
 			"importpath": "github.com/jinzhu/inflection",

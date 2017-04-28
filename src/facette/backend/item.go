@@ -4,35 +4,48 @@ import (
 	"time"
 
 	"github.com/hashicorp/go-uuid"
+	"github.com/jinzhu/gorm"
 )
 
-// Validator represents an item validator interface.
-type Validator interface {
-	Validate(*Backend) error
-}
-
-// Item represents a backend item instance.
+// Item represents a back-end item instance.
 type Item struct {
-	ID          string     `orm:"type:varchar(36);not_null;primary_key" json:"id"`
-	Name        string     `orm:"type:varchar(255);not_null;unique" json:"name"`
-	Description *string    `json:"description"`
-	Created     time.Time  `orm:"not_null" json:"created"`
-	Modified    *time.Time `json:"modified"`
+	Backend *Backend `gorm:"-" json:"-"`
+	Type    string   `gorm:"-" json:"type,omitempty"`
+
+	ID          string    `gorm:"type:varchar(36);not null;primary_key" json:"id"`
+	Name        string    `gorm:"type:varchar(128);not null;unique_index" json:"name"`
+	Description *string   `gorm:"type:text" json:"description"`
+	Created     time.Time `gorm:"not null;default:current_timestamp" json:"created"`
+	Modified    time.Time `gorm:"not null;default:current_timestamp" json:"modified"`
 }
 
-// Validate checks whether or not the item instance is valid.
-func (i *Item) Validate(backend *Backend) error {
-	if _, err := uuid.ParseUUID(i.ID); err != nil {
-		return ErrInvalidID
-	} else if i.Name == "" {
+func (i *Item) BeforeSave(scope *gorm.Scope) error {
+	var err error
+
+	if !nameRegexp.MatchString(i.Name) {
 		return ErrInvalidName
 	}
 
-	return nil
-}
+	// Set default fields
+	if i.ID == "" {
+		i.ID, err = uuid.GenerateUUID()
+		if err != nil {
+			return err
+		}
+	}
 
-// TypedItem represents a typed backend item instance.
-type TypedItem struct {
-	Item
-	Type string `json:"type"`
+	now := time.Now().UTC()
+
+	if i.Created.IsZero() {
+		i.Created = now
+	}
+
+	i.Modified = now
+
+	// Ensure optional fields are null if empty
+	if i.Description != nil && *i.Description == "" {
+		i.Description = nil
+	}
+
+	return nil
 }
