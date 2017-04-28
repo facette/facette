@@ -60,26 +60,28 @@ func NewFilterChain(rules *backend.ProviderFilters) *FilterChain {
 	}
 
 	// Parse filter chain rules
-	for _, r := range *rules {
-		if r.Target == "" {
-			r.Target = TargetAny
-		}
+	if rules != nil {
+		for _, r := range *rules {
+			if r.Target == "" {
+				r.Target = TargetAny
+			}
 
-		if !actions.Has(r.Action) {
-			fc.Messages <- fmt.Sprintf("unknown %q filter action, discarding", r.Action)
-			continue
-		} else if !targets.Has(r.Target) {
-			fc.Messages <- fmt.Sprintf("unknown %q filter target, discarding", r.Target)
-			continue
-		}
+			if !actions.Has(r.Action) {
+				fc.Messages <- fmt.Sprintf("unknown %q filter action, discarding", r.Action)
+				continue
+			} else if !targets.Has(r.Target) {
+				fc.Messages <- fmt.Sprintf("unknown %q filter target, discarding", r.Target)
+				continue
+			}
 
-		re, err := regexp.Compile(r.Pattern)
-		if err != nil {
-			fc.Messages <- fmt.Sprintf("unable to compile filter pattern: %s, discarding", err)
-			continue
-		}
+			re, err := regexp.Compile(r.Pattern)
+			if err != nil {
+				fc.Messages <- fmt.Sprintf("unable to compile filter pattern: %s, discarding", err)
+				continue
+			}
 
-		fc.rules = append(fc.rules, filterRule{ProviderFilter: r, re: re})
+			fc.rules = append(fc.rules, filterRule{ProviderFilter: r, re: re})
+		}
 	}
 
 	// Start filtering routine
