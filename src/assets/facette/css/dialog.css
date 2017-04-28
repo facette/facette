@@ -4,7 +4,7 @@
 	right: 0;
 	text-align: center;
 	top: 0;
-	z-index: 200;
+	z-index: 230;
 }
 
 .ngdialog-overlay {
@@ -14,7 +14,7 @@
 	position: fixed;
 	right: 0;
 	top: 0;
-	z-index: 210;
+	z-index: 220;
 }
 
 .ngdialog-content {
