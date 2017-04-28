@@ -84,7 +84,7 @@ endif
 				-X main.buildDate=$(BUILD_DATE) \
 				-X main.buildHash=$(BUILD_HASH) \
 			" \
-			-o $(BUILD_DIR)/bin/$$bin ./src/cmd/$$bin; \
+			-o $(BUILD_DIR)/bin/$$bin ./src/cmd/$$bin || exit 1; \
 	done) && $(call mesg_ok) || $(call mesg_fail)
 
 build-assets:
