@@ -92,6 +92,11 @@ func (l *Logger) Context(context string) *Logger {
 	}
 }
 
+// CurrentContext returns the current logger context.
+func (l *Logger) CurrentContext() string {
+	return l.context
+}
+
 // Error prints an error message in the logging system.
 func (l *Logger) Error(format string, v ...interface{}) *Logger {
 	l.write(LevelError, format, v...)

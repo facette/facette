@@ -2,7 +2,6 @@ package httputil
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -14,7 +13,7 @@ func BindJSON(v interface{}, out interface{}) error {
 	var body io.ReadCloser
 
 	if ct, _ := GetContentType(v); ct != "application/json" {
-		return fmt.Errorf("invalid %q Content-Type, expecting \"application/json\"", ct)
+		return ErrInvalidContentType
 	}
 
 	switch v.(type) {
@@ -45,7 +44,7 @@ func WriteJSON(rw http.ResponseWriter, v interface{}, code int) error {
 		return err
 	}
 
-	rw.Header().Set("Content-Type", "application/json; charset=utf-8")
+	rw.Header().Set("Content-Type", "application/json")
 	rw.WriteHeader(code)
 	rw.Write(body)
 	rw.Write([]byte("\n"))

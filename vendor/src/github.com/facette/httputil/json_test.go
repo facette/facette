@@ -21,7 +21,7 @@ func Test_BindJSON(t *testing.T) {
 	}
 	defer req.Body.Close()
 
-	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header.Set("Content-Type", "application/json")
 
 	result := make(map[string]int)
 	if err := BindJSON(req, &result); err != nil {

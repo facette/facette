@@ -16,7 +16,7 @@
 		{
 			"importpath": "github.com/facette/httputil",
 			"repository": "https://github.com/facette/httputil",
-			"revision": "f622ebb5516e92834ef98cd02b7c87ab9f01c017",
+			"revision": "60b4ff39bac27d53d8244e15c3430a66776f1960",
 			"branch": "master"
 		},
 		{
@@ -28,7 +28,7 @@
 		{
 			"importpath": "github.com/facette/logger",
 			"repository": "https://github.com/facette/logger",
-			"revision": "ed22e9fb4da919f3ff841432a0921b2c78f00907",
+			"revision": "4dcfb431e53d946a7f3e21ecfdbfa9d817359bee",
 			"branch": "master"
 		},
 		{
