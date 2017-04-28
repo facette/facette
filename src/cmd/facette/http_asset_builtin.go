@@ -9,12 +9,11 @@ import (
 	"strings"
 )
 
-const (
-	httpDefaultPath = "html/index.html"
-)
-
 func (w *httpWorker) httpHandleAsset(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
-	var ct string
+	var (
+		isDefault bool
+		ct        string
+	)
 
 	// Stop handling assets if frontend is disabled
 	if !w.service.config.Frontend.Enabled {
@@ -23,14 +22,24 @@ func (w *httpWorker) httpHandleAsset(ctx context.Context, rw http.ResponseWriter
 	}
 
 	// Get file data from built-in assets
-	filePath := strings.TrimPrefix(r.URL.Path, "/assets/")
+	filePath := strings.TrimPrefix(r.URL.Path, w.service.config.RootPath+"/assets/")
 	if strings.HasSuffix(filePath, "/") || filepath.Ext(filePath) == "" {
 		filePath = httpDefaultPath
+	}
+
+	if filePath == httpDefaultPath {
+		isDefault = true
 	}
 
 	data, err := Asset(filePath)
 	if err != nil {
 		rw.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	// Handle default file path
+	if isDefault {
+		w.httpServeDefault(rw, string(data))
 		return
 	}
 

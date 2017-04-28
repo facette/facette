@@ -1,44 +1,35 @@
-// +build !builtin_assets
-
 package main
 
 import (
-	"context"
+	"bytes"
+	"html/template"
 	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 const (
 	httpDefaultPath = "html/index.html"
 )
 
-func (w *httpWorker) httpHandleAsset(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
-	// Stop handling assets if frontend is disabled
-	if !w.service.config.Frontend.Enabled {
-		rw.WriteHeader(http.StatusForbidden)
+func (w *httpWorker) httpServeDefault(rw http.ResponseWriter, text string) {
+	tmpl, err := template.New("index").Parse(text)
+	if err != nil {
+		w.service.log.Error("failed to parse template: %s", err)
+		http.Error(rw, "", http.StatusInternalServerError)
 		return
 	}
 
-	// Strip assets prefix and handle default path
-	filePath := strings.TrimPrefix(r.URL.Path, "/assets")
-	if strings.HasSuffix(filePath, "/") || filepath.Ext(filePath) == "" {
-		filePath = httpDefaultPath
-	}
+	buf := bytes.NewBuffer(nil)
 
-	filePath = filepath.Join(w.service.config.Frontend.AssetsDir, filePath)
+	data := struct{ RootPath string }{w.service.config.RootPath + "/"}
 
-	// Check for existing asset file
-	if fi, err := os.Stat(filePath); err != nil {
-		http.Error(rw, "", http.StatusNotFound)
-		return
-	} else if fi.IsDir() && filePath != httpDefaultPath {
-		// Prevent directory listing
-		http.Error(rw, "", http.StatusForbidden)
+	err = tmpl.Execute(buf, data)
+	if err != nil {
+		w.service.log.Error("failed to execute template: %s", err)
+		http.Error(rw, "", http.StatusInternalServerError)
 		return
 	}
 
-	// Serve static file
-	http.ServeFile(rw, r, filePath)
+	rw.Header().Set("Content-Type", "text/html")
+	rw.WriteHeader(http.StatusOK)
+	rw.Write(buf.Bytes())
 }

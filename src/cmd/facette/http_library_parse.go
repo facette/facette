@@ -46,13 +46,13 @@ func (w *httpWorker) httpHandleLibraryParse(ctx context.Context, rw http.Respons
 		}
 
 		// Make internal request to retrieve item
-		paths := []string{apiPrefix + "/library/" + req.Type + "/" + req.ID}
+		paths := []string{w.prefix + "/library/" + req.Type + "/" + req.ID}
 
 		if req.Type == "collections" {
 			collection := backend.Collection{}
 			if err := w.service.backend.Get(req.ID, &collection); err == nil {
 				for _, entry := range collection.Entries {
-					paths = append(paths, apiPrefix+"/library/graphs/"+entry.ID)
+					paths = append(paths, w.prefix+"/library/graphs/"+entry.ID)
 				}
 			}
 		}

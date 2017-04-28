@@ -170,7 +170,7 @@ app.config(function($httpProvider, $locationProvider, $resourceProvider, $routeP
         .useMessageFormatInterpolation()
         .useSanitizeValueStrategy(null)
         .useStaticFilesLoader({
-            prefix: '/assets/js/locales/',
+            prefix: 'assets/js/locales/',
             suffix: '.json'
         })
         .registerAvailableLanguageKeys(['en', 'fr'], {

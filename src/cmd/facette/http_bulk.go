@@ -53,7 +53,7 @@ func (w *httpWorker) httpHandleBulk(ctx context.Context, rw http.ResponseWriter,
 		// Prepare sub-request
 		rec := httptest.NewRecorder()
 
-		r, err := http.NewRequest(entry.Method, apiPrefix+"/"+strings.TrimLeft(entry.Endpoint, "/"),
+		r, err := http.NewRequest(entry.Method, w.prefix+"/"+strings.TrimLeft(entry.Endpoint, "/"),
 			bytes.NewReader(entry.Data))
 		if err != nil {
 			w.log.Error("unable to generate bulk sub-request: %s", err)

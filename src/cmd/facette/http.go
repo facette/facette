@@ -27,6 +27,7 @@ type httpWorker struct {
 	log     *logger.Logger
 	router  *httproute.Router
 	server  *graceful.Server
+	prefix  string
 }
 
 func newHTTPWorker(s *Service) *httpWorker {
@@ -34,64 +35,65 @@ func newHTTPWorker(s *Service) *httpWorker {
 		service: s,
 		log:     s.log.Context("http"),
 		router:  httproute.NewRouter(),
+		prefix:  s.config.RootPath + apiPrefix,
 	}
 
 	// Initialize HTTP router
 	w.router.Use(w.httpHandleLogger)
 
-	w.router.Endpoint(apiPrefix + "/bulk").
+	w.router.Endpoint(w.prefix + "/bulk").
 		Post(w.httpHandleBulk)
 
-	w.router.Endpoint(apiPrefix + "/catalog/").
+	w.router.Endpoint(w.prefix + "/catalog/").
 		Get(w.httpHandleCatalogRoot)
-	w.router.Endpoint(apiPrefix + "/catalog/:type/").
+	w.router.Endpoint(w.prefix + "/catalog/:type/").
 		Get(w.httpHandleCatalogType)
-	w.router.Endpoint(apiPrefix + "/catalog/:type/:name").
+	w.router.Endpoint(w.prefix + "/catalog/:type/:name").
 		Get(w.httpHandleCatalogEntry)
 
-	w.router.Endpoint(apiPrefix + "/expand").
+	w.router.Endpoint(w.prefix + "/expand").
 		Post(w.httpHandleExpand)
 
-	w.router.Endpoint(apiPrefix + "/library/").
+	w.router.Endpoint(w.prefix + "/library/").
 		Get(w.httpHandleLibraryRoot)
-	w.router.Endpoint(apiPrefix + "/library/parse").
+	w.router.Endpoint(w.prefix + "/library/parse").
 		Post(w.httpHandleLibraryParse)
-	w.router.Endpoint(apiPrefix + "/library/search").
+	w.router.Endpoint(w.prefix + "/library/search").
 		Post(w.httpHandleLibrarySearch)
-	w.router.Endpoint(apiPrefix + "/library/collections/tree").
+	w.router.Endpoint(w.prefix + "/library/collections/tree").
 		Get(w.httpHandleLibraryCollectionTree)
-	w.router.Endpoint(apiPrefix + "/library/:type/").
+	w.router.Endpoint(w.prefix + "/library/:type/").
 		Delete(w.httpHandleBackendDeleteAll).
 		Get(w.httpHandleBackendList).
 		Post(w.httpHandleBackendCreate)
-	w.router.Endpoint(apiPrefix + "/library/:type/:id").
+	w.router.Endpoint(w.prefix + "/library/:type/:id").
 		Delete(w.httpHandleBackendDelete).
 		Get(w.httpHandleBackendGet).
 		Patch(w.httpHandleBackendUpdate).
 		Put(w.httpHandleBackendUpdate)
 
-	w.router.Endpoint(apiPrefix + "/plots").
+	w.router.Endpoint(w.prefix + "/plots").
 		Post(w.httpHandlePlots)
 
-	w.router.Endpoint(apiPrefix+"/providers/").
+	w.router.Endpoint(w.prefix+"/providers/").
 		SetContext("type", "providers").
 		Delete(w.httpHandleBackendDeleteAll).
 		Get(w.httpHandleBackendList).
 		Post(w.httpHandleBackendCreate)
-	w.router.Endpoint(apiPrefix+"/providers/:id").
+	w.router.Endpoint(w.prefix+"/providers/:id").
 		SetContext("type", "providers").
 		Delete(w.httpHandleBackendDelete).
 		Get(w.httpHandleBackendGet).
 		Patch(w.httpHandleBackendUpdate).
 		Put(w.httpHandleBackendUpdate)
 
-	w.router.Endpoint(apiPrefix + "/providers/:id/refresh").
+	w.router.Endpoint(w.prefix + "/providers/:id/refresh").
 		Post(w.httpHandleProviderRefresh)
 
-	w.router.Endpoint(apiPrefix + "/").
+	w.router.Endpoint(w.prefix + "/").
 		Get(w.httpHandleInfo)
 
-	w.router.Endpoint(apiPrefix + "/*").
+	w.router.Endpoint(w.prefix + "/*").
 		Get(httpHandleNotFound)
 
 	w.router.Endpoint("/*").

@@ -3,13 +3,15 @@ package main
 import (
 	"facette/mapper"
 	"facette/yamlutil"
+	"strings"
 )
 
 const (
 	defaultListen            = "localhost:12003"
+	defaultGracefulTimeout   = 30
+	defaultRootPath          = "/"
 	defaultLogPath           = ""
 	defaultLogLevel          = "info"
-	defaultGracefulTimeout   = 30
 	defaultFrontendEnabled   = true
 	defaultFrontendAssetsDir = "assets"
 	defaultHideBuildDetails  = false
@@ -25,9 +27,10 @@ type config struct {
 	SocketMode       string         `yaml:"socket_mode"`
 	SocketUser       string         `yaml:"socket_user"`
 	SocketGroup      string         `yaml:"socket_group"`
+	GracefulTimeout  int            `yaml:"graceful_timeout"`
+	RootPath         string         `yaml:"root_path"`
 	LogPath          string         `yaml:"log_path"`
 	LogLevel         string         `yaml:"log_level"`
-	GracefulTimeout  int            `yaml:"graceful_timeout"`
 	Frontend         frontendConfig `yaml:"frontend"`
 	Backend          *mapper.Map    `yaml:"backend"`
 	HideBuildDetails bool           `yaml:"hide_build_details"`
@@ -39,6 +42,7 @@ func initConfig(path string) (*config, error) {
 		config = config{
 			Listen:          defaultListen,
 			GracefulTimeout: defaultGracefulTimeout,
+			RootPath:        defaultRootPath,
 			LogPath:         defaultLogPath,
 			LogLevel:        defaultLogLevel,
 			Frontend: frontendConfig{
@@ -54,6 +58,9 @@ func initConfig(path string) (*config, error) {
 			return nil, err
 		}
 	}
+
+	config.RootPath = strings.TrimSuffix(config.RootPath, "/")
+	config.Frontend.AssetsDir = strings.TrimSuffix(config.Frontend.AssetsDir, "/")
 
 	return &config, nil
 }

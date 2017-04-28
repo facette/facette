@@ -7,6 +7,8 @@ listen: localhost:12003
 
 graceful_timeout: 30
 
+#root_path: /facette
+
 log_path:
 log_level: info
 
