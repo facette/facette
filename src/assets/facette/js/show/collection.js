@@ -5,12 +5,22 @@ app.controller('ShowCollectionController', function($rootScope, $routeParams, $s
     library.get({
         type: 'collections',
         id: $scope.id,
-        fields: 'entries.id,entries.attributes,options',
+        fields: 'entries.graph,entries.attributes,entries.options,attributes',
         expand: 1
     }, function(data) {
-        var graph = data.entries[$scope.index] || {};
-        graph.options = angular.extend(graph.options || {}, browseCollection.getGlobalOptions(null));
+        var entry = data.entries[$scope.index],
+            graph = {
+                id: entry.graph,
+                attributes: entry.attributes || {},
+                options: entry.options || {}
+            };
+
+        angular.extend(graph.options, browseCollection.getGlobalOptions(null));
         graph.options.frame = true;
+
+        if (data.attributes) {
+            angular.extend(graph.attributes, data.attributes);
+        }
 
         $scope.graph = graph;
 

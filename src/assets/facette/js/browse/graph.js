@@ -169,7 +169,7 @@ app.controller('BrowseGraphController', function($rootScope, $routeParams, $scop
         var query = {
             type: $scope.section,
             id: $scope.id,
-            fields: 'id,name,entries.id,entries.options,entries.attributes,options,attributes,parent'
+            fields: 'id,name,entries.graph,entries.options,entries.attributes,options,attributes,parent'
         };
 
         // Always expand collections when browsing
