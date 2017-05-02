@@ -19,7 +19,7 @@ type Collection struct {
 	Options    maputil.Map        `gorm:"type:text" json:"options,omitempty"`
 	Parent     *Collection        `json:"-"`
 	ParentID   *string            `gorm:"column:parent;type:varchar(36);default:NULL" json:"parent,omitempty"`
-	Template   bool               `gorm:"not null;default:false" json:"template"`
+	Template   bool               `gorm:"not null" json:"template"`
 }
 
 func (b *Backend) NewCollection() *Collection {

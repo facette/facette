@@ -20,7 +20,7 @@ type Graph struct {
 	Attributes maputil.Map  `gorm:"type:text" json:"attributes,omitempty"`
 	Alias      *string      `gorm:"type:varchar(128);unique_index" json:"alias,omitempty"`
 	Options    maputil.Map  `gorm:"type:text" json:"options,omitempty"`
-	Template   bool         `gorm:"not null;default:false" json:"template"`
+	Template   bool         `gorm:"not null" json:"template"`
 }
 
 func (b *Backend) NewGraph() *Graph {
