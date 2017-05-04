@@ -13,4 +13,6 @@ var (
 	ErrInvalidName = errors.New("invalid name")
 	// ErrInvalidPriority represents an invalid priority error.
 	ErrInvalidPriority = errors.New("invalid priority")
+	// ErrUnresolvableItem represents an unresolvable item error.
+	ErrUnresolvableItem = errors.New("unresolvable item")
 )

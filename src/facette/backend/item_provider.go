@@ -20,7 +20,7 @@ type Provider struct {
 }
 
 func (b *Backend) NewProvider() *Provider {
-	return &Provider{Item: Item{Backend: b}}
+	return &Provider{Item: Item{backend: b}}
 }
 
 func (p *Provider) BeforeSave(scope *gorm.Scope) error {

@@ -21,10 +21,13 @@ type Graph struct {
 	Alias      *string      `gorm:"type:varchar(128);unique_index" json:"alias,omitempty"`
 	Options    maputil.Map  `gorm:"type:text" json:"options,omitempty"`
 	Template   bool         `gorm:"not null" json:"template"`
+
+	resolved bool
+	expanded bool
 }
 
 func (b *Backend) NewGraph() *Graph {
-	return &Graph{Item: Item{Backend: b}}
+	return &Graph{Item: Item{backend: b}}
 }
 
 func (g *Graph) BeforeSave(scope *gorm.Scope) error {
@@ -48,19 +51,25 @@ func (g *Graph) BeforeSave(scope *gorm.Scope) error {
 func (g *Graph) Expand(attrs maputil.Map) error {
 	var err error
 
+	if g.expanded {
+		return nil
+	}
+
 	if len(attrs) > 0 {
 		g.Attributes.Merge(attrs, true)
 	}
 
-	if g.Backend != nil && g.LinkID != nil && *g.LinkID != "" {
-		// Expand template and applies current graph's attributes
-		tmpl := g.Backend.NewGraph()
-		if err := g.Backend.Storage().Get("id", *g.LinkID, tmpl); err != nil {
+	if g.backend != nil && g.LinkID != nil && *g.LinkID != "" {
+		if err := g.Resolve(); err != nil {
 			return err
 		}
 
+		// Expand template and applies current graph's attributes
+		tmpl := g.Link
+		tmpl.ID = g.ID
 		tmpl.Attributes.Merge(g.Attributes, true)
 		tmpl.Options.Merge(g.Options, true)
+		tmpl.Template = false
 
 		*g = *tmpl
 	}
@@ -84,6 +93,27 @@ func (g *Graph) Expand(attrs maputil.Map) error {
 			}
 		}
 	}
+
+	g.expanded = true
+
+	return nil
+}
+
+func (g *Graph) Resolve() error {
+	if g.resolved {
+		return nil
+	} else if g.backend == nil {
+		return ErrUnresolvableItem
+	}
+
+	if g.LinkID != nil && *g.LinkID != "" {
+		g.Link = g.backend.NewGraph()
+		if err := g.backend.Storage().Get("id", *g.LinkID, g.Link); err != nil {
+			return err
+		}
+	}
+
+	g.resolved = true
 
 	return nil
 }

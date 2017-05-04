@@ -17,7 +17,7 @@ type SourceGroup struct {
 }
 
 func (b *Backend) NewSourceGroup() *SourceGroup {
-	return &SourceGroup{Item: Item{Backend: b}}
+	return &SourceGroup{Item: Item{backend: b}}
 }
 
 // TableName returns the table name to use in the database.
@@ -32,7 +32,7 @@ type MetricGroup struct {
 }
 
 func (b *Backend) NewMetricGroup() *MetricGroup {
-	return &MetricGroup{Item: Item{Backend: b}}
+	return &MetricGroup{Item: Item{backend: b}}
 }
 
 // TableName returns the table name to use in the database.

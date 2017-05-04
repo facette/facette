@@ -9,14 +9,14 @@ import (
 
 // Item represents a back-end item instance.
 type Item struct {
-	Backend *Backend `gorm:"-" json:"-"`
-	Type    string   `gorm:"-" json:"type,omitempty"`
-
+	Type        string    `gorm:"-" json:"type,omitempty"`
 	ID          string    `gorm:"type:varchar(36);not null;primary_key" json:"id"`
 	Name        string    `gorm:"type:varchar(128);not null;unique_index" json:"name"`
 	Description *string   `gorm:"type:text" json:"description"`
 	Created     time.Time `gorm:"not null;default:current_timestamp" json:"created"`
 	Modified    time.Time `gorm:"not null;default:current_timestamp" json:"modified"`
+
+	backend *Backend `gorm:"-" json:"-"`
 }
 
 func (i *Item) BeforeSave(scope *gorm.Scope) error {
@@ -32,6 +32,8 @@ func (i *Item) BeforeSave(scope *gorm.Scope) error {
 		if err != nil {
 			return err
 		}
+	} else if _, err := uuid.ParseUUID(uuid); err != nil {
+		return ErrInvalidID
 	}
 
 	now := time.Now().UTC()

@@ -169,7 +169,7 @@ app.controller('BrowseGraphController', function($rootScope, $routeParams, $scop
         var query = {
             type: $scope.section,
             id: $scope.id,
-            fields: 'id,name,entries.graph,entries.options,entries.attributes,options,attributes,parent'
+            fields: 'id,name,entries.graph,entries.options,entries.attributes,options,attributes,parent,template'
         };
 
         // Always expand collections when browsing
@@ -178,9 +178,13 @@ app.controller('BrowseGraphController', function($rootScope, $routeParams, $scop
         }
 
         library.get(query, function(data) {
-            var title = data.options && data.options.title ? data.options.title : data.name;
+            // Abort display if template requested
+            if (data.template) {
+                return;
+            }
 
             // Set page title
+            var title = data.options && data.options.title ? data.options.title : data.name;
             $rootScope.setTitle([title]);
 
             // Set grid size
