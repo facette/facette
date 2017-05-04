@@ -330,8 +330,7 @@ func (w *httpWorker) httpHandleBackendDeleteAll(ctx context.Context, rw http.Res
 	// Stop provider upon deletion
 	if typ == "providers" {
 		for i, n := 0, reflect.Indirect(rv).Len(); i < n; i++ {
-			go w.service.poller.StopProvider(reflect.Indirect(rv).Index(i).Addr().Interface().(*backend.Provider),
-				false)
+			go w.service.poller.StopProvider(reflect.Indirect(rv).Index(i).Interface().(*backend.Provider), false)
 		}
 	}
 
