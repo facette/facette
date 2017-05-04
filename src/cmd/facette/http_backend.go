@@ -88,7 +88,7 @@ func (w *httpWorker) httpHandleBackendCreate(ctx context.Context, rw http.Respon
 	}
 
 	// Insert item into back-end
-	if err := w.service.backend.Storage().Create(rv.Interface()); err != nil {
+	if err := w.service.backend.Storage().Save(rv.Interface()); err != nil {
 		switch err {
 		case sqlstorage.ErrItemConflict:
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusConflict)
@@ -207,7 +207,7 @@ func (w *httpWorker) httpHandleBackendUpdate(ctx context.Context, rw http.Respon
 	}
 
 	// Update item in back-end
-	if err := w.service.backend.Storage().Update(rv.Interface()); err != nil {
+	if err := w.service.backend.Storage().Save(rv.Interface()); err != nil {
 		switch err {
 		case sqlstorage.ErrItemConflict:
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusConflict)

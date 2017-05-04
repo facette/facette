@@ -20,33 +20,33 @@ type Item struct {
 }
 
 func (i *Item) BeforeSave(scope *gorm.Scope) error {
-	var err error
-
 	if !nameRegexp.MatchString(i.Name) {
 		return ErrInvalidName
 	}
 
 	// Set default fields
 	if i.ID == "" {
-		i.ID, err = uuid.GenerateUUID()
+		id, err := uuid.GenerateUUID()
 		if err != nil {
 			return err
 		}
-	} else if _, err := uuid.ParseUUID(uuid); err != nil {
+
+		scope.SetColumn("ID", id)
+	} else if _, err := uuid.ParseUUID(i.ID); err != nil {
 		return ErrInvalidID
 	}
 
 	now := time.Now().UTC()
 
 	if i.Created.IsZero() {
-		i.Created = now
+		scope.SetColumn("Created", now)
 	}
 
-	i.Modified = now
+	scope.SetColumn("Modified", now)
 
 	// Ensure optional fields are null if empty
 	if i.Description != nil && *i.Description == "" {
-		i.Description = nil
+		scope.SetColumn("Description", nil)
 	}
 
 	return nil

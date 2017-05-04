@@ -199,7 +199,7 @@ func FilterStruct(v interface{}, fields []string) map[string]interface{} {
 
 			// Get field tag and check if it needs to be skipped
 			tag := ft.Tag.Get("json")
-			if tag == "-" || filterSkip(tag, f) {
+			if tag == "-" || filterSkip(tag, f) || !f.CanSet() {
 				continue
 			}
 

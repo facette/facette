@@ -39,10 +39,11 @@ func (g *Graph) BeforeSave(scope *gorm.Scope) error {
 
 	// Ensure optional fields are null if empty
 	if g.LinkID != nil && *g.LinkID == "" {
-		g.LinkID = nil
+		scope.SetColumn("LinkID", nil)
 	}
+
 	if g.Alias != nil && *g.Alias == "" {
-		g.Alias = nil
+		scope.SetColumn("Alias", nil)
 	}
 
 	return nil

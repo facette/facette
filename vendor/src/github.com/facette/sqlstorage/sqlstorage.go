@@ -18,7 +18,7 @@ type Storage struct {
 	log          *logger.Logger
 	driver       sqlDriver
 	db           *gorm.DB
-	associations map[reflect.Type]string
+	associations map[reflect.Type][]string
 }
 
 // NewStorage creates a new storage instance.
@@ -59,7 +59,7 @@ func NewStorage(name string, config *maputil.Map, log *logger.Logger) (*Storage,
 		log:          log,
 		driver:       driver,
 		db:           db,
-		associations: make(map[reflect.Type]string),
+		associations: make(map[reflect.Type][]string),
 	}, nil
 }
 
@@ -80,17 +80,31 @@ func (s *Storage) AddForeignKey(v interface{}, field, dest, onDelete, onUpdate s
 }
 
 // Association registers a new item association field.
-func (s *Storage) Association(v interface{}, field string) *Storage {
-	s.associations[reflect.TypeOf(v)] = field
+func (s *Storage) Association(v interface{}, fields ...string) *Storage {
+	rt := reflect.TypeOf(v)
+	for rt.Kind() == reflect.Ptr {
+		rt = rt.Elem()
+	}
+
+	if _, ok := s.associations[rt]; !ok {
+		s.associations[rt] = []string{}
+	}
+	s.associations[rt] = append(s.associations[rt], fields...)
+
 	return s
 }
 
-// Create stores a new item into the storage.
-func (s *Storage) Create(v interface{}) error {
+// Save stores a new item or modifies an existing item into the storage.
+func (s *Storage) Save(v interface{}) error {
 	tx := s.db.Begin()
 	defer tx.Commit()
 
-	if err := tx.Create(v).Error; err != nil {
+	// Delete previous associations
+	if err := s.handleAssociations(tx, v, true); err != nil {
+		return err
+	}
+
+	if err := tx.Save(v).Error; err != nil {
 		return s.driver.NormalizeError(err)
 	}
 
@@ -116,24 +130,7 @@ func (s *Storage) Get(column string, values interface{}, v interface{}) error {
 		return s.driver.NormalizeError(err)
 	}
 
-	// Retrieve item-specific associations
-	if field, ok := s.associations[reflect.TypeOf(v)]; ok {
-		tx.Model(v).Association(field).Find(reflect.Indirect(reflect.ValueOf(v)).FieldByName(field).Addr().Interface())
-	}
-
-	return nil
-}
-
-// Update modifies an existing item from the storage.
-func (s *Storage) Update(v interface{}) error {
-	tx := s.db.Begin()
-	defer tx.Commit()
-
-	if err := tx.Save(v).Error; err != nil {
-		return s.driver.NormalizeError(err)
-	}
-
-	return nil
+	return s.handleAssociations(tx, v, false)
 }
 
 // Delete removes an existing item from the storage.
@@ -208,19 +205,18 @@ func (s *Storage) List(v interface{}, filters map[string]interface{}, sort []str
 
 	// Retrieve item-specific associations
 	rv := reflect.ValueOf(v)
-	if rv.Kind() == reflect.Ptr {
+	for rv.Kind() == reflect.Ptr {
 		rv = rv.Elem()
 	}
 
-	if field, ok := s.associations[rv.Type().Elem()]; ok {
+	if _, ok := s.associations[rv.Type().Elem()]; ok {
 		// Reset filters, orders and limits
 		tx = tx.New()
 
 		for i, n := 0, rv.Len(); i < n; i++ {
-			cur := rv.Index(i)
-
-			tx.Model(cur.Interface()).Association(field).
-				Find(reflect.Indirect(cur).FieldByName(field).Addr().Interface())
+			if err := s.handleAssociations(tx, rv.Index(i).Interface(), false); err != nil {
+				return 0, err
+			}
 		}
 	}
 
@@ -305,4 +301,45 @@ func (s *Storage) Search(values []interface{}, v interface{}, filters map[string
 	}
 
 	return count, nil
+}
+
+func (s *Storage) handleAssociations(tx *gorm.DB, v interface{}, delete bool) error {
+	rv := reflect.ValueOf(v)
+
+	rt := rv.Type()
+	for rt.Kind() == reflect.Ptr {
+		rt = rt.Elem()
+	}
+
+	if fieldNames, ok := s.associations[rt]; ok {
+		tx = tx.New()
+
+		for _, name := range fieldNames {
+			fv := reflect.Indirect(rv).FieldByName(name).Addr().Interface()
+
+			if delete {
+				scope := tx.NewScope(v)
+				if field, ok := scope.FieldByName(name); ok {
+					for idx, foreignKey := range field.Relationship.ForeignDBNames {
+						assocName := field.Relationship.AssociationForeignFieldNames[idx]
+						if assocField, ok := scope.FieldByName(assocName); ok {
+							tx = tx.Where(fmt.Sprintf("%v = ?", scope.Quote(foreignKey)), assocField.Field.Interface())
+						}
+					}
+
+					if err := tx.Delete(fv).Error; err != nil {
+						return s.driver.NormalizeError(err)
+					}
+				}
+
+				continue
+			}
+
+			if err := tx.Model(v).Association(name).Find(fv).Error; err != nil {
+				return s.driver.NormalizeError(err)
+			}
+		}
+	}
+
+	return nil
 }

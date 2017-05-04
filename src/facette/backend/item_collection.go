@@ -44,15 +44,15 @@ func (c *Collection) BeforeSave(scope *gorm.Scope) error {
 
 	// Ensure optional fields are null if empty
 	if c.LinkID != nil && *c.LinkID == "" {
-		c.LinkID = nil
+		scope.SetColumn("LinkID", nil)
 	}
 
 	if c.Alias != nil && *c.Alias == "" {
-		c.Alias = nil
+		scope.SetColumn("Alias", nil)
 	}
 
 	if c.ParentID != nil && *c.ParentID == "" {
-		c.ParentID = nil
+		scope.SetColumn("ParentID", nil)
 	}
 
 	return nil

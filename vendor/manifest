@@ -22,7 +22,7 @@
 		{
 			"importpath": "github.com/facette/jsonutil",
 			"repository": "https://github.com/facette/jsonutil",
-			"revision": "3070f33c416a4d5deb8b9c94901514112b72158d",
+			"revision": "1bbe8ca52b35fed6c560427d52548456f42744df",
 			"branch": "master"
 		},
 		{
@@ -52,7 +52,7 @@
 		{
 			"importpath": "github.com/facette/sqlstorage",
 			"repository": "https://github.com/facette/sqlstorage",
-			"revision": "3ccec57b59ac40d97c274915e8a17fc9f567850b",
+			"revision": "9f2f40d2f06aebde1f68f370c00c2baaec713e26",
 			"branch": "master"
 		},
 		{

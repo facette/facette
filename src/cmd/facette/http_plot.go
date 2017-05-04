@@ -59,10 +59,6 @@ func (w *httpWorker) httpHandlePlots(ctx context.Context, rw http.ResponseWriter
 	}
 
 	// Expand graph template if linked
-	if req.Graph.Backend == nil {
-		req.Graph.Backend = w.service.backend
-	}
-
 	if err := req.Graph.Expand(req.Attributes); err != nil {
 		w.log.Warning("%s", err)
 		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusInternalServerError)
