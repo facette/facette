@@ -39,11 +39,11 @@ type collectionRef struct {
 var (
 	// Backend types are listed according to their restoration order
 	backendTypes = []string{
-		"collections",
-		"graphs",
+		"providers",
 		"sourcegroups",
 		"metricgroups",
-		"providers",
+		"graphs",
+		"collections",
 	}
 )
 
