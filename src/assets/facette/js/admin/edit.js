@@ -127,6 +127,9 @@ app.factory('adminEdit', function($location, $rootScope, $timeout, $translate, a
             scope.conflict = {name: false, alias: name};
             scope.validated = true;
 
+            // Strip Angular's internal keys from payload
+            data = angular.fromJson(angular.toJson(data));
+
             // Prepare item data
             var factory = adminHelpers.getFactory(scope);
 
