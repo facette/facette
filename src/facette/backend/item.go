@@ -51,3 +51,7 @@ func (i *Item) BeforeSave(scope *gorm.Scope) error {
 
 	return nil
 }
+
+func (i *Item) SetBackend(b *Backend) {
+	i.backend = b
+}

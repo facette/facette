@@ -53,7 +53,10 @@ func (w *httpWorker) httpHandlePlots(ctx context.Context, rw http.ResponseWriter
 			httputil.WriteJSON(rw, httpBuildMessage(ErrUnhandledError), http.StatusInternalServerError)
 			return
 		}
-	} else if req.Graph == nil {
+	} else if req.Graph != nil {
+		// Register back-end (needed for graph expansion)
+		req.Graph.Item.SetBackend(w.service.backend)
+	} else {
 		httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidParameter), http.StatusBadRequest)
 		return
 	}
