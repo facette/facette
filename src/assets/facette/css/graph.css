@@ -11,7 +11,7 @@
 	min-height: 100%;
 }
 
-.graph:hover .graph-control,
+.graph:hover .graph-slides,
 .graph.focus,
 .graph.folded:hover {
 	outline: 0.9rem solid #ecf0f1;
@@ -27,8 +27,8 @@
 	outline-color: #dee2e3;
 }
 
-.graph.frame:hover .graph-control,
-.graph.preview:hover .graph-control {
+.graph.frame:hover .graph-slides,
+.graph.preview:hover .graph-slides {
 	outline: none;
 }
 
@@ -78,9 +78,13 @@
 }
 
 .graph-control {
+	display: none;
+}
+
+.graph-slides {
 	align-items: center;
 	cursor: default;
-	display: none;
+	display: flex;
 	flex-direction: column;
 	overflow: hidden;
 	pointer-events: none;
@@ -92,7 +96,7 @@
 }
 
 .graph:hover .graph-control {
-	display: flex;
+	display: block;
 }
 
 .graph-fold,
@@ -149,13 +153,18 @@
 	left: 0;
 }
 
+.graph-fold,
 .graph-legend {
-	border-radius: 0.25rem 0.25rem 0 0;
 	padding: 0 1rem;
 }
 
+.graph-fold .fa,
 .graph-legend .fa {
 	margin-right: 0.35rem;
+}
+
+.graph-legend {
+	border-radius: 0.25rem 0.25rem 0 0;
 }
 
 .graph-step {

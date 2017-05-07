@@ -2,10 +2,6 @@
 	<message class="clickable" icon="eye-slash" ng-click="toggleFold(false)" ng-show="folded">{{ 'mesg.graphs_folded' | translate }}</a></message>
 
 	<div class="graph-control" ng-if="controls && !folded">
-		<div class="graph-fold" ng-class="{active: foldActive}" ng-if="!frame">
-			<div class="fa fa-chevron-up" ng-click="toggleFold(true)" ng-show="!folded"></div>
-		</div>
-
 		<menu class="graph-menu">
 			<menuitem href="{{ ::baseURL }}admin/graphs/{{ graphId }}" icon="pencil" title="{{ 'label.graphs_edit' | translate }}" type="button" ng-if="!$root.readOnly"></menuitem>
 			<menuitem type="separator" ng-if="!$root.readOnly"></menuitem>
@@ -34,14 +30,20 @@
 			<menuitem href="{{ ::baseURL }}show/{{ embeddablePath }}" target="_blank" icon="window-maximize" title="{{ 'label.graphs_goto_embeddable' | translate }}" type="button" ng-if="!frame && embeddablePath"></menuitem>
 		</menu>
 
-		<div class="graph-step">
-			<div class="graph-step-backward fa fa-arrow-left" ng-click="moveStep(false)" ng-class="{active: stepActive == 'backward'}"></div>
-			<div class="graph-step-forward fa fa-arrow-right" ng-click="moveStep(true)" ng-class="{active: stepActive == 'forward'}"></div>
-		</div>
+		<div class="graph-slides">
+			<div class="graph-fold" ng-class="{active: foldActive}" ng-if="!frame">
+				<div ng-click="toggleFold(true)" ng-show="!folded"><span class="fa fa-chevron-up"></span> {{ 'label.graphs_fold' | translate }}</div>
+			</div>
 
-		<div class="graph-legend" ng-show="!error">
-			<div ng-click="toggleLegend(true)" ng-show="!legendActive"><span class="fa fa-chevron-down"></span> {{ 'label.graphs_show_legend' | translate }}</div>
-			<div ng-click="toggleLegend(false)" ng-show="legendActive"><span class="fa fa-chevron-up"></span> {{ 'label.graphs_hide_legend' | translate }}</div>
+			<div class="graph-step">
+				<div class="graph-step-backward fa fa-arrow-left" ng-click="moveStep(false)" ng-class="{active: stepActive == 'backward'}"></div>
+				<div class="graph-step-forward fa fa-arrow-right" ng-click="moveStep(true)" ng-class="{active: stepActive == 'forward'}"></div>
+			</div>
+
+			<div class="graph-legend" ng-show="!error">
+				<div ng-click="toggleLegend(true)" ng-show="!legendActive"><span class="fa fa-chevron-down"></span> {{ 'label.graphs_show_legend' | translate }}</div>
+				<div ng-click="toggleLegend(false)" ng-show="legendActive"><span class="fa fa-chevron-up"></span> {{ 'label.graphs_hide_legend' | translate }}</div>
+			</div>
 		</div>
 	</div>
 
