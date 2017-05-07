@@ -5,11 +5,17 @@ angular.module('facette.ui.graph', [])
         restrict: 'E',
         replace: true,
         scope: {
-            graphIndex: '@',
+            index: '@',
             graphId: '@',
-            graphData: '=?',
-            graphOptions: '=?',
-            graphAttrs: '=?'
+            def: '=?',
+            options: '=?',
+            attributes: '=?',
+            controls: '@',
+            frame: '@'
+        },
+        link: function(scope, element, attrs) {
+            attrs.$observe('controls', function() { scope.controls = scope.$eval(attrs.controls); });
+            attrs.$observe('frame', function() { scope.frame = scope.$eval(attrs.frame); });
         },
         controller: 'GraphController',
         templateUrl: 'templates/graph.html'
@@ -19,15 +25,12 @@ angular.module('facette.ui.graph', [])
 .controller('GraphController', function($scope, $rootScope, $element, $pageVisibility, $timeout, $window, plots) {
     $scope.graph = null;
 
-    $scope.options = {
-        controls: true
-    };
-
-    if ($scope.graphOptions) {
-        angular.extend($scope.options, $scope.graphOptions);
+    if (!angular.isDefined($scope.options)) {
+        $scope.options = {};
     }
-
     $scope.optionsRef = angular.copy($scope.options);
+
+    $scope.embeddablePath = $scope.options.embeddable_path || null;
 
     $scope.startTime = null;
     $scope.endTime = null;
@@ -56,21 +59,48 @@ angular.module('facette.ui.graph', [])
         force = typeof force == 'boolean' ? force : false;
 
         var optionsOrig = angular.copy($scope.options),
-            optionsNew = angular.copy($scope.options);
+            optionsNew = angular.copy($scope.options),
+            embeddablePath = null;
 
         angular.extend(optionsNew, options);
 
         if (options.start_time || options.end_time) {
             delete optionsNew.time;
             delete optionsNew.range;
+
+            if ($scope.options.embeddable_path) {
+                embeddablePath = $scope.options.embeddable_path +
+                    "?start=" + encodeURIComponent(moment(options.start_time).format(timeFormatRFC3339)) +
+                    "&end=" + encodeURIComponent(moment(options.end_time).format(timeFormatRFC3339));
+            }
         } else if (options.time || options.range) {
             delete optionsNew.start_time;
             delete optionsNew.end_time;
+
+            if ($scope.options.embeddable_path) {
+                embeddablePath = $scope.options.embeddable_path + "?";
+
+                if (options.time) {
+                    embeddablePath += "time=" + encodeURIComponent(moment(options.time).format(timeFormatRFC3339));
+                }
+
+                if (options.range) {
+                    embeddablePath += (options.time ? '&' : '') + "range=" + options.range;
+                }
+            }
         } else {
             delete optionsNew.time;
             delete optionsNew.range;
             delete optionsNew.start_time;
             delete optionsNew.end_time;
+
+            if ($scope.options.embeddable_path) {
+                embeddablePath = $scope.options.embeddable_path;
+            }
+        }
+
+        if (embeddablePath) {
+            $scope.embeddablePath = embeddablePath;
         }
 
         $scope.options = optionsNew;
@@ -129,7 +159,7 @@ angular.module('facette.ui.graph', [])
                 onSelect: function(start, end) {
                     var startTime = moment(start);
 
-                    angular.extend($scope.options, {
+                    applyOptions({
                         time: startTime.format(timeFormatRFC3339),
                         range: timeToRange(moment(end).diff(startTime))
                     });
@@ -186,7 +216,7 @@ angular.module('facette.ui.graph', [])
 
         try {
             $scope.chart = chart[$scope.chart ? 'update' : 'create'](chartCfg);
-            $scope.$parent.$emit('GraphLoaded', $scope.graphIndex, $scope.graphId);
+            $scope.$parent.$emit('GraphLoaded', $scope.index, $scope.graphId);
         } catch (e) {
             console.error('Failed to render graph: ' + e.name + (e.message ? ': ' + e.message : ''));
         }
@@ -218,8 +248,8 @@ angular.module('facette.ui.graph', [])
 
         if ($scope.graphId) {
             query.id = $scope.graphId;
-        } else if ($scope.graphData) {
-            query.graph = $scope.graphData;
+        } else if ($scope.def) {
+            query.graph = $scope.def;
 
             // Set range and sample values with graph options ones if any
             if (query.graph.options) {
@@ -238,8 +268,8 @@ angular.module('facette.ui.graph', [])
         }
 
         // Append attributes to request if any (used for collections templates)
-        if ($scope.graphAttrs) {
-            query.attributes = $scope.graphAttrs;
+        if ($scope.attributes) {
+            query.attributes = $scope.attributes;
         }
 
         // Cancel previous refresh timeout if any
@@ -285,7 +315,7 @@ angular.module('facette.ui.graph', [])
     }
 
     function emitChange() {
-        $scope.$parent.$emit('GraphChanged', $scope.graphIndex, $scope.graphId, {
+        $scope.$parent.$emit('GraphChanged', $scope.index, $scope.graphId, {
             folded: $scope.folded,
             legendActive: $scope.legendActive
         });
@@ -413,7 +443,7 @@ angular.module('facette.ui.graph', [])
             delta *= -1;
         }
 
-        angular.extend($scope.options, {
+        applyOptions({
             time: moment(startTime).add(delta).format(timeFormatRFC3339),
             range: ($scope.options.range || defaultTimeRange).replace(/^-/, '')
         });
@@ -445,7 +475,7 @@ angular.module('facette.ui.graph', [])
 
     $scope.setRange = function(range) {
         if (range != 'custom') {
-            angular.extend($scope.options, {range: '-' + range});
+            applyOptions({range: '-' + range});
             return;
         }
 
@@ -511,7 +541,7 @@ angular.module('facette.ui.graph', [])
             delta = (delta / 2) * -1;
         }
 
-        angular.extend($scope.options, {
+        applyOptions({
             time: moment(startTime).add(delta).format(timeFormatRFC3339),
             range: range
         });
@@ -543,7 +573,7 @@ angular.module('facette.ui.graph', [])
 
     $scope.$watch('graphId', updateGraph, true);
     $scope.$watch('options', updateGraph, true);
-    $scope.$watch('graphData', updateGraph, true);
+    $scope.$watch('def', updateGraph, true);
 
     // Attach events
     var unregisterCallbacks = [];
@@ -558,6 +588,10 @@ angular.module('facette.ui.graph', [])
         }
 
         $scope.chart.toggleCursor(time);
+    }));
+
+    unregisterCallbacks.push($rootScope.$on('ResetTimeRange', function() {
+        $scope.reset();
     }));
 
     unregisterCallbacks.push($rootScope.$on('RedrawGraph', function() {
@@ -582,7 +616,7 @@ angular.module('facette.ui.graph', [])
     }));
 
     unregisterCallbacks.push($rootScope.$on('ToggleGraphLegend', function(e, idx, id, state) {
-        if (idx && idx !== $scope.graphIndex || id && id !== $scope.graphId) {
+        if (idx && idx !== $scope.index || id && id !== $scope.graphId) {
             return;
         }
 

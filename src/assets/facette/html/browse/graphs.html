@@ -15,9 +15,11 @@
 			</menuitem>
 			<menuitem href="" icon="clock-o" title="{{ 'label.range_set' | translate }}" type="button" drop="true">
 				<menu>
+					<menuitem icon="history" label="{{ 'label.range_reset' | translate }}" type="button" ng-click="resetRange()"></menuitem>
+					<menuitem type="separator"></menuitem>
 					<menuitem label="{{ range }}" type="button" ng-click="setRange(range)" ng-repeat="range in rangeValues"></menuitem>
 					<menuitem type="separator"></menuitem>
-					<menuitem label="{{ 'label.range_custom' | translate }}" type="button" ng-click="setRange('custom')"></menuitem>
+					<menuitem icon="calendar" label="{{ 'label.range_custom' | translate }}" type="button" ng-click="setRange('custom')"></menuitem>
 				</menu>
 			</menuitem>
 			<menuitem href="" icon="columns" title="{{ 'label.page_grid_set' | translate }}" type="button" drop="true">
@@ -48,7 +50,7 @@
 		<div class="grid grid{{ gridSize }}">
 			<div class="grid-item" ng-repeat="g in graphs" ng-if="graphs.length > 0">
 				<a id="graph{{ g.index }}"></a>
-				<graph graph-index="{{ g.index }}" graph-id="{{ g.id }}" graph-options="g.options" graph-attrs="g.attributes" ng-show="!g.hidden"></graph>
+				<graph index="{{ g.index }}" graph-id="{{ g.id }}" options="g.options" attributes="g.attributes" controls="true" ng-show="!g.hidden"></graph>
 			</div>
 		</div>
 	</section>

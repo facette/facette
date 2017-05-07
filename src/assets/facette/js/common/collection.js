@@ -5,8 +5,14 @@ app.factory('browseCollection', function($routeParams, $timeout, library, storag
 
             angular.forEach($routeParams, function(value, key) {
                 switch (key) {
+                case 'start':
+                case 'end':
                 case 'range':
                 case 'time':
+                    if (key == 'start' || key == 'end') {
+                        key += '_time';
+                    }
+
                     options[key] = value;
                     if (scope) {
                         scope[key] = options[key];

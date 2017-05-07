@@ -182,7 +182,7 @@
 				<column class="side" ng-if="!optionsEdit">
 					<h2>{{ 'label.graphs_preview' | translate }}</h2>
 
-					<graph class="preview" graph-data="itemData" graph-options="{controls: false}"></graph>
+					<graph class="preview" def="itemDef" controls="false"></graph>
 
 					<div ng-show="item.template">
 						<h3>{{ 'label.templates_attrs' | translate }} <span class="note">{{ 'label.templates_attrs_note' | translate }}</span></h3>
@@ -318,7 +318,7 @@
 
 			<column class="side">
 				<h2>{{ 'label.graphs_preview' | translate }}</h2>
-				<graph class="preview" graph-data="itemData" graph-options="{controls: false}"></graph>
+				<graph class="preview" def="itemDef" controls="false"></graph>
 			</column>
 		</columns>
 	</section>

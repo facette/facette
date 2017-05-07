@@ -1,8 +1,23 @@
-app.controller('ShowGraphController', function($rootScope, $routeParams, $scope, browseCollection, timeRange) {
+app.controller('ShowGraphController', function($location, $rootScope, $routeParams, $scope, browseCollection,
+    timeRange) {
+
     $scope.graph = {
         id: $routeParams.id,
-        options: angular.extend({frame: true}, browseCollection.getGlobalOptions(null))
+        options: browseCollection.getGlobalOptions(null)
     };
+
+    $scope.$watch('graph.options', function(newValue, oldValue) {
+        if (angular.equals(newValue, oldValue)) {
+            return;
+        }
+
+        $location.skipReload()
+            .search('start', newValue.start_time || null)
+            .search('end', newValue.end_time || null)
+            .search('time', newValue.time || null)
+            .search('range', newValue.range || null)
+            .replace();
+    }, true);
 
     // Attach events
     var unregisterPromptTimerange = $rootScope.$on('PromptTimeRange', function(e, callback, data) {

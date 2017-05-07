@@ -96,12 +96,12 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
         });
     }
 
-    function updateItemData() {
-        var data = angular.copy($scope.item);
-        $scope.cleanProperties(data);
-        data.attributes = angular.copy($scope.item.attributes);
+    function updateItemDef() {
+        var def = angular.copy($scope.item);
+        $scope.cleanProperties(def);
+        def.attributes = angular.copy($scope.item.attributes);
 
-        $scope.itemData = data;
+        $scope.itemDef = def;
     }
 
     function updateTemplate(item) {
@@ -179,7 +179,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
     // Define scope functions
     $scope.cancel = function(force) { adminEdit.cancel($scope, force); };
     $scope.delete = function() { adminEdit.delete($scope, {id: $scope.id, name: $scope.itemRef.name}); };
-    $scope.reset = function() { adminEdit.reset($scope); fetchGroups(); updateItemData(); };
+    $scope.reset = function() { adminEdit.reset($scope); fetchGroups(); updateItemDef(); };
 
     $scope.save = function(go) {
         adminEdit.save($scope, function(data) {
@@ -655,7 +655,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
     adminEdit.watch($scope, function(newValue, oldValue) {
         if ($scope.step == 2 && !$scope.linked) {
             updateTemplate();
-            updateItemData();
+            updateItemDef();
         } else if ($scope.linked) {
             if (!oldValue || newValue.link !== oldValue.link) {
                 library.get({
@@ -668,10 +668,10 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
                     }
 
                     updateTemplate(data);
-                    updateItemData();
+                    updateItemDef();
                 });
             } else if (newValue.link) {
-                updateItemData();
+                updateItemDef();
             }
         }
     });
@@ -741,7 +741,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
                 }
 
                 // Trigger initial graph preview update
-                updateItemData();
+                updateItemDef();
             });
 
             $scope.$watch('selectedOptions', function(newValue, oldValue) {

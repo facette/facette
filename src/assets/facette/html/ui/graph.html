@@ -1,8 +1,8 @@
-<div class="graph" in-view="handleView($inview, $inviewInfo)" ng-class="{empty: empty, error: error, focus: focus, folded: folded, frame: options.frame, loading: loading, zooming: zooming}">
+<div class="graph" in-view="handleView($inview, $inviewInfo)" ng-class="{empty: empty, error: error, focus: focus, folded: folded, frame: frame, loading: loading, zooming: zooming}">
 	<message class="clickable" icon="eye-slash" ng-click="toggleFold(false)" ng-show="folded">{{ 'mesg.graphs_folded' | translate }}</a></message>
 
-	<div class="graph-control" ng-if="options.controls && !folded">
-		<div class="graph-fold" ng-class="{active: foldActive}" ng-if="!options.frame">
+	<div class="graph-control" ng-if="controls && !folded">
+		<div class="graph-fold" ng-class="{active: foldActive}" ng-if="!frame">
 			<div class="fa fa-chevron-up" ng-click="toggleFold(true)" ng-show="!folded"></div>
 		</div>
 
@@ -12,12 +12,13 @@
 			<menuitem icon="refresh" title="{{ 'label.graphs_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
 			<menuitem icon="clock-o" title="{{ 'label.range_modify' | translate }}" type="button">
 				<menu>
+					<menuitem icon="history" label="{{ 'label.range_reset' | translate }}" type="button" ng-click="reset()" ng-disabled="!modified"></menuitem>
+					<menuitem type="separator"></menuitem>
 					<menuitem label="{{ range }}" type="button" ng-click="setRange(range)" ng-repeat="range in rangeValues"></menuitem>
 					<menuitem type="separator"></menuitem>
-					<menuitem label="{{ 'label.range_custom' | translate }}" type="button" ng-click="setRange('custom')"></menuitem>
+					<menuitem icon="calendar" label="{{ 'label.range_custom' | translate }}" type="button" ng-click="setRange('custom')"></menuitem>
 				</menu>
 			</menuitem>
-			<menuitem icon="history" title="{{ 'label.range_reset' | translate }}" type="button" ng-click="reset()" ng-disabled="!modified"></menuitem>
 			<menuitem icon="arrows-v" title="{{ 'label.range_propagate' | translate }}" type="button" ng-click="propagate()"></menuitem>
 			<menuitem icon="search-minus" title="{{ 'label.graphs_zoom_out' | translate }}" type="button" ng-click="zoom(false)"></menuitem>
 			<menuitem icon="search-plus" title="{{ 'label.graphs_zoom_in' | translate }}" type="button" ng-click="zoom(true)"></menuitem>
@@ -30,7 +31,7 @@
 					<menuitem label="{{ 'label.graphs_export_summary_json' | translate }}" type="button" ng-click="export($event, 'summary_json')"></menuitem>
 				</menu>
 			</menuitem>
-			<menuitem href="{{ ::baseURL }}show/{{ options.embeddable_path }}" target="_blank" icon="window-maximize" title="{{ 'label.graphs_goto_embeddable' | translate }}" type="button" ng-if="!options.frame && options.embeddable_path"></menuitem>
+			<menuitem href="{{ ::baseURL }}show/{{ embeddablePath }}" target="_blank" icon="window-maximize" title="{{ 'label.graphs_goto_embeddable' | translate }}" type="button" ng-if="!frame && embeddablePath"></menuitem>
 		</menu>
 
 		<div class="graph-step">

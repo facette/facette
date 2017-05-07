@@ -66,6 +66,10 @@ header .menuitem > .subcontent > .menu {
 	flex-direction: column;
 }
 
+header .menuitem > .subcontent .menuitem .fa {
+	font-size: 1.1rem;
+}
+
 header .menuitem > .subcontent .menuitem.button {
 	cursor: pointer;
 }

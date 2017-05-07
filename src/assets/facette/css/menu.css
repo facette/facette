@@ -2,6 +2,11 @@
 	position: relative;
 }
 
+.menuitem.button[disabled] {
+	opacity: 0.35;
+	pointer-events: none;
+}
+
 .tooltip-wrapper {
 	position: fixed;
 	z-index: 200;

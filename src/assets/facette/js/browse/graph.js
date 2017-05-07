@@ -1,5 +1,5 @@
-app.controller('BrowseGraphController', function($rootScope, $routeParams, $scope, $timeout, $window, browseCollection,
-    bulk, library, storage, timeRange) {
+app.controller('BrowseGraphController', function($location, $rootScope, $routeParams, $scope, $timeout, $window,
+    browseCollection, bulk, library, storage, timeRange) {
 
     $scope.section = $routeParams.section;
     $scope.id = $routeParams.id;
@@ -25,9 +25,32 @@ app.controller('BrowseGraphController', function($rootScope, $routeParams, $scop
         $rootScope.$emit('RefreshGraph');
     };
 
+    $scope.resetRange = function() {
+        $scope.startTime = null;
+        $scope.endTime = null;
+        $scope.time = null;
+        $scope.range = null;
+
+        $rootScope.$emit('ResetTimeRange');
+
+        $location.skipReload()
+            .search('start', $scope.startTime)
+            .search('end', $scope.endTime)
+            .search('time', $scope.time)
+            .search('range', $scope.range)
+            .replace();
+    };
+
     $scope.setRange = function(range) {
         if (range != 'custom') {
             $rootScope.$emit('ApplyGraphOptions', {range: '-' + range});
+
+            $location.skipReload()
+                .search('start', null)
+                .search('end', null)
+                .search('range', '-' + range || null)
+                .replace();
+
             return;
         }
 
@@ -44,6 +67,13 @@ app.controller('BrowseGraphController', function($rootScope, $routeParams, $scop
                 time: time,
                 range: range
             });
+
+            $location.skipReload()
+                .search('start', startTime ? moment(startTime).format(timeFormatRFC3339) : null)
+                .search('end', endTime ? moment(endTime).format(timeFormatRFC3339) : null)
+                .search('time', time ? moment(time).format(timeFormatRFC3339) : null)
+                .search('range', range || null)
+                .replace();
         }, {
             start: $scope.startTime,
             end: $scope.endTime,

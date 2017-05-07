@@ -227,11 +227,6 @@
 	width: 1.5rem;
 }
 
-.graph-menu > .menuitem.button[disabled] {
-	opacity: 0.35;
-	pointer-events: none;
-}
-
 .graph-menu > .menuitem.button:hover {
 	border-radius: 0.2rem;
 }
@@ -272,6 +267,11 @@
 	cursor: default;
 	text-align: left;
 	white-space: nowrap;
+}
+
+.graph-menu > .menuitem .subcontent .menuitem.button .fa {
+	margin-right: 0;
+	width: 1.35rem;
 }
 
 .graph-menu > .menuitem .subcontent .menuitem.button a {
@@ -371,6 +371,10 @@
 .chart-zoom {
 	fill: rgba(41, 128, 185, 0.35);
 	pointer-events: none;
+}
+
+.chart-event {
+	cursor: crosshair;
 }
 
 .chart-legend {
