@@ -96,6 +96,8 @@ func (s *Storage) Association(v interface{}, fields ...string) *Storage {
 
 // Save stores a new item or modifies an existing item into the storage.
 func (s *Storage) Save(v interface{}) error {
+	var err error
+
 	tx := s.db.Begin()
 	defer tx.Commit()
 
@@ -104,7 +106,22 @@ func (s *Storage) Save(v interface{}) error {
 		return err
 	}
 
-	if err := tx.Save(v).Error; err != nil {
+	// Check if item with the given primary field already exists
+	rv := reflect.ValueOf(v)
+	scope := tx.NewScope(v)
+	field := scope.PrimaryField()
+
+	if tx.First(
+		reflect.New(rv.Type().Elem()).Interface(),
+		fmt.Sprintf("%v = ?", scope.Quote(field.DBName)),
+		reflect.Indirect(rv).FieldByName(field.Name).Interface(),
+	).RecordNotFound() {
+		err = tx.Create(v).Error
+	} else {
+		err = tx.Save(v).Error
+	}
+
+	if err != nil {
 		return s.driver.NormalizeError(err)
 	}
 

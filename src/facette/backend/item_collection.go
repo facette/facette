@@ -10,7 +10,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// Collection represents a library collection item instance.
+// Collection represents a back-end collection item instance.
 type Collection struct {
 	Item
 	Entries    []*CollectionEntry `json:"entries,omitempty"`
@@ -27,10 +27,12 @@ type Collection struct {
 	expanded bool
 }
 
+// NewCollection creates a new collection item instance.
 func (b *Backend) NewCollection() *Collection {
 	return &Collection{Item: Item{backend: b}}
 }
 
+// BeforeSave handles the ORM 'BeforeSave' callback.
 func (c *Collection) BeforeSave(scope *gorm.Scope) error {
 	if err := c.Item.BeforeSave(scope); err != nil {
 		return err
@@ -58,6 +60,35 @@ func (c *Collection) BeforeSave(scope *gorm.Scope) error {
 	return nil
 }
 
+// Clone returns a clone of the collection item instance.
+func (c *Collection) Clone() *Collection {
+	clone := &Collection{}
+	*clone = *c
+
+	clone.Attributes = maputil.Map{}
+	for k, v := range c.Attributes {
+		clone.Attributes[k] = v
+	}
+
+	clone.Options = maputil.Map{}
+	for k, v := range c.Options {
+		clone.Options[k] = v
+	}
+
+	if c.Link != nil {
+		clone.Link = &Collection{}
+		*clone.Link = *c.Link
+	}
+
+	if c.Parent != nil {
+		clone.Parent = &Collection{}
+		*clone.Parent = *c.Parent
+	}
+
+	return clone
+}
+
+// Expand expands the collection item instance using its linked instance.
 func (c *Collection) Expand(attrs maputil.Map) error {
 	var err error
 
@@ -70,16 +101,21 @@ func (c *Collection) Expand(attrs maputil.Map) error {
 	}
 
 	if c.backend != nil && c.LinkID != nil && *c.LinkID != "" {
-		if err := c.Resolve(); err != nil {
+		if err := c.Resolve(nil); err != nil {
 			return err
 		}
 
 		// Expand template and applies current collection's attributes and options
-		tmpl := c.Link
+		tmpl := c.Link.Clone()
 		tmpl.ID = c.ID
 		tmpl.Attributes.Merge(c.Attributes, true)
 		tmpl.Options.Merge(c.Options, true)
 		tmpl.Template = false
+
+		if c.ParentID != nil && *c.ParentID != "" {
+			tmpl.Parent = c.Parent.Clone()
+			tmpl.ParentID = c.ParentID
+		}
 
 		if title, ok := tmpl.Options["title"].(string); ok {
 			if tmpl.Options["title"], err = template.Expand(title, tmpl.Attributes); err != nil {
@@ -141,11 +177,13 @@ func (c *Collection) Expand(attrs maputil.Map) error {
 	return nil
 }
 
+// HasParent returns whether or not the collection item has a parent instance.
 func (c *Collection) HasParent() bool {
 	return c.ParentID != nil && *c.ParentID != ""
 }
 
-func (c *Collection) Resolve() error {
+// Resolve resolves both the collection item linked and parent instances.
+func (c *Collection) Resolve(cache map[string]*Collection) error {
 	if c.resolved {
 		return nil
 	} else if c.backend == nil {
@@ -153,16 +191,28 @@ func (c *Collection) Resolve() error {
 	}
 
 	if c.LinkID != nil && *c.LinkID != "" {
-		c.Link = c.backend.NewCollection()
-		if err := c.backend.Storage().Get("id", *c.LinkID, c.Link); err != nil {
-			return err
+		if cache != nil {
+			if link, ok := cache[*c.LinkID]; ok {
+				c.Link = link
+			}
+		} else {
+			c.Link = c.backend.NewCollection()
+			if err := c.backend.Storage().Get("id", *c.LinkID, c.Link); err != nil {
+				return err
+			}
 		}
 	}
 
 	if c.ParentID != nil && *c.ParentID != "" {
-		c.Parent = c.backend.NewCollection()
-		if err := c.backend.Storage().Get("id", *c.ParentID, c.Parent); err != nil {
-			return err
+		if cache != nil {
+			if parent, ok := cache[*c.ParentID]; ok {
+				c.Parent = parent
+			}
+		} else {
+			c.Parent = c.backend.NewCollection()
+			if err := c.backend.Storage().Get("id", *c.ParentID, c.Parent); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -191,7 +241,7 @@ func (c *Collection) treeEntry() *CollectionTreeEntry {
 	return entry
 }
 
-// CollectionEntry represents a library collection entry instance.
+// CollectionEntry represents a back-end collection entry instance.
 type CollectionEntry struct {
 	Index        int         `gorm:"type:int;not null;primary_key" json:"-"`
 	Collection   *Collection `json:"-"`
@@ -202,23 +252,29 @@ type CollectionEntry struct {
 	Options      maputil.Map `gorm:"type:text" json:"options,omitempty"`
 }
 
+// CollectionTree represents a back-end collection tree instance.
 type CollectionTree []*CollectionTreeEntry
 
+// NewCollectionTree creates a new back-end collection tree instance.
 func (b *Backend) NewCollectionTree(root string) (*CollectionTree, error) {
-	filters := map[string]interface{}{"template": false}
-	if root != "" {
-		filters["parent"] = root
+	collections := []*Collection{}
+	if _, err := b.Storage().List(&collections, nil, nil, 0, 0); err != nil {
+		return nil, err
 	}
 
-	collections := []*Collection{}
-	if _, err := b.Storage().List(&collections, filters, nil, 0, 0); err != nil {
-		return nil, err
+	collectionsCache := map[string]*Collection{}
+	for _, c := range collections {
+		collectionsCache[c.ID] = c
 	}
 
 	entries := map[string]*CollectionTreeEntry{}
 	for _, c := range collections {
+		if c.Template {
+			continue
+		}
+
 		c.backend = b
-		c.Resolve()
+		c.Resolve(collectionsCache)
 		c.Expand(nil)
 
 		// Fill collections tree
@@ -230,23 +286,20 @@ func (b *Backend) NewCollectionTree(root string) (*CollectionTree, error) {
 			parentID := *c.ParentID
 
 			if _, ok := entries[parentID]; !ok {
-				c.Parent.Resolve()
+				c.Parent.backend = b
+				c.Parent.Resolve(collectionsCache)
 				c.Parent.Expand(nil)
 
 				entries[parentID] = c.Parent.treeEntry()
 			}
 
 			*entries[parentID].Children = append(*entries[parentID].Children, entries[c.ID])
-
-			if parentID == filters["parent"] {
-				entries[c.ID].Parent = ""
-			}
 		}
 	}
 
 	tree := &CollectionTree{}
 	for _, entry := range entries {
-		if entry.Parent == "" && entry.ID != filters["parent"] {
+		if entry.Parent == root {
 			*tree = append(*tree, entry)
 			sort.Sort(entry.Children)
 		}
@@ -269,6 +322,7 @@ func (c CollectionTree) Swap(i, j int) {
 	c[i], c[j] = c[j], c[i]
 }
 
+// CollectionTreeEntry represents a back-end collections tree entry instance.
 type CollectionTreeEntry struct {
 	ID       string          `json:"id,omitempty"`
 	Label    string          `json:"label,omitempty"`

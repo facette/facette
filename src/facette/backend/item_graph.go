@@ -26,10 +26,12 @@ type Graph struct {
 	expanded bool
 }
 
+// NewGraph creates a new back-end graph item instance.
 func (b *Backend) NewGraph() *Graph {
 	return &Graph{Item: Item{backend: b}}
 }
 
+// BeforeSave handles the ORM 'BeforeSave' callback.
 func (g *Graph) BeforeSave(scope *gorm.Scope) error {
 	if err := g.Item.BeforeSave(scope); err != nil {
 		return err
@@ -49,6 +51,7 @@ func (g *Graph) BeforeSave(scope *gorm.Scope) error {
 	return nil
 }
 
+// Expand expands the graph item instance using its linked instance.
 func (g *Graph) Expand(attrs maputil.Map) error {
 	var err error
 
@@ -100,6 +103,7 @@ func (g *Graph) Expand(attrs maputil.Map) error {
 	return nil
 }
 
+// Resolve resolves the graph item linked instance.
 func (g *Graph) Resolve() error {
 	if g.resolved {
 		return nil

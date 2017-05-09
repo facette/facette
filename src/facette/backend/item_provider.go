@@ -19,10 +19,12 @@ type Provider struct {
 	Enabled         bool             `gorm:"not null;default:true" json:"enabled"`
 }
 
+// NewProvider creates a new back-end provider item instance.
 func (b *Backend) NewProvider() *Provider {
 	return &Provider{Item: Item{backend: b}}
 }
 
+// BeforeSave handles the ORM 'BeforeSave' callback.
 func (p *Provider) BeforeSave(scope *gorm.Scope) error {
 	if err := p.Item.BeforeSave(scope); err != nil {
 		return err

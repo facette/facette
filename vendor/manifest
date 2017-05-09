@@ -52,7 +52,7 @@
 		{
 			"importpath": "github.com/facette/sqlstorage",
 			"repository": "https://github.com/facette/sqlstorage",
-			"revision": "9f2f40d2f06aebde1f68f370c00c2baaec713e26",
+			"revision": "19120a480baf21ac9c25130ba41f6ade8997e617",
 			"branch": "master"
 		},
 		{

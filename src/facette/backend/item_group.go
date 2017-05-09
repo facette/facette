@@ -16,6 +16,7 @@ type SourceGroup struct {
 	Patterns *GroupPatterns `gorm:"type:text;not null" json:"patterns"`
 }
 
+// NewSourceGroup creates a new back-end source group item instance.
 func (b *Backend) NewSourceGroup() *SourceGroup {
 	return &SourceGroup{Item: Item{backend: b}}
 }
@@ -31,6 +32,7 @@ type MetricGroup struct {
 	Patterns *GroupPatterns `gorm:"type:text;not null" json:"patterns"`
 }
 
+// NewMetricGroup creates a new back-end metric group item instance.
 func (b *Backend) NewMetricGroup() *MetricGroup {
 	return &MetricGroup{Item: Item{backend: b}}
 }

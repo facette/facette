@@ -19,6 +19,7 @@ type Item struct {
 	backend *Backend `gorm:"-" json:"-"`
 }
 
+// BeforeSave handles the ORM 'BeforeSave' callback.
 func (i *Item) BeforeSave(scope *gorm.Scope) error {
 	if !nameRegexp.MatchString(i.Name) {
 		return ErrInvalidName
@@ -52,6 +53,7 @@ func (i *Item) BeforeSave(scope *gorm.Scope) error {
 	return nil
 }
 
+// SetBackend sets the item internal back-end reference.
 func (i *Item) SetBackend(b *Backend) {
 	i.backend = b
 }
