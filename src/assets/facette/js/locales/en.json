@@ -223,7 +223,6 @@
     "label.separator_comma": "separated by comma",
     "label.series": "Series",
     "label.series_add": "Add series",
-    "label.series_autoname": "Auto-name",
     "label.series_consolidate": "Consolidation",
     "label.series_consolidate_interpolate": "Interpolate missing plots",
     "label.series_consolidate_select": "Select a consolidation…",

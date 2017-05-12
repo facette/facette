@@ -223,7 +223,6 @@
     "label.separator_comma": "séparé par des virgules",
     "label.series": "Séries",
     "label.series_add": "Ajouter une série",
-    "label.series_autoname": "Nommage automatique",
     "label.series_consolidate": "Consolidation",
     "label.series_consolidate_interpolate": "Interpoler les points manquants",
     "label.series_consolidate_select": "Sélectionnez une consolidation…",

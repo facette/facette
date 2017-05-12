@@ -24,7 +24,6 @@
 						<div class="formblock">
 							<button ng-click="mergeGroup(true)" ng-disabled="selected.length <= 1" ng-show="selectedGroup.length === 0 || selectedGroup.length != selected.length"><span class="fa fa-object-group"></span> {{ 'label.series_group' | translate }}</button>
 							<button ng-click="mergeGroup(false)" ng-show="selectedGroup.length > 0 && selectedGroup.length === selected.length"><span class="fa fa-object-ungroup"></span> {{ 'label.series_ungroup' | translate }}</button>
-							<button ng-click="autonameSeries(true)"><span class="fa fa-magic"></span> {{ 'label.series_autoname' | translate }}</button>
 						</div>
 					</div>
 
