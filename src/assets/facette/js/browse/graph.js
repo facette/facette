@@ -33,6 +33,10 @@ app.controller('BrowseGraphController', function($location, $rootScope, $routePa
 
         $rootScope.$emit('ResetTimeRange');
 
+        if (angular.equals($location.search(), {})) {
+            return;
+        }
+
         $location.skipReload()
             .search('start', $scope.startTime)
             .search('end', $scope.endTime)
