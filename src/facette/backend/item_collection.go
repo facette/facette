@@ -153,6 +153,7 @@ func (c *Collection) Expand(attrs maputil.Map) error {
 			attrs := maputil.Map{}
 			attrs.Merge(c.Attributes, true)
 			attrs.Merge(g.Attributes, true)
+			attrs.Merge(entry.Attributes, true)
 
 			opts := maputil.Map{}
 			opts.Merge(g.Options, true)
