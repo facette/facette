@@ -256,7 +256,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
             return;
         }
 
-        $scope.series[this.id] = typeof data.originalObject == 'string' ?
+        $scope.series.entries[$scope.seriesCurrent][this.id] = typeof data.originalObject == 'string' ?
             data.originalObject : data.originalObject.value;
 
         var next;
@@ -328,28 +328,25 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
         }
 
         // Set series as auto-named
-        var series = {
-            origin: $scope.series.origin,
-            source: $scope.series.source,
-            metric: $scope.series.metric,
-            autoname: true
-        };
+        $scope.series.entries.map(function(entry) {
+            entry.autoname = true;
 
-        if ($scope.series.index) {
-            var seriesOrig = $scope.item.groups[$scope.series.index[0]].series[$scope.series.index[1]];
-            seriesOrig = angular.extend(seriesOrig, series);
+            return entry;
+        });
+
+        if ($scope.series.index !== undefined) {
+            $scope.item.groups[$scope.series.index].series = angular.copy($scope.series.entries);
+            $scope.resetSeries(false, true);
         } else {
-            $scope.item.groups.push({series: [series]});
+            $scope.item.groups.push({series: $scope.series.entries});
+            $scope.resetSeries(false, false);
         }
 
         // Update template status
         updateTemplate();
 
-        // Reset series form
-        $scope.resetSeries();
-
         // Trigger series auto-naming
-        if (series.source.startsWith(groupPrefix) || series.metric.startsWith(groupPrefix)) {
+        if ($scope.series.hasGroups) {
             fetchGroups(function() { $scope.autonameSeries(false); });
         } else {
             $scope.autonameSeries(false);
@@ -433,24 +430,29 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
         });
     };
 
-    $scope.editSeries = function(group, series) {
-        var idx1 = $scope.item.groups.indexOf(group);
-        if (idx1 == -1) {
+    $scope.editSeries = function(group) {
+        var idx = $scope.item.groups.indexOf(group);
+        if (idx == -1) {
             return;
         }
 
-        var idx2 = group.series.indexOf(series);
-        if (idx2 == -1) {
-            return;
-        }
+        $scope.series = {index: idx, entries: angular.copy($scope.item.groups[idx].series)};
+        $scope.seriesCurrent = 0;
+        $scope.seriesTotal = group.series.length;
 
-        $scope.series = angular.extend({index: [idx1, idx2]}, series);
+        $scope.switchSeries(0);
+    };
 
-        $scope.$broadcast('angucomplete-alt:changeInput', 'origin', $scope.series.origin);
-        $scope.$broadcast('angucomplete-alt:changeInput', 'source', $scope.resolveGroup($scope.series.source));
-        $scope.$broadcast('angucomplete-alt:changeInput', 'metric', $scope.resolveGroup($scope.series.metric));
+    $scope.switchSeries = function(delta) {
+        $scope.seriesCurrent += delta;
 
-        $scope.$applyAsync(function() { angular.element('#metric_value').select(); });
+        var series = $scope.series.entries[$scope.seriesCurrent];
+
+        $scope.$broadcast('angucomplete-alt:changeInput', 'origin', series.origin);
+        $scope.$broadcast('angucomplete-alt:changeInput', 'source', $scope.resolveGroup(series.source));
+        $scope.$broadcast('angucomplete-alt:changeInput', 'metric', $scope.resolveGroup(series.metric));
+
+        $timeout(function() { angular.element('#metric_value').select(); }, 0);
     };
 
     $scope.autonameSeries = function(force) {
@@ -608,14 +610,27 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
         return input;
     };
 
-    $scope.resetSeries = function(init) {
+    $scope.resetSeries = function(init, update) {
         init = typeof init == 'boolean' ? init : false;
+        update = typeof update == 'boolean' ? update : false;
 
         if (init) {
             $scope.series = {};
         } else {
-            delete $scope.series.metric;
             delete $scope.series.index;
+            delete $scope.seriesTotal;
+
+            if (update) {
+                delete $scope.series.entries;
+
+                $scope.$broadcast('angucomplete-alt:clearInput', 'origin');
+                $scope.$broadcast('angucomplete-alt:clearInput', 'source');
+            } else {
+                delete $scope.series.entries[0].metric;
+            }
+
+            $scope.series.valid = false;
+            $scope.seriesCurrent = 0;
 
             $scope.$broadcast('angucomplete-alt:clearInput', 'metric');
             $scope.$applyAsync(function() { angular.element('#metric_value').focus(); });
@@ -697,6 +712,27 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
 
         $scope.selected = selected;
         $scope.selectedGroup = selectedGroup;
+    }, true);
+
+    $scope.$watch('series', function(newValue, oldValue) {
+        if (newValue === oldValue || !$scope.series.entries) {
+            return;
+        }
+
+        angular.extend($scope.series, {
+            hasGroups: false,
+            valid: true
+        });
+
+        $scope.series.entries.forEach(function(entry) {
+            if (entry.source.startsWith(groupPrefix) || entry.metric.startsWith(groupPrefix)) {
+                $scope.series.hasGroups = true;
+            }
+
+            if (!entry.origin || !entry.source || !entry.metric) {
+                $scope.series.valid = false;
+            }
+        });
     }, true);
 
     // Initialize scope
@@ -818,7 +854,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
                 {name: 'Percent', value: graphStackModePercent}
             ];
 
-            $scope.resetSeries(true);
+            $scope.resetSeries(true, true);
 
             // Restore or set main options
             var applyOptions = function(list, key) {

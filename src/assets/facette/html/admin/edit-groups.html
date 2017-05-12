@@ -19,7 +19,7 @@
 
 				<list ng-show="state == stateOK && item.patterns && item.patterns.length > 0">
 					<div as-sortable="listSortControl" ng-model="item.patterns">
-						<listrow as-sortable-item="" ng-class="{active: pattern.index === $index, locked: pattern.index !== undefined && pattern.index !== $index}" ng-repeat="(idx, p) in item.patterns track by unique(idx, p)">
+						<listrow as-sortable-item="" ng-class="{active: pattern.index === $index, locked: pattern.index !== undefined && pattern.index !== $index}" ng-click="editPattern(p)" ng-repeat="(idx, p) in item.patterns track by unique(idx, p)">
 							<listcolumn class="handle">
 								<span as-sortable-item-handle="" class="fa fa-ellipsis-v"></span>
 							</listcolumn>
@@ -28,7 +28,6 @@
 									<div class="name">{{ p }}</div>
 									<div class="actions">
 										<menu>
-											<menuitem href="" icon="pencil" title="{{ 'label.patterns_edit' | translate }}" type="button" ng-click="editPattern(p)"></menuitem>
 											<menuitem href="" icon="info-circle" title="{{ 'label.patterns_test' | translate }}" type="button" tooltip-data="p" tooltip-formatter="testPattern" tooltip-position="bottom" ng-if="p.indexOf('glob:') === 0 || p.indexOf('regexp:') === 0"></menuitem>
 										</menu>
 									</div>
@@ -36,7 +35,7 @@
 							</listcolumn>
 							<listcolumn class="actions">
 								<menu>
-									<menuitem href="" icon="times-circle" title="{{ 'label.patterns_remove' | translate }}" type="button" ng-click="remove(item.patterns, p)"></menuitem>
+									<menuitem href="" icon="times-circle" title="{{ 'label.patterns_remove' | translate }}" type="button" ng-click="$event.stopPropagation(); remove(item.patterns, p)"></menuitem>
 								</menu>
 							</listcolumn>
 						</listrow>

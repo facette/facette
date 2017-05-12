@@ -25,12 +25,12 @@
 
 					<list ng-show="state == stateOK && item.entries && item.entries.length > 0">
 						<div as-sortable="listSortControl" ng-model="item.entries">
-							<listrow as-sortable-item="" ng-class="{active: graph.index === $index || graphEntryEdit === e, disabled: e.options && e.options.enabled === false, locked: graph.index !== undefined && graph.index !== $index || graphEntryEdit && graphEntryEdit !== e}" ng-repeat="e in item.entries">
+							<listrow as-sortable-item="" ng-class="{active: graph.index === $index || graphEntryEdit === e, disabled: e.options && e.options.enabled === false, locked: graph.index !== undefined && graph.index !== $index || graphEntryEdit && graphEntryEdit !== e}" ng-click="editGraph(e)" ng-repeat="e in item.entries">
 								<listcolumn class="handle">
 									<span as-sortable-item-handle="" class="fa fa-ellipsis-v"></span>
 								</listcolumn>
 								<listcolumn class="toggle">
-									<span class="toggle fa" ng-class="{'fa-toggle-on': !e.options || e.options.enabled === true || e.options.enabled === undefined, 'fa-toggle-off': e.options && e.options.enabled === false}" ng-click="toggleGraph(e)"></span>
+									<span class="toggle fa" ng-class="{'fa-toggle-on': !e.options || e.options.enabled === true || e.options.enabled === undefined, 'fa-toggle-off': e.options && e.options.enabled === false}" ng-click="$event.stopPropagation(); toggleGraph(e)"></span>
 								</listcolumn>
 								<listcolumn class="main expand">
 									<div class="row">
@@ -38,8 +38,8 @@
 										<div class="note error" ng-if="graphFetched && !graphData[e.graph]"><span class="fa fa-warning"></span> {{ 'mesg.items_not_found' | translate }}</div>
 										<div class="actions">
 											<menu>
-												<menuitem href="" icon="cog" title="{{ 'label.graphs_manage' | translate }}" type="button" ng-click="editGraphEntry(e)"></menuitem>
-												<menuitem href="{{ ::baseURL }}admin/graphs/{{ e.graph }}" icon="pencil" title="{{ 'label.graphs_edit' | translate }}" type="button" ng-click="editGraph(e)"></menuitem>
+												<menuitem href="" icon="cog" title="{{ 'label.graphs_manage' | translate }}" type="button" ng-click="$event.stopPropagation(); editGraphEntry(e)"></menuitem>
+												<menuitem href="{{ ::baseURL }}admin/graphs/{{ e.graph }}" icon="arrow-circle-right" title="{{ 'label.graphs_goto' | translate }}" type="button"></menuitem>
 											</menu>
 										</div>
 									</div>
@@ -51,7 +51,7 @@
 								</listcolumn>
 								<listcolumn class="actions">
 									<menu>
-										<menuitem href="" icon="times-circle" title="{{ 'label.graphs_remove' | translate }}" type="button" ng-click="remove(item.entries, e)"></menuitem>
+										<menuitem href="" icon="times-circle" title="{{ 'label.graphs_remove' | translate }}" type="button" ng-click="$event.stopPropagation(); remove(item.entries, e)"></menuitem>
 									</menu>
 								</listcolumn>
 							</listrow>
@@ -226,8 +226,7 @@
 							<div class="name">{{ i.name }}</div>
 							<div class="actions">
 								<menu>
-									<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ i.id }}" icon="pencil" title="{{ 'label.' + section + '_edit' | translate }}" type="button"></menuitem>
-									<menuitem href="{{ ::baseURL }}browse/{{ section }}/{{ i.id }}" icon="arrow-circle-right" title="{{ 'label.' + section + '_goto' | translate }}" type="button"></menuitem>
+									<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ i.id }}" icon="arrow-circle-right" title="{{ 'label.' + section + '_goto' | translate }}" type="button"></menuitem>
 								</menu>
 							</div>
 						</div>

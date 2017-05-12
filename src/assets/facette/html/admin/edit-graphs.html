@@ -33,11 +33,11 @@
 
 					<list ng-show="state == stateOK && item.groups && item.groups.length > 0">
 						<div as-sortable="listSortControl" ng-model="item.groups">
-							<listrow as-sortable-item="" ng-class="{active: series.index[0] === $index, locked: series.index[0] !== undefined && series.index[0] !== $index, selected: g.selected}" ng-repeat="g in item.groups">
+							<listrow as-sortable-item="" ng-class="{active: series.index === $index, locked: series.index !== undefined && series.index !== $index, selected: g.selected}" ng-click="editSeries(g)" ng-repeat="g in item.groups">
 								<listcolumn class="handle">
 									<span as-sortable-item-handle="" class="fa fa-ellipsis-v"></span>
 								</listcolumn>
-								<listcolumn class="checkbox">
+								<listcolumn class="checkbox" ng-click="$event.stopPropagation()">
 									<input id="item{{ $index }}" type="checkbox" ng-model="g.selected">
 									<label class="empty" for="item{{ $index }}" tabindex="0"></label>
 								</listcolumn>
@@ -47,7 +47,7 @@
 										<div class="name">{{ g.name || (g.series.length == 1 ? g.series[0].name : '&nbsp;') }}</div>
 										<div class="actions">
 											<menu>
-												<menuitem href="" icon="cog" title="{{ 'label.series_group_edit' | translate }}" type="button" ng-click="editGroup(g)"></menuitem>
+												<menuitem href="" icon="cog" title="{{ 'label.series_group_edit' | translate }}" type="button" ng-click="$event.stopPropagation(); editGroup(g)"></menuitem>
 											</menu>
 										</div>
 									</div>
@@ -61,17 +61,16 @@
 										</div>
 										<div class="actions">
 											<menu>
-												<menuitem href="" icon="pencil" title="{{ 'label.series_edit' | translate }}" type="button" ng-click="editSeries(g, s)"></menuitem>
-												<menuitem href="" icon="times" title="{{ 'label.series_remove' | translate }}" type="button" ng-click="remove(g.series, s)"></menuitem>
+												<menuitem href="" icon="times" title="{{ 'label.series_remove' | translate }}" type="button" ng-click="$event.stopPropagation(); remove(g.series, s)"></menuitem>
 											</menu>
 										</div>
 									</div>
 								</listcolumn>
 								<listcolumn class="actions">
 									<menu>
-										<menuitem href="" icon="caret-square-o-down" title="{{ 'label.groups_expand' | translate }}" type="button" ng-click="expandGroup(g, true)" ng-show="g.series.length == 1 && g.series[0].expansion !== undefined"></menuitem>
-										<menuitem href="" icon="caret-square-o-up" title="{{ 'label.groups_collapse' | translate }}" type="button" ng-click="expandGroup(g, false)" ng-show="g.series.length == 1 && g.series[0].expanded !== undefined"></menuitem>
-										<menuitem href="" icon="times-circle" title="{{ 'label.groups_remove' | translate }}" type="button" ng-click="remove(item.groups, g)"></menuitem>
+										<menuitem href="" icon="caret-square-o-down" title="{{ 'label.groups_expand' | translate }}" type="button" ng-click="$event.stopPropagation(); expandGroup(g, true)" ng-show="g.series.length == 1 && g.series[0].expansion !== undefined"></menuitem>
+										<menuitem href="" icon="caret-square-o-up" title="{{ 'label.groups_collapse' | translate }}" type="button" ng-click="$event.stopPropagation(); expandGroup(g, false)" ng-show="g.series.length == 1 && g.series[0].expanded !== undefined"></menuitem>
+										<menuitem href="" icon="times-circle" title="{{ 'label.groups_remove' | translate }}" type="button" ng-click="$event.stopPropagation(); remove(item.groups, g)"></menuitem>
 									</menu>
 								</listcolumn>
 							</listrow>
@@ -80,7 +79,7 @@
 				</column>
 
 				<column class="side">
-					<h2>{{ 'label.series_define' | translate }}</h2>
+					<h2>{{ 'label.series_define' | translate }} <span ng-show="series.index !== undefined && seriesTotal > 1">– {{ 'label.series_paging' | translate:{current: seriesCurrent + 1, total: seriesTotal} }}</span></h2>
 
 					<div class="formblock">
 						<label>{{ 'label.origin' | translate }}</label>
@@ -93,9 +92,14 @@
 						<angucomplete-alt id="metric" pause="250" input-changed="changedSeries" selected-object="selectSeries" remote-api-handler="seriesMetrics" title-field="name" minlength="1" focus-first="true" match-class="highlight" override-suggestions="true" text-no-results="{{ (seriesTemplate.metric ? 'mesg.complete_found_template' : 'mesg.complete_no_match') | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
 					</div>
 
-					<div class="formblock">
-						<button ng-click="setSeries()" ng-disabled="!series.origin || !series.source || !series.metric">{{ (series.index === undefined ? 'label.series_add' : 'label.series_update') | translate }}</button>
-						<button class="danger" ng-click="resetSeries()" ng-show="series.index !== undefined">{{ 'label.cancel' | translate }}</button>
+					<div class="formblock" ng-class="{actions: series.index !== undefined && seriesTotal > 1}">
+						<button ng-click="setSeries()" ng-disabled="!series.valid">{{ (series.index === undefined ? 'label.series_add' : 'label.series_update') | translate }}</button>
+						<button class="danger" ng-click="resetSeries(false, true)" ng-show="series.index !== undefined">{{ 'label.cancel' | translate }}</button>
+
+						<div class="switch" ng-show="series.index !== undefined && seriesTotal > 1">
+							<button type="button" ng-click="switchSeries(-1)" ng-disabled="seriesCurrent === 0"><span class="fa fa-chevron-left"></span></button>
+							<button type="button" ng-click="switchSeries(1)" ng-disabled="seriesCurrent === (seriesTotal - 1)"><span class="fa fa-chevron-right"></span></button>
+						</div>
 					</div>
 				</column>
 			</columns>
@@ -254,8 +258,7 @@
 							<div class="name">{{ i.name }}</div>
 							<div class="actions">
 								<menu>
-									<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ i.id }}" icon="pencil" title="{{ 'label.' + section + '_edit' | translate }}" type="button"></menuitem>
-									<menuitem href="{{ ::baseURL }}browse/{{ section }}/{{ i.id }}" icon="arrow-circle-right" title="{{ 'label.' + section + '_goto' | translate }}" type="button"></menuitem>
+									<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ i.id }}" icon="arrow-circle-right" title="{{ 'label.' + section + '_goto' | translate }}" type="button"></menuitem>
 								</menu>
 							</div>
 						</div>

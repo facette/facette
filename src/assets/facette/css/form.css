@@ -233,16 +233,13 @@ textarea {
 }
 
 .formblock.actions {
-	text-align: right;
-}
-
-.ngdialog-content .formblock.actions {
-	margin-bottom: 0;
+	display: flex;
+	justify-content: right;
 }
 
 .formblock.actions .switch {
-	float: left;
-	margin-right: 3rem;
+	flex: 1;
+	text-align: right;
 }
 
 .formblock.actions .switch button {
@@ -257,6 +254,14 @@ textarea {
 .formblock.actions .switch button:last-child {
 	border-top-left-radius: 0;
 	border-bottom-left-radius: 0;
+}
+
+.ngdialog-content .formblock.actions {
+	margin-bottom: 0;
+}
+
+.ngdialog-content .formblock.actions .switch {
+	text-align: left;
 }
 
 .column label,

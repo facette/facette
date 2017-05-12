@@ -44,6 +44,11 @@ table.list .listrow:last-child .listcolumn {
 	color: #fff;
 }
 
+.listrow.active .listcolumn.checkbox label,
+.listrow.selected .listcolumn.checkbox label {
+	opacity: 0.5;
+}
+
 .listrow.active,
 .listrow.selected,
 .listrow.active + .listrow,
@@ -118,7 +123,8 @@ thead .listcolumn.heading {
 }
 
 .listrow.active .listcolumn.handle .fa,
-.listrow.locked .listcolumn.handle .fa {
+.listrow.locked .listcolumn.handle .fa,
+.listrow.active .listcolumn.checkbox label {
 	visibility: hidden;
 }
 
