@@ -6,18 +6,7 @@ app.controller('ShowGraphController', function($location, $rootScope, $routePara
         options: browseCollection.getGlobalOptions(null)
     };
 
-    $scope.$watch('graph.options', function(newValue, oldValue) {
-        if (angular.equals(newValue, oldValue)) {
-            return;
-        }
-
-        $location.skipReload()
-            .search('start', newValue.start_time || null)
-            .search('end', newValue.end_time || null)
-            .search('time', newValue.time || null)
-            .search('range', newValue.range || null)
-            .replace();
-    }, true);
+    browseCollection.watchGraphOptions($scope, 'graph.options');
 
     // Attach events
     var unregisterPromptTimerange = $rootScope.$on('PromptTimeRange', function(e, callback, data) {

@@ -1,4 +1,4 @@
-app.factory('browseCollection', function($routeParams, $timeout, library, storage) {
+app.factory('browseCollection', function($location, $routeParams, $timeout, library, storage) {
     return {
         getGlobalOptions: function(scope) {
             var options = {};
@@ -74,6 +74,21 @@ app.factory('browseCollection', function($routeParams, $timeout, library, storag
             });
 
             storage.set('browse-collection_tree', 'state', state);
+        },
+
+        watchGraphOptions: function(scope, key) {
+            scope.$watch(key, function(newValue, oldValue) {
+                if (angular.equals(newValue, oldValue)) {
+                    return;
+                }
+
+                $location.skipReload()
+                    .search('start', newValue.start_time || null)
+                    .search('end', newValue.end_time || null)
+                    .search('time', newValue.time || null)
+                    .search('range', newValue.range || null)
+                    .replace();
+            }, true);
         }
     };
 });

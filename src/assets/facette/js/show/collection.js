@@ -24,6 +24,8 @@ app.controller('ShowCollectionController', function($rootScope, $routeParams, $s
 
         $scope.graph = graph;
 
+        browseCollection.watchGraphOptions($scope, 'graph.options');
+
         // Set root scope loaded (no '$includeContentLoaded' event triggered on 'show' route)
         $rootScope.loaded = true;
     });
