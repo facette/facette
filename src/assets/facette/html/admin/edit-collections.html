@@ -74,9 +74,9 @@
 				</column>
 
 				<column class="side" ng-if="graphEntryEdit">
-					<h2 ng-if="graphData[graphEntryEdit.id].template">{{ 'label.templates_attrs' | translate }}</h2>
+					<h2 ng-if="graphData[graphEntryEdit.graph].template">{{ 'label.templates_attrs' | translate }}</h2>
 
-					<div class="formblock" ng-if="graphData[graphEntryEdit.id].template">
+					<div class="formblock" ng-if="graphData[graphEntryEdit.graph].template">
 						<table class="keylist">
 							<tbody>
 								<tr ng-repeat="(key, _) in entryAttrs">
@@ -91,19 +91,19 @@
 
 					<div class="formblock">
 						<label>{{ 'label.range' | translate }}</label>
-						<input class="small" type="text" placeholder="{{ graphData[graphEntryEdit.id].options.range }}" ng-model="entryOptions.range">
+						<input class="small" type="text" placeholder="{{ graphData[graphEntryEdit.graph].options.range }}" ng-model="entryOptions.range">
 
 						<label>{{ 'label.graphs_sample' | translate }}</label>
-						<input class="small" type="number" placeholder="{{ graphData[graphEntryEdit.id].options.sample }}" ng-model="entryOptions.sample">
+						<input class="small" type="number" placeholder="{{ graphData[graphEntryEdit.graph].options.sample }}" ng-model="entryOptions.sample">
 
 						<label>{{ 'label.graphs_constants' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
-						<input class="small" type="text" placeholder="{{ graphData[graphEntryEdit.id].options.constants.join(',') }}" ng-list="," ng-model="entryOptions.constants">
+						<input class="small" type="text" placeholder="{{ graphData[graphEntryEdit.graph].options.constants.join(',') }}" ng-list="," ng-model="entryOptions.constants">
 
 						<label>{{ 'label.graphs_percentiles' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
-						<input class="small" type="text" placeholder="{{ graphData[graphEntryEdit.id].options.percentiles.join(',') }}" ng-list="," ng-model="entryOptions.percentiles">
+						<input class="small" type="text" placeholder="{{ graphData[graphEntryEdit.graph].options.percentiles.join(',') }}" ng-list="," ng-model="entryOptions.percentiles">
 
 						<label>{{ 'label.refresh_interval' | translate }} <span class="note">{{ 'label.refresh_interval_unit' | translate }}</span></label>
-						<input class="small" type="number" placeholder="{{ graphData[graphEntryEdit.id].options.refresh_interval }}" ng-model="entryOptions.refresh_interval">
+						<input class="small" type="number" placeholder="{{ graphData[graphEntryEdit.graph].options.refresh_interval }}" ng-model="entryOptions.refresh_interval">
 
 						<label>{{ 'label.graphs_misc' | translate }}</label>
 						<input id="fold" type="checkbox" tabindex="0" ng-model="entryOptions.folded">
