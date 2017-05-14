@@ -13,5 +13,13 @@ func (m Map) Value() (driver.Value, error) {
 
 // Scan unmarshals the keys mapping retrieved from SQL drivers.
 func (m *Map) Scan(v interface{}) error {
-	return json.Unmarshal(v.([]byte), m)
+	switch v.(type) {
+	case []byte:
+		return json.Unmarshal(v.([]byte), m)
+
+	case string:
+		return json.Unmarshal([]byte(v.(string)), m)
+	}
+
+	return ErrUnscannableValue
 }

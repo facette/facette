@@ -15,12 +15,12 @@ type Collection struct {
 	Item
 	Entries    []*CollectionEntry `json:"entries,omitempty"`
 	Link       *Collection        `json:"-"`
-	LinkID     *string            `gorm:"column:link;type:varchar(36);default:NULL" json:"link,omitempty"`
+	LinkID     *string            `gorm:"column:link;type:varchar(36) DEFAULT NULL REFERENCES collections (id) ON DELETE CASCADE ON UPDATE CASCADE" json:"link,omitempty"`
 	Attributes maputil.Map        `gorm:"type:text" json:"attributes,omitempty"`
 	Alias      *string            `gorm:"type:varchar(128);unique_index" json:"alias,omitempty"`
 	Options    maputil.Map        `gorm:"type:text" json:"options,omitempty"`
 	Parent     *Collection        `json:"-"`
-	ParentID   *string            `gorm:"column:parent;type:varchar(36);default:NULL" json:"parent,omitempty"`
+	ParentID   *string            `gorm:"column:parent;type:varchar(36) DEFAULT NULL REFERENCES collections (id) ON DELETE SET NULL ON UPDATE SET NULL" json:"parent,omitempty"`
 	Template   bool               `gorm:"not null" json:"template"`
 
 	resolved bool
@@ -244,11 +244,11 @@ func (c *Collection) treeEntry() *CollectionTreeEntry {
 
 // CollectionEntry represents a back-end collection entry instance.
 type CollectionEntry struct {
-	Index        int         `gorm:"type:int;not null;primary_key" json:"-"`
+	Index        int         `gorm:"type:int NOT NULL;primary_key" json:"-"`
 	Collection   *Collection `json:"-"`
-	CollectionID string      `gorm:"column:collection;type:varchar(36);not null;primary_key" json:"-"`
+	CollectionID string      `gorm:"column:collection;type:varchar(36) NOT NULL REFERENCES collections (id) ON DELETE CASCADE ON UPDATE CASCADE;primary_key" json:"-"`
 	Graph        *Graph      `json:"-"`
-	GraphID      string      `gorm:"column:graph;type:varchar(36);not null;primary_key" json:"graph"`
+	GraphID      string      `gorm:"column:graph;type:varchar(36) NOT NULL REFERENCES graphs (id) ON DELETE CASCADE ON UPDATE CASCADE;primary_key" json:"graph"`
 	Attributes   maputil.Map `gorm:"type:text" json:"attributes,omitempty"`
 	Options      maputil.Map `gorm:"type:text" json:"options,omitempty"`
 }

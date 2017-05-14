@@ -40,19 +40,24 @@ func NewBackend(config *maputil.Map, log *logger.Logger) (*Backend, error) {
 		&SourceGroup{},
 		&MetricGroup{},
 		&Graph{},
-		&CollectionEntry{},
 		&Collection{},
+		&CollectionEntry{},
 	); err != nil {
 		return nil, err
 	}
 
-	storage.
-		AddForeignKey(&Graph{}, "link", "graphs(id)", "CASCADE", "CASCADE").
-		AddForeignKey(&CollectionEntry{}, "collection", "collections(id)", "CASCADE", "CASCADE").
-		AddForeignKey(&CollectionEntry{}, "graph", "graphs(id)", "CASCADE", "CASCADE").
-		AddForeignKey(&Collection{}, "link", "collections(id)", "CASCADE", "CASCADE").
-		AddForeignKey(&Collection{}, "parent", "collections(id)", "SET NULL", "SET NULL").
-		Association(&Collection{}, "Entries")
+	// If driver is 'mysql', handle foreign separately as MySQL parses but ignores inlined in column definitions
+	// (see https://dev.mysql.com/doc/refman/5.7/en/create-table-foreign-keys.html)
+	if driver, err := config.GetString("driver", ""); err == nil && driver == "mysql" {
+		storage.
+			AddForeignKey(&Graph{}, "link", "graphs(id)", "CASCADE", "CASCADE").
+			AddForeignKey(&CollectionEntry{}, "collection", "collections(id)", "CASCADE", "CASCADE").
+			AddForeignKey(&CollectionEntry{}, "graph", "graphs(id)", "CASCADE", "CASCADE").
+			AddForeignKey(&Collection{}, "link", "collections(id)", "CASCADE", "CASCADE").
+			AddForeignKey(&Collection{}, "parent", "collections(id)", "SET NULL", "SET NULL")
+	}
+
+	storage.Association(&Collection{}, "Entries")
 
 	return &Backend{
 		config:  config,

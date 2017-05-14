@@ -15,4 +15,6 @@ var (
 	ErrInvalidPriority = errors.New("invalid priority")
 	// ErrUnresolvableItem represents an unresolvable item error.
 	ErrUnresolvableItem = errors.New("unresolvable item")
+	// ErrUnscannableValue represents an unscannable value error.
+	ErrUnscannableValue = errors.New("unscannable value")
 )

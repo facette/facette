@@ -34,7 +34,7 @@ func (d sqliteDriver) Open() (*sql.DB, error) {
 
 func (d sqliteDriver) Init(db *gorm.DB) error {
 	// Enable 'foreign_key' pragma
-	return db.Raw("PRAGMA foreign_keys = ON").Error
+	return db.Exec("PRAGMA foreign_keys = ON").Error
 }
 
 func (d sqliteDriver) NormalizeError(err error) error {

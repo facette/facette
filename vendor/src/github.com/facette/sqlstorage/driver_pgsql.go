@@ -14,8 +14,9 @@ import (
 )
 
 const (
-	defaultPgsqlDriverHost = "localhost"
-	defaultPgsqlDriverPort = 5432
+	defaultPgsqlDriverHost    = "localhost"
+	defaultPgsqlDriverPort    = 5432
+	defaultPgsqlDriverSSLMode = "disable"
 )
 
 // pgsqlDriver implements the database driver interface for PostgreSQL.
@@ -25,6 +26,7 @@ type pgsqlDriver struct {
 	user     string
 	password string
 	dbName   string
+	sslMode  string
 }
 
 func (d pgsqlDriver) Name() string {
@@ -33,12 +35,13 @@ func (d pgsqlDriver) Name() string {
 
 func (d pgsqlDriver) Open() (*sql.DB, error) {
 	dsn := fmt.Sprintf(
-		"%s=%v %s=%v %s=%v %s=%v %s=%v",
+		"%s=%v %s=%v %s=%v %s=%v %s=%v %s=%v",
 		"host", d.host,
 		"port", d.port,
 		"user", d.user,
 		"password", d.password,
 		"dbname", d.dbName,
+		"sslmode", d.sslMode,
 	)
 
 	return sql.Open("postgres", dsn)
@@ -119,6 +122,10 @@ func init() {
 
 		if d.dbName, err = settings.GetString("dbname", name); err != nil {
 			return nil, errors.Wrap(err, "invalid \"dbname\" setting")
+		}
+
+		if d.sslMode, err = settings.GetString("sslmode", defaultPgsqlDriverSSLMode); err != nil {
+			return nil, errors.Wrap(err, "invalid \"sslmode\" setting")
 		}
 
 		return d, nil

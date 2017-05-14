@@ -46,12 +46,12 @@ func (MetricGroup) TableName() string {
 type GroupPatterns []string
 
 // Value marshals the group patterns for compatibility with SQL drivers.
-func (l GroupPatterns) Value() (driver.Value, error) {
-	data, err := json.Marshal(l)
+func (gp GroupPatterns) Value() (driver.Value, error) {
+	data, err := json.Marshal(gp)
 	return data, err
 }
 
 // Scan unmarshals the group patterns retrieved from SQL drivers.
-func (l *GroupPatterns) Scan(v interface{}) error {
-	return json.Unmarshal(v.([]byte), l)
+func (gp *GroupPatterns) Scan(v interface{}) error {
+	return scanValue(v, gp)
 }

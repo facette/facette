@@ -34,7 +34,7 @@
 		{
 			"importpath": "github.com/facette/maputil",
 			"repository": "https://github.com/facette/maputil",
-			"revision": "d02d4f3330e51e56e7902c23ec6dad5c5b8ed4a3",
+			"revision": "4ad98bafbb22d1ecd747cf7e439b434e8241f277",
 			"branch": "master"
 		},
 		{
@@ -52,7 +52,7 @@
 		{
 			"importpath": "github.com/facette/sqlstorage",
 			"repository": "https://github.com/facette/sqlstorage",
-			"revision": "19120a480baf21ac9c25130ba41f6ade8997e617",
+			"revision": "9226812a7e30d6288914a2bb45937e22a184e55c",
 			"branch": "master"
 		},
 		{

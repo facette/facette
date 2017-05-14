@@ -41,14 +41,14 @@ func (p *Provider) BeforeSave(scope *gorm.Scope) error {
 type ProviderFilters []ProviderFilter
 
 // Value marshals the provider filter entries for compatibility with SQL drivers.
-func (l ProviderFilters) Value() (driver.Value, error) {
-	data, err := json.Marshal(l)
+func (pf ProviderFilters) Value() (driver.Value, error) {
+	data, err := json.Marshal(pf)
 	return data, err
 }
 
 // Scan unmarshals the provider filter entries retrieved from SQL drivers.
-func (l *ProviderFilters) Scan(v interface{}) error {
-	return json.Unmarshal(v.([]byte), l)
+func (pf *ProviderFilters) Scan(v interface{}) error {
+	return scanValue(v, pf)
 }
 
 // ProviderFilter represents a back-end provider filter entry instance.

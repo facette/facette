@@ -16,7 +16,7 @@ type Graph struct {
 	Item
 	Groups     SeriesGroups `gorm:"type:text;not null" json:"groups,omitempty"`
 	Link       *Graph       `json:"-"`
-	LinkID     *string      `gorm:"column:link;type:varchar(36)" json:"link,omitempty"`
+	LinkID     *string      `gorm:"column:link;type:varchar(36) DEFAULT NULL REFERENCES graphs (id) ON DELETE CASCADE ON UPDATE CASCADE" json:"link,omitempty"`
 	Attributes maputil.Map  `gorm:"type:text" json:"attributes,omitempty"`
 	Alias      *string      `gorm:"type:varchar(128);unique_index" json:"alias,omitempty"`
 	Options    maputil.Map  `gorm:"type:text" json:"options,omitempty"`
@@ -127,14 +127,14 @@ func (g *Graph) Resolve() error {
 type SeriesGroups []*SeriesGroup
 
 // Value marshals the series groups for compatibility with SQL drivers.
-func (l SeriesGroups) Value() (driver.Value, error) {
-	data, err := json.Marshal(l)
+func (sg SeriesGroups) Value() (driver.Value, error) {
+	data, err := json.Marshal(sg)
 	return data, err
 }
 
 // Scan unmarshals the series groups retrieved from SQL drivers.
-func (l *SeriesGroups) Scan(v interface{}) error {
-	return json.Unmarshal(v.([]byte), l)
+func (sg *SeriesGroups) Scan(v interface{}) error {
+	return scanValue(v, sg)
 }
 
 // SeriesGroup represents a library graph series group entry instance.
