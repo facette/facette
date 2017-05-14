@@ -159,7 +159,7 @@ func Test_Normalize_Average(t *testing.T) {
 			{Time: time.Unix(240, 0), Value: 43},
 			{Time: time.Unix(270, 0), Value: Value(math.NaN())},
 		}},
-	}, ConsolidateAverage, t)
+	}, ConsolidateAverage, false, t)
 }
 
 func Test_Normalize_First(t *testing.T) {
@@ -200,7 +200,7 @@ func Test_Normalize_First(t *testing.T) {
 			{Time: time.Unix(240, 0), Value: 43},
 			{Time: time.Unix(270, 0), Value: Value(math.NaN())},
 		}},
-	}, ConsolidateFirst, t)
+	}, ConsolidateFirst, false, t)
 }
 
 func Test_Normalize_Last(t *testing.T) {
@@ -241,7 +241,7 @@ func Test_Normalize_Last(t *testing.T) {
 			{Time: time.Unix(240, 0), Value: 43},
 			{Time: time.Unix(270, 0), Value: Value(math.NaN())},
 		}},
-	}, ConsolidateLast, t)
+	}, ConsolidateLast, false, t)
 }
 
 func Test_Normalize_Max(t *testing.T) {
@@ -282,7 +282,7 @@ func Test_Normalize_Max(t *testing.T) {
 			{Time: time.Unix(240, 0), Value: 43},
 			{Time: time.Unix(270, 0), Value: Value(math.NaN())},
 		}},
-	}, ConsolidateMax, t)
+	}, ConsolidateMax, false, t)
 }
 
 func Test_Normalize_Min(t *testing.T) {
@@ -323,7 +323,7 @@ func Test_Normalize_Min(t *testing.T) {
 			{Time: time.Unix(240, 0), Value: 43},
 			{Time: time.Unix(270, 0), Value: Value(math.NaN())},
 		}},
-	}, ConsolidateMin, t)
+	}, ConsolidateMin, false, t)
 }
 
 func Test_Normalize_Sum(t *testing.T) {
@@ -364,8 +364,255 @@ func Test_Normalize_Sum(t *testing.T) {
 			{Time: time.Unix(240, 0), Value: 43},
 			{Time: time.Unix(270, 0), Value: Value(math.NaN())},
 		}},
-	}, ConsolidateSum, t)
+	}, ConsolidateSum, false, t)
 }
+
+func Test_Normalize_Average_Interpolate(t *testing.T) {
+	testNormalize([]Series{
+		{Step: 30, Plots: []Plot{
+			{Time: time.Unix(0, 0), Value: 4},
+			{Time: time.Unix(30, 0), Value: 27.666666666666668},
+			{Time: time.Unix(60, 0), Value: 36.666666666666664},
+			{Time: time.Unix(90, 0), Value: 25.333333333333332},
+			{Time: time.Unix(120, 0), Value: 30.666666666666668},
+			{Time: time.Unix(150, 0), Value: 24.333333333333332},
+			{Time: time.Unix(180, 0), Value: 27},
+			{Time: time.Unix(210, 0), Value: 33},
+			{Time: time.Unix(240, 0), Value: 31.333333333333332},
+			{Time: time.Unix(270, 0), Value: 26.333333333333332},
+		}},
+		{Step: 30, Plots: []Plot{
+			{Time: time.Unix(0, 0), Value: 17},
+			{Time: time.Unix(30, 0), Value: 25},
+			{Time: time.Unix(60, 0), Value: 3},
+			{Time: time.Unix(90, 0), Value: 2},
+			{Time: time.Unix(120, 0), Value: 3.5}, // Interpolated
+			{Time: time.Unix(150, 0), Value: 5},
+			{Time: time.Unix(180, 0), Value: 49},
+			{Time: time.Unix(210, 0), Value: 0},
+			{Time: time.Unix(240, 0), Value: 19},
+			{Time: time.Unix(270, 0), Value: 22},
+		}},
+		{Step: 30, Plots: []Plot{
+			{Time: time.Unix(0, 0), Value: 24},
+			{Time: time.Unix(30, 0), Value: 20}, // Interpolated
+			{Time: time.Unix(60, 0), Value: 16},
+			{Time: time.Unix(90, 0), Value: 26.5}, // Interpolated
+			{Time: time.Unix(120, 0), Value: 37},
+			{Time: time.Unix(150, 0), Value: 38.5}, // Interpolated
+			{Time: time.Unix(180, 0), Value: 40},
+			{Time: time.Unix(210, 0), Value: 41.5}, // Interpolated
+			{Time: time.Unix(240, 0), Value: 43},
+			{Time: time.Unix(270, 0), Value: Value(math.NaN())}, // Can't be interpolated
+		}},
+	}, ConsolidateAverage, true, t)
+}
+
+func Test_Normalize_First_Interpolate(t *testing.T) {
+	testNormalize([]Series{
+		{Step: 30, Plots: []Plot{
+			{Time: time.Unix(0, 0), Value: Value(math.NaN())},
+			{Time: time.Unix(30, 0), Value: 29},
+			{Time: time.Unix(60, 0), Value: 46},
+			{Time: time.Unix(90, 0), Value: 31},
+			{Time: time.Unix(120, 0), Value: 20},
+			{Time: time.Unix(150, 0), Value: 27},
+			{Time: time.Unix(180, 0), Value: 28},
+			{Time: time.Unix(210, 0), Value: 41},
+			{Time: time.Unix(240, 0), Value: 31},
+			{Time: time.Unix(270, 0), Value: 34},
+		}},
+		{Step: 30, Plots: []Plot{
+			{Time: time.Unix(0, 0), Value: 17},
+			{Time: time.Unix(30, 0), Value: 25},
+			{Time: time.Unix(60, 0), Value: 3},
+			{Time: time.Unix(90, 0), Value: 2},
+			{Time: time.Unix(120, 0), Value: 3.5}, // Interpolated
+			{Time: time.Unix(150, 0), Value: 5},
+			{Time: time.Unix(180, 0), Value: 49},
+			{Time: time.Unix(210, 0), Value: 0},
+			{Time: time.Unix(240, 0), Value: 19},
+			{Time: time.Unix(270, 0), Value: 22},
+		}},
+		{Step: 30, Plots: []Plot{
+			{Time: time.Unix(0, 0), Value: 24},
+			{Time: time.Unix(30, 0), Value: 20}, // Interpolated
+			{Time: time.Unix(60, 0), Value: 16},
+			{Time: time.Unix(90, 0), Value: 26.5}, // Interpolated
+			{Time: time.Unix(120, 0), Value: 37},
+			{Time: time.Unix(150, 0), Value: 38.5}, // Interpolated
+			{Time: time.Unix(180, 0), Value: 40},
+			{Time: time.Unix(210, 0), Value: 41.5}, // Interpolated
+			{Time: time.Unix(240, 0), Value: 43},
+			{Time: time.Unix(270, 0), Value: Value(math.NaN())},
+		}},
+	}, ConsolidateFirst, true, t)
+}
+
+func Test_Normalize_Last_Interpolate(t *testing.T) {
+	testNormalize([]Series{
+		{Step: 30, Plots: []Plot{
+			{Time: time.Unix(0, 0), Value: 7},
+			{Time: time.Unix(30, 0), Value: 27},
+			{Time: time.Unix(60, 0), Value: 43},
+			{Time: time.Unix(90, 0), Value: 8},
+			{Time: time.Unix(120, 0), Value: 44},
+			{Time: time.Unix(150, 0), Value: 13},
+			{Time: time.Unix(180, 0), Value: 41},
+			{Time: time.Unix(210, 0), Value: 47},
+			{Time: time.Unix(240, 0), Value: 17},
+			{Time: time.Unix(270, 0), Value: 21},
+		}},
+		{Step: 30, Plots: []Plot{
+			{Time: time.Unix(0, 0), Value: 17},
+			{Time: time.Unix(30, 0), Value: 25},
+			{Time: time.Unix(60, 0), Value: 3},
+			{Time: time.Unix(90, 0), Value: 2},
+			{Time: time.Unix(120, 0), Value: 3.5}, // Interpolated
+			{Time: time.Unix(150, 0), Value: 5},
+			{Time: time.Unix(180, 0), Value: 49},
+			{Time: time.Unix(210, 0), Value: 0},
+			{Time: time.Unix(240, 0), Value: 19},
+			{Time: time.Unix(270, 0), Value: 22},
+		}},
+		{Step: 30, Plots: []Plot{
+			{Time: time.Unix(0, 0), Value: 24},
+			{Time: time.Unix(30, 0), Value: 20}, // Interpolated
+			{Time: time.Unix(60, 0), Value: 16},
+			{Time: time.Unix(90, 0), Value: 26.5}, // Interpolated
+			{Time: time.Unix(120, 0), Value: 37},
+			{Time: time.Unix(150, 0), Value: 38.5}, // Interpolated
+			{Time: time.Unix(180, 0), Value: 40},
+			{Time: time.Unix(210, 0), Value: 41.5}, // Interpolated
+			{Time: time.Unix(240, 0), Value: 43},
+			{Time: time.Unix(270, 0), Value: Value(math.NaN())},
+		}},
+	}, ConsolidateLast, true, t)
+}
+
+func Test_Normalize_Max_Interpolate(t *testing.T) {
+	testNormalize([]Series{
+		{Step: 30, Plots: []Plot{
+			{Time: time.Unix(0, 0), Value: 7},
+			{Time: time.Unix(30, 0), Value: 29},
+			{Time: time.Unix(60, 0), Value: 46},
+			{Time: time.Unix(90, 0), Value: 37},
+			{Time: time.Unix(120, 0), Value: 44},
+			{Time: time.Unix(150, 0), Value: 33},
+			{Time: time.Unix(180, 0), Value: 41},
+			{Time: time.Unix(210, 0), Value: 47},
+			{Time: time.Unix(240, 0), Value: 46},
+			{Time: time.Unix(270, 0), Value: 34},
+		}},
+		{Step: 30, Plots: []Plot{
+			{Time: time.Unix(0, 0), Value: 17},
+			{Time: time.Unix(30, 0), Value: 25},
+			{Time: time.Unix(60, 0), Value: 3},
+			{Time: time.Unix(90, 0), Value: 2},
+			{Time: time.Unix(120, 0), Value: 3.5}, // Interpolated
+			{Time: time.Unix(150, 0), Value: 5},
+			{Time: time.Unix(180, 0), Value: 49},
+			{Time: time.Unix(210, 0), Value: 0},
+			{Time: time.Unix(240, 0), Value: 19},
+			{Time: time.Unix(270, 0), Value: 22},
+		}},
+		{Step: 30, Plots: []Plot{
+			{Time: time.Unix(0, 0), Value: 24},
+			{Time: time.Unix(30, 0), Value: 20}, // Interpolated
+			{Time: time.Unix(60, 0), Value: 16},
+			{Time: time.Unix(90, 0), Value: 26.5}, // Interpolated
+			{Time: time.Unix(120, 0), Value: 37},
+			{Time: time.Unix(150, 0), Value: 38.5}, // Interpolated
+			{Time: time.Unix(180, 0), Value: 40},
+			{Time: time.Unix(210, 0), Value: 41.5}, // Interpolated
+			{Time: time.Unix(240, 0), Value: 43},
+			{Time: time.Unix(270, 0), Value: Value(math.NaN())},
+		}},
+	}, ConsolidateMax, true, t)
+}
+
+func Test_Normalize_Min_Interpolate(t *testing.T) {
+	testNormalize([]Series{
+		{Step: 30, Plots: []Plot{
+			{Time: time.Unix(0, 0), Value: 1},
+			{Time: time.Unix(30, 0), Value: 27},
+			{Time: time.Unix(60, 0), Value: 21},
+			{Time: time.Unix(90, 0), Value: 8},
+			{Time: time.Unix(120, 0), Value: 20},
+			{Time: time.Unix(150, 0), Value: 13},
+			{Time: time.Unix(180, 0), Value: 12},
+			{Time: time.Unix(210, 0), Value: 11},
+			{Time: time.Unix(240, 0), Value: 17},
+			{Time: time.Unix(270, 0), Value: 21},
+		}},
+		{Step: 30, Plots: []Plot{
+			{Time: time.Unix(0, 0), Value: 17},
+			{Time: time.Unix(30, 0), Value: 25},
+			{Time: time.Unix(60, 0), Value: 3},
+			{Time: time.Unix(90, 0), Value: 2},
+			{Time: time.Unix(120, 0), Value: 3.5}, // Interpolated
+			{Time: time.Unix(150, 0), Value: 5},
+			{Time: time.Unix(180, 0), Value: 49},
+			{Time: time.Unix(210, 0), Value: 0},
+			{Time: time.Unix(240, 0), Value: 19},
+			{Time: time.Unix(270, 0), Value: 22},
+		}},
+		{Step: 30, Plots: []Plot{
+			{Time: time.Unix(0, 0), Value: 24},
+			{Time: time.Unix(30, 0), Value: 20}, // Interpolated
+			{Time: time.Unix(60, 0), Value: 16},
+			{Time: time.Unix(90, 0), Value: 26.5}, // Interpolated
+			{Time: time.Unix(120, 0), Value: 37},
+			{Time: time.Unix(150, 0), Value: 38.5}, // Interpolated
+			{Time: time.Unix(180, 0), Value: 40},
+			{Time: time.Unix(210, 0), Value: 41.5}, // Interpolated
+			{Time: time.Unix(240, 0), Value: 43},
+			{Time: time.Unix(270, 0), Value: Value(math.NaN())},
+		}},
+	}, ConsolidateMin, true, t)
+}
+
+func Test_Normalize_Sum_Interpolate(t *testing.T) {
+	testNormalize([]Series{
+		{Step: 30, Plots: []Plot{
+			{Time: time.Unix(0, 0), Value: 8},
+			{Time: time.Unix(30, 0), Value: 83},
+			{Time: time.Unix(60, 0), Value: 110},
+			{Time: time.Unix(90, 0), Value: 76},
+			{Time: time.Unix(120, 0), Value: 92},
+			{Time: time.Unix(150, 0), Value: 73},
+			{Time: time.Unix(180, 0), Value: 81},
+			{Time: time.Unix(210, 0), Value: 99},
+			{Time: time.Unix(240, 0), Value: 94},
+			{Time: time.Unix(270, 0), Value: 79},
+		}},
+		{Step: 30, Plots: []Plot{
+			{Time: time.Unix(0, 0), Value: 17},
+			{Time: time.Unix(30, 0), Value: 25},
+			{Time: time.Unix(60, 0), Value: 3},
+			{Time: time.Unix(90, 0), Value: 2},
+			{Time: time.Unix(120, 0), Value: 3.5}, // Interpolated
+			{Time: time.Unix(150, 0), Value: 5},
+			{Time: time.Unix(180, 0), Value: 49},
+			{Time: time.Unix(210, 0), Value: 0},
+			{Time: time.Unix(240, 0), Value: 19},
+			{Time: time.Unix(270, 0), Value: 22},
+		}},
+		{Step: 30, Plots: []Plot{
+			{Time: time.Unix(0, 0), Value: 24},
+			{Time: time.Unix(30, 0), Value: 20}, // Interpolated
+			{Time: time.Unix(60, 0), Value: 16},
+			{Time: time.Unix(90, 0), Value: 26.5}, // Interpolated
+			{Time: time.Unix(120, 0), Value: 37},
+			{Time: time.Unix(150, 0), Value: 38.5}, // Interpolated
+			{Time: time.Unix(180, 0), Value: 40},
+			{Time: time.Unix(210, 0), Value: 41.5}, // Interpolated
+			{Time: time.Unix(240, 0), Value: 43},
+			{Time: time.Unix(270, 0), Value: Value(math.NaN())},
+		}},
+	}, ConsolidateSum, true, t)
+}
+
 func Test_Average(t *testing.T) {
 	expected := Series{
 		Step: 10,
@@ -400,10 +647,11 @@ func Test_Sum(t *testing.T) {
 	}
 }
 
-func testNormalize(expected []Series, consolidation int, t *testing.T) {
+func testNormalize(expected []Series, consolidation int, interpolate bool, t *testing.T) {
 	startTime := time.Unix(0, 0)
 
-	series, err := Normalize(testSeriesNormalize, startTime, startTime.Add(300*time.Second), 10, consolidation)
+	series, err := Normalize(testSeriesNormalize, startTime, startTime.Add(300*time.Second), 10, consolidation,
+		interpolate)
 	if err != nil {
 		t.Log(err)
 		t.Fail()

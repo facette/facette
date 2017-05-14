@@ -224,7 +224,7 @@ func Normalize(series []Series, startTime, endTime time.Time, sample int, consol
 			}
 
 			a := float64(plot.next.Value-plot.prev.Value) / float64(plot.next.Time.UnixNano()-plot.prev.Time.UnixNano())
-			b := float64(plot.prev.Value) - a*float64(plot.prev.Time.UnixNano())
+			b := float64(plot.prev.Value) - a*float64(plot.Time.UnixNano())
 
 			result[i].Plots[j].Value = Value(a*float64(plot.next.Time.UnixNano()) + b)
 		}
