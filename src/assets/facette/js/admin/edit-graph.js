@@ -338,7 +338,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
             $scope.item.groups[$scope.series.index].series = angular.copy($scope.series.entries);
             $scope.resetSeries(false, true);
         } else {
-            $scope.item.groups.push({series: $scope.series.entries});
+            $scope.item.groups.push({series: angular.copy($scope.series.entries)});
             $scope.resetSeries(false, false);
         }
 
@@ -614,15 +614,17 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
         init = typeof init == 'boolean' ? init : false;
         update = typeof update == 'boolean' ? update : false;
 
-        if (init) {
-            $scope.series = {};
-        } else {
+        $scope.seriesCurrent = 0;
+
+        if (init || update) {
+            $scope.series = {entries: [{origin: null, source: null, metric: null}]};
+        }
+
+        if (!init) {
             delete $scope.series.index;
             delete $scope.seriesTotal;
 
             if (update) {
-                delete $scope.series.entries;
-
                 $scope.$broadcast('angucomplete-alt:clearInput', 'origin');
                 $scope.$broadcast('angucomplete-alt:clearInput', 'source');
             } else {
@@ -630,7 +632,6 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
             }
 
             $scope.series.valid = false;
-            $scope.seriesCurrent = 0;
 
             $scope.$broadcast('angucomplete-alt:clearInput', 'metric');
             $scope.$applyAsync(function() { angular.element('#metric_value').focus(); });
@@ -725,7 +726,8 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
         });
 
         $scope.series.entries.forEach(function(entry) {
-            if (entry.source.startsWith(groupPrefix) || entry.metric.startsWith(groupPrefix)) {
+            if (entry.source && entry.source.startsWith(groupPrefix) ||
+                    entry.metric && entry.metric.startsWith(groupPrefix)) {
                 $scope.series.hasGroups = true;
             }
 
