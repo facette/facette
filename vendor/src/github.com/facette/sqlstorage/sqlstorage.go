@@ -226,7 +226,12 @@ func (s *Storage) List(v interface{}, filters map[string]interface{}, sort []str
 		rv = rv.Elem()
 	}
 
-	if _, ok := s.associations[rv.Type().Elem()]; ok {
+	rt := rv.Type().Elem()
+	for rt.Kind() == reflect.Ptr {
+		rt = rt.Elem()
+	}
+
+	if _, ok := s.associations[rt]; ok {
 		// Reset filters, orders and limits
 		tx = tx.New()
 
@@ -332,7 +337,7 @@ func (s *Storage) handleAssociations(tx *gorm.DB, v interface{}, delete bool) er
 		tx = tx.New()
 
 		for _, name := range fieldNames {
-			fv := reflect.Indirect(rv).FieldByName(name).Addr().Interface()
+			fv := reflect.Indirect(rv).FieldByName(name).Addr()
 
 			if delete {
 				scope := tx.NewScope(v)
@@ -344,7 +349,7 @@ func (s *Storage) handleAssociations(tx *gorm.DB, v interface{}, delete bool) er
 						}
 					}
 
-					if err := tx.Delete(fv).Error; err != nil {
+					if err := tx.Delete(fv.Interface()).Error; err != nil {
 						return s.driver.NormalizeError(err)
 					}
 				}
@@ -352,7 +357,7 @@ func (s *Storage) handleAssociations(tx *gorm.DB, v interface{}, delete bool) er
 				continue
 			}
 
-			if err := tx.Model(v).Association(name).Find(fv).Error; err != nil {
+			if err := tx.Model(v).Association(name).Find(fv.Interface()).Error; err != nil {
 				return s.driver.NormalizeError(err)
 			}
 		}

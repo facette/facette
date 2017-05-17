@@ -5,11 +5,20 @@ import (
 	"reflect"
 )
 
-// Map represents an instance of keys mappings.
+// Map represents an instance of keys mapping.
 //
 // All the function returning values associated with keys will return a fallback value if the key is not present in the
 // map or if the value can't be converted to the requested type.
 type Map map[string]interface{}
+
+// Clone returns a clone of the keys mapping instance.
+func (m Map) Clone() Map {
+	clone := Map{}
+	for k, v := range m {
+		clone[k] = v
+	}
+	return clone
+}
 
 // Set sets the mapping key k to the value v.
 func (m Map) Set(k string, v interface{}) {

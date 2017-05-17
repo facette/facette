@@ -55,7 +55,7 @@ func Test_Has(t *testing.T) {
 
 	for _, entry := range tests {
 		if result := Has(entry.slice, entry.search); result != entry.found {
-			t.Logf("\nExpected %d\nbut got  %d", entry.found, result)
+			t.Logf("\nExpected %t\nbut got  %t", entry.found, result)
 			t.Fail()
 		}
 	}

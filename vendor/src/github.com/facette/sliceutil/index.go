@@ -11,7 +11,7 @@ func IndexOf(s, v interface{}) int {
 	}
 
 	// Interate on slice elements
-	for i := 0; i < rv.Len(); i++ {
+	for i, n := 0, rv.Len(); i < n; i++ {
 		if reflect.DeepEqual(rv.Index(i).Interface(), v) {
 			return i
 		}

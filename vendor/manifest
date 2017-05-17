@@ -34,7 +34,7 @@
 		{
 			"importpath": "github.com/facette/maputil",
 			"repository": "https://github.com/facette/maputil",
-			"revision": "4ad98bafbb22d1ecd747cf7e439b434e8241f277",
+			"revision": "9852c5c3aee0521ac58a093851a456f794fc55ac",
 			"branch": "master"
 		},
 		{
@@ -46,13 +46,13 @@
 		{
 			"importpath": "github.com/facette/sliceutil",
 			"repository": "https://github.com/facette/sliceutil",
-			"revision": "74404cdf68c600d69de0e76eed89e50cd79236f1",
+			"revision": "4d3b747100a55825db27e7a70f684d402059cde6",
 			"branch": "master"
 		},
 		{
 			"importpath": "github.com/facette/sqlstorage",
 			"repository": "https://github.com/facette/sqlstorage",
-			"revision": "9226812a7e30d6288914a2bb45937e22a184e55c",
+			"revision": "5ac7d714403e8f822f8efeb83359f58aed0756ab",
 			"branch": "master"
 		},
 		{
