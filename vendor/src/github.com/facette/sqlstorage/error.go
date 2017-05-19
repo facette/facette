@@ -3,8 +3,6 @@ package sqlstorage
 import "errors"
 
 var (
-	// ErrEmptyPassword represents an empty password error.
-	ErrEmptyPassword = errors.New("empty password")
 	// ErrItemConflict represents an item conflict error.
 	ErrItemConflict = errors.New("item conflict")
 	// ErrItemNotFound represents an item not found error.

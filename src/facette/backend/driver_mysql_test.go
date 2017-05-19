@@ -44,8 +44,6 @@ func init() {
 	}
 	if v := os.Getenv("TEST_MYSQL_PASSWORD"); v != "" {
 		config.Set("password", v)
-	} else {
-		config.Set("password", "facette")
 	}
 
 	mysqlBackend, err = NewBackend(&config, log)

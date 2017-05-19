@@ -46,8 +46,6 @@ func init() {
 	}
 	if v := os.Getenv("TEST_PGSQL_PASSWORD"); v != "" {
 		config.Set("password", v)
-	} else {
-		config.Set("password", "facette")
 	}
 
 	pgsqlBackend, err = NewBackend(&config, log)

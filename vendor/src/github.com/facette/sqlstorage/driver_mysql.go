@@ -113,10 +113,7 @@ func init() {
 			return nil, errors.Wrap(err, "invalid \"user\" setting")
 		}
 
-		if d.password, err = settings.GetString("password", ""); err != nil || d.password == "" {
-			if d.password == "" {
-				err = ErrEmptyPassword
-			}
+		if d.password, err = settings.GetString("password", ""); err != nil {
 			return nil, errors.Wrap(err, "invalid \"password\" setting")
 		}
 
