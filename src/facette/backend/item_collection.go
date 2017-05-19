@@ -36,7 +36,7 @@ func (b *Backend) NewCollection() *Collection {
 func (c *Collection) BeforeSave(scope *gorm.Scope) error {
 	if err := c.Item.BeforeSave(scope); err != nil {
 		return err
-	} else if c.Alias != nil && !nameRegexp.MatchString(*c.Alias) {
+	} else if c.Alias != nil && *c.Alias != "" && !nameRegexp.MatchString(*c.Alias) {
 		return ErrInvalidAlias
 	}
 
@@ -65,14 +65,22 @@ func (c *Collection) Clone() *Collection {
 	clone := &Collection{}
 	*clone = *c
 
-	clone.Attributes = maputil.Map{}
-	for k, v := range c.Attributes {
-		clone.Attributes[k] = v
+	clone.Entries = make([]*CollectionEntry, len(c.Entries))
+	for i, entry := range c.Entries {
+		clone.Entries[i] = &CollectionEntry{}
+		*clone.Entries[i] = *entry
+
+		if entry.Options != nil {
+			clone.Entries[i].Options = entry.Options.Clone()
+		}
 	}
 
-	clone.Options = maputil.Map{}
-	for k, v := range c.Options {
-		clone.Options[k] = v
+	if c.Attributes != nil {
+		clone.Attributes = c.Attributes.Clone()
+	}
+
+	if c.Options != nil {
+		clone.Options = c.Options.Clone()
 	}
 
 	if c.Link != nil {

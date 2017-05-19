@@ -16,16 +16,11 @@ type Item struct {
 	Created     time.Time `gorm:"not null;default:current_timestamp" json:"created"`
 	Modified    time.Time `gorm:"not null;default:current_timestamp" json:"modified"`
 
-	backend *Backend `gorm:"-" json:"-"`
+	backend *Backend
 }
 
 // BeforeSave handles the ORM 'BeforeSave' callback.
 func (i *Item) BeforeSave(scope *gorm.Scope) error {
-	if !nameRegexp.MatchString(i.Name) {
-		return ErrInvalidName
-	}
-
-	// Set default fields
 	if i.ID == "" {
 		id, err := uuid.GenerateUUID()
 		if err != nil {
@@ -37,7 +32,11 @@ func (i *Item) BeforeSave(scope *gorm.Scope) error {
 		return ErrInvalidID
 	}
 
-	now := time.Now().UTC()
+	if !nameRegexp.MatchString(i.Name) {
+		return ErrInvalidName
+	}
+
+	now := time.Now().UTC().Round(time.Second)
 
 	if i.Created.IsZero() {
 		scope.SetColumn("Created", now)

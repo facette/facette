@@ -35,7 +35,7 @@ func (b *Backend) NewGraph() *Graph {
 func (g *Graph) BeforeSave(scope *gorm.Scope) error {
 	if err := g.Item.BeforeSave(scope); err != nil {
 		return err
-	} else if g.Alias != nil && !nameRegexp.MatchString(*g.Alias) {
+	} else if g.Alias != nil && *g.Alias != "" && !nameRegexp.MatchString(*g.Alias) {
 		return ErrInvalidAlias
 	}
 
@@ -49,6 +49,47 @@ func (g *Graph) BeforeSave(scope *gorm.Scope) error {
 	}
 
 	return nil
+}
+
+// Clone returns a clone of the graph item instance.
+func (g *Graph) Clone() *Graph {
+	clone := &Graph{}
+	*clone = *g
+
+	clone.Groups = make(SeriesGroups, len(g.Groups))
+	for i, group := range g.Groups {
+		clone.Groups[i] = &SeriesGroup{}
+		*clone.Groups[i] = *group
+
+		if group.Options != nil {
+			clone.Groups[i].Options = group.Options.Clone()
+		}
+
+		clone.Groups[i].Series = make([]*Series, len(group.Series))
+		for j, series := range group.Series {
+			clone.Groups[i].Series[j] = &Series{}
+			*clone.Groups[i].Series[j] = *series
+
+			if series.Options != nil {
+				clone.Groups[i].Series[j].Options = series.Options.Clone()
+			}
+		}
+	}
+
+	if g.Attributes != nil {
+		clone.Attributes = g.Attributes.Clone()
+	}
+
+	if g.Options != nil {
+		clone.Options = g.Options.Clone()
+	}
+
+	if g.Link != nil {
+		clone.Link = &Graph{}
+		*clone.Link = *g.Link
+	}
+
+	return clone
 }
 
 // Expand expands the graph item instance using its linked instance.
@@ -69,7 +110,7 @@ func (g *Graph) Expand(attrs maputil.Map) error {
 		}
 
 		// Expand template and applies current graph's attributes
-		tmpl := g.Link
+		tmpl := g.Link.Clone()
 		tmpl.ID = g.ID
 		tmpl.Attributes.Merge(g.Attributes, true)
 		tmpl.Options.Merge(g.Options, true)

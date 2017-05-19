@@ -62,11 +62,7 @@ func (w *httpWorker) expandSeries(series *backend.Series, existOnly bool) []*bac
 
 		// Loop through sources checking for patterns matching
 		for _, s := range w.service.searcher.Sources(series.Origin, "", -1) {
-			if group.Patterns == nil {
-				continue
-			}
-
-			for _, p := range *group.Patterns {
+			for _, p := range group.Patterns {
 				if filterMatch(p, s.Name) {
 					sourcesSet.Add(s.Name)
 				}
@@ -89,12 +85,12 @@ func (w *httpWorker) expandSeries(series *backend.Series, existOnly bool) []*bac
 
 		// Loop through metrics checking for patterns matching
 		for _, m := range w.service.searcher.Metrics(series.Origin, "", "", -1) {
-			// Skip if metric source does not match an existing metric or if no pattern
-			if existOnly && !sourcesSet.Has(m.Source().Name) || group.Patterns == nil {
+			// Skip if metric source does not match an existing metric
+			if existOnly && !sourcesSet.Has(m.Source().Name) {
 				continue
 			}
 
-			for _, p := range *group.Patterns {
+			for _, p := range group.Patterns {
 				if filterMatch(p, m.Name) {
 					metricsSet.Add(m.Name)
 				}

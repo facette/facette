@@ -11,12 +11,12 @@ import (
 // Provider represents a back-end provider item instance.
 type Provider struct {
 	Item
-	Connector       string           `gorm:"type:varchar(32);not null" json:"connector"`
-	Settings        maputil.Map      `gorm:"type:text" json:"settings"`
-	Filters         *ProviderFilters `gorm:"type:text" json:"filters"`
-	RefreshInterval int              `gorm:"not null;default:0" json:"refresh_interval"`
-	Priority        int              `gorm:"not null;default:0" json:"priority"`
-	Enabled         bool             `gorm:"not null;default:true" json:"enabled"`
+	Connector       string          `gorm:"type:varchar(32);not null" json:"connector"`
+	Settings        maputil.Map     `gorm:"type:text" json:"settings"`
+	Filters         ProviderFilters `gorm:"type:text" json:"filters"`
+	RefreshInterval int             `gorm:"not null;default:0" json:"refresh_interval"`
+	Priority        int             `gorm:"not null;default:0" json:"priority"`
+	Enabled         bool            `gorm:"not null;default:true" json:"enabled"`
 }
 
 // NewProvider creates a new back-end provider item instance.

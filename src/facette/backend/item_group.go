@@ -13,7 +13,7 @@ const (
 // SourceGroup represents a library source group item instance.
 type SourceGroup struct {
 	Item
-	Patterns *GroupPatterns `gorm:"type:text;not null" json:"patterns"`
+	Patterns GroupPatterns `gorm:"type:text;not null" json:"patterns"`
 }
 
 // NewSourceGroup creates a new back-end source group item instance.
@@ -29,7 +29,7 @@ func (SourceGroup) TableName() string {
 // MetricGroup represents a library metric group item instance.
 type MetricGroup struct {
 	Item
-	Patterns *GroupPatterns `gorm:"type:text;not null" json:"patterns"`
+	Patterns GroupPatterns `gorm:"type:text;not null" json:"patterns"`
 }
 
 // NewMetricGroup creates a new back-end metric group item instance.

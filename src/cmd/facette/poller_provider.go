@@ -43,7 +43,7 @@ func newProviderWorker(poller *pollerWorker, prov *backend.Provider) (*providerW
 		provider:  prov,
 		connector: c,
 		catalog:   catalog.NewCatalog(prov.Name),
-		filters:   catalog.NewFilterChain(prov.Filters),
+		filters:   catalog.NewFilterChain(&prov.Filters),
 		cmdChan:   make(chan int),
 		wg:        &sync.WaitGroup{},
 	}, nil
