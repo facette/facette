@@ -1,0 +1,31 @@
+---
+language: go
+
+go:
+- 1.8
+
+dist: trusty
+
+services:
+- postgresql
+- mysql
+
+env:
+- TEST_PGSQL_USER=postgres TEST_MYSQL_USER=root
+
+before_install:
+- sudo apt-get -qq update
+- sudo apt-get install -y librrd-dev
+
+before_script:
+- psql -c 'create database facette;' -U postgres
+- mysql -e 'create database facette charset=utf8;'
+
+script:
+- make test
+
+notifications:
+  email:
+  - dev@facette.io
+
+# vim: ts=2 sw=2 et
