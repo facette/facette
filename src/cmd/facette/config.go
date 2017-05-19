@@ -1,9 +1,10 @@
 package main
 
 import (
+	"io/ioutil"
 	"strings"
 
-	"facette/yamlutil"
+	"gopkg.in/yaml.v2"
 
 	"github.com/facette/maputil"
 )
@@ -56,7 +57,12 @@ func initConfig(path string) (*config, error) {
 	)
 
 	if path != "" {
-		if err := yamlutil.UnmarshalFile(path, &config); err != nil {
+		data, err := ioutil.ReadFile(path)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := yaml.Unmarshal(data, &config); err != nil {
 			return nil, err
 		}
 	}
