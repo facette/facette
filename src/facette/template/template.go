@@ -16,7 +16,7 @@ func Expand(data string, attrs map[string]interface{}) (string, error) {
 	// Parse response for template keys
 	trees, err := parse.Parse("inline", data, "", "")
 	if err != nil {
-		return "", err
+		return "", ErrInvalidTemplate
 	}
 
 	for _, node := range trees["inline"].Root.Nodes {
