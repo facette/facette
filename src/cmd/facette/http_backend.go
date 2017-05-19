@@ -118,6 +118,8 @@ func (w *httpWorker) httpHandleBackendCreate(rw http.ResponseWriter, r *http.Req
 }
 
 func (w *httpWorker) httpHandleBackendGet(rw http.ResponseWriter, r *http.Request) {
+	var result interface{}
+
 	typ := httproute.ContextParam(r, "type").(string)
 	id := httproute.ContextParam(r, "id").(string)
 
@@ -146,7 +148,11 @@ func (w *httpWorker) httpHandleBackendGet(rw http.ResponseWriter, r *http.Reques
 		c.Expand(nil)
 	}
 
-	result := jsonutil.FilterStruct(rv.Interface(), httpGetListParam(r, "fields", nil))
+	if fields := httpGetListParam(r, "fields", nil); fields != nil {
+		result = jsonutil.FilterStruct(rv.Interface(), fields)
+	} else {
+		result = rv.Interface()
+	}
 
 	httputil.WriteJSON(rw, result, http.StatusOK)
 }
