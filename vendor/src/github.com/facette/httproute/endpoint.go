@@ -148,7 +148,12 @@ func newEndpointHandler(rt *Router) *endpointHandler {
 // ServeHTTP satisfies 'http.Handler' interface requirements for the endpoint handler.
 func (h *endpointHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	for _, endpoint := range h.router.endpoints {
-		if ctx, ok := endpoint.pattern.match(endpoint.context, r.URL.Path); ok {
+		endpointCtx := endpoint.context
+		if endpointCtx == nil {
+			endpointCtx = context.Background()
+		}
+
+		if ctx, ok := endpoint.pattern.match(endpointCtx, r.URL.Path); ok {
 			endpoint.handle(rw, r.WithContext(ctx))
 			return
 		}
