@@ -1,6 +1,9 @@
 package catalog
 
-import "sync"
+import (
+	"sort"
+	"sync"
+)
 
 // Catalog represents a catalog instance.
 type Catalog struct {
@@ -90,12 +93,13 @@ func (c *Catalog) Origins() []*Origin {
 	c.RLock()
 	defer c.RUnlock()
 
-	items := []*Origin{}
+	origins := originList{}
 	for _, o := range c.origins {
-		items = append(items, o)
+		origins = append(origins, o)
 	}
+	sort.Sort(origins)
 
-	return items
+	return origins
 }
 
 // Source returns a source for a specific origin from the catalog.
@@ -124,7 +128,6 @@ func (c *Catalog) Metric(origin, source, name string) (*Metric, error) {
 	return s.Metric(name)
 }
 
-// catalogList represents a list of catalog instances.
 type catalogList []*Catalog
 
 func (l catalogList) Len() int {
@@ -132,7 +135,7 @@ func (l catalogList) Len() int {
 }
 
 func (l catalogList) Less(i, j int) bool {
-	return l[i].priority < l[j].priority
+	return l[i].priority > l[j].priority
 }
 
 func (l catalogList) Swap(i, j int) {

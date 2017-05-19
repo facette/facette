@@ -42,7 +42,7 @@ func (s *Searcher) Unregister(c *Catalog) {
 
 // ApplyPriorities reorders the catalogs instances according to the set priorities.
 func (s *Searcher) ApplyPriorities() {
-	sort.Sort(sort.Reverse(s.catalogs))
+	sort.Sort(s.catalogs)
 }
 
 // Origins returns a slice of origins from the catalog searcher.

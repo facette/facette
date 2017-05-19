@@ -1,5 +1,7 @@
 package catalog
 
+import "sort"
+
 // Source represents a catalog source instance.
 type Source struct {
 	Name         string
@@ -26,12 +28,13 @@ func (s *Source) Metrics() []*Metric {
 	s.origin.catalog.RLock()
 	defer s.origin.catalog.RUnlock()
 
-	items := []*Metric{}
+	metrics := metricList{}
 	for _, m := range s.metrics {
-		items = append(items, m)
+		metrics = append(metrics, m)
 	}
+	sort.Sort(metrics)
 
-	return items
+	return metrics
 }
 
 // Origin returns the parent origin from the catalog source.
@@ -40,4 +43,18 @@ func (s *Source) Origin() *Origin {
 	defer s.origin.catalog.RUnlock()
 
 	return s.origin
+}
+
+type sourceList []*Source
+
+func (l sourceList) Len() int {
+	return len(l)
+}
+
+func (l sourceList) Less(i, j int) bool {
+	return l[i].Name < l[j].Name
+}
+
+func (l sourceList) Swap(i, j int) {
+	l[i], l[j] = l[j], l[i]
 }

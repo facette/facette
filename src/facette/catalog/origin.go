@@ -1,5 +1,7 @@
 package catalog
 
+import "sort"
+
 // Origin represents a catalog origin instance.
 type Origin struct {
 	Name         string
@@ -34,10 +36,25 @@ func (o *Origin) Sources() []*Source {
 	o.catalog.RLock()
 	defer o.catalog.RUnlock()
 
-	items := []*Source{}
+	sources := sourceList{}
 	for _, s := range o.sources {
-		items = append(items, s)
+		sources = append(sources, s)
 	}
+	sort.Sort(sources)
 
-	return items
+	return sources
+}
+
+type originList []*Origin
+
+func (l originList) Len() int {
+	return len(l)
+}
+
+func (l originList) Less(i, j int) bool {
+	return l[i].Name < l[j].Name
+}
+
+func (l originList) Swap(i, j int) {
+	l[i], l[j] = l[j], l[i]
 }

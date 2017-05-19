@@ -23,3 +23,17 @@ func (m *Metric) Connector() interface{} {
 
 	return m.connector
 }
+
+type metricList []*Metric
+
+func (l metricList) Len() int {
+	return len(l)
+}
+
+func (l metricList) Less(i, j int) bool {
+	return l[i].Name < l[j].Name
+}
+
+func (l metricList) Swap(i, j int) {
+	l[i], l[j] = l[j], l[i]
+}
