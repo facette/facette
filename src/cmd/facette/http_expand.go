@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"sort"
@@ -15,7 +14,7 @@ import (
 
 type expandListEntry [3]string
 
-func (w *httpWorker) httpHandleExpand(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+func (w *httpWorker) httpHandleExpand(rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	// Get expand request from received data

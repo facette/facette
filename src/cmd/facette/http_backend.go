@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,6 +10,7 @@ import (
 	"facette/backend"
 	"facette/template"
 
+	"github.com/facette/httproute"
 	"github.com/facette/httputil"
 	"github.com/facette/jsonutil"
 	"github.com/facette/sqlstorage"
@@ -24,13 +24,13 @@ var backendTypes = []string{
 	"metricgroups",
 }
 
-func (w *httpWorker) httpHandleBackendCreate(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+func (w *httpWorker) httpHandleBackendCreate(rw http.ResponseWriter, r *http.Request) {
 	if w.service.config.ReadOnly {
 		httputil.WriteJSON(rw, httpBuildMessage(ErrReadOnly), http.StatusForbidden)
 		return
 	}
 
-	typ := ctx.Value("type").(string)
+	typ := httproute.ContextParam(r, "type").(string)
 
 	// Initialize new back-end item
 	item, ok := w.httpBackendNewItem(typ)
@@ -117,9 +117,9 @@ func (w *httpWorker) httpHandleBackendCreate(ctx context.Context, rw http.Respon
 	http.Redirect(rw, r, strings.TrimRight(r.URL.Path, "/")+"/"+id, http.StatusCreated)
 }
 
-func (w *httpWorker) httpHandleBackendGet(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
-	typ := ctx.Value("type").(string)
-	id := ctx.Value("id").(string)
+func (w *httpWorker) httpHandleBackendGet(rw http.ResponseWriter, r *http.Request) {
+	typ := httproute.ContextParam(r, "type").(string)
+	id := httproute.ContextParam(r, "id").(string)
 
 	// Initialize new back-end item
 	item, ok := w.httpBackendNewItem(typ)
@@ -151,14 +151,14 @@ func (w *httpWorker) httpHandleBackendGet(ctx context.Context, rw http.ResponseW
 	httputil.WriteJSON(rw, result, http.StatusOK)
 }
 
-func (w *httpWorker) httpHandleBackendUpdate(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+func (w *httpWorker) httpHandleBackendUpdate(rw http.ResponseWriter, r *http.Request) {
 	if w.service.config.ReadOnly {
 		httputil.WriteJSON(rw, httpBuildMessage(ErrReadOnly), http.StatusForbidden)
 		return
 	}
 
-	typ := ctx.Value("type").(string)
-	id := ctx.Value("id").(string)
+	typ := httproute.ContextParam(r, "type").(string)
+	id := httproute.ContextParam(r, "id").(string)
 
 	// Initialize new back-end item
 	item, ok := w.httpBackendNewItem(typ)
@@ -236,14 +236,14 @@ func (w *httpWorker) httpHandleBackendUpdate(ctx context.Context, rw http.Respon
 	rw.WriteHeader(http.StatusNoContent)
 }
 
-func (w *httpWorker) httpHandleBackendDelete(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+func (w *httpWorker) httpHandleBackendDelete(rw http.ResponseWriter, r *http.Request) {
 	if w.service.config.ReadOnly {
 		httputil.WriteJSON(rw, httpBuildMessage(ErrReadOnly), http.StatusForbidden)
 		return
 	}
 
-	typ := ctx.Value("type").(string)
-	id := ctx.Value("id").(string)
+	typ := httproute.ContextParam(r, "type").(string)
+	id := httproute.ContextParam(r, "id").(string)
 
 	// Initialize new back-end item
 	item, ok := w.httpBackendNewItem(typ)
@@ -285,7 +285,7 @@ func (w *httpWorker) httpHandleBackendDelete(ctx context.Context, rw http.Respon
 	rw.WriteHeader(http.StatusNoContent)
 }
 
-func (w *httpWorker) httpHandleBackendDeleteAll(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+func (w *httpWorker) httpHandleBackendDeleteAll(rw http.ResponseWriter, r *http.Request) {
 	var rv reflect.Value
 
 	if w.service.config.ReadOnly {
@@ -293,7 +293,7 @@ func (w *httpWorker) httpHandleBackendDeleteAll(ctx context.Context, rw http.Res
 		return
 	}
 
-	typ := ctx.Value("type").(string)
+	typ := httproute.ContextParam(r, "type").(string)
 
 	// Initialize new back-end item
 	item, ok := w.httpBackendNewItem(typ)
@@ -337,8 +337,8 @@ func (w *httpWorker) httpHandleBackendDeleteAll(ctx context.Context, rw http.Res
 	rw.WriteHeader(http.StatusNoContent)
 }
 
-func (w *httpWorker) httpHandleBackendList(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
-	typ := ctx.Value("type").(string)
+func (w *httpWorker) httpHandleBackendList(rw http.ResponseWriter, r *http.Request) {
+	typ := httproute.ContextParam(r, "type").(string)
 
 	// Initialize new back-end item
 	item, ok := w.httpBackendNewItem(typ)

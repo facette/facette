@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -9,11 +8,12 @@ import (
 
 	"facette/catalog"
 
+	"github.com/facette/httproute"
 	"github.com/facette/httputil"
 	"github.com/fatih/set"
 )
 
-func (w *httpWorker) httpHandleCatalogRoot(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+func (w *httpWorker) httpHandleCatalogRoot(rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	// Get item types list and information
@@ -26,10 +26,10 @@ func (w *httpWorker) httpHandleCatalogRoot(ctx context.Context, rw http.Response
 	httputil.WriteJSON(rw, result, http.StatusOK)
 }
 
-func (w *httpWorker) httpHandleCatalogType(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+func (w *httpWorker) httpHandleCatalogType(rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	typ := ctx.Value("type").(string)
+	typ := httproute.ContextParam(r, "type").(string)
 
 	search := w.httpCatalogSearch(typ, "", r)
 	if search == nil {
@@ -80,13 +80,13 @@ func (w *httpWorker) httpHandleCatalogType(ctx context.Context, rw http.Response
 	httputil.WriteJSON(rw, result, http.StatusOK)
 }
 
-func (w *httpWorker) httpHandleCatalogEntry(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+func (w *httpWorker) httpHandleCatalogEntry(rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	var result interface{}
 
-	typ := ctx.Value("type").(string)
-	name := ctx.Value("name").(string)
+	typ := httproute.ContextParam(r, "type").(string)
+	name := httproute.ContextParam(r, "name").(string)
 
 	search := w.httpCatalogSearch(typ, name, r)
 	if search == nil || len(search) == 0 {

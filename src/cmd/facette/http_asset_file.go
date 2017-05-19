@@ -3,7 +3,6 @@
 package main
 
 import (
-	"context"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -11,7 +10,7 @@ import (
 	"strings"
 )
 
-func (w *httpWorker) httpHandleAsset(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+func (w *httpWorker) httpHandleAsset(rw http.ResponseWriter, r *http.Request) {
 	var isDefault bool
 
 	// Stop handling assets if frontend is disabled

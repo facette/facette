@@ -57,7 +57,7 @@ func TestPatternMatch(t *testing.T) {
 func execTestPatternMatch(mt matchTest, t *testing.T) {
 	p := newPattern(mt.pattern)
 
-	ctx, match := p.match(mt.path)
+	ctx, match := p.match(nil, mt.path)
 	if match != mt.match {
 		t.Errorf(
 			"invalid match for %q path on %q pattern: expected \"%t\" but got \"%t\"",

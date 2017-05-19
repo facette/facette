@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -19,7 +18,7 @@ type parseRequest struct {
 	Data json.RawMessage `json:"data"`
 }
 
-func (w *httpWorker) httpHandleLibraryParse(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+func (w *httpWorker) httpHandleLibraryParse(rw http.ResponseWriter, r *http.Request) {
 	var data string
 
 	defer r.Body.Close()

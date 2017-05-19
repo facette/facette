@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -31,7 +30,7 @@ type bulkResponseEntry struct {
 func init() {
 }
 
-func (w *httpWorker) httpHandleBulk(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+func (w *httpWorker) httpHandleBulk(rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	// Get search request from received data

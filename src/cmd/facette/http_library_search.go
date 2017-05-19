@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 
@@ -15,7 +14,7 @@ type searchRequest struct {
 	Terms map[string]interface{} `json:"terms"`
 }
 
-func (w *httpWorker) httpHandleLibrarySearch(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+func (w *httpWorker) httpHandleLibrarySearch(rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	// Get search request from received data

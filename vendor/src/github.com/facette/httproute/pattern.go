@@ -38,11 +38,8 @@ func newPattern(value string) *pattern {
 }
 
 // match checks whether or not a path matches the pattern, returning the associated context.
-func (p *pattern) match(path string) (context.Context, bool) {
+func (p *pattern) match(ctx context.Context, path string) (context.Context, bool) {
 	var i, j int
-
-	// Initialize context
-	ctx := context.Background()
 
 	// Remove trailing slash on patn for future comparison
 	if path != "/" && strings.HasSuffix(path, "/") {

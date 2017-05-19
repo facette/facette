@@ -1,17 +1,17 @@
 package main
 
 import (
-	"context"
 	"net/http"
 
 	"facette/backend"
 
+	"github.com/facette/httproute"
 	"github.com/facette/httputil"
 	"github.com/facette/sqlstorage"
 )
 
-func (w *httpWorker) httpHandleProviderRefresh(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
-	id := ctx.Value("id").(string)
+func (w *httpWorker) httpHandleProviderRefresh(rw http.ResponseWriter, r *http.Request) {
+	id := httproute.ContextParam(r, "id").(string)
 
 	provider := backend.Provider{}
 

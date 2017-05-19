@@ -1,13 +1,12 @@
 package main
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/facette/httputil"
 )
 
-func (w *httpWorker) httpHandleLibraryCollectionTree(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+func (w *httpWorker) httpHandleLibraryCollectionTree(rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	tree, err := w.service.backend.NewCollectionTree(r.URL.Query().Get("parent"))

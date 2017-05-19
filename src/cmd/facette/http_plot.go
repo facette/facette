@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"net/http"
 	"strings"
 	"time"
@@ -25,7 +24,7 @@ type plotQuery struct {
 	connector connector.Connector
 }
 
-func (w *httpWorker) httpHandlePlots(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+func (w *httpWorker) httpHandlePlots(rw http.ResponseWriter, r *http.Request) {
 	var err error
 
 	defer r.Body.Close()

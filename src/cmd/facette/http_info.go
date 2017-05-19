@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"runtime"
@@ -22,7 +21,7 @@ type httpInfo struct {
 	ReadOnly   bool     `json:"read_only,omitempty"`
 }
 
-func (w *httpWorker) httpHandleInfo(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+func (w *httpWorker) httpHandleInfo(rw http.ResponseWriter, r *http.Request) {
 	var result httpInfo
 
 	defer r.Body.Close()

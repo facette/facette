@@ -1,6 +1,7 @@
 package httproute
 
 import (
+	"context"
 	"net/http"
 	"strings"
 )
@@ -33,6 +34,13 @@ func (rt *Router) Endpoint(pattern string) *Endpoint {
 	return e
 }
 
+// EndpointWithContext creates a new HTTP router endpoint given a context.
+func (rt *Router) EndpointWithContext(pattern string, ctx context.Context) *Endpoint {
+	e := rt.Endpoint(pattern)
+	e.context = ctx
+	return e
+}
+
 // ServeHTTP satisfies 'http.Handler' interface requirements.
 func (rt *Router) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
@@ -44,9 +52,11 @@ func (rt *Router) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 }
 
 // Use registers a new middleware in the HTTP handlers chain.
-func (rt *Router) Use(f func(http.Handler) http.Handler) {
+func (rt *Router) Use(f func(http.Handler) http.Handler) *Router {
 	rt.middlewares = append(rt.middlewares, f)
 	rt.updateChain()
+
+	return rt
 }
 
 // updateChain updates the middleware HTTP handlers chain.

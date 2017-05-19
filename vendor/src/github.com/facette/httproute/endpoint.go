@@ -9,23 +9,22 @@ import (
 )
 
 // Handler represents an HTTP request handler.
-type Handler func(context.Context, http.ResponseWriter, *http.Request)
+type Handler func(http.ResponseWriter, *http.Request)
 
 // Endpoint represents an HTTP router endpoint.
 type Endpoint struct {
-	pattern       *pattern
-	handlers      map[string]Handler
-	contextValues map[string]interface{}
-	router        *Router
+	pattern  *pattern
+	handlers map[string]Handler
+	context  context.Context
+	router   *Router
 }
 
 // newEndpoint creates a new HTTP enpdpoint instance.
 func newEndpoint(pattern string, rt *Router) *Endpoint {
 	return &Endpoint{
-		pattern:       newPattern(pattern),
-		handlers:      make(map[string]Handler),
-		contextValues: make(map[string]interface{}),
-		router:        rt,
+		pattern:  newPattern(pattern),
+		handlers: make(map[string]Handler),
+		router:   rt,
 	}
 }
 
@@ -88,16 +87,8 @@ func (e *Endpoint) Put(h Handler) *Endpoint {
 	return e.register("PUT", h)
 }
 
-// SetContext appends a new value to the requests context.
-func (e *Endpoint) SetContext(name string, v interface{}) *Endpoint {
-	// Register new context value
-	e.contextValues[name] = v
-
-	return e
-}
-
 // handle wraps HTTP router endpoint handler with common internal logic.
-func (e *Endpoint) handle(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+func (e *Endpoint) handle(rw http.ResponseWriter, r *http.Request) {
 	// Handle slash redirections
 	if !e.pattern.hasWildcard {
 		if e.pattern.hasSlash && !strings.HasSuffix(r.URL.Path, "/") {
@@ -135,13 +126,12 @@ func (e *Endpoint) handle(ctx context.Context, rw http.ResponseWriter, r *http.R
 		return
 	}
 
-	// Apply context values if any
-	for name, v := range e.contextValues {
-		ctx = context.WithValue(ctx, name, v)
+	// Execute request handler
+	if e.context != nil {
+		r = r.WithContext(e.context)
 	}
 
-	// Execute request handler
-	handler(ctx, rw, r)
+	handler(rw, r)
 }
 
 // register registers a new HTTP handler for a given method.
@@ -163,8 +153,8 @@ func newEndpointHandler(rt *Router) *endpointHandler {
 // ServeHTTP satisfies 'http.Handler' interface requirements for the endpoint handler.
 func (h *endpointHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	for _, endpoint := range h.router.endpoints {
-		if ctx, ok := endpoint.pattern.match(r.URL.Path); ok {
-			endpoint.handle(ctx, rw, r)
+		if ctx, ok := endpoint.pattern.match(r.Context(), r.URL.Path); ok {
+			endpoint.handle(rw, r.WithContext(ctx))
 			return
 		}
 	}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -37,6 +36,6 @@ func httpGetListParam(r *http.Request, name string, fallback []string) []string 
 	return list
 }
 
-func httpHandleNotFound(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+func httpHandleNotFound(rw http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(rw, httpBuildMessage(ErrUnknownEndpoint), http.StatusNotFound)
 }

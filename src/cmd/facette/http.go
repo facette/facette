@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"net"
 	"net/http"
 	"os"
@@ -75,13 +76,13 @@ func newHTTPWorker(s *Service) *httpWorker {
 	w.router.Endpoint(w.prefix + "/plots").
 		Post(w.httpHandlePlots)
 
-	w.router.Endpoint(w.prefix+"/providers/").
-		SetContext("type", "providers").
+	providerCtx := context.WithValue(context.Background(), "type", "providers")
+
+	w.router.EndpointWithContext(w.prefix+"/providers/", providerCtx).
 		Delete(w.httpHandleBackendDeleteAll).
 		Get(w.httpHandleBackendList).
 		Post(w.httpHandleBackendCreate)
-	w.router.Endpoint(w.prefix+"/providers/:id").
-		SetContext("type", "providers").
+	w.router.EndpointWithContext(w.prefix+"/providers/:id", providerCtx).
 		Delete(w.httpHandleBackendDelete).
 		Get(w.httpHandleBackendGet).
 		Patch(w.httpHandleBackendUpdate).

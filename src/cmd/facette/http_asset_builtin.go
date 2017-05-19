@@ -3,14 +3,13 @@
 package main
 
 import (
-	"context"
 	"net/http"
 	"path"
 	"path/filepath"
 	"strings"
 )
 
-func (w *httpWorker) httpHandleAsset(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+func (w *httpWorker) httpHandleAsset(rw http.ResponseWriter, r *http.Request) {
 	var (
 		isDefault bool
 		ct        string
