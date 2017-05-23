@@ -38,7 +38,7 @@ func (w *httpWorker) httpHandleCatalogType(rw http.ResponseWriter, r *http.Reque
 	}
 
 	// Fill result list
-	filter := r.URL.Query().Get("filter")
+	filter := httproute.QueryParam(r, "filter")
 
 	s := set.New()
 	for _, item := range search {
@@ -190,7 +190,7 @@ func (w *httpWorker) httpCatalogSearch(typ, name string, r *http.Request) []inte
 
 	case "sources":
 		for _, s := range w.service.searcher.Sources(
-			r.URL.Query().Get("origin"),
+			httproute.QueryParam(r, "origin"),
 			name,
 			-1,
 		) {
@@ -199,8 +199,8 @@ func (w *httpWorker) httpCatalogSearch(typ, name string, r *http.Request) []inte
 
 	case "metrics":
 		for _, m := range w.service.searcher.Metrics(
-			r.URL.Query().Get("origin"),
-			r.URL.Query().Get("source"),
+			httproute.QueryParam(r, "origin"),
+			httproute.QueryParam(r, "source"),
 			name,
 			-1,
 		) {

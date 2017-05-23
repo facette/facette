@@ -42,7 +42,7 @@ func (w *httpWorker) httpHandleBackendCreate(rw http.ResponseWriter, r *http.Req
 	// Retrieve existing item data from back-end if inheriting
 	rv := reflect.ValueOf(item)
 
-	if id := r.URL.Query().Get("inherit"); id != "" {
+	if id := httproute.QueryParam(r, "inherit"); id != "" {
 		if err := w.service.backend.Storage().Get("id", id, rv.Interface()); err == sqlstorage.ErrItemNotFound {
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
 			return
@@ -361,12 +361,12 @@ func (w *httpWorker) httpHandleBackendList(rw http.ResponseWriter, r *http.Reque
 	// Check for list filter
 	filters := make(map[string]interface{})
 
-	if v := r.URL.Query().Get("filter"); v != "" {
+	if v := httproute.QueryParam(r, "filter"); v != "" {
 		filters["name"] = filterApplyModifier(v)
 	}
 
 	if typ == "collections" || typ == "graphs" {
-		switch r.URL.Query().Get("kind") {
+		switch httproute.QueryParam(r, "kind") {
 		case "raw":
 			filters["template"] = false
 
@@ -381,12 +381,12 @@ func (w *httpWorker) httpHandleBackendList(rw http.ResponseWriter, r *http.Reque
 			return
 		}
 
-		if v := r.URL.Query().Get("link"); v != "" {
+		if v := httproute.QueryParam(r, "link"); v != "" {
 			filters["link"] = v
 		}
 
 		if typ == "collections" {
-			if v := r.URL.Query().Get("parent"); v != "" {
+			if v := httproute.QueryParam(r, "parent"); v != "" {
 				filters["parent"] = v
 			}
 		}
@@ -432,7 +432,7 @@ func (w *httpWorker) httpHandleBackendList(rw http.ResponseWriter, r *http.Reque
 	result := []map[string]interface{}{}
 
 	for i, n := 0, reflect.Indirect(rv).Len(); i < n; i++ {
-		if typ == "collections" && r.URL.Query().Get("expand") == "1" {
+		if typ == "collections" && httproute.QueryParam(r, "expand") == "1" {
 			collection := reflect.Indirect(rv).Index(i).Interface().(*backend.Collection)
 			collection.Expand(nil)
 
