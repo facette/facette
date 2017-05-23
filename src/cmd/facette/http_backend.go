@@ -143,9 +143,14 @@ func (w *httpWorker) httpHandleBackendGet(rw http.ResponseWriter, r *http.Reques
 	}
 
 	// Handle collection expansion request
-	if typ == "collections" && r.URL.Query().Get("expand") == "1" {
-		c := rv.Interface().(*backend.Collection)
-		c.Expand(nil)
+	if httproute.QueryParam(r, "expand") == "1" {
+		if typ == "collections" {
+			c := rv.Interface().(*backend.Collection)
+			c.Expand(nil)
+		} else if typ == "graphs" {
+			g := rv.Interface().(*backend.Graph)
+			g.Expand(nil)
+		}
 	}
 
 	if fields := httpGetListParam(r, "fields", nil); fields != nil {

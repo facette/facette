@@ -181,6 +181,25 @@ func (c *Collection) Expand(attrs maputil.Map) error {
 		*c = *tmpl
 	}
 
+	if len(c.Entries) > 0 {
+		if !c.resolved {
+			if err := c.Resolve(nil); err != nil {
+				return err
+			}
+		}
+
+		for _, entry := range c.Entries {
+			entry.Graph.Expand(c.Attributes)
+
+			if v, ok := entry.Graph.Options["title"]; ok {
+				if entry.Options == nil {
+					entry.Options = maputil.Map{}
+				}
+				entry.Options["title"] = v
+			}
+		}
+	}
+
 	c.expanded = true
 
 	return nil
@@ -221,6 +240,32 @@ func (c *Collection) Resolve(cache map[string]*Collection) error {
 			c.Parent = c.backend.NewCollection()
 			if err := c.backend.Storage().Get("id", *c.ParentID, c.Parent); err != nil {
 				return err
+			}
+		}
+	}
+
+	// Resolve associated graphs if any
+	ids := []string{}
+	for _, entry := range c.Entries {
+		if !sliceutil.Has(ids, entry.GraphID) {
+			ids = append(ids, entry.GraphID)
+		}
+	}
+
+	if len(ids) > 0 {
+		graphs := []*Graph{}
+		if err := c.backend.Storage().Get("id", ids, &graphs); err != nil {
+			return err
+		}
+
+		graphsMap := map[string]*Graph{}
+		for _, g := range graphs {
+			graphsMap[g.ID] = g
+		}
+
+		for _, entry := range c.Entries {
+			if g, ok := graphsMap[entry.GraphID]; ok {
+				entry.Graph = g.Clone()
 			}
 		}
 	}

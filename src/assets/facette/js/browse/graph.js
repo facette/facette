@@ -269,12 +269,6 @@ app.controller('BrowseGraphController', function($location, $rootScope, $routePa
                     // Keep useful graph data
                     if (entry.options && entry.options.title) {
                         graph.title = entry.options.title;
-                    } else {
-                        if (!graphsResolve[entry.graph]) {
-                            graphsResolve[entry.graph] = [];
-                        }
-
-                        graphsResolve[entry.graph].push(graph);
                     }
 
                     graph.attributes = angular.extend({}, data.attributes, entry.attributes) || null;
@@ -284,33 +278,6 @@ app.controller('BrowseGraphController', function($location, $rootScope, $routePa
 
                     graphs.push(graph);
                 });
-
-                // Retrieve graphs titles information
-                var infoQuery = [];
-                angular.forEach(graphsResolve, function(entries, id) {
-                    infoQuery.push({
-                        endpoint: 'library/graphs/' + id,
-                        method: 'GET',
-                        params: {fields: 'id,name,options.title'}
-                    });
-                });
-
-                if (infoQuery.length > 0) {
-                    bulk.exec(infoQuery, function(data) {
-                        angular.forEach(data, function(entry) {
-                            if (entry.status != 200) {
-                                return;
-                            }
-
-                            var title = entry.data.options && entry.data.options.title ?
-                                entry.data.options.title : entry.data.name;
-
-                            angular.forEach(graphsResolve[entry.data.id], function(entry) {
-                                entry.title = title;
-                            });
-                        });
-                    });
-                }
 
                 $scope.graphs = graphs;
             } else {
