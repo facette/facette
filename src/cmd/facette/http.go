@@ -46,7 +46,7 @@ func newHTTPWorker(s *Service) *httpWorker {
 		Post(w.httpHandleBulk)
 
 	w.router.Endpoint(w.prefix + "/catalog/").
-		Get(w.httpHandleCatalogRoot)
+		Get(w.httpHandleCatalogSummary)
 	w.router.Endpoint(w.prefix + "/catalog/:type/").
 		Get(w.httpHandleCatalogType)
 	w.router.Endpoint(w.prefix + "/catalog/:type/:name").
@@ -56,7 +56,7 @@ func newHTTPWorker(s *Service) *httpWorker {
 		Post(w.httpHandleExpand)
 
 	w.router.Endpoint(w.prefix + "/library/").
-		Get(w.httpHandleLibraryRoot)
+		Get(w.httpHandleLibrarySummary)
 	w.router.Endpoint(w.prefix + "/library/parse").
 		Post(w.httpHandleLibraryParse)
 	w.router.Endpoint(w.prefix + "/library/search").

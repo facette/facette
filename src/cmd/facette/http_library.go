@@ -13,7 +13,7 @@ var libraryTypes = []string{
 	"metricgroups",
 }
 
-func (w *httpWorker) httpHandleLibraryRoot(rw http.ResponseWriter, r *http.Request) {
+func (w *httpWorker) httpHandleLibrarySummary(rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	// Get item types list and information

@@ -13,7 +13,7 @@ import (
 	"github.com/fatih/set"
 )
 
-func (w *httpWorker) httpHandleCatalogRoot(rw http.ResponseWriter, r *http.Request) {
+func (w *httpWorker) httpHandleCatalogSummary(rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	// Get item types list and information
