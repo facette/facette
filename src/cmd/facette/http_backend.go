@@ -14,6 +14,7 @@ import (
 	"github.com/facette/httputil"
 	"github.com/facette/jsonutil"
 	"github.com/facette/sqlstorage"
+	"github.com/hashicorp/go-uuid"
 )
 
 var backendTypes = []string{
@@ -130,10 +131,18 @@ func (w *httpWorker) httpHandleBackendGet(rw http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	// Check for aliased item if identifier value isn't valid
+	column := "id"
+	if typ == "collections" || typ == "graphs" {
+		if _, err := uuid.ParseUUID(id); err != nil {
+			column = "alias"
+		}
+	}
+
 	// Request item from back-end
 	rv := reflect.ValueOf(item)
 
-	if err := w.service.backend.Storage().Get("id", id, rv.Interface()); err == sqlstorage.ErrItemNotFound {
+	if err := w.service.backend.Storage().Get(column, id, rv.Interface()); err == sqlstorage.ErrItemNotFound {
 		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
 		return
 	} else if err != nil {

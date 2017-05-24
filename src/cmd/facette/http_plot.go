@@ -12,6 +12,7 @@ import (
 
 	"github.com/facette/httputil"
 	"github.com/facette/sqlstorage"
+	"github.com/hashicorp/go-uuid"
 )
 
 const (
@@ -44,7 +45,13 @@ func (w *httpWorker) httpHandlePlots(rw http.ResponseWriter, r *http.Request) {
 	if req.ID != "" {
 		req.Graph = w.service.backend.NewGraph()
 
-		if err := w.service.backend.Storage().Get("id", req.ID, req.Graph); err == sqlstorage.ErrItemNotFound {
+		// Check for aliased item if identifier value isn't valid
+		column := "id"
+		if _, err := uuid.ParseUUID(req.ID); err != nil {
+			column = "alias"
+		}
+
+		if err := w.service.backend.Storage().Get(column, req.ID, req.Graph); err == sqlstorage.ErrItemNotFound {
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
 			return
 		} else if err != nil {
