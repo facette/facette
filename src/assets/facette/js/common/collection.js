@@ -53,7 +53,7 @@ app.factory('browseCollection', function($location, $routeParams, $timeout, libr
                 }
             }
 
-            var data = storage.get('browse-collection_tree', 'data');
+            var data = storage.get('browse-collection_tree', 'cache-' + $location.url());
             if (data) {
                 scope.collections = data;
                 scope.collectionsLoaded = true;
@@ -63,7 +63,7 @@ app.factory('browseCollection', function($location, $routeParams, $timeout, libr
                 scope.collections = data;
                 scope.collectionsLoaded = true;
 
-                storage.set('browse-collection_tree', 'data', data);
+                storage.set('browse-collection_tree', 'cache-' + $location.url(), data);
 
                 scope.$applyAsync(function() { applyState(); });
             });
