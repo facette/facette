@@ -64,7 +64,7 @@ func init() {
 		} else if c.url == "" {
 			return nil, ErrMissingConnectorSetting("url")
 		}
-		c.url = strings.TrimRight(c.url, "/")
+		normalizeURL(&c.url)
 
 		if c.timeout, err = settings.GetInt("timeout", connectorDefaultTimeout); err != nil {
 			return nil, err

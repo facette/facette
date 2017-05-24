@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 
 	"facette/catalog"
@@ -113,7 +112,7 @@ func init() {
 		} else if c.url == "" {
 			return nil, ErrMissingConnectorSetting("url")
 		}
-		c.url = strings.TrimRight(c.url, "/")
+		normalizeURL(&c.url)
 
 		if c.aggregators, err = settings.GetStringSlice("aggregators", kairosdbDefaultAggregators); err != nil {
 			return nil, err
