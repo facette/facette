@@ -5,6 +5,8 @@ import (
 	"facette/catalog"
 	"facette/worker"
 	"fmt"
+	"os"
+	"runtime/debug"
 
 	"github.com/facette/logger"
 )
@@ -38,6 +40,14 @@ func (s *Service) Run() error {
 	if err != nil {
 		return err
 	}
+
+	// Catch panic and write its output to the logger
+	defer func() {
+		if r := recover(); r != nil {
+			s.log.Error("panic: %s\n%s", r, debug.Stack())
+			os.Exit(1)
+		}
+	}()
 
 	s.log.Info("service started")
 
