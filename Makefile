@@ -101,7 +101,10 @@ test-bin: build-dir
 	@$(call mesg_start,test,Testing packages...)
 	@(cd $(BUILD_DIR) && for pkg in $(PKG_LIST); do \
 		install -d -m 0755 tests/`dirname $$pkg`; \
-		$(GO) test -coverprofile tests/$$pkg.out -v $$pkg || exit 1; \
+		$(GO) test -v \
+			-tags "$(BUILD_TAGS)" \
+			-coverprofile tests/$$pkg.out $$pkg \
+			|| exit 1; \
 		test ! -f tests/$$pkg.out || $(GO) tool cover -o tests/$$pkg.func -func=tests/$$pkg.out || exit 1; \
 	done) && $(call mesg_ok) || $(call mesg_fail)
 
