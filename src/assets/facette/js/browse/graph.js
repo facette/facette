@@ -215,7 +215,7 @@ app.controller('BrowseGraphController', function($location, $rootScope, $routePa
         var query = {
             type: $scope.section,
             id: $scope.id,
-            fields: 'id,name,entries.graph,entries.options,entries.attributes,options,attributes,parent,template'
+            fields: 'id,name,entries.graph,entries.options,entries.attributes,options,alias,attributes,parent,template'
         };
 
         // Always expand collections when browsing
@@ -228,6 +228,9 @@ app.controller('BrowseGraphController', function($location, $rootScope, $routePa
             if (data.template) {
                 return;
             }
+
+            $scope.id = data.id;
+            $scope.alias = data.alias;
 
             // Set page title
             var title = data.options && data.options.title ? data.options.title : data.name;

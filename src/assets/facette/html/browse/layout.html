@@ -25,7 +25,7 @@
 					</ul>
 				</div>
 			</menuitem>
-			<menuitem href="{{ ::baseURL }}browse/{{ section }}/{{ id }}#graph{{ g.index }}" label="{{ g.title }}" type="button" ng-mouseenter="handleGraphFocus($event, g.index)" ng-mouseleave="handleGraphFocus($event, g.index)" ng-repeat="g in graphs" ng-show="!g.hidden"></menuitem>
+			<menuitem href="{{ ::baseURL }}browse/{{ section }}/{{ alias || id }}#graph{{ g.index }}" label="{{ g.title }}" type="button" ng-mouseenter="handleGraphFocus($event, g.index)" ng-mouseleave="handleGraphFocus($event, g.index)" ng-repeat="g in graphs" ng-show="!g.hidden"></menuitem>
 			<menuitem icon="info-circle" label="{{ 'mesg.collections_empty' | translate }}" ng-if="!graphs && (!collections || collections.length === 0)" type="placeholder"></menuitem>
 		</menu>
 	</nav>

@@ -5,13 +5,14 @@ package main
 import (
 	"net/http"
 	"path"
-	"path/filepath"
 	"strings"
 )
 
 func (w *httpWorker) httpHandleAsset(rw http.ResponseWriter, r *http.Request) {
 	var (
+		isAsset   bool
 		isDefault bool
+		filePath  string
 		ct        string
 	)
 
@@ -22,8 +23,12 @@ func (w *httpWorker) httpHandleAsset(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get file data from built-in assets
-	filePath := strings.TrimPrefix(r.URL.Path, w.service.config.RootPath+"/assets/")
-	if strings.HasSuffix(filePath, "/") || filepath.Ext(filePath) == "" {
+	if strings.HasPrefix(r.URL.Path, w.service.config.RootPath+"/assets/") {
+		filePath = strings.TrimPrefix(r.URL.Path, w.service.config.RootPath+"/assets/")
+		isAsset = true
+	}
+
+	if strings.HasSuffix(filePath, "/") || !isAsset {
 		filePath = httpDefaultPath
 	}
 

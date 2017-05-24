@@ -11,7 +11,11 @@ import (
 )
 
 func (w *httpWorker) httpHandleAsset(rw http.ResponseWriter, r *http.Request) {
-	var isDefault bool
+	var (
+		isAsset   bool
+		isDefault bool
+		filePath  string
+	)
 
 	// Stop handling assets if frontend is disabled
 	if !w.service.config.Frontend.Enabled {
@@ -20,8 +24,12 @@ func (w *httpWorker) httpHandleAsset(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	// Strip assets prefix and handle default path
-	filePath := strings.TrimPrefix(r.URL.Path, w.service.config.RootPath+"/assets")
-	if strings.HasSuffix(filePath, "/") || filepath.Ext(filePath) == "" {
+	if strings.HasPrefix(r.URL.Path, w.service.config.RootPath+"/assets") {
+		filePath = strings.TrimPrefix(r.URL.Path, w.service.config.RootPath+"/assets")
+		isAsset = true
+	}
+
+	if strings.HasSuffix(filePath, "/") || !isAsset {
 		filePath = httpDefaultPath
 	}
 
