@@ -11,6 +11,8 @@ var (
 	ErrInvalidInterval = errors.New("invalid interval")
 	// ErrInvalidName represents an invalid name error.
 	ErrInvalidName = errors.New("invalid name")
+	// ErrInvalidPattern represents an invalid pattern error.
+	ErrInvalidPattern = errors.New("invalid pattern")
 	// ErrInvalidPriority represents an invalid priority error.
 	ErrInvalidPriority = errors.New("invalid priority")
 	// ErrUnresolvableItem represents an unresolvable item error.

@@ -3,11 +3,20 @@ package backend
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"regexp"
+	"strings"
+
+	"github.com/jinzhu/gorm"
 )
 
 const (
-	// GroupPrefix is the source or metric group prefix.
+	// GroupPrefix represents the source or metric group prefix.
 	GroupPrefix = "group:"
+
+	// GlobPrefix represents the glob pattern prefix.
+	GlobPrefix = "glob:"
+	// RegexpPrefix represents the regexp pattern prefix.
+	RegexpPrefix = "regexp:"
 )
 
 // SourceGroup represents a library source group item instance.
@@ -19,6 +28,25 @@ type SourceGroup struct {
 // NewSourceGroup creates a new back-end source group item instance.
 func (b *Backend) NewSourceGroup() *SourceGroup {
 	return &SourceGroup{Item: Item{backend: b}}
+}
+
+// BeforeSave handles the ORM 'BeforeSave' callback.
+func (sg *SourceGroup) BeforeSave(scope *gorm.Scope) error {
+	if err := sg.Item.BeforeSave(scope); err != nil {
+		return err
+	}
+
+	for _, p := range sg.Patterns {
+		if !strings.HasPrefix(p, RegexpPrefix) {
+			continue
+		}
+
+		if _, err := regexp.Compile(strings.TrimPrefix(p, RegexpPrefix)); err != nil {
+			return ErrInvalidPattern
+		}
+	}
+
+	return nil
 }
 
 // TableName returns the table name to use in the database.
@@ -35,6 +63,25 @@ type MetricGroup struct {
 // NewMetricGroup creates a new back-end metric group item instance.
 func (b *Backend) NewMetricGroup() *MetricGroup {
 	return &MetricGroup{Item: Item{backend: b}}
+}
+
+// BeforeSave handles the ORM 'BeforeSave' callback.
+func (mg *MetricGroup) BeforeSave(scope *gorm.Scope) error {
+	if err := mg.Item.BeforeSave(scope); err != nil {
+		return err
+	}
+
+	for _, p := range mg.Patterns {
+		if !strings.HasPrefix(p, RegexpPrefix) {
+			continue
+		}
+
+		if _, err := regexp.Compile(strings.TrimPrefix(p, RegexpPrefix)); err != nil {
+			return ErrInvalidPattern
+		}
+	}
+
+	return nil
 }
 
 // TableName returns the table name to use in the database.

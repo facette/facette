@@ -93,8 +93,8 @@ func (w *httpWorker) httpHandleBackendCreate(rw http.ResponseWriter, r *http.Req
 		case sqlstorage.ErrItemConflict:
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusConflict)
 
-		case backend.ErrInvalidAlias, backend.ErrInvalidID, backend.ErrInvalidName, sqlstorage.ErrMissingField,
-			sqlstorage.ErrUnknownReference:
+		case backend.ErrInvalidAlias, backend.ErrInvalidID, backend.ErrInvalidName, backend.ErrInvalidPattern,
+			sqlstorage.ErrMissingField, sqlstorage.ErrUnknownReference:
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusBadRequest)
 
 		default:
@@ -223,8 +223,8 @@ func (w *httpWorker) httpHandleBackendUpdate(rw http.ResponseWriter, r *http.Req
 		case sqlstorage.ErrItemConflict:
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusConflict)
 
-		case backend.ErrInvalidAlias, backend.ErrInvalidID, backend.ErrInvalidName, sqlstorage.ErrMissingField,
-			sqlstorage.ErrUnknownReference:
+		case backend.ErrInvalidAlias, backend.ErrInvalidID, backend.ErrInvalidName, backend.ErrInvalidPattern,
+			sqlstorage.ErrMissingField, sqlstorage.ErrUnknownReference:
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusBadRequest)
 
 		default:

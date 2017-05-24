@@ -43,7 +43,12 @@ func (w *httpWorker) httpHandleCatalogType(rw http.ResponseWriter, r *http.Reque
 	s := set.New()
 	for _, item := range search {
 		name := reflect.Indirect(reflect.ValueOf(item)).FieldByName("Name").String()
-		if filter == "" || filterMatch(filter, name) {
+		if filter == "" {
+			s.Add(name)
+		} else if match, err := filterMatch(filter, name); err != nil {
+			httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidFilter), http.StatusBadRequest)
+			return
+		} else if match {
 			s.Add(name)
 		}
 	}

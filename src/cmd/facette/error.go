@@ -3,6 +3,8 @@ package main
 import "errors"
 
 var (
+	// ErrInvalidFilter represents an invalid filter pattern error.
+	ErrInvalidFilter = errors.New("invalid filter pattern")
 	// ErrInvalidJSON represents an invalid JSON data error.
 	ErrInvalidJSON = errors.New("invalid JSON data")
 	// ErrInvalidParameter represents an invalid request parameter error.

@@ -63,7 +63,10 @@ func (w *httpWorker) expandSeries(series *backend.Series, existOnly bool) []*bac
 		// Loop through sources checking for patterns matching
 		for _, s := range w.service.searcher.Sources(series.Origin, "", -1) {
 			for _, p := range group.Patterns {
-				if filterMatch(p, s.Name) {
+				if match, err := filterMatch(p, s.Name); err != nil {
+					w.log.Error("failed to match filter: %s", err)
+					return nil
+				} else if match {
 					sourcesSet.Add(s.Name)
 				}
 			}
@@ -91,7 +94,10 @@ func (w *httpWorker) expandSeries(series *backend.Series, existOnly bool) []*bac
 			}
 
 			for _, p := range group.Patterns {
-				if filterMatch(p, m.Name) {
+				if match, err := filterMatch(p, m.Name); err != nil {
+					w.log.Error("failed to match filter: %s", err)
+					return nil
+				} else if match {
 					metricsSet.Add(m.Name)
 				}
 			}

@@ -5,35 +5,36 @@ import (
 	"regexp"
 	"strings"
 
+	"facette/backend"
+
 	"github.com/facette/sqlstorage"
 )
 
-const (
-	filterGlobPrefix   = "glob:"
-	filterRegexpPrefix = "regexp:"
-)
-
 func filterApplyModifier(pattern string) interface{} {
-	if strings.HasPrefix(pattern, filterGlobPrefix) {
-		return sqlstorage.GlobModifier(strings.TrimPrefix(pattern, filterGlobPrefix))
-	} else if strings.HasPrefix(pattern, filterRegexpPrefix) {
-		return sqlstorage.RegexpModifier(strings.TrimPrefix(pattern, filterRegexpPrefix))
+	if strings.HasPrefix(pattern, backend.GlobPrefix) {
+		return sqlstorage.GlobModifier(strings.TrimPrefix(pattern, backend.GlobPrefix))
+	} else if strings.HasPrefix(pattern, backend.RegexpPrefix) {
+		return sqlstorage.RegexpModifier(strings.TrimPrefix(pattern, backend.RegexpPrefix))
 	}
 
 	return pattern
 }
 
-func filterMatch(pattern, value string) bool {
-	if strings.HasPrefix(pattern, filterGlobPrefix) {
+func filterMatch(pattern, value string) (bool, error) {
+	if strings.HasPrefix(pattern, backend.GlobPrefix) {
 		// Remove slashes from pattern and value as 'path.Match' does not handle them
 		pattern = strings.ToLower(strings.Replace(pattern, "/", "\x1e", -1))
 		value = strings.ToLower(strings.Replace(value, "/", "\x1e", -1))
 
-		ok, _ := path.Match(strings.TrimPrefix(pattern, filterGlobPrefix), value)
-		return ok
-	} else if strings.HasPrefix(pattern, filterRegexpPrefix) {
-		return regexp.MustCompile(strings.TrimPrefix(pattern, filterRegexpPrefix)).MatchString(value)
+		ok, _ := path.Match(strings.TrimPrefix(pattern, backend.GlobPrefix), value)
+		return ok, nil
+	} else if strings.HasPrefix(pattern, backend.RegexpPrefix) {
+		if re, err := regexp.Compile(strings.TrimPrefix(pattern, backend.RegexpPrefix)); err != nil {
+			return false, err
+		} else {
+			return re.MatchString(value), nil
+		}
 	}
 
-	return pattern == value
+	return pattern == value, nil
 }
