@@ -20,6 +20,16 @@ app.controller('BrowseGraphController', function($location, $rootScope, $routePa
     // Set range values
     $scope.rangeValues = timeRanges;
 
+    // Define helper functions
+    function locationApplyRange() {
+        $location.skipReload()
+            .search('start', $scope.startTime ? moment($scope.startTime).format(timeFormatRFC3339) : null)
+            .search('end', $scope.endTime ? moment($scope.endTime).format(timeFormatRFC3339) : null)
+            .search('time', $scope.time ? moment($scope.time).format(timeFormatRFC3339) : null)
+            .search('range', $scope.range || null)
+            .replace();
+        }
+
     // Register scope functions
     $scope.refresh = function() {
         $rootScope.$emit('RefreshGraph');
@@ -37,28 +47,35 @@ app.controller('BrowseGraphController', function($location, $rootScope, $routePa
             return;
         }
 
-        $location.skipReload()
-            .search('start', $scope.startTime)
-            .search('end', $scope.endTime)
-            .search('time', $scope.time)
-            .search('range', $scope.range)
-            .replace();
+        locationApplyRange();
     };
 
     $scope.setRange = function(range) {
         if (range != 'custom') {
-            $rootScope.$emit('ApplyGraphOptions', {range: '-' + range});
+            range = '-' + range;
 
-            $location.skipReload()
-                .search('start', null)
-                .search('end', null)
-                .search('range', '-' + range || null)
-                .replace();
+            $rootScope.$emit('ApplyGraphOptions', {range: range});
+
+            if ($scope.range === range) {
+                return;
+            }
+
+            $scope.startTime = null;
+            $scope.endTime = null;
+            $scope.time = null;
+            $scope.range = range || null;
+
+            locationApplyRange();
 
             return;
         }
 
         $rootScope.$emit('PromptTimeRange', function(startTime, endTime, time, range) {
+            if ($scope.startTime === startTime && $scope.endTime === endTime && $scope.time === time &&
+                $scope.range === range) {
+                return;
+            }
+
             $scope.startTime = startTime;
             $scope.endTime = endTime;
             $scope.time = time;
@@ -72,12 +89,7 @@ app.controller('BrowseGraphController', function($location, $rootScope, $routePa
                 range: range
             });
 
-            $location.skipReload()
-                .search('start', startTime ? moment(startTime).format(timeFormatRFC3339) : null)
-                .search('end', endTime ? moment(endTime).format(timeFormatRFC3339) : null)
-                .search('time', time ? moment(time).format(timeFormatRFC3339) : null)
-                .search('range', range || null)
-                .replace();
+            locationApplyRange();
         }, {
             start: $scope.startTime,
             end: $scope.endTime,
