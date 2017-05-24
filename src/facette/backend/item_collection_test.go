@@ -54,7 +54,7 @@ func testCollectionCreateInvalid(b *Backend, testCollections []*Collection, t *t
 
 	alias := "invalid!"
 	if err := b.Storage().Save(&Collection{Item: Item{Name: "name"}, Alias: &alias}); err != ErrInvalidAlias {
-		t.Logf("\nExpected %#v\nbut got  %#v", ErrInvalidInterval, err)
+		t.Logf("\nExpected %#v\nbut got  %#v", ErrInvalidAlias, err)
 		t.Fail()
 	}
 }

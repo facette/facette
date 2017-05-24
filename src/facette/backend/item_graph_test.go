@@ -76,7 +76,7 @@ func testGraphCreateInvalid(b *Backend, testGraphs []*Graph, t *testing.T) {
 
 	alias := "invalid!"
 	if err := b.Storage().Save(&Graph{Item: Item{Name: "name"}, Alias: &alias}); err != ErrInvalidAlias {
-		t.Logf("\nExpected %#v\nbut got  %#v", ErrInvalidInterval, err)
+		t.Logf("\nExpected %#v\nbut got  %#v", ErrInvalidAlias, err)
 		t.Fail()
 	}
 }
