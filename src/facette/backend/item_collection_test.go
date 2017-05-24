@@ -81,7 +81,7 @@ func testCollectionUpdate(b *Backend, testCollections []*Collection, t *testing.
 	}
 
 	collection := &Collection{}
-	if err := b.Storage().Get("name", "item1", collection); err != nil {
+	if err := b.Storage().Get("name", "item1", collection, true); err != nil {
 		t.Logf("\nExpected <nil>\nbut got  %#v", err)
 		t.Fail()
 	} else if !reflect.DeepEqual(collection, testCollections[0]) {

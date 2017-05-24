@@ -102,7 +102,7 @@ func testGraphUpdate(b *Backend, testGraphs []*Graph, t *testing.T) {
 	}
 
 	graph := &Graph{}
-	if err := b.Storage().Get("name", "item1", graph); err != nil {
+	if err := b.Storage().Get("name", "item1", graph, true); err != nil {
 		t.Logf("\nExpected <nil>\nbut got  %#v", err)
 		t.Fail()
 	} else if !reflect.DeepEqual(graph, testGraphs[0]) {

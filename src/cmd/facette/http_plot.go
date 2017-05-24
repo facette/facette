@@ -51,7 +51,7 @@ func (w *httpWorker) httpHandlePlots(rw http.ResponseWriter, r *http.Request) {
 			column = "alias"
 		}
 
-		if err := w.service.backend.Storage().Get(column, req.ID, req.Graph); err == sqlstorage.ErrItemNotFound {
+		if err := w.service.backend.Storage().Get(column, req.ID, req.Graph, false); err == sqlstorage.ErrItemNotFound {
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
 			return
 		} else if err != nil {

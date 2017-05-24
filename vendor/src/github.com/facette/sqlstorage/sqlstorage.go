@@ -129,7 +129,7 @@ func (s *Storage) Save(v interface{}) error {
 }
 
 // Get retrieves an existing item from the storage.
-func (s *Storage) Get(column string, values interface{}, v interface{}) error {
+func (s *Storage) Get(column string, values interface{}, v interface{}, assoc bool) error {
 	tx := s.db.Begin()
 	defer tx.Commit()
 
@@ -147,7 +147,11 @@ func (s *Storage) Get(column string, values interface{}, v interface{}) error {
 		return s.driver.NormalizeError(err)
 	}
 
-	return s.handleAssociations(tx, v, false)
+	if assoc {
+		return s.handleAssociations(tx, v, false)
+	}
+
+	return nil
 }
 
 // Delete removes an existing item from the storage.
@@ -177,7 +181,9 @@ func (s *Storage) Count(v interface{}) (int, error) {
 }
 
 // List retrieves a list of existing items from the storage.
-func (s *Storage) List(v interface{}, filters map[string]interface{}, sort []string, offset, limit int) (int, error) {
+func (s *Storage) List(v interface{}, filters map[string]interface{}, sort []string, offset, limit int,
+	assoc bool) (int, error) {
+
 	tx := s.db.Begin()
 	defer tx.Commit()
 
@@ -221,23 +227,25 @@ func (s *Storage) List(v interface{}, filters map[string]interface{}, sort []str
 	}
 
 	// Retrieve item-specific associations
-	rv := reflect.ValueOf(v)
-	for rv.Kind() == reflect.Ptr {
-		rv = rv.Elem()
-	}
+	if assoc {
+		rv := reflect.ValueOf(v)
+		for rv.Kind() == reflect.Ptr {
+			rv = rv.Elem()
+		}
 
-	rt := rv.Type().Elem()
-	for rt.Kind() == reflect.Ptr {
-		rt = rt.Elem()
-	}
+		rt := rv.Type().Elem()
+		for rt.Kind() == reflect.Ptr {
+			rt = rt.Elem()
+		}
 
-	if _, ok := s.associations[rt]; ok {
-		// Reset filters, orders and limits
-		tx = tx.New()
+		if _, ok := s.associations[rt]; ok {
+			// Reset filters, orders and limits
+			tx = tx.New()
 
-		for i, n := 0, rv.Len(); i < n; i++ {
-			if err := s.handleAssociations(tx, rv.Index(i).Interface(), false); err != nil {
-				return 0, err
+			for i, n := 0, rv.Len(); i < n; i++ {
+				if err := s.handleAssociations(tx, rv.Index(i).Interface(), false); err != nil {
+					return 0, err
+				}
 			}
 		}
 	}

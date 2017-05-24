@@ -154,7 +154,7 @@ func (g *Graph) Resolve() error {
 
 	if g.LinkID != nil && *g.LinkID != "" {
 		g.Link = g.backend.NewGraph()
-		if err := g.backend.Storage().Get("id", *g.LinkID, g.Link); err != nil {
+		if err := g.backend.Storage().Get("id", *g.LinkID, g.Link, false); err != nil {
 			return err
 		}
 	}

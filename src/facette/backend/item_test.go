@@ -61,7 +61,7 @@ func testItemCreateInvalid(b *Backend, refItem interface{}, testItems []interfac
 func testItemGet(b *Backend, refItem interface{}, testItems []interface{}, t *testing.T) {
 	item := testNewItem(refItem)
 	rv := reflect.Indirect(reflect.ValueOf(item))
-	if err := b.Storage().Get("name", "item1", item); err != nil {
+	if err := b.Storage().Get("name", "item1", item, true); err != nil {
 		t.Logf("\nExpected <nil>\nbut got  %#v", err)
 		t.Fail()
 	} else if id := rv.FieldByName("ID").String(); id == "" {
@@ -80,7 +80,7 @@ func testItemGet(b *Backend, refItem interface{}, testItems []interface{}, t *te
 
 func testItemGetUnknown(b *Backend, refItem interface{}, testItems []interface{}, t *testing.T) {
 	item := testNewItem(refItem)
-	if err := b.Storage().Get("name", "unknown1", item); err != sqlstorage.ErrItemNotFound {
+	if err := b.Storage().Get("name", "unknown1", item, true); err != sqlstorage.ErrItemNotFound {
 		t.Logf("\nExpected <nil>\nbut got  %#v", err)
 		t.Fail()
 	}
@@ -99,7 +99,7 @@ func testItemUpdate(b *Backend, refItem interface{}, testItems []interface{}, t 
 
 	item := testNewItem(refItem)
 	rv := reflect.Indirect(reflect.ValueOf(item))
-	if err := b.Storage().Get("name", "item1", item); err != nil {
+	if err := b.Storage().Get("name", "item1", item, true); err != nil {
 		t.Logf("\nExpected <nil>\nbut got  %#v", err)
 		t.Fail()
 	} else if id := rv.FieldByName("ID").String(); id == "" {
@@ -128,7 +128,7 @@ func testItemUpdate(b *Backend, refItem interface{}, testItems []interface{}, t 
 
 	item = testNewItem(refItem)
 	rv = reflect.Indirect(reflect.ValueOf(item))
-	if err := b.Storage().Get("name", "item1", item); err != nil {
+	if err := b.Storage().Get("name", "item1", item, true); err != nil {
 		t.Logf("\nExpected <nil>\nbut got  %#v", err)
 		t.Fail()
 	} else if !reflect.DeepEqual(item, testItems[0]) {
@@ -159,7 +159,7 @@ func testItemList(b *Backend, refItem interface{}, testItems []interface{}, t *t
 	}
 
 	items := testNewItemSlice(refItem)
-	if count, err := b.Storage().List(items, nil, []string{"name"}, 0, 0); err != nil {
+	if count, err := b.Storage().List(items, nil, []string{"name"}, 0, 0, true); err != nil {
 		t.Logf("\nExpected <nil>\nbut got  %#v", err)
 		t.Fail()
 	} else if count != len(testItems) {
@@ -172,7 +172,7 @@ func testItemList(b *Backend, refItem interface{}, testItems []interface{}, t *t
 
 	items = testNewItemSlice(refItem)
 	if count, err := b.Storage().List(items, map[string]interface{}{"name": "item1"},
-		[]string{"name"}, 0, 0); err != nil {
+		[]string{"name"}, 0, 0, true); err != nil {
 		t.Logf("\nExpected <nil>\nbut got  %#v", err)
 		t.Fail()
 	} else if count != 1 {
@@ -184,7 +184,7 @@ func testItemList(b *Backend, refItem interface{}, testItems []interface{}, t *t
 	}
 
 	items = testNewItemSlice(refItem)
-	if count, err := b.Storage().List(items, nil, []string{"name"}, 0, 2); err != nil {
+	if count, err := b.Storage().List(items, nil, []string{"name"}, 0, 2, true); err != nil {
 		t.Logf("\nExpected <nil>\nbut got  %#v", err)
 		t.Fail()
 	} else if count != len(testItems) {
@@ -196,7 +196,7 @@ func testItemList(b *Backend, refItem interface{}, testItems []interface{}, t *t
 	}
 
 	items = testNewItemSlice(refItem)
-	if count, err := b.Storage().List(items, nil, []string{"name"}, 1, 1); err != nil {
+	if count, err := b.Storage().List(items, nil, []string{"name"}, 1, 1, true); err != nil {
 		t.Logf("\nExpected <nil>\nbut got  %#v", err)
 		t.Fail()
 	} else if count != len(testItems) {
@@ -210,7 +210,7 @@ func testItemList(b *Backend, refItem interface{}, testItems []interface{}, t *t
 	sliceutil.Reverse(testItems)
 
 	items = testNewItemSlice(refItem)
-	if count, err := b.Storage().List(items, nil, []string{"-name"}, 0, 0); err != nil {
+	if count, err := b.Storage().List(items, nil, []string{"-name"}, 0, 0, true); err != nil {
 		t.Logf("\nExpected <nil>\nbut got  %#v", err)
 		t.Fail()
 	} else if count != len(testItems) {
@@ -222,7 +222,7 @@ func testItemList(b *Backend, refItem interface{}, testItems []interface{}, t *t
 	}
 
 	items = testNewItemSlice(refItem)
-	if count, err := b.Storage().List(items, nil, []string{"-name"}, 2, 10); err != nil {
+	if count, err := b.Storage().List(items, nil, []string{"-name"}, 2, 10, true); err != nil {
 		t.Logf("\nExpected <nil>\nbut got  %#v", err)
 		t.Fail()
 	} else if count != len(testItems) {
@@ -241,7 +241,7 @@ func testItemDelete(b *Backend, refItem interface{}, testItems []interface{}, t 
 	}
 
 	item := testNewItem(refItem)
-	if err := b.Storage().Get("name", "item1", item); err != sqlstorage.ErrItemNotFound {
+	if err := b.Storage().Get("name", "item1", item, true); err != sqlstorage.ErrItemNotFound {
 		t.Logf("\nExpected %#v\nbut got  %#v", sqlstorage.ErrItemNotFound, err)
 		t.Fail()
 	}

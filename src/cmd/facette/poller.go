@@ -39,7 +39,7 @@ func (w *pollerWorker) Run(wg *sync.WaitGroup) {
 	providers := []*backend.Provider{}
 
 	if _, err := w.service.backend.Storage().List(&providers, map[string]interface{}{"enabled": true},
-		nil, 0, 0); err != nil {
+		nil, 0, 0, false); err != nil {
 		w.log.Error("failed to list providers: %s", err)
 		return
 	}

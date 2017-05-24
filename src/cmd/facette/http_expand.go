@@ -55,7 +55,7 @@ func (w *httpWorker) expandSeries(series *backend.Series, existOnly bool) []*bac
 
 		// Request source group from back-end
 		group := backend.SourceGroup{}
-		if err := w.service.backend.Storage().Get("id", id, &group); err != nil {
+		if err := w.service.backend.Storage().Get("id", id, &group, false); err != nil {
 			w.log.Warning("unable to expand %s source group: %s", id, err)
 			return nil
 		}
@@ -81,7 +81,7 @@ func (w *httpWorker) expandSeries(series *backend.Series, existOnly bool) []*bac
 
 		// Request metric group from back-end
 		group := backend.MetricGroup{}
-		if err := w.service.backend.Storage().Get("id", id, &group); err != nil {
+		if err := w.service.backend.Storage().Get("id", id, &group, false); err != nil {
 			w.log.Warning("unable to expand %s metric group: %s", id, err)
 			return nil
 		}

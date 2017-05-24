@@ -46,7 +46,7 @@ func (w *httpWorker) httpHandleLibraryParse(rw http.ResponseWriter, r *http.Requ
 
 		if req.Type == "collections" {
 			collection := backend.Collection{}
-			if err := w.service.backend.Storage().Get("id", req.ID, &collection); err == nil {
+			if err := w.service.backend.Storage().Get("id", req.ID, &collection, true); err == nil {
 				for _, entry := range collection.Entries {
 					paths = append(paths, w.prefix+"/library/graphs/"+entry.GraphID)
 				}

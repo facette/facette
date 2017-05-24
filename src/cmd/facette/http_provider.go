@@ -16,7 +16,7 @@ func (w *httpWorker) httpHandleProviderRefresh(rw http.ResponseWriter, r *http.R
 	provider := backend.Provider{}
 
 	// Request item from back-end
-	if err := w.service.backend.Storage().Get("id", id, &provider); err == sqlstorage.ErrItemNotFound {
+	if err := w.service.backend.Storage().Get("id", id, &provider, false); err == sqlstorage.ErrItemNotFound {
 		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
 		return
 	} else if err != nil {

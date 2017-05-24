@@ -44,7 +44,7 @@ func (w *httpWorker) httpHandleBackendCreate(rw http.ResponseWriter, r *http.Req
 	rv := reflect.ValueOf(item)
 
 	if id := httproute.QueryParam(r, "inherit"); id != "" {
-		if err := w.service.backend.Storage().Get("id", id, rv.Interface()); err == sqlstorage.ErrItemNotFound {
+		if err := w.service.backend.Storage().Get("id", id, rv.Interface(), false); err == sqlstorage.ErrItemNotFound {
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
 			return
 		} else if err != nil {
@@ -142,7 +142,7 @@ func (w *httpWorker) httpHandleBackendGet(rw http.ResponseWriter, r *http.Reques
 	// Request item from back-end
 	rv := reflect.ValueOf(item)
 
-	if err := w.service.backend.Storage().Get(column, id, rv.Interface()); err == sqlstorage.ErrItemNotFound {
+	if err := w.service.backend.Storage().Get(column, id, rv.Interface(), true); err == sqlstorage.ErrItemNotFound {
 		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
 		return
 	} else if err != nil {
@@ -191,7 +191,7 @@ func (w *httpWorker) httpHandleBackendUpdate(rw http.ResponseWriter, r *http.Req
 	rv := reflect.ValueOf(item)
 
 	if r.Method == "PATCH" {
-		if err := w.service.backend.Storage().Get("id", id, rv.Interface()); err == sqlstorage.ErrItemNotFound {
+		if err := w.service.backend.Storage().Get("id", id, rv.Interface(), true); err == sqlstorage.ErrItemNotFound {
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
 			return
 		} else if err != nil {
@@ -248,7 +248,7 @@ func (w *httpWorker) httpHandleBackendUpdate(rw http.ResponseWriter, r *http.Req
 
 	// Restart provider on update
 	if typ == "providers" {
-		if err := w.service.backend.Storage().Get("id", id, rv.Interface()); err == nil {
+		if err := w.service.backend.Storage().Get("id", id, rv.Interface(), false); err == nil {
 			go w.service.poller.StopProvider(rv.Interface().(*backend.Provider), true)
 		}
 	}
@@ -275,7 +275,7 @@ func (w *httpWorker) httpHandleBackendDelete(rw http.ResponseWriter, r *http.Req
 	// Request item from back-end
 	rv := reflect.ValueOf(item)
 
-	if err := w.service.backend.Storage().Get("id", id, rv.Interface()); err == sqlstorage.ErrItemNotFound {
+	if err := w.service.backend.Storage().Get("id", id, rv.Interface(), false); err == sqlstorage.ErrItemNotFound {
 		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusNotFound)
 		return
 	} else if err != nil {
@@ -332,7 +332,7 @@ func (w *httpWorker) httpHandleBackendDeleteAll(rw http.ResponseWriter, r *http.
 	if typ == "providers" {
 		rv = reflect.New(reflect.MakeSlice(reflect.SliceOf(reflect.TypeOf(item)), 0, 0).Type())
 
-		_, err := w.service.backend.Storage().List(rv.Interface(), nil, nil, 0, 0)
+		_, err := w.service.backend.Storage().List(rv.Interface(), nil, nil, 0, 0, false)
 		if err == sqlstorage.ErrUnknownColumn {
 			httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusBadRequest)
 			return
@@ -418,7 +418,7 @@ func (w *httpWorker) httpHandleBackendList(rw http.ResponseWriter, r *http.Reque
 
 	sort := httpGetListParam(r, "sort", []string{"name"})
 
-	count, err := w.service.backend.Storage().List(rv.Interface(), filters, sort, offset, limit)
+	count, err := w.service.backend.Storage().List(rv.Interface(), filters, sort, offset, limit, true)
 	if err == sqlstorage.ErrUnknownColumn {
 		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusBadRequest)
 		return

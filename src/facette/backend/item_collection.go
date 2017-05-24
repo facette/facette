@@ -143,7 +143,7 @@ func (c *Collection) Expand(attrs maputil.Map) error {
 
 		if len(values) > 0 {
 			result := []*Graph{}
-			if err := c.backend.Storage().Get("id", values, &result); err != nil {
+			if err := c.backend.Storage().Get("id", values, &result, false); err != nil {
 				return err
 			}
 
@@ -225,7 +225,7 @@ func (c *Collection) Resolve(cache map[string]*Collection) error {
 			}
 		} else {
 			c.Link = c.backend.NewCollection()
-			if err := c.backend.Storage().Get("id", *c.LinkID, c.Link); err != nil {
+			if err := c.backend.Storage().Get("id", *c.LinkID, c.Link, true); err != nil {
 				return err
 			}
 		}
@@ -238,7 +238,7 @@ func (c *Collection) Resolve(cache map[string]*Collection) error {
 			}
 		} else {
 			c.Parent = c.backend.NewCollection()
-			if err := c.backend.Storage().Get("id", *c.ParentID, c.Parent); err != nil {
+			if err := c.backend.Storage().Get("id", *c.ParentID, c.Parent, true); err != nil {
 				return err
 			}
 		}
@@ -254,7 +254,7 @@ func (c *Collection) Resolve(cache map[string]*Collection) error {
 
 	if len(ids) > 0 {
 		graphs := []*Graph{}
-		if err := c.backend.Storage().Get("id", ids, &graphs); err != nil {
+		if err := c.backend.Storage().Get("id", ids, &graphs, false); err != nil {
 			return err
 		}
 
@@ -312,7 +312,7 @@ type CollectionTree []*CollectionTreeEntry
 // NewCollectionTree creates a new back-end collection tree instance.
 func (b *Backend) NewCollectionTree(root string) (*CollectionTree, error) {
 	collections := []*Collection{}
-	if _, err := b.Storage().List(&collections, nil, nil, 0, 0); err != nil {
+	if _, err := b.Storage().List(&collections, nil, nil, 0, 0, false); err != nil {
 		return nil, err
 	}
 
