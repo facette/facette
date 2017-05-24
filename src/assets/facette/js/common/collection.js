@@ -53,9 +53,17 @@ app.factory('browseCollection', function($location, $routeParams, $timeout, libr
                 }
             }
 
+            var data = storage.get('browse-collection_tree', 'data');
+            if (data) {
+                scope.collections = data;
+                scope.collectionsLoaded = true;
+            }
+
             library.collectionTree({parent: scope.id || null}, function(data) {
                 scope.collections = data;
                 scope.collectionsLoaded = true;
+
+                storage.set('browse-collection_tree', 'data', data);
 
                 scope.$applyAsync(function() { applyState(); });
             });
