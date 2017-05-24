@@ -291,9 +291,6 @@ angular.module('facette.ui.graph', [])
             $scope.data = data;
             $scope.loading = false;
 
-            // Remove old rendered graph
-            $element.find('.graph-container svg').remove();
-
             draw();
 
             // Register next draw if refresh interval set
