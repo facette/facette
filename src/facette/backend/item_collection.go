@@ -131,53 +131,6 @@ func (c *Collection) Expand(attrs maputil.Map) error {
 			}
 		}
 
-		// Fetch graph entries titles
-		graphs := map[string]*Graph{}
-
-		values := []string{}
-		for _, entry := range tmpl.Entries {
-			if !sliceutil.Has(values, entry.GraphID) {
-				values = append(values, entry.GraphID)
-			}
-		}
-
-		if len(values) > 0 {
-			result := []*Graph{}
-			if err := c.backend.Storage().Get("id", values, &result, false); err != nil {
-				return err
-			}
-
-			for _, entry := range result {
-				graphs[entry.ID] = entry
-			}
-		}
-
-		for _, entry := range tmpl.Entries {
-			g, ok := graphs[entry.GraphID]
-			if !ok {
-				continue
-			}
-
-			attrs := maputil.Map{}
-			attrs.Merge(c.Attributes, true)
-			attrs.Merge(g.Attributes, true)
-			attrs.Merge(entry.Attributes, true)
-
-			opts := maputil.Map{}
-			opts.Merge(g.Options, true)
-			opts.Merge(entry.Options, true)
-
-			if opts.Has("title") {
-				title, _ := opts.GetString("title", "")
-
-				if opts["title"], err = template.Expand(title, attrs); err != nil {
-					return err
-				}
-			}
-
-			entry.Options = opts
-		}
-
 		*c = *tmpl
 	}
 
@@ -189,7 +142,11 @@ func (c *Collection) Expand(attrs maputil.Map) error {
 		}
 
 		for _, entry := range c.Entries {
-			entry.Graph.Expand(c.Attributes)
+			attrs := maputil.Map{}
+			attrs.Merge(c.Attributes, true)
+			attrs.Merge(entry.Attributes, true)
+
+			entry.Graph.Expand(attrs)
 
 			if v, ok := entry.Graph.Options["title"]; ok {
 				if entry.Options == nil {
