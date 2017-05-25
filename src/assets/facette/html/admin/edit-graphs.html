@@ -46,7 +46,7 @@
 										<div class="name">{{ g.name || (g.series.length == 1 ? g.series[0].name : '&nbsp;') }}</div>
 										<div class="actions">
 											<menu>
-												<menuitem href="" icon="cog" title="{{ 'label.series_group_edit' | translate }}" type="button" ng-click="$event.stopPropagation(); editGroup(g)"></menuitem>
+												<menuitem href="" icon="cog" info="{{ 'label.series_group_edit' | translate }}" type="button" ng-click="$event.stopPropagation(); editGroup(g)"></menuitem>
 											</menu>
 										</div>
 									</div>
@@ -60,16 +60,16 @@
 										</div>
 										<div class="actions">
 											<menu>
-												<menuitem href="" icon="times" title="{{ 'label.series_remove' | translate }}" type="button" ng-click="$event.stopPropagation(); remove(g.series, s)"></menuitem>
+												<menuitem href="" icon="times" info="{{ 'label.series_remove' | translate }}" type="button" ng-click="$event.stopPropagation(); remove(g.series, s)"></menuitem>
 											</menu>
 										</div>
 									</div>
 								</listcolumn>
 								<listcolumn class="actions">
 									<menu>
-										<menuitem href="" icon="caret-square-o-down" title="{{ 'label.groups_expand' | translate }}" type="button" ng-click="$event.stopPropagation(); expandGroup(g, true)" ng-show="g.series.length == 1 && g.series[0].expansion !== undefined"></menuitem>
-										<menuitem href="" icon="caret-square-o-up" title="{{ 'label.groups_collapse' | translate }}" type="button" ng-click="$event.stopPropagation(); expandGroup(g, false)" ng-show="g.series.length == 1 && g.series[0].expanded !== undefined"></menuitem>
-										<menuitem href="" icon="times-circle" title="{{ 'label.groups_remove' | translate }}" type="button" ng-click="$event.stopPropagation(); remove(item.groups, g)"></menuitem>
+										<menuitem href="" icon="caret-square-o-down" info="{{ 'label.groups_expand' | translate }}" type="button" ng-click="$event.stopPropagation(); expandGroup(g, true)" ng-show="g.series.length == 1 && g.series[0].expansion !== undefined"></menuitem>
+										<menuitem href="" icon="caret-square-o-up" info="{{ 'label.groups_collapse' | translate }}" type="button" ng-click="$event.stopPropagation(); expandGroup(g, false)" ng-show="g.series.length == 1 && g.series[0].expanded !== undefined"></menuitem>
+										<menuitem href="" icon="times-circle" info="{{ 'label.groups_remove' | translate }}" type="button" ng-click="$event.stopPropagation(); remove(item.groups, g)"></menuitem>
 									</menu>
 								</listcolumn>
 							</listrow>
@@ -257,7 +257,7 @@
 							<div class="name">{{ i.name }}</div>
 							<div class="actions">
 								<menu>
-									<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ i.id }}" icon="arrow-circle-right" title="{{ 'label.' + section + '_goto' | translate }}" type="button"></menuitem>
+									<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ i.id }}" icon="arrow-circle-right" info="{{ 'label.' + section + '_goto' | translate }}" type="button"></menuitem>
 								</menu>
 							</div>
 						</div>
@@ -277,7 +277,7 @@
 		<h1>{{ 'label.admin_panel' | translate }} – {{ (id == 'link' ? 'label.graphs_new' : 'label.graphs_edit') | translate }}</h1>
 
 		<menu ng-if="id != 'add' && item.link">
-			<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ item.link }}" icon="pencil" title="{{ 'label.' + section + '_edit_template' | translate }}" type="button"></menuitem>
+			<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ item.link }}" icon="pencil" info="{{ 'label.' + section + '_edit_template' | translate }}" type="button"></menuitem>
 		</menu>
 	</header>
 

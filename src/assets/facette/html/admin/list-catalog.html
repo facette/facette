@@ -5,7 +5,7 @@
 		<h1>{{ 'label.admin_panel' | translate }} – {{ 'label.' + section | translate }}</h1>
 
 		<menu class="main expand">
-			<menuitem href="" icon="refresh" title="{{ 'label.list_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
+			<menuitem href="" icon="refresh" info="{{ 'label.list_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
 		</menu>
 
 		<search name="search" placeholder="{{ 'label.' + section + '_search' | translate }}" ng-model="form.search"></search>
@@ -28,7 +28,7 @@
 						<div class="name">{{ name }}</div>
 						<div class="actions">
 							<menu>
-								<menuitem href="" icon="info-circle" type="button" tooltip-data="name" tooltip-formatter="formatCatalogTooltip" tooltip-position="bottom"></menuitem>
+								<menuitem href="" icon="info-circle" type="button" info="<table><tr><th class='label'>{{ 'label.providers' | translate }}</th><td>{{ providersData[name].join(', ') || ('mesg.wait' | translate) }}</td></tr></table>" info-direction="bottom-right" ng-mouseenter="providersData[name] || getProviders(name)"></menuitem>
 							</menu>
 						</div>
 					</div>

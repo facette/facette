@@ -1,0 +1,90 @@
+.angular-tooltip {
+	background-color: rgba(34, 34, 34, 0.98);
+	border-radius: 0.2rem;
+	box-sizing: border-box;
+	color: #fff;
+	font-size: 0.9rem;
+	max-width: 35%;
+	opacity: 0;
+	padding: 0.35rem 0.65rem;
+	pointer-events: none;
+	position: absolute;
+	transition: opacity .2s ease-in-out .5s;
+	user-select: none;
+	z-index: 200;
+}
+
+.angular-tooltip::before {
+	border: 0.5rem solid transparent;
+	content: '';
+	position: absolute;
+}
+
+.angular-tooltip-top::before,
+.angular-tooltip-top-left::before,
+.angular-tooltip-top-right::before {
+	border-top-color: rgba(34, 34, 34, 0.98);
+	top: 100%;
+}
+
+.angular-tooltip-top::before {
+	left: 50%;
+	margin-left: -0.5rem;
+}
+
+.angular-tooltip-top-left,
+.angular-tooltip-bottom-left {
+	margin-left: 0.5rem;
+}
+
+.angular-tooltip-top-left::before,
+.angular-tooltip-bottom-left::before {
+	right: 0.5rem;
+}
+
+.angular-tooltip-top-right,
+.angular-tooltip-bottom-right {
+	margin-left: -0.5rem;
+}
+
+.angular-tooltip-top-right::before,
+.angular-tooltip-bottom-right::before {
+	left: 0.5rem;
+}
+
+.angular-tooltip-right::before {
+	border-right-color: rgba(34, 34, 34, 0.98);
+	margin-top: -0.5rem;
+	right: 100%;
+	top: 50%;
+}
+
+.angular-tooltip-bottom::before,
+.angular-tooltip-bottom-left::before,
+.angular-tooltip-bottom-right::before {
+	border-bottom-color: rgba(34, 34, 34, 0.98);
+	bottom: 100%;
+}
+
+.angular-tooltip-bottom::before {
+	left: 50%;
+	margin-left: -0.5rem;
+}
+
+.angular-tooltip-left::before {
+	border-left-color: rgba(34, 34, 34, 0.98);
+	margin-top: -0.5rem;
+	left: 100%;
+	top: 50%;
+}
+
+.angular-tooltip-fade-in {
+	opacity: 1;
+}
+
+.angular-tooltip .label {
+	color: #777;
+	font-weight: 500;
+	padding-right: 0.5rem;
+	text-align: right;
+}

@@ -5,9 +5,9 @@
 		<h1>{{ 'label.admin_panel' | translate }} – {{ 'label.' + section | translate }}</h1>
 
 		<menu class="main expand">
-			<menuitem href="" icon="refresh" title="{{ 'label.list_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
-			<menuitem href="{{ ::baseURL }}admin/{{ section }}/add" icon="plus" title="{{ 'label.' + section + '_create' | translate }}" type="button" ng-if="!readOnly && section != 'collections' && section != 'graphs'"></menuitem>
-			<menuitem icon="plus" title="{{ 'label.' + section + '_create' | translate }}" type="button" drop="true" ng-if="!readOnly && (section == 'collections' || section == 'graphs')">
+			<menuitem href="" icon="refresh" info="{{ 'label.list_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
+			<menuitem href="{{ ::baseURL }}admin/{{ section }}/add" icon="plus" info="{{ 'label.' + section + '_create' | translate }}" type="button" ng-if="!readOnly && section != 'collections' && section != 'graphs'"></menuitem>
+			<menuitem icon="plus" type="button" drop="true" ng-if="!readOnly && (section == 'collections' || section == 'graphs')">
 				<menu>
 					<menuitem href="{{ ::baseURL }}admin/{{ section }}/add" label="{{ 'label.' + section + '_create' | translate }}" type="button"></menuitem>
 					<menuitem href="{{ ::baseURL }}admin/{{ section }}/link" label="{{ 'label.items_create_linked' | translate }}" type="button"></menuitem>
@@ -40,10 +40,10 @@
 						<div class="name">{{ i.name }} <span class="fa fa-link" ng-if="i.link"></span></div>
 						<div class="actions">
 							<menu>
-								<menuitem href="" icon="info-circle" type="button" tooltip-data="i" tooltip-formatter="formatBasicTooltip" tooltip-position="bottom"></menuitem>
-								<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ i.id }}" icon="pencil" title="{{ 'label.' + section + '_edit' | translate }}" type="button" ng-if="!readOnly"></menuitem>
-								<menuitem href="" icon="clone" title="{{ 'label.' + section + '_clone' | translate }}" type="button" ng-click="clone(i)" ng-if="!readOnly"></menuitem>
-								<menuitem href="{{ ::baseURL }}browse/{{ section }}/{{ i.id }}" icon="arrow-circle-right" title="{{ 'label.' + section + '_goto' | translate }}" type="button" ng-if="!templates && (section == 'collections' || section == 'graphs')"></menuitem>
+								<menuitem href="" icon="info-circle" type="button" info="<table><tr><th class='label'>{{ 'label.identifier' | translate }}</th><td>{{ i.id }}</td></tr><tr ng-if='{{ section == 'collections' || section == 'graphs' }}'><th class='label'>{{ 'label.alias' | translate }}</th><td>{{ i.alias || '-' }}</td></tr></table>" info-direction="bottom-right"></menuitem>
+								<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ i.id }}" icon="pencil" info="{{ 'label.' + section + '_edit' | translate }}" type="button" ng-if="!readOnly"></menuitem>
+								<menuitem href="" icon="clone" info="{{ 'label.' + section + '_clone' | translate }}" type="button" ng-click="clone(i)" ng-if="!readOnly"></menuitem>
+								<menuitem href="{{ ::baseURL }}browse/{{ section }}/{{ i.id }}" icon="arrow-circle-right" info="{{ 'label.' + section + '_goto' | translate }}" type="button" ng-if="!templates && (section == 'collections' || section == 'graphs')"></menuitem>
 							</menu>
 						</div>
 					</div>
@@ -54,7 +54,7 @@
 				</listcolumn>
 				<listcolumn class="actions" ng-if="!readOnly">
 					<menu>
-						<menuitem href="" icon="times-circle" title="{{ 'label.' + section + '_delete' | translate }}" type="button" ng-click="delete(i)"></menuitem>
+						<menuitem href="" icon="times-circle" info="{{ 'label.' + section + '_delete' | translate }}" type="button" ng-click="delete(i)"></menuitem>
 					</menu>
 				</listcolumn>
 			</listitem>

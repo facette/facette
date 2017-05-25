@@ -5,8 +5,8 @@
 		<h1>{{ 'label.admin_panel' | translate }} – {{ 'label.providers' | translate }}</h1>
 
 		<menu class="main expand">
-			<menuitem href="" icon="refresh" title="{{ 'label.list_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
-			<menuitem href="{{ ::baseURL }}admin/providers/add" icon="plus" title="{{ 'label.providers_add' | translate }}" type="button" ng-if="!readOnly"></menuitem>
+			<menuitem href="" icon="refresh" info="{{ 'label.list_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
+			<menuitem href="{{ ::baseURL }}admin/providers/add" icon="plus" info="{{ 'label.providers_add' | translate }}" type="button" ng-if="!readOnly"></menuitem>
 		</menu>
 
 		<search name="search" placeholder="{{ 'label.providers_search' | translate }}" ng-model="search"></search>
@@ -32,10 +32,10 @@
 						<div class="name">{{ i.name }}</div>
 						<div class="actions">
 							<menu>
-								<menuitem icon="info-circle" type="button" tooltip-data="i" tooltip-formatter="formatBasicTooltip" tooltip-position="bottom"></menuitem>
-								<menuitem href="{{ ::baseURL }}admin/providers/{{ i.id }}" icon="pencil" title="{{ 'label.providers_edit' | translate }}" type="button" ng-if="!readOnly"></menuitem>
-								<menuitem icon="clone" title="{{ 'label.providers_clone' | translate }}" type="button" ng-click="clone(i)" ng-if="!readOnly"></menuitem>
-								<menuitem icon="refresh" title="{{ 'label.providers_refresh' | translate }}" type="button" ng-click="refreshProvider(i)" ng-disabled="i.refreshing" ng-show="i.enabled"></menuitem>
+								<menuitem icon="info-circle" type="button" info="<table><tr><th class='label'>{{ 'label.identifier' | translate }}</th><td>{{ i.id }}</td></tr></table>" info-direction="bottom-right"></menuitem>
+								<menuitem href="{{ ::baseURL }}admin/providers/{{ i.id }}" icon="pencil" info="{{ 'label.providers_edit' | translate }}" type="button" ng-if="!readOnly"></menuitem>
+								<menuitem icon="clone" info="{{ 'label.providers_clone' | translate }}" type="button" ng-click="clone(i)" ng-if="!readOnly"></menuitem>
+								<menuitem icon="refresh" info="{{ 'label.providers_refresh' | translate }}" type="button" ng-click="refreshProvider(i)" ng-disabled="i.refreshing" ng-show="i.enabled"></menuitem>
 							</menu>
 						</div>
 					</div>
@@ -47,7 +47,7 @@
 				</listcolumn>
 				<listcolumn class="actions" ng-if="!readOnly">
 					<menu>
-						<menuitem href="" icon="times-circle" title="{{ 'label.providers_delete' | translate }}" type="button" ng-click="delete(i)"></menuitem>
+						<menuitem href="" icon="times-circle" info="{{ 'label.providers_delete' | translate }}" type="button" ng-click="delete(i)"></menuitem>
 					</menu>
 				</listcolumn>
 			</listrow>

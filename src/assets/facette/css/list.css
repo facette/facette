@@ -312,17 +312,6 @@ thead .listcolumn.heading {
 	opacity: 1;
 }
 
-.listrow .actions .tooltip.bottom {
-	left: -0.5rem;
-	transform: none;
-	white-space: nowrap;
-}
-
-.listrow .actions .tooltip.bottom::before {
-	left: 0.75rem;
-	margin-left: 0;
-}
-
 .keylist {
 	border-spacing: 0 0.35rem;
 	width: 100%;

@@ -42,12 +42,10 @@ angular.module('facette.ui.menu', [])
             badge: '@',
             label: '@',
             name: '@',
-            title: '@',
+            info: '@',
+            infoDirection: '@',
             type: '@',
             drop: '=?',
-            tooltipData: '=',
-            tooltipFormatter: '=',
-            tooltipPosition: '@',
             selectable: '=?'
         },
         link: function(scope, element, attrs, controller) {
@@ -56,12 +54,9 @@ angular.module('facette.ui.menu', [])
                 scope.selectable = true;
             }
 
-            if (scope.tooltipPosition === undefined) {
-                scope.tooltipPosition = 'bottom';
+            if (scope.infoDirection === undefined) {
+                scope.infoDirection = 'bottom';
             }
-
-            scope.tooltipActive = false;
-            scope.tooltipContent = '';
 
             // Remove empty subcontent element
             if (!element.find('.subcontent').html()) {
@@ -104,26 +99,6 @@ angular.module('facette.ui.menu', [])
             scope.handleKey = function(e) {
                 if (e.which == 13) { // <Enter>
                     $timeout(function() { element.trigger('click'); });
-                }
-            };
-
-            // Handle tooltip display
-            scope.toggleTooltip = function(e) {
-                if (e.type == 'mouseenter') {
-                    if (!scope.tooltipContent && scope.tooltipFormatter) {
-                        scope.tooltipFormatter(scope.tooltipData).then(function(data) {
-                            scope.tooltipContent = data;
-                        });
-                    }
-
-                    scope.tooltipActive = true;
-                } else {
-                    if (angular.element(e.originalEvent.relatedTarget).closest('.tooltip').length > 0) {
-                        e.preventDefault();
-                        return;
-                    }
-
-                    scope.tooltipActive = false;
                 }
             };
 

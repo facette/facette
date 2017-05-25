@@ -14,6 +14,8 @@ app.controller('AdminListController', function($location, $q, $rootScope, $route
     $scope.page = 1;
     $scope.limit = pagingLimit;
 
+    $scope.providersData = {};
+
     var factory = adminHelpers.getFactory($scope);
 
     // Set page title
@@ -110,33 +112,10 @@ app.controller('AdminListController', function($location, $q, $rootScope, $route
         });
     };
 
-    $scope.formatBasicTooltip = function(entry) {
-        var defer = $q.defer();
-
-        $translate(['label.identifier', 'label.alias']).then(function(data) {
-            var content = '<tr><th class="label">' + data['label.identifier'] + '</th><td>' + entry.id + '</td></tr>';
-            if (entry.alias) {
-                content += '<tr><th class="label">' + data['label.alias'] + '</th><td>' + entry.alias + '</td></tr>';
-            }
-
-            defer.resolve('<table>' + content + '</table>');
+    $scope.getProviders = function(name) {
+        catalog.get({type: $scope.section, name: name}, function(data) {
+            $scope.providersData[name] = data.providers;
         });
-
-        return defer.promise;
-    };
-
-    $scope.formatCatalogTooltip = function(name) {
-        var defer = $q.defer();
-
-        $q.all([
-            $translate(['label.providers']),
-            catalog.get({type: $scope.section, name: name}).$promise
-        ]).then(function(data) {
-            defer.resolve('<span class="label">' + data[0]['label.providers'] + '</span> ' +
-                data[1].providers.join(', '));
-        });
-
-        return defer.promise;
     };
 
     $scope.refreshProvider = function(entry) {

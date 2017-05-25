@@ -2,6 +2,8 @@ app.controller('AdminEditGroupController', function($q, $route, $routeParams, $s
     $scope.section = $route.current.$$route._type;
     $scope.id = $routeParams.id;
 
+    $scope.patternsData = {};
+
     // Define scope functions
     $scope.cancel = function(force) { adminEdit.cancel($scope, force); };
     $scope.delete = function() { adminEdit.delete($scope, {id: $scope.id, name: $scope.itemRef.name}); };
@@ -73,8 +75,7 @@ app.controller('AdminEditGroupController', function($q, $route, $routeParams, $s
     };
 
     $scope.testPattern = function(pattern) {
-        var limit = 10,
-            defer = $q.defer();
+        var limit = 10;
 
         $q.all([
             $translate(['label.patterns_matches', 'label.patterns_matches_total', 'label.patterns_matches_none']),
@@ -88,17 +89,16 @@ app.controller('AdminEditGroupController', function($q, $route, $routeParams, $s
                 data[1].push(data[0]['label.patterns_matches_none']);
             }
 
-            var content = '<span>' + data[0]['label.patterns_matches'] + '</span><br>\n' + data[1].join('<br>\n');
+            var content = '<span class="label">' + data[0]['label.patterns_matches'] + '</span><br>\n' +
+                data[1].join('<br>\n');
 
             if (data[1].$totalRecords > limit) {
-                content += '<br>\n…<br>\n<span>' + data[0]['label.patterns_matches_total'] + '</span> ' +
+                content += '<br>\n…<br>\n<span class="label">' + data[0]['label.patterns_matches_total'] + '</span> ' +
                     data[1].$totalRecords;
             }
 
-            defer.resolve(content);
+            $scope.patternsData[pattern] = content;
         });
-
-        return defer.promise;
     };
 
     $scope.resetPattern = function() {

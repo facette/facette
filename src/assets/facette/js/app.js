@@ -24,6 +24,7 @@ var app = angular.module('facette', [
     'ngRoute',
     'ngSanitize',
     'pascalprecht.translate',
+    'tooltips',
     'ui.bootstrap.datetimepicker',
     'ui.dateTimeInput',
     'ui.select',

@@ -7,7 +7,7 @@
 		</a>
 
 		<menu>
-			<menuitem icon="bars" type="button" ng-click="toggleSidebar()"></menuitem>
+			<menuitem icon="bars" type="button" info="{{ 'label.toggle_sidebar' | translate }}" info-direction="{{ sidebarCollapse ? 'bottom-right' : 'bottom' }}" ng-click="toggleSidebar()"></menuitem>
 		</menu>
 	</header>
 

@@ -75,6 +75,7 @@ var config = {
             'src/assets/facette/css/sortable.css',
             'src/assets/facette/css/form.css',
             'src/assets/facette/css/menu.css',
+            'src/assets/facette/css/tooltip.css',
             'src/assets/facette/css/graph.css'
         ],
         style_print: [
@@ -111,6 +112,7 @@ var config = {
                 'vendor/bower_components/angular-paging/dist/paging.min.js',
                 'vendor/bower_components/ng-sortable/dist/ng-sortable.min.js',
                 'vendor/bower_components/angucomplete-alt/dist/angucomplete-alt.min.js',
+                'vendor/bower_components/angular-tooltips/dist/angular-tooltips.min.js',
                 'vendor/bower_components/angular-bootstrap-colorpicker/js/bootstrap-colorpicker-module.min.js',
                 'vendor/bower_components/angular-bootstrap-datetimepicker/src/js/datetimepicker.js',
                 'vendor/bower_components/angular-date-time-input/src/dateTimeInput.js'

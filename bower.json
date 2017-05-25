@@ -14,6 +14,7 @@
     "angular-resource": "1.6.4",
     "angular-route": "1.6.4",
     "angular-sanitize": "1.6.4",
+    "angular-tooltips": "tooltips-angular#1.0.3",
     "angular-translate": "2.15.1",
     "angular-translate-interpolation-messageformat": "2.15.1",
     "angular-translate-loader-static-files": "2.15.1",
