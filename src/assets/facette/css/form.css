@@ -11,13 +11,24 @@ textarea {
 }
 
 label {
-	display: block;
+	align-items: center;
+	display: flex;
+}
+
+label .info {
+	margin-left: 0.5rem;
+	opacity: 0.35;
+}
+
+label .info:hover {
+	opacity: 0.65;
 }
 
 label .warn {
 	color: #e74c3c;
-	float: right;
+	flex: 1;
 	font-size: 0.9rem;
+	text-align: right;
 }
 
 button,

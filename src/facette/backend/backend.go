@@ -16,7 +16,7 @@ const (
 )
 
 var (
-	nameRegexp = regexp.MustCompile("(?i)^[a-z0-9](?:[a-z0-9\\-_\\.]*[a-z0-9])*$")
+	nameRegexp = regexp.MustCompile("(?i)^[a-z0-9](?:[a-z0-9\\-_\\.]*[a-z0-9])?$")
 )
 
 // Backend represents a back-end instance.
