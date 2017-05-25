@@ -61,6 +61,7 @@
 .graph .message.warning.float {
 	background-color: #f1c40f;
 	color: #fff;
+	display: none;
 	opacity: 0.98;
 }
 
@@ -95,6 +96,7 @@
 	left: 0;
 }
 
+.graph:hover .message.warning.float,
 .graph:hover .graph-control {
 	display: block;
 }
