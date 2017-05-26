@@ -8,6 +8,7 @@ import (
 	"facette/backend"
 	"facette/connector"
 	"facette/plot"
+	"facette/template"
 	"facette/timerange"
 
 	"github.com/facette/httputil"
@@ -68,9 +69,12 @@ func (w *httpWorker) httpHandlePlots(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	// Expand graph template if linked
-	if err := req.Graph.Expand(req.Attributes); err != nil {
-		w.log.Warning("%s", err)
-		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusInternalServerError)
+	if err := req.Graph.Expand(req.Attributes); req.ID == "" && err == template.ErrInvalidTemplate {
+		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusBadRequest)
+		return
+	} else if err != nil {
+		w.log.Error("%s", err)
+		httputil.WriteJSON(rw, httpBuildMessage(ErrUnhandledError), http.StatusInternalServerError)
 		return
 	}
 
