@@ -101,6 +101,15 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
         $scope.cleanProperties(def);
         def.attributes = angular.copy($scope.item.attributes);
 
+        if (
+            $scope.itemDef &&
+            angular.equals(def.groups, $scope.itemDef.groups) &&
+            angular.equals(def.options, $scope.itemDef.options) &&
+            angular.equals(def.attributes, $scope.itemDef.attributes)
+        ) {
+            return
+        }
+
         $scope.itemDef = def;
     }
 
