@@ -25,7 +25,6 @@ func Expand(data string, attrs map[string]interface{}) (string, error) {
 			}
 
 			for _, arg := range action.Pipe.Cmds[0].Args {
-				fmt.Printf(">>> %#v\n", arg)
 				if field, ok := arg.(*parse.FieldNode); ok {
 					if len(field.Ident) == 1 {
 						// Replace template key with attribute value
