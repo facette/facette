@@ -285,7 +285,7 @@
     "mesg.last_update": "Last updated on",
     "mesg.metricgroups_empty": "No metric group defined",
     "mesg.name_invalid": "Name attribute must be valid",
-    "mesg.name_pattern": "Must start and end by an alphanumerical character, along with alphanumerical characters, hyphens, underscores or dots.",
+    "mesg.name_pattern": "Must start and end by an alphanumerical character, and contain alphanumerical characters, hyphens, underscores or dots.",
     "mesg.name_unique": "Name attribute must be unique",
     "mesg.no_desc": "No description set",
     "mesg.no_search_match": "Your search filter does not match any item",
