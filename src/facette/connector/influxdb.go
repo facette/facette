@@ -88,7 +88,7 @@ func init() {
 			return nil, ErrMissingConnectorSetting("database")
 		}
 
-		if settings.Has("pattern") && settings.Has("mapping") {
+		if v, _ := settings.GetString("pattern", ""); v != "" && settings.Has("mapping") {
 			return nil, fmt.Errorf("connector settings allows either %q or %q, not both", "pattern", "mapping")
 		} else if !settings.Has("pattern") && !settings.Has("mapping") {
 			return nil, fmt.Errorf("connector settings %q or %q must be specified", "pattern", "mapping")
