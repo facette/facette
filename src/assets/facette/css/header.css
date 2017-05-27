@@ -27,10 +27,11 @@ header .menuitem .fa {
 }
 
 header .menuitem > .subcontent {
-	background-color: rgba(34, 34, 34, 0.98);
+	background-color: #fff;
 	border-radius: 0.2rem;
+	box-shadow: 0 0.15rem 0.5rem rgba(34, 34, 34, 0.2);
 	box-sizing: border-box;
-	color: #fff;
+	color: #2c3e50;
 	cursor: default;
 	display: none;
 	line-height: 2rem;
@@ -40,11 +41,11 @@ header .menuitem > .subcontent {
 }
 
 header .menuitem > .subcontent::before {
-	border: 0.75rem solid transparent;
-	border-bottom-color: rgba(34, 34, 34, 0.98);
+	border: 0.65rem solid transparent;
+	border-bottom-color: #fff;
 	bottom: 100%;
 	content: '';
-	left: 1rem;
+	left: 1.1rem;
 	position: absolute;
 }
 
@@ -59,7 +60,7 @@ header .menuitem.left > .subcontent {
 
 header .menuitem.left > .subcontent::before {
 	left: auto;
-	right: 1rem;
+	right: 1.1rem;
 }
 
 header .menuitem > .subcontent > .menu {
@@ -91,15 +92,16 @@ header .menuitem > .subcontent .menu.icons > .menuitem.button .label:first-child
 }
 
 header .menuitem > .subcontent .menuitem.separator {
+	background-color: rgba(34, 34, 34, 0.1);
 	display: block;
 	height: 1px;
-	margin: 0.35rem 0.65rem;
+	margin: 0.35rem 0;
 }
 
 header .menuitem > .subcontent .menuitem.button:hover,
-header .menuitem > .subcontent .menuitem.button a:focus,
-header .menuitem > .subcontent .menuitem.separator {
-	background-color: rgba(70, 70, 70, 0.98);
+header .menuitem > .subcontent .menuitem.button a:focus {
+	background-color: #2980b9;
+	color: #fff;
 }
 
 @media screen and (max-width: 1024px) {

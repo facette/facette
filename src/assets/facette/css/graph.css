@@ -251,10 +251,11 @@
 }
 
 .graph-menu > .menuitem .subcontent {
-	background-color: rgba(34, 34, 34, 0.98);
+	background-color: #fff;
 	border-radius: 0.2rem;
+	box-shadow: 0 0.15rem 0.5rem rgba(34, 34, 34, 0.1);
 	box-sizing: border-box;
-	color: #fff;
+	color: #2c3e50;
 	display: none;
 	font-size: 0.9rem;
 	line-height: 1.65rem;
@@ -270,6 +271,7 @@
 }
 
 .graph-menu > .menuitem .subcontent .menuitem.separator {
+	background-color: rgba(34, 34, 34, 0.1);
 	height: 1px;
 	margin: 0.35rem 0.65rem;
 }
@@ -291,8 +293,9 @@
 }
 
 .graph-menu > .menuitem .subcontent .menuitem.button:hover,
-.graph-menu > .menuitem .subcontent .menuitem.separator {
-	background-color: rgba(70, 70, 70, 0.98);
+.graph-menu > .menuitem .subcontent .menuitem.button a:focus {
+	background-color: #2980b9;
+	color: #fff;
 }
 
 .graph-container {

@@ -287,6 +287,11 @@ textarea {
 	width: 100%;
 }
 
+.ngdialog-content angucomplete-alt,
+.ngdialog-content .ui-select-container {
+	display: block;
+}
+
 .column angucomplete-alt.small,
 .column .ui-select-container.small,
 .column input[type=number].small,

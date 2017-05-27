@@ -27,7 +27,7 @@
 					<menuitem label="{{ 'label.graphs_export_summary_json' | translate }}" type="button" ng-click="export($event, 'summary_json')"></menuitem>
 				</menu>
 			</menuitem>
-			<menuitem href="{{ ::baseURL }}show/{{ embeddablePath }}" target="_blank" icon="window-maximize" info="{{ 'label.graphs_goto_embeddable' | translate }}" type="button" ng-if="!frame && embeddablePath"></menuitem>
+			<menuitem href="{{ ::baseURL }}show/{{ embeddablePath }}" target="_blank" icon="window-maximize" info="{{ 'label.graphs_goto_embeddable' | translate }}" info-direction="bottom-left" type="button" ng-if="!frame && embeddablePath"></menuitem>
 		</menu>
 
 		<div class="graph-slides">
