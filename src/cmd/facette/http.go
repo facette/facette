@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"net"
 	"net/http"
 	"os"
@@ -15,7 +14,7 @@ import (
 
 	"github.com/facette/httproute"
 	"github.com/facette/logger"
-	"gopkg.in/tylerb/graceful.v1"
+	graceful "gopkg.in/tylerb/graceful.v1"
 )
 
 const apiPrefix = "/api/v1"
@@ -76,17 +75,15 @@ func newHTTPWorker(s *Service) *httpWorker {
 	w.router.Endpoint(w.prefix + "/plots").
 		Post(w.httpHandlePlots)
 
-	providerCtx := context.WithValue(context.Background(), "type", "providers")
-
-	w.router.EndpointWithContext(w.prefix+"/providers/", providerCtx).
-		Delete(w.httpHandleBackendDeleteAll).
-		Get(w.httpHandleBackendList).
-		Post(w.httpHandleBackendCreate)
-	w.router.EndpointWithContext(w.prefix+"/providers/:id", providerCtx).
-		Delete(w.httpHandleBackendDelete).
-		Get(w.httpHandleBackendGet).
-		Patch(w.httpHandleBackendUpdate).
-		Put(w.httpHandleBackendUpdate)
+	w.router.Endpoint(w.prefix + "/providers/").
+		Delete(w.httpHandleProviderDeleteAll).
+		Get(w.httpHandleProviderList).
+		Post(w.httpHandleProviderCreate)
+	w.router.Endpoint(w.prefix + "/providers/:id").
+		Delete(w.httpHandleProviderDelete).
+		Get(w.httpHandleProviderGet).
+		Patch(w.httpHandleProviderUpdate).
+		Put(w.httpHandleProviderUpdate)
 
 	w.router.Endpoint(w.prefix + "/providers/:id/refresh").
 		Post(w.httpHandleProviderRefresh)

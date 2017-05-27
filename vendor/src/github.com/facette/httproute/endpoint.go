@@ -4,8 +4,6 @@ import (
 	"net/http"
 	"sort"
 	"strings"
-
-	"context"
 )
 
 // Handler represents an HTTP request handler.
@@ -15,7 +13,6 @@ type Handler func(http.ResponseWriter, *http.Request)
 type Endpoint struct {
 	pattern  *pattern
 	handlers map[string]Handler
-	context  context.Context
 	router   *Router
 }
 
@@ -148,12 +145,7 @@ func newEndpointHandler(rt *Router) *endpointHandler {
 // ServeHTTP satisfies 'http.Handler' interface requirements for the endpoint handler.
 func (h *endpointHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	for _, endpoint := range h.router.endpoints {
-		endpointCtx := endpoint.context
-		if endpointCtx == nil {
-			endpointCtx = context.Background()
-		}
-
-		if ctx, ok := endpoint.pattern.match(endpointCtx, r.URL.Path); ok {
+		if ctx, ok := endpoint.pattern.match(r.Context(), r.URL.Path); ok {
 			endpoint.handle(rw, r.WithContext(ctx))
 			return
 		}

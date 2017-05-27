@@ -1,7 +1,6 @@
 package httproute
 
 import (
-	"context"
 	"net/http"
 	"strings"
 )
@@ -31,13 +30,6 @@ func (rt *Router) Endpoint(pattern string) *Endpoint {
 	e := newEndpoint(pattern, rt)
 	rt.endpoints = append(rt.endpoints, e)
 
-	return e
-}
-
-// EndpointWithContext creates a new HTTP router endpoint given a context.
-func (rt *Router) EndpointWithContext(pattern string, ctx context.Context) *Endpoint {
-	e := rt.Endpoint(pattern)
-	e.context = ctx
 	return e
 }
 

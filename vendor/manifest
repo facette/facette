@@ -10,7 +10,7 @@
 		{
 			"importpath": "github.com/facette/httproute",
 			"repository": "https://github.com/facette/httproute",
-			"revision": "208f0973277197ef512591986aa7c83027e32e86",
+			"revision": "aabd476b5e5013eef3c8e36bc8bcc61285c07f28",
 			"branch": "master"
 		},
 		{

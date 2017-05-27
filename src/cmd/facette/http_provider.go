@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"net/http"
 
 	"facette/backend"
@@ -9,6 +10,30 @@ import (
 	"github.com/facette/httputil"
 	"github.com/facette/sqlstorage"
 )
+
+func (w *httpWorker) httpHandleProviderCreate(rw http.ResponseWriter, r *http.Request) {
+	w.httpHandleBackendCreate(rw, r.WithContext(context.WithValue(r.Context(), "type", "providers")))
+}
+
+func (w *httpWorker) httpHandleProviderGet(rw http.ResponseWriter, r *http.Request) {
+	w.httpHandleBackendGet(rw, r.WithContext(context.WithValue(r.Context(), "type", "providers")))
+}
+
+func (w *httpWorker) httpHandleProviderUpdate(rw http.ResponseWriter, r *http.Request) {
+	w.httpHandleBackendUpdate(rw, r.WithContext(context.WithValue(r.Context(), "type", "providers")))
+}
+
+func (w *httpWorker) httpHandleProviderDelete(rw http.ResponseWriter, r *http.Request) {
+	w.httpHandleBackendDelete(rw, r.WithContext(context.WithValue(r.Context(), "type", "providers")))
+}
+
+func (w *httpWorker) httpHandleProviderDeleteAll(rw http.ResponseWriter, r *http.Request) {
+	w.httpHandleBackendDeleteAll(rw, r.WithContext(context.WithValue(r.Context(), "type", "providers")))
+}
+
+func (w *httpWorker) httpHandleProviderList(rw http.ResponseWriter, r *http.Request) {
+	w.httpHandleBackendList(rw, r.WithContext(context.WithValue(r.Context(), "type", "providers")))
+}
 
 func (w *httpWorker) httpHandleProviderRefresh(rw http.ResponseWriter, r *http.Request) {
 	id := httproute.ContextParam(r, "id").(string)
