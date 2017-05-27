@@ -12,14 +12,12 @@ import (
 	"github.com/fatih/set"
 )
 
-type expandListEntry [3]string
-
 func (w *httpWorker) httpHandleExpand(rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	// Get expand request from received data
-	list := []expandListEntry{}
-	if err := httputil.BindJSON(r, &list); err == httputil.ErrInvalidContentType {
+	series := []*backend.Series{}
+	if err := httputil.BindJSON(r, &series); err == httputil.ErrInvalidContentType {
 		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusUnsupportedMediaType)
 		return
 	} else if err != nil {
@@ -28,19 +26,10 @@ func (w *httpWorker) httpHandleExpand(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := make([][]expandListEntry, len(list))
+	result := make([][]*backend.Series, len(series))
 
-	for i, entry := range list {
-		s := &backend.Series{
-			Origin: entry[0],
-			Source: entry[1],
-			Metric: entry[2],
-		}
-
-		result[i] = []expandListEntry{}
-		for _, s := range w.expandSeries(s, false) {
-			result[i] = append(result[i], expandListEntry{s.Origin, s.Source, s.Metric})
-		}
+	for i, s := range series {
+		result[i] = w.expandSeries(s, false)
 	}
 
 	httputil.WriteJSON(rw, result, http.StatusOK)

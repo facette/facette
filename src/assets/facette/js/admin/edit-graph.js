@@ -56,7 +56,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
 
                 if (series.source.startsWith(groupPrefix) || series.metric.startsWith(groupPrefix)) {
                     series.expansion = expandQuery.length;
-                    expandQuery.push([series.origin, series.source, series.metric]);
+                    expandQuery.push(series);
                 }
             });
         });
@@ -551,9 +551,9 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
 
             angular.forEach($scope.expandData[group.series[0].expansion], function(entry) {
                 var series = {
-                    origin: entry[0],
-                    source: entry[1],
-                    metric: entry[2],
+                    origin: entry.origin,
+                    source: entry.source,
+                    metric: entry.metric,
                     autoname: true,
                     expanded: $scope.groupTmp.length
                 };
