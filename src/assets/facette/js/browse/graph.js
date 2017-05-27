@@ -120,10 +120,6 @@ app.controller('BrowseGraphController', function($location, $rootScope, $routePa
         });
     };
 
-    $scope.print = function() {
-        $scope.$applyAsync(window.print);
-    };
-
     $scope.setGrid = function(size) {
         $scope.gridSize = size;
         storage.set('browse-grid', $scope.section + '-' + $scope.id, size);

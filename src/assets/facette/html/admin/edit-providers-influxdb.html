@@ -1,7 +1,7 @@
 <h1>{{ 'label.providers_definition' | translate }}</h1>
 
 <columns>
-	<column class="main">
+	<column class="main" ng-init="matchType = item.settings.mapping ? 'mapping' : 'pattern'">
 		<h2>{{ 'label.connectors_settings' | translate }}</h2>
 
 		<label>{{ 'label.connectors_instance_url' | translate }}</label>
@@ -24,7 +24,7 @@
 		<input type="text" ng-model="item.settings.database">
 
 		<label>{{ 'label.connectors_influxdb_match_type' | translate }}</label>
-		<input id="match-pattern" name="match" type="radio" value="pattern" ng-init="matchType = matchType || 'pattern'" ng-model="matchType">
+		<input id="match-pattern" name="match" type="radio" value="pattern" ng-model="matchType">
 		<label for="match-pattern" tabindex="0">{{ 'label.connectors_influxdb_match_pattern' | translate }}</label>
 		<input id="match-mapping" name="match" type="radio" value="mapping" ng-model="matchType">
 		<label for="match-mapping" tabindex="0">{{ 'label.connectors_influxdb_match_mapping' | translate }}</label>
@@ -36,10 +36,10 @@
 
 		<div ng-if="matchType == 'mapping'">
 			<label>{{ 'label.connectors_match_mapping_source' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
-			<input type="text" ng-list="," ng-model="item.settings.mapping.source">
+			<input type="text" ng-list=", " ng-model="item.settings.mapping.source">
 
 			<label>{{ 'label.connectors_match_mapping_metric' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
-			<input type="text" ng-list="," ng-model="item.settings.mapping.metric">
+			<input type="text" ng-list=", " ng-model="item.settings.mapping.metric">
 
 			<label>{{ 'label.connectors_match_mapping_glue' | translate }}</label>
 			<input type="text" ng-model="item.settings.mapping.glue">

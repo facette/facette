@@ -37,9 +37,6 @@ var filterActions = [
     patternPrefixGlob = 'glob:',
     patternPrefixRegexp = 'regexp:',
 
-    providerDefaultFilterAction = 'discard',
-    profiderDefaultFilterTarget = 'all',
-
     pagingLimit = 20,
 
     graphPadding = 24,

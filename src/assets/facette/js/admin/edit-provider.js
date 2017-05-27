@@ -10,14 +10,18 @@ app.controller('AdminEditProviderController', function($routeParams, $scope, adm
     $scope.remove = function(list, entry) { adminEdit.remove($scope, list, entry); };
 
     $scope.addFilter = function() {
+        var actionIdx = 0,
+            targetIdx = 0;
+
         if (!$scope.item.filters) {
             $scope.item.filters = [];
+        } else {
+            var last = $scope.item.filters[$scope.item.filters.length-1];
+            actionIdx = $scope.filterActions.indexOf(last.action);
+            targetIdx = $scope.filterTargets.indexOf(last.target);
         }
 
-        $scope.item.filters.push({
-            action: $scope.filterActions[0],
-            target: $scope.filterTargets[0]
-        });
+        $scope.item.filters.push({action: $scope.filterActions[actionIdx], target: $scope.filterTargets[targetIdx]});
     };
 
     // Register watchers

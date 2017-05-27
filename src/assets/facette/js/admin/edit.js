@@ -268,10 +268,15 @@ app.factory('adminEdit', function($location, $rootScope, $timeout, $translate, a
             // Load existing item
             scope.state = stateLoading;
 
-            adminHelpers.getFactory(scope).get({
-                type: scope.section,
+            var query = {
                 id: scope.id
-            }, function(data) {
+            };
+
+            if (scope.section != 'providers') {
+                query.type = scope.section;
+            }
+
+            adminHelpers.getFactory(scope).get(query, function(data) {
                 data = data.toJSON();
                 delete data.id;
 
