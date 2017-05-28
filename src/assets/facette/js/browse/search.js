@@ -20,7 +20,7 @@ app.controller('BrowseSearchController', function($location, $rootScope, $scope,
     };
 
     $scope.searchSelect = function(data) {
-        $location.path('browse/' + data.originalObject.type + '/' + data.originalObject.value.id);
+        $location.path('browse/' + data.originalObject.type + '/' + data.originalObject.id);
     };
 
     // Handle tree state save
