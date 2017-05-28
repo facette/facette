@@ -96,7 +96,10 @@ angular.module('facette.ui.menu', [])
                     var parentElement = element.parent().closest('.has-content'),
                         nextElement = angular.element(e.originalEvent.relatedTarget);
 
-                    if (!nextElement.parents('.has-content').is(parentElement)) {
+                    if (parentElement.length === 0 && (nextElement.length === 0 ||
+                        nextElement.closest('.has-content').length === 0)) {
+                        element.removeClass('focus');
+                    } else if (!nextElement.parents('.has-content').is(parentElement)) {
                         parentElement.removeClass('focus');
                     }
                 }
