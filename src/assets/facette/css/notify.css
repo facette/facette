@@ -10,8 +10,6 @@
 	right: 0;
 	top: 0;
 	transform: translateY(-100%);
-	transition: left .3s ease-in-out,
-	            transform .2s ease-in-out;
 	z-index: 210;
 }
 

@@ -14,7 +14,6 @@ aside {
 	flex-direction: column;
 	padding-top: 3.5rem;
 	top: 0;
-	transition: transform .3s ease-in-out;
 	z-index: 100;
 }
 
@@ -48,7 +47,6 @@ aside header .menu {
 	background-color: inherit;
 	flex: 1;
 	justify-content: flex-end;
-	transition: transform .3s ease-in-out;
 }
 
 aside header .menuitem.button {

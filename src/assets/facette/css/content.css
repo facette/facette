@@ -13,14 +13,9 @@
 	z-index: 500;
 }
 
-.idle * {
-	transition: none !important
-}
-
 article {
 	margin-left: 22rem;
 	padding: 5.5rem 2rem 2rem;
-	transition: margin-left .3s ease-in-out;
 }
 
 aside.collapse + article {
@@ -32,8 +27,6 @@ article footer {
 	left: 22rem;
 	position: fixed;
 	right: 0;
-	transition: left .3s ease-in-out,
-	            padding .3s ease-in-out;
 }
 
 aside.collapse + article header,
@@ -163,6 +156,10 @@ article header .search input {
 	border: none;
 	color: #fff;
 	width: 22rem;
+}
+
+article header .search.focus .fa {
+	color: #95a5a6;
 }
 
 article header .search.focus input {
@@ -328,7 +325,6 @@ article .titlerow .formblock button {
 		margin: 0;
 		position: fixed;
 		top: 3.5rem;
-		transition: left .3s ease-in-out;
 		white-space: normal;
 		width: 3.5rem;
 	}
