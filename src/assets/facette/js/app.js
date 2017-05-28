@@ -266,7 +266,8 @@ app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope
                         angular.element('.ngdialog-content .validate').focus();
                     }
                 }, 50);
-            }
+            },
+            showClose: false
         }).closePromise.then(function(scope) {
             scope.$dialog.remove();
 

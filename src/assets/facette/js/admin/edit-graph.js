@@ -409,7 +409,8 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
                 $timeout(function() {
                     $scope.switchEdit($scope.seriesTotal > 1 || $scope.groupItem.series[0].expansion !== undefined);
                 }, 0);
-            }
+            },
+            showClose: false
         }).closePromise.then(function(scope) {
             scope.$dialog.remove();
 
