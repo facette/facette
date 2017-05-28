@@ -48,6 +48,7 @@ var config = {
             'src/assets/facette/js/chart/legend.js',
             'src/assets/facette/js/chart/utils.js',
             'src/assets/facette/js/define.js',
+            'src/assets/facette/js/locales.js',
             'src/assets/facette/js/utils.js',
             'src/assets/facette/js/app.js',
             'src/assets/facette/js/api.js',

@@ -167,6 +167,8 @@ app.config(function($httpProvider, $locationProvider, $resourceProvider, $routeP
     $resourceProvider.defaults.stripTrailingSlashes = false;
 
     // Set up translation
+    var locale = localStorage.getItem('locale');
+
     $translateProvider
         .useMessageFormatInterpolation()
         .useSanitizeValueStrategy(null)
@@ -178,8 +180,13 @@ app.config(function($httpProvider, $locationProvider, $resourceProvider, $routeP
             'en_*': 'en',
             'fr_*': 'fr',
             '*': 'en'
-        })
-        .determinePreferredLanguage();
+        });
+
+    if (locale) {
+        $translateProvider.preferredLanguage(locale);
+    } else {
+        $translateProvider.determinePreferredLanguage();
+    }
 
     // Set up tree defaults
     treeConfig.defaultCollapsed = true;
@@ -195,6 +202,14 @@ app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope
     $rootScope.stateOK = stateOK;
     $rootScope.stateLoading = stateLoading;
     $rootScope.stateError = stateError;
+
+    // Handle locales
+    $rootScope.locales = locales;
+
+    $rootScope.changeLocale = function(locale) {
+        $translate.use(locale);
+        localStorage.setItem('locale', locale);
+    };
 
     // Handle page title
     $rootScope.setTitle = function(parts) {
