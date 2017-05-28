@@ -107,7 +107,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
             angular.equals(def.options, $scope.itemDef.options) &&
             angular.equals(def.attributes, $scope.itemDef.attributes)
         ) {
-            return
+            return;
         }
 
         $scope.itemDef = def;

@@ -31,9 +31,9 @@ func filterMatch(pattern, value string) (bool, error) {
 	} else if strings.HasPrefix(pattern, backend.RegexpPrefix) {
 		if re, err := regexp.Compile(strings.TrimPrefix(pattern, backend.RegexpPrefix)); err != nil {
 			return false, err
-		} else {
-			return re.MatchString(value), nil
 		}
+
+		return re.MatchString(value), nil
 	}
 
 	return pattern == value, nil

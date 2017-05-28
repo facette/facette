@@ -16,7 +16,7 @@ app.controller('AdminEditProviderController', function($routeParams, $scope, adm
         if (!$scope.item.filters) {
             $scope.item.filters = [];
         } else {
-            var last = $scope.item.filters[$scope.item.filters.length-1];
+            var last = $scope.item.filters[$scope.item.filters.length - 1];
             actionIdx = $scope.filterActions.indexOf(last.action);
             targetIdx = $scope.filterTargets.indexOf(last.target);
         }
