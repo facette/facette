@@ -58,6 +58,39 @@ header .menuitem.left > .subcontent {
 	right: 0;
 }
 
+header .menuitem.left > .subcontent .menuitem.has-content a {
+	padding-right: 2rem;
+}
+
+header .menuitem.left > .subcontent .menuitem.has-content::after {
+	content: '\f0da';
+	font: normal normal normal 14px/1 FontAwesome;
+	font-size: 1.25rem;
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-font-smoothing: antialiased;
+	line-height: 2rem;
+	opacity: 0.35;
+	position: absolute;
+	right: 0.5rem;
+	text-rendering: auto;
+	top: 0;
+	vertical-align: middle;
+	width: 1rem;
+}
+
+header .menuitem.left > .subcontent .menuitem.has-content:hover::after {
+	opacity: 0.65;
+}
+
+header .menuitem.left > .subcontent .menuitem > .subcontent {
+	top: -0.35rem;
+	right: 100%;
+}
+
+header .menuitem.left > .subcontent .menuitem > .subcontent::before {
+	content: none;
+}
+
 header .menuitem.left > .subcontent::before {
 	left: auto;
 	right: 1.1rem;
@@ -87,7 +120,7 @@ header .menuitem > .subcontent .menuitem.button .label {
 	white-space: nowrap;
 }
 
-header .menuitem > .subcontent .menu.icons > .menuitem.button .label:first-child {
+header .menuitem > .subcontent .menu.icons > .menuitem.button > .content > .label:first-child {
 	margin-left: 2rem;
 }
 

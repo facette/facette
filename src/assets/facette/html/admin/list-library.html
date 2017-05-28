@@ -7,7 +7,7 @@
 		<menu class="main expand">
 			<menuitem icon="refresh" info="{{ 'label.list_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
 			<menuitem href="{{ ::baseURL }}admin/{{ section }}/add" icon="plus" info="{{ 'label.' + section + '_create' | translate }}" type="button" ng-if="!readOnly && section != 'collections' && section != 'graphs'"></menuitem>
-			<menuitem icon="plus" type="button" drop="true" ng-if="!readOnly && (section == 'collections' || section == 'graphs')">
+			<menuitem icon="plus" type="button" ng-if="!readOnly && (section == 'collections' || section == 'graphs')">
 				<menu>
 					<menuitem href="{{ ::baseURL }}admin/{{ section }}/add" label="{{ 'label.' + section + '_create' | translate }}" type="button"></menuitem>
 					<menuitem href="{{ ::baseURL }}admin/{{ section }}/link" label="{{ 'label.items_create_linked' | translate }}" type="button"></menuitem>

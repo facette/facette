@@ -45,10 +45,14 @@ angular.module('facette.ui.menu', [])
             info: '@',
             infoDirection: '@',
             type: '@',
-            drop: '=?',
             selectable: '=?'
         },
-        link: function(scope, element, attrs, controller) {
+        link: function(scope, element, attrs, controller, transcludeFn) {
+            // Check if menu item has sub-content
+            transcludeFn(function(clone) {
+                scope.hasContent = clone.length > 0;
+            });
+
             // Set defaults
             if (scope.selectable === undefined) {
                 scope.selectable = true;
@@ -82,15 +86,18 @@ angular.module('facette.ui.menu', [])
 
             // Handle focus events
             scope.handleFocus = function(e) {
-                if (e.type == 'focus' && element.find('.subcontent').length > 0) {
-                    element.addClass('focus');
-                } else if (e.type == 'blur') {
-                    var nextElement = angular.element(e.originalEvent.relatedTarget);
+                if (e.type == 'focus') {
+                    element.siblings('.focus').removeClass('focus');
 
-                    if (element.hasClass('focus') && nextElement.closest('.drop').length === 0 ||
-                            element.closest('.subcontent').length > 0 &&
-                            nextElement.closest('.subcontent').length === 0) {
-                        element.closest('.drop').removeClass('focus');
+                    if (scope.hasContent) {
+                        element.addClass('focus');
+                    }
+                } else if (e.type == 'blur') {
+                    var parentElement = element.parent().closest('.has-content'),
+                        nextElement = angular.element(e.originalEvent.relatedTarget);
+
+                    if (!nextElement.parents('.has-content').is(parentElement)) {
+                        parentElement.removeClass('focus');
                     }
                 }
             };

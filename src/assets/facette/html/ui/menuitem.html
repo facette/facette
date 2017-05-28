@@ -1,4 +1,4 @@
-<div class="menuitem" ng-class="{active: type == 'button' && (active || focus), '{{ type }}': type, icon: icon && !label, drop: drop}">
+<div class="menuitem" ng-class="{active: type == 'button' && (active || focus), '{{ type }}': type, icon: icon && !label, 'has-content': hasContent}">
 	<a class="content" tabindex="0" target="{{ target }}" ng-href="{{ href }}" ng-class='{active: tooltipActive}' ng-mouseenter="toggleTooltip($event)" ng-mouseleave="toggleTooltip($event)" ng-blur="handleFocus($event)" ng-focus="handleFocus($event)" ng-keypress="handleKey($event)" ng-if="type == 'button'">
 		<span class="fa fa-{{ icon }}" title="{{ info }}" title-direction="{{ infoDirection }}" ng-if="icon"></span>
 		<span class="badge" ng-if="badge">{{ badge }}</span>
@@ -14,5 +14,5 @@
 		<span class="badge" ng-if="badge">{{ badge }}</span>
 		<span class="label" ng-if="label">{{ label }}</span>
 	</div>
-	<div class="subcontent" ng-transclude=""></div>
+	<div class="subcontent" ng-transclude="" ng-if="hasContent"></div>
 </div>
