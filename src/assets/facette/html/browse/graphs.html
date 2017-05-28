@@ -6,14 +6,14 @@
 
 		<menu class="main expand">
 			<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ id }}" icon="pencil" info="{{ 'label.' + section + '_edit' | translate }}" type="button" ng-if="!readOnly"></menuitem>
-			<menuitem href="" icon="refresh" badge="{{ refreshInterval || '' }}" info="{{ 'label.' + section + '_refresh' | translate }}" type="button" drop="true">
+			<menuitem icon="refresh" badge="{{ refreshInterval || '' }}" info="{{ 'label.' + section + '_refresh' | translate }}" type="button" drop="true">
 				<menu>
 					<menuitem label="{{ 'label.' + section + '_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
 					<menuitem type="separator"></menuitem>
 					<menuitem label="{{ 'label.graphs_refresh_set_alt' | translate }}" type="button" ng-click="setRefresh($event)"></menuitem>
 				</menu>
 			</menuitem>
-			<menuitem href="" icon="clock-o" info="{{ 'label.range_set' | translate }}" type="button" drop="true">
+			<menuitem icon="clock-o" info="{{ 'label.range_set' | translate }}" type="button" drop="true">
 				<menu>
 					<menuitem icon="history" label="{{ 'label.range_reset' | translate }}" type="button" ng-click="resetRange()"></menuitem>
 					<menuitem type="separator"></menuitem>
@@ -22,7 +22,7 @@
 					<menuitem icon="calendar" label="{{ 'label.range_custom' | translate }}" type="button" ng-click="setRange('custom')"></menuitem>
 				</menu>
 			</menuitem>
-			<menuitem href="" icon="columns" info="{{ 'label.page_grid_set' | translate }}" type="button" drop="true">
+			<menuitem icon="columns" info="{{ 'label.page_grid_set' | translate }}" type="button" drop="true">
 				<menu>
 					<menuitem label="{{ 'label.page_grid_1' | translate }}" ng-click="setGrid(1)" type="button"></menuitem>
 					<menuitem label="{{ 'label.page_grid_2' | translate }}" ng-click="setGrid(2)" type="button"></menuitem>
@@ -32,8 +32,8 @@
 		</menu>
 
 		<menu>
-			<menuitem href="" icon="toggle-off" label="{{ 'label.graphs_show_legends' | translate }}" type="button" ng-click="toggleLegends(true)" ng-show="!showLegends"></menuitem>
-			<menuitem href="" icon="toggle-on" label="{{ 'label.graphs_show_legends' | translate }}" type="button" ng-click="toggleLegends(false)" ng-show="showLegends"></menuitem>
+			<menuitem icon="toggle-off" label="{{ 'label.graphs_show_legends' | translate }}" type="button" ng-click="toggleLegends(true)" ng-show="!showLegends"></menuitem>
+			<menuitem icon="toggle-on" label="{{ 'label.graphs_show_legends' | translate }}" type="button" ng-click="toggleLegends(false)" ng-show="showLegends"></menuitem>
 		</menu>
 
 		<search name="filter" icon="filter" placeholder="{{ 'label.graphs_filter' | translate }}" ng-model="form.filter" ng-if="section == 'collections'"></search>

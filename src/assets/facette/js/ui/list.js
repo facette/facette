@@ -16,7 +16,9 @@ angular.module('facette.ui.list', [])
         restrict: 'E',
         replace: true,
         transclude: true,
-        scope: {},
+        scope: {
+            href: '@'
+        },
         templateUrl: 'templates/listrow.html'
     };
 })

@@ -46,7 +46,7 @@
 										<div class="name">{{ g.name || (g.series.length == 1 ? g.series[0].name : '&nbsp;') }}</div>
 										<div class="actions">
 											<menu>
-												<menuitem href="" icon="cog" info="{{ 'label.series_group_edit' | translate }}" type="button" ng-click="$event.stopPropagation(); editGroup(g)"></menuitem>
+												<menuitem icon="cog" info="{{ 'label.series_group_edit' | translate }}" type="button" ng-click="$event.stopPropagation(); editGroup(g)"></menuitem>
 											</menu>
 										</div>
 									</div>
@@ -60,16 +60,16 @@
 										</div>
 										<div class="actions">
 											<menu>
-												<menuitem href="" icon="times" info="{{ 'label.series_remove' | translate }}" type="button" ng-click="$event.stopPropagation(); remove(g.series, s)"></menuitem>
+												<menuitem icon="times" info="{{ 'label.series_remove' | translate }}" type="button" ng-click="$event.stopPropagation(); remove(g.series, s)"></menuitem>
 											</menu>
 										</div>
 									</div>
 								</listcolumn>
 								<listcolumn class="actions">
 									<menu>
-										<menuitem href="" icon="caret-square-o-down" info="{{ 'label.groups_expand' | translate }}" type="button" ng-click="$event.stopPropagation(); expandGroup(g, true)" ng-show="g.series.length == 1 && g.series[0].expansion !== undefined"></menuitem>
-										<menuitem href="" icon="caret-square-o-up" info="{{ 'label.groups_collapse' | translate }}" type="button" ng-click="$event.stopPropagation(); expandGroup(g, false)" ng-show="g.series.length == 1 && g.series[0].expanded !== undefined"></menuitem>
-										<menuitem href="" icon="times-circle" info="{{ 'label.groups_remove' | translate }}" type="button" ng-click="$event.stopPropagation(); remove(item.groups, g)"></menuitem>
+										<menuitem icon="caret-square-o-down" info="{{ 'label.groups_expand' | translate }}" type="button" ng-click="$event.stopPropagation(); expandGroup(g, true)" ng-show="g.series.length == 1 && g.series[0].expansion !== undefined"></menuitem>
+										<menuitem icon="caret-square-o-up" info="{{ 'label.groups_collapse' | translate }}" type="button" ng-click="$event.stopPropagation(); expandGroup(g, false)" ng-show="g.series.length == 1 && g.series[0].expanded !== undefined"></menuitem>
+										<menuitem icon="times-circle" info="{{ 'label.groups_remove' | translate }}" type="button" ng-click="$event.stopPropagation(); remove(item.groups, g)"></menuitem>
 									</menu>
 								</listcolumn>
 							</listrow>
@@ -168,7 +168,9 @@
 							</column>
 
 							<column>
-								<label>{{ 'label.graphs_yaxis_unit' | translate }}</label>
+								<label>{{ 'label.graphs_yaxis_unit' | translate }}
+									<span class="info fa fa-question-circle" title="{{ 'mesg.graphs_yaxis_unit_fixed' | translate }}<br>{{ 'mesg.graphs_yaxis_unit_metric' | translate }}<br>{{ 'mesg.graphs_yaxis_unit_binary' | translate }}" title-direction="right"></span>
+								</label>
 								<input id="axis-unit-fixed" name="axis-unit" type="radio" value="fixed" ng-model="item.options.yaxis_unit">
 								<label for="axis-unit-fixed" tabindex="0">{{ 'label.graphs_yaxis_unit_fixed' | translate }}</label>
 								<input id="axis-unit-metric" name="axis-unit" type="radio" value="metric" ng-model="item.options.yaxis_unit">

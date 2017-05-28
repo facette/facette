@@ -28,14 +28,14 @@
 									<div class="name">{{ p }}</div>
 									<div class="actions">
 										<menu>
-											<menuitem href="" icon="info-circle" type="button" info="{{ patternsData[p] || ('mesg.wait' | translate) }}" info-direction="bottom-right" ng-mouseenter="patternsData[p] || testPattern(p)" ng-if="p.indexOf('glob:') === 0 || p.indexOf('regexp:') === 0"></menuitem>
+											<menuitem icon="info-circle" type="button" info="{{ patternsData[p] || ('mesg.wait' | translate) }}" info-direction="bottom-right" ng-mouseenter="patternsData[p] || testPattern(p)" ng-if="p.indexOf('glob:') === 0 || p.indexOf('regexp:') === 0"></menuitem>
 										</menu>
 									</div>
 								</div>
 							</listcolumn>
 							<listcolumn class="actions">
 								<menu>
-									<menuitem href="" icon="times-circle" info="{{ 'label.patterns_remove' | translate }}" type="button" ng-click="$event.stopPropagation(); remove(item.patterns, p)"></menuitem>
+									<menuitem icon="times-circle" info="{{ 'label.patterns_remove' | translate }}" type="button" ng-click="$event.stopPropagation(); remove(item.patterns, p)"></menuitem>
 								</menu>
 							</listcolumn>
 						</listrow>

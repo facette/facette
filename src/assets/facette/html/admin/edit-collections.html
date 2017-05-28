@@ -38,7 +38,7 @@
 										<div class="note error" ng-if="graphFetched && !graphData[e.graph]"><span class="fa fa-warning"></span> {{ 'mesg.items_not_found' | translate }}</div>
 										<div class="actions">
 											<menu>
-												<menuitem href="" icon="cog" info="{{ 'label.graphs_manage' | translate }}" type="button" ng-click="$event.stopPropagation(); editGraphEntry(e)"></menuitem>
+												<menuitem icon="cog" info="{{ 'label.graphs_manage' | translate }}" type="button" ng-click="$event.stopPropagation(); editGraphEntry(e)"></menuitem>
 												<menuitem href="{{ ::baseURL }}admin/graphs/{{ e.graph }}" icon="arrow-circle-right" info="{{ 'label.graphs_goto' | translate }}" type="button"></menuitem>
 											</menu>
 										</div>
@@ -51,7 +51,7 @@
 								</listcolumn>
 								<listcolumn class="actions">
 									<menu>
-										<menuitem href="" icon="times-circle" info="{{ 'label.graphs_remove' | translate }}" type="button" ng-click="$event.stopPropagation(); remove(item.entries, e)"></menuitem>
+										<menuitem icon="times-circle" info="{{ 'label.graphs_remove' | translate }}" type="button" ng-click="$event.stopPropagation(); remove(item.entries, e)"></menuitem>
 									</menu>
 								</listcolumn>
 							</listrow>

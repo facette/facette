@@ -23,6 +23,10 @@ table.list .listcolumn {
 	box-sizing: border-box;
 }
 
+.listrow {
+	text-decoration: none;
+}
+
 table.list .listrow {
 	display: table-row;
 }
@@ -32,30 +36,38 @@ table.list .listrow:last-child .listcolumn {
 	border-bottom: 1px solid #ecf0f1;
 }
 
+.listrow:focus,
 .listrow.active,
 .listrow.selected {
 	background-color: #3498db;
+	outline: none;
 }
 
+.listrow:focus,
 .listrow.active,
 .listrow.selected,
+.listrow:focus .listcolumn.checkbox label,
 .listrow.active .listcolumn.checkbox label,
 .listrow.selected .listcolumn.checkbox label {
 	color: #fff;
 }
 
+.listrow:focus .listcolumn.checkbox label,
 .listrow.active .listcolumn.checkbox label,
 .listrow.selected .listcolumn.checkbox label {
 	opacity: 0.5;
 }
 
+.listrow:focus,
 .listrow.active,
 .listrow.selected,
+.listrow:focus + .listrow,
 .listrow.active + .listrow,
 .listrow.selected + .listrow {
 	border-top-color: #318ecc;
 }
 
+.listrow:focus:last-child,
 .listrow.active:last-child,
 .listrow.selected:last-child {
 	border-bottom-color: #318ecc;

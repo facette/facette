@@ -11,16 +11,22 @@
 	width: 2rem;
 }
 
-.pagination .active {
-	background-color: #ecf0f1;
+.pagination a {
 	border-radius: 0.2rem;
+	display: block;
+	text-decoration: none;
 }
 
-.pagination .disabled {
+.pagination .active a {
+	background-color: #ecf0f1;
+}
+
+.pagination .disabled a {
 	opacity: 0.35;
 	pointer-events: none;
 }
 
-.pagination a {
-	text-decoration: none;
+.pagination a:focus {
+	background-color: #5fa0cb;
+	color: #fff;
 }
