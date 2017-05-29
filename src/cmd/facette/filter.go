@@ -29,7 +29,8 @@ func filterMatch(pattern, value string) (bool, error) {
 		ok, _ := path.Match(strings.TrimPrefix(pattern, backend.GlobPrefix), value)
 		return ok, nil
 	} else if strings.HasPrefix(pattern, backend.RegexpPrefix) {
-		if re, err := regexp.Compile(strings.TrimPrefix(pattern, backend.RegexpPrefix)); err != nil {
+		re, err := regexp.Compile(strings.TrimPrefix(pattern, backend.RegexpPrefix))
+		if err != nil {
 			return false, err
 		}
 
