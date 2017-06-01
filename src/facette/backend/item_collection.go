@@ -146,6 +146,7 @@ func (c *Collection) Expand(attrs maputil.Map) error {
 			attrs.Merge(c.Attributes, true)
 			attrs.Merge(entry.Attributes, true)
 
+			entry.Graph.backend = c.backend
 			entry.Graph.Expand(attrs)
 
 			if v, ok := entry.Graph.Options["title"]; ok {
