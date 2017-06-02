@@ -13,6 +13,32 @@ import (
 	"github.com/fatih/set"
 )
 
+// api:section catalog "Catalog"
+//
+// The catalog contains entries of the following types:
+//
+//  * `origins`
+//  * `sources`
+//  * `metrics`
+//
+
+// api:method GET /api/v1/catalog/ "Get catalog summary"
+//
+// This endpoint returns catalog entries count per type.
+//
+// ---
+// section: catalog
+// responses:
+//   200:
+//     type: object
+//     example:
+//       format: json
+//       body: |
+//         {
+//           "origins": 1,
+//           "sources": 3,
+//           "metrics": 42
+//         }
 func (w *httpWorker) httpHandleCatalogSummary(rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -26,6 +52,45 @@ func (w *httpWorker) httpHandleCatalogSummary(rw http.ResponseWriter, r *http.Re
 	httputil.WriteJSON(rw, result, http.StatusOK)
 }
 
+// api:method GET /api/v1/catalog/:type/ "Get catalog entries of a given type"
+//
+// This endpoint returns catalog entries of a given type. If a `filter` query parameter is given, only entries having
+// their name matching the filter will be returned.
+//
+// This endpoint supports pagination through the `offset` and `limit` query parameters.
+//
+// ---
+// section: catalog
+// parameters:
+// - name: type
+//   type: string
+//   description: type of catalog entries
+//   in: path
+//   required: true
+// - name: filter
+//   type: string
+//   description: term to filter names on
+// - name: offset
+//   type: integer
+//   description: offset to return items from
+// - name: limit
+//   type: integer
+//   description: number of items to return
+// responses:
+//   200:
+//     type: array
+//     headers:
+//       X-Total-Records: total number of catalog records for this type
+//     example:
+//       headers:
+//         X-Total-Records: 3
+//       format: json
+//       body: |
+//         [
+//           "metric1",
+//           "metric2",
+//           "metric3"
+//         ]
 func (w *httpWorker) httpHandleCatalogType(rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
@@ -85,6 +150,41 @@ func (w *httpWorker) httpHandleCatalogType(rw http.ResponseWriter, r *http.Reque
 	httputil.WriteJSON(rw, result, http.StatusOK)
 }
 
+// api:method GET /api/v1/catalog/:type/:name "Get catalog entry information"
+//
+// This endpoint returns the information associated with a catalog entry given its type and name.
+//
+// ---
+// section: catalog
+// parameters:
+// - name: type
+//   type: string
+//   description: type of catalog items
+//   in: path
+//   required: true
+// - name: name
+//   type: string
+//   description: name of the catalog item
+//   in: path
+//   required: true
+// responses:
+//   200:
+//     type: object
+//     example:
+//       format: json
+//       body: |
+//         {
+//           "name": "metric3",
+//           "origins": [
+//             "provider1",
+//           ],
+//           "sources": [
+//             "host1.example.net"
+//           ],
+//           "providers": [
+//             "provider1",
+//           ]
+//         }
 func (w *httpWorker) httpHandleCatalogEntry(rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 

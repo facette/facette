@@ -6,6 +6,8 @@ import (
 	"github.com/facette/httputil"
 )
 
+// api:section library "Library"
+
 var libraryTypes = []string{
 	"collections",
 	"graphs",
@@ -13,6 +15,23 @@ var libraryTypes = []string{
 	"metricgroups",
 }
 
+// api:method GET /api/v1/library/ "Get library summary"
+//
+// This endpoint returns library items count per type.
+//
+// ---
+// section: library
+// responses:
+//   200:
+//     type: object
+//     example:
+//       body: |
+//         {
+//           "collections": 1,
+//           "graphs": 7,
+//           "sourcegroups": 3,
+//           "metricgroups": 42
+//         }
 func (w *httpWorker) httpHandleLibrarySummary(rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 

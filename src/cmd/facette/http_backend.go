@@ -25,6 +25,29 @@ var backendTypes = []string{
 	"metricgroups",
 }
 
+// api:method POST /api/v1/library/:type/ "Create a new item of a given type"
+//
+// This endpoint creates a new item and stores it to the back-end database.
+//
+// The `inherit` query parameter can be used to inherit fields from an existing item, then applying new values with
+// received body payload.
+//
+// If the instance is *read-only* the operation will be rejected with `403 Forbidden`.
+//
+// ---
+// section: library
+// parameters:
+// - name: type
+//   type: string
+//   description: type of library items
+//   required: true
+//   in: path
+// - name: inherit
+//   type: string
+//   description: identifier of the item to inherit from
+//   in: query
+// responses:
+//   201:
 func (w *httpWorker) httpHandleBackendCreate(rw http.ResponseWriter, r *http.Request) {
 	if w.service.config.ReadOnly {
 		httputil.WriteJSON(rw, httpBuildMessage(ErrReadOnly), http.StatusForbidden)
@@ -118,6 +141,37 @@ func (w *httpWorker) httpHandleBackendCreate(rw http.ResponseWriter, r *http.Req
 	http.Redirect(rw, r, strings.TrimRight(r.URL.Path, "/")+"/"+id, http.StatusCreated)
 }
 
+// api:method GET /api/v1/library/:type/:id "Get a library item"
+//
+// This endpoint returns a library item given its type and identifier.
+//
+// The `expand` query parameter _(available for collections and graphs)_ can be set to request item exansion. If the
+// item is an instance of a template, all internal references will be resolved.
+//
+// ---
+// section: library
+// parameters:
+// - name: type
+//   type: string
+//   description: type of library items
+//   required: true
+//   in: path
+// - name: id
+//   type: string
+//   description: identifier of the item
+//   required: true
+//   in: path
+// - name: expand
+//   type: boolean
+//   description: item expansion flag
+//   in: query
+// responses:
+//   200:
+//     type: object
+//     example:
+//       format: json
+//       body: |
+//         {}
 func (w *httpWorker) httpHandleBackendGet(rw http.ResponseWriter, r *http.Request) {
 	var result interface{}
 
@@ -256,6 +310,27 @@ func (w *httpWorker) httpHandleBackendUpdate(rw http.ResponseWriter, r *http.Req
 	rw.WriteHeader(http.StatusNoContent)
 }
 
+// api:method DELETE /api/v1/library/:type/:id "Delete a library item"
+//
+// This endpoint deletes a library item given its type and identifier.
+//
+// If the instance is *read-only* the operation will be rejected with `403 Forbidden`.
+//
+// ---
+// section: library
+// parameters:
+// - name: type
+//   type: string
+//   description: type of library items
+//   required: true
+//   in: path
+// - name: id
+//   type: string
+//   description: identifier of the item
+//   required: true
+//   in: path
+// responses:
+//   204:
 func (w *httpWorker) httpHandleBackendDelete(rw http.ResponseWriter, r *http.Request) {
 	if w.service.config.ReadOnly {
 		httputil.WriteJSON(rw, httpBuildMessage(ErrReadOnly), http.StatusForbidden)
@@ -305,6 +380,23 @@ func (w *httpWorker) httpHandleBackendDelete(rw http.ResponseWriter, r *http.Req
 	rw.WriteHeader(http.StatusNoContent)
 }
 
+// api:method DELETE /api/v1/library/:type/ "Delete library items of a given type"
+//
+// This endpoint deletes all items of a given type.
+//
+// If the request header `X-Confirm-Action` is not present or if the instance is *read-only* the operation will be
+// rejected with `403 Forbidden`.
+//
+// ---
+// section: library
+// parameters:
+// - name: type
+//   type: string
+//   description: type of library items
+//   required: true
+//   in: path
+// responses:
+//   204:
 func (w *httpWorker) httpHandleBackendDeleteAll(rw http.ResponseWriter, r *http.Request) {
 	var rv reflect.Value
 
@@ -357,6 +449,70 @@ func (w *httpWorker) httpHandleBackendDeleteAll(rw http.ResponseWriter, r *http.
 	rw.WriteHeader(http.StatusNoContent)
 }
 
+// api:method GET /api/v1/library/:type/ "Get library items of a given type"
+//
+// This endpoint returns library items of a given type. If a `filter` query parameter is given, only items having
+// their name matching the filter will be returned.
+//
+// This endpoint supports pagination through the `offset` and `limit` query parameters and sorting using `sort` query
+// parameter (separated by commas; prefix field name with "-" to reverse sort order).
+//
+// The `kind` query parameter _(available for collections and graphs)_ can be set in order to target or exclude
+// templates from result:
+//
+//  * `all`: return all kind of items (default)
+//  * `raw`: only return raw items, thus removing templates from result
+//  * `template`: only return templates
+//
+// The `link` parameter _(available for collection and graphs)_ can be set in order to only return items having the
+// given item as template reference.
+//
+// The `parent` query parameter _(only available for collections)_ can be set in order to only return items having the
+// given collection for parent.
+//
+// ---
+// section: library
+// parameters:
+// - name: type
+//   type: string
+//   description: type of library items
+//   required: true
+//   in: path
+// - name: filter
+//   type: string
+//   description: term to filter names on
+//   in: query
+// - name: sort
+//   type: string
+//   description: fields to sort results on
+//   in: query
+// - name: offset
+//   type: integer
+//   description: offset to return items from
+//   in: query
+// - name: limit
+//   type: integer
+//   description: number of items to return
+//   in: query
+// - name: kind
+//   type: string
+//   description: kind of item to return
+//   in: query
+// - name: link
+//   type: string
+//   description: identifier of the linked item
+//   in: query
+// - name: parent
+//   type: string
+//   description: identifier of the parent item
+//   in: query
+// responses:
+//   200:
+//     type: array
+//     example:
+//       format: json
+//       body: |
+//         []
 func (w *httpWorker) httpHandleBackendList(rw http.ResponseWriter, r *http.Request) {
 	typ := httproute.ContextParam(r, "type").(string)
 

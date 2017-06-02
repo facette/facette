@@ -12,6 +12,69 @@ import (
 	"github.com/fatih/set"
 )
 
+// api:section expand "Expand"
+
+// api:method POST /expand/ "Expand source/metric group in graph series"
+//
+// This endpoint performs source/metric group expansion for a specific origin. The input format is a list of series
+// element (`origin`/`source`/`metric`), where the both of the `source` and `metric` field value can be a reference to
+// an existing source/metric group ID.
+//
+// The format for describing a series in a expansion list is:
+//
+// ```
+// {
+//   "origin": "< Origin name >",
+//   "source": "< Source name or source group ID (format: `group:ID`) >",
+//   "metric": "< Metric name or metric group ID (format: `group:ID`) >"
+// }
+// ```
+//
+// Here is an example of an expansion request body:
+//
+// ```
+// [
+//   {
+//     "origin": "kairosdb",
+//     "source": "host1.example.net",
+//     "metric": "group:118e864e-d880-5499-864b-06dedfd9f9ef"
+//   }
+// ]
+// ```
+//
+// The response is a list of series (origin/source/metric, and a pre-formatted `name` field for display purposes).
+//
+// ---
+// section: expand
+// content_types:
+// - application/json
+// responses:
+//   200:
+//     type: array
+//     example:
+//       format: json
+//       body: |
+//         [
+//             {
+//               "name": "host1.example.net (load.shortterm)",
+//               "origin": "kairosdb",
+//               "source": "host1.example.net",
+//               "metric": "load.shortterm"
+//             },
+//             {
+//               "name": "host1.example.net (load.midterm)",
+//               "origin": "kairosdb",
+//               "source": "host1.example.net",
+//               "metric": "load.midterm"
+//             },
+//             {
+//               "name": "host1.example.net (load.longterm)",
+//               "origin": "kairosdb",
+//               "source": "host1.example.net",
+//               "metric": "load.longterm"
+//             }
+//           ]
+//         ]
 func (w *httpWorker) httpHandleExpand(rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
