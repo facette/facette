@@ -51,7 +51,9 @@ chart.fn.drawEventRect = function() {
 
     var dateBisect = d3.bisector(function(a) { return a[0] * 1000; }).left,
         rectWidth = $$.areaGroup.node().getBBox().width,
-        rectHeight = $$.height - ($$.titleGroup ? $$.titleGroup.node().getBBox().height : 0) - 2 * $$.config.padding;
+        rectHeight = $$.height - ($$.titleGroup ? $$.titleGroup.node().getBBox().height : 0) - 2 * $$.config.padding,
+        tooltipPosYStick = false,
+        tooltipDelta = $$.yAxisGroup.node().getBBox().width + $$.config.padding;
 
     $$.areaGroup.append('rect')
         .attr('class', 'chart-event')
@@ -110,9 +112,30 @@ chart.fn.drawEventRect = function() {
             $$.resetZoomRect();
         })
         .on('mousemove', function() {
-            var mouse = d3.mouse(this),
-                tooltipPos = mouse[0] + $$.yAxisGroup.node().getBBox().width + $$.config.padding,
-                tooltipPosKey = 'left',
+            var mouse = d3.mouse(this);
+
+            // Set tooltip content
+            var data = {
+                date: $$.xScale.invert(mouse[0]),
+                values: []
+            };
+
+            $$.config.series.forEach(function(series, idx) {
+                var idxPlot = series.plots ? dateBisect(series.plots, data.date, 1) : -1;
+
+                data.values[idx] = {
+                    name: series.name,
+                    value: idxPlot != -1 ? series.plots[idxPlot] : null
+                };
+            });
+
+            $$.updateTooltip(data);
+
+            // Set tooltip position
+            var tooltipPosX = mouse[0] + tooltipDelta,
+                tooltipPosXKey = 'left',
+                tooltipPosY = tooltipPosYStick ? 0 : rectHeight + $$.config.padding - mouse[1],
+                tooltipPosYKey = tooltipPosYStick ? 'top' : 'bottom',
                 tooltipWidth = $$.tooltipGroup.node().clientWidth;
 
             // Update zoom selection if active
@@ -138,34 +161,34 @@ chart.fn.drawEventRect = function() {
             }
 
             // Update tooltip position
-            if (tooltipPos + tooltipWidth > rectWidth) {
-                tooltipPos = Math.abs(mouse[0] - rectWidth) + $$.config.padding;
-                tooltipPosKey = 'right';
+            if (tooltipPosX + tooltipWidth > rectWidth) {
+                tooltipPosX = Math.abs(mouse[0] - rectWidth) + $$.config.padding;
+                tooltipPosXKey = 'right';
 
                 $$.tooltipGroup.style('left', null);
             } else {
+                if ($$.yLegend) {
+                    tooltipPosX += $$.config.padding;
+                }
+
                 $$.tooltipGroup.style('right', null);
             }
 
+            if (!tooltipPosYStick) {
+                var tooltipPosYDelta = $$.tooltipGroup.node().getBoundingClientRect().top;
+                if (tooltipPosYDelta < 0) {
+                    tooltipPosY = 0;
+                    tooltipPosYKey = 'top';
+                    tooltipPosYStick = true;
+
+                    $$.tooltipGroup.style('bottom', null);
+                } else {
+                    $$.tooltipGroup.style('top', null);
+                }
+            }
+
             $$.tooltipGroup
-                .style(tooltipPosKey, tooltipPos + 'px')
-                .style('top', mouse[1] + 'px');
-
-            // Set tooltip content
-            var data = {
-                date: $$.xScale.invert(mouse[0]),
-                values: []
-            };
-
-            $$.config.series.forEach(function(series, idx) {
-                var idxPlot = series.plots ? dateBisect(series.plots, data.date, 1) : -1;
-
-                data.values[idx] = {
-                    name: series.name,
-                    value: idxPlot != -1 ? series.plots[idxPlot] : null
-                };
-            });
-
-            $$.updateTooltip(data);
+                .style(tooltipPosXKey, tooltipPosX + 'px')
+                .style(tooltipPosYKey, tooltipPosY + 'px');
         });
 };

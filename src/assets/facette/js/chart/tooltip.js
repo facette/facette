@@ -25,13 +25,17 @@ chart.fn.toggleTooltip = function(state) {
 
     $$.tooltipEnabled = state;
     this.tooltipGroup.style('display', $$.tooltipEnabled ? 'block' : 'none');
+
+    if (!$$.tooltipEnabled) {
+        $$.tooltipBody.selectAll('tr').remove();
+    }
 };
 
 chart.fn.updateTooltip = function(data) {
     var $$ = this;
 
     $$.tooltipDate.text($$.config.tooltip.date.format ? $$.config.tooltip.date.format(data.date) : data.date);
-    $$.tooltipBody.selectAll('*').remove();
+    $$.tooltipBody.selectAll('tr').remove();
 
     var total = 0;
 
