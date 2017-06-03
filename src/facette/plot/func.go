@@ -28,8 +28,6 @@ const (
 	OperatorAverage
 	// OperatorSum represents a sum operation type.
 	OperatorSum
-	// OperatorNormalize represents a normalize operation type.
-	OperatorNormalize
 )
 
 type bucket struct {
@@ -131,19 +129,6 @@ func Normalize(series []Series, startTime, endTime time.Time, sample int, consol
 	result := make([]Series, length)
 	buckets := make([][]bucket, length)
 
-	// Override sample to max series length if smaller than requested
-	maxLength := 0
-	for _, s := range series {
-		l := len(s.Plots)
-		if l > maxLength {
-			maxLength = l
-		}
-	}
-
-	if maxLength > 0 && maxLength < sample {
-		sample = maxLength
-	}
-
 	// Calculate the common step for all series based on time range and requested sampling
 	step := endTime.Sub(startTime) / time.Duration(sample)
 
@@ -201,11 +186,6 @@ func Normalize(series []Series, startTime, endTime time.Time, sample int, consol
 
 					lastKnown = j
 				}
-			}
-
-			// Stop if only one series is being normalized (no need to align times)
-			if length == 1 {
-				continue
 			}
 
 			// Align consolidated plots timestamps among normalized series lists

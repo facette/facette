@@ -843,7 +843,6 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
                 {name: 'None', value: groupOperatorNone},
                 {name: 'Average', value: groupOperatorAverage},
                 {name: 'Sum', value: groupOperatorSum},
-                {name: 'Normalize', value: groupOperatorNormalize}
             ];
 
             $scope.groupConsolidations = [

@@ -196,11 +196,6 @@ func (w *httpWorker) executeRequest(req *plot.Request) []plot.SeriesResponse {
 			}
 		}
 
-		// Skip operations if none requested
-		if group.Operator == plot.OperatorNone {
-			goto finalize
-		}
-
 		// Get group consolidation mode and interpolation options
 		consolidate = plot.ConsolidateAverage
 		if v, ok := group.Options["consolidate"].(int); ok {
@@ -243,7 +238,7 @@ func (w *httpWorker) executeRequest(req *plot.Request) []plot.SeriesResponse {
 			// Replace group series with operation result
 			data[i] = []plot.Series{series}
 
-		case plot.OperatorNormalize:
+		case plot.OperatorNone:
 			// noop
 
 		default:

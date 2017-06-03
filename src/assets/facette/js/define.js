@@ -25,7 +25,6 @@ var filterActions = [
     groupOperatorNone = 0,
     groupOperatorAverage = 1,
     groupOperatorSum = 2,
-    groupOperatorNormalize = 3,
 
     groupConsolidateAverage = 1,
     groupConsolidateFirst = 2,
