@@ -35,7 +35,7 @@ chart.fn.updateData = function() {
             stackData.forEach(function(entry) {
                 var sum = 0;
                 keys.forEach(function(key) { sum += entry[key]; });
-                keys.forEach(function(key) { entry[key] /= sum; });
+                keys.forEach(function(key) { if (sum !== 0) { entry[key] /= sum; } });
             });
         }
 

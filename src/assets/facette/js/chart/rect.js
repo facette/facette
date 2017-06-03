@@ -65,6 +65,8 @@ chart.fn.drawEventRect = function() {
             d3.event.stopPropagation();
         })
         .on('mouseout', function() {
+            tooltipPosYStick = false;
+
             // Hide tooltip and cursor line
             $$.cursorLine.style('display', 'none');
             $$.toggleTooltip(false);
