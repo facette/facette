@@ -357,17 +357,12 @@ func (c *influxdbConnector) Plots(q *plot.Query) ([]plot.Series, error) {
 	}
 
 	// Parse results received from back-end
-	step := int(q.EndTime.Sub(q.StartTime) / time.Duration(q.Sample))
-
 	for i, r := range response.Results {
 		if r.Err != "" {
 			continue
 		}
 
-		results[i] = plot.Series{
-			Step: step,
-		}
-
+		results[i] = plot.Series{}
 		for _, s := range r.Series {
 			for _, v := range s.Values {
 				time, err := time.Parse(time.RFC3339Nano, v[0].(string))

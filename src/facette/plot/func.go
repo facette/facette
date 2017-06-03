@@ -160,7 +160,6 @@ func Normalize(series []Series, startTime, endTime time.Time, sample int, consol
 		}
 
 		result[i] = Series{
-			Step:    int(step.Seconds()),
 			Plots:   make([]Plot, sample),
 			Summary: make(map[string]Value),
 		}

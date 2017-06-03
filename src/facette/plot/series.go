@@ -9,7 +9,6 @@ import (
 // Series represents a time series instance.
 type Series struct {
 	Plots   []Plot           `json:"plots"`
-	Step    int              `json:"step"`
 	Summary map[string]Value `json:"summary"`
 }
 
