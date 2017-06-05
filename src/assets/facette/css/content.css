@@ -244,12 +244,12 @@ article section .search {
 	position: relative;
 }
 
-article section .search input[type=text],
+article section .search input[type=search],
 article section .search button {
 	font-size: 1.25rem;
 }
 
-article section .search input[type=text] {
+article section .search input[type=search] {
 	padding: 0.5rem 4rem 0.5rem 0.5rem;
 }
 
@@ -264,16 +264,20 @@ article section .search button {
 	width: 3.5rem;
 }
 
-article section .search angucomplete-alt {
+article section .search .autocomplete {
 	width: 100%;
 }
 
-article section .search angucomplete-alt.focus + button {
+article section .search .autocomplete.focus + button {
 	background-color: #5fa0cb;
 }
 
-article section .search angucomplete-alt .angucomplete-dropdown {
+article section .search .autocomplete-dropdown {
 	width: calc(100% - 3.5rem);
+}
+
+article section .search .autocomplete-row {
+	line-height: 2rem;
 }
 
 article .graph {

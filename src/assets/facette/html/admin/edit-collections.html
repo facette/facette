@@ -64,7 +64,7 @@
 
 					<div class="formblock">
 						<label>{{ 'label.graph' | translate }}</label>
-						<angucomplete-alt id="graph" pause="250" selected-object="selectGraph" remote-api-handler="graphsList" title-field="name" minlength="1" focus-first="true" match-class="highlight" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
+						<autocomplete id="graph" delay="250" source="graphsList" on-select="selectGraph"></autocomplete>
 					</div>
 
 					<div class="formblock">
@@ -164,7 +164,7 @@
 						</columns>
 
 						<label>{{ 'label.collections_parent' | translate }}</label>
-						<angucomplete-alt class="small" id="parent" pause="250" selected-object="selectParent" remote-api-handler="collectionsList" title-field="name" minlength="1" focus-first="true" match-class="highlight" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
+						<autocomplete class="small" id="parent" delay="250" source="collectionsList" on-select="selectParent"></autocomplete>
 						<button ng-click="removeParent()" ng-disabled="!item.parent">{{ 'label.remove' | translate }}</button>
 					</div>
 
@@ -272,10 +272,10 @@
 				<input type="text" pattern="[a-zA-Z0-9](?:[a-zA-Z0-9\-_\.]*[a-zA-Z0-9])?" ng-class="{danger: conflict.alias}" ng-model="item.alias">
 
 				<label>{{ 'label.templates_source' | translate }}</label>
-				<angucomplete-alt class="small" id="template" pause="250" selected-object="selectTemplate" remote-api-handler="templateSources" title-field="name" minlength="1" focus-first="true" match-class="highlight" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}" ng-class="{danger: validated && !item.link}"></angucomplete-alt>
+				<autocomplete class="small" id="template" delay="250" source="templateSources" on-select="selectTemplate"></autocomplete>
 
 				<label>{{ 'label.collections_parent' | translate }}</label>
-				<angucomplete-alt class="small" id="parent" pause="250" selected-object="selectParent" remote-api-handler="collectionsList" title-field="name" minlength="1" focus-first="true" match-class="highlight" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
+				<autocomplete class="small" id="parent" delay="250" source="collectionsList" on-select="selectParent"></autocomplete>
 				<button ng-click="removeParent()" ng-disabled="!item.parent">{{ 'label.remove' | translate }}</button>
 
 				<h2>{{ 'label.templates_attrs' | translate }}</h2>

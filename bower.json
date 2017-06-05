@@ -4,7 +4,6 @@
   "homepage": "https://facette.io/",
   "license": "BSD",
   "dependencies": {
-    "angucomplete-alt": "3.0.0",
     "angular": "1.6.4",
     "angular-bootstrap-colorpicker": "3.0.25",
     "angular-bootstrap-datetimepicker": "1.1.4",

@@ -11,7 +11,7 @@
 		<div class="logo"><img src="assets/images/logo-main.png" alt="logo" height="80"></div>
 
 		<div class="search">
-			<angucomplete-alt id="search" pause="250" selected-object="searchSelect" remote-api-handler="searchHandler" title-field="name" description-field="description" minlength="1" focus-first="true" focus-in="focus = true" focus-out="focus = false" match-class="highlight" ng-class="{focus: focus}" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
+			<autocomplete id="search" delay="250" source="searchHandler" on-select="searchSelect"></autocomplete>
 			<button><span class="fa fa-search"></span></button>
 		</div>
 	</section>

@@ -33,7 +33,7 @@ label .warn {
 
 button,
 input,
-angucomplete-alt {
+.autocomplete {
 	margin-right: 0.35rem;
 }
 
@@ -43,7 +43,7 @@ angucomplete-alt {
 
 button:last-child,
 input:last-child,
-angucomplete-alt:last-child,
+.autocomplete:last-child,
 .ui-select-container:last-child {
 	margin-right: 0;
 }
@@ -222,8 +222,8 @@ input[type=password]:invalid,
 input[type=password].danger,
 input[type=search]:invalid,
 input[type=search].danger,
-angucomplete-alt input[type=text]:invalid,
-angucomplete-alt.danger input[type=text],
+.autocomplete input[type=search]:invalid,
+.autocomplete.danger input[type=search],
 .ui-select-container.danger input[type=search] {
 	border-color: #e74c3c;
 	box-shadow: none;
@@ -280,19 +280,19 @@ textarea {
 	margin: 0.75rem 0 0.5rem;
 }
 
-.column angucomplete-alt,
+.column .autocomplete,
 .column .ui-select-container,
-.ngdialog-content angucomplete-alt,
+.ngdialog-content .autocomplete,
 .ngdialog-content .ui-select-container {
 	width: 100%;
 }
 
-.ngdialog-content angucomplete-alt,
+.ngdialog-content .autocomplete,
 .ngdialog-content .ui-select-container {
 	display: block;
 }
 
-.column angucomplete-alt.small,
+.column .autocomplete.small,
 .column .ui-select-container.small,
 .column input[type=number].small,
 .column input[type=text].small,
@@ -303,9 +303,10 @@ textarea {
 	width: calc(50% - 1rem);
 }
 
-angucomplete-alt input[type=text],
+.autocomplete input[type=search],
 .ui-select-container,
 .ui-select-container input[type=search] {
+	margin-right: 0;
 	width: 100%;
 }
 
@@ -313,7 +314,7 @@ angucomplete-alt input[type=text],
 	width: 100% !important;
 }
 
-angucomplete-alt,
+.autocomplete,
 .ui-select-container {
 	display: inline-block;
 	position: relative;
@@ -352,7 +353,7 @@ angucomplete-alt,
 	align-items: center;
 }
 
-.angucomplete-dropdown,
+.autocomplete-dropdown,
 .ui-select-choices,
 .colorpicker .dropdown-menu,
 .datetimepicker {
@@ -370,15 +371,14 @@ angucomplete-alt,
 	z-index: 200;
 }
 
-.angucomplete-dropdown,
+.autocomplete-dropdown,
 .ui-select-choices {
 	max-height: 12rem;
 	overflow-y: auto;
 	text-align: left;
 }
 
-.angucomplete-searching,
-.angucomplete-row,
+.autocomplete-row,
 .ui-select-choices-row {
 	cursor: default;
 	line-height: 1.75rem;
@@ -386,25 +386,33 @@ angucomplete-alt,
 	white-space: nowrap;
 }
 
-.angucomplete-searching,
-.angucomplete-row,
-.angucomplete-title,
+.autocomplete-row,
 .ui-select-choices-row {
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
 
-.angucomplete-selected-row,
+.autocomplete-row.active,
 .ui-select-choices-row.active {
 	background-color: rgba(70, 70, 70, 0.98);
 }
 
-.angucomplete-description {
-	margin-top: -0.5rem;
+.autocomplete-row {
+	display: flex;
+}
+
+.autocomplete-row .label {
+	flex: 1;
+}
+
+.autocomplete-row .note {
+	margin-left: 1rem;
 	opacity: 0.5;
 }
 
-.angucomplete-row .highlight {
+.autocomplete-row mark {
+	background: none;
+	color: inherit;
 	text-decoration: underline;
 }
 

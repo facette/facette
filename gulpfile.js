@@ -112,7 +112,6 @@ var config = {
                 'vendor/bower_components/angular-ui-tree/dist/angular-ui-tree.js',
                 'vendor/bower_components/angular-paging/dist/paging.js',
                 'vendor/bower_components/ng-sortable/dist/ng-sortable.js',
-                'vendor/bower_components/angucomplete-alt/angucomplete-alt.js',
                 'vendor/bower_components/angular-tooltips/dist/angular-tooltips.js',
                 'vendor/bower_components/angular-bootstrap-colorpicker/js/bootstrap-colorpicker-module.js',
                 'vendor/bower_components/angular-bootstrap-datetimepicker/src/js/datetimepicker.js',

@@ -12,13 +12,9 @@ app.controller('AdminEditGroupController', function($q, $route, $routeParams, $s
     $scope.remove = function(list, entry) { adminEdit.remove($scope, list, entry); };
 
     $scope.selectPattern = function(data) {
-        if (!data || !data.originalObject || !data.originalObject.name) {
-            return;
-        }
-
         angular.extend($scope.pattern, {
             type: $scope.patternTypes[0],
-            value: data.originalObject.name
+            value: data
         });
     };
 
@@ -65,13 +61,12 @@ app.controller('AdminEditGroupController', function($q, $route, $routeParams, $s
             $scope.pattern = {type: $scope.patternTypes[2], value: entry.substr(patternPrefixRegexp.length)};
         } else {
             $scope.pattern = {type: $scope.patternTypes[0], value: entry};
-            $scope.$broadcast('angucomplete-alt:changeInput', 'value', entry);
-            focus += '_value';
+            focus += ' input';
         }
 
         $scope.pattern.index = idx;
 
-        $scope.$applyAsync(function() { angular.element(focus).select(); });
+        $scope.$applyAsync(function() { angular.element(focus).val($scope.pattern.value).select(); });
     };
 
     $scope.testPattern = function(pattern) {
@@ -107,8 +102,7 @@ app.controller('AdminEditGroupController', function($q, $route, $routeParams, $s
             value: null
         };
 
-        $scope.$broadcast('angucomplete-alt:clearInput', 'value');
-        $scope.$applyAsync(function() { angular.element('#value_value').focus(); });
+        $scope.$applyAsync(function() { angular.element('#value input').val('').focus(); });
     };
 
     // Register watchers
@@ -128,11 +122,7 @@ app.controller('AdminEditGroupController', function($q, $route, $routeParams, $s
             var defer = $q.defer();
 
             catalog.list({type: type, filter: 'glob:*' + term + '*'}).$promise.then(function(data) {
-                var result = [];
-                angular.forEach(data, function(name) {
-                    result.push({name: name});
-                });
-                defer.resolve(result);
+                defer.resolve(data.map(function(a) { return {label: a, value: a}; }));
             });
 
             return defer.promise;

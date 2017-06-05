@@ -58,8 +58,8 @@
 					</ui-select>
 
 					<label>{{ 'label.patterns_value' | translate }}</label>
-					<angucomplete-alt id="value" pause="250" selected-object="selectPattern" remote-api-handler="patternValues" title-field="name" minlength="1" focus-first="true" match-class="highlight" ng-show="pattern.type.value == 1" text-no-results="{{ 'mesg.complete_no_match' | translate }}" text-searching="{{ 'mesg.complete_searching' | translate }}"></angucomplete-alt>
-					<input type="text" ng-model="pattern.value" ng-show="pattern.type.value != 1">
+					<autocomplete id="value" delay="250" allow-override="true" source="patternValues" on-select="selectPattern" ng-if="pattern.type.value == 1"></autocomplete>
+					<input type="text" ng-model="pattern.value" ng-if="pattern.type.value != 1">
 				</div>
 
 				<div class="formblock">

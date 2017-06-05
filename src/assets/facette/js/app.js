@@ -1,9 +1,9 @@
 var app = angular.module('facette', [
-    'angucomplete-alt',
     'angular-inview',
     'angular-page-visibility',
     'as.sortable',
     'bw.paging',
+    'facette.ui.autocomplete',
     'facette.ui.color',
     'facette.ui.column',
     'facette.ui.dialog',

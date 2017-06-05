@@ -9,26 +9,6 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
     $scope.seriesTemplate = {};
 
     // Define helper functions
-    function searchSeries(promises) {
-        var defer = $q.defer();
-
-        $q.all(promises).then(function(data) {
-            var result = [];
-            angular.forEach(data, function(entry) {
-                angular.forEach(entry, function(subentry) {
-                    if (angular.isObject(subentry)) {
-                        result.push({name: groupPrefix + subentry.name, value: groupPrefix + subentry.id});
-                    } else {
-                        result.push({name: subentry, value: subentry});
-                    }
-                });
-            });
-            defer.resolve(result);
-        });
-
-        return defer.promise;
-    }
-
     function fetchGroups(callback) {
         var groupQuery = [],
             expandQuery = [];
@@ -242,41 +222,23 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
         });
     };
 
-    $scope.changedSeries = function(input) {
-        var id = this.id;
-
-        if ($scope.seriesTemplateTimeout) {
-            $timeout.cancel($scope.seriesTemplateTimeout);
-            $scope.seriesTemplateTimeout = null;
-        }
-
-        $scope.seriesTemplateTimeout = $timeout(function() {
-            $scope.seriesTemplate[id] = input.match(templateRegexp) !== null;
-        }, 250);
-    };
-
-    $scope.changedCompletion = function(input) {
-        $scope.completing = Boolean(input);
-    };
-
     $scope.selectSeries = function(data) {
-        if (!data || !data.originalObject || typeof data.originalObject == 'object' && !data.originalObject.value ||
-                typeof data.originalObject == 'string' && !$scope.seriesTemplate[this.id]) {
-            return;
+        if (typeof data == 'string') {
+            $scope.series.entries[$scope.seriesCurrent][this.id] = data;
+        } else {
+            $scope.groupNames[data.id] = data.name;
+            $scope.series.entries[$scope.seriesCurrent][this.id] = groupPrefix + data.id;
         }
-
-        $scope.series.entries[$scope.seriesCurrent][this.id] = typeof data.originalObject == 'string' ?
-            data.originalObject : data.originalObject.value;
 
         var next;
 
         switch (this.id) {
         case 'origin':
-            next = '#source_value';
+            next = '#source input';
             break;
 
         case 'source':
-            next = '#metric_value';
+            next = '#metric input';
             break;
         }
 
@@ -288,11 +250,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
     };
 
     $scope.selectTemplate = function(data) {
-        if (!data || !data.originalObject || !data.originalObject.id) {
-            return;
-        }
-
-        $scope.item.link = data.originalObject.id;
+        $scope.item.link = data;
     };
 
     $scope.selectOption = function(option, data) {
@@ -339,7 +297,6 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
         // Set series as auto-named
         $scope.series.entries.map(function(entry) {
             entry.autoname = true;
-
             return entry;
         });
 
@@ -354,12 +311,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
         // Update template status
         updateTemplate();
 
-        // Trigger series auto-naming
-        if ($scope.series.hasGroups) {
-            fetchGroups(function() { $scope.autonameSeries(false); });
-        } else {
-            $scope.autonameSeries(false);
-        }
+        $scope.autonameSeries(false);
     };
 
     $scope.editOptions = function(state) {
@@ -458,11 +410,11 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
 
         var series = $scope.series.entries[$scope.seriesCurrent];
 
-        $scope.$broadcast('angucomplete-alt:changeInput', 'origin', series.origin);
-        $scope.$broadcast('angucomplete-alt:changeInput', 'source', $scope.resolveGroup(series.source));
-        $scope.$broadcast('angucomplete-alt:changeInput', 'metric', $scope.resolveGroup(series.metric));
+        angular.element('#origin input').val(series.origin);
+        angular.element('#source input').val($scope.resolveGroup(series.source));
+        angular.element('#metric input').val($scope.resolveGroup(series.metric));
 
-        $timeout(function() { angular.element('#metric_value').select(); }, 0);
+        $timeout(function() { angular.element('#metric input').select(); }, 0);
     };
 
     $scope.autonameSeries = function(force) {
@@ -635,16 +587,15 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
             delete $scope.seriesTotal;
 
             if (update) {
-                $scope.$broadcast('angucomplete-alt:clearInput', 'origin');
-                $scope.$broadcast('angucomplete-alt:clearInput', 'source');
+                angular.element('#origin input').val('');
+                angular.element('#source input').val('');
             } else {
                 delete $scope.series.entries[0].metric;
             }
 
             $scope.series.valid = false;
 
-            $scope.$broadcast('angucomplete-alt:clearInput', 'metric');
-            $scope.$applyAsync(function() { angular.element('#metric_value').focus(); });
+            $scope.$applyAsync(function() { angular.element('#metric input').val('').focus(); });
         }
     };
 
@@ -690,7 +641,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
                 }, function(data) {
                     // Restore selected template name
                     if (!oldValue) {
-                        $scope.$broadcast('angucomplete-alt:changeInput', 'template', data.name);
+                        $scope.$applyAsync(function() { angular.element('#template input').val(data.name); });
                     }
 
                     updateTemplate(data);
@@ -730,17 +681,9 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
             return;
         }
 
-        angular.extend($scope.series, {
-            hasGroups: false,
-            valid: true
-        });
+        angular.extend($scope.series, {valid: true});
 
         $scope.series.entries.forEach(function(entry) {
-            if (entry.source && entry.source.startsWith(groupPrefix) ||
-                    entry.metric && entry.metric.startsWith(groupPrefix)) {
-                $scope.series.hasGroups = true;
-            }
-
             if (!entry.origin || !entry.source || !entry.metric) {
                 $scope.series.valid = false;
             }
@@ -820,23 +763,85 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
             };
 
             $scope.seriesOrigins = function(term) {
-                return searchSeries([
-                    catalog.list({type: 'origins', filter: 'glob:*' + term + '*'}).$promise
-                ]);
+                var defer = $q.defer();
+
+                catalog.list({type: 'origins', filter: 'glob:*' + term + '*'}, function(data) {
+                    defer.resolve(data.map(function(a) { return {label: a, value: a}; }));
+                }, function() {
+                    defer.reject();
+                })
+
+                return defer.promise;
             };
 
             $scope.seriesSources = function(term) {
-                return searchSeries([
-                    library.list({type: 'sourcegroups', filter: 'glob:*' + term + '*'}).$promise,
-                    catalog.list({type: 'sources', filter: 'glob:*' + term + '*'}).$promise
-                ]);
+                var defer = $q.defer();
+
+                bulk.exec([
+                    {
+                        endpoint: 'library/sourcegroups/',
+                        method: 'GET',
+                        params: {fields: 'id,name', filter: 'glob:*' + term + '*'}
+                    },
+                    {
+                        endpoint: 'catalog/sources/',
+                        method: 'GET',
+                        params: {filter: 'glob:*' + term + '*'}
+                    }
+                ], function(data) {
+                    var result = [];
+
+                    if (data[0].data) {
+                        result = result.concat(data[0].data.map(function(a) {
+                            return {label: a.name, value: a, note: 'group'};
+                        }));
+                    }
+
+                    if (data[1].data) {
+                        result = result.concat(data[1].data.map(function(a) { return {label: a, value: a}; }));
+                    }
+
+                    defer.resolve(result);
+                }, function() {
+                    defer.reject();
+                });
+
+                return defer.promise;
             };
 
             $scope.seriesMetrics = function(term) {
-                return searchSeries([
-                    library.list({type: 'metricgroups', filter: 'glob:*' + term + '*'}).$promise,
-                    catalog.list({type: 'metrics', filter: 'glob:*' + term + '*'}).$promise
-                ]);
+                var defer = $q.defer();
+
+                bulk.exec([
+                    {
+                        endpoint: 'library/metricgroups/',
+                        method: 'GET',
+                        params: {fields: 'id,name', filter: 'glob:*' + term + '*'}
+                    },
+                    {
+                        endpoint: 'catalog/metrics/',
+                        method: 'GET',
+                        params: {filter: 'glob:*' + term + '*'}
+                    }
+                ], function(data) {
+                    var result = [];
+
+                    if (data[0].data) {
+                        result = result.concat(data[0].data.map(function(a) {
+                            return {label: a.name, value: a, note: 'group'};
+                        }));
+                    }
+
+                    if (data[1].data) {
+                        result = result.concat(data[1].data.map(function(a) { return {label: a, value: a}; }));
+                    }
+
+                    defer.resolve(result);
+                }, function() {
+                    defer.reject();
+                });
+
+                return defer.promise;
             };
 
             $scope.groupOperators = [
@@ -891,8 +896,20 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
             fetchGroups();
         } else {
             $scope.templateSources = function(term) {
-                return library.list({type: 'graphs', kind: 'template', fields: 'id,name',
-                    filter: 'glob:*' + term + '*'}).$promise;
+                var defer = $q.defer();
+
+                library.list({
+                    type: 'graphs',
+                    kind: 'template',
+                    fields: 'id,name',
+                    filter: 'glob:*' + term + '*'
+                }, function(data) {
+                    defer.resolve(data.map(function(a) { return {label: a.name, value: a.id}; }));
+                }, function() {
+                    defer.reject();
+                });
+
+                return defer.promise;
             };
 
             // Select first field

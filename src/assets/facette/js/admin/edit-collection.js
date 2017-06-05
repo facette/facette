@@ -159,11 +159,7 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
     };
 
     $scope.selectGraph = function(data) {
-        if (!data || !data.originalObject) {
-            return;
-        }
-
-        angular.extend($scope.graph, data.originalObject);
+        angular.extend($scope.graph, data);
     };
 
     $scope.setGraph = function() {
@@ -200,9 +196,7 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
 
     $scope.resetGraph = function() {
         $scope.graph = {};
-
-        $scope.$broadcast('angucomplete-alt:clearInput', 'graph');
-        $scope.$applyAsync(function() { angular.element('#graph_value').focus(); }, 0);
+        $scope.$applyAsync(function() { angular.element('#graph input').val('').focus(); });
     };
 
     $scope.editGraph = function(entry) {
@@ -211,11 +205,11 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
             return;
         }
 
-        $scope.graph = angular.extend({index: idx}, $scope.graphData[entry.graph]);
+        $scope.graph = angular.extend({index: idx, id: entry.graph}, $scope.graphData[entry.graph]);
 
-        $scope.$broadcast('angucomplete-alt:changeInput', 'graph', $scope.graphData[entry.graph].name);
-
-        $scope.$applyAsync(function() { angular.element('#graph_value').select(); });
+        $scope.$applyAsync(function() {
+            angular.element('#graph input').val($scope.graphData[entry.graph].name).select();
+        });
     };
 
     $scope.toggleGraph = function(entry) {
@@ -288,24 +282,16 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
     };
 
     $scope.selectParent = function(data) {
-        if (!data || !data.originalObject || !data.originalObject.id) {
-            return;
-        }
-
-        $scope.item.parent = data.originalObject.id;
+        $scope.item.parent = data.id;
     };
 
     $scope.removeParent = function() {
         $scope.item.parent = null;
-        $scope.$broadcast('angucomplete-alt:clearInput', 'parent');
+        $scope.$applyAsync(function() { angular.element('#parent input').val(''); });
     };
 
     $scope.selectTemplate = function(data) {
-        if (!data || !data.originalObject || !data.originalObject.id) {
-            return;
-        }
-
-        $scope.item.link = data.originalObject.id;
+        $scope.item.link = data;
     };
 
     $scope.switchTab = function(idx) {
@@ -336,7 +322,7 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
                 }, function(data) {
                     // Restore selected template name
                     if (!oldValue) {
-                        $scope.$broadcast('angucomplete-alt:changeInput', 'template', data.name);
+                        $scope.$applyAsync(function() { angular.element('#template input').val(data.name); });
                     }
 
                     updateTemplate();
@@ -386,11 +372,19 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
             }, true);
 
             $scope.graphsList = function(term) {
-                return library.list({
+                var defer = $q.defer();
+
+                library.list({
                     type: 'graphs',
                     fields: 'id,name,options,template',
                     filter: 'glob:*' + term + '*'
-                }).$promise;
+                }, function(data) {
+                    defer.resolve(data.map(function(a) { return {label: a.name, value: a}; }));
+                }, function() {
+                    defer.reject();
+                });
+
+                return defer.promise;
             };
 
             $translate(['label.page_grid_1', 'label.page_grid_2', 'label.page_grid_3']).then(function(data) {
@@ -422,8 +416,20 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
             fetchGraphs();
         } else {
             $scope.templateSources = function(term) {
-                return library.list({type: 'collections', kind: 'template', fields: 'id,name',
-                    filter: 'glob:*' + term + '*'}).$promise;
+                var defer = $q.defer();
+
+                library.list({
+                    type: 'collections',
+                    kind: 'template',
+                    fields: 'id,name',
+                    filter: 'glob:*' + term + '*'
+                }, function(data) {
+                    defer.resolve(data.map(function(a) { return {label: a.name, value: a.id}; }));
+                }, function() {
+                    defer.reject();
+                });
+
+                return defer.promise;
             };
 
             // Select first field
@@ -471,7 +477,7 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
                 var result = [];
 
                 angular.forEach(collections, function(entry) {
-                    result.push(entry);
+                    result.push({label: entry.name, value: entry});
                 });
 
                 defer.resolve(result);
@@ -487,7 +493,7 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
                 id: $scope.item.parent,
                 fields: 'name'
             }, function(data) {
-                $scope.$broadcast('angucomplete-alt:changeInput', 'parent', data.name);
+                $scope.$applyAsync(function() { angular.element('#parent input').val(data.name); });
             });
         }
     });

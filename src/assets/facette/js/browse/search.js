@@ -1,4 +1,4 @@
-app.controller('BrowseSearchController', function($location, $rootScope, $scope, $window, browseCollection,
+app.controller('BrowseSearchController', function($location, $q, $rootScope, $scope, $window, browseCollection,
     libraryAction) {
 
     $scope.collections = {};
@@ -9,18 +9,32 @@ app.controller('BrowseSearchController', function($location, $rootScope, $scope,
 
     // Register scope functions
     $scope.searchHandler = function(term) {
-        return libraryAction.search({
+        var defer = $q.defer();
+
+        libraryAction.search({
             types: ['collections', 'graphs'],
             terms: {
                 name: 'glob:*' + term + '*',
                 template: false
             },
             limit: pagingLimit
-        }).$promise;
+        }, function(data) {
+            defer.resolve(data.map(function(a) {
+                return {
+                    label: a.name,
+                    value: a,
+                    note: a.type
+                };
+            }));
+        }, function() {
+            defer.reject();
+        });
+
+        return defer.promise;
     };
 
     $scope.searchSelect = function(data) {
-        $location.path('browse/' + data.originalObject.type + '/' + data.originalObject.id);
+        $location.path('browse/' + data.type + '/' + data.id);
     };
 
     // Handle tree state save
