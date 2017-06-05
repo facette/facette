@@ -39,7 +39,7 @@
 										<div class="actions">
 											<menu>
 												<menuitem icon="cog" info="{{ 'label.graphs_manage' | translate }}" type="button" ng-click="$event.stopPropagation(); editGraphEntry(e)"></menuitem>
-												<menuitem href="{{ ::baseURL }}admin/graphs/{{ e.graph }}" icon="arrow-circle-right" info="{{ 'label.graphs_goto' | translate }}" type="button"></menuitem>
+												<menuitem href="{{ ::baseURL }}admin/graphs/{{ e.graph }}" icon="arrow-circle-right" info="{{ 'label.graphs_goto' | translate }}" type="button" ng-click="$event.stopPropagation()"></menuitem>
 											</menu>
 										</div>
 									</div>
