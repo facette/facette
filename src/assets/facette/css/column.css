@@ -12,7 +12,6 @@
 
 .columns .column.main {
 	flex: 1;
-	overflow: hidden;
 }
 
 .columns .column.main:last-child {
@@ -21,6 +20,10 @@
 
 .columns .column.side {
 	min-width: 22rem;
+}
+
+.columns .column.flexible {
+	overflow-x: hidden;
 }
 
 section > .columns {

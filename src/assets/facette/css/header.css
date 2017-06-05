@@ -153,9 +153,9 @@ header .menuitem > .subcontent .menuitem.button a:focus {
 
 	header > .menu.main > .menuitem > .subcontent::before {
 		border-bottom-color: transparent;
-		border-right-color: rgba(34, 34, 34, 0.98);
+		border-right-color: #fff;
 		bottom: auto;
-		left: -1.45rem;
+		left: -1.25rem;
 		top: 1rem;
 	}
 }
