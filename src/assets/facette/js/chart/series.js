@@ -1,9 +1,14 @@
 chart.fn.drawSeries = function() {
     var $$ = this;
 
-    $$.areaGroup.selectAll('.chart-series').remove();
+    // Check for enabled series
+    var count = 0;
+    $$.config.series.map(function(a) { if (!a.disabled) { count++; } });
+    $$.tooltipLocked = count === 0;
 
     // Draw series paths
+    $$.areaGroup.selectAll('.chart-series').remove();
+
     var data = $$.areaGroup.selectAll('.chart-series')
         .data($$.dataSet);
 

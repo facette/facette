@@ -40,10 +40,12 @@ chart.fn.updateTooltip = function(data) {
     var total = 0;
 
     data.values.forEach(function(entry, idx) {
+        if ($$.config.series[idx].disabled) {
+            return
+        }
+
         var row = $$.tooltipBody.append('tr'),
             cell = row.append('th');
-
-        row.classed('disabled', $$.config.series[idx].disabled);
 
         cell.append('span')
             .attr('class', 'chart-tooltip-color')

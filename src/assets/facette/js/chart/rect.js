@@ -116,6 +116,23 @@ chart.fn.drawEventRect = function() {
         .on('mousemove', function() {
             var mouse = d3.mouse(this);
 
+            // Set cursor line position
+            if (!$$.tooltipEnabled) {
+                $$.cursorLine.style('display', 'block');
+            }
+
+            $$.cursorLine
+                .attr('x1', mouse[0])
+                .attr('x2', mouse[0]);
+
+            if ($$.config.events.cursorMove) {
+                $$.config.events.cursorMove($$.xScale.invert(mouse[0]));
+            }
+
+            if ($$.tooltipLocked) {
+                return;
+            }
+
             // Set tooltip content
             var data = {
                 date: $$.xScale.invert(mouse[0]),
@@ -149,17 +166,7 @@ chart.fn.drawEventRect = function() {
 
             // Show tooltip and cursor line
             if (!$$.tooltipEnabled) {
-                $$.cursorLine.style('display', 'block');
                 $$.toggleTooltip(true);
-            }
-
-            // Set cursor line position
-            $$.cursorLine
-                .attr('x1', mouse[0])
-                .attr('x2', mouse[0]);
-
-            if ($$.config.events.cursorMove) {
-                $$.config.events.cursorMove($$.xScale.invert(mouse[0]));
             }
 
             // Update tooltip position
