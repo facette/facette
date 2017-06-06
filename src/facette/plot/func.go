@@ -134,6 +134,10 @@ func Normalize(series []Series, startTime, endTime time.Time, sample int, consol
 
 	// Dispatch plots into proper time step buckets and then apply consolidation function
 	for i, s := range series {
+		if s.Plots == nil {
+			continue
+		}
+
 		buckets[i] = make([]bucket, sample)
 
 		// Initialize time steps
