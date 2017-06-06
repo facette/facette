@@ -157,6 +157,10 @@ chart.fn.drawEventRect = function() {
                 tooltipPosYKey = tooltipPosYStick ? 'top' : 'bottom',
                 tooltipWidth = $$.tooltipGroup.node().clientWidth;
 
+            if ($$.legendGroup) {
+                tooltipPosY += $$.legendGroup.node().getBBox().height + $$.config.padding;
+            }
+
             // Update zoom selection if active
             if ($$.zoomActive) {
                 $$.zoomRect
