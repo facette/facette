@@ -40,7 +40,8 @@ chart.fn.updateTooltip = function(data) {
     var total = 0;
 
     data.values.forEach(function(entry, idx) {
-        if ($$.config.series[idx].disabled) {
+        if ($$.config.series[idx].disabled || !$$.config.series[idx].plots ||
+                $$.config.series[idx].plots.length === 0) {
             return
         }
 

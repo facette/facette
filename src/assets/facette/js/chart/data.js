@@ -16,7 +16,7 @@ chart.fn.updateData = function() {
 
         $$.config.series.forEach(function(series) {
             if (!series.plots) {
-                return;
+                series.plots = [];
             }
 
             series.plots.forEach(function(plot, idx) {
