@@ -3,11 +3,7 @@ chart.fn.updateData = function() {
 
     // Map data set coordinates
     $$.dataSet = $$.config.series.map(function(series) {
-        if (!series.plots) {
-            series.disabled = true;
-        }
-
-        if (series.disabled) {
+        if (!series.plots || series.disabled) {
             return [];
         }
 
