@@ -311,7 +311,11 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
         // Update template status
         updateTemplate();
 
-        $scope.autonameSeries(false);
+        if ($scope.series.hasGroups) {
+            fetchGroups(function() { $scope.autonameSeries(false); });
+        } else {
+            $scope.autonameSeries(false);
+        }
     };
 
     $scope.editOptions = function(state) {
@@ -681,9 +685,14 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
             return;
         }
 
-        angular.extend($scope.series, {valid: true});
+        angular.extend($scope.series, {hasGroups: false, valid: true});
 
         $scope.series.entries.forEach(function(entry) {
+            if (entry.source && entry.source.startsWith(groupPrefix) ||
+                    entry.metric && entry.metric.startsWith(groupPrefix)) {
+                $scope.series.hasGroups = true;
+            }
+
             if (!entry.origin || !entry.source || !entry.metric) {
                 $scope.series.valid = false;
             }
@@ -889,7 +898,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
             applyOptions($scope.graphStackModes, 'stack_mode');
 
             // Select first field
-            $scope.$applyAsync(function() { angular.element('#origin_value').focus(); });
+            $scope.$applyAsync(function() { angular.element('#origin input').focus(); });
 
             // Trigger initial group information retrieval
             updateTemplate();

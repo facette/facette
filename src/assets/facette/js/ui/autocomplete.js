@@ -17,7 +17,7 @@ angular.module('facette.ui.autocomplete', [])
 })
 
 .controller('AutocompleteController', function($sce, $scope, $timeout) {
-    $scope.selected = false;
+    $scope.selected = true;
 
     if (!angular.isDefined($scope.delay)) {
         $scope.delay = 250;
