@@ -18,7 +18,6 @@ var app = angular.module('facette', [
     'facette.ui.search',
     'facette.ui.tab',
     'facette.ui.tabindex',
-    'facette.ui.transition',
     'ngDialog',
     'ngResource',
     'ngRoute',
@@ -301,10 +300,8 @@ app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope
     $rootScope.toggleSidebar = function() {
         $rootScope.sidebarCollapse = !$rootScope.sidebarCollapse;
         storage.set('global-sidebar', 'collapsed', $rootScope.sidebarCollapse);
-    };
 
-    $rootScope.handleSidebar = function(e) {
-        // Trigger resize event on end of sidebar transition
+        // Trigger resize event to force graphs redraw
         angular.element($window).trigger('resize');
     };
 
