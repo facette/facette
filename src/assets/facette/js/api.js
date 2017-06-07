@@ -1,5 +1,7 @@
 function apiTransformRequest(data) {
     delete data.type;
+    delete data.normalize;
+
     return JSON.stringify(data);
 }
 
@@ -164,6 +166,9 @@ app.factory('plots', function($resource) {
     return $resource('api/v1/plots', null, {
         fetch: {
             method: 'POST',
+            params: {
+                normalize: '@normalize'
+            },
             transformRequest: apiTransformRequest
         }
     });

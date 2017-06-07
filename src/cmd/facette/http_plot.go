@@ -123,7 +123,7 @@ func (w *httpWorker) httpHandlePlots(rw http.ResponseWriter, r *http.Request) {
 	plots := plot.Response{
 		Start:   req.StartTime.Format(time.RFC3339),
 		End:     req.EndTime.Format(time.RFC3339),
-		Series:  w.executeRequest(req),
+		Series:  w.executeRequest(req, httpGetBoolParam(r, "normalize")),
 		Options: req.Graph.Options,
 	}
 
@@ -139,7 +139,7 @@ func (w *httpWorker) httpHandlePlots(rw http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(rw, plots, http.StatusOK)
 }
 
-func (w *httpWorker) executeRequest(req *plot.Request) []plot.SeriesResponse {
+func (w *httpWorker) executeRequest(req *plot.Request, forceNormalize bool) []plot.SeriesResponse {
 	// Expand groups series
 	for _, group := range req.Graph.Groups {
 		expandedSeries := []*backend.Series{}
@@ -175,6 +175,20 @@ func (w *httpWorker) executeRequest(req *plot.Request) []plot.SeriesResponse {
 		}
 	}
 
+	// Lower sample size if too few plots available
+	maxPlots := 0
+	for i, group := range req.Graph.Groups {
+		for j := range group.Series {
+			if n := len(data[i][j].Plots); n > maxPlots {
+				maxPlots = n
+			}
+		}
+	}
+
+	if req.Sample > maxPlots {
+		req.Sample = maxPlots
+	}
+
 	// Generate plots series
 	result := []plot.SeriesResponse{}
 	for i, group := range req.Graph.Groups {
@@ -196,15 +210,9 @@ func (w *httpWorker) executeRequest(req *plot.Request) []plot.SeriesResponse {
 			}
 		}
 
-		// Skip normalization if operator and stack mode are not set
-		if group.Operator == plot.OperatorNone {
-			if group.Options == nil {
-				goto finalize
-			}
-
-			if v, ok := group.Options["stack_mode"].(string); ok && v == "" {
-				goto finalize
-			}
+		// Skip normalization if operator is not set and not forced
+		if group.Operator == plot.OperatorNone && !forceNormalize {
+			goto finalize
 		}
 
 		// Get group consolidation mode and interpolation options

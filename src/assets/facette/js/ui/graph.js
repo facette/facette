@@ -238,7 +238,9 @@ angular.module('facette.ui.graph', [])
         $scope.error = false;
         $scope.summary = {};
 
-        var query = {};
+        var query = {
+            normalize: 1
+        };
 
         angular.forEach(['start_time', 'end_time', 'time', 'range'], function(key) {
             if ($scope.options[key]) {

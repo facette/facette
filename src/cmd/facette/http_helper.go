@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/facette/httproute"
 	"github.com/facette/httputil"
 )
 
@@ -16,8 +17,13 @@ func httpBuildMessage(err error) map[string]string {
 	}
 }
 
+func httpGetBoolParam(r *http.Request, name string) bool {
+	vs := httproute.QueryParam(r, name)
+	return vs == "1" || vs == "true"
+}
+
 func httpGetIntParam(r *http.Request, name string) (int, error) {
-	vs := r.URL.Query().Get(name)
+	vs := httproute.QueryParam(r, name)
 
 	v, err := strconv.Atoi(vs)
 	if vs != "" && err != nil {
