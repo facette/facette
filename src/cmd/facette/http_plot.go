@@ -196,6 +196,17 @@ func (w *httpWorker) executeRequest(req *plot.Request) []plot.SeriesResponse {
 			}
 		}
 
+		// Skip normalization if operator and stack mode are not set
+		if group.Operator == plot.OperatorNone {
+			if group.Options == nil {
+				goto finalize
+			}
+
+			if v, ok := group.Options["stack_mode"].(string); ok && v == "" {
+				goto finalize
+			}
+		}
+
 		// Get group consolidation mode and interpolation options
 		consolidate = plot.ConsolidateAverage
 		if v, ok := group.Options["consolidate"].(int); ok {
