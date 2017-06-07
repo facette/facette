@@ -182,7 +182,8 @@ app.factory('providers', function($resource) {
             method: 'POST',
             params: {
                 id: null
-            }
+            },
+            transformRequest: apiTransformRequest
         },
         delete: {
             method: 'DELETE',
@@ -207,7 +208,8 @@ app.factory('providers', function($resource) {
             method: 'PATCH',
             params: {
                 id: '@id'
-            }
+            },
+            transformRequest: apiTransformRequest
         }
     });
 });
