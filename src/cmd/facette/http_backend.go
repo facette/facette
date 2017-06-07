@@ -152,7 +152,7 @@ func (w *httpWorker) httpHandleBackendGet(rw http.ResponseWriter, r *http.Reques
 	}
 
 	// Handle collection expansion request
-	if httproute.QueryParam(r, "expand") == "1" {
+	if httpGetBoolParam(r, "expand") {
 		if typ == "collections" {
 			c := rv.Interface().(*backend.Collection)
 			c.Expand(nil)
@@ -441,7 +441,7 @@ func (w *httpWorker) httpHandleBackendList(rw http.ResponseWriter, r *http.Reque
 	result := []map[string]interface{}{}
 
 	for i, n := 0, reflect.Indirect(rv).Len(); i < n; i++ {
-		if typ == "collections" && httproute.QueryParam(r, "expand") == "1" {
+		if typ == "collections" && httpGetBoolParam(r, "expand") {
 			collection := reflect.Indirect(rv).Index(i).Interface().(*backend.Collection)
 			collection.Expand(nil)
 
