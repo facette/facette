@@ -258,7 +258,7 @@ func (w *httpWorker) executeRequest(req *plot.Request, forceNormalize bool) []pl
 		}
 	}
 
-	if req.Sample > maxPlots {
+	if req.Sample > maxPlots && maxPlots > 0 {
 		req.Sample = maxPlots
 	}
 
