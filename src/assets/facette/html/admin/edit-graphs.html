@@ -67,7 +67,7 @@
 								</listcolumn>
 								<listcolumn class="actions">
 									<menu>
-										<menuitem icon="caret-square-o-down" info="{{ 'label.groups_expand' | translate }}" type="button" ng-click="$event.stopPropagation(); expandGroup(g, true)" ng-show="g.series.length == 1 && g.series[0].expansion !== undefined"></menuitem>
+										<menuitem icon="caret-square-o-down" info="{{ 'label.groups_expand' | translate }}" type="button" ng-click="$event.stopPropagation(); expandGroup(g, true)" ng-disabled="expandData[g.series[0].expansion].length === 0" ng-show="g.series.length == 1 && g.series[0].expansion !== undefined"></menuitem>
 										<menuitem icon="caret-square-o-up" info="{{ 'label.groups_collapse' | translate }}" type="button" ng-click="$event.stopPropagation(); expandGroup(g, false)" ng-show="g.series.length == 1 && g.series[0].expanded !== undefined"></menuitem>
 										<menuitem icon="times-circle" info="{{ 'label.groups_remove' | translate }}" type="button" ng-click="$event.stopPropagation(); remove(item.groups, g)"></menuitem>
 									</menu>
