@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"facette/catalog"
-	"facette/plot"
+	"facette/series"
 
 	"github.com/facette/httputil"
 	"github.com/facette/logger"
@@ -25,7 +25,7 @@ const (
 	graphiteURLRender  = "/render"
 )
 
-type graphitePlot struct {
+type graphitePoint struct {
 	Target     string
 	Datapoints [][2]float64
 }
@@ -152,11 +152,11 @@ func (c *graphiteConnector) Refresh(output chan<- *catalog.Record) error {
 	return nil
 }
 
-// Plots retrieves the time series data according to the query parameters and a time interval.
-func (c *graphiteConnector) Plots(q *plot.Query) ([]plot.Series, error) {
+// Points retrieves the time series data according to the query parameters and a time interval.
+func (c *graphiteConnector) Points(q *series.Query) ([]series.Series, error) {
 	var (
-		plots   []graphitePlot
-		results []plot.Series
+		points  []graphitePoint
+		results []series.Series
 	)
 
 	if len(q.Series) == 0 {
@@ -193,13 +193,13 @@ func (c *graphiteConnector) Plots(q *plot.Query) ([]plot.Series, error) {
 		return nil, fmt.Errorf("graphite[%s]: unable to read HTTP response body: %s", c.name, err)
 	}
 
-	if err = json.Unmarshal(data, &plots); err != nil {
+	if err = json.Unmarshal(data, &points); err != nil {
 		return nil, fmt.Errorf("graphite[%s]: unable to unmarshal JSON data: %s", c.name, err)
 	}
 
 	// Extract results from response
-	if results, err = graphiteExtractResult(plots); err != nil {
-		return nil, fmt.Errorf("graphite[%s]: unable to extract plot values from back-end response: %s", c.name, err)
+	if results, err = graphiteExtractResult(points); err != nil {
+		return nil, fmt.Errorf("graphite[%s]: unable to extract point values from back-end response: %s", c.name, err)
 	}
 
 	return results, nil
@@ -219,7 +219,7 @@ func graphiteCheckBackendResponse(resp *http.Response) error {
 	return nil
 }
 
-func graphiteBuildQueryURL(q *plot.Query, graphiteSeries map[string]map[string]string) (string, error) {
+func graphiteBuildQueryURL(q *series.Query, graphiteSeries map[string]map[string]string) (string, error) {
 	now := time.Now()
 
 	fromTime := 0
@@ -244,19 +244,19 @@ func graphiteBuildQueryURL(q *plot.Query, graphiteSeries map[string]map[string]s
 	return queryURL, nil
 }
 
-func graphiteExtractResult(plots []graphitePlot) ([]plot.Series, error) {
-	var results []plot.Series
+func graphiteExtractResult(points []graphitePoint) ([]series.Series, error) {
+	var results []series.Series
 
-	for _, p := range plots {
-		series := plot.Series{}
+	for _, p := range points {
+		s := series.Series{}
 		for _, d := range p.Datapoints {
-			series.Plots = append(series.Plots, plot.Plot{
+			s.Points = append(s.Points, series.Point{
 				Time:  time.Unix(int64(d[1]), 0),
-				Value: plot.Value(d[0]),
+				Value: series.Value(d[0]),
 			})
 		}
 
-		results = append(results, series)
+		results = append(results, s)
 	}
 
 	return results, nil

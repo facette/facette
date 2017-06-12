@@ -1,4 +1,4 @@
-package plot
+package series
 
 import (
 	"math"
@@ -8,11 +8,11 @@ import (
 
 func Test_Scale(t *testing.T) {
 	series := Series{
-		Plots: []Plot{{Value: 0.61}, {Value: 0.69}, {Value: 0.98}, {Value: Value(math.NaN())}, {Value: 0.43}},
+		Points: []Point{{Value: 0.61}, {Value: 0.69}, {Value: 0.98}, {Value: Value(math.NaN())}, {Value: 0.43}},
 	}
 
 	expected := Series{
-		Plots: []Plot{{Value: 61}, {Value: 69}, {Value: 98}, {Value: Value(math.NaN())}, {Value: 43}},
+		Points: []Point{{Value: 61}, {Value: 69}, {Value: 98}, {Value: Value(math.NaN())}, {Value: 43}},
 	}
 
 	series.Scale(Value(100))
@@ -24,7 +24,7 @@ func Test_Scale(t *testing.T) {
 
 func Test_Summarize(t *testing.T) {
 	series := Series{
-		Plots: []Plot{
+		Points: []Point{
 			{Value: Value(math.NaN())}, {Value: 61}, {Value: 69}, {Value: 98}, {Value: 56}, {Value: 43},
 			{Value: 68}, {Value: Value(math.NaN())}, {Value: 87}, {Value: 95}, {Value: 69}, {Value: 79},
 			{Value: 99}, {Value: 54}, {Value: 88}, {Value: Value(math.NaN())}, {Value: 99}, {Value: 77},
@@ -35,7 +35,7 @@ func Test_Summarize(t *testing.T) {
 	}
 
 	seriesNeg := Series{
-		Plots: []Plot{
+		Points: []Point{
 			{Value: Value(math.NaN())}, {Value: -61}, {Value: -69}, {Value: -98}, {Value: -56}, {Value: -43},
 			{Value: -68}, {Value: Value(math.NaN())}, {Value: -87}, {Value: -95}, {Value: -69}, {Value: -79},
 			{Value: -99}, {Value: -54}, {Value: -88}, {Value: Value(math.NaN())}, {Value: -99}, {Value: -77},
@@ -46,9 +46,9 @@ func Test_Summarize(t *testing.T) {
 	}
 
 	startTime := time.Now().UTC()
-	for i := range series.Plots {
-		series.Plots[i].Time = startTime.Add(time.Duration(i) * time.Second)
-		seriesNeg.Plots[i].Time = startTime.Add(time.Duration(i) * time.Second)
+	for i := range series.Points {
+		series.Points[i].Time = startTime.Add(time.Duration(i) * time.Second)
+		seriesNeg.Points[i].Time = startTime.Add(time.Duration(i) * time.Second)
 	}
 
 	checks := []struct {
@@ -84,14 +84,14 @@ func Test_Summarize(t *testing.T) {
 }
 
 func compareSeries(actual, expected Series) bool {
-	if len(actual.Plots) != len(expected.Plots) {
+	if len(actual.Points) != len(expected.Points) {
 		return false
 	}
 
-	for i := range expected.Plots {
-		if actual.Plots[i].Value.IsNaN() && !expected.Plots[i].Value.IsNaN() ||
-			!actual.Plots[i].Value.IsNaN() && actual.Plots[i].Value != expected.Plots[i].Value ||
-			!actual.Plots[i].Time.Equal(expected.Plots[i].Time) {
+	for i := range expected.Points {
+		if actual.Points[i].Value.IsNaN() && !expected.Points[i].Value.IsNaN() ||
+			!actual.Points[i].Value.IsNaN() && actual.Points[i].Value != expected.Points[i].Value ||
+			!actual.Points[i].Time.Equal(expected.Points[i].Time) {
 			return false
 		}
 	}

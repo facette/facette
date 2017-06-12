@@ -112,7 +112,7 @@ chart.fn.drawLegend = function() {
             .attr('y', legendLineHeight * 0.1875)
             .attr('fill', series.color);
 
-        if (!series.plots || series.plots.length === 0) {
+        if (!series.points || series.points.length === 0) {
             legendRows[idx].classed('error', true);
 
             legendRows[idx].append('text')

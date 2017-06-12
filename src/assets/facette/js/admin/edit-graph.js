@@ -1,5 +1,5 @@
 app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams, $scope, $timeout, adminEdit, bulk,
-    catalog, expand, library, ngDialog) {
+    catalog, library, ngDialog, series) {
 
     $scope.section = 'graphs';
     $scope.id = $routeParams.id;
@@ -49,7 +49,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
             queries.push(bulk.exec(groupQuery).$promise);
         }
         if (expandQuery.length > 0) {
-            queries.push(expand.fetch(expandQuery).$promise);
+            queries.push(series.expand(expandQuery).$promise);
         }
 
         if (!queries) {

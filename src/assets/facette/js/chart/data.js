@@ -3,11 +3,11 @@ chart.fn.updateData = function() {
 
     // Map data set coordinates
     $$.dataSet = $$.config.series.map(function(series) {
-        if (!series.plots || series.disabled) {
+        if (!series.points || series.disabled) {
             return [];
         }
 
-        return series.plots.map(function(a) { return {x: a[0] * 1000, y1: a[1]}; });
+        return series.points.map(function(a) { return {x: a[0] * 1000, y1: a[1]}; });
     });
 
     if ($$.config.stack && $$.dataSet.length > 0) {
@@ -15,16 +15,16 @@ chart.fn.updateData = function() {
             keys = [];
 
         $$.config.series.forEach(function(series) {
-            if (!series.plots) {
-                series.plots = [];
+            if (!series.points) {
+                series.points = [];
             }
 
-            series.plots.forEach(function(plot, idx) {
+            series.points.forEach(function(point, idx) {
                 if (!stackData[idx]) {
-                    stackData[idx] = {date: plot[0] * 1000};
+                    stackData[idx] = {date: point[0] * 1000};
                 }
 
-                stackData[idx][series.name] = series.disabled ? 0 : plot[1];
+                stackData[idx][series.name] = series.disabled ? 0 : point[1];
             });
 
             keys.push(series.name);

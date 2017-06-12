@@ -1,4 +1,4 @@
-package plot
+package series
 
 import (
 	"encoding/json"
@@ -11,34 +11,34 @@ const (
 	DefaultSample = 400
 )
 
-// Plot represents a time series plot instance.
-type Plot struct {
+// Point represents a time series point instance.
+type Point struct {
 	Time  time.Time `json:"time"`
 	Value Value     `json:"value"`
 
-	prev *Plot
-	next *Plot
+	prev *Point
+	next *Point
 }
 
 // MarshalJSON implements the json.Marshaler interface.
-func (plot Plot) MarshalJSON() ([]byte, error) {
-	return json.Marshal([2]interface{}{int(plot.Time.Unix()), plot.Value})
+func (point Point) MarshalJSON() ([]byte, error) {
+	return json.Marshal([2]interface{}{int(point.Time.Unix()), point.Value})
 }
 
 // UnmarshalJSON implements the json.Unmarshaler interface.
-func (plot *Plot) UnmarshalJSON(data []byte) error {
+func (point *Point) UnmarshalJSON(data []byte) error {
 	input := [2]float64{}
 	if err := json.Unmarshal(data, &input); err != nil {
 		return err
 	}
 
-	plot.Time = time.Unix(int64(input[0]), 0)
-	plot.Value = Value(input[1])
+	point.Time = time.Unix(int64(input[0]), 0)
+	point.Value = Value(input[1])
 
 	return nil
 }
 
-// Value represents a time series plot value.
+// Value represents a time series point value.
 type Value float64
 
 // MarshalJSON implements the json.Marshaler interface.

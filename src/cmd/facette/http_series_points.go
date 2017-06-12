@@ -7,7 +7,7 @@ import (
 
 	"facette/backend"
 	"facette/connector"
-	"facette/plot"
+	"facette/series"
 	"facette/template"
 	"facette/timerange"
 
@@ -16,21 +16,21 @@ import (
 	"github.com/hashicorp/go-uuid"
 )
 
-// api:section plot "Plot"
+// api:section points "Data points"
 
 const (
 	defaultTimeRange = "-1h"
 )
 
-type plotQuery struct {
-	query     plot.Query
+type pointQuery struct {
+	query     series.Query
 	queryMap  [][2]int
 	connector connector.Connector
 }
 
-// api:method POST /plots/ "Retrieve graph series data points"
+// api:method POST /api/v1/series/points/ "Retrieve graph series data points"
 //
-// This endpoint retrieves data points for all of a graph's series based on a plot query specifying either one of the
+// This endpoint retrieves data points for all of a graph's series based on a points query specifying either one of the
 // following elements:
 //
 //   * `id` (type _string_): ID of an existing graph
@@ -42,12 +42,12 @@ type plotQuery struct {
 //   * `range` (type _string_, default `"-1h"`): time offset relative to the reference `time` option
 //   * `start_time` (type _string_): absolute time start bound (format: RFC 3339)
 //   * `end_time` (type _string_): absolute time end bound (format: RFC 3339)
-//   * `sample` (type _integer_): plot sampling size
+//   * `sample` (type _integer_): data points sampling size
 //   * `attributes` (type _object_): graph template attributes
 //
 // Note: for absolute time span selection, both `start_end` and `end_time` values must be specified.
 //
-// Here is an example of a plot request body:
+// Here is an example of a points request body:
 //
 // ```json
 // {
@@ -57,21 +57,22 @@ type plotQuery struct {
 // }
 // ```
 //
-// The response is an array of graph series and their datapoints for the requested time span.
+// The response is an array of graph series and their data points for the requested time span.
 //
 // ---
-// section: plot
+// section: points
 // responses:
 //   200:
 //     type: object
 //     example:
+//       format: json
 //       body: |
 //         {
 //           "start": "2017-06-07T12:28:08Z",
 //           "end": "2017-06-07T12:29:08Z",
 //           "series": [
 //             {
-//               "plots": [
+//               "points": [
 //                 [ 1496838488, 673 ],
 //                 [ 1496838494, 576 ],
 //                 [ 1496838500, 585.5 ],
@@ -99,13 +100,13 @@ type plotQuery struct {
 //             "yaxis_unit": "metric"
 //           }
 //         }
-func (w *httpWorker) httpHandlePlots(rw http.ResponseWriter, r *http.Request) {
+func (w *httpWorker) httpHandleSeriesPoints(rw http.ResponseWriter, r *http.Request) {
 	var err error
 
 	defer r.Body.Close()
 
-	// Get plot request from received data
-	req := &plot.Request{}
+	// Get point request from received data
+	req := &series.Request{}
 	if err := httputil.BindJSON(r, req); err == httputil.ErrInvalidContentType {
 		httputil.WriteJSON(rw, httpBuildMessage(err), http.StatusUnsupportedMediaType)
 		return
@@ -187,13 +188,13 @@ func (w *httpWorker) httpHandlePlots(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Set default plot sample if none provided
+	// Set default point sample if none provided
 	if req.Sample == 0 {
-		req.Sample = plot.DefaultSample
+		req.Sample = series.DefaultSample
 	}
 
-	// Execute plots request
-	plots := plot.Response{
+	// Execute points request
+	points := series.Response{
 		Start:   req.StartTime.Format(time.RFC3339),
 		End:     req.EndTime.Format(time.RFC3339),
 		Series:  w.executeRequest(req, httpGetBoolParam(r, "normalize")),
@@ -201,69 +202,69 @@ func (w *httpWorker) httpHandlePlots(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	// Set fallback title to graph name if none provided
-	if plots.Options == nil {
-		plots.Options = make(map[string]interface{})
+	if points.Options == nil {
+		points.Options = make(map[string]interface{})
 	}
 
-	if _, ok := plots.Options["title"]; !ok {
-		plots.Options["title"] = req.Graph.Name
+	if _, ok := points.Options["title"]; !ok {
+		points.Options["title"] = req.Graph.Name
 	}
 
-	httputil.WriteJSON(rw, plots, http.StatusOK)
+	httputil.WriteJSON(rw, points, http.StatusOK)
 }
 
-func (w *httpWorker) executeRequest(req *plot.Request, forceNormalize bool) []plot.SeriesResponse {
+func (w *httpWorker) executeRequest(req *series.Request, forceNormalize bool) []series.SeriesResponse {
 	// Expand groups series
 	for _, group := range req.Graph.Groups {
 		expandedSeries := []*backend.Series{}
-		for _, series := range group.Series {
-			expandedSeries = append(expandedSeries, w.expandSeries(series, true)...)
+		for _, s := range group.Series {
+			expandedSeries = append(expandedSeries, w.expandSeries(s, true)...)
 		}
 		group.Series = expandedSeries
 	}
 
-	// Dispatch plot queries among providers
-	data := make([][]plot.Series, len(req.Graph.Groups))
+	// Dispatch point queries among providers
+	data := make([][]series.Series, len(req.Graph.Groups))
 	for i, group := range req.Graph.Groups {
-		data[i] = make([]plot.Series, len(group.Series))
+		data[i] = make([]series.Series, len(group.Series))
 	}
 
 	for _, q := range w.dispatchQueries(req) {
-		series, err := q.connector.Plots(&q.query)
+		points, err := q.connector.Points(&q.query)
 		if err != nil {
-			w.log.Error("unable to fetch plots: %s", err)
+			w.log.Error("unable to fetch points: %s", err)
 			continue
 		}
 
-		count := len(series)
+		count := len(points)
 		expected := len(q.query.Series)
 		if count != expected {
-			w.log.Error("unable to fetch plots: expected %d series but got %d", expected, count)
+			w.log.Error("unable to fetch points: expected %d series but got %d", expected, count)
 			continue
 		}
 
 		// Put back series to its original indexes
-		for i, s := range series {
-			data[q.queryMap[i][0]][q.queryMap[i][1]] = s
+		for i, p := range points {
+			data[q.queryMap[i][0]][q.queryMap[i][1]] = p
 		}
 	}
 
-	// Lower sample size if too few plots available
-	maxPlots := 0
+	// Lower sample size if too few points available
+	maxPoints := 0
 	for i, group := range req.Graph.Groups {
 		for j := range group.Series {
-			if n := len(data[i][j].Plots); n > maxPlots {
-				maxPlots = n
+			if n := len(data[i][j].Points); n > maxPoints {
+				maxPoints = n
 			}
 		}
 	}
 
-	if req.Sample > maxPlots && maxPlots > 0 {
-		req.Sample = maxPlots
+	if req.Sample > maxPoints && maxPoints > 0 {
+		req.Sample = maxPoints
 	}
 
-	// Generate plots series
-	result := []plot.SeriesResponse{}
+	// Generate points series
+	result := []series.SeriesResponse{}
 	for i, group := range req.Graph.Groups {
 		var (
 			consolidate int
@@ -277,19 +278,19 @@ func (w *httpWorker) executeRequest(req *plot.Request, forceNormalize bool) []pl
 		}
 
 		// Apply series scale if any
-		for j, series := range group.Series {
-			if v, ok := series.Options["scale"].(float64); ok {
-				data[i][j].Scale(plot.Value(v))
+		for j, s := range group.Series {
+			if v, ok := s.Options["scale"].(float64); ok {
+				data[i][j].Scale(series.Value(v))
 			}
 		}
 
 		// Skip normalization if operator is not set and not forced
-		if group.Operator == plot.OperatorNone && !forceNormalize {
+		if group.Operator == series.OperatorNone && !forceNormalize {
 			goto finalize
 		}
 
 		// Get group consolidation mode and interpolation options
-		consolidate = plot.ConsolidateAverage
+		consolidate = series.ConsolidateAverage
 		if v, ok := group.Options["consolidate"].(int); ok {
 			consolidate = v
 		}
@@ -300,23 +301,23 @@ func (w *httpWorker) executeRequest(req *plot.Request, forceNormalize bool) []pl
 		}
 
 		// Normalize series and apply operations
-		data[i], err = plot.Normalize(data[i], req.StartTime, req.EndTime, req.Sample, consolidate, interpolate)
+		data[i], err = series.Normalize(data[i], req.StartTime, req.EndTime, req.Sample, consolidate, interpolate)
 		if err != nil {
 			w.log.Error("failed to normalize series: %s", err)
 			continue
 		}
 
 		switch group.Operator {
-		case plot.OperatorAverage, plot.OperatorSum:
+		case series.OperatorAverage, series.OperatorSum:
 			var (
-				series plot.Series
-				err    error
+				s   series.Series
+				err error
 			)
 
-			if group.Operator == plot.OperatorAverage {
-				series, err = plot.Average(data[i])
+			if group.Operator == series.OperatorAverage {
+				s, err = series.Average(data[i])
 			} else {
-				series, err = plot.Sum(data[i])
+				s, err = series.Sum(data[i])
 			}
 
 			if err != nil {
@@ -328,9 +329,9 @@ func (w *httpWorker) executeRequest(req *plot.Request, forceNormalize bool) []pl
 			group.Series[0].Name = group.Name
 
 			// Replace group series with operation result
-			data[i] = []plot.Series{series}
+			data[i] = []series.Series{s}
 
-		case plot.OperatorNone:
+		case series.OperatorNone:
 			// noop
 
 		default:
@@ -342,10 +343,10 @@ func (w *httpWorker) executeRequest(req *plot.Request, forceNormalize bool) []pl
 		// Get group scale value
 		scale, _ := group.Options["scale"].(float64)
 
-		for j, series := range data[i] {
+		for j, s := range data[i] {
 			// Apply group scale if any
 			if scale != 0 {
-				series.Scale(plot.Value(scale))
+				s.Scale(series.Value(scale))
 			}
 
 			// Summarize series
@@ -358,10 +359,10 @@ func (w *httpWorker) executeRequest(req *plot.Request, forceNormalize bool) []pl
 				}
 			}
 
-			series.Summarize(percentiles)
+			s.Summarize(percentiles)
 
-			result = append(result, plot.SeriesResponse{
-				Series:  series,
+			result = append(result, series.SeriesResponse{
+				Series:  s,
 				Name:    group.Series[j].Name,
 				Options: group.Series[j].Options,
 			})
@@ -371,19 +372,19 @@ func (w *httpWorker) executeRequest(req *plot.Request, forceNormalize bool) []pl
 	return result
 }
 
-func (w *httpWorker) dispatchQueries(req *plot.Request) []plotQuery {
-	providers := make(map[string]*plotQuery)
+func (w *httpWorker) dispatchQueries(req *series.Request) []pointQuery {
+	providers := make(map[string]*pointQuery)
 
 	for i, group := range req.Graph.Groups {
-		for j, series := range group.Series {
-			if !series.IsValid() {
-				w.log.Warning("invalid series metric: %s", series)
+		for j, s := range group.Series {
+			if !s.IsValid() {
+				w.log.Warning("invalid series metric: %s", s)
 				continue
 			}
 
-			search := w.service.searcher.Metrics(series.Origin, series.Source, series.Metric, 1)
+			search := w.service.searcher.Metrics(s.Origin, s.Source, s.Metric, 1)
 			if len(search) == 0 {
-				w.log.Warning("unable to find series metric: %s", series)
+				w.log.Warning("unable to find series metric: %s", s)
 				continue
 			}
 
@@ -391,22 +392,22 @@ func (w *httpWorker) dispatchQueries(req *plot.Request) []plotQuery {
 			c := search[0].Connector().(connector.Connector)
 			provName := c.Name()
 
-			// Initialize provider-specific plot query
+			// Initialize provider-specific point query
 			if _, ok := providers[provName]; !ok {
-				providers[provName] = &plotQuery{
-					query: plot.Query{
+				providers[provName] = &pointQuery{
+					query: series.Query{
 						StartTime: req.StartTime,
 						EndTime:   req.EndTime,
 						Sample:    req.Sample,
-						Series:    []plot.QuerySeries{},
+						Series:    []series.QuerySeries{},
 					},
 					queryMap:  [][2]int{},
 					connector: c,
 				}
 			}
 
-			// Append new series to plot query and save series index
-			providers[provName].query.Series = append(providers[provName].query.Series, plot.QuerySeries{
+			// Append new series to point query and save series index
+			providers[provName].query.Series = append(providers[provName].query.Series, series.QuerySeries{
 				Origin: search[0].Source().Origin().OriginalName,
 				Source: search[0].Source().OriginalName,
 				Metric: search[0].OriginalName,
@@ -416,7 +417,7 @@ func (w *httpWorker) dispatchQueries(req *plot.Request) []plotQuery {
 		}
 	}
 
-	result := []plotQuery{}
+	result := []pointQuery{}
 	for _, q := range providers {
 		result = append(result, *q)
 	}

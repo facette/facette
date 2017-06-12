@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"facette/catalog"
-	"facette/plot"
+	"facette/series"
 
 	"github.com/facette/logger"
 	"github.com/facette/maputil"
@@ -154,12 +154,12 @@ func (c *rrdConnector) Refresh(output chan<- *catalog.Record) error {
 	return c.walk(c.path, "", walkFunc)
 }
 
-// Plots retrieves the time series data according to the query parameters and a time interval.
-func (c *rrdConnector) Plots(q *plot.Query) ([]plot.Series, error) {
+// Points retrieves the time series data according to the query parameters and a time interval.
+func (c *rrdConnector) Points(q *series.Query) ([]series.Series, error) {
 	var step time.Duration
 
 	if len(q.Series) == 0 {
-		return nil, plot.ErrEmptySeries
+		return nil, series.ErrEmptySeries
 	}
 
 	// Initialize new RRD exporter
@@ -191,24 +191,24 @@ func (c *rrdConnector) Plots(q *plot.Query) ([]plot.Series, error) {
 
 	// Set fallback step if none found
 	if step == 0 {
-		step = q.EndTime.Sub(q.StartTime) / time.Duration(plot.DefaultSample)
+		step = q.EndTime.Sub(q.StartTime) / time.Duration(series.DefaultSample)
 	}
 
-	// Retrieve plots data
+	// Retrieve data points
 	data, err := xport.Xport(q.StartTime, q.EndTime, step)
 	if err != nil {
 		return nil, err
 	}
 
-	result := []plot.Series{}
+	result := []series.Series{}
 	for idx := range data.Legends {
-		s := plot.Series{}
+		s := series.Series{}
 
 		// FIXME: skip last garbage entry (see https://github.com/ziutek/rrd/pull/13)
 		for i, n := 0, data.RowCnt-1; i < n; i++ {
-			s.Plots = append(s.Plots, plot.Plot{
+			s.Points = append(s.Points, series.Point{
 				Time:  q.StartTime.Add(data.Step * time.Duration(i)),
-				Value: plot.Value(data.ValueAt(idx, i)),
+				Value: series.Value(data.ValueAt(idx, i)),
 			})
 		}
 

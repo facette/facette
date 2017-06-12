@@ -1,8 +1,8 @@
-package plot
+package series
 
 import "time"
 
-// Query represents a time series plot query instance.
+// Query represents a time series point query instance.
 type Query struct {
 	StartTime time.Time
 	EndTime   time.Time
@@ -10,7 +10,7 @@ type Query struct {
 	Series    []QuerySeries
 }
 
-// QuerySeries represents a series instance in a time series plot query.
+// QuerySeries represents a series instance in a time series point query.
 type QuerySeries struct {
 	Origin string
 	Source string

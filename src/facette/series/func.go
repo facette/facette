@@ -1,4 +1,4 @@
-package plot
+package series
 
 import (
 	"math"
@@ -32,26 +32,26 @@ const (
 
 type bucket struct {
 	startTime time.Time
-	plots     []Plot
+	points    []Point
 }
 
-// Consolidate consolidates plots buckets based on consolidation function.
-func (b bucket) Consolidate(consolidation int) Plot {
-	plot := Plot{
+// Consolidate consolidates points buckets based on consolidation function.
+func (b bucket) Consolidate(consolidation int) Point {
+	point := Point{
 		Value: Value(math.NaN()),
 		Time:  b.startTime,
 	}
 
-	length := len(b.plots)
+	length := len(b.points)
 	if length == 0 {
-		return plot
+		return point
 	}
 
 	switch consolidation {
 	case ConsolidateAverage:
 		sum := 0.0
 		sumCount := 0
-		for _, p := range b.plots {
+		for _, p := range b.points {
 			if p.Value.IsNaN() {
 				continue
 			}
@@ -61,20 +61,20 @@ func (b bucket) Consolidate(consolidation int) Plot {
 		}
 
 		if sumCount > 0 {
-			plot.Value = Value(sum / float64(sumCount))
+			point.Value = Value(sum / float64(sumCount))
 		}
 
 		if length == 1 {
-			plot.Time = b.plots[0].Time
+			point.Time = b.points[0].Time
 		} else {
 			// Interpolate median time
-			plot.Time = b.plots[0].Time.Add(b.plots[length-1].Time.Sub(b.plots[0].Time) / 2)
+			point.Time = b.points[0].Time.Add(b.points[length-1].Time.Sub(b.points[0].Time) / 2)
 		}
 
 	case ConsolidateSum:
 		sum := 0.0
 		sumCount := 0
-		for _, p := range b.plots {
+		for _, p := range b.points {
 			if p.Value.IsNaN() {
 				continue
 			}
@@ -84,36 +84,36 @@ func (b bucket) Consolidate(consolidation int) Plot {
 		}
 
 		if sumCount > 0 {
-			plot.Value = Value(sum)
+			point.Value = Value(sum)
 		}
 
-		plot.Time = b.plots[length-1].Time
+		point.Time = b.points[length-1].Time
 
 	case ConsolidateFirst:
-		plot = b.plots[0]
+		point = b.points[0]
 
 	case ConsolidateLast:
-		plot = b.plots[length-1]
+		point = b.points[length-1]
 
 	case ConsolidateMax:
-		for _, p := range b.plots {
-			if !p.Value.IsNaN() && p.Value > plot.Value || plot.Value.IsNaN() {
-				plot = p
+		for _, p := range b.points {
+			if !p.Value.IsNaN() && p.Value > point.Value || point.Value.IsNaN() {
+				point = p
 			}
 		}
 
 	case ConsolidateMin:
-		for _, p := range b.plots {
-			if !p.Value.IsNaN() && p.Value < plot.Value || plot.Value.IsNaN() {
-				plot = p
+		for _, p := range b.points {
+			if !p.Value.IsNaN() && p.Value < point.Value || point.Value.IsNaN() {
+				point = p
 			}
 		}
 	}
 
-	return plot
+	return point
 }
 
-// Normalize aligns multiple plot series on a common time step, consolidates plots samples if necessary.
+// Normalize aligns multiple point series on a common time step, consolidates points samples if necessary.
 func Normalize(series []Series, startTime, endTime time.Time, sample int, consolidation int,
 	interpolate bool) ([]Series, error) {
 
@@ -132,9 +132,9 @@ func Normalize(series []Series, startTime, endTime time.Time, sample int, consol
 	// Calculate the common step for all series based on time range and requested sampling
 	step := endTime.Sub(startTime) / time.Duration(sample)
 
-	// Dispatch plots into proper time step buckets and then apply consolidation function
+	// Dispatch points into proper time step buckets and then apply consolidation function
 	for i, s := range series {
-		if s.Plots == nil {
+		if s.Points == nil {
 			continue
 		}
 
@@ -144,12 +144,12 @@ func Normalize(series []Series, startTime, endTime time.Time, sample int, consol
 		for j := 0; j < sample; j++ {
 			buckets[i][j] = bucket{
 				startTime: startTime.Add(time.Duration(j) * step),
-				plots:     make([]Plot, 0),
+				points:    make([]Point, 0),
 			}
 		}
 
-		for _, p := range s.Plots {
-			// Discard series plots out of time specs range
+		for _, p := range s.Points {
+			// Discard series points out of time specs range
 			if p.Time.Before(startTime) || p.Time.After(endTime) {
 				continue
 			}
@@ -160,30 +160,30 @@ func Normalize(series []Series, startTime, endTime time.Time, sample int, consol
 				continue
 			}
 
-			buckets[i][idx].plots = append(buckets[i][idx].plots, p)
+			buckets[i][idx].points = append(buckets[i][idx].points, p)
 		}
 
 		result[i] = Series{
-			Plots:   make([]Plot, sample),
+			Points:  make([]Point, sample),
 			Summary: make(map[string]Value),
 		}
 
-		// Consolidate plot buckets
+		// Consolidate point buckets
 		lastKnown := -1
 
 		for j := range buckets[i] {
-			result[i].Plots[j] = buckets[i][j].Consolidate(consolidation)
+			result[i].Points[j] = buckets[i][j].Consolidate(consolidation)
 
 			if interpolate {
-				// Keep reference of last and next known plots
+				// Keep reference of last and next known points
 				if lastKnown != -1 {
-					result[i].Plots[j].prev = &result[i].Plots[lastKnown]
+					result[i].Points[j].prev = &result[i].Points[lastKnown]
 				}
 
-				if !result[i].Plots[j].Value.IsNaN() {
+				if !result[i].Points[j].Value.IsNaN() {
 					if lastKnown != -1 {
 						for k := lastKnown; k < j; k++ {
-							result[i].Plots[k].next = &result[i].Plots[j]
+							result[i].Points[k].next = &result[i].Points[j]
 						}
 					}
 
@@ -191,8 +191,8 @@ func Normalize(series []Series, startTime, endTime time.Time, sample int, consol
 				}
 			}
 
-			// Align consolidated plots timestamps among normalized series lists
-			result[i].Plots[j].Time = buckets[i][j].startTime.Add(time.Duration(step.Seconds() * float64(j))).
+			// Align consolidated points timestamps among normalized series lists
+			result[i].Points[j].Time = buckets[i][j].startTime.Add(time.Duration(step.Seconds() * float64(j))).
 				Round(time.Second)
 		}
 
@@ -201,15 +201,15 @@ func Normalize(series []Series, startTime, endTime time.Time, sample int, consol
 			continue
 		}
 
-		for j, plot := range result[i].Plots {
-			if !plot.Value.IsNaN() || plot.prev == nil || plot.next == nil {
+		for j, point := range result[i].Points {
+			if !point.Value.IsNaN() || point.prev == nil || point.next == nil {
 				continue
 			}
 
-			a := float64(plot.next.Value-plot.prev.Value) / float64(plot.next.Time.UnixNano()-plot.prev.Time.UnixNano())
-			b := float64(plot.prev.Value) - a*float64(plot.Time.UnixNano())
+			a := float64(point.next.Value-point.prev.Value) / float64(point.next.Time.UnixNano()-point.prev.Time.UnixNano())
+			b := float64(point.prev.Value) - a*float64(point.Time.UnixNano())
 
-			result[i].Plots[j].Value = Value(a*float64(plot.next.Time.UnixNano()) + b)
+			result[i].Points[j].Value = Value(a*float64(point.next.Time.UnixNano()) + b)
 		}
 	}
 
@@ -232,33 +232,33 @@ func applyOperator(series []Series, operator int) (Series, error) {
 		return Series{}, ErrEmptySeries
 	}
 
-	count := len(series[0].Plots)
+	count := len(series[0].Points)
 
 	result := Series{
-		Plots:   make([]Plot, count),
+		Points:  make([]Point, count),
 		Summary: make(map[string]Value),
 	}
 
 	for i := 0; i < count; i++ {
 		sumCount := 0
 
-		result.Plots[i].Time = series[0].Plots[i].Time
+		result.Points[i].Time = series[0].Points[i].Time
 
 		for _, s := range series {
-			if len(s.Plots) != count {
+			if len(s.Points) != count {
 				return Series{}, ErrUnnormalizedSeries
-			} else if s.Plots[i].Value.IsNaN() {
+			} else if s.Points[i].Value.IsNaN() {
 				continue
 			}
 
-			result.Plots[i].Value += s.Plots[i].Value
+			result.Points[i].Value += s.Points[i].Value
 			sumCount++
 		}
 
 		if sumCount == 0 {
-			result.Plots[i].Value = Value(math.NaN())
+			result.Points[i].Value = Value(math.NaN())
 		} else if operator == OperatorAverage {
-			result.Plots[i].Value /= Value(sumCount)
+			result.Points[i].Value /= Value(sumCount)
 		}
 	}
 

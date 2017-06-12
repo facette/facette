@@ -39,16 +39,6 @@ app.factory('catalog', function($resource) {
     });
 });
 
-app.factory('expand', function($resource) {
-    return $resource('api/v1/expand', null, {
-        fetch: {
-            method: 'POST',
-            isArray: true,
-            transformRequest: apiTransformRequest
-        }
-    });
-});
-
 app.factory('info', function($resource) {
     return $resource('api/v1/', null, {
         get: {
@@ -162,11 +152,22 @@ app.factory('libraryAction', function($resource) {
     });
 });
 
-app.factory('plots', function($resource) {
-    return $resource('api/v1/plots', null, {
-        fetch: {
+app.factory('series', function($resource) {
+    return $resource('api/v1/series/:action', {
+        action: '@action'
+    }, {
+        expand: {
             method: 'POST',
             params: {
+                action: 'expand'
+            },
+            isArray: true,
+            transformRequest: apiTransformRequest
+        },
+        points: {
+            method: 'POST',
+            params: {
+                action: 'points',
                 normalize: '@normalize'
             },
             transformRequest: apiTransformRequest

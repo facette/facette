@@ -14,7 +14,7 @@ import (
 
 // api:section expand "Expand"
 
-// api:method POST /expand/ "Expand source/metric group in graph series"
+// api:method POST /api/v1/series/expand/ "Expand source/metric group in graph series"
 //
 // This endpoint performs source/metric group expansion for a specific origin. The input format is a list of series
 // element (`origin`/`source`/`metric`), where the both of the `source` and `metric` field value can be a reference to
@@ -75,7 +75,7 @@ import (
 //             }
 //           ]
 //         ]
-func (w *httpWorker) httpHandleExpand(rw http.ResponseWriter, r *http.Request) {
+func (w *httpWorker) httpHandleSeriesExpand(rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	// Get expand request from received data
@@ -99,14 +99,10 @@ func (w *httpWorker) httpHandleExpand(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (w *httpWorker) expandSeries(series *backend.Series, existOnly bool) []*backend.Series {
-	var hasGroups bool
-
 	out := []*backend.Series{}
 
 	sourcesSet := set.New()
 	if strings.HasPrefix(series.Source, backend.GroupPrefix) {
-		hasGroups = true
-
 		id := strings.TrimPrefix(series.Source, backend.GroupPrefix)
 
 		// Request source group from back-end
@@ -133,8 +129,6 @@ func (w *httpWorker) expandSeries(series *backend.Series, existOnly bool) []*bac
 
 	metricsSet := set.New()
 	if strings.HasPrefix(series.Metric, backend.GroupPrefix) {
-		hasGroups = true
-
 		id := strings.TrimPrefix(series.Metric, backend.GroupPrefix)
 
 		// Request metric group from back-end
@@ -164,6 +158,7 @@ func (w *httpWorker) expandSeries(series *backend.Series, existOnly bool) []*bac
 		metricsSet.Add(series.Metric)
 	}
 
+	multiple := sourcesSet.Size() > 1 || metricsSet.Size() > 1
 	count := 0
 
 	sources := set.StringSlice(sourcesSet)
@@ -176,7 +171,7 @@ func (w *httpWorker) expandSeries(series *backend.Series, existOnly bool) []*bac
 			var name string
 
 			// Override name if source/series has been expanded
-			if hasGroups {
+			if multiple {
 				name = fmt.Sprintf("%s (%s)", source, metric)
 				count++
 			} else {

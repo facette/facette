@@ -3,7 +3,7 @@ chart.fn.drawSeries = function() {
 
     // Check for enabled series
     var count = 0;
-    $$.config.series.map(function(a) { if (!a.disabled && a.plots) { count++; } });
+    $$.config.series.map(function(a) { if (!a.disabled && a.points) { count++; } });
     $$.tooltipLocked = count === 0;
 
     // Draw series paths

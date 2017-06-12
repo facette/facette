@@ -51,9 +51,6 @@ func newHTTPWorker(s *Service) *httpWorker {
 	w.router.Endpoint(w.prefix + "/catalog/:type/:name").
 		Get(w.httpHandleCatalogEntry)
 
-	w.router.Endpoint(w.prefix + "/expand").
-		Post(w.httpHandleExpand)
-
 	w.router.Endpoint(w.prefix + "/library/").
 		Get(w.httpHandleLibrarySummary)
 	w.router.Endpoint(w.prefix + "/library/parse").
@@ -72,9 +69,6 @@ func newHTTPWorker(s *Service) *httpWorker {
 		Patch(w.httpHandleBackendUpdate).
 		Put(w.httpHandleBackendUpdate)
 
-	w.router.Endpoint(w.prefix + "/plots").
-		Post(w.httpHandlePlots)
-
 	w.router.Endpoint(w.prefix + "/providers/").
 		Delete(w.httpHandleProviderDeleteAll).
 		Get(w.httpHandleProviderList).
@@ -84,9 +78,13 @@ func newHTTPWorker(s *Service) *httpWorker {
 		Get(w.httpHandleProviderGet).
 		Patch(w.httpHandleProviderUpdate).
 		Put(w.httpHandleProviderUpdate)
-
 	w.router.Endpoint(w.prefix + "/providers/:id/refresh").
 		Post(w.httpHandleProviderRefresh)
+
+	w.router.Endpoint(w.prefix + "/series/expand").
+		Post(w.httpHandleSeriesExpand)
+	w.router.Endpoint(w.prefix + "/series/points").
+		Post(w.httpHandleSeriesPoints)
 
 	w.router.Endpoint(w.prefix + "/").
 		Get(w.httpHandleInfo)

@@ -1,4 +1,4 @@
-package plot
+package series
 
 import (
 	"time"
@@ -8,7 +8,7 @@ import (
 	"github.com/facette/maputil"
 )
 
-// Request represents a plot request instance.
+// Request represents a point request instance.
 type Request struct {
 	StartTime  time.Time      `json:"start_time,omitempty"`
 	EndTime    time.Time      `json:"end_time,omitempty"`

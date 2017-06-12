@@ -4,7 +4,7 @@ import (
 	"sort"
 
 	"facette/catalog"
-	"facette/plot"
+	"facette/series"
 
 	"github.com/facette/logger"
 	"github.com/facette/maputil"
@@ -22,7 +22,7 @@ var (
 type Connector interface {
 	Name() string
 	Refresh(chan<- *catalog.Record) error
-	Plots(*plot.Query) ([]plot.Series, error)
+	Points(*series.Query) ([]series.Series, error)
 }
 
 // NewConnector creates a new instance of a connector handler.

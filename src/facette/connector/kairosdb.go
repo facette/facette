@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"facette/catalog"
-	"facette/plot"
+	"facette/series"
 
 	"github.com/facette/httputil"
 	"github.com/facette/logger"
@@ -238,8 +238,8 @@ func (c *kairosdbConnector) Refresh(output chan<- *catalog.Record) error {
 	return nil
 }
 
-// Plots retrieves the time series data according to the query parameters and a time interval.
-func (c *kairosdbConnector) Plots(q *plot.Query) ([]plot.Series, error) {
+// Points retrieves the time series data according to the query parameters and a time interval.
+func (c *kairosdbConnector) Points(q *series.Query) ([]series.Series, error) {
 	step := q.EndTime.Sub(q.StartTime) / time.Duration(q.Sample)
 	sampling := step.Nanoseconds() / 1000000
 
@@ -295,13 +295,13 @@ func (c *kairosdbConnector) Plots(q *plot.Query) ([]plot.Series, error) {
 		return nil, fmt.Errorf("unable to unmarshal JSON data: %s", err)
 	}
 
-	result := []plot.Series{}
+	result := []series.Series{}
 	for _, q := range pr.Queries {
-		s := plot.Series{}
+		s := series.Series{}
 		for _, value := range q.Results[0].Values {
-			s.Plots = append(s.Plots, plot.Plot{
+			s.Points = append(s.Points, series.Point{
 				Time:  time.Unix(int64(value[0]/1000), 0),
-				Value: plot.Value(value[1]),
+				Value: series.Value(value[1]),
 			})
 		}
 

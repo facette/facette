@@ -1,6 +1,6 @@
-package plot
+package series
 
-// Response represents a plot response instance.
+// Response represents a point response instance.
 type Response struct {
 	Start   string                 `json:"start"`
 	End     string                 `json:"end"`
@@ -8,7 +8,7 @@ type Response struct {
 	Options map[string]interface{} `json:"options"`
 }
 
-// SeriesResponse represents a plot response series instance.
+// SeriesResponse represents a point response series instance.
 type SeriesResponse struct {
 	Series
 	Name    string                 `json:"name"`

@@ -12,7 +12,7 @@ import (
 
 	"facette/backend"
 	"facette/catalog"
-	"facette/plot"
+	"facette/series"
 
 	"github.com/facette/httputil"
 	"github.com/facette/logger"
@@ -21,7 +21,7 @@ import (
 
 const (
 	facetteURLCatalog = "/api/v1/catalog/"
-	facetteURLPlots   = "/api/v1/plots"
+	facetteURLPoints  = "/api/v1/series/points"
 )
 
 // facetteConnector implements the connector handler for another Facette instance.
@@ -110,10 +110,10 @@ func (c *facetteConnector) Refresh(output chan<- *catalog.Record) error {
 	return nil
 }
 
-// Plots retrieves the time series data according to the query parameters and a time interval.
-func (c *facetteConnector) Plots(q *plot.Query) ([]plot.Series, error) {
-	// Convert query into a Facette plot request
-	body, err := json.Marshal(plot.Request{
+// Points retrieves the time series data according to the query parameters and a time interval.
+func (c *facetteConnector) Points(q *series.Query) ([]series.Series, error) {
+	// Convert query into a Facette point request
+	body, err := json.Marshal(series.Request{
 		StartTime: q.StartTime,
 		EndTime:   q.EndTime,
 		Sample:    q.Sample,
@@ -123,7 +123,7 @@ func (c *facetteConnector) Plots(q *plot.Query) ([]plot.Series, error) {
 			},
 			Groups: backend.SeriesGroups{
 				{
-					Series: func(series []plot.QuerySeries) []*backend.Series {
+					Series: func(series []series.QuerySeries) []*backend.Series {
 						out := make([]*backend.Series, len(series))
 						for i, s := range series {
 							out[i] = &backend.Series{
@@ -141,11 +141,11 @@ func (c *facetteConnector) Plots(q *plot.Query) ([]plot.Series, error) {
 		},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("unable to marshal plot request: %s", err)
+		return nil, fmt.Errorf("unable to marshal points request: %s", err)
 	}
 
 	// Create new HTTP request
-	req, err := http.NewRequest("POST", c.url+facetteURLPlots, bytes.NewReader(body))
+	req, err := http.NewRequest("POST", c.url+facetteURLPoints, bytes.NewReader(body))
 	if err != nil {
 		return nil, fmt.Errorf("unable to set up HTTP request: %s", err)
 	}
@@ -153,7 +153,7 @@ func (c *facetteConnector) Plots(q *plot.Query) ([]plot.Series, error) {
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("User-Agent", "facette/"+version)
 
-	// Retrieve upstream plots data
+	// Retrieve upstream data points
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("unable to perform HTTP request: %s", err)
@@ -161,15 +161,15 @@ func (c *facetteConnector) Plots(q *plot.Query) ([]plot.Series, error) {
 	defer resp.Body.Close()
 
 	// Fill result with data received from request
-	data := plot.Response{}
+	data := series.Response{}
 	if err := httputil.BindJSON(resp, &data); err != nil {
 		return nil, fmt.Errorf("unable to unmarshal JSON data: %s", err)
 	}
 
-	result := []plot.Series{}
+	result := []series.Series{}
 	for _, s := range data.Series {
-		result = append(result, plot.Series{
-			Plots:   s.Plots,
+		result = append(result, series.Series{
+			Points:  s.Points,
 			Summary: s.Summary,
 		})
 	}

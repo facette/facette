@@ -22,7 +22,7 @@ angular.module('facette.ui.graph', [])
     };
 })
 
-.controller('GraphController', function($scope, $rootScope, $element, $pageVisibility, $timeout, $window, plots) {
+.controller('GraphController', function($scope, $rootScope, $element, $pageVisibility, $timeout, $window, series) {
     $scope.graph = null;
 
     if (!angular.isDefined($scope.options)) {
@@ -193,13 +193,13 @@ angular.module('facette.ui.graph', [])
 
         // Append series to chart
         angular.forEach($scope.data.series, function(series) {
-            if (series.plots === null) {
+            if (series.points === null) {
                 $scope.partial = true;
             }
 
             var entry = {
                 name: series.name,
-                plots: series.plots,
+                points: series.points,
                 summary: series.summary
             };
 
@@ -280,8 +280,8 @@ angular.module('facette.ui.graph', [])
             $scope.timeout = null;
         }
 
-        // Fetch plots data
-        plots.fetch(query, function(data) {
+        // Fetch data points
+        series.points(query, function(data) {
             // Apply options defaults
             data.options = angular.extend({
                 type: graphTypeArea,

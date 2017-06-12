@@ -140,11 +140,11 @@ chart.fn.drawEventRect = function() {
             };
 
             $$.config.series.forEach(function(series, idx) {
-                var idxPlot = series.plots ? dateBisect(series.plots, data.date, 1) : -1;
+                var idxPoints = series.points ? dateBisect(series.points, data.date, 1) : -1;
 
                 data.values[idx] = {
                     name: series.name,
-                    value: idxPlot != -1 ? series.plots[idxPlot] : null
+                    value: idxPoints != -1 ? series.points[idxPoints] : null
                 };
             });
 

@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"facette/catalog"
-	"facette/plot"
+	"facette/series"
 
 	"github.com/facette/logger"
 	"github.com/facette/maputil"
@@ -296,8 +296,8 @@ func (c *influxdbConnector) Refresh(output chan<- *catalog.Record) error {
 	return nil
 }
 
-// Plots retrieves the time series data according to the query parameters and a time interval.
-func (c *influxdbConnector) Plots(q *plot.Query) ([]plot.Series, error) {
+// Points retrieves the time series data according to the query parameters and a time interval.
+func (c *influxdbConnector) Points(q *series.Query) ([]series.Series, error) {
 	var queries []string
 
 	l := len(q.Series)
@@ -305,7 +305,7 @@ func (c *influxdbConnector) Plots(q *plot.Query) ([]plot.Series, error) {
 		return nil, fmt.Errorf("influxdb[%s]: requested series list is empty", c.name)
 	}
 
-	results := make([]plot.Series, l)
+	results := make([]series.Series, l)
 
 	// Prepare query
 	for _, s := range q.Series {
@@ -351,9 +351,9 @@ func (c *influxdbConnector) Plots(q *plot.Query) ([]plot.Series, error) {
 	// Execute query
 	response, err := c.client.Query(query)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch plots: %s", err)
+		return nil, fmt.Errorf("failed to fetch points: %s", err)
 	} else if response.Error() != nil {
-		return nil, fmt.Errorf("failed to fetch plots: %s", response.Error())
+		return nil, fmt.Errorf("failed to fetch points: %s", response.Error())
 	}
 
 	// Parse results received from back-end
@@ -362,7 +362,7 @@ func (c *influxdbConnector) Plots(q *plot.Query) ([]plot.Series, error) {
 			continue
 		}
 
-		results[i] = plot.Series{}
+		results[i] = series.Series{}
 		for _, s := range r.Series {
 			for _, v := range s.Values {
 				time, err := time.Parse(time.RFC3339Nano, v[0].(string))
@@ -375,9 +375,9 @@ func (c *influxdbConnector) Plots(q *plot.Query) ([]plot.Series, error) {
 					return nil, fmt.Errorf("failed to parse value: %s", v[1])
 				}
 
-				results[i].Plots = append(results[i].Plots, plot.Plot{
+				results[i].Points = append(results[i].Points, series.Point{
 					Time:  time,
-					Value: plot.Value(value),
+					Value: series.Value(value),
 				})
 			}
 		}

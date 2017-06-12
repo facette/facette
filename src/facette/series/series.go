@@ -1,4 +1,4 @@
-package plot
+package series
 
 import (
 	"fmt"
@@ -8,15 +8,15 @@ import (
 
 // Series represents a time series instance.
 type Series struct {
-	Plots   []Plot           `json:"plots"`
+	Points  []Point          `json:"points"`
 	Summary map[string]Value `json:"summary"`
 }
 
-// Scale applies a factor on a series of plots.
+// Scale applies a factor on a series of points.
 func (s *Series) Scale(factor Value) {
-	for i := range s.Plots {
-		if !s.Plots[i].Value.IsNaN() {
-			s.Plots[i].Value *= factor
+	for i := range s.Points {
+		if !s.Points[i].Value.IsNaN() {
+			s.Points[i].Value *= factor
 		}
 	}
 }
@@ -25,25 +25,25 @@ func (s *Series) Scale(factor Value) {
 func (s *Series) Summarize(percentiles []float64) {
 	var (
 		min, max, total, current Value
-		nValidPlots              int64
+		nValidPoints             int64
 	)
 
 	min = Value(math.NaN())
 	max = Value(math.NaN())
 	current = Value(math.NaN())
 
-	for i := range s.Plots {
-		if !s.Plots[i].Value.IsNaN() {
-			current = s.Plots[i].Value
+	for i := range s.Points {
+		if !s.Points[i].Value.IsNaN() {
+			current = s.Points[i].Value
 			if current < min || min.IsNaN() {
-				min = s.Plots[i].Value
+				min = s.Points[i].Value
 			}
 			if current > max || max.IsNaN() {
 				max = current
 			}
 
 			total += current
-			nValidPlots++
+			nValidPoints++
 		}
 	}
 
@@ -53,7 +53,7 @@ func (s *Series) Summarize(percentiles []float64) {
 
 	s.Summary["min"] = min
 	s.Summary["max"] = max
-	s.Summary["avg"] = total / Value(nValidPlots)
+	s.Summary["avg"] = total / Value(nValidPoints)
 	s.Summary["last"] = current
 
 	if len(percentiles) > 0 {
@@ -70,9 +70,9 @@ func (s *Series) Percentiles(values []float64) {
 		return
 	}
 
-	for i := range s.Plots {
-		if !s.Plots[i].Value.IsNaN() {
-			set = append(set, float64(s.Plots[i].Value))
+	for i := range s.Points {
+		if !s.Points[i].Value.IsNaN() {
+			set = append(set, float64(s.Points[i].Value))
 		}
 	}
 
