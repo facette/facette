@@ -1,24 +1,16 @@
-Facette [![](https://api.travis-ci.org/facette/facette.png)](https://travis-ci.org/facette/facette)
+Facette [![](https://api.travis-ci.org/facette/facette.svg?branch=master)](https://travis-ci.org/facette/facette)
 =======
 
-![logo](https://cloud.githubusercontent.com/assets/1122379/3501756/07726d40-061a-11e4-8ffa-bbaa6cf3adfb.png)
+[Facette][0] is a open source web application to display time series data from various sources — such as [collectd][1],
+[Graphite][2], [InfluxDB][5] or [KairosDB][6] — on graphs. To learn more on its architecture, read
+[this page](http://docs.facette.io/architecture/).
 
-What is Facette?
-----------------
+The source code is available at [Github][3] and is licensed under the terms of the [BSD license][4].
 
-[Facette][0] is a web application to display time series data from various sources — such as [collectd][1],
-[Graphite][2], [InfluxDB][5] or [KairosDB][6] — on graphs, designed to be easy to setup and to use. To learn more on
-its architecture, read [this page](http://docs.facette.io/architecture/).
-
-The source code is available at [Github][3] and licensed under the terms of the [BSD license][4].
-
-![facette_sshot2](https://cloud.githubusercontent.com/assets/1122379/3489453/3a61f74e-052e-11e4-884e-ea781b93efdd.png)
-![facette_sshot1](https://cloud.githubusercontent.com/assets/1122379/3489442/74b3b000-052d-11e4-812e-e462b8048ebd.png)
+![](https://facette.io/assets/images/sshot-view1.png)
 
 Installation
 ------------
-
-:warning: Facette is currently under development and is **not ready** for a production environment.
 
 Please see [INSTALL.md](INSTALL.md) file for build instructions and installation procedures.
 
