@@ -304,6 +304,7 @@ textarea {
 }
 
 .autocomplete input[type=search],
+.ui-select-container,
 .ui-select-container input[type=search] {
 	margin-right: 0;
 	width: 100%;
