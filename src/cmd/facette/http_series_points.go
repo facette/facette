@@ -16,8 +16,6 @@ import (
 	"github.com/hashicorp/go-uuid"
 )
 
-// api:section points "Data points"
-
 const (
 	defaultTimeRange = "-1h"
 )
@@ -28,7 +26,7 @@ type pointQuery struct {
 	connector connector.Connector
 }
 
-// api:method POST /api/v1/series/points/ "Retrieve graph series data points"
+// api:method POST /api/v1/series/points "Retrieve series data points"
 //
 // This endpoint retrieves data points for all of a graph's series based on a points query specifying either one of the
 // following elements:
@@ -47,25 +45,27 @@ type pointQuery struct {
 //
 // Note: for absolute time span selection, both `start_end` and `end_time` values must be specified.
 //
-// Here is an example of a points request body:
-//
-// ```json
-// {
-//   "id": "c5e5faf1-dda1-50b3-abcb-4a5bdae7328e",
-//   "sample": 10,
-//   "range": "-60s"
-// }
-// ```
-//
 // The response is an array of graph series and their data points for the requested time span.
 //
 // ---
-// section: points
+// section: series
+// request:
+//   type: object
+//   examples:
+//   - format: javascript
+//     headers:
+//       Content-Type: application/json
+//     body: |
+//       {
+//         "id": "c5e5faf1-dda1-50b3-abcb-4a5bdae7328e",
+//         "sample": 10,
+//         "range": "-60s"
+//       }
 // responses:
 //   200:
 //     type: object
-//     example:
-//       format: json
+//     examples:
+//     - format: javascript
 //       body: |
 //         {
 //           "start": "2017-06-07T12:28:08Z",
@@ -73,16 +73,16 @@ type pointQuery struct {
 //           "series": [
 //             {
 //               "points": [
-//                 [ 1496838488, 673 ],
-//                 [ 1496838494, 576 ],
-//                 [ 1496838500, 585.5 ],
-//                 [ 1496838506, 595 ],
-//                 [ 1496838512, 648 ],
-//                 [ 1496838518, 678 ],
-//                 [ 1496838524, 708 ],
-//                 [ 1496838530, 716 ],
-//                 [ 1496838536, 724 ],
-//                 [ 1496838542, 733 ]
+//                 [1496838488, 673],
+//                 [1496838494, 576],
+//                 [1496838500, 585.5],
+//                 [1496838506, 595],
+//                 [1496838512, 648],
+//                 [1496838518, 678],
+//                 [1496838524, 708],
+//                 [1496838530, 716],
+//                 [1496838536, 724],
+//                 [1496838542, 733]
 //               ],
 //               "summary": {
 //                 "avg": 662.6111111111111,

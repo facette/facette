@@ -7,6 +7,17 @@ import (
 	"github.com/facette/httputil"
 )
 
+// api:method GET /api/v1/library/collections/tree "Get collections tree"
+//
+// This endpoint renders the library collections tree.
+//
+// ---
+// section: library
+// parameters:
+// - name: parent
+//   type: string
+//   description: parent node to generate the tree from
+//   in: query
 func (w *httpWorker) httpHandleLibraryCollectionTree(rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 

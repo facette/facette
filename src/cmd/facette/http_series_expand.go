@@ -12,9 +12,9 @@ import (
 	"github.com/fatih/set"
 )
 
-// api:section expand "Expand"
+// api:section series "Series"
 
-// api:method POST /api/v1/series/expand/ "Expand source/metric group in graph series"
+// api:method POST /api/v1/series/expand "Expand groups in series"
 //
 // This endpoint performs source/metric group expansion for a specific origin. The input format is a list of series
 // element (`origin`/`source`/`metric`), where the both of the `source` and `metric` field value can be a reference to
@@ -22,37 +22,37 @@ import (
 //
 // The format for describing a series in a expansion list is:
 //
-// ```
+// ```javascript
 // {
-//   "origin": "< Origin name >",
-//   "source": "< Source name or source group ID (format: `group:ID`) >",
-//   "metric": "< Metric name or metric group ID (format: `group:ID`) >"
+//   "origin": "<origin name>",
+//   "source": "<source name or source group identifier (format: `group:ID`)>",
+//   "metric": "<metric name or metric group identifier (format: `group:ID`)>"
 // }
-// ```
-//
-// Here is an example of an expansion request body:
-//
-// ```
-// [
-//   {
-//     "origin": "kairosdb",
-//     "source": "host1.example.net",
-//     "metric": "group:118e864e-d880-5499-864b-06dedfd9f9ef"
-//   }
-// ]
 // ```
 //
 // The response is a list of series (origin/source/metric, and a pre-formatted `name` field for display purposes).
 //
 // ---
-// section: expand
-// content_types:
-// - application/json
+// section: series
+// request:
+//   type: object
+//   examples:
+//   - format: javascript
+//     headers:
+//       Content-Type: application/json
+//     body: |
+//       [
+//         {
+//           "origin": "kairosdb",
+//           "source": "host1.example.net",
+//           "metric": "group:118e864e-d880-5499-864b-06dedfd9f9ef"
+//         }
+//       ]
 // responses:
 //   200:
 //     type: array
-//     example:
-//       format: json
+//     examples:
+//     - format: javascript
 //       body: |
 //         [
 //             {

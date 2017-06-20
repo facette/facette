@@ -35,7 +35,8 @@ type httpInfo struct {
 // responses:
 //   200:
 //     type: object
-//     example:
+//     examples:
+//     - format: javascript
 //       body: |
 //         {
 //           "version": "0.4.0",

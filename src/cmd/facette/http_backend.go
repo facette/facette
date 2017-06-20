@@ -25,7 +25,7 @@ var backendTypes = []string{
 	"metricgroups",
 }
 
-// api:method POST /api/v1/library/:type/ "Create a new item of a given type"
+// api:method POST /api/v1/library/:type/ "Create a library item"
 //
 // This endpoint creates a new item and stores it to the back-end database.
 //
@@ -145,7 +145,7 @@ func (w *httpWorker) httpHandleBackendCreate(rw http.ResponseWriter, r *http.Req
 //
 // This endpoint returns a library item given its type and identifier.
 //
-// The `expand` query parameter _(available for collections and graphs)_ can be set to request item exansion. If the
+// The `expand` query parameter _(available for collections and graphs)_ can be set to request item expansion. If the
 // item is an instance of a template, all internal references will be resolved.
 //
 // ---
@@ -168,10 +168,72 @@ func (w *httpWorker) httpHandleBackendCreate(rw http.ResponseWriter, r *http.Req
 // responses:
 //   200:
 //     type: object
-//     example:
-//       format: json
+//     examples:
+//     - format: javascript
 //       body: |
-//         {}
+//         {
+//           "id": "eccd09c3-aaa9-592b-ad55-3d92b4acf119",
+//           "name": "load",
+//           "description": "Load average for \"{{ .source }}\"",
+//           "created": "2017-05-19T15:08:39Z",
+//           "modified": "2017-06-14T06:17:46Z",
+//           "groups": [
+//             {
+//               "name": "",
+//               "operator": 0,
+//               "consolidate": 1,
+//               "series": [
+//                 {
+//                   "name": "shortterm",
+//                   "origin": "{{ .origin }}",
+//                   "source": "{{ .source }}",
+//                   "metric": "load.shortterm",
+//                   "options": {
+//                     "color": "#fff726"
+//                   }
+//                 }
+//               ]
+//             },
+//             {
+//               "name": "",
+//               "operator": 0,
+//               "consolidate": 1,
+//               "series": [
+//                 {
+//                   "name": "midterm",
+//                   "origin": "{{ .origin }}",
+//                   "source": "{{ .source }}",
+//                   "metric": "load.midterm",
+//                   "options": {
+//                     "color": "#ff602a"
+//                   }
+//                 }
+//               ]
+//             },
+//             {
+//               "name": "",
+//               "operator": 0,
+//               "consolidate": 1,
+//               "series": [
+//                 {
+//                   "name": "longterm",
+//                   "origin": "{{ .origin }}",
+//                   "source": "{{ .source }}",
+//                   "metric": "load.longterm",
+//                   "options": {
+//                     "color": "#be1732"
+//                   }
+//                 }
+//               ]
+//             }
+//           ],
+//           "options": {
+//             "title": "{{ .source }} - Load Average",
+//             "type": "line",
+//             "yaxis_unit": "fixed"
+//           },
+//           "template": true
+//         }
 func (w *httpWorker) httpHandleBackendGet(rw http.ResponseWriter, r *http.Request) {
 	var result interface{}
 
@@ -225,6 +287,46 @@ func (w *httpWorker) httpHandleBackendGet(rw http.ResponseWriter, r *http.Reques
 	httputil.WriteJSON(rw, result, http.StatusOK)
 }
 
+// api:method PUT /api/v1/library/:type/:id "Update a library item"
+//
+// This endpoint updates a library item given its identifier. The request body is similar to the _Create a new library
+// item_ endpoint.
+//
+// If the instance is *read-only* the operation will be rejected with `403 Forbidden`.
+//
+// ---
+// section: library
+// parameters:
+// - name: type
+//   type: string
+//   description: type of library items
+//   required: true
+//   in: path
+// - name: id
+//   type: string
+//   description: identifier of the item
+//   required: true
+//   in: path
+// responses:
+//   204:
+
+// api:method PATCH /api/v1/library/:type/:id "Partially update a library item"
+//
+// This endpoint partially updates a library item given its identifier. The request body is similar to the _Update a
+// library item_ endpoint, but only specified fields will be modified.
+//
+// If the instance is *read-only* the operation will be rejected with `403 Forbidden`.
+//
+// ---
+// section: library
+// parameters:
+// - name: id
+//   type: string
+//   description: identifier of the provider
+//   required: true
+//   in: path
+// responses:
+//   204:
 func (w *httpWorker) httpHandleBackendUpdate(rw http.ResponseWriter, r *http.Request) {
 	if w.service.config.ReadOnly {
 		httputil.WriteJSON(rw, httpBuildMessage(ErrReadOnly), http.StatusForbidden)
@@ -449,7 +551,7 @@ func (w *httpWorker) httpHandleBackendDeleteAll(rw http.ResponseWriter, r *http.
 	rw.WriteHeader(http.StatusNoContent)
 }
 
-// api:method GET /api/v1/library/:type/ "Get library items of a given type"
+// api:method GET /api/v1/library/:type/ "List library items of a given type"
 //
 // This endpoint returns library items of a given type. If a `filter` query parameter is given, only items having
 // their name matching the filter will be returned.
@@ -509,10 +611,34 @@ func (w *httpWorker) httpHandleBackendDeleteAll(rw http.ResponseWriter, r *http.
 // responses:
 //   200:
 //     type: array
-//     example:
-//       format: json
+//     examples:
+//     - format: javascript
+//       headers:
+//         X-Total-Records: 3
 //       body: |
-//         []
+//         [
+//           {
+//             "created": "2017-05-19T15:08:40Z",
+//             "description": "CPU usage for \"{{ .source }}\"",
+//             "id": "c1c5ba71-428a-565e-94e3-304c16e9a92f",
+//             "modified": "2017-06-14T06:17:46Z",
+//             "name": "cpu"
+//           },
+//           {
+//             "created": "2017-05-19T15:08:39Z",
+//             "description": "Disk usage for \"{{ .volume }}\" on \"{{ .source }}\"",
+//             "id": "c77c2dae-b37f-5210-80b5-5d44ce5f7a97",
+//             "modified": "2017-06-14T06:17:46Z",
+//             "name": "df.bytes"
+//           },
+//           {
+//             "created": "2017-05-19T15:08:39Z",
+//             "description": "Load average for \"{{ .source }}\"",
+//             "id": "eccd09c3-aaa9-592b-ad55-3d92b4acf119",
+//             "modified": "2017-06-14T06:17:46Z",
+//             "name": "load"
+//           }
+//         ]
 func (w *httpWorker) httpHandleBackendList(rw http.ResponseWriter, r *http.Request) {
 	typ := httproute.ContextParam(r, "type").(string)
 

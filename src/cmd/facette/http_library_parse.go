@@ -18,6 +18,48 @@ type parseRequest struct {
 	Data json.RawMessage `json:"data"`
 }
 
+// api:method POST /api/v1/library/parse "Retrieve template keys"
+//
+// This endpoint parses requested library item or received data and returns the template keys.
+//
+// | Name | Type | Description |
+// | --- | --- | --- |
+// | `id` | string | identifier of the item |
+// | `type`| string | type of the item |
+// | `data` | string | arbitrary data to parse |
+//
+// Note: you should either specify `id` and `type` or `data` but not both.
+//
+// ---
+// section: library
+// request:
+//   type: object
+//   examples:
+//   - format: javascript
+//     headers:
+//       Content-Type: application/json
+//     body: |
+//       {
+//         "id": "368b62f2-873d-580c-ba24-440325af0582",
+//         "type": "collections"
+//       }
+//   - format: javascript
+//     headers:
+//       Content-Type: application/json
+//     body: |
+//       {
+//         "data": "{\"description\":\"A test string with {{ .key1 }}.\"}"
+//       }
+// responses:
+//   200:
+//     type: array
+//     examples:
+//     - format: javascript
+//       body: |
+//         [
+//           "key1",
+//           "key2"
+//         ]
 func (w *httpWorker) httpHandleLibraryParse(rw http.ResponseWriter, r *http.Request) {
 	var data string
 

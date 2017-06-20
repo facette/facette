@@ -24,7 +24,8 @@ var libraryTypes = []string{
 // responses:
 //   200:
 //     type: object
-//     example:
+//     examples:
+//     - format: javascript
 //       body: |
 //         {
 //           "collections": 1,

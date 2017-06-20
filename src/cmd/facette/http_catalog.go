@@ -31,8 +31,8 @@ import (
 // responses:
 //   200:
 //     type: object
-//     example:
-//       format: json
+//     examples:
+//     - format: javascript
 //       body: |
 //         {
 //           "origins": 1,
@@ -52,7 +52,7 @@ func (w *httpWorker) httpHandleCatalogSummary(rw http.ResponseWriter, r *http.Re
 	httputil.WriteJSON(rw, result, http.StatusOK)
 }
 
-// api:method GET /api/v1/catalog/:type/ "Get catalog entries of a given type"
+// api:method GET /api/v1/catalog/:type/ "List catalog entries of a given type"
 //
 // This endpoint returns catalog entries of a given type. If a `filter` query parameter is given, only entries having
 // their name matching the filter will be returned.
@@ -70,21 +70,24 @@ func (w *httpWorker) httpHandleCatalogSummary(rw http.ResponseWriter, r *http.Re
 // - name: filter
 //   type: string
 //   description: term to filter names on
+//   in: query
 // - name: offset
 //   type: integer
 //   description: offset to return items from
+//   in: query
 // - name: limit
 //   type: integer
 //   description: number of items to return
+//   in: query
 // responses:
 //   200:
 //     type: array
 //     headers:
 //       X-Total-Records: total number of catalog records for this type
-//     example:
-//       headers:
+//     examples:
+//     - headers:
 //         X-Total-Records: 3
-//       format: json
+//       format: javascript
 //       body: |
 //         [
 //           "metric1",
@@ -170,8 +173,8 @@ func (w *httpWorker) httpHandleCatalogType(rw http.ResponseWriter, r *http.Reque
 // responses:
 //   200:
 //     type: object
-//     example:
-//       format: json
+//     examples:
+//     - format: javascript
 //       body: |
 //         {
 //           "name": "metric3",

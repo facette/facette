@@ -32,57 +32,58 @@ type bulkResponseEntry struct {
 func init() {
 }
 
-// api:method POST /api/v1/bulk/ "Bulk API requests execution"
+// api:method POST /api/v1/bulk/ "Bulk requests execution"
 //
 // This endpoint expects a request providing as body a list of API requests to execute in bulk, and returns a list of
 // API responses corresponding to the requests. The format for describing an API request in a bulk list is:
 //
-// ```
+// ```javascript
 // {
-//   "endpoint": "< API endpoint relative to prefix /api/v1/ >",
-//   "method": "< HTTP Mmethod >",
+//   "endpoint": "<API endpoint relative to `/api/v1/` prefix>",
+//   "method": "<HTTP Method>",
 //   "params": {
-//     < Query string parameters >
-// }
-// ```
-//
-// Here is an example of a bulk request body listing several requests to be performed in bulk:
-//
-// ```
-// [
-//   {
-//     "endpoint": "library/graphs/9084083e-312f-55cf-9bd6-57406cfad22a",
-//     "method": "GET",
-//     "params": {
-//       "fields": "id,name"
-//     }
-//   },
-//   {
-//     "endpoint": "library/graphs/65f812e1-9856-5a2c-8f1a-8e349f8945f0",
-//     "method": "GET",
-//     "params": {
-//       "fields": "id,name"
-//     }
-//   },
-//   {
-//     "endpoint": "library/graphs/36bdae08-8d4e-51cb-87d1-f016bed65864",
-//     "method": "GET",
-//     "params": {
-//       "fields": "id,name"
-//     }
+//     <query string parameters>
 //   }
-// ]
+// }
 // ```
 //
 // ---
 // section: bulk
-// content_types:
-// - application/json
+// request:
+//   type: object
+//   examples:
+//   - format: javascript
+//     headers:
+//       Content-Type: application/json
+//     body: |
+//       [
+//         {
+//           "endpoint": "library/graphs/9084083e-312f-55cf-9bd6-57406cfad22a",
+//           "method": "GET",
+//           "params": {
+//             "fields": "id,name"
+//           }
+//         },
+//         {
+//           "endpoint": "library/graphs/65f812e1-9856-5a2c-8f1a-8e349f8945f0",
+//           "method": "GET",
+//           "params": {
+//             "fields": "id,name"
+//           }
+//         },
+//         {
+//           "endpoint": "library/graphs/36bdae08-8d4e-51cb-87d1-f016bed65864",
+//           "method": "GET",
+//           "params": {
+//             "fields": "id,name"
+//           }
+//         }
+//       ]
 // responses:
 //   200:
 //     type: array
-//     example:
-//       format: json
+//     examples:
+//     - format: javascript
 //       body: |
 //         [
 //           {
