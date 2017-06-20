@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+var builtinAssets = true
+
 func (w *httpWorker) httpHandleAsset(rw http.ResponseWriter, r *http.Request) {
 	var (
 		isAsset   bool

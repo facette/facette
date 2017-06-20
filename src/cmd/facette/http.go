@@ -163,6 +163,10 @@ func (w *httpWorker) Run(wg *sync.WaitGroup) {
 		}
 	}
 
+       if builtinAssets {
+               w.log.Info("serving web assets from built-in files")
+       }
+
 	w.Lock()
 	w.server = &graceful.Server{
 		Server: &http.Server{
