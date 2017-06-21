@@ -333,6 +333,10 @@ article .titlerow .formblock button {
 		width: 3.5rem;
 	}
 
+	aside.collapse + article.with-actions .menu.main {
+		left: 0;
+	}
+
 	article header > .menu.main > .menuitem.button > a {
 		color: #2c3e50;
 	}
