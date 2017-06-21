@@ -1,4 +1,6 @@
-app.controller('ShowCollectionController', function($rootScope, $routeParams, $scope, browseCollection, library) {
+app.controller('ShowCollectionController', function($rootScope, $routeParams, $scope, browseCollection, library,
+    timeRange) {
+
     $scope.id = $routeParams.id;
     $scope.index = $routeParams.index;
 
@@ -25,6 +27,15 @@ app.controller('ShowCollectionController', function($rootScope, $routeParams, $s
         $scope.graph = graph;
 
         browseCollection.watchGraphOptions($scope, 'graph.options');
+
+        // Attach events
+        var unregisterPromptTimerange = $rootScope.$on('PromptTimeRange', function(e, callback, data) {
+            timeRange.prompt(callback, data);
+        });
+
+        $scope.$on('$destroy', function() {
+            unregisterPromptTimerange();
+        });
 
         // Set root scope loaded (no '$includeContentLoaded' event triggered on 'show' route)
         $rootScope.loaded = true;
