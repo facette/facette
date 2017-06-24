@@ -2,11 +2,11 @@
 	<message class="clickable" icon="eye-slash" ng-click="toggleFold(false)" ng-show="folded">{{ 'mesg.graphs_folded' | translate }}</a></message>
 
 	<div class="graph-control" ng-if="controls && !folded">
-		<menu class="graph-menu">
+		<menu class="dropdown graph-menu">
 			<menuitem href="{{ ::baseURL }}admin/graphs/{{ graphId }}" icon="pencil" info="{{ 'label.graphs_edit' | translate }}" type="button" ng-if="!$root.readOnly"></menuitem>
 			<menuitem type="separator" ng-if="!$root.readOnly"></menuitem>
 			<menuitem icon="refresh" info="{{ 'label.graphs_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
-			<menuitem icon="clock-o" info="{{ 'label.range_modify' | translate }}" type="button">
+			<menuitem class="left" icon="clock-o" info="{{ 'label.range_modify' | translate }}" type="button">
 				<menu>
 					<menuitem icon="history" label="{{ 'label.range_reset' | translate }}" type="button" ng-click="reset()" ng-disabled="!modified"></menuitem>
 					<menuitem type="separator"></menuitem>
@@ -19,7 +19,7 @@
 			<menuitem icon="search-minus" info="{{ 'label.graphs_zoom_out' | translate }}" type="button" ng-click="zoom(false)"></menuitem>
 			<menuitem icon="search-plus" info="{{ 'label.graphs_zoom_in' | translate }}" type="button" ng-click="zoom(true)"></menuitem>
 			<menuitem type="separator"></menuitem>
-			<menuitem icon="download" info="{{ 'label.graphs_export' | translate }}" type="button">
+			<menuitem class="left" icon="download" info="{{ 'label.graphs_export' | translate }}" type="button">
 				<menu>
 					<menuitem label="{{ 'label.graphs_export_png' | translate }}" type="button" ng-click="export($event, 'png')" ng-disabled="error"></menuitem>
 					<menuitem type="separator"></menuitem>

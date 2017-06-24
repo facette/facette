@@ -216,7 +216,6 @@
 
 .graph-menu > .menuitem {
 	display: inline-block;
-	font-size: 1.1rem;
 	height: 1.5rem;
 	line-height: 1.5rem;
 	margin-left: 0.35rem;
@@ -250,52 +249,12 @@
 	width: 1px;
 }
 
-.graph-menu > .menuitem .subcontent {
-	background-color: #fff;
-	border-radius: 0.2rem;
-	box-shadow: 0 0.15rem 0.5rem rgba(34, 34, 34, 0.1);
-	box-sizing: border-box;
-	color: #2c3e50;
-	display: none;
-	font-size: 0.9rem;
-	line-height: 1.65rem;
-	padding: 0.35rem 0;
-	position: absolute;
-	right: 0;
-	top: 100%;
-	z-index: 200;
+.graph-menu .menuitem > .subcontent {
+	transform: translateX(1rem);
 }
 
-.graph-menu > .menuitem:hover .subcontent {
-	display: block;
-}
-
-.graph-menu > .menuitem .subcontent .menuitem.separator {
-	background-color: rgba(34, 34, 34, 0.1);
-	height: 1px;
-	margin: 0.35rem 0.65rem;
-}
-
-.graph-menu > .menuitem .subcontent .menuitem.button {
-	cursor: default;
-	text-align: left;
-	white-space: nowrap;
-}
-
-.graph-menu > .menuitem .subcontent .menuitem.button .fa {
-	margin-right: 0;
-	width: 1.35rem;
-}
-
-.graph-menu > .menuitem .subcontent .menuitem.button a {
-	display: block;
-	padding: 0 1rem;
-}
-
-.graph-menu > .menuitem .subcontent .menuitem.button:hover,
-.graph-menu > .menuitem .subcontent .menuitem.button a:focus {
-	background-color: #2980b9;
-	color: #fff;
+.graph-menu > .menuitem .fa {
+	font-size: 1.1rem;
 }
 
 .graph-container {

@@ -82,10 +82,15 @@ aside nav {
 
 aside nav .menu {
 	flex: 1;
+	flex-direction: column;
 }
 
 aside nav .menuitem {
 	white-space: nowrap;
+}
+
+aside nav .menuitem > .subcontent {
+	display: block;
 }
 
 aside nav .menuitem.label {
@@ -124,6 +129,10 @@ aside nav .menuitem.button.active a,
 aside nav .menuitem.button:hover a,
 aside nav .treeitem a:hover {
 	background-color: #353535;
+}
+
+aside nav .menuitem.button > .content {
+	text-align: left;
 }
 
 aside nav .menuitem.button.active a {

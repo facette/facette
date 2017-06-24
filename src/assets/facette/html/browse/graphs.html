@@ -4,7 +4,7 @@
 	<header>
 		<h1 title="{{ title }}">{{ title }}</h1>
 
-		<menu class="main expand">
+		<menu class="dropdown main expand">
 			<menuitem href="{{ ::baseURL }}admin/{{ section }}/{{ id }}" icon="pencil" info="{{ 'label.' + section + '_edit' | translate }}" type="button" ng-if="!readOnly"></menuitem>
 			<menuitem icon="refresh" badge="{{ refreshInterval || '' }}" info="{{ 'label.' + section + '_refresh' | translate }}" type="button">
 				<menu>

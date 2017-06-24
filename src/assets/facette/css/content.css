@@ -72,16 +72,6 @@ article header > .menu.extra > .menuitem.button {
 	color: #fff;
 }
 
-article header > .menu > .menuitem.button .fa {
-	display: inline-block;
-	margin-right: 0.35rem;
-}
-
-article header > .menu > .menuitem.button.icon .fa {
-	margin-right: 0;
-	width: 2rem;
-}
-
 article header > .menu > .menuitem.button > a > .badge {
 	background: #fff;
 	background-clip: padding-box;
