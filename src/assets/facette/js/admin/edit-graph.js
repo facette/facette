@@ -253,42 +253,6 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
         $scope.item.link = data;
     };
 
-    $scope.selectOption = function(option, data) {
-        if (!$scope.completing) {
-            angular.element('.ngdialog-content button[type="submit"]').trigger('click');
-            return;
-        }
-
-        $scope.completing = false;
-
-        if (!data || !data.originalObject || typeof data.originalObject == 'object' && !data.originalObject.value) {
-            return;
-        }
-
-        if ($scope.groupEdit) {
-            if (!$scope.groupItem.options) {
-                $scope.groupItem.options = {};
-            }
-            $scope.groupItem.options[option] = typeof data.originalObject == 'string' ?
-                data.originalObject : data.originalObject.value;
-        } else {
-            var series = $scope.groupItem.series[$scope.seriesCurrent];
-            if (!series.options) {
-                series.options = {};
-            }
-            series.options[option] = typeof data.originalObject == 'string' ?
-                data.originalObject : data.originalObject.value;
-        }
-    };
-
-    $scope.selectScale = function(data) {
-        return $scope.selectOption('scale', data);
-    };
-
-    $scope.selectUnit = function(data) {
-        return $scope.selectOption('unit', data);
-    };
-
     $scope.setSeries = function() {
         if (!$scope.item.groups) {
             $scope.item.groups = [];
