@@ -241,6 +241,7 @@ article section .search button {
 
 article section .search input[type=search] {
 	padding: 0.5rem 4rem 0.5rem 0.5rem;
+	line-height: normal;
 }
 
 article section .search button {
