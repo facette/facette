@@ -1,4 +1,4 @@
-app.controller('AdminEditProviderController', function($routeParams, $scope, adminEdit, info) {
+app.controller('AdminEditProviderController', function($routeParams, $scope, adminEdit, globalHotkeys, info) {
     $scope.section = 'providers';
     $scope.id = $routeParams.id;
 
@@ -44,4 +44,7 @@ app.controller('AdminEditProviderController', function($routeParams, $scope, adm
         $scope.filterActions = filterActions;
         $scope.filterTargets = filterTargets;
     });
+
+    // Register global hotkeys
+    globalHotkeys.register($scope);
 });

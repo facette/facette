@@ -1,0 +1,82 @@
+.cfp-hotkeys-container {
+	background-color: rgba(255, 255, 255, 0.95);
+	bottom: 0;
+	display: flex !important;
+	justify-content: center;
+	left: 0;
+	overflow: auto;
+	position: fixed;
+	right: 0;
+	top: 0;
+}
+
+.cfp-hotkeys-container.fade {
+	opacity: 0;
+	transition: opacity .2s linear;
+	visibility: hidden;
+}
+
+.cfp-hotkeys-container.fade.in {
+	opacity: 1;
+	visibility: visible;
+	z-index: 600;
+}
+
+.cfp-hotkeys-title {
+	margin: 2rem 0;
+}
+
+.cfp-hotkeys h4 {
+	font-size: 1.5rem;
+	font-weight: 400;
+}
+
+.cfp-hotkeys table {
+	border-spacing: 0.75rem;
+	margin-bottom: 2rem;
+}
+
+.cfp-hotkeys-keys {
+	text-align: right;
+}
+
+.cfp-hotkeys-key {
+	background-color: #333;
+	border-bottom: 0.2rem solid #111;
+	border-radius: 0.35rem;
+	border-top: 0.1rem solid #333;
+	box-shadow: inset 0 0.1rem 0 #666;
+	box-sizing: border-box;
+	color: #fff;
+	display: inline-block;
+	font-size: 1.1rem;
+	line-height: 2.5rem;
+	margin: 0 0.25rem;
+	min-width: 2.8rem;
+	padding: 0 1rem;
+	text-align: center;
+}
+
+.cfp-hotkeys-close {
+	position: fixed;
+	top: 2rem;
+	right: 2rem;
+}
+
+.cfp-hotkeys-close {
+	color: transparent;
+	cursor: pointer;
+}
+
+.cfp-hotkeys-close::before {
+	color: #2c3e50;
+	content: '\f00d';
+	display: inline-block;
+	font: normal normal normal 14px/1 FontAwesome;
+	font-size: 2rem;
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-font-smoothing: antialiased;
+	line-height: 1.5rem;
+	text-align: center;
+	text-rendering: auto;
+}

@@ -5,7 +5,6 @@ angular.module('facette.ui.search', [])
         restrict: 'E',
         replace: true,
         scope: {
-            name: '@',
             icon: '@',
             placeholder: '@',
             ngModel: '='

@@ -1,5 +1,5 @@
 app.controller('BrowseSearchController', function($location, $q, $rootScope, $scope, $window, browseCollection,
-    libraryAction) {
+    globalHotkeys, libraryAction) {
 
     $scope.collections = {};
     $scope.collectionsLoaded = false;
@@ -43,4 +43,7 @@ app.controller('BrowseSearchController', function($location, $q, $rootScope, $sc
 
     // Load collections tree
     browseCollection.injectTree($scope);
+
+    // Register global hotkeys
+    globalHotkeys.register($scope);
 });

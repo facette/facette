@@ -1,5 +1,5 @@
 app.controller('AdminListController', function($location, $q, $rootScope, $route, $routeParams, $scope, $timeout,
-    $translate, adminEdit, adminHelpers, catalog, providersAction) {
+    $translate, adminEdit, adminHelpers, catalog, globalHotkeys, hotkeys, providersAction) {
 
     $scope.section = $route.current.$$route._type;
     $scope.state = stateLoading;
@@ -149,4 +149,15 @@ app.controller('AdminListController', function($location, $q, $rootScope, $route
 
     // Load items
     $scope.refresh();
+
+    // Register scope-specific and global hotkeys
+    $translate('label.' + $scope.section + '_search').then(function(data) {
+        hotkeys.bindTo($scope).add({
+            combo: '/',
+            description: data,
+            callback: function() { angular.element('#search input').focus(); }
+        });
+    });
+
+    globalHotkeys.register($scope);
 });

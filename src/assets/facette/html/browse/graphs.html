@@ -36,7 +36,7 @@
 			<menuitem icon="toggle-on" label="{{ 'label.graphs_show_legends' | translate }}" type="button" ng-click="toggleLegends(false)" ng-show="showLegends"></menuitem>
 		</menu>
 
-		<search name="filter" icon="filter" placeholder="{{ 'label.graphs_filter' | translate }}" ng-model="form.filter" ng-if="section == 'collections'"></search>
+		<search id="filter" name="filter" icon="filter" placeholder="{{ 'label.graphs_filter' | translate }}" ng-model="form.filter" ng-if="section == 'collections'"></search>
 
 		<ng-include src="'templates/common/extra-menu.html'" ng-include-replace="true"></ng-include>
 	</header>

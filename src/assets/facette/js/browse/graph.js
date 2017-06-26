@@ -1,5 +1,5 @@
-app.controller('BrowseGraphController', function($location, $rootScope, $routeParams, $scope, $timeout, $window,
-    browseCollection, bulk, library, storage, timeRange) {
+app.controller('BrowseGraphController', function($location, $rootScope, $routeParams, $scope, $timeout, $translate,
+    $window, browseCollection, bulk, globalHotkeys, hotkeys, library, storage, timeRange) {
 
     $scope.section = $routeParams.section;
     $scope.id = $routeParams.id;
@@ -28,7 +28,7 @@ app.controller('BrowseGraphController', function($location, $rootScope, $routePa
             .search('time', $scope.time ? moment($scope.time).format(timeFormatRFC3339) : null)
             .search('range', $scope.range || null)
             .replace();
-        }
+    }
 
     // Register scope functions
     $scope.refresh = function() {
@@ -310,4 +310,15 @@ app.controller('BrowseGraphController', function($location, $rootScope, $routePa
 
     // Load collections tree
     browseCollection.injectTree($scope);
+
+    // Register scope-specific and global hotkeys
+    $translate('label.graphs_filter').then(function(data) {
+        hotkeys.bindTo($scope).add({
+            combo: '/',
+            description: data,
+            callback: function() { angular.element('#filter input').focus(); }
+        });
+    });
+
+    globalHotkeys.register($scope);
 });

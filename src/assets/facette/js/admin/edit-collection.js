@@ -1,5 +1,5 @@
 app.controller('AdminEditCollectionController', function($q, $routeParams, $scope, $timeout, $translate, adminEdit,
-    bulk, library, libraryAction) {
+    bulk, globalHotkeys, library, libraryAction) {
 
     $scope.section = 'collections';
     $scope.id = $routeParams.id;
@@ -497,4 +497,7 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
             });
         }
     });
+
+    // Register global hotkeys
+    globalHotkeys.register($scope);
 });

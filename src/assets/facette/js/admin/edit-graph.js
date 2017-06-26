@@ -1,5 +1,5 @@
 app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams, $scope, $timeout, adminEdit, bulk,
-    catalog, library, ngDialog, series) {
+    catalog, globalHotkeys, library, ngDialog, series) {
 
     $scope.section = 'graphs';
     $scope.id = $routeParams.id;
@@ -889,4 +889,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
             $scope.$applyAsync(function() { angular.element('.pane :input:visible:first').select(); });
         }
     });
+
+    // Register global hotkeys
+    globalHotkeys.register($scope);
 });

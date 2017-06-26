@@ -1,4 +1,6 @@
-app.controller('AdminEditGroupController', function($q, $route, $routeParams, $scope, $translate, adminEdit, catalog) {
+app.controller('AdminEditGroupController', function($q, $route, $routeParams, $scope, $translate, adminEdit, catalog,
+    globalHotkeys) {
+
     $scope.section = $route.current.$$route._type;
     $scope.id = $routeParams.id;
 
@@ -130,4 +132,7 @@ app.controller('AdminEditGroupController', function($q, $route, $routeParams, $s
 
         $scope.resetPattern();
     });
+
+    // Register global hotkeys
+    globalHotkeys.register($scope);
 });

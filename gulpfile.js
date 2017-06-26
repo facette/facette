@@ -77,6 +77,7 @@ var config = {
             'src/assets/facette/css/form.css',
             'src/assets/facette/css/menu.css',
             'src/assets/facette/css/tooltip.css',
+            'src/assets/facette/css/hotkeys.css',
             'src/assets/facette/css/graph.css'
         ],
         style_print: [
@@ -115,7 +116,8 @@ var config = {
                 'vendor/bower_components/angular-tooltips/dist/angular-tooltips.js',
                 'vendor/bower_components/angular-bootstrap-colorpicker/js/bootstrap-colorpicker-module.js',
                 'vendor/bower_components/angular-bootstrap-datetimepicker/src/js/datetimepicker.js',
-                'vendor/bower_components/angular-date-time-input/src/dateTimeInput.js'
+                'vendor/bower_components/angular-date-time-input/src/dateTimeInput.js',
+                'vendor/bower_components/angular-hotkeys/build/hotkeys.js'
             ],
             css: [
                 'vendor/bower_components/font-awesome/css/font-awesome.min.css'

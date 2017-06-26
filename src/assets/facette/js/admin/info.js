@@ -1,4 +1,4 @@
-app.controller('AdminInfoController', function($rootScope, $scope, info) {
+app.controller('AdminInfoController', function($rootScope, $scope, globalHotkeys, info) {
     // Set page title
     $rootScope.setTitle(['label.info', 'label.admin_panel']);
 
@@ -7,4 +7,7 @@ app.controller('AdminInfoController', function($rootScope, $scope, info) {
     info.get(null, function(data) {
         $scope.info = data;
     });
+
+    // Register global hotkeys
+    globalHotkeys.register($scope);
 });

@@ -3,6 +3,7 @@ var app = angular.module('facette', [
     'angular-page-visibility',
     'as.sortable',
     'bw.paging',
+    'cfp.hotkeys',
     'facette.ui.autocomplete',
     'facette.ui.color',
     'facette.ui.column',

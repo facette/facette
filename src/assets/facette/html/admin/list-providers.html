@@ -9,7 +9,7 @@
 			<menuitem href="{{ ::baseURL }}admin/providers/add" icon="plus" info="{{ 'label.providers_add' | translate }}" type="button" ng-if="!readOnly"></menuitem>
 		</menu>
 
-		<search name="search" placeholder="{{ 'label.providers_search' | translate }}" ng-model="search"></search>
+		<search id="search" placeholder="{{ 'label.providers_search' | translate }}" ng-model="search"></search>
 
 		<ng-include src="'templates/common/extra-menu.html'" ng-include-replace="true"></ng-include>
 	</header>
