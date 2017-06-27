@@ -23,8 +23,17 @@ chart.fn.drawArea = function() {
         $$.areaGroup.remove();
     }
 
+    // Draw area clip path
+    var rectWidth = $$.width - $$.yAxisGroup.node().getBBox().width - 2 * $$.config.padding,
+        rectHeight = $$.height - ($$.titleGroup ? $$.titleGroup.node().getBBox().height : 0) - 2 * $$.config.padding;
+
+    $$.areaClip = $$.mainGroup.append('clipPath').attr('id', 'area-clip').append('rect')
+        .attr('width', rectWidth)
+        .attr('height', rectHeight);
+
     $$.areaGroup = $$.mainGroup.insert('g', 'g.chart-axis')
         .attr('class', 'chart-area')
+        .attr("clip-path", "url(#area-clip)")
         .attr('transform', 'translate(' + areaLeft + ',' + areaTop + ')');
 
     // Draw Y axis grid lines
