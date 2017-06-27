@@ -175,6 +175,19 @@ angular.module('facette.ui.graph', [])
             }
         };
 
+        // Set Y-Axis extremes and centering
+        if ($scope.data.options.yaxis_min) {
+            chartCfg.axis.y.min = $scope.data.options.yaxis_min;
+        }
+
+        if ($scope.data.options.yaxis_max) {
+            chartCfg.axis.y.max = $scope.data.options.yaxis_max;
+        }
+
+        if (typeof $scope.data.options.yaxis_center == 'boolean') {
+            chartCfg.axis.y.center = $scope.data.options.yaxis_center;
+        }
+
         // Define unit formatter
         switch ($scope.data.options.yaxis_unit) {
         case graphYAxisUnitMetric:

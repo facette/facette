@@ -103,8 +103,8 @@ chart.fn.getDomain = function(axis, dataKey) {
         max = d3.max($$.dataSet, function(a) { return d3.max(a, function(b) { return b[dataKey]; }); });
     }
 
-    // Center Y-axis zero if negative values are present
-    if (axis == 'y' && min < 0) {
+    // Center Y-Axis zero if negative values are present
+    if (axis == 'y' && $$.config.axis.y.center && min < 0) {
         max = Math.max(max, Math.abs(min));
         min = max * -1;
     }

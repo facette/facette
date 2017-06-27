@@ -206,23 +206,52 @@
 				</column>
 
 				<column class="main" ng-if="optionsEdit">
-					<h2>{{ 'label.graphs_options' | translate }}</h2>
-
 					<form ng-entersubmit="setOptions()">
-						<label>{{ 'label.range' | translate }}</label>
-						<input class="small" type="text" placeholder="-1h" ng-model="options.range">
+						<h2>{{ 'label.graphs_options' | translate }}</h2>
 
-						<label>{{ 'label.graphs_sample' | translate }}</label>
-						<input class="small" type="number" placeholder="400" ng-model="options.sample">
+						<columns>
+							<column>
+								<label>{{ 'label.range' | translate }}</label>
+								<input type="text" placeholder="-1h" ng-model="options.range">
+							</column>
 
-						<label>{{ 'label.graphs_constants' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
-						<input class="small" type="text" ng-list=", " ng-model="options.constants">
+							<column>
+								<label>{{ 'label.graphs_sample' | translate }}</label>
+								<input type="number" placeholder="400" ng-model="options.sample">
+							</column>
+						</columns>
 
-						<label>{{ 'label.graphs_percentiles' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
-						<input class="small" type="text" ng-list=", " ng-model="options.percentiles">
+						<columns>
+							<column>
+								<label>{{ 'label.graphs_constants' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
+								<input type="text" ng-list=", " ng-model="options.constants">
+							</column>
+
+							<column>
+								<label>{{ 'label.graphs_percentiles' | translate }} <span class="note">{{ 'label.separator_comma' | translate }}</span></label>
+								<input type="text" ng-list=", " ng-model="options.percentiles">
+							</column>
+						</columns>
 
 						<label>{{ 'label.refresh_interval' | translate }} <span class="note">{{ 'label.refresh_interval_unit' | translate }}</span></label>
 						<input class="small" type="number" ng-model="options.refresh_interval">
+
+						<h2>{{ 'label.graphs_yaxis_options' | translate }}</h2>
+
+						<columns>
+							<column>
+								<label>{{ 'label.graphs_yaxis_min' | translate }}</label>
+								<input type="number" step="any" placeholder="auto" ng-model="options.yaxis_min">
+							</column>
+
+							<column>
+								<label>{{ 'label.graphs_yaxis_max' | translate }}</label>
+								<input type="number" step="any" placeholder="auto" ng-model="options.yaxis_max">
+							</column>
+						</columns>
+
+						<input id="yaxis-center" type="checkbox" tabindex="0" ng-model="options.yaxis_center">
+						<label for="yaxis-center">{{ 'label.graphs_yaxis_center' | translate }}</label>
 					</form>
 				</column>
 			</columns>

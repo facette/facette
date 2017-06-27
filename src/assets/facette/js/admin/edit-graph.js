@@ -160,6 +160,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
             options: {
                 type: graphTypeArea,
                 stack_mode: graphStackModeNone,
+                yaxis_center: true,
                 yaxis_unit: graphYAxisUnitFixed
             }
         }, input);
@@ -598,6 +599,10 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
 
     // Register watchers
     adminEdit.watch($scope, function(newValue, oldValue) {
+        if (angular.equals(newValue, oldValue)) {
+            return;
+        }
+
         if ($scope.step == 2 && !$scope.linked) {
             updateTemplate();
             updateItemDef();

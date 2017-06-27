@@ -41,6 +41,7 @@ chart.fn.getDefaultConfig = function() {
                 }
             },
             y: {
+                center: true,
                 label: null,
                 max: null,
                 min: null,
