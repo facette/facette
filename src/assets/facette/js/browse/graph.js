@@ -117,6 +117,10 @@ app.controller('BrowseGraphController', function($location, $rootScope, $routePa
 
             $scope.refreshInterval = parseInt(data.value, 10);
             $rootScope.$emit('ApplyGraphOptions', {refresh_interval: $scope.refreshInterval});
+
+            $location.skipReload()
+                .search('refresh', $scope.refreshInterval || null)
+                .replace();
         });
     };
 
