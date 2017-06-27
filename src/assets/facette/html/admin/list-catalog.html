@@ -5,7 +5,7 @@
 		<h1>{{ 'label.admin_panel' | translate }} – {{ 'label.' + section | translate }}</h1>
 
 		<menu class="main expand">
-			<menuitem icon="refresh" info="{{ 'label.list_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
+			<menuitem icon="refresh{{ refreshing ? ' spin 3x' : '' }}" info="{{ 'label.list_refresh' | translate }}" type="button" ng-click="refresh()"></menuitem>
 		</menu>
 
 		<search id="search" placeholder="{{ 'label.' + section + '_search' | translate }}" ng-model="form.search"></search>

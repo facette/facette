@@ -3,6 +3,7 @@ app.controller('AdminListController', function($location, $q, $rootScope, $route
 
     $scope.section = $route.current.$$route._type;
     $scope.state = stateLoading;
+    $scope.refreshing = false;
     $scope.items = [];
     $scope.templates = ($scope.section == 'collections' || $scope.section == 'graphs') &&
         $routeParams.templates !== undefined;
@@ -61,12 +62,18 @@ app.controller('AdminListController', function($location, $q, $rootScope, $route
             }
         }
 
+        if ($scope.state != stateLoading) {
+            $scope.refreshing = true;
+        }
+
         factory.list(query, function(data, headers) {
             $scope.items = data;
             $scope.total = parseInt(headers('X-Total-Records'), 10);
             $scope.state = stateOK;
+            $timeout(function() { $scope.refreshing = false; }, 500);
         }, function() {
             $scope.state = stateError;
+            $scope.refreshing = false;
         });
     };
 

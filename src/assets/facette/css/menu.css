@@ -28,6 +28,10 @@
 	vertical-align: middle;
 }
 
+.menuitem .fa-spin {
+	animation: fa-spin 1s infinite linear;
+}
+
 .menu.dropdown .menuitem > .subcontent::before {
 	border: 0.65rem solid transparent;
 	border-bottom-color: #fff;
