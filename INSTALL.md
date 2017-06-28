@@ -35,7 +35,7 @@ installation directory set the `PREFIX` variable:
 Configuration
 -------------
 
-Once installed, follow the configuration steps described here: http://docs.facette.io/configuration/
+Once installed, follow the configuration steps described here: http://docs.facette.io/latest/configuration/
 
 Additional Targets
 ------------------
