@@ -17,7 +17,7 @@ backend:
 
   ### SQLite
   driver: sqlite
-  path: data.db
+  path: /var/lib/facette/data.db
 
   ### PostgreSQL
   #driver: pgsql
@@ -37,7 +37,7 @@ backend:
 
 frontend:
   enabled: true
-  assets_dir: assets
+  assets_dir: /usr/local/share/facette/assets
 
 hide_build_details: false
 
