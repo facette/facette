@@ -26,7 +26,19 @@
 	</tabset>
 
 	<section>
-		<h1>{{ 'label.' + section + '_list' | translate }} <span class="count" ng-if="total">{{ total }}</span></h1>
+		<div class="space">
+			<h1 class="main">{{ 'label.' + section + '_list' | translate }} <span class="count" ng-if="total">{{ total }}</span></h1>
+
+			<menu class="dropdown">
+				<menuitem class="left reverse" icon="sort" label="{{ 'label.sort' | translate }}" type="button">
+					<menu class="icons">
+						<menuitem icon="{{ sort === null ? 'check' : '' }}" label="{{ 'label.sort_type_name' | translate }}" type="button" ng-click="setSort(null)"></menuitem>
+						<menuitem icon="{{ sort == '-modified' ? 'check' : '' }}" label="{{ 'label.sort_type_newest' | translate }}" type="button" ng-click="setSort('-modified')"></menuitem>
+						<menuitem icon="{{ sort == 'modified' ? 'check' : '' }}" label="{{ 'label.sort_type_oldest' | translate }}" type="button" ng-click="setSort('modified')"></menuitem>
+					</menu>
+				</menuitem>
+			</menu>
+		</div>
 
 		<message icon="clock-o" type="placeholder" ng-show="state == stateLoading">{{ 'mesg.wait' | translate }}</message>
 		<message icon="info-circle" type="info" ng-show="state == stateOK && !form.search && items.length === 0">{{ 'mesg.' + section + '_empty' | translate }}</message>

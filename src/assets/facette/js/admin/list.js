@@ -12,6 +12,7 @@ app.controller('AdminListController', function($location, $q, $rootScope, $route
         search: $routeParams.search || ''
     };
 
+    $scope.sort = $routeParams.sort || null;
     $scope.page = 1;
     $scope.limit = pagingLimit;
 
@@ -35,6 +36,10 @@ app.controller('AdminListController', function($location, $q, $rootScope, $route
             offset: ($scope.page - 1) * $scope.limit,
             limit: $scope.limit
         };
+
+        if ($scope.sort) {
+            query.sort = $scope.sort;
+        }
 
         if ($scope.form.search) {
             var parts = [];
@@ -130,6 +135,13 @@ app.controller('AdminListController', function($location, $q, $rootScope, $route
             entry.refreshing = true;
             $timeout(function() { entry.refreshing = false; }, 3000);
         });
+    };
+
+    $scope.setSort = function(value) {
+        $location.skipReload().search('sort', value || null).replace();
+
+        $scope.sort = value;
+        $scope.refresh();
     };
 
     // Register watchers

@@ -102,7 +102,7 @@
 
 .menuitem > .subcontent .menuitem.button .fa {
 	display: inline-block;
-	margin-right: 0.5rem;
+	width: 1.75rem;
 }
 
 .menuitem > .subcontent .menuitem.button > .content {
@@ -118,7 +118,7 @@
 }
 
 .menuitem > .subcontent .menu.icons > .menuitem.button > .content > .label:first-child {
-	margin-left: 2rem;
+	margin-left: 1.75rem;
 }
 
 .menuitem > .subcontent .menuitem.separator {
@@ -142,4 +142,33 @@
 .menuitem.button > .content {
 	display: block;
 	text-align: center;
+}
+
+article section .space > .menu {
+	height: 1.5rem;
+}
+
+article section .space > .menu > .menuitem > .content {
+	align-items: center;
+	border-radius: 0.2rem;
+	cursor: pointer;
+	display: flex;
+	padding: 0 0.5rem;
+}
+
+article section .space > .menu > .menuitem > .content > .fa {
+	width: 1.5rem;
+}
+
+article section .space > .menu > .menuitem.reverse > .content {
+	flex-direction: row-reverse;
+}
+
+article section .space > .menu > .menuitem:hover > .content,
+article section .space > .menu > .menuitem.focus > .content {
+	background-color: #ecf0f1;
+}
+
+article section .space > .menu > .menuitem > .subcontent::before {
+	content: none;
 }

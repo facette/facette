@@ -271,6 +271,14 @@ article section .search .autocomplete-row {
 	line-height: 2rem;
 }
 
+article section .space {
+	display: flex;
+}
+
+article section .space .main {
+	flex: 1;
+}
+
 article .graph {
 	margin-bottom: 2rem;
 }
