@@ -110,6 +110,10 @@ func (g *Graph) Expand(attrs maputil.Map) error {
 		}
 
 		// Expand template and applies current graph's attributes
+		if g.Link == nil {
+			return ErrUnresolvableItem
+		}
+
 		tmpl := g.Link.Clone()
 		tmpl.ID = g.ID
 		tmpl.Attributes.Merge(g.Attributes, true)
