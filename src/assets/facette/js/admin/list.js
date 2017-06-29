@@ -170,12 +170,10 @@ app.controller('AdminListController', function($location, $q, $rootScope, $route
     $scope.refresh();
 
     // Register scope-specific and global hotkeys
-    $translate('label.' + $scope.section + '_search').then(function(data) {
-        hotkeys.bindTo($scope).add({
-            combo: '/',
-            description: data,
-            callback: function() { angular.element('#search input').focus(); }
-        });
+    hotkeys.bindTo($scope).add({
+        combo: '/',
+        description: 'label.' + $scope.section + '_search',
+        callback: function() { angular.element('#search input').focus(); }
     });
 
     globalHotkeys.register($scope);

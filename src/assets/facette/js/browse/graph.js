@@ -1,5 +1,5 @@
-app.controller('BrowseGraphController', function($location, $rootScope, $routeParams, $scope, $timeout, $translate,
-    $window, browseCollection, bulk, globalHotkeys, hotkeys, library, storage, timeRange) {
+app.controller('BrowseGraphController', function($location, $rootScope, $routeParams, $scope, $timeout, $window,
+    browseCollection, bulk, globalHotkeys, hotkeys, library, storage, timeRange) {
 
     $scope.section = $routeParams.section;
     $scope.id = $routeParams.id;
@@ -316,12 +316,10 @@ app.controller('BrowseGraphController', function($location, $rootScope, $routePa
     browseCollection.injectTree($scope);
 
     // Register scope-specific and global hotkeys
-    $translate('label.graphs_filter').then(function(data) {
-        hotkeys.bindTo($scope).add({
-            combo: '/',
-            description: data,
-            callback: function() { angular.element('#filter input').focus(); }
-        });
+    hotkeys.bindTo($scope).add({
+        combo: '/',
+        description: 'label.graphs_filter',
+        callback: function() { angular.element('#filter input').focus(); }
     });
 
     globalHotkeys.register($scope);

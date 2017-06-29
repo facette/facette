@@ -28,16 +28,9 @@ app.factory('globalHotkeys', function($location, $translate, hotkeys) {
 
     return {
         register: function(scope) {
-            var labels = [];
-            angular.forEach(combos, function(attrs) {
-                labels.push(attrs.description);
-            });
-
-            $translate(labels).then(function(data) {
-                var hk = hotkeys.bindTo(scope);
-                angular.forEach(combos, function(attrs, combo) {
-                    hk.add({combo: combo, description: data[attrs.description], callback: handleGotoHotkey});
-                });
+            var hk = hotkeys.bindTo(scope);
+            angular.forEach(combos, function(attrs, combo) {
+                hk.add({combo: combo, description: attrs.description, callback: handleGotoHotkey});
             });
         }
     };

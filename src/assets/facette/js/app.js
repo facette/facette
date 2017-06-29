@@ -32,7 +32,7 @@ var app = angular.module('facette', [
 ]);
 
 app.config(function($httpProvider, $locationProvider, $resourceProvider, $routeProvider, $translateProvider,
-    treeConfig) {
+    hotkeysProvider, treeConfig) {
 
     // Set HTML5-styled URLs
     $locationProvider
@@ -166,7 +166,7 @@ app.config(function($httpProvider, $locationProvider, $resourceProvider, $routeP
     // Don't strip trailing slash on requests
     $resourceProvider.defaults.stripTrailingSlashes = false;
 
-    // Set up translation
+    // Setup translation
     var locale = localStorage.getItem('locale');
 
     $translateProvider
@@ -188,7 +188,26 @@ app.config(function($httpProvider, $locationProvider, $resourceProvider, $routeP
         $translateProvider.determinePreferredLanguage();
     }
 
-    // Set up tree defaults
+    // Setup hotkeys cheatsheet template
+    hotkeysProvider.template = '<div class="hotkeys-container fade" ng-class="{in: helpVisible}" ' +
+        'style="display: none;"><div class="hotkeys">'  +
+            '<div class="hotkeys-header">' +
+                '<h4 class="hotkeys-title">{{ \'label.keyboard_shortcuts\' | translate }}</h4>' +
+                '<div class="hotkeys-close" tabindex="0" ng-click="toggleCheatSheet()">' +
+                    '<span class="fa fa-times"></span>' +
+                '</div>' +
+            '</div>' +
+            '<div class="hotkeys-list">' +
+                '<div class="hotkeys-entry" ng-repeat="hotkey in hotkeys | filter:{ description: \'!$$undefined$$\' }">' +
+                    '<div class="hotkeys-keys">' +
+                        '<span ng-repeat="k in hotkey.format() track by $index" class="hotkeys-key">{{ k }}</span>' +
+                    '</div>' +
+                    '<div class="hotkeys-text">{{ hotkey.description | translate }}</div>' +
+                '</div>' +
+            '</div>' +
+        '</div></div>';
+
+    // Setup tree defaults
     treeConfig.defaultCollapsed = true;
 });
 
