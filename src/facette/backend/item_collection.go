@@ -114,6 +114,10 @@ func (c *Collection) Expand(attrs maputil.Map) error {
 		}
 
 		// Expand template and applies current collection's attributes and options
+		if c.Link == nil {
+			return ErrUnresolvableItem
+		}
+
 		tmpl := c.Link.Clone()
 		tmpl.ID = c.ID
 		tmpl.Attributes.Merge(c.Attributes, true)
