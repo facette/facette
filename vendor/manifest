@@ -34,7 +34,7 @@
 		{
 			"importpath": "github.com/facette/maputil",
 			"repository": "https://github.com/facette/maputil",
-			"revision": "9852c5c3aee0521ac58a093851a456f794fc55ac",
+			"revision": "58b8de6f03934b4b5c19d9189cc1cae22b764a54",
 			"branch": "master"
 		},
 		{
