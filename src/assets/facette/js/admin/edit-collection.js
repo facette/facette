@@ -158,7 +158,7 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
         updateTemplate();
     };
 
-    $scope.selectGraph = function(data) {
+    $scope.selectGraph = function(e, data) {
         angular.extend($scope.graph, data);
     };
 
@@ -281,7 +281,7 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
         $scope.editAttrs(null);
     };
 
-    $scope.selectParent = function(data) {
+    $scope.selectParent = function(e, data) {
         $scope.item.parent = data.id;
     };
 
@@ -290,7 +290,7 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
         $scope.$applyAsync(function() { angular.element('#parent input').val(''); });
     };
 
-    $scope.selectTemplate = function(data) {
+    $scope.selectTemplate = function(e, data) {
         $scope.item.link = data;
     };
 

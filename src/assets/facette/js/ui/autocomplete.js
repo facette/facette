@@ -33,7 +33,7 @@ angular.module('facette.ui.autocomplete', [])
 
         if (e.type == 'blur') {
             if ($scope.allowOverride && !$scope.selected) {
-                $scope.select({label: e.target.value, value: e.target.value});
+                $scope.select(e, {label: e.target.value, value: e.target.value});
             } else {
                 delete $scope.entries;
             }
@@ -44,9 +44,9 @@ angular.module('facette.ui.autocomplete', [])
         switch (e.which) {
         case 13: // <Enter>
             if ($scope.entries !== undefined) {
-                $scope.select($scope.entries[$scope.index]);
+                $scope.select(e, $scope.entries[$scope.index]);
             } else if ($scope.allowOverride && !$scope.selected) {
-                $scope.select({label: e.target.value, value: e.target.value});
+                $scope.select(e, {label: e.target.value, value: e.target.value});
             }
 
             break;
@@ -78,13 +78,13 @@ angular.module('facette.ui.autocomplete', [])
         }
     };
 
-    $scope.select = function(entry) {
+    $scope.select = function(e, data) {
         unwatchValue();
-        $scope.value = entry.label;
+        $scope.value = data.label;
         watchValue();
 
         if (angular.isDefined($scope.onSelect)) {
-            $scope.onSelect(entry.value);
+            $scope.onSelect(e, data.value);
         }
 
         $scope.selected = true;
