@@ -11,7 +11,7 @@ app.controller('AdminEditGroupController', function($q, $route, $routeParams, $s
     $scope.save = function() { adminEdit.save($scope); };
     $scope.remove = function(list, entry) { adminEdit.remove($scope, list, entry); };
 
-    $scope.selectPattern = function(data) {
+    $scope.selectPattern = function(e, data) {
         angular.extend($scope.pattern, {
             type: $scope.patternTypes[0],
             value: data

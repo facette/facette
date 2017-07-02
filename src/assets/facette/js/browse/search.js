@@ -33,7 +33,7 @@ app.controller('BrowseSearchController', function($location, $q, $rootScope, $sc
         return defer.promise;
     };
 
-    $scope.searchSelect = function(data) {
+    $scope.searchSelect = function(e, data) {
         $location.path('browse/' + data.type + '/' + data.id);
     };
 

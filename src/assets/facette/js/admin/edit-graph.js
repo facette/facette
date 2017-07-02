@@ -222,12 +222,16 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
         });
     };
 
-    $scope.selectSeries = function(data) {
+    $scope.selectSeries = function(e, data) {
         if (typeof data == 'string') {
             $scope.series.entries[$scope.seriesCurrent][this.id] = data;
         } else {
             $scope.groupNames[data.id] = data.name;
             $scope.series.entries[$scope.seriesCurrent][this.id] = groupPrefix + data.id;
+        }
+
+        if (e.type == 'blur') {
+            return;
         }
 
         var next;
@@ -249,7 +253,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
         $scope.$applyAsync(function() { angular.element(next).focus(); });
     };
 
-    $scope.selectTemplate = function(data) {
+    $scope.selectTemplate = function(e, data) {
         $scope.item.link = data;
     };
 
