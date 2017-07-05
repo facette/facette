@@ -2,7 +2,7 @@ FROM debian:jessie-slim
  
 MAINTAINER Development Team <dev@facette.io>
  
-ENV GO_VERSION=1.8.3 NODE_VERSION=7.10.0 PREFIX=/usr
+ENV GO_VERSION=1.8.3 NODE_VERSION=7.10.0 PREFIX=/usr BUILD_TAGS=builtin_assets
  
 RUN echo "deb http://deb.debian.org/debian jessie-backports main" >>/etc/apt/sources.list && \
     apt-get update && \
