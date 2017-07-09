@@ -17,10 +17,10 @@
 	<section>
 		<h1>{{ 'label.providers_list' | translate }} <span class="count" ng-if="total">{{ total }}</span></h1>
 
-		<message icon="clock-o" type="placeholder" ng-show="state == stateLoading">{{ 'mesg.wait' | translate }}</message>
-		<message icon="info-circle" type="info" ng-show="state == stateOK && !search && items.length === 0">{{ 'mesg.items_empty' | translate }}</message>
-		<message icon="info-circle" type="warning" ng-show="state == stateOK && search && items.length === 0">{{ 'mesg.no_search_match' | translate }} <a href="" ng-click="reset()">{{ 'label.reset' | translate }}</a></message>
-		<message icon="times-circle" type="error" ng-show="state == stateError">{{ 'mesg.fetch_error' | translate }} <a href="" ng-click="refresh()">{{ 'label.retry' | translate }}</a></message>
+		<message icon="clock-o" type="placeholder" ng-if="state == stateLoading">{{ 'mesg.wait' | translate }}</message>
+		<message icon="info-circle" type="info" ng-if="state == stateOK && !search && items.length === 0">{{ 'mesg.items_empty' | translate }}</message>
+		<message icon="info-circle" type="warning" ng-if="state == stateOK && search && items.length === 0">{{ 'mesg.no_search_match' | translate }} <a href="" ng-click="reset()">{{ 'label.reset' | translate }}</a></message>
+		<message icon="times-circle" type="error" ng-if="state == stateError">{{ 'mesg.fetch_error' | translate }} <a href="" ng-click="refresh()">{{ 'label.retry' | translate }}</a></message>
 
 		<list ng-show="state == stateOK && items.length > 0">
 			<listrow href="{{ !readOnly ? baseURL + 'admin/providers/' + i.id : '' }}" ng-class="{disabled: !i.enabled}" ng-repeat="i in items">
