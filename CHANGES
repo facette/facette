@@ -1,0 +1,152 @@
+CHANGES
+=======
+
+0.4.0alpha2 (2017-07-09)
+------------------------
+
+ * Prevent panic when link resolution fails
+ * Fix providers list search filter
+ * Documentation update
+ * UI fixes and improvements
+
+0.4.0alpha1 (2017-06-21)
+------------------------
+
+ * Front-end rewritten from scratch
+ * Back-end rewritten from scratch
+ * SQL Database-backed storage (MySQL, PostgreSQL, SQLite)
+ * YAML-based configuration file format
+ * Collection templates
+ * Collection/graph aliasing (permalinks)
+ * Variable columns collection graphs display
+ * Support for API batch queries
+ * Built-in UI files
+ * UI localization
+ * Performance improvements
+
+0.3.0 (2015-07-07)
+------------------
+
+ * Add natural sorting for API results
+ * Add nginx and apache2 examples in Debian package
+ * Add links to graph edition in collections setup
+ * Add collection tree state save support
+ * Improve rrd file data point handling
+ * Make graphs in collections enabled by default
+ * Update KairosDB API version check to support > 0.9.5
+ * Fix issue with time range global spread
+ * Fix time range reset button behavior
+ * Fix max value issue when values are negative
+ * Fix event triggering browser compatibility issue
+ * Fix graph template field parsing issues
+ * Fix issue with URL prefix check in group listing API calls
+ * Fix duplicated metrics name when expanding source groups
+ * Fix state loss on graph automatic refresh
+ * Fix completion issue with single entries in metric and source groups
+ * Various bug fixes
+ * UI improvements
+
+0.3.0rc1 (2015-03-22)
+---------------------
+
+ * Add consolidation function choice support for operation groups
+ * Add global refresh interval/time range/legends togglers in browse UI
+ * Add graph templates support
+ * Add missing close calls on HTTP responses bodies in connectors
+ * Add new KairosDB connector
+ * Add SSL/TLS support for InfluxDB connector
+ * Add support of consolidation functions in RRD connector
+ * Add top-level collections retrieval in library API
+ * Add library items ID display in Administration Panel
+ * Improve filesystem walking times
+ * Improve HTTP routes handling
+ * Make collection entries title optional
+ * Move plots API URL away from library into a dedicated route
+ * Prevent loop when using Facette connectors relying on each others
+ * Update connectors example configurations
+ * Update thirdparty packages
+ * Fix crash when cloning collection
+ * Fix parsing issue when multiple percentiles are provided
+ * Fix plot lines z-index issue
+ * Fix quoted strings modifier syntax
+ * Various minor bug fixes
+ * UI improvements
+
+0.2.3 (2014-12-15)
+------------------
+
+ * Fix issue in InfluxDB connector with unescaped series names
+ * Fix missing titles in collection graphs listing
+ * Fix relations update with collections parents
+ * Fix issue with graph draw queue failing to propagate time spans
+ * Fix InfluxDB 1.8 client result backend support
+
+0.2.2 (2014-10-16)
+------------------
+
+ * Fix metric name issue when cloning graph
+ * Fix operation groups custom colors management issue
+ * Fix buggy globbing in source/metric groups
+ * UI improvements
+
+0.2.1 (2014-10-13)
+------------------
+
+ * Add support for influxdb >= 0.8
+ * Fix issues with unitialized autofill option
+ * Fix bad legend rendering in embeddable mode
+ * Fix missing facette connector build in Makefile
+ * Fix broken facette connector following last code refactoring
+ * Fix bad filter match separator
+ * Fix percentiles parsing
+ * Fix missing constants draw
+ * Fix various graph/series options issues
+ * Prevent panic when offset or limit is negative
+
+0.2.0 (2014-09-10)
+------------------
+
+ * Add InfluxDB connector (experimental)
+ * Add UNIX socket support for backend
+ * Add `sieve' provider filter type
+ * Implement internal series operations handling
+ * Add read-only mode
+ * Add embeddable graphs support
+ * Add multiple fixed graph plot lines support
+ * Implement series auto-naming
+ * Make graph legends foldable
+ * Add per stack series summing
+ * Add graphs visibility toggling in collections
+ * Add collection graphs auto-refresh support
+ * Add Docker image support
+ * Add OpenSearch support
+ * Add HiDPI displays support
+ * Make base server settings optional
+ * Remove refresh API calls
+ * Updated provider filter rules format
+ * Various bug fixes
+ * UI improvments
+
+0.1.2 (2014-08-01)
+------------------
+
+ * Fix crash expanding group with unknown source
+ * Fix crash while reading RRD files with numeric DS names
+ * Fix missing URL escaping in Graphite connector
+ * Fix some UI issues with graphs legends
+
+0.1.1 (2014-07-12)
+------------------
+
+ * Fix bug occurring at provider shutdown
+ * Fix UI glitches
+ * Fix missing URL prefixes on static assets
+ * Fix JS console errors caused by duplicate names check
+ * Fix scale precision issue (#65)
+ * Makefile improvements
+ * Minor bugfixes
+
+0.1.0 (2014-07-01)
+------------------
+
+ * Initial public release
