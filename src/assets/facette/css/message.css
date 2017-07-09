@@ -3,7 +3,7 @@
 	padding: 0.5rem 0.75rem;
 }
 
-section .message:first-child {
+section > .message:first-of-type {
 	margin-top: 0;
 }
 
