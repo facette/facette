@@ -17,17 +17,14 @@ RUN echo "deb http://deb.debian.org/debian jessie-backports main" >>/etc/apt/sou
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
  
-ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/usr/local/node/bin
  
 RUN curl -s -L https://storage.googleapis.com/golang/go${GO_VERSION}.linux-amd64.tar.gz | \
-    tar -C /usr/local -xvzf -
- 
-ENV PATH=${PATH}:/usr/local/go/bin
+    tar -C /usr/local -xvzf - && \
+    go get -u github.com/jteeuwen/go-bindata/... && cp ~/go/bin/* /usr/local/bin
  
 RUN curl -s -L https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz | \
     tar -C /usr/local --transform "flags=r;s/^node-v${NODE_VERSION}-linux-x64/node/" -xvJf -
- 
-ENV PATH=${PATH}:/usr/local/node/bin
  
 COPY . /facette
 
