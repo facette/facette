@@ -15,4 +15,4 @@ override_dh_auto_test:
 endif
 
 override_dh_auto_install:
-	$(MAKE) PREFIX=$(CURDIR)/debian/tmp/usr install
+	$(MAKE) PREFIX="$(CURDIR)/debian/tmp/usr" BUILD_TAGS="build_docs" install
