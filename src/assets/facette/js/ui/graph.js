@@ -448,16 +448,15 @@ angular.module('facette.ui.graph', [])
     $scope.moveStep = function(forward) {
         forward = typeof forward == 'boolean' ? forward : false;
 
-        var startTime = moment($scope.data.start),
-            delta = moment($scope.data.end).diff(startTime) / 4;
+        var endTime = moment($scope.data.end),
+            delta = moment($scope.data.start).diff(endTime) / 4;
 
-        if (!forward) {
+        if (forward) {
             delta *= -1;
         }
 
         applyOptions({
-            time: moment(startTime).add(delta).format(timeFormatRFC3339),
-            range: ($scope.options.range || defaultTimeRange).replace(/^-/, '')
+            time: moment(endTime).add(delta).format(timeFormatRFC3339)
         });
     };
 

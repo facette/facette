@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"strings"
 
-	"gopkg.in/yaml.v2"
+	"facette/timerange"
 
 	"github.com/facette/maputil"
+	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -17,6 +19,7 @@ const (
 	defaultLogLevel          = "info"
 	defaultFrontendEnabled   = true
 	defaultFrontendAssetsDir = "assets"
+	defaultTimeRange         = "-1h"
 	defaultHideBuildDetails  = false
 )
 
@@ -36,6 +39,7 @@ type config struct {
 	LogLevel         string         `yaml:"log_level"`
 	Frontend         frontendConfig `yaml:"frontend"`
 	Backend          *maputil.Map   `yaml:"backend"`
+	DefaultTimeRange string         `yaml:"default_time_range"`
 	HideBuildDetails bool           `yaml:"hide_build_details"`
 	ReadOnly         bool           `yaml:"read_only"`
 }
@@ -52,6 +56,7 @@ func initConfig(path string) (*config, error) {
 				Enabled:   defaultFrontendEnabled,
 				AssetsDir: defaultFrontendAssetsDir,
 			},
+			DefaultTimeRange: defaultTimeRange,
 			HideBuildDetails: defaultHideBuildDetails,
 		}
 	)
@@ -69,6 +74,11 @@ func initConfig(path string) (*config, error) {
 
 	config.RootPath = strings.TrimSuffix(config.RootPath, "/")
 	config.Frontend.AssetsDir = strings.TrimSuffix(config.Frontend.AssetsDir, "/")
+
+	// Check for settings validity
+	if !timerange.IsValid(config.DefaultTimeRange) {
+		return nil, fmt.Errorf("invalid default time range %q", config.DefaultTimeRange)
+	}
 
 	return &config, nil
 }

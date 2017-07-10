@@ -16,10 +16,6 @@ import (
 	"github.com/hashicorp/go-uuid"
 )
 
-const (
-	defaultTimeRange = "-1h"
-)
-
 type pointQuery struct {
 	query     series.Query
 	queryMap  [][2]int
@@ -164,7 +160,7 @@ func (w *httpWorker) httpHandleSeriesPoints(rw http.ResponseWriter, r *http.Requ
 			if value, ok := req.Graph.Options["range"].(string); ok {
 				req.Range = value
 			} else {
-				req.Range = defaultTimeRange
+				req.Range = w.service.config.DefaultTimeRange
 			}
 		}
 

@@ -62,8 +62,6 @@ var filterActions = [
         '1y'
     ],
 
-    defaultTimeRange = '-1h',
-
     graphSummaryBase = [
         'min',
         'avg',
