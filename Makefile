@@ -89,11 +89,13 @@ build-assets: node_modules
 		$(call mesg_ok) || $(call mesg_fail)
 
 build-docs:
+ifneq ($(filter build_docs,$(BUILD_TAGS)),)
 	@for man in $(MAN_LIST); do \
 		$(call mesg_start,docs,Generating $$man manual page...); \
 		install -d -m 0755 $(BUILD_DIR)/man && $(PANDOC) $(PANDOC_ARGS) docs/man/$$man.md >$(BUILD_DIR)/man/$$man && \
 			$(call mesg_ok) || $(call mesg_fail); \
 	done
+endif
 
 test: test-bin
 
