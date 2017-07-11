@@ -1,15 +1,14 @@
 <tabset>
-	<tab active="groupEdit" label="{{ 'label.group' | translate }}" ng-click="switchEdit(true, null)" ng-if="seriesTotal > 1 || groupItem.series[0].expansion !== undefined"></tab>
+	<tab active="groupEdit" label="{{ 'label.group' | translate }}" ng-click="switchEdit(true, null)"></tab>
 	<tab active="!groupEdit" label="{{ 'label.series_paging' | translate:{current: seriesCurrent + 1, total: seriesTotal} }}" ng-click="switchEdit(false, null)"></tab>
 </tabset>
 
 <form>
-	<div class="formblock" ng-if="groupEdit && (seriesTotal > 1 || groupItem.series[0].expansion !== undefined)">
+	<div class="formblock" ng-if="groupEdit">
 		<columns>
 			<column class="main">
 				<label>{{ 'label.name' | translate }}</label>
-				<input type="text" ng-model="groupItem.name" ng-if="seriesTotal > 1">
-				<input type="text" ng-model="groupItem.series[seriesCurrent].name" ng-if="seriesTotal == 1">
+				<input type="text" ng-model="groupItem.name">
 			</column>
 
 			<column>
@@ -31,20 +30,18 @@
 			</ui-select-choices>
 		</ui-select>
 
-		<div ng-show="selectedOptions.group.operator !== groupOperators[0]">
-			<label>{{ 'label.series_consolidate' | translate }}</label>
-			<ui-select theme="selectize" ng-model="selectedOptions.group.consolidate">
-				<ui-select-match placeholder="{{ 'label.series_consolidate_select' | translate }}">
-					<span ng-bind="$select.selected.name"></span>
-				</ui-select-match>
-				<ui-select-choices repeat="c in (groupConsolidations | filter: $select.search)">
-					<span ng-bind="c.name"></span>
-				</ui-select-choices>
-			</ui-select>
+		<label>{{ 'label.series_consolidate' | translate }}</label>
+		<ui-select theme="selectize" ng-model="selectedOptions.group.consolidate">
+			<ui-select-match placeholder="{{ 'label.series_consolidate_select' | translate }}">
+				<span ng-bind="$select.selected.name"></span>
+			</ui-select-match>
+			<ui-select-choices repeat="c in (groupConsolidations | filter: $select.search)">
+				<span ng-bind="c.name"></span>
+			</ui-select-choices>
+		</ui-select>
 
-			<input id="interpolate" type="checkbox" tabindex="0" ng-model="groupItem.options.interpolate">
-			<label for="interpolate">{{ 'label.series_consolidate_interpolate' | translate }}</label>
-		</div>
+		<input id="interpolate" type="checkbox" tabindex="0" ng-model="groupItem.options.interpolate">
+		<label for="interpolate">{{ 'label.series_consolidate_interpolate' | translate }}</label>
 	</div>
 
 	<div class="formblock" ng-if="!groupEdit">
