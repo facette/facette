@@ -1,7 +1,7 @@
 <div class="autocomplete" ng-class="{focus: focus}">
 	<input autocomplete="off" type="search" ng-blur="handleFocus($event)" ng-focus="handleFocus($event)" ng-keydown="handleKey($event)" ng-model="value">
 	<ul class="autocomplete-dropdown" ng-show="entries && entries.length > 0">
-		<li class="autocomplete-row" ng-class="{active: index == $index}" ng-mousedown="$event.preventDefault()" ng-click="select(e)" ng-mouseenter="activate($index)" ng-repeat="e in entries">
+		<li class="autocomplete-row" ng-class="{active: index == $index}" ng-mousedown="$event.preventDefault()" ng-click="select($event, e)" ng-mouseenter="activate($index)" ng-repeat="e in entries">
 			<span class="label" ng-bind-html="highlight(e.label, value)"></span>
 			<span class="note" ng-if="e.note">{{ e.note }}</span>
 		</li>
