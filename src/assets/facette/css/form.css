@@ -112,11 +112,13 @@ input[type=radio] + label {
 	margin: 0 1rem 0 0;
 }
 
-.columns + input[type=checkbox] + label,
-.columns + input[type=radio] + label,
-.ui-select-container + input[type=checkbox] + label,
-.ui-select-container + input[type=radio] + label {
+.columns + .checkbox,
+.ui-select-container + .checkbox {
 	margin-top: 1rem;
+}
+
+.checkbox + .checkbox {
+	margin-top: 0.5rem;
 }
 
 input[type=checkbox] + label.empty {

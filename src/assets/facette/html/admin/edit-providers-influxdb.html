@@ -11,8 +11,10 @@
 		<input class="small" id="timeout" type="number" placeholder="10" ng-model="item.settings.timeout">
 
 		<label>{{ 'label.connectors_tls' | translate }}</label>
-		<input id="allow-insecure" type="checkbox" tabindex="0" ng-model="item.settings.allow_insecure_tls">
-		<label for="allow-insecure" tabindex="0">{{ 'label.connectors_allow_insecure' | translate }}</label>
+		<div class="checkbox">
+			<input id="allow-insecure" type="checkbox" tabindex="0" ng-model="item.settings.allow_insecure_tls">
+			<label for="allow-insecure" tabindex="0">{{ 'label.connectors_allow_insecure' | translate }}</label>
+		</div>
 
 		<label>{{ 'label.connectors_influxdb_username' | translate }}</label>
 		<input type="text" ng-model="item.settings.username">
