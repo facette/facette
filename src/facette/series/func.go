@@ -202,11 +202,12 @@ func Normalize(series []Series, startTime, endTime time.Time, sample int, consol
 		}
 
 		for j, point := range result[i].Points {
-			if !point.Value.IsNaN() || point.prev == nil || point.next == nil {
+			if !point.Value.IsNaN() || point.Value.IsNaN() && (point.prev == nil || point.next == nil) {
 				continue
 			}
 
-			a := float64(point.next.Value-point.prev.Value) / float64(point.next.Time.UnixNano()-point.prev.Time.UnixNano())
+			a := float64(point.next.Value-point.prev.Value) / float64(point.next.Time.UnixNano()-
+				point.prev.Time.UnixNano())
 			b := float64(point.prev.Value) - a*float64(point.Time.UnixNano())
 
 			result[i].Points[j].Value = Value(a*float64(point.next.Time.UnixNano()) + b)

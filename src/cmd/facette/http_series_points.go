@@ -285,7 +285,7 @@ func (w *httpWorker) executeRequest(req *series.Request, forceNormalize bool) []
 			goto finalize
 		}
 
-		// Get group consolidation mode and interpolation options
+		// Get group consolidation mode and group options
 		consolidate = series.ConsolidateAverage
 		if v, ok := group.Options["consolidate"].(int); ok {
 			consolidate = v
@@ -294,6 +294,12 @@ func (w *httpWorker) executeRequest(req *series.Request, forceNormalize bool) []
 		interpolate = true
 		if v, ok := group.Options["interpolate"].(bool); ok {
 			interpolate = v
+		}
+
+		if ok, _ := group.Options["zero_nulls"].(bool); ok {
+			for _, s := range data[i] {
+				s.ZeroNulls()
+			}
 		}
 
 		// Normalize series and apply operations

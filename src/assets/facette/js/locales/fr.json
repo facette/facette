@@ -258,6 +258,7 @@
     "label.series_remove": "Supprimer la série",
     "label.series_ungroup": "Dégrouper",
     "label.series_update": "Mettre à jour",
+    "label.series_zero_nulls": "Mettre les valeurs nulles à zéro",
     "label.sort": "Tri",
     "label.sort_type_name": "Nom",
     "label.sort_type_newest": "Plus récent",

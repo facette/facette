@@ -102,3 +102,12 @@ func (s *Series) Percentiles(values []float64) {
 		s.Summary[label] = Value(set[rankInt-1] + rankFrac*(set[rankInt]-set[rankInt-1]))
 	}
 }
+
+// ZeroNulls replaces all null point values by zero.
+func (s *Series) ZeroNulls() {
+	for i := range s.Points {
+		if s.Points[i].Value.IsNaN() {
+			s.Points[i].Value = Value(0)
+		}
+	}
+}

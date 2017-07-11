@@ -258,6 +258,7 @@
     "label.series_remove": "Remove series",
     "label.series_ungroup": "Ungroup",
     "label.series_update": "Update series",
+    "label.series_zero_nulls": "Set null values to zero",
     "label.sort": "Sort",
     "label.sort_type_name": "Name",
     "label.sort_type_newest": "Newest",
