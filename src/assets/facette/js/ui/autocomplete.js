@@ -72,8 +72,8 @@ angular.module('facette.ui.autocomplete', [])
 
     $scope.highlight = function(input, value) {
         try {
-            return $sce.trustAsHtml(input.replace(new RegExp('(' + value + ')', 'gi'), '<mark>$1</mark>'))
-        } catch(e) {
+            return $sce.trustAsHtml(input.replace(new RegExp('(' + value + ')', 'gi'), '<mark>$1</mark>'));
+        } catch (e) {
             return input;
         }
     };

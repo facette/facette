@@ -198,7 +198,8 @@ app.config(function($httpProvider, $locationProvider, $resourceProvider, $routeP
                 '</div>' +
             '</div>' +
             '<div class="hotkeys-list">' +
-                '<div class="hotkeys-entry" ng-repeat="hotkey in hotkeys | filter:{ description: \'!$$undefined$$\' }">' +
+                '<div class="hotkeys-entry" ng-repeat="hotkey in hotkeys | ' +
+                        'filter:{ description: \'!$$undefined$$\' }">' +
                     '<div class="hotkeys-keys">' +
                         '<span ng-repeat="k in hotkey.format() track by $index" class="hotkeys-key">{{ k }}</span>' +
                     '</div>' +

@@ -18,7 +18,7 @@ app.factory('globalHotkeys', function($location, $translate, hotkeys) {
         'c s':  {description: 'label.goto_create_sourcegroups', path: '/admin/sourcegroups/add'},
         'c m':  {description: 'label.goto_create_metricgroups', path: '/admin/metricgroups/add'},
         'c p':  {description: 'label.goto_create_providers', path: '/admin/providers/add'}
-    }
+    };
 
     function handleGotoHotkey(e, hotkey) {
         if (combos[hotkey.combo[0]]) {

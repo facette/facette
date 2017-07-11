@@ -42,7 +42,7 @@ chart.fn.updateTooltip = function(data) {
     data.values.forEach(function(entry, idx) {
         if ($$.config.series[idx].disabled || !$$.config.series[idx].points ||
                 $$.config.series[idx].points.length === 0) {
-            return
+            return;
         }
 
         var row = $$.tooltipBody.append('tr'),

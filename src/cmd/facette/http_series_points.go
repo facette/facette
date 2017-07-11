@@ -209,7 +209,7 @@ func (w *httpWorker) httpHandleSeriesPoints(rw http.ResponseWriter, r *http.Requ
 	httputil.WriteJSON(rw, points, http.StatusOK)
 }
 
-func (w *httpWorker) executeRequest(req *series.Request, forceNormalize bool) []series.SeriesResponse {
+func (w *httpWorker) executeRequest(req *series.Request, forceNormalize bool) []series.ResponseSeries {
 	// Expand groups series
 	for _, group := range req.Graph.Groups {
 		expandedSeries := []*backend.Series{}
@@ -260,7 +260,7 @@ func (w *httpWorker) executeRequest(req *series.Request, forceNormalize bool) []
 	}
 
 	// Generate points series
-	result := []series.SeriesResponse{}
+	result := []series.ResponseSeries{}
 	for i, group := range req.Graph.Groups {
 		var (
 			consolidate int
@@ -363,7 +363,7 @@ func (w *httpWorker) executeRequest(req *series.Request, forceNormalize bool) []
 
 			s.Summarize(percentiles)
 
-			result = append(result, series.SeriesResponse{
+			result = append(result, series.ResponseSeries{
 				Series:  s,
 				Name:    group.Series[j].Name,
 				Options: group.Series[j].Options,

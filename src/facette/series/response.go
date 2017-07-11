@@ -4,12 +4,12 @@ package series
 type Response struct {
 	Start   string                 `json:"start"`
 	End     string                 `json:"end"`
-	Series  []SeriesResponse       `json:"series"`
+	Series  []ResponseSeries       `json:"series"`
 	Options map[string]interface{} `json:"options"`
 }
 
-// SeriesResponse represents a point response series instance.
-type SeriesResponse struct {
+// ResponseSeries represents a point response series instance.
+type ResponseSeries struct {
 	Series
 	Name    string                 `json:"name"`
 	Options map[string]interface{} `json:"options"`

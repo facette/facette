@@ -759,7 +759,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
                     defer.resolve(data.map(function(a) { return {label: a, value: a}; }));
                 }, function() {
                     defer.reject();
-                })
+                });
 
                 return defer.promise;
             };
@@ -837,7 +837,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
             $scope.groupOperators = [
                 {name: 'None', value: groupOperatorNone},
                 {name: 'Average', value: groupOperatorAverage},
-                {name: 'Sum', value: groupOperatorSum},
+                {name: 'Sum', value: groupOperatorSum}
             ];
 
             $scope.groupConsolidations = [
