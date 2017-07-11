@@ -123,9 +123,11 @@ install-assets: build-assets
 		$(call mesg_ok) || $(call mesg_fail)
 
 install-docs: build-docs
+ifneq ($(filter build_docs,$(BUILD_TAGS)),)
 	@$(call mesg_start,install,Installing manual pages...)
 	@install -d -m 0755 $(PREFIX)/share/man/man1 && cp -r $(BUILD_DIR)/man/* $(PREFIX)/share/man/man1 && \
 		$(call mesg_ok) || $(call mesg_fail)
+endif
 
 lint: lint-bin lint-assets
 
