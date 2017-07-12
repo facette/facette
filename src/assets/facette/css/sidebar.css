@@ -102,6 +102,7 @@ aside nav .menuitem.label {
 
 aside nav .menuitem.button,
 aside nav .treeitem {
+	display: block;
 	line-height: 2rem;
 	margin: 0.2rem 0;
 }

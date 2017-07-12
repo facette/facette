@@ -231,7 +231,7 @@ article section .search {
 }
 
 article section .search {
-	position: relative;
+	display: flex;
 }
 
 article section .search input[type=search],
@@ -240,23 +240,23 @@ article section .search button {
 }
 
 article section .search input[type=search] {
-	padding: 0.5rem 4rem 0.5rem 0.5rem;
+	border-bottom-right-radius: 0;
+	border-right: none;
+	border-top-right-radius: 0;
 	line-height: normal;
+	padding: 0.5rem;
 }
 
 article section .search button {
 	border-bottom-left-radius: 0;
 	border-top-left-radius: 0;
-	bottom: 0;
-	position: absolute;
-	right: 0;
 	text-align: center;
-	top: 0;
 	width: 3.5rem;
 }
 
 article section .search .autocomplete {
-	width: 100%;
+	flex: 1;
+	margin-right: 0;
 }
 
 article section .search .autocomplete.focus + button {
