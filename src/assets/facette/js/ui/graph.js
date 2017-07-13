@@ -370,23 +370,29 @@ angular.module('facette.ui.graph', [])
                 return;
             }
 
-            var image = new Image();
+            var name = slugify($scope.chart.config.title) +
+                '_' + moment($scope.data.start).format(timeFormatFilename) +
+                '_' + moment($scope.data.end).format(timeFormatFilename) +
+                '.png';
+
+            var image = new Image(),
+                svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'}),
+                url = URL.createObjectURL(svg);
 
             image.onload = function() {
-                var name = slugify($scope.chart.config.title) +
-                    '_' + moment($scope.data.start).format(timeFormatFilename) +
-                    '_' + moment($scope.data.end).format(timeFormatFilename) +
-                    '.png';
-
                 context.drawImage(image, 0, 0);
+
+                var png = canvas.toDataURL('image/png');
 
                 $scope.exportLinks[type]
                     .attr('download', name)
-                    .attr('href', canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream'))
+                    .attr('href', png.replace('image/png', 'image/octet-stream'))
                     .get(0).click();
+
+                URL.revokeObjectURL(png);
             };
 
-            image.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(data)));
+            image.src = url;
 
             break;
 

@@ -26,14 +26,16 @@ chart.fn.drawSVG = function() {
 };
 
 chart.fn.getSVG = function() {
-    var node = this.svg.node().cloneNode(true);
-    node.setAttribute('version', '1.1');
-    node.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    var node = this.svg.node(),
+        clone = node.cloneNode(true);
+
+    clone.setAttribute('version', '1.1');
+    clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+    chart.utils.inlineStyles(node, clone);
 
     // Remove UI-related nodes
-    d3.select(node).selectAll('.chart-cursor, .chart-event, .chart-zoom').remove();
+    d3.select(clone).selectAll('.chart-cursor, .chart-event, .chart-zoom').remove();
 
-    chart.utils.inlineStyles(node);
-
-    return node.outerHTML;
+    return new XMLSerializer().serializeToString(clone);
 };

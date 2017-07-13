@@ -25,21 +25,18 @@ chart.utils.stylesList = [
     'text-anchor'
 ];
 
-chart.utils.inlineStyles = function(element) {
-    var style = window.getComputedStyle(element, null),
-        parts = [];
+chart.utils.inlineStyles = function(src, dst) {
+    var style = getComputedStyle(src, null);
 
     for (var i = 0, n = style.length; i < n; i++) {
         if (chart.utils.stylesList.indexOf(style[i]) != -1) {
-            parts.push(style[i] + ': ' + style.getPropertyValue(style[i]));
+            dst.style[style[i]] = style.getPropertyValue(style[i]);
         }
     }
 
-    element.style = parts.join('; ');
-
-    for (i in element.childNodes) {
-        if (element.childNodes[i].nodeType == 1) {
-            chart.utils.inlineStyles(element.childNodes[i]);
+    for (var i in src.childNodes) {
+        if (src.childNodes[i].nodeType == 1) {
+            chart.utils.inlineStyles(src.childNodes[i], dst.childNodes[i]);
         }
     }
 };
