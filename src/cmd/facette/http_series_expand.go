@@ -99,6 +99,8 @@ func (w *httpWorker) httpHandleSeriesExpand(rw http.ResponseWriter, r *http.Requ
 }
 
 func (w *httpWorker) expandSeries(series *backend.Series, existOnly bool) []*backend.Series {
+	var hasGroup bool
+
 	out := []*backend.Series{}
 
 	sourcesSet := set.New()
@@ -123,6 +125,8 @@ func (w *httpWorker) expandSeries(series *backend.Series, existOnly bool) []*bac
 				}
 			}
 		}
+
+		hasGroup = true
 	} else {
 		sourcesSet.Add(series.Source)
 	}
@@ -154,11 +158,12 @@ func (w *httpWorker) expandSeries(series *backend.Series, existOnly bool) []*bac
 				}
 			}
 		}
+
+		hasGroup = true
 	} else {
 		metricsSet.Add(series.Metric)
 	}
 
-	multiple := sourcesSet.Size() > 1 || metricsSet.Size() > 1
 	count := 0
 
 	sources := set.StringSlice(sourcesSet)
@@ -171,7 +176,7 @@ func (w *httpWorker) expandSeries(series *backend.Series, existOnly bool) []*bac
 			var name string
 
 			// Override name if source/series has been expanded
-			if multiple {
+			if hasGroup {
 				name = fmt.Sprintf("%s (%s)", source, metric)
 				count++
 			} else {
