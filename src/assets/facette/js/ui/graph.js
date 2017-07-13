@@ -436,10 +436,12 @@ angular.module('facette.ui.graph', [])
                 hrefData = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(summary, null, '\t'));
             }
 
-            $scope.exportLinks[type]
-                .attr('download', name)
-                .attr('href', hrefData)
-                .get(0).click();
+            $timeout(function() {
+                $scope.exportLinks[type]
+                    .attr('download', name)
+                    .attr('href', hrefData)
+                    .get(0).click();
+            }, 0);
 
             break;
         }
