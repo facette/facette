@@ -134,8 +134,7 @@ func (w *providerWorker) Shutdown() {
 }
 
 func (w *providerWorker) Refresh() {
-	if w.refreshing {
-		fmt.Println("nope!")
+	if w == nil || w.refreshing {
 		return
 	}
 
