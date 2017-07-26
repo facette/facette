@@ -1,6 +1,6 @@
 # -*- Makefile -*-
 
-VERSION := 0.4.0rc1
+VERSION := 0.4.0rc2
 
 BUILD_DATE := $(shell date +%F)
 BUILD_HASH := $(shell git rev-parse --short HEAD)
