@@ -16,7 +16,7 @@ angular.module('facette.ui.autocomplete', [])
     };
 })
 
-.controller('AutocompleteController', function($sce, $scope, $timeout) {
+.controller('AutocompleteController', function($element, $sce, $scope, $timeout) {
     $scope.selected = true;
 
     if (!angular.isDefined($scope.delay)) {
@@ -65,6 +65,20 @@ angular.module('facette.ui.autocomplete', [])
             } else if (e.which == 40 && $scope.index < $scope.entries.length - 1) {
                 $scope.index++;
             }
+
+            // Update scroll position
+            $timeout(function() {
+                var row = $element.find('.autocomplete-row.active'),
+                    position = row.position(),
+                    container = row.parent();
+
+                if (position.top + row.outerHeight(true) > container.innerHeight()) {
+                    container.scrollTop(container.scrollTop() + position.top - container.innerHeight() +
+                        row.outerHeight(true) + (container.outerHeight() - container.innerHeight()));
+                } else if (position.top < 0) {
+                    container.scrollTop(container.scrollTop() + position.top);
+                }
+            }, 0);
 
             break;
         }
