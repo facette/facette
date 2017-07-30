@@ -3,7 +3,7 @@ Facette [![](https://api.travis-ci.org/facette/facette.svg?branch=master)](https
 
 [Facette][0] is a open source web application to display time series data from various sources — such as [collectd][1],
 [Graphite][2], [InfluxDB][5] or [KairosDB][6] — on graphs. To learn more on its architecture, read
-[this page](http://docs.facette.io/architecture/).
+[this page](http://docs.facette.io/latest/architecture/).
 
 The source code is available at [Github][3] and is licensed under the terms of the [BSD license][4].
 
