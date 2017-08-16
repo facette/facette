@@ -29,9 +29,6 @@ type bulkResponseEntry struct {
 	Data   interface{} `json:"data"`
 }
 
-func init() {
-}
-
 // api:method POST /api/v1/bulk/ "Bulk requests execution"
 //
 // This endpoint expects a request providing as body a list of API requests to execute in bulk, and returns a list of
