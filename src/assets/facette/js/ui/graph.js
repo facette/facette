@@ -461,6 +461,8 @@ angular.module('facette.ui.graph', [])
 
         if (forward) {
             delta *= -1;
+        } else if ($scope.options.range && !$scope.options.range.startsWith('-')) {
+            $scope.options.range = '-' + $scope.options.range;
         }
 
         applyOptions({
