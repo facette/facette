@@ -86,7 +86,7 @@ func (m Map) GetMap(key string, fallback Map) (Map, error) {
 		}
 
 	default:
-		for k, v := range val.(map[interface{}]interface{}) {
+		for k, v := range val.(map[string]interface{}) {
 			result[fmt.Sprintf("%v", k)] = v
 		}
 	}
