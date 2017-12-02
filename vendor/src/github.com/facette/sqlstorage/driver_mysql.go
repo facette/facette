@@ -25,6 +25,7 @@ type mysqlDriver struct {
 	user     string
 	password string
 	dbName   string
+	charset  string
 }
 
 func (d mysqlDriver) Name() string {
@@ -33,12 +34,13 @@ func (d mysqlDriver) Name() string {
 
 func (d mysqlDriver) Open() (*sql.DB, error) {
 	dsn := fmt.Sprintf(
-		"%s:%s@tcp(%s:%d)/%s?parseTime=true",
+		"%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=true",
 		d.user,
 		d.password,
 		d.host,
 		d.port,
 		d.dbName,
+		d.charset,
 	)
 
 	return sql.Open("mysql", dsn)
@@ -119,6 +121,10 @@ func init() {
 
 		if d.dbName, err = settings.GetString("dbname", name); err != nil {
 			return nil, errors.Wrap(err, "invalid \"dbname\" setting")
+		}
+
+		if d.charset, err = settings.GetString("charset", "utf8"); err != nil {
+			return nil, errors.Wrap(err, "invalid \"charset\" setting")
 		}
 
 		return d, nil

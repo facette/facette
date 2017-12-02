@@ -12,7 +12,6 @@ The following code:
 package main
 
 import (
-        "context"
         "fmt"
         "log"
         "net/http"
@@ -43,15 +42,15 @@ func main() {
         }
 }
 
-func handleBar(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
-        fmt.Fprintf(rw, "Received %q\n", ctx.Value("baz").(string))
+func handleBar(rw http.ResponseWriter, r *http.Request) {
+        fmt.Fprintf(rw, "Received %q\n", httproute.ContextParam(r, "baz").(string))
 }
 
-func handleDefault(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+func handleDefault(rw http.ResponseWriter, r *http.Request) {
         fmt.Fprintln(rw, "Default here!")
 }
 
-func handleFoo(ctx context.Context, rw http.ResponseWriter, r *http.Request) {
+func handleFoo(rw http.ResponseWriter, r *http.Request) {
         fmt.Fprintf(rw, "Received %q request\n", r.Method)
 }
 ```

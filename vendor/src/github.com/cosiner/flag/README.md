@@ -15,6 +15,7 @@ Documentation can be found at [Godoc](https://godoc.org/github.com/cosiner/flag)
 * Multiple flag names, e.g. '-z, -gz, -gzip, --gz, --gzip'
 * '-' to ensure next argument must be a flag, e.g. 
 * '--' to ensure next argument must be a value, e.g. 'rm -- -a.go' to delete file '-a.go'
+* '-!' to stop greedy-consumption for slice flags.
 * Support '=', e.g. '-a=b', '-a=true'
 * Support single bool flag, e.g. '-rm' is equal to '-rm=true'
 * Support multiple single flags: e.g. '-zcf a.tgz' is equal to '-z -c -f a.tgz'

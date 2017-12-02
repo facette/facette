@@ -4,11 +4,17 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 )
 
 // preloadCallback used to preload associations
 func preloadCallback(scope *Scope) {
+
+	if _, ok := scope.Get("gorm:auto_preload"); ok {
+		autoPreload(scope)
+	}
+
 	if scope.Search.preload == nil || scope.HasError() {
 		return
 	}
@@ -76,6 +82,25 @@ func preloadCallback(scope *Scope) {
 				}
 			}
 		}
+	}
+}
+
+func autoPreload(scope *Scope) {
+	for _, field := range scope.Fields() {
+		if field.Relationship == nil {
+			continue
+		}
+
+		if val, ok := field.TagSettings["PRELOAD"]; ok {
+			if preload, err := strconv.ParseBool(val); err != nil {
+				scope.Err(errors.New("invalid preload option"))
+				return
+			} else if !preload {
+				continue
+			}
+		}
+
+		scope.Search.Preload(field.Name)
 	}
 }
 
@@ -264,7 +289,12 @@ func (scope *Scope) handleManyToManyPreload(field *Field, conditions []interface
 
 	// generate query with join table
 	newScope := scope.New(reflect.New(fieldType).Interface())
-	preloadDB = preloadDB.Table(newScope.TableName()).Model(newScope.Value).Select("*")
+	preloadDB = preloadDB.Table(newScope.TableName()).Model(newScope.Value)
+
+	if len(preloadDB.search.selects) == 0 {
+		preloadDB = preloadDB.Select("*")
+	}
+
 	preloadDB = joinTableHandler.JoinWith(joinTableHandler, preloadDB, scope.Value)
 
 	// preload inline conditions

@@ -379,3 +379,19 @@ func TestSubset(t *testing.T) {
 	build, _ := set.FindSubset("build")
 	build.Help(false)
 }
+
+func TestStopConsumption(t *testing.T) {
+	type Flags struct {
+		Slice []string
+		Rest  []string `args:"true"`
+	}
+
+	var flags Flags
+	NewFlagSet(Flag{}).ParseStruct(&flags, "test", "-slice", "a", "b", "--", "-!", "-!", "c", "d")
+	if !reflect.DeepEqual(flags.Slice, []string{"a", "b", "-!"}) {
+		t.FailNow()
+	}
+	if !reflect.DeepEqual(flags.Rest, []string{"c", "d"}) {
+		t.FailNow()
+	}
+}

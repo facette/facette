@@ -131,6 +131,12 @@ func (r *resolver) resolveFlags(f *FlagSet, context []string, args []argument) e
 				return newErrorf(errDuplicateFlagParsed, "duplicate flag: %v.%s", context, flag.Names)
 			}
 			argCount = 1
+		case argumentStopConsumption:
+			err = applyLastFlag()
+			if err != nil {
+				return err
+			}
+			flag = nil
 		case argumentValue:
 			if flag == nil {
 				err = appendRemainArgs(args[i:])

@@ -17,6 +17,9 @@ type SyslogConfig struct {
 	// syslog facility to send messages to.
 	Facility string
 
+	// syslog tag to specify in messages.
+	Tag string
+
 	// syslog service address and transport type (either "udp", "tcp" or "unix"). If not sepcified, local syslog will
 	// be used.
 	Address   string

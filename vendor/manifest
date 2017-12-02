@@ -4,13 +4,13 @@
 		{
 			"importpath": "github.com/cosiner/flag",
 			"repository": "https://github.com/cosiner/flag",
-			"revision": "46d5fc1f3ad582bc923a2a0819ff128a63b37171",
+			"revision": "e5e06a5be4a39c3d65d0986890d13158b784fb0f",
 			"branch": "master"
 		},
 		{
 			"importpath": "github.com/facette/httproute",
 			"repository": "https://github.com/facette/httproute",
-			"revision": "aabd476b5e5013eef3c8e36bc8bcc61285c07f28",
+			"revision": "f53258bca1d45a222a9d32b74814282eea29af53",
 			"branch": "master"
 		},
 		{
@@ -22,13 +22,13 @@
 		{
 			"importpath": "github.com/facette/jsonutil",
 			"repository": "https://github.com/facette/jsonutil",
-			"revision": "1bbe8ca52b35fed6c560427d52548456f42744df",
+			"revision": "c36d1c130ef6a5a24585b836bc75d6c9111b7659",
 			"branch": "master"
 		},
 		{
 			"importpath": "github.com/facette/logger",
 			"repository": "https://github.com/facette/logger",
-			"revision": "4dcfb431e53d946a7f3e21ecfdbfa9d817359bee",
+			"revision": "ded3054c57b9b4deaf4f0a82949e5329c4d030df",
 			"branch": "master"
 		},
 		{
@@ -52,7 +52,7 @@
 		{
 			"importpath": "github.com/facette/sqlstorage",
 			"repository": "https://github.com/facette/sqlstorage",
-			"revision": "3e0a2ae051fb6186baf33ee55cf8ad36a902136b",
+			"revision": "4963afb62f5c240cfe4624b0e42dd33c62de625d",
 			"branch": "master"
 		},
 		{
@@ -64,13 +64,13 @@
 		{
 			"importpath": "github.com/go-sql-driver/mysql",
 			"repository": "https://github.com/go-sql-driver/mysql",
-			"revision": "9dee4ca50b83acdf57a35fb9e6fb4be640afa2f3",
+			"revision": "cd4cb909ce1a31435164be29bf3682031f61539a",
 			"branch": "master"
 		},
 		{
 			"importpath": "github.com/gogo/protobuf/proto",
 			"repository": "https://github.com/gogo/protobuf",
-			"revision": "6fe4aed35b712b681d5d372e06da5344c22ed61f",
+			"revision": "fd9a4790f3963525fb889cc00e0a8f828e0b3a29",
 			"branch": "master",
 			"path": "/proto"
 		},
@@ -83,35 +83,34 @@
 		{
 			"importpath": "github.com/influxdata/influxdb/client/v2",
 			"repository": "https://github.com/influxdata/influxdb",
-			"revision": "7c5ce27bb05ad7a917d1c1fc687b7dcaa375e8c7",
+			"revision": "fd11e200c8b2e4d23c31945e330b2768b83d46f5",
 			"branch": "master",
 			"path": "/client/v2"
 		},
 		{
-			"importpath": "github.com/influxdata/influxdb/influxql",
-			"repository": "https://github.com/influxdata/influxdb",
-			"revision": "7c5ce27bb05ad7a917d1c1fc687b7dcaa375e8c7",
-			"branch": "master",
-			"path": "/influxql"
-		},
-		{
 			"importpath": "github.com/influxdata/influxdb/models",
 			"repository": "https://github.com/influxdata/influxdb",
-			"revision": "7c5ce27bb05ad7a917d1c1fc687b7dcaa375e8c7",
+			"revision": "fd11e200c8b2e4d23c31945e330b2768b83d46f5",
 			"branch": "master",
 			"path": "/models"
 		},
 		{
 			"importpath": "github.com/influxdata/influxdb/pkg/escape",
 			"repository": "https://github.com/influxdata/influxdb",
-			"revision": "7c5ce27bb05ad7a917d1c1fc687b7dcaa375e8c7",
+			"revision": "fd11e200c8b2e4d23c31945e330b2768b83d46f5",
 			"branch": "master",
 			"path": "/pkg/escape"
 		},
 		{
+			"importpath": "github.com/influxdata/influxql",
+			"repository": "https://github.com/influxdata/influxql",
+			"revision": "c108c5fb9a432242754d18371795aa8099e73fe7",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/jinzhu/gorm",
 			"repository": "https://github.com/jinzhu/gorm",
-			"revision": "717654b31c3d51348cb305684369c20a8387154b",
+			"revision": "0a51f6cdc55d1650d9ed3b4c13026cfa9133b01e",
 			"branch": "master"
 		},
 		{
@@ -123,19 +122,25 @@
 		{
 			"importpath": "github.com/lib/pq",
 			"repository": "https://github.com/lib/pq",
-			"revision": "2704adc878c21e1329f46f6e56a1c387d788ff94",
+			"revision": "83612a56d3dd153a94a629cd64925371c9adad78",
 			"branch": "master"
 		},
 		{
 			"importpath": "github.com/mattn/go-colorable",
 			"repository": "https://github.com/mattn/go-colorable",
-			"revision": "ded68f7a9561c023e790de24279db7ebf473ea80",
+			"revision": "6fcc0c1fd9b620311d821b106a400b35dc95c497",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/mattn/go-isatty",
+			"repository": "https://github.com/mattn/go-isatty",
+			"revision": "6ca4dbf54d38eea1a992b3c722a76a5d1c4cb25c",
 			"branch": "master"
 		},
 		{
 			"importpath": "github.com/mattn/go-sqlite3",
 			"repository": "https://github.com/mattn/go-sqlite3",
-			"revision": "cf7286f069c3ef596efcc87781a4653a2e7607bd",
+			"revision": "d5ffb5c0cca8778699a929b236766f4a7af674e8",
 			"branch": "master"
 		},
 		{
@@ -147,13 +152,13 @@
 		{
 			"importpath": "github.com/pkg/errors",
 			"repository": "https://github.com/pkg/errors",
-			"revision": "ff09b135c25aae272398c51a07235b90a75aa4f0",
+			"revision": "f15c970de5b76fac0b59abb32d62c17cc7bed265",
 			"branch": "master"
 		},
 		{
 			"importpath": "github.com/urfave/negroni",
 			"repository": "https://github.com/urfave/negroni",
-			"revision": "c0db5feaa33826cd5117930c8f4ee5c0f565eec6",
+			"revision": "5dbbc83f748fc3ad38585842b0aedab546d0ea1e",
 			"branch": "master"
 		},
 		{
@@ -165,7 +170,7 @@
 		{
 			"importpath": "golang.org/x/net/context",
 			"repository": "https://go.googlesource.com/net",
-			"revision": "d1e1b351919c6738fdeb9893d5c998b161464f0c",
+			"revision": "a8b9294777976932365dabb6640cf1468d95c70f",
 			"branch": "master",
 			"path": "/context"
 		},
@@ -178,7 +183,7 @@
 		{
 			"importpath": "gopkg.in/yaml.v2",
 			"repository": "https://gopkg.in/yaml.v2",
-			"revision": "cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b",
+			"revision": "287cf08546ab5e7e37d55a84f7ed3fd1db036de5",
 			"branch": "v2"
 		}
 	]

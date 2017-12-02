@@ -21,6 +21,7 @@ logger, err := logger.NewLogger(
 		Path:  "/path/to/file.log",
 	},
 	logger.SyslogConfig{
+		Tag:      "myapp",
 		Level:    "warning",
 		Facility: "local7",
 	},

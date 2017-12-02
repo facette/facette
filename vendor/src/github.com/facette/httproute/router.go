@@ -21,6 +21,7 @@ func NewRouter() *Router {
 	}
 
 	rt.endpointHandler = newEndpointHandler(rt)
+	rt.chain = rt.endpointHandler
 
 	return rt
 }

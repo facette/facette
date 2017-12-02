@@ -17,7 +17,7 @@ import (
 	"github.com/facette/logger"
 	"github.com/facette/maputil"
 	influxdb "github.com/influxdata/influxdb/client/v2"
-	"github.com/influxdata/influxdb/influxql"
+	"github.com/influxdata/influxql"
 )
 
 type influxDBMap struct {

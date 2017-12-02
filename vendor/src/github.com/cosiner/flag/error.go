@@ -22,6 +22,7 @@ const (
 	errDuplicateFlagParsed
 	errInvalidSelects
 	errInvalidDefault
+	errInvalidStructure
 )
 
 func (t errorType) String() string {
@@ -46,6 +47,8 @@ func (t errorType) String() string {
 		return "DuplicateFlagParsed"
 	case errInvalidSelects:
 		return "InvalidSelects"
+	case errInvalidStructure:
+		return "InvalidStructure"
 	default:
 		return "UnknownError"
 	}

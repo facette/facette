@@ -89,7 +89,7 @@ func (r register) registerFlag(parent, set *FlagSet, flag Flag) error {
 
 	ns, names := r.cleanFlagNames(flag.Names)
 	if duplicates := r.findDuplicates(parent, set, ns); len(duplicates) > 0 {
-		return newErrorf(errDuplicateFlagRegister, "duplicate flags with parent/self/childs: %v", duplicates)
+		return newErrorf(errDuplicateFlagRegister, "duplicate flags with parent/self/childs: %s->%s, %v", parent.self.Names, set.self.Names, duplicates)
 	}
 
 	flag.Names = names
@@ -130,6 +130,7 @@ func (r register) registerSet(parent, set *FlagSet, flag Flag) (*FlagSet, error)
 }
 
 func (r register) registerStructure(parent, set *FlagSet, st interface{}) error {
+	// parent is used to checking duplicate flags and indicate that subset must has a 'Enable' field
 	const (
 		tagNames     = "names"
 		tagArglist   = "arglist"
@@ -294,6 +295,9 @@ func (r register) registerStructure(parent, set *FlagSet, st interface{}) error 
 			}
 		}
 	}
+	if parent != nil && set.self.Ptr == nil {
+		return newErrorf(errInvalidStructure, "child structure must has a 'Enable' field")
+	}
 	return nil
 }
 
@@ -410,11 +414,11 @@ func (r register) searchChildrenFlag(set *FlagSet, children string) (*Flag, *Fla
 			continue
 		}
 		if i != last {
-			return nil, nil, newErrorf(errFlagNotFound, "subset %s is not found", sec)
+			return nil, nil, newErrorf(errFlagNotFound, "subset/flag %s is not found", sec)
 		}
 		index, has = currSet.flagIndexes[sec]
 		if !has {
-			return nil, nil, newErrorf(errFlagNotFound, "subset or flag %s is not found", sec)
+			return nil, nil, newErrorf(errFlagNotFound, "subset/flag %s is not found", sec)
 		}
 		currFlag = &currSet.flags[index]
 	}
@@ -443,9 +447,4 @@ func (r register) updateMeta(set *FlagSet, children string, meta Flag) error {
 	}
 	r.cleanFlag(flag)
 	return nil
-}
-
-func (r register) findSubset(set *FlagSet, children string) (*FlagSet, error) {
-	_, subset, err := r.searchChildrenFlag(set, children)
-	return subset, err
 }

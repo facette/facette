@@ -36,9 +36,6 @@ func (w *writer) maxFlagInfoLen(f *FlagSet) int {
 	if maxLen > maxInfoLen {
 		maxLen = maxInfoLen
 	}
-	if w.isTop {
-		maxLen += 1
-	}
 	return maxLen
 }
 

@@ -68,9 +68,9 @@ func newSyslogBackend(config SyslogConfig, logger *Logger) (backend, error) {
 			network = "udp"
 		}
 
-		writer, err = syslog.Dial(network, config.Address, facility, "")
+		writer, err = syslog.Dial(network, config.Address, facility, config.Tag)
 	} else {
-		writer, err = syslog.New(facility, "")
+		writer, err = syslog.New(facility, config.Tag)
 	}
 
 	if err != nil {

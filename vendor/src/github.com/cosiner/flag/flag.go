@@ -98,6 +98,24 @@ type FlagSet struct {
 	helpFlagDefined bool
 }
 
+// NewFlagSet create a new flagset
+func NewFlagSet(flag Flag) *FlagSet {
+	if flag.Names == "" {
+		flag.Names = filepath.Base(os.Args[0])
+	}
+	return newFlagSet(flag)
+}
+
+func newFlagSet(flag Flag) *FlagSet {
+	defaultReguster.cleanFlag(&flag)
+	return &FlagSet{
+		self:          flag,
+		flagIndexes:   make(map[string]int),
+		subsetIndexes: make(map[string]int),
+		errorHandling: DefaultErrorHandling,
+	}
+}
+
 func (f *FlagSet) searchFlag(name string) *Flag {
 	index, has := f.flagIndexes[name]
 	if !has {
@@ -118,24 +136,6 @@ func (f *FlagSet) isSubset(name string) bool {
 
 func (f *FlagSet) isFlagOrSubset(name string) bool {
 	return f.isFlag(name) || f.isSubset(name)
-}
-
-// NewFlagSet create a new flagset
-func NewFlagSet(flag Flag) *FlagSet {
-	if flag.Names == "" {
-		flag.Names = filepath.Base(os.Args[0])
-	}
-	return newFlagSet(flag)
-}
-
-func newFlagSet(flag Flag) *FlagSet {
-	defaultReguster.cleanFlag(&flag)
-	return &FlagSet{
-		self:          flag,
-		flagIndexes:   make(map[string]int),
-		subsetIndexes: make(map[string]int),
-		errorHandling: DefaultErrorHandling,
-	}
 }
 
 // UpdateMeta update flag metadata by the children identifier, only Desc, Arglist,
@@ -182,14 +182,32 @@ func (f *FlagSet) Subset(flag Flag) (*FlagSet, error) {
 	return child, f.errorHandling.handle(err)
 }
 
-// FindSubset search flagset by the children identifier, children is set names split by ','.
+// FindSubset search flagset by the children identifier, children is subset names split by ','.
 func (f *FlagSet) FindSubset(children string) (*FlagSet, error) {
-	return defaultReguster.findSubset(f, children)
+	_, subset, err := defaultReguster.searchChildrenFlag(f, children)
+	if subset == nil && err == nil {
+		err = newErrorf(errFlagNotFound, "subset %s is not found", children)
+	}
+	return subset, err
+}
+
+// FindFlag search flag by the children identifier, children is set subset/flag names split by ','.
+func (f *FlagSet) FindFlag(children string) (*Flag, error) {
+	flag, _, err := defaultReguster.searchChildrenFlag(f, children)
+	if flag == nil && err == nil {
+		err = newErrorf(errFlagNotFound, "flag %s is not found", children)
+	}
+	return flag, err
 }
 
 // StructFlags parse the structure pointer and add exported fields to flagset.
-func (f *FlagSet) StructFlags(val interface{}) error {
-	return f.errorHandling.handle(defaultReguster.registerStructure(nil, f, val))
+// if parent is not nil, it will checking duplicate flags with parent.
+func (f *FlagSet) StructFlags(val interface{}, parent ...*FlagSet) error {
+	var p *FlagSet
+	if len(parent) > 0 {
+		p = parent[0]
+	}
+	return f.errorHandling.handle(defaultReguster.registerStructure(p, f, val))
 }
 
 // Parse parse arguments, if empty, os.Args will be used.

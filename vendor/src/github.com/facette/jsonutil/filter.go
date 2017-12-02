@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"unicode"
 )
 
 // Filter filters an interface given its type and JSON field paths.
@@ -199,7 +200,7 @@ func FilterStruct(v interface{}, fields []string) map[string]interface{} {
 
 			// Get field tag and check if it needs to be skipped
 			tag := ft.Tag.Get("json")
-			if tag == "-" || filterSkip(tag, f) || !f.CanSet() {
+			if tag == "-" || filterSkip(tag, f) || unicode.IsLower(rune(ft.Name[0])) {
 				continue
 			}
 

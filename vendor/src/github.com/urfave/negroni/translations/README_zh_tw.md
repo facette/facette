@@ -7,7 +7,7 @@
 **注意:** 本函式庫原來自於
 `github.com/codegangsta/negroni` -- Github會自動將連線轉到本連結, 但我們建議你更新一下參照.
 
-尼格龍尼符合Go的web 中介器特性. 精簡、非侵入式、鼓勵使用 `net/http`  Handler.
+尼格龍尼是一款web中介器. 道地的Go寫法、精簡、非侵入、鼓勵用`net/http`處理器.
 
 如果你喜歡[Martini](http://github.com/go-martini/martini), 但覺得這其中包太多神奇的功能, 那麼尼格龍尼會是你的最佳選擇.
 
@@ -57,8 +57,9 @@ go run server.go
 
 你現在起了一個Go的net/http網頁伺服器在`localhost:3000`.
 
-## 有問題?
-如果你有問題或新功能建議, [到這郵件群組討論](https://groups.google.com/forum/#!forum/negroni-users). 尼格龍尼在GitHub上的issues專欄是專門用來回報bug跟pull requests.
+### 打包
+如果`negroni`在Debian環境下是個[套件](https://packages.debian.org/sid/golang-github-urfave-negroni-dev), 可直接
+執行`apt install golang-github-urfave-negroni-dev`安裝(這在`sid`倉庫中).
 
 ## 尼格龍尼是個framework嗎?
 尼格龍尼**不是**framework, 是個設計用來直接使用net/http的library.
@@ -143,8 +144,9 @@ func main() {
 }
 ```
 
-In general, you will want to use net/http methods and pass negroni as a Handler, as this is more flexible, e.g.:
-一般來說, 你會希望使用 `net/http` 方法, 並且將尼格龍尼當作處理器傳入, 這相對起來彈性比較大, 例如：
+未提供路徑情況下會使用系統環境變數`PORT`, 若未定義該系統環境變數則會用預設路徑, 請見[Run](https://godoc.org/github.com/urfave/negroni#Negroni.Run)細看說明.
+
+一般來說, 你會希望使用 `net/http` 方法, 並且將尼格龍尼當作處理器傳入, 這相對起來彈性比較大, 例如:
 
 ``` go
 package main
@@ -194,7 +196,7 @@ router.Handle("/admin", negroni.New(
 ))
 ```
 
-如果你使用 [Gorilla Mux](https://github.com/gorilla/mux), 下方是一個使用 subrounter 的例子：
+如果你使用 [Gorilla Mux](https://github.com/gorilla/mux), 下方是一個使用 subrounter 的例子:
 
 ``` go
 router := mux.NewRouter()
@@ -285,7 +287,7 @@ func main() {
 
 本中介器接收`panic`跟錯誤代碼`500`的回應. 如果其他任何中介器寫了回應
 的HTTP代碼或內容的話, 中介器會無法順利地傳送500給用戶端, 因為用戶端
-已經收到HTTP的回應代碼. 另外, 可以掛載`ErrorHandlerFunc`來回報500
+已經收到HTTP的回應代碼. 另外, 可以掛載`PanicHandlerFunc`來回報500
 的錯誤到錯誤回報系統, 如: Sentry或Airbrake.
 
 範例:
@@ -337,14 +339,14 @@ func main() {
 
   n := negroni.New()
   recovery := negroni.NewRecovery()
-  recovery.ErrorHandlerFunc = reportToSentry
+  recovery.PanicHandlerFunc = reportToSentry
   n.Use(recovery)
   n.UseHandler(mux)
 
   http.ListenAndServe(":3003", n)
 }
 
-func reportToSentry(error interface{}) {
+func reportToSentry(info *negroni.PanicInformation) {
     // 在這寫些程式回報錯誤給Sentry
 }
 ```
@@ -384,8 +386,7 @@ func main() {
 在每個請求印的紀錄會看起來像:
 
 ```
-[negroni] Started GET /
-[negroni] Completed 200 OK in 145.446µs
+[negroni] 2017-10-04T14:56:25+02:00 | 200 |      378µs | localhost:3004 | GET /
 ```
 
 ## 第三方中介器
@@ -394,6 +395,7 @@ func main() {
 
 | 中介器 | 作者 | 說明 |
 | -----------|--------|-------------|
+| [authz](https://github.com/casbin/negroni-authz) | [Yang Luo](https://github.com/hsluoyz) | 支援ACL, RBAC, ABAC的權限管理中介器. 基於[Casbin](https://github.com/casbin/casbin) |
 | [binding](https://github.com/mholt/binding) | [Matt Holt](https://github.com/mholt) | 把HTTP請求的資料榜定到structs |
 | [cloudwatch](https://github.com/cvillecsteele/negroni-cloudwatch) | [Colin Steele](https://github.com/cvillecsteele) | AWS CloudWatch 矩陣的中介器 |
 | [cors](https://github.com/rs/cors) | [Olivier Poitrey](https://github.com/rs) | 支援[Cross Origin Resource Sharing](http://www.w3.org/TR/cors/)(CORS) |
@@ -424,7 +426,7 @@ func main() {
 [Alexander Rødseth](https://github.com/xyproto)所建
 [mooseware](https://github.com/xyproto/mooseware)用來寫尼格龍尼中介處理器的骨架
 
-## Live code reload?
+## 即時編譯
 
 [gin](https://github.com/codegangsta/gin)和
 [fresh](https://github.com/pilu/fresh)兩個尼格龍尼即時重載的應用.
