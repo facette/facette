@@ -1,6 +1,6 @@
 {
   "name": "angular-translate-interpolation-messageformat",
-  "version": "2.15.1",
+  "version": "2.16.0",
   "description": "Uses MessageFormat.js to interpolate strings against some values.",
   "main": "angular-translate-interpolation-messageformat.js",
   "repository": {
@@ -19,7 +19,7 @@
   },
   "homepage": "https://angular-translate.github.io",
   "dependencies": {
-    "angular-translate": "~2.15.1",
+    "angular-translate": "~2.16.0",
     "messageformat": "~1.0.2"
   }
 }

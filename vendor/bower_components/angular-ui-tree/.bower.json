@@ -1,6 +1,6 @@
 {
   "name": "angular-ui-tree",
-  "version": "2.22.5",
+  "version": "2.22.6",
   "homepage": "https://github.com/angular-ui-tree/angular-ui-tree",
   "authors": [
     "Jim Liu <https://github.com/JimLiu>",
@@ -50,13 +50,13 @@
   "resolutions": {
     "angular": "1.2.x || 1.3.x || 1.4.x || 1.5.x"
   },
-  "_release": "2.22.5",
+  "_release": "2.22.6",
   "_resolution": {
     "type": "version",
-    "tag": "v2.22.5",
-    "commit": "6ad4df091288b32eb287ee108a14ae220ccd818d"
+    "tag": "v2.22.6",
+    "commit": "c37b032def694863e8db1936e9003e1171477921"
   },
   "_source": "https://github.com/JimLiu/angular-ui-tree.git",
-  "_target": "2.22.5",
+  "_target": "2.22.6",
   "_originalSource": "angular-ui-tree"
 }

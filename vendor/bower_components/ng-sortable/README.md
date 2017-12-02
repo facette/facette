@@ -6,7 +6,9 @@ Angular Library for Drag and Drop, supports Sortable and Draggable. No JQuery UI
 
 #### Release:
 
-Latest release version 1.3.7
+Latest release version 1.3.8
+
+`The Angular2 version of this Library is coming soon..`
 
 #### Demo Page:
 

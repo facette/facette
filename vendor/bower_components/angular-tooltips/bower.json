@@ -1,7 +1,7 @@
 {
   "name": "angular-tooltips",
   "description": "Tooltip Directive For AngularJS",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "homepage": "https://github.com/intellipharm/angular-tooltips",
   "repository": {
     "type": "git",

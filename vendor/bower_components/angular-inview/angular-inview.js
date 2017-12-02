@@ -1,7 +1,7 @@
 // # Angular-Inview
 // - Author: [Nicola Peduzzi](https://github.com/thenikso)
 // - Repository: https://github.com/thenikso/angular-inview
-// - Install with: `npm install angular-inview@beta`
+// - Install with: `npm install angular-inview`
 // - Version: **2.2.0**
 (function() {
 'use strict';
@@ -222,10 +222,10 @@ function offsetRect (rect, offset) {
     return rect;
   }
   var offsetObject = {
-    top: isPercent(offset[0]) ? (parseFloat(offset[0]) * rect.height) : offset[0],
-    right: isPercent(offset[1]) ? (parseFloat(offset[1]) * rect.width) : offset[1],
-    bottom: isPercent(offset[2]) ? (parseFloat(offset[2]) * rect.height) : offset[2],
-    left: isPercent(offset[3]) ? (parseFloat(offset[3]) * rect.width) : offset[3]
+    top: isPercent(offset[0]) ? (parseFloat(offset[0]) * rect.height / 100) : offset[0],
+    right: isPercent(offset[1]) ? (parseFloat(offset[1]) * rect.width / 100) : offset[1],
+    bottom: isPercent(offset[2]) ? (parseFloat(offset[2]) * rect.height / 100) : offset[2],
+    left: isPercent(offset[3]) ? (parseFloat(offset[3]) * rect.width / 100) : offset[3]
   };
   // Note: ClientRect object does not allow its properties to be written to therefore a new object has to be created.
   return {
@@ -359,9 +359,9 @@ function signalFromEvent (target, event) {
       subscriber(e);
     };
     var el = angular.element(target);
-    el.on(event, handler);
+    el[0].addEventListener(event, handler, true);
     subscriber.$dispose = function () {
-      el.off(event, handler);
+      el[0].removeEventListener(event, handler, true);
     };
   });
 }

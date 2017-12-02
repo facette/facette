@@ -212,6 +212,25 @@ describe("angular-inview", function() {
 				.then(done);
 			});
 
+			it("should consider percent offset option", function(done) {
+				makeTestForHtml(
+					'<div in-view="spy($inviewInfo)" style="height:200px" in-view-options="{ offset:[\'25%\', 0], generateParts: true }"></div>' +
+					'<div style="height:200%"></div>'
+				)
+				.then(function (test) {
+					var info = test.spy.calls.argsFor(0)[0];
+					expect(info.inView).toEqual(true);
+					expect(info.parts).toEqual({
+						top: false,
+						left: true,
+						bottom: true,
+						right: true
+					});
+					return test;
+				})
+				.then(done);
+			});
+
 			it("should consider viewport offset options", function(done) {
 				makeTestForHtml(
 					'<div in-view="spy($inviewInfo)" style="height:200px" in-view-options="{ viewportOffset:[100, 0], generateParts: true }"></div>' +

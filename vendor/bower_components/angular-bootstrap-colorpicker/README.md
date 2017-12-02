@@ -21,6 +21,11 @@ Installation
 $ npm install angular-bootstrap-colorpicker --save
 ```
 
+#### bower
+```shell
+$ bower install angular-bootstrap-colorpicker --save
+```
+
 Copy `css/colorpicker.css` and `js/bootstrap-colorpicker-module.js`.
 Add a dependency to your app, for instance:
 
