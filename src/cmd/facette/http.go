@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"net"
 	"net/http"
 	"os"
@@ -14,7 +15,6 @@ import (
 
 	"github.com/facette/httproute"
 	"github.com/facette/logger"
-	graceful "gopkg.in/tylerb/graceful.v1"
 )
 
 const apiPrefix = "/api/v1"
@@ -26,7 +26,7 @@ type httpWorker struct {
 	service *Service
 	log     *logger.Logger
 	router  *httproute.Router
-	server  *graceful.Server
+	server  *http.Server
 	prefix  string
 }
 
@@ -163,36 +163,35 @@ func (w *httpWorker) Run(wg *sync.WaitGroup) {
 		}
 	}
 
-       if builtinAssets {
-               w.log.Info("serving web assets from built-in files")
-       }
+	if builtinAssets {
+		w.log.Info("serving web assets from built-in files")
+	}
 
 	w.Lock()
-	w.server = &graceful.Server{
-		Server: &http.Server{
-			Addr:    netAddr,
-			Handler: w.router,
-		},
-		NoSignalHandling: true,
-		Timeout:          time.Duration(w.service.config.GracefulTimeout) * time.Second,
+	w.server = &http.Server{
+		Addr:    netAddr,
+		Handler: w.router,
 	}
 	w.Unlock()
 
-	if err := w.server.Serve(listener); err != nil {
+	if err := w.server.Serve(listener); err != nil && err != http.ErrServerClosed {
 		w.log.Error("failed to serve: %s", err)
-		return
 	}
 
 	w.log.Debug("worker stopped")
 }
 
 func (w *httpWorker) Shutdown() {
-	w.Lock()
-	defer w.Unlock()
-
-	// Trigger graceful shutdown
+	// Gracefully stop HTTP server
 	if w.server != nil {
-		w.server.Stop(w.server.Timeout)
+		w.Lock()
+		defer w.Unlock()
+
+		ctx, cancel := context.WithTimeout(context.Background(),
+			time.Duration(w.service.config.GracefulTimeout)*time.Second)
+		defer cancel()
+
+		w.server.Shutdown(ctx)
 	}
 
 	// Shutdown worker

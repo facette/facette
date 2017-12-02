@@ -156,12 +156,6 @@
 			"branch": "master"
 		},
 		{
-			"importpath": "github.com/urfave/negroni",
-			"repository": "https://github.com/urfave/negroni",
-			"revision": "5dbbc83f748fc3ad38585842b0aedab546d0ea1e",
-			"branch": "master"
-		},
-		{
 			"importpath": "github.com/ziutek/rrd",
 			"repository": "https://github.com/ziutek/rrd",
 			"revision": "86f4f09e7abbf4bfb3912da6c041cabba4e933bc",
@@ -173,12 +167,6 @@
 			"revision": "a8b9294777976932365dabb6640cf1468d95c70f",
 			"branch": "master",
 			"path": "/context"
-		},
-		{
-			"importpath": "gopkg.in/tylerb/graceful.v1",
-			"repository": "https://gopkg.in/tylerb/graceful.v1",
-			"revision": "4654dfbb6ad53cb5e27f37d99b02e16c1872fbbb",
-			"branch": "master"
 		},
 		{
 			"importpath": "gopkg.in/yaml.v2",
