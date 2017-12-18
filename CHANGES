@@ -1,6 +1,13 @@
 CHANGES
 =======
 
+0.4.0 (2017-12-18)
+------------------
+
+ * Display graphs groups options for single series
+ * Fix bogus time selection on graph zoom
+ * Documentation fixes
+
 0.4.0rc2 (2017-07-26)
 ---------------------
 
