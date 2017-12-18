@@ -150,5 +150,5 @@ update-locales:
 
 node_modules:
 	@$(call mesg_start,build,Retrieving assets build dependencies...)
-	@$(NPM) $(NPM_ARGS) install >/dev/null && \
+	@$(NPM) $(NPM_ARGS) install --package-lock=false >/dev/null && \
 		$(call mesg_ok) || $(call mesg_fail)
