@@ -45,4 +45,7 @@ hide_build_details: false
 
 read_only: false
 
+# username: facette
+# password: facette
+
 # vim: ts=2 sw=2 et
