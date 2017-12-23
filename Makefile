@@ -34,10 +34,11 @@ BIN_LIST = $(patsubst src/cmd/%,%,$(wildcard src/cmd/*))
 PKG_LIST = $(patsubst src/%,%,$(wildcard src/facette/*))
 MAN_LIST = $(patsubst docs/man/%.md,%,$(wildcard docs/man/*.[0-9].md))
 
-mesg_start = echo "$(shell tty -s && tput setaf 4)$(1):$(shell tty -s && tput sgr0) $(2)"
+tput = $(shell tty 1>/dev/null 2>&1 && tput $(1))
+mesg_start = echo "$(call tput,setaf 4)$(1):$(call tput,sgr0) $(2)"
 mesg_step = echo "$(1)"
-mesg_ok = echo "result: $(shell tty -s && tput setaf 2)ok$(shell tty -s && tput sgr0)"
-mesg_fail = (echo "result: $(shell tty -s && tput setaf 1)fail$(shell tty -s && tput sgr0)" && false)
+mesg_ok = echo "result: $(call tput,setaf 2)ok$(call tput,sgr0)"
+mesg_fail = (echo "result: $(call tput,setaf 1)fail$(call tput,sgr0)" && false)
 
 all: build
 
