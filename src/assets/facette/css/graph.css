@@ -215,12 +215,21 @@
 }
 
 .graph-menu > .menuitem {
-	display: inline-block;
+	display: inline-flex;
 	height: 1.5rem;
-	line-height: 1.5rem;
+	justify-content: center;
 	margin-left: 0.35rem;
 	position: relative;
 	vertical-align: middle;
+}
+
+.graph-menu > .menuitem > .content {
+	display: flex;
+	align-items: center;
+}
+
+.graph-menu > .menuitem > .subcontent {
+	top: 1.5rem;
 }
 
 .graph-menu > .menuitem.button:hover,
