@@ -25,8 +25,9 @@ type bulkRequestEntry struct {
 type bulkResponse []bulkResponseEntry
 
 type bulkResponseEntry struct {
-	Status int         `json:"status"`
-	Data   interface{} `json:"data"`
+	Status  int         `json:"status"`
+	Headers http.Header `json:"headers"`
+	Data    interface{} `json:"data"`
 }
 
 // api:method POST /api/v1/bulk/ "Bulk requests execution"
@@ -151,7 +152,8 @@ func (w *httpWorker) httpHandleBulk(rw http.ResponseWriter, r *http.Request) {
 
 		// Generate response entry
 		result[idx] = bulkResponseEntry{
-			Status: rec.Code,
+			Status:  rec.Code,
+			Headers: rec.HeaderMap,
 		}
 
 		json.Unmarshal(rec.Body.Bytes(), &result[idx].Data)
