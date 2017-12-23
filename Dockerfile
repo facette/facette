@@ -1,54 +1,30 @@
-FROM debian:jessie-slim
- 
+FROM alpine:latest
+
 MAINTAINER Development Team <dev@facette.io>
- 
-ENV GO_VERSION=1.8.3 NODE_VERSION=7.10.0 PREFIX=/usr BUILD_TAGS=builtin_assets
- 
-RUN echo "deb http://deb.debian.org/debian jessie-backports main" >>/etc/apt/sources.list && \
-    apt-get update && \
-    apt-get install --no-install-recommends -y -t jessie-backports \
-        build-essential \
-        ca-certificates \
-        curl \
-        git \
-        librrd-dev \
-        pandoc \
-        xz-utils && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
- 
-ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/usr/local/node/bin
- 
-RUN curl -s -L https://storage.googleapis.com/golang/go${GO_VERSION}.linux-amd64.tar.gz | \
-    tar -C /usr/local -xvzf - && \
-    go get -u github.com/jteeuwen/go-bindata/... && cp ~/go/bin/* /usr/local/bin
- 
-RUN curl -s -L https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz | \
-    tar -C /usr/local --transform "flags=r;s/^node-v${NODE_VERSION}-linux-x64/node/" -xvJf -
- 
-COPY . /facette
 
-WORKDIR /facette 
+COPY . /tmp/build
 
-RUN make && \
-    make install && \
-    install -D docs/examples/facette.yaml /etc/facette/facette.yaml && \
-    useradd -r -m -u 12003 -s /usr/sbin/nologin -d /var/lib/facette facette && \
+RUN apk --no-cache add --virtual .build-deps git go make musl-dev nodejs rrdtool-dev && \
+    make -C /tmp/build build install && \
+    install -D /tmp/build/docs/examples/facette.yaml /etc/facette/facette.yaml && \
     sed -i -r \
         -e 's/listen: localhost:12003/listen: :12003/' \
         -e 's/path: data.db/path: \/var\/lib\/facette\/data.db/' \
         -e 's/assets_dir: assets/assets_dir: \/usr\/share\/facette\/assets/' \
         /etc/facette/facette.yaml && \
-    rm -rf /facette
+    rm -rf /tmp/build && \
+    apk del .build-deps
 
-WORKDIR /
+RUN apk --no-cache add rrdtool
 
-VOLUME /var/lib/facette
+RUN adduser -h /var/lib/facette -S -D -u 1234 facette
+
+USER 1234
 
 EXPOSE 12003
 
-USER 12003
+VOLUME /var/lib/facette
 
 ENTRYPOINT ["facette"]
- 
+
 # vim: ts=4 sw=4 et

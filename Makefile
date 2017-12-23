@@ -153,3 +153,7 @@ node_modules:
 	@$(call mesg_start,build,Retrieving assets build dependencies...)
 	@$(NPM) $(NPM_ARGS) install --package-lock=false >/dev/null && \
 		$(call mesg_ok) || $(call mesg_fail)
+
+docker:
+	@$(call mesg_start,docker,Building image...)
+	@docker build -f Dockerfile -t facette/facette:$(VERSION) .
