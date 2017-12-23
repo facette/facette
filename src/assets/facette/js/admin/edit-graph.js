@@ -752,11 +752,22 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
                 });
             };
 
-            $scope.seriesOrigins = function(term) {
+            $scope.seriesOrigins = function(term, limit) {
                 var defer = $q.defer();
 
-                catalog.list({type: 'origins', filter: 'glob:*' + term + '*'}, function(data) {
-                    defer.resolve(data.map(function(a) { return {label: a, value: a}; }));
+                var query = {type: 'origins'};
+                if (term) {
+                    query.filter = 'glob:*' + term + '*';
+                }
+                if (limit) {
+                    query.limit = limit;
+                }
+
+                catalog.list(query, function(data, headers) {
+                    defer.resolve({
+                        entries: data.map(function(a) { return {label: a, value: a}; }),
+                        total: parseInt(headers('X-Total-Records'), 10)
+                    });
                 }, function() {
                     defer.reject();
                 });
@@ -764,34 +775,46 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
                 return defer.promise;
             };
 
-            $scope.seriesSources = function(term) {
+            $scope.seriesSources = function(term, limit) {
                 var defer = $q.defer();
+
+                var params = {};
+                if (term) {
+                    params.filter = 'glob:*' + term + '*';
+                }
+                if (limit) {
+                    params.limit = limit;
+                }
 
                 bulk.exec([
                     {
                         endpoint: 'library/sourcegroups/',
                         method: 'GET',
-                        params: {fields: 'id,name', filter: 'glob:*' + term + '*'}
+                        params: angular.extend({fields: 'id,name'}, params)
                     },
                     {
                         endpoint: 'catalog/sources/',
                         method: 'GET',
-                        params: {filter: 'glob:*' + term + '*'}
+                        params: angular.extend({}, params)
                     }
                 ], function(data) {
-                    var result = [];
+                    var entries = [];
 
                     if (data[0].data) {
-                        result = result.concat(data[0].data.map(function(a) {
+                        entries = entries.concat(data[0].data.map(function(a) {
                             return {label: a.name, value: a, note: 'group'};
                         }));
                     }
 
                     if (data[1].data) {
-                        result = result.concat(data[1].data.map(function(a) { return {label: a, value: a}; }));
+                        entries = entries.concat(data[1].data.map(function(a) { return {label: a, value: a}; }));
                     }
 
-                    defer.resolve(result);
+                    defer.resolve({
+                        entries: entries,
+                        total: parseInt(data[0].headers['X-Total-Records'][0], 10) +
+                            parseInt(data[1].headers['X-Total-Records'][0], 10)
+                    });
                 }, function() {
                     defer.reject();
                 });
@@ -799,34 +822,46 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
                 return defer.promise;
             };
 
-            $scope.seriesMetrics = function(term) {
+            $scope.seriesMetrics = function(term, limit) {
                 var defer = $q.defer();
+
+                var params = {};
+                if (term) {
+                    params.filter = 'glob:*' + term + '*';
+                }
+                if (limit) {
+                    params.limit = limit;
+                }
 
                 bulk.exec([
                     {
                         endpoint: 'library/metricgroups/',
                         method: 'GET',
-                        params: {fields: 'id,name', filter: 'glob:*' + term + '*'}
+                        params: angular.extend({fields: 'id,name'}, params)
                     },
                     {
                         endpoint: 'catalog/metrics/',
                         method: 'GET',
-                        params: {filter: 'glob:*' + term + '*'}
+                        params: angular.extend({}, params)
                     }
                 ], function(data) {
-                    var result = [];
+                    var entries = [];
 
                     if (data[0].data) {
-                        result = result.concat(data[0].data.map(function(a) {
+                        entries = entries.concat(data[0].data.map(function(a) {
                             return {label: a.name, value: a, note: 'group'};
                         }));
                     }
 
                     if (data[1].data) {
-                        result = result.concat(data[1].data.map(function(a) { return {label: a, value: a}; }));
+                        entries = entries.concat(data[1].data.map(function(a) { return {label: a, value: a}; }));
                     }
 
-                    defer.resolve(result);
+                    defer.resolve({
+                        entries: entries,
+                        total: parseInt(data[0].headers['X-Total-Records'][0], 10) +
+                            parseInt(data[1].headers['X-Total-Records'][0], 10)
+                    });
                 }, function() {
                     defer.reject();
                 });
@@ -893,8 +928,11 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
                     kind: 'template',
                     fields: 'id,name',
                     filter: 'glob:*' + term + '*'
-                }, function(data) {
-                    defer.resolve(data.map(function(a) { return {label: a.name, value: a.id}; }));
+                }, function(data, headers) {
+                    defer.resolve({
+                        entries: data.map(function(a) { return {label: a.name, value: a.id}; }),
+                        total: parseInt(headers('X-Total-Records'), 10)
+                    });
                 }, function() {
                     defer.reject();
                 });

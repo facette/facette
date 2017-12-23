@@ -123,8 +123,13 @@ app.controller('AdminEditGroupController', function($q, $route, $routeParams, $s
         $scope.patternValues = function(term) {
             var defer = $q.defer();
 
-            catalog.list({type: type, filter: 'glob:*' + term + '*'}).$promise.then(function(data) {
-                defer.resolve(data.map(function(a) { return {label: a, value: a}; }));
+            catalog.list({type: type, filter: 'glob:*' + term + '*'}, function(data, headers) {
+                defer.resolve({
+                    entries: data.map(function(a) { return {label: a, value: a}; }),
+                    total: parseInt(headers('X-Total-Records'), 10)
+                });
+            }, function() {
+                defer.reject();
             });
 
             return defer.promise;

@@ -82,10 +82,10 @@
 
 					<div class="formblock">
 						<label>{{ 'label.origin' | translate }}</label>
-						<autocomplete id="origin" delay="250" allow-override="true" source="seriesOrigins" on-select="selectSeries"></autocomplete>
+						<autocomplete id="origin" delay="250" allow-override="true" prefill="true" source="seriesOrigins" on-select="selectSeries"></autocomplete>
 
 						<label>{{ 'label.source' | translate }}</label>
-						<autocomplete id="source" delay="250" allow-override="true" source="seriesSources" on-select="selectSeries"></autocomplete>
+						<autocomplete id="source" delay="250" allow-override="true" prefill="true" source="seriesSources" on-select="selectSeries"></autocomplete>
 
 						<label>{{ 'label.metric' | translate }}</label>
 						<autocomplete id="metric" delay="250" allow-override="true" source="seriesMetrics" on-select="selectSeries"></autocomplete>

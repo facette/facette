@@ -378,8 +378,11 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
                     type: 'graphs',
                     fields: 'id,name,options,template',
                     filter: 'glob:*' + term + '*'
-                }, function(data) {
-                    defer.resolve(data.map(function(a) { return {label: a.name, value: a}; }));
+                }, function(data, headers) {
+                    defer.resolve({
+                        entries: data.map(function(a) { return {label: a.name, value: a}; }),
+                        total: parseInt(headers('X-Total-Records'), 10)
+                    });
                 }, function() {
                     defer.reject();
                 });
@@ -423,8 +426,11 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
                     kind: 'template',
                     fields: 'id,name',
                     filter: 'glob:*' + term + '*'
-                }, function(data) {
-                    defer.resolve(data.map(function(a) { return {label: a.name, value: a.id}; }));
+                }, function(data, headers) {
+                    defer.resolve({
+                        entries: data.map(function(a) { return {label: a.name, value: a.id}; }),
+                        total: parseInt(headers('X-Total-Records'), 10)
+                    });
                 }, function() {
                     defer.reject();
                 });
@@ -474,13 +480,16 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
                 }
 
                 // Return cleaned up list
-                var result = [];
+                var entries = [];
 
                 angular.forEach(collections, function(entry) {
-                    result.push({label: entry.name, value: entry});
+                    entries.push({label: entry.name, value: entry});
                 });
 
-                defer.resolve(result);
+                defer.resolve({
+                    entries: entries,
+                    total: entries.length
+                });
             });
 
             return defer.promise;

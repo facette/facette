@@ -8,6 +8,7 @@ angular.module('facette.ui.autocomplete', [])
             id: '@',
             delay: '@',
             allowOverride: '=?',
+            prefill: '=?',
             source: '=',
             onSelect: '=?'
         },
@@ -128,9 +129,17 @@ angular.module('facette.ui.autocomplete', [])
                 $scope.activate(0);
 
                 $scope.source(newValue).then(function(data) {
-                    $scope.entries = data;
+                    $scope.entries = data.entries;
                 });
             }, $scope.delay);
+        });
+    }
+
+    if ($scope.prefill) {
+        $scope.source(null, 1).then(function(data) {
+            if (data.total == 1) {
+                $scope.select(document.createEvent('Event'), data.entries[0]);
+            }
         });
     }
 

@@ -19,13 +19,10 @@ app.controller('BrowseSearchController', function($location, $q, $rootScope, $sc
             },
             limit: pagingLimit
         }, function(data) {
-            defer.resolve(data.map(function(a) {
-                return {
-                    label: a.name,
-                    value: a,
-                    note: a.type
-                };
-            }));
+            defer.resolve({
+                entries: data.map(function(a) { return {label: a.name, value: a, note: a.type}; }),
+                total: 0
+            });
         }, function() {
             defer.reject();
         });
