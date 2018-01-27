@@ -17,6 +17,7 @@ import (
 	"github.com/facette/logger"
 	"github.com/facette/maputil"
 	influxdb "github.com/influxdata/influxdb/client/v2"
+	influxmodels "github.com/influxdata/influxdb/models"
 	"github.com/influxdata/influxql"
 )
 
@@ -241,7 +242,10 @@ func (c *influxdbConnector) Refresh(output chan<- *catalog.Record) error {
 		// Parse results for sources and metrics
 		for _, s := range response.Results[0].Series {
 			for i := range s.Values {
-				seriesColumns := mapSeriesColumns(s.Values[i][0].(string))
+				seriesColumns, err := mapSeriesColumns(s.Values[i][0].(string))
+				if err != nil {
+					return fmt.Errorf("failed to map columns: %s", err)
+				}
 
 				var parts []string
 
@@ -401,18 +405,16 @@ func mapKey(seriesColumns map[string]string, item string) (string, string) {
 	return "", ""
 }
 
-func mapSeriesColumns(series string) map[string]string {
-	columns := make(map[string]string)
+func mapSeriesColumns(series string) (map[string]string, error) {
+	idx := strings.Index(series, ",")
 
-	// From InfluxDB documentation of "SHOW SERIES":
-	// 		"Everything before the first comma is the measurement name.
-	// 		Everything after the first comma is either a tag key or a tag value."
-
-	columns["name"] = series[:strings.Index(series, ",")]
-	for _, col := range strings.Split(series[strings.Index(series, ",")+1:], ",") {
-		kv := strings.Split(col, "=")
-		columns[kv[0]] = kv[1]
+	tags, err := influxmodels.ParseTags([]byte(series))
+	if err != nil {
+		return nil, err
 	}
 
-	return columns
+	columns := tags.Map()
+	columns["name"] = series[:idx]
+
+	return columns, nil
 }
