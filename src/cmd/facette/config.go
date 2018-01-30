@@ -42,6 +42,8 @@ type config struct {
 	DefaultTimeRange string         `yaml:"default_time_range"`
 	HideBuildDetails bool           `yaml:"hide_build_details"`
 	ReadOnly         bool           `yaml:"read_only"`
+	Username         string         `yaml:"username"`
+	Password         string         `yaml:"password"`
 }
 
 func initConfig(path string) (*config, error) {

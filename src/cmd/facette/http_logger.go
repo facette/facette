@@ -21,6 +21,14 @@ func (rw responseWriter) WriteHeader(status int) {
 
 func (w *httpWorker) httpHandleLogger(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		if w.service.config.Username != "" && w.service.config.Password != "" {
+			user, pass, _ := r.BasicAuth()
+			if user != w.service.config.Username || pass != w.service.config.Password {
+				rw.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
+				http.Error(rw, "Unauthorized.", 401)
+				return
+			}
+		}
 		h.ServeHTTP(responseWriter{rw, r, w.log}, r)
 	})
 }
