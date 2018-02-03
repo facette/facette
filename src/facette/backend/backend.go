@@ -8,13 +8,6 @@ import (
 	"github.com/facette/sqlstorage"
 )
 
-const (
-	// FilterGlobPrefix is the glob pattern matching filter prefix.
-	FilterGlobPrefix = "glob:"
-	// FilterRegexpPrefix is the regular expression matching filter prefix.
-	FilterRegexpPrefix = "regexp:"
-)
-
 var (
 	nameRegexp = regexp.MustCompile("(?i)^[a-z0-9](?:[a-z0-9\\-_\\.]*[a-z0-9])?$")
 )

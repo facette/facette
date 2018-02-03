@@ -6,17 +6,14 @@ import (
 	"regexp"
 	"strings"
 
+	"facette/pattern"
+
 	"github.com/jinzhu/gorm"
 )
 
 const (
 	// GroupPrefix represents the source or metric group prefix.
 	GroupPrefix = "group:"
-
-	// GlobPrefix represents the glob pattern prefix.
-	GlobPrefix = "glob:"
-	// RegexpPrefix represents the regexp pattern prefix.
-	RegexpPrefix = "regexp:"
 )
 
 // SourceGroup represents a library source group item instance.
@@ -37,11 +34,11 @@ func (sg *SourceGroup) BeforeSave(scope *gorm.Scope) error {
 	}
 
 	for _, p := range sg.Patterns {
-		if !strings.HasPrefix(p, RegexpPrefix) {
+		if !strings.HasPrefix(p, pattern.RegexpPrefix) {
 			continue
 		}
 
-		if _, err := regexp.Compile(strings.TrimPrefix(p, RegexpPrefix)); err != nil {
+		if _, err := regexp.Compile(strings.TrimPrefix(p, pattern.RegexpPrefix)); err != nil {
 			return ErrInvalidPattern
 		}
 	}
@@ -72,11 +69,11 @@ func (mg *MetricGroup) BeforeSave(scope *gorm.Scope) error {
 	}
 
 	for _, p := range mg.Patterns {
-		if !strings.HasPrefix(p, RegexpPrefix) {
+		if !strings.HasPrefix(p, pattern.RegexpPrefix) {
 			continue
 		}
 
-		if _, err := regexp.Compile(strings.TrimPrefix(p, RegexpPrefix)); err != nil {
+		if _, err := regexp.Compile(strings.TrimPrefix(p, pattern.RegexpPrefix)); err != nil {
 			return ErrInvalidPattern
 		}
 	}

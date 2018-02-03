@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"facette/backend"
+	"facette/pattern"
 
 	"github.com/facette/httputil"
 	"github.com/fatih/set"
@@ -117,7 +118,7 @@ func (w *httpWorker) expandSeries(series *backend.Series, existOnly bool) []*bac
 		// Loop through sources checking for patterns matching
 		for _, s := range w.service.searcher.Sources(series.Origin, "", -1) {
 			for _, p := range group.Patterns {
-				if match, err := filterMatch(p, s.Name); err != nil {
+				if match, err := pattern.Match(p, s.Name); err != nil {
 					w.log.Error("failed to match filter: %s", err)
 					return nil
 				} else if match {
@@ -150,7 +151,7 @@ func (w *httpWorker) expandSeries(series *backend.Series, existOnly bool) []*bac
 			}
 
 			for _, p := range group.Patterns {
-				if match, err := filterMatch(p, m.Name); err != nil {
+				if match, err := pattern.Match(p, m.Name); err != nil {
 					w.log.Error("failed to match filter: %s", err)
 					return nil
 				} else if match {

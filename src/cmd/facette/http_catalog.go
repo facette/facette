@@ -7,6 +7,7 @@ import (
 	"sort"
 
 	"facette/catalog"
+	"facette/pattern"
 
 	"github.com/facette/httproute"
 	"github.com/facette/httputil"
@@ -113,7 +114,7 @@ func (w *httpWorker) httpHandleCatalogType(rw http.ResponseWriter, r *http.Reque
 		name := reflect.Indirect(reflect.ValueOf(item)).FieldByName("Name").String()
 		if filter == "" {
 			s.Add(name)
-		} else if match, err := filterMatch(filter, name); err != nil {
+		} else if match, err := pattern.Match(filter, name); err != nil {
 			httputil.WriteJSON(rw, httpBuildMessage(ErrInvalidFilter), http.StatusBadRequest)
 			return
 		} else if match {
