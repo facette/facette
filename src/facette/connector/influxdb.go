@@ -33,7 +33,7 @@ type influxDBMapEntry struct {
 	terms  map[string]string
 }
 
-// influxdbConnector implements the connector handler for another InfluxDB instance.
+// influxdbConnector implements the connector handler for an InfluxDB instance.
 type influxdbConnector struct {
 	name          string
 	url           string

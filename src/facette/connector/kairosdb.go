@@ -85,7 +85,7 @@ type kairosdbQuery struct {
 	Metrics       []kairosdbQueryMetric `json:"metrics"`
 }
 
-// kairosdbConnector implements the connector handler for another KairosDB instance.
+// kairosdbConnector implements the connector handler for a KairosDB instance.
 type kairosdbConnector struct {
 	name          string
 	url           string

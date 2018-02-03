@@ -30,7 +30,7 @@ type graphitePoint struct {
 	Datapoints [][2]float64
 }
 
-// graphiteConnector implements the connector handler for another Graphite instance.
+// graphiteConnector implements the connector handler for a Graphite instance.
 type graphiteConnector struct {
 	name          string
 	url           string
