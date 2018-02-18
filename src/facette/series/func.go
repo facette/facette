@@ -246,7 +246,9 @@ func applyOperator(series []Series, operator int) (Series, error) {
 		result.Points[i].Time = series[0].Points[i].Time
 
 		for _, s := range series {
-			if len(s.Points) != count {
+			if s.Points == nil {
+				continue
+			} else if len(s.Points) != count {
 				return Series{}, ErrUnnormalizedSeries
 			} else if s.Points[i].Value.IsNaN() {
 				continue
