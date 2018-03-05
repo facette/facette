@@ -103,7 +103,7 @@ func init() {
 
 		c := &kairosdbConnector{
 			name:    name,
-			metrics: make(map[string]map[string]*kairosdbMetric),
+			metrics: make(map[string]map[string]*kairosdbMetric), // FIXME: init map in Refresh()
 		}
 
 		// Get connector handler settings
@@ -240,7 +240,7 @@ func (c *kairosdbConnector) Refresh(output chan<- *catalog.Record) error {
 
 // Points retrieves the time series data according to the query parameters and a time interval.
 func (c *kairosdbConnector) Points(q *series.Query) ([]series.Series, error) {
-	step := q.EndTime.Sub(q.StartTime) / time.Duration(q.Sample)
+	step := q.EndTime.Sub(q.StartTime) / time.Duration(q.Sample) // FIXME: use q.Step()
 	sampling := step.Nanoseconds() / 1000000
 
 	pq := kairosdbQuery{
