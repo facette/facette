@@ -33,6 +33,10 @@ func (sg *SourceGroup) BeforeSave(scope *gorm.Scope) error {
 		return err
 	}
 
+	if len(sg.Patterns) == 0 {
+		return ErrEmptyGroup
+	}
+
 	for _, p := range sg.Patterns {
 		if !strings.HasPrefix(p, pattern.RegexpPrefix) {
 			continue

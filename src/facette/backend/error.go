@@ -3,6 +3,8 @@ package backend
 import "errors"
 
 var (
+	// ErrEmptyGroup represents an empty group error.
+	ErrEmptyGroup = errors.New("empty group")
 	// ErrInvalidAlias represents an invalid alias error.
 	ErrInvalidAlias = errors.New("invalid alias")
 	// ErrInvalidID represents an invalid identifier error.
