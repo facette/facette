@@ -18,6 +18,9 @@ func testSourceGroupNew() []*SourceGroup {
 			Item: Item{
 				Name: "item2",
 			},
+			Patterns: GroupPatterns{
+				"pattern2",
+			},
 		},
 
 		&SourceGroup{
@@ -46,6 +49,9 @@ func testMetricGroupNew() []*MetricGroup {
 		&MetricGroup{
 			Item: Item{
 				Name: "item2",
+			},
+			Patterns: GroupPatterns{
+				"pattern2",
 			},
 		},
 
