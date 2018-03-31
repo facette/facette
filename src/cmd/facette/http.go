@@ -48,7 +48,7 @@ func newHTTPWorker(s *Service) *httpWorker {
 		Get(w.httpHandleCatalogSummary)
 	w.router.Endpoint(w.prefix + "/catalog/:type/").
 		Get(w.httpHandleCatalogType)
-	w.router.Endpoint(w.prefix + "/catalog/:type/:name").
+	w.router.Endpoint(w.prefix + "/catalog/:type/*").
 		Get(w.httpHandleCatalogEntry)
 
 	w.router.Endpoint(w.prefix + "/library/").

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"reflect"
 	"sort"
+	"strings"
 
 	"facette/catalog"
 	"facette/pattern"
@@ -195,7 +196,7 @@ func (w *httpWorker) httpHandleCatalogEntry(rw http.ResponseWriter, r *http.Requ
 	var result interface{}
 
 	typ := httproute.ContextParam(r, "type").(string)
-	name := httproute.ContextParam(r, "name").(string)
+	name := strings.TrimPrefix(r.URL.Path, w.prefix+"/catalog/"+typ+"/")
 
 	search := w.httpCatalogSearch(typ, name, r)
 	if search == nil || len(search) == 0 {
