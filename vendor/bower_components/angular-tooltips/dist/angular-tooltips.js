@@ -7,6 +7,7 @@
             scope: {
                 title: '@',
                 fixedPosition: '=',
+                titleClass: '@',
             },
             link: function ($scope, element, attrs) {
                 // adds the tooltip to the body
@@ -15,7 +16,7 @@
                         var direction = $scope.getDirection();
 
                         // create the tooltip
-                        $scope.tooltipElement = angular.element('<div>').addClass('angular-tooltip');
+                        $scope.tooltipElement = angular.element('<div>').addClass('angular-tooltip').addClass($scope.titleClass);
 
                         // append to the body
                         angular.element(document).find('body').append($scope.tooltipElement);

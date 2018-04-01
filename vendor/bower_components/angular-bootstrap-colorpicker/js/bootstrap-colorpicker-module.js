@@ -299,10 +299,12 @@ angular.module('colorpicker.module', [])
               sliderHue = colorpickerTemplate.find('colorpicker-hue'),
               sliderSaturation = colorpickerTemplate.find('colorpicker-saturation'),
               colorpickerPreview = colorpickerTemplate.find('colorpicker-preview'),
-              pickerColorPointers = colorpickerTemplate.find('i');
+              pickerColorPointers = colorpickerTemplate.find('i'),
+              componentWidthWithToolbars = parseInt(componentSize) + 29 + (thisFormat === 'rgba' ? 15 : 0),
+              componentHeightWithToolbars = parseInt(componentSize) + 55;
 
           $compile(colorpickerTemplate)($scope);
-          colorpickerTemplate.css('min-width', parseInt(componentSize) + 29 + 'px');
+          colorpickerTemplate.css('min-width', componentWidthWithToolbars + 'px');
           sliderSaturation.css({
             'width' : componentSizePx,
             'height' : componentSizePx
@@ -468,7 +470,8 @@ angular.module('colorpicker.module', [])
           function getColorpickerTemplatePosition() {
             var
                 positionValue,
-                positionOffset = Helper.getOffset(elem[0]);
+                positionOffset = Helper.getOffset(elem[0]),
+                additionalSpaceBetweenElements = 2;
 
             if(angular.isDefined(attrs.colorpickerParent)) {
               positionOffset.left = 0;
@@ -477,23 +480,23 @@ angular.module('colorpicker.module', [])
 
             if (position === 'top') {
               positionValue =  {
-                'top': positionOffset.top - 147,
+                'top': positionOffset.top - componentHeightWithToolbars - additionalSpaceBetweenElements,
                 'left': positionOffset.left
               };
             } else if (position === 'right') {
               positionValue = {
                 'top': positionOffset.top,
-                'left': positionOffset.left + 126
+                'left': positionOffset.left + elem[0].offsetWidth + additionalSpaceBetweenElements
               };
             } else if (position === 'bottom') {
               positionValue = {
-                'top': positionOffset.top + elem[0].offsetHeight + 2,
+                'top': positionOffset.top + elem[0].offsetHeight + additionalSpaceBetweenElements,
                 'left': positionOffset.left
               };
             } else if (position === 'left') {
               positionValue = {
                 'top': positionOffset.top,
-                'left': positionOffset.left - 150
+                'left': positionOffset.left - componentWidthWithToolbars - additionalSpaceBetweenElements
               };
             }
             return {
