@@ -24,13 +24,16 @@ const (
 	LevelDebug
 )
 
-var levelMap = map[string]int{
-	"error":   LevelError,
-	"warning": LevelWarning,
-	"notice":  LevelNotice,
-	"info":    LevelInfo,
-	"debug":   LevelDebug,
-}
+var (
+	logger   *Logger
+	levelMap = map[string]int{
+		"error":   LevelError,
+		"warning": LevelWarning,
+		"notice":  LevelNotice,
+		"info":    LevelInfo,
+		"debug":   LevelDebug,
+	}
+)
 
 // Logger represents a logger instance.
 type Logger struct {
@@ -40,6 +43,10 @@ type Logger struct {
 	wg sync.WaitGroup
 
 	sync.Mutex
+}
+
+func init() {
+	logger, _ = NewLogger(FileConfig{Level: "debug"})
 }
 
 // NewLogger returns a new Logger instance initialized with the given configuration.
@@ -103,10 +110,20 @@ func (l *Logger) Error(format string, v ...interface{}) *Logger {
 	return l
 }
 
+// Error prints an error message using the default logger.
+func Error(format string, v ...interface{}) {
+	logger.Error(format, v...)
+}
+
 // Warning prints a warning message in the logging system.
 func (l *Logger) Warning(format string, v ...interface{}) *Logger {
 	l.write(LevelWarning, format, v...)
 	return l
+}
+
+// Warning prints a warning message using the default logger.
+func Warning(format string, v ...interface{}) {
+	logger.Warning(format, v...)
 }
 
 // Notice prints a notice message in the logging system.
@@ -115,16 +132,31 @@ func (l *Logger) Notice(format string, v ...interface{}) *Logger {
 	return l
 }
 
+// Notice prints a notice message using the default logger.
+func Notice(format string, v ...interface{}) {
+	logger.Notice(format, v...)
+}
+
 // Info prints an information message in the logging system.
 func (l *Logger) Info(format string, v ...interface{}) *Logger {
 	l.write(LevelInfo, format, v...)
 	return l
 }
 
+// Info prints an information message using the default logger.
+func Info(format string, v ...interface{}) {
+	logger.Info(format, v...)
+}
+
 // Debug prints a debug message in the logging system.
 func (l *Logger) Debug(format string, v ...interface{}) *Logger {
 	l.write(LevelDebug, format, v...)
 	return l
+}
+
+// Debug prints a debug message using the default logger.
+func Debug(format string, v ...interface{}) {
+	logger.Debug(format, v...)
 }
 
 // Close closes the logger output file.

@@ -17,6 +17,8 @@ const (
 	defaultRootPath          = "/"
 	defaultLogPath           = ""
 	defaultLogLevel          = "info"
+	defaultSyslogFacility    = "daemon"
+	defaultSyslogTag         = "facette"
 	defaultFrontendEnabled   = true
 	defaultFrontendAssetsDir = "assets"
 	defaultTimeRange         = "-1h"
@@ -37,6 +39,11 @@ type config struct {
 	RootPath         string         `yaml:"root_path"`
 	LogPath          string         `yaml:"log_path"`
 	LogLevel         string         `yaml:"log_level"`
+	SyslogLevel      string         `yaml:"syslog_level"`
+	SyslogFacility   string         `yaml:"syslog_facility"`
+	SyslogTag        string         `yaml:"syslog_tag"`
+	SyslogAddress    string         `yaml:"syslog_address"`
+	SyslogTransport  string         `yaml:"syslog_transport"`
 	Frontend         frontendConfig `yaml:"frontend"`
 	Backend          *maputil.Map   `yaml:"backend"`
 	DefaultTimeRange string         `yaml:"default_time_range"`
@@ -52,6 +59,8 @@ func initConfig(path string) (*config, error) {
 			RootPath:        defaultRootPath,
 			LogPath:         defaultLogPath,
 			LogLevel:        defaultLogLevel,
+			SyslogFacility:  defaultSyslogFacility,
+			SyslogTag:       defaultSyslogTag,
 			Frontend: frontendConfig{
 				Enabled:   defaultFrontendEnabled,
 				AssetsDir: defaultFrontendAssetsDir,

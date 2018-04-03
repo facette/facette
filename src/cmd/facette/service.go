@@ -33,10 +33,28 @@ func NewService(config *config) *Service {
 
 // Run starts the service processing.
 func (s *Service) Run() error {
-	var err error
+	var (
+		loggers = make([]interface{}, 0)
+		err     error
+	)
 
 	// Initialize logger
-	s.log, err = logger.NewLogger(logger.FileConfig{Level: s.config.LogLevel, Path: s.config.LogPath})
+	loggers = append(loggers, logger.FileConfig{
+		Level: s.config.LogLevel,
+		Path:  s.config.LogPath,
+	})
+
+	if s.config.SyslogLevel != "" {
+		loggers = append(loggers, logger.SyslogConfig{
+			Level:     s.config.SyslogLevel,
+			Facility:  s.config.SyslogFacility,
+			Tag:       s.config.SyslogTag,
+			Address:   s.config.SyslogAddress,
+			Transport: s.config.SyslogTransport,
+		})
+	}
+
+	s.log, err = logger.NewLogger(loggers...)
 	if err != nil {
 		return err
 	}

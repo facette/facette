@@ -28,7 +28,7 @@
 		{
 			"importpath": "github.com/facette/logger",
 			"repository": "https://github.com/facette/logger",
-			"revision": "ded3054c57b9b4deaf4f0a82949e5329c4d030df",
+			"revision": "60ca3a8b846b4034dc8e93e725ac5d02388ae780",
 			"branch": "master"
 		},
 		{
