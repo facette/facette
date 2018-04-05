@@ -15,7 +15,7 @@ const (
 	defaultListen            = "localhost:12003"
 	defaultGracefulTimeout   = 30
 	defaultRootPath          = "/"
-	defaultLogPath           = ""
+	defaultLogPath           = "-"
 	defaultLogLevel          = "info"
 	defaultSyslogFacility    = "daemon"
 	defaultSyslogTag         = "facette"

@@ -39,10 +39,12 @@ func (s *Service) Run() error {
 	)
 
 	// Initialize logger
-	loggers = append(loggers, logger.FileConfig{
-		Level: s.config.LogLevel,
-		Path:  s.config.LogPath,
-	})
+	if s.config.LogPath != "" {
+		loggers = append(loggers, logger.FileConfig{
+			Level: s.config.LogLevel,
+			Path:  s.config.LogPath,
+		})
+	}
 
 	if s.config.SyslogLevel != "" {
 		loggers = append(loggers, logger.SyslogConfig{
