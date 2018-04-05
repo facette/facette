@@ -4,11 +4,11 @@ Installation
 Requirements
 ------------
 
- * Go language environment (>= 1.8)
- * RRDtool library and development files (>= 1.4.0)
- * pkg-config helper tool
- * Node.js and "npm" package manager
- * Pandoc document converter
+* Go language environment (>= 1.8)
+* RRDtool library and development files (>= 1.4.0)
+* pkg-config helper tool
+* Node.js and "npm" package manager
+* Pandoc document converter
 
 Debian/Ubuntu:
 
