@@ -46,8 +46,10 @@ func newFileBackend(config FileConfig, logger *Logger) (backend, error) {
 		// Create parent folders if needed
 		dirPath, _ := path.Split(config.Path)
 
-		if err = os.MkdirAll(dirPath, 0755); err != nil {
-			return nil, err
+		if dirPath != "" {
+			if err = os.MkdirAll(dirPath, 0755); err != nil {
+				return nil, err
+			}
 		}
 
 		// Open logging output file
