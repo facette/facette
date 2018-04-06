@@ -136,10 +136,16 @@ angular.module('facette.ui.autocomplete', [])
     }
 
     if ($scope.prefill) {
-        $scope.source(null, 1).then(function(data) {
-            if (data.total == 1) {
-                $scope.select(document.createEvent('Event'), data.entries[0]);
+        $scope.$watch('source', function(newValue, oldValue) {
+            if (oldValue || !newValue) {
+                return;
             }
+
+            $scope.source(null, 1).then(function(data) {
+                if (data.total == 1) {
+                    $scope.select(document.createEvent('Event'), data.entries[0]);
+                }
+            });
         });
     }
 
