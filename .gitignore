@@ -1,6 +1,4 @@
-/build
-/node_modules
-/package-lock.json
-/pkg
-/vendor/pkg
-bindata.go
+/bin
+/cmd/facette/bindata.go
+/dist
+/ui/node_modules

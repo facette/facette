@@ -1,6 +1,0 @@
-bower_components/
-node_modules/
-libpeerconnection.log
-npm-debug.log
-.idea
-docs

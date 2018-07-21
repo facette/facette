@@ -1,5 +1,6 @@
 # -*- Makefile -*-
 
+NAME := facette
 VERSION := 0.5.0dev
 
 BUILD_DATE := $(shell date +%F)
@@ -7,153 +8,145 @@ BUILD_HASH := $(shell git rev-parse --short HEAD)
 
 PREFIX ?= /usr/local
 
+ENV ?= production
+
 GO ?= go
+GOLINT ?= golint
 
 GOOS ?= $(shell $(GO) env GOOS)
 GOARCH ?= $(shell $(GO) env GOARCH)
 
-BUILD_NAME = facette-$(GOOS)-$(GOARCH)
-BUILD_DIR = build/$(BUILD_NAME)
-BUILD_ENV ?= production
-
-export GOPATH = $(realpath $(BUILD_DIR)):$(realpath $(BUILD_DIR))/vendor
-
-GOLINT ?= golint
-GOLINT_ARGS =
-
-NPM ?= npm
-NPM_ARGS =
-
-GULP ?= node_modules/.bin/gulp
-GULP_ARGS = --no-color
+YARN ?= yarn
+YARN_ARGS ?= --cwd ui
 
 PANDOC ?= pandoc
 PANDOC_ARGS = --standalone --to man
 
-BIN_LIST = $(patsubst src/cmd/%,%,$(wildcard src/cmd/*))
-PKG_LIST = $(patsubst src/%,%,$(wildcard src/facette/*))
+ifeq ($(shell uname -s),Darwin)
+TAR ?= gtar
+else
+TAR ?= tar
+endif
+
+GIT_HOOKS := $(patsubst misc/git-hooks/%,.git/hooks/%,$(wildcard misc/git-hooks/*))
+
+BIN_LIST := $(patsubst cmd/%,%,$(wildcard cmd/*))
+PKG_LIST = $(call uniq,$(dir $(wildcard */*.go)))
 MAN_LIST = $(patsubst docs/man/%.md,%,$(wildcard docs/man/*.[0-9].md))
 
-tput = $(shell tty 1>/dev/null 2>&1 && tput $(1))
-mesg_start = echo "$(call tput,setaf 4)$(1):$(call tput,sgr0) $(2)"
-mesg_step = echo "$(1)"
-mesg_ok = echo "result: $(call tput,setaf 2)ok$(call tput,sgr0)"
-mesg_fail = (echo "result: $(call tput,setaf 1)fail$(call tput,sgr0)" && false)
+DIST_DIR ?= dist
+
+tput = $(shell tty 1>/dev/null 2>&1 && tput $1)
+print_error = (echo "$(call tput,setaf 1)Error:$(call tput,sgr0) $1" && false)
+print_step = echo "$(call tput,setaf 4)***$(call tput,sgr0) $1"
+uniq = $(if $1,$(firstword $1) $(call uniq,$(filter-out $(firstword $1),$1)))
 
 all: build
 
 clean:
-	@$(call mesg_start,clean,Removing build data...)
-	@rm -rf $(BUILD_DIR) src/cmd/facette/bindata.go && \
-		$(call mesg_ok) || $(call mesg_fail)
-	@rmdir build 2>/dev/null || true
-
-clean-all: clean
-	@$(call mesg_start,clean,Removing assets build dependencies...)
-	@rm -rf node_modules && \
-		$(call mesg_ok) || $(call mesg_fail)
+	@$(call print_step,"Cleaning files...")
+	@rm -rf bin/ dist/
 
 build: build-bin build-assets build-docs
 
-build-dir:
-	@$(call mesg_start,build,Preparing build directory...)
-	@(install -d -m 0755 $(BUILD_DIR)/bin $(BUILD_DIR)/pkg $(BUILD_DIR)/vendor && \
-		(cd $(BUILD_DIR) && ln -sf ../../src .) && (cd $(BUILD_DIR)/vendor && ln -sf ../../../vendor/src ../pkg .)) && \
-		$(call mesg_ok) || $(call mesg_fail)
-
-ifneq ($(filter builtin_assets,$(BUILD_TAGS)),)
-build-bin: build-dir build-assets
-	@$(call mesg_start,build,Embedding assets files...)
+ifneq ($(filter builtin_assets,$(TAGS)),)
+build-bin: build-assets
+	@$(call print_step,"Embedding assets files...")
 	@go-bindata \
-			-prefix $(BUILD_DIR)/assets \
-			-tags 'builtin_assets' \
-			-o src/cmd/facette/bindata.go $(BUILD_DIR)/assets/... && \
-		$(call mesg_ok) || $(call mesg_fail)
+		-prefix $(DIST_DIR)/assets \
+		-tags 'builtin_assets' \
+		-o cmd/facette/bindata.go $(DIST_DIR)/assets/...
 else
-build-bin: build-dir
+build-bin:
 endif
-	@$(call mesg_start,build,Building binaries...)
-	@(for bin in $(BIN_LIST); do \
-		$(GO) build -i -v \
-			-tags "$(BUILD_TAGS)" \
+	@$(call print_step,"Building binaries for $(GOOS)/$(GOARCH)...")
+	@for bin in $(BIN_LIST); do \
+		$(GO) build -i \
+			-tags "$(TAGS)" \
 			-ldflags "-s -w \
 				-X main.version=$(VERSION) \
 				-X main.buildDate=$(BUILD_DATE) \
 				-X main.buildHash=$(BUILD_HASH) \
 			" \
-			-o $(BUILD_DIR)/bin/$$bin ./src/cmd/$$bin || exit 1; \
-	done) && $(call mesg_ok) || $(call mesg_fail)
+		-o bin/$$bin -v ./cmd/$$bin || $(call print_error,"failed to build $$bin"); \
+	done
 
-build-assets: node_modules
-	@$(call mesg_start,build,Building assets...)
-	@BUILD_DIR=$(BUILD_DIR) $(GULP) $(GULP_ARGS) build --env $(BUILD_ENV) >/dev/null && \
-		$(call mesg_ok) || $(call mesg_fail)
+build-assets: ui/node_modules
+	@$(call print_step,"Building assets...")
+	@$(YARN) $(YARN_ARGS) build --env $(ENV)
 
 build-docs:
-ifneq ($(filter build_docs,$(BUILD_TAGS)),)
+ifneq ($(filter build_docs,$(TAGS)),)
+	@$(call print_step,"Generating manual pages...")
 	@for man in $(MAN_LIST); do \
-		$(call mesg_start,docs,Generating $$man manual page...); \
-		install -d -m 0755 $(BUILD_DIR)/man && $(PANDOC) $(PANDOC_ARGS) docs/man/$$man.md >$(BUILD_DIR)/man/$$man && \
-			$(call mesg_ok) || $(call mesg_fail); \
+		install -d -m 0755 $(DIST_DIR)/man && $(PANDOC) $(PANDOC_ARGS) docs/man/$$man.md >$(DIST_DIR)/man/$$man; \
 	done
 endif
 
 test: test-bin
 
-test-bin: build-dir
-	@$(call mesg_start,test,Testing packages...)
-	@(cd $(BUILD_DIR) && for pkg in $(PKG_LIST); do \
-		install -d -m 0755 tests/`dirname $$pkg`; \
-		$(GO) test -v \
-			-tags "$(BUILD_TAGS)" \
-			-coverprofile tests/$$pkg.out $$pkg \
-			|| exit 1; \
-		test ! -f tests/$$pkg.out || $(GO) tool cover -o tests/$$pkg.func -func=tests/$$pkg.out || exit 1; \
-	done) && $(call mesg_ok) || $(call mesg_fail)
+test-bin:
+	@$(call print_step,"Testing packages...")
+	@for pkg in $(PKG_LIST); do \
+		$(GO) test -cover -v ./$$pkg; \
+	done
 
 install: install-bin install-assets install-docs
 
 install-bin: build-bin
-	@$(call mesg_start,install,Installing binaries...)
-	@install -d -m 0755 $(PREFIX)/bin && install -m 0755 $(BUILD_DIR)/bin/* $(PREFIX)/bin/ && \
-		$(call mesg_ok) || $(call mesg_fail)
+	@$(call print_step,"Installing binaries...")
+	@install -d -m 0755 $(PREFIX)/bin && install -m 0755 bin/* $(PREFIX)/bin/
 
 install-assets: build-assets
-	@$(call mesg_start,install,Installing assets...)
-	@install -d -m 0755 $(PREFIX)/share/facette && cp -r $(BUILD_DIR)/assets $(PREFIX)/share/facette/ && \
-		$(call mesg_ok) || $(call mesg_fail)
+	@$(call print_step,"Installing assets...")
+	@install -d -m 0755 $(PREFIX)/share/facette && cp -r $(DIST_DIR)/assets $(PREFIX)/share/facette/
 
 install-docs: build-docs
-ifneq ($(filter build_docs,$(BUILD_TAGS)),)
-	@$(call mesg_start,install,Installing manual pages...)
-	@install -d -m 0755 $(PREFIX)/share/man/man1 && cp -r $(BUILD_DIR)/man/* $(PREFIX)/share/man/man1 && \
-		$(call mesg_ok) || $(call mesg_fail)
+ifneq ($(filter build_docs,$(TAGS)),)
+	@$(call print_step,"Installing manual pages...")
+	@install -d -m 0755 $(PREFIX)/share/man/man1 && cp -r $(DIST_DIR)/man/* $(PREFIX)/share/man/man1
 endif
 
 lint: lint-bin lint-assets
 
 lint-bin:
-	@for pkg in $(PKG_LIST) $(BIN_LIST:%=cmd/%); do \
-		$(call mesg_start,lint,Checking $$pkg sources...); \
-		$(GOLINT) $(GOLINT_ARGS) ./src/$$pkg && \
-			$(call mesg_ok) || $(call mesg_fail); \
-	done
+	@$(call print_step,"Linting binaries and packages...")
+	@$(GOLINT) $(BIN_LIST:%=./cmd/%) $(PKG_LIST:%=./%)
 
 lint-assets:
-	@$(call mesg_start,lint,Checking assets sources...)
-	@BUILD_DIR=$(BUILD_DIR) $(GULP) $(GULP_ARGS) lint && \
-		$(call mesg_ok) || $(call mesg_fail)
+	@$(call print_step,"Checking assets sources...")
+	@$(YARN) $(YARN_ARGS) lint
+
+dist: dist-source dist-bin dist-docker
+
+dist-source:
+	@$(call print_step,"Building source archive...")
+	@install -d -m 0755 $(DIST_DIR) && $(TAR) -czf $(DIST_DIR)/$(NAME)_$(VERSION).tar.gz \
+		--transform "flags=r;s/^/$(NAME)-$(VERSION)/" \
+		--exclude=.git --exclude=.vscode --exclude=bin --exclude=dist .
+
+dist-bin: build-bin
+	@$(call print_step,"Building binary archive...")
+	@install -d -m 0755 $(DIST_DIR) && $(TAR) -czf $(DIST_DIR)/$(NAME)_$(VERSION)_$(GOOS)_$(GOARCH).tar.gz \
+		--transform "flags=r;s/.*\//$(NAME)-$(VERSION)\//" ./bin/* ./CHANGES.md ./README.md
+
+dist-docker:
+	@$(call print_step,"Building Docker image...")
+	@docker build -f Dockerfile -t facette/facette:$(VERSION) .
 
 update-locales:
-	@$(call mesg_start,locale,Updating locale files...)
-	@BUILD_DIR=$(BUILD_DIR) $(GULP) $(GULP_ARGS) update-locales >/dev/null && \
-		$(call mesg_ok) || $(call mesg_fail)
+	@$(call print_step,Updating locale files...)
+	@$(YARN) $(YARN_ARGS) update-locales
 
-node_modules:
-	@$(call mesg_start,build,Retrieving assets build dependencies...)
-	@$(NPM) $(NPM_ARGS) install --package-lock=false >/dev/null && \
-		$(call mesg_ok) || $(call mesg_fail)
+ui/node_modules:
+	@$(call print_step,"Fetching node modules...")
+	@$(YARN) $(YARN_ARGS)
 
-docker:
-	@$(call mesg_start,docker,Building image...)
-	@docker build -f Dockerfile -t facette/facette:$(VERSION) .
+# Always install missing Git hooks
+git-hooks: $(GIT_HOOKS)
+
+.git/hooks/%:
+	@$(call print_step,"Installing $* Git hook...")
+	@(install -d -m 0755 .git/hooks && cd .git/hooks && ln -s ../../misc/git-hooks/$(@F) .)
+
+-include git-hooks
