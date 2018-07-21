@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+0.4.1 (2018-07-21)
+------------------
+
+* Fix InfluxDB tags parsing
+* Fix collections tree listing with aliases
+
 0.4.0 (2017-12-18)
 ------------------
 
