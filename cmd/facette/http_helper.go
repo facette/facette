@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"facette.io/httproute"
 	"facette.io/httputil"
+	"github.com/vbatoufflet/httproute"
 )
 
 func httpBuildMessage(err error) map[string]string {

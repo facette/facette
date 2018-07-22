@@ -9,11 +9,11 @@ import (
 
 	"facette.io/facette/backend"
 	"facette.io/facette/template"
-	"facette.io/httproute"
 	"facette.io/httputil"
 	"facette.io/jsonutil"
 	"facette.io/sqlstorage"
 	"github.com/hashicorp/go-uuid"
+	"github.com/vbatoufflet/httproute"
 )
 
 var backendTypes = []string{

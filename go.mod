@@ -2,7 +2,6 @@ module facette.io/facette
 
 require (
 	cloud.google.com/go v0.25.0 // indirect
-	facette.io/httproute v0.0.0-20180331091320-6cd02cbf8f5c
 	facette.io/httputil v0.0.0-20170428061541-60b4ff39bac2
 	facette.io/jsonutil v0.0.0-20180612092102-be94c45d1cfa
 	facette.io/logger v0.0.0-20180117130157-60ca3a8b846b
@@ -31,6 +30,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.9.0 // indirect
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b
 	github.com/pkg/errors v0.8.0
+	github.com/vbatoufflet/httproute v0.0.0-20180331091320-6cd02cbf8f5c
 	github.com/ziutek/rrd v0.0.0-20170125160940-86f4f09e7abb
 	golang.org/x/crypto v0.0.0-20180718160520-a2144134853f // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect

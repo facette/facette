@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"facette.io/facette/worker"
-	"facette.io/httproute"
 	"facette.io/logger"
+	"github.com/vbatoufflet/httproute"
 )
 
 const apiPrefix = "/api/v1"

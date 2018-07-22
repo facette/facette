@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"facette.io/facette/backend"
-	"facette.io/httproute"
 	"facette.io/httputil"
 	"facette.io/sqlstorage"
+	"github.com/vbatoufflet/httproute"
 )
 
 // api:section providers "Providers"

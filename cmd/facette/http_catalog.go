@@ -9,9 +9,9 @@ import (
 
 	"facette.io/facette/catalog"
 	"facette.io/facette/pattern"
-	"facette.io/httproute"
 	"facette.io/httputil"
 	"github.com/fatih/set"
+	"github.com/vbatoufflet/httproute"
 )
 
 // api:section catalog "Catalog"

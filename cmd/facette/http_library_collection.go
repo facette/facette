@@ -4,10 +4,10 @@ import (
 	"net/http"
 
 	"facette.io/facette/backend"
-	"facette.io/httproute"
 	"facette.io/httputil"
 	"facette.io/sqlstorage"
 	"github.com/hashicorp/go-uuid"
+	"github.com/vbatoufflet/httproute"
 )
 
 // api:method GET /api/v1/library/collections/tree "Get collections tree"

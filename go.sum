@@ -1,7 +1,5 @@
 cloud.google.com/go v0.25.0 h1:6vD6xZTc8Jo6To8gHxFDRVsMvWFDgY3rugNszcDalN8=
 cloud.google.com/go v0.25.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
-facette.io/httproute v0.0.0-20180331091320-6cd02cbf8f5c h1:1o3EwfNva6e5FZi/EiPxwZptWTrJuqoasnO4GonTKVQ=
-facette.io/httproute v0.0.0-20180331091320-6cd02cbf8f5c/go.mod h1:sksUT5r1MvMeYRFY6Sz4t4Xjz83fWA295p1KgZ2DoN0=
 facette.io/httputil v0.0.0-20170428061541-60b4ff39bac2 h1:xoxb56mS30xya0/bIGJa1Uy1JS9vDPvuHTTMUIsmb5A=
 facette.io/httputil v0.0.0-20170428061541-60b4ff39bac2/go.mod h1:nJojrTx2I7ZNj2t9p7RMsuiVqVB8Xm2HV12pj4hOtKQ=
 facette.io/jsonutil v0.0.0-20180612092102-be94c45d1cfa h1:OkrlHV2Hq3pZx3sbrO2H3ZBWPjBuG70bilZtJS5Hv9g=
@@ -61,6 +59,8 @@ github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b h1:j7+1HpAFS1zy5+Q4qx1f
 github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b/go.mod h1:01TrycV0kFyexm33Z7vhZRXopbI8J3TDReVlkTgMUxE=
 github.com/pkg/errors v0.8.0 h1:WdK/asTD0HN+q6hsWO3/vpuAkAr+tw6aNJNDFFf0+qw=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
+github.com/vbatoufflet/httproute v0.0.0-20180331091320-6cd02cbf8f5c h1:QPjHwkXaf6Wlj3rqTcrVm1t3frUTF28Iwg2r1NCOUes=
+github.com/vbatoufflet/httproute v0.0.0-20180331091320-6cd02cbf8f5c/go.mod h1:s070+ojzqAKg9U9FC51du+lnQe1QTmQ1h8HPgtPHIYo=
 github.com/ziutek/rrd v0.0.0-20170125160940-86f4f09e7abb h1:PyyvUBJ5QfaEKL/IRe0kzckEWMmufuCWEokPOx9RLHo=
 github.com/ziutek/rrd v0.0.0-20170125160940-86f4f09e7abb/go.mod h1:kncaQbFuKfmLNOnFKb9VQJ6qWV61iHxIxUQZBZvbEfA=
 golang.org/x/crypto v0.0.0-20180718160520-a2144134853f h1:lRy+hhwk7YT7MsKejxuz0C5Q1gk6p/QoPQYEmKmGFb8=
