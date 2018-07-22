@@ -10,7 +10,7 @@ PREFIX ?= /usr/local
 
 ENV ?= production
 
-GO ?= go
+GO ?= vgo
 GOLINT ?= golint
 
 GOOS ?= $(shell $(GO) env GOOS)
