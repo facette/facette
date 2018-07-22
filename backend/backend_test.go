@@ -1,6 +1,6 @@
 package backend
 
-import "github.com/facette/logger"
+import "facette.io/logger"
 
 var log *logger.Logger
 
