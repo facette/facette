@@ -37,7 +37,7 @@ MAN_LIST = $(patsubst docs/man/%.md,%,$(wildcard docs/man/*.[0-9].md))
 DIST_DIR ?= dist
 
 tput = $(shell tty 1>/dev/null 2>&1 && tput $1)
-print_error = (echo "$(call tput,setaf 1)Error:$(call tput,sgr0) $1" && false)
+print_error = (echo "$(call tput,setaf 1)Error:$(call tput,sgr0) $1")
 print_step = echo "$(call tput,setaf 4)***$(call tput,sgr0) $1"
 uniq = $(if $1,$(firstword $1) $(call uniq,$(filter-out $(firstword $1),$1)))
 
@@ -68,7 +68,7 @@ endif
 				-X main.buildDate=$(BUILD_DATE) \
 				-X main.buildHash=$(BUILD_HASH) \
 			" \
-		-o bin/$$bin -v ./cmd/$$bin || $(call print_error,"failed to build $$bin"); \
+		-o bin/$$bin -v ./cmd/$$bin || ($(call print_error,"failed to build $$bin") && exit 1); \
 	done
 
 build-assets: ui/node_modules
@@ -88,7 +88,7 @@ test: test-bin
 test-bin:
 	@$(call print_step,"Testing packages...")
 	@for pkg in $(PKG_LIST); do \
-		$(GO) test -cover -v ./$$pkg; \
+		$(GO) test -cover -v ./$$pkg || ($(call print_error,"failed to test $$pkg") && exit 1); \
 	done
 
 install: install-bin install-assets install-docs
