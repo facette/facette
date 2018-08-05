@@ -70,9 +70,8 @@ func (w *providerWorker) Run(wg *sync.WaitGroup) {
 	}
 
 	// Create new time ticker for automatic refresh
-	refresh, _ := w.provider.Settings.GetInt("refresh_interval", 0)
-	if refresh > 0 {
-		ticker = time.NewTicker(time.Duration(refresh) * time.Second)
+	if w.provider.RefreshInterval > 0 {
+		ticker = time.NewTicker(time.Duration(w.provider.RefreshInterval) * time.Second)
 		timeChan = ticker.C
 	}
 
