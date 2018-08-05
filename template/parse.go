@@ -4,7 +4,7 @@ import (
 	"sort"
 	"text/template/parse"
 
-	"github.com/fatih/set"
+	"facette.io/facette/set"
 )
 
 // Parse parses a given string, returning the list of template keys.
@@ -12,7 +12,7 @@ func Parse(data string) ([]string, error) {
 	// Parse response for template keys
 	trees, err := parse.Parse("inline", data, "", "")
 	if err != nil {
-		return nil, err
+		return nil, ErrInvalidTemplate
 	}
 
 	keys := set.New()

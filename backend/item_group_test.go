@@ -1,6 +1,10 @@
 package backend
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func testSourceGroupNew() []*SourceGroup {
 	return []*SourceGroup{
@@ -72,14 +76,10 @@ func testSourceGroupCreate(b *Backend, testSourceGroups []*SourceGroup, t *testi
 
 func testSourceGroupCreateInvalid(b *Backend, testSourceGroups []*SourceGroup, t *testing.T) {
 	testItemCreateInvalid(b, &SourceGroup{}, testInterfaceToSlice(testSourceGroups), t)
-
-	if err := b.Storage().Save(&SourceGroup{
+	assert.Equal(t, ErrInvalidPattern, b.Storage().Save(&SourceGroup{
 		Item:     Item{Name: "name"},
-		Patterns: GroupPatterns{"regexp:(.*"}},
-	); err != ErrInvalidPattern {
-		t.Logf("\nExpected %#v\nbut got  %#v", ErrInvalidPattern, err)
-		t.Fail()
-	}
+		Patterns: GroupPatterns{"regexp:(.*"},
+	}))
 }
 
 func testSourceGroupGet(b *Backend, testSourceGroups []*SourceGroup, t *testing.T) {
@@ -116,14 +116,10 @@ func testMetricGroupCreate(b *Backend, testMetricGroups []*MetricGroup, t *testi
 
 func testMetricGroupCreateInvalid(b *Backend, testMetricGroups []*MetricGroup, t *testing.T) {
 	testItemCreateInvalid(b, &MetricGroup{}, testInterfaceToSlice(testMetricGroups), t)
-
-	if err := b.Storage().Save(&MetricGroup{
+	assert.Equal(t, ErrInvalidPattern, b.Storage().Save(&MetricGroup{
 		Item:     Item{Name: "name"},
-		Patterns: GroupPatterns{"regexp:(.*"}},
-	); err != ErrInvalidPattern {
-		t.Logf("\nExpected %#v\nbut got  %#v", ErrInvalidPattern, err)
-		t.Fail()
-	}
+		Patterns: GroupPatterns{"regexp:(.*"},
+	}))
 }
 
 func testMetricGroupGet(b *Backend, testMetricGroups []*MetricGroup, t *testing.T) {

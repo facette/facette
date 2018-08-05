@@ -23,14 +23,17 @@ var (
 )
 
 func init() {
-	var err error
+	var (
+		tmpFile *os.File
+		err     error
+	)
 
 	config := maputil.Map{"driver": "sqlite"}
 
 	if v := os.Getenv("TEST_SQLITE_PATH"); v != "" {
 		config.Set("path", v)
 	} else {
-		tmpFile, err := ioutil.TempFile("", "facette")
+		tmpFile, err = ioutil.TempFile("", "facette_")
 		if err != nil {
 			panic(fmt.Sprintf("failed to create temporary file: %s", err))
 		}
@@ -39,7 +42,7 @@ func init() {
 		config.Set("path", sqliteTempFile)
 	}
 
-	sqliteBackend, err = NewBackend(&config, log)
+	sqliteBackend, err = New(&config, log)
 	if err != nil {
 		panic(errors.Wrap(err, "failed to initialize SQLite backend"))
 	}

@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	nameRegexp = regexp.MustCompile("(?i)^[a-z0-9](?:[a-z0-9\\-_\\.]*[a-z0-9])?$")
+	nameRegexp = regexp.MustCompile(`(?i)^[a-z0-9](?:[a-z0-9\-_\.]*[a-z0-9])?$`)
 )
 
 // Backend represents a back-end instance.
@@ -19,8 +19,8 @@ type Backend struct {
 	storage *sqlstorage.Storage
 }
 
-// NewBackend creates a new back-end instance.
-func NewBackend(config *maputil.Map, log *logger.Logger) (*Backend, error) {
+// New creates a new back-end instance.
+func New(config *maputil.Map, log *logger.Logger) (*Backend, error) {
 	// Initialize storage
 	storage, err := sqlstorage.NewStorage("facette", config, log)
 	if err != nil {

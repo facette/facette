@@ -1,10 +1,10 @@
 package backend
 
 import (
-	"reflect"
 	"testing"
 
 	"facette.io/maputil"
+	"github.com/stretchr/testify/assert"
 )
 
 func testGraphNew() []*Graph {
@@ -73,12 +73,8 @@ func testGraphCreate(b *Backend, testGraphs []*Graph, t *testing.T) {
 
 func testGraphCreateInvalid(b *Backend, testGraphs []*Graph, t *testing.T) {
 	testItemCreateInvalid(b, &Graph{}, testInterfaceToSlice(testGraphs), t)
-
 	alias := "invalid!"
-	if err := b.Storage().Save(&Graph{Item: Item{Name: "name"}, Alias: &alias}); err != ErrInvalidAlias {
-		t.Logf("\nExpected %#v\nbut got  %#v", ErrInvalidAlias, err)
-		t.Fail()
-	}
+	assert.Equal(t, ErrInvalidAlias, b.Storage().Save(&Graph{Item: Item{Name: "name"}, Alias: &alias}))
 }
 
 func testGraphGet(b *Backend, testGraphs []*Graph, t *testing.T) {
@@ -96,25 +92,13 @@ func testGraphUpdate(b *Backend, testGraphs []*Graph, t *testing.T) {
 	testGraphs[0].Alias = &val
 	testGraphs[0].LinkID = &val
 
-	if err := b.Storage().Save(testGraphs[0]); err != nil {
-		t.Logf("\nExpected <nil>\nbut got  %#v", err)
-		t.Fail()
-	}
+	assert.Nil(t, b.Storage().Save(testGraphs[0]))
 
 	graph := &Graph{}
-	if err := b.Storage().Get("name", "item1", graph, true); err != nil {
-		t.Logf("\nExpected <nil>\nbut got  %#v", err)
-		t.Fail()
-	} else if !reflect.DeepEqual(graph, testGraphs[0]) {
-		t.Logf("\nExpected %#v\nbut got  %#v", testGraphs[0], graph)
-		t.Fail()
-	} else if testGraphs[0].Alias != nil {
-		t.Logf("\nExpected <nil>\nbut got  %#v", testGraphs[0].Alias)
-		t.Fail()
-	} else if testGraphs[0].LinkID != nil {
-		t.Logf("\nExpected <nil>\nbut got  %#v", testGraphs[0].LinkID)
-		t.Fail()
-	}
+	assert.Nil(t, b.Storage().Get("name", "item1", graph, true))
+	assert.Nil(t, graph.Alias)
+	assert.Nil(t, graph.LinkID)
+	assert.Equal(t, testGraphs[0], graph)
 }
 
 func testGraphCount(b *Backend, testGraphs []*Graph, t *testing.T) {
@@ -134,45 +118,20 @@ func testGraphDeleteAll(b *Backend, testGraphs []*Graph, t *testing.T) {
 }
 
 func testGraphResolve(b *Backend, testGraphs []*Graph, t *testing.T) {
-	if err := testGraphs[2].Resolve(); err != ErrUnresolvableItem {
-		t.Logf("\nExpected %#v\nbut got  %#v", ErrUnresolvableItem, err)
-		t.Fail()
-	}
-
+	assert.Equal(t, ErrUnresolvableItem, testGraphs[2].Resolve())
 	testGraphs[1].SetBackend(b)
 	testGraphs[2].SetBackend(b)
-
-	if err := testGraphs[2].Resolve(); err != nil {
-		t.Logf("\nExpected <nil>\nbut got  %#v", err)
-		t.Fail()
-	} else if !reflect.DeepEqual(testGraphs[2].Link, testGraphs[1]) {
-		t.Logf("\nExpected %#v\nbut got  %#v", testGraphs[1], testGraphs[2].Link)
-		t.Fail()
-	}
+	assert.Nil(t, testGraphs[2].Resolve())
+	assert.Equal(t, testGraphs[1], testGraphs[2].Link)
 }
 
 func testGraphExpand(b *Backend, testGraphs []*Graph, t *testing.T) {
 	graph := testGraphs[2].Clone()
-	if err := graph.Expand(nil); err != nil {
-		t.Logf("\nExpected <nil>\nbut got  %#v", err)
-		t.Fail()
-	} else if graph.Groups[0].Series[0].Source != graph.Attributes["source"] {
-		t.Logf("\nExpected %#v\nbut got  %#v", graph.Attributes["source"], graph.Groups[0].Series[0].Source)
-		t.Fail()
-	} else if graph.Options["title"] != testGraphs[2].Attributes["source"] {
-		t.Logf("\nExpected %#v\nbut got  %#v", testGraphs[2].Attributes["source"], graph.Options["title"])
-		t.Fail()
-	}
+	assert.Nil(t, graph.Expand(nil))
+	assert.Equal(t, graph.Attributes["source"], graph.Groups[0].Series[0].Source)
 
 	graph = testGraphs[2].Clone()
-	if err := graph.Expand(maputil.Map{"source": "other1"}); err != nil {
-		t.Logf("\nExpected <nil>\nbut got  %#v", err)
-		t.Fail()
-	} else if graph.Groups[0].Series[0].Source != "other1" {
-		t.Logf("\nExpected %#v\nbut got  %#v", "other1", graph.Groups[0].Series[0].Source)
-		t.Fail()
-	} else if graph.Options["title"] != "other1" {
-		t.Logf("\nExpected %#v\nbut got  %#v", "other1", graph.Options["title"])
-		t.Fail()
-	}
+	assert.Nil(t, graph.Expand(maputil.Map{"source": "other1"}))
+	assert.Equal(t, "other1", graph.Groups[0].Series[0].Source)
+	assert.Equal(t, "other1", graph.Options["title"])
 }

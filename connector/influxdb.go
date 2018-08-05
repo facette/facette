@@ -48,7 +48,10 @@ type influxdbConnector struct {
 
 func init() {
 	connectors["influxdb"] = func(name string, settings *maputil.Map, log *logger.Logger) (Connector, error) {
-		var err error
+		var (
+			glue string
+			err  error
+		)
 
 		c := &influxdbConnector{
 			name: name,
@@ -119,7 +122,7 @@ func init() {
 				return nil, err
 			}
 
-			glue, err := mapping.GetString("glue", ".")
+			glue, err = mapping.GetString("glue", ".")
 			if err != nil {
 				return nil, err
 			} else if glue != "" {
@@ -128,7 +131,7 @@ func init() {
 		}
 
 		// Check remote instance URL
-		if _, err := url.Parse(c.url); err != nil {
+		if _, err = url.Parse(c.url); err != nil {
 			return nil, fmt.Errorf("unable to parse URL: %s", err)
 		}
 
@@ -156,7 +159,7 @@ func (c *influxdbConnector) Name() string {
 // Refresh triggers the connector data refresh.
 func (c *influxdbConnector) Refresh(output chan<- *catalog.Record) error {
 	// Query back-end for sample rows (used to detect numerical values)
-	columnsMap := make(map[string][]string, 0)
+	columnsMap := make(map[string][]string)
 
 	q := influxdb.Query{
 		Command:  "select * from /.*/ limit 1",

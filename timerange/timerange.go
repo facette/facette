@@ -75,7 +75,7 @@ func FromDuration(d time.Duration) string {
 	seconds := int(math.Abs(d.Seconds()))
 
 	for _, unit := range units {
-		count := int(math.Floor(float64(seconds / unit.value)))
+		count := int(float64(seconds / unit.value))
 		if count > 0 {
 			parts = append(parts, fmt.Sprintf("%d%s", count, unit.text))
 			seconds %= unit.value

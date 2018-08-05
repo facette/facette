@@ -11,11 +11,7 @@ import (
 
 const connectorDefaultTimeout int = 10
 
-var (
-	version string
-
-	connectors = make(map[string]func(string, *maputil.Map, *logger.Logger) (Connector, error))
-)
+var connectors = make(map[string]func(string, *maputil.Map, *logger.Logger) (Connector, error))
 
 // Connector represents a connector handler interface.
 type Connector interface {
@@ -25,7 +21,7 @@ type Connector interface {
 }
 
 // NewConnector creates a new instance of a connector handler.
-func NewConnector(typ string, name string, settings *maputil.Map, log *logger.Logger) (Connector, error) {
+func NewConnector(typ, name string, settings *maputil.Map, log *logger.Logger) (Connector, error) {
 	// Check for existing connector handler
 	if _, ok := connectors[typ]; !ok {
 		return nil, ErrUnsupportedConnector

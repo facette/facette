@@ -1,4 +1,3 @@
-// package pattern provides pattern matching functions.
 package pattern
 
 import (
@@ -15,7 +14,9 @@ const (
 	RegexpPrefix = "regexp:"
 )
 
-// Match returns true if the value matches the pattern, or an error if pattern compilation fails. If the pattern is prefixed with "glob:" the value will be evaluated using shell-style globbing, if it prefixed with "regexp:" it will be evaluated using regular expression matching.
+// Match returns true if the value matches the pattern, or an error if pattern compilation fails. If the pattern is
+// prefixed with "glob:" the value will be evaluated using shell-style globbing, if it prefixed with "regexp:" it will
+// be evaluated using regular expression matching.
 func Match(pattern, value string) (bool, error) {
 	if strings.HasPrefix(pattern, GlobPrefix) {
 		// Remove slashes from pattern and value as 'path.Match' does not handle them

@@ -22,7 +22,10 @@ var (
 )
 
 func init() {
-	var err error
+	var (
+		port int64
+		err  error
+	)
 
 	config := maputil.Map{"driver": "mysql"}
 
@@ -33,11 +36,11 @@ func init() {
 		config.Set("host", v)
 	}
 	if v := os.Getenv("TEST_MYSQL_PORT"); v != "" {
-		i, err := strconv.ParseInt(v, 10, 64)
+		port, err = strconv.ParseInt(v, 10, 64)
 		if err != nil {
 			panic(fmt.Sprintf("failed to convert port to integer: %s", err))
 		}
-		config.Set("port", i)
+		config.Set("port", port)
 	}
 	if v := os.Getenv("TEST_MYSQL_USER"); v != "" {
 		config.Set("user", v)
@@ -46,7 +49,7 @@ func init() {
 		config.Set("password", v)
 	}
 
-	mysqlBackend, err = NewBackend(&config, log)
+	mysqlBackend, err = New(&config, log)
 	if err != nil {
 		panic(errors.Wrap(err, "failed to initialize MySQL backend"))
 	}

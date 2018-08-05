@@ -98,8 +98,6 @@ func (c *Collection) Clone() *Collection {
 
 // Expand expands the collection item instance using its linked instance.
 func (c *Collection) Expand(attrs maputil.Map) error {
-	var err error
-
 	if c.expanded {
 		return nil
 	}
@@ -109,7 +107,8 @@ func (c *Collection) Expand(attrs maputil.Map) error {
 	}
 
 	if c.backend != nil && c.LinkID != nil && *c.LinkID != "" {
-		if err := c.Resolve(nil); err != nil {
+		err := c.Resolve(nil)
+		if err != nil {
 			return err
 		}
 

@@ -1,31 +1,31 @@
 package template
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func Test_Expand(t *testing.T) {
-	testExpand("This is a sample text!", false, "This {{ .a }} a {{ .b }}!",
-		map[string]interface{}{"a": "is", "b": "sample text"}, t)
+	actual, err := Expand("This {{ .a }} a {{ .b }}!", map[string]interface{}{"a": "is", "b": "sample text"})
+	assert.Nil(t, err)
+	assert.Equal(t, "This is a sample text!", actual)
 }
 
 func Test_Expand_Empty(t *testing.T) {
-	testExpand("This is a !", false, "This {{ .a }} a {{ .b }}!", map[string]interface{}{"a": "is"}, t)
+	actual, err := Expand("This {{ .a }} a {{ .b }}!", map[string]interface{}{"a": "is"})
+	assert.Nil(t, err)
+	assert.Equal(t, "This is a !", actual)
 }
 
-func Test_Expand_Fail_Syntax(t *testing.T) {
-	testExpand("", true, "This {{ .a } a {{ .b }}!", map[string]interface{}{"a": "is", "b": "sample text"}, t)
+func Test_Expand_SyntaxFail(t *testing.T) {
+	actual, err := Expand("This {{ .a } a {{ .b }}!", map[string]interface{}{"a": "is", "b": "sample text"})
+	assert.Equal(t, ErrInvalidTemplate, err)
+	assert.Equal(t, "", actual)
 }
 
-func Test_Expand_Fail_Ident(t *testing.T) {
-	testExpand("", true, "This {{ .a }} a {{ b }}!", map[string]interface{}{"a": "is", "b": "sample text"}, t)
-}
-
-func testExpand(expected string, expectedErr bool, data string, attrs map[string]interface{}, t *testing.T) {
-	result, err := Expand(data, attrs)
-	if expectedErr && err == nil || !expectedErr && err != nil {
-		t.Logf("\nExpected an error\nbut got  %#v", err)
-		t.Fail()
-	} else if result != expected {
-		t.Logf("\nExpected %q\nbut got  %q", expected, result)
-		t.Fail()
-	}
+func Test_Expand_IdentFail(t *testing.T) {
+	actual, err := Expand("This {{ .a }} a {{ b }}!", map[string]interface{}{"a": "is", "b": "sample text"})
+	assert.Equal(t, ErrInvalidTemplate, err)
+	assert.Equal(t, "", actual)
 }

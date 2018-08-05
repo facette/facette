@@ -1,11 +1,11 @@
 package catalog
 
 import (
-	"reflect"
 	"sync"
 	"testing"
 
 	"facette.io/facette/backend"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_Filter_Rewrite(t *testing.T) {
@@ -56,16 +56,11 @@ func Test_Filter_Rewrite(t *testing.T) {
 			OriginalSource: "host3_example_net", OriginalMetric: "cpu.percent-wait"},
 	}
 
-	result := runTestFilter(&backend.ProviderFilters{
+	assert.Equal(t, expected, runTestFilter(&backend.ProviderFilters{
 		{Action: "rewrite", Target: "origin", Pattern: "^origin(\\d+)$", Into: "origin-$1"},
 		{Action: "rewrite", Target: "source", Pattern: "_", Into: "."},
 		{Action: "rewrite", Target: "metric", Pattern: "^interface-(.+)\\.if_(.+)\\.(.+)$", Into: "net.$1.$2.$3"},
-	}, len(expected))
-
-	if !reflect.DeepEqual(expected, result) {
-		t.Logf("\nExpected %#v\nbut got  %#v", expected, result)
-		t.Fail()
-	}
+	}, len(expected)))
 }
 
 func Test_Filter_Discard(t *testing.T) {
@@ -78,16 +73,11 @@ func Test_Filter_Discard(t *testing.T) {
 			OriginalOrigin: "origin1", OriginalSource: "host2_example_net", OriginalMetric: "load.load.longterm"},
 	}
 
-	result := runTestFilter(&backend.ProviderFilters{
+	assert.Equal(t, expected, runTestFilter(&backend.ProviderFilters{
 		{Action: "discard", Target: "origin", Pattern: "origin2"},
 		{Action: "discard", Target: "source", Pattern: "host1_example_net"},
 		{Action: "discard", Target: "metric", Pattern: "^interface"},
-	}, len(expected))
-
-	if !reflect.DeepEqual(expected, result) {
-		t.Logf("\nExpected %#v\nbut got  %#v", expected, result)
-		t.Fail()
-	}
+	}, len(expected)))
 }
 
 func Test_Filter_Sieve(t *testing.T) {
@@ -100,16 +90,11 @@ func Test_Filter_Sieve(t *testing.T) {
 			OriginalOrigin: "origin1", OriginalSource: "host1_example_net", OriginalMetric: "load.load.longterm"},
 	}
 
-	result := runTestFilter(&backend.ProviderFilters{
+	assert.Equal(t, expected, runTestFilter(&backend.ProviderFilters{
 		{Action: "sieve", Target: "origin", Pattern: "origin1"},
 		{Action: "sieve", Target: "source", Pattern: "host1_example_net"},
 		{Action: "sieve", Target: "metric", Pattern: "load"},
-	}, len(expected))
-
-	if !reflect.DeepEqual(expected, result) {
-		t.Logf("\nExpected %#v\nbut got  %#v", expected, result)
-		t.Fail()
-	}
+	}, len(expected)))
 }
 
 func Test_Filter_Combined(t *testing.T) {
@@ -122,16 +107,11 @@ func Test_Filter_Combined(t *testing.T) {
 			OriginalOrigin: "origin1", OriginalSource: "host1_example_net", OriginalMetric: "load.load.longterm"},
 	}
 
-	result := runTestFilter(&backend.ProviderFilters{
+	assert.Equal(t, expected, runTestFilter(&backend.ProviderFilters{
 		{Action: "sieve", Target: "source", Pattern: "host1_example_net"},
 		{Action: "discard", Target: "metric", Pattern: "interface"},
 		{Action: "rewrite", Target: "metric", Pattern: "load\\.load", Into: "load"},
-	}, len(expected))
-
-	if !reflect.DeepEqual(expected, result) {
-		t.Logf("\nExpected %#v\nbut got  %#v", expected, result)
-		t.Fail()
-	}
+	}, len(expected)))
 }
 
 func runTestFilter(filters *backend.ProviderFilters, expectedLen int) []Record {
@@ -177,7 +157,7 @@ func runTestFilter(filters *backend.ProviderFilters, expectedLen int) []Record {
 				*records = append(*records, *r)
 				wg.Done()
 
-			case _ = <-chain.Messages:
+			case <-chain.Messages:
 				// consume messages to avoid test being blocked
 			}
 		}

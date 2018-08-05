@@ -1,10 +1,12 @@
 package series
 
 import (
+	"fmt"
 	"math"
-	"reflect"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -68,57 +70,27 @@ func init() {
 }
 
 func Test_Consolidate_Average(t *testing.T) {
-	expected := Point{Time: time.Unix(60, 0), Value: 11.75}
-	result := testBucket.Consolidate(ConsolidateAverage)
-	if !reflect.DeepEqual(result, expected) {
-		t.Logf("\nExpected %#v\nbut got  %#v", result, expected)
-		t.Fail()
-	}
+	assert.Equal(t, Point{Time: time.Unix(60, 0), Value: 11.75}, testBucket.Consolidate(ConsolidateAverage))
 }
 
 func Test_Consolidate_Sum(t *testing.T) {
-	expected := Point{Time: time.Unix(120, 0), Value: 47}
-	result := testBucket.Consolidate(ConsolidateSum)
-	if !reflect.DeepEqual(result, expected) {
-		t.Logf("\nExpected %#v\nbut got  %#v", result, expected)
-		t.Fail()
-	}
+	assert.Equal(t, Point{Time: time.Unix(120, 0), Value: 47}, testBucket.Consolidate(ConsolidateSum))
 }
 
 func Test_Consolidate_First(t *testing.T) {
-	expected := Point{Time: time.Unix(0, 0), Value: 17}
-	result := testBucket.Consolidate(ConsolidateFirst)
-	if !reflect.DeepEqual(result, expected) {
-		t.Logf("\nExpected %#v\nbut got  %#v", expected, result)
-		t.Fail()
-	}
+	assert.Equal(t, Point{Time: time.Unix(0, 0), Value: 17}, testBucket.Consolidate(ConsolidateFirst))
 }
 
 func Test_Consolidate_Last(t *testing.T) {
-	expected := Point{Time: time.Unix(120, 0), Value: 2}
-	result := testBucket.Consolidate(ConsolidateLast)
-	if !reflect.DeepEqual(result, expected) {
-		t.Logf("\nExpected %#v\nbut got  %#v", expected, result)
-		t.Fail()
-	}
+	assert.Equal(t, Point{Time: time.Unix(120, 0), Value: 2}, testBucket.Consolidate(ConsolidateLast))
 }
 
 func Test_Consolidate_Min(t *testing.T) {
-	expected := Point{Time: time.Unix(120, 0), Value: 2}
-	result := testBucket.Consolidate(ConsolidateMin)
-	if !reflect.DeepEqual(result, expected) {
-		t.Logf("\nExpected %#v\nbut got  %#v", expected, result)
-		t.Fail()
-	}
+	assert.Equal(t, Point{Time: time.Unix(120, 0), Value: 2}, testBucket.Consolidate(ConsolidateMin))
 }
 
 func Test_Consolidate_Max(t *testing.T) {
-	expected := Point{Time: time.Unix(30, 0), Value: 25}
-	result := testBucket.Consolidate(ConsolidateMax)
-	if !reflect.DeepEqual(result, expected) {
-		t.Logf("\nExpected %#v\nbut got  %#v", expected, result)
-		t.Fail()
-	}
+	assert.Equal(t, Point{Time: time.Unix(30, 0), Value: 25}, testBucket.Consolidate(ConsolidateMax))
 }
 
 func Test_Normalize_Average(t *testing.T) {
@@ -621,12 +593,9 @@ func Test_Average(t *testing.T) {
 	}
 
 	series, err := Average(testSeries)
-	if err != nil {
-		t.Log(err)
-		t.Fail()
-	} else if !compareSeries(series, expected) {
-		t.Logf("\nExpected %#v\nbut got  %#v", expected, series)
-		t.Fail()
+	assert.Nil(t, err)
+	if !compareSeries(series, expected) {
+		assert.Fail(t, fmt.Sprintf("Not equal: \nexpected: %#v\nactual  : %#v", expected, series))
 	}
 }
 
@@ -636,32 +605,29 @@ func Test_Sum(t *testing.T) {
 	}
 
 	series, err := Sum(testSeries)
-	if err != nil {
-		t.Log(err)
-		t.Fail()
-	} else if !compareSeries(series, expected) {
-		t.Logf("\nExpected %#v\nbut got  %#v", expected, series)
-		t.Fail()
+	assert.Nil(t, err)
+	if !compareSeries(series, expected) {
+		assert.Fail(t, fmt.Sprintf("Not equal: \nexpected: %#v\nactual  : %#v", expected, series))
 	}
 }
 
 func testNormalize(expected []Series, consolidation int, interpolate bool, t *testing.T) {
 	startTime := time.Unix(0, 0)
 
-	series, err := Normalize(testSeriesNormalize, startTime, startTime.Add(300*time.Second), 10, consolidation,
-		interpolate)
-	if err != nil {
-		t.Log(err)
-		t.Fail()
-	} else if len(series) != len(expected) {
-		t.Logf("\nExpected %d\nbut got  %d", len(expected), len(series))
-		t.Fail()
-	}
+	series, err := Normalize(
+		testSeriesNormalize,
+		startTime,
+		startTime.Add(300*time.Second),
+		10,
+		consolidation,
+		interpolate,
+	)
+	assert.Nil(t, err)
+	assert.Len(t, series, len(expected))
 
 	for i, s := range series {
 		if !compareSeries(s, expected[i]) {
-			t.Logf("\nExpected %#v\nbut got  %#v", expected[i], s)
-			t.Fail()
+			assert.Fail(t, fmt.Sprintf("Not equal: \nexpected: %#v\nactual  : %#v", expected[i], s))
 		}
 	}
 }

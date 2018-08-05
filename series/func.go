@@ -114,9 +114,13 @@ func (b bucket) Consolidate(consolidation int) Point {
 }
 
 // Normalize aligns multiple point series on a common time step, consolidates points samples if necessary.
-func Normalize(series []Series, startTime, endTime time.Time, sample int, consolidation int,
-	interpolate bool) ([]Series, error) {
-
+func Normalize(
+	series []Series,
+	startTime, endTime time.Time,
+	sample int,
+	consolidation int,
+	interpolate bool,
+) ([]Series, error) {
 	if sample <= 0 {
 		return nil, ErrInvalidSample
 	}

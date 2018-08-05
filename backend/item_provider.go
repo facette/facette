@@ -12,7 +12,7 @@ import (
 type Provider struct {
 	Item
 	Connector       string          `gorm:"type:varchar(32);not null" json:"connector"`
-	Settings        maputil.Map     `gorm:"type:text" json:"settings"`
+	Settings        *maputil.Map    `gorm:"type:text" json:"settings"`
 	Filters         ProviderFilters `gorm:"type:text" json:"filters"`
 	RefreshInterval int             `gorm:"not null;default:0" json:"refresh_interval"`
 	Priority        int             `gorm:"not null;default:0" json:"priority"`
@@ -38,7 +38,7 @@ func (p *Provider) BeforeSave(scope *gorm.Scope) error {
 }
 
 // ProviderFilters represents a list of back-end provider filters.
-type ProviderFilters []ProviderFilter
+type ProviderFilters []*ProviderFilter
 
 // Value marshals the provider filter entries for compatibility with SQL drivers.
 func (pf ProviderFilters) Value() (driver.Value, error) {

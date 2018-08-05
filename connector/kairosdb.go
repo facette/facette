@@ -12,10 +12,11 @@ import (
 
 	"facette.io/facette/catalog"
 	"facette.io/facette/series"
+	"facette.io/facette/set"
+	"facette.io/facette/version"
 	"facette.io/httputil"
 	"facette.io/logger"
 	"facette.io/maputil"
-	"github.com/fatih/set"
 )
 
 const (
@@ -167,7 +168,7 @@ func (c *kairosdbConnector) Refresh(output chan<- *catalog.Record) error {
 	defer resp.Body.Close()
 
 	mr := kairosdbMetricResponse{}
-	if err := httputil.BindJSON(resp, &mr); err != nil {
+	if err = httputil.BindJSON(resp, &mr); err != nil {
 		return fmt.Errorf("unable to unmarshal JSON data: %s", err)
 	}
 
@@ -187,7 +188,7 @@ func (c *kairosdbConnector) Refresh(output chan<- *catalog.Record) error {
 		return fmt.Errorf("unable to set up HTTP request: %s", err)
 	}
 
-	req.Header.Add("User-Agent", "facette/"+version)
+	req.Header.Add("User-Agent", "facette/"+version.Version)
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err = c.client.Do(req)
@@ -280,7 +281,7 @@ func (c *kairosdbConnector) Points(q *series.Query) ([]series.Series, error) {
 		return nil, fmt.Errorf("unable to set up HTTP request: %s", err)
 	}
 
-	req.Header.Add("User-Agent", "facette/"+version)
+	req.Header.Add("User-Agent", "facette/"+version.Version)
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := c.client.Do(req)

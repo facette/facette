@@ -2,9 +2,11 @@
 
 NAME := facette
 VERSION := 0.5.0dev
+BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
+REVISION := $(shell git rev-parse HEAD)
+BUILD_DATE := $(shell date +"%F %T")
 
-BUILD_DATE := $(shell date +%F)
-BUILD_HASH := $(shell git rev-parse --short HEAD)
+REPO_PATH := facette.io/facette
 
 PREFIX ?= /usr/local
 
@@ -37,7 +39,6 @@ MAN_LIST = $(patsubst docs/man/%.md,%,$(wildcard docs/man/*.[0-9].md))
 DIST_DIR ?= dist
 
 tput = $(shell tty 1>/dev/null 2>&1 && tput $1)
-print_error = (echo "$(call tput,setaf 1)Error:$(call tput,sgr0) $1")
 print_step = echo "$(call tput,setaf 4)***$(call tput,sgr0) $1"
 uniq = $(if $1,$(firstword $1) $(call uniq,$(filter-out $(firstword $1),$1)))
 
@@ -53,9 +54,10 @@ ifneq ($(filter builtin_assets,$(TAGS)),)
 build-bin: build-assets
 	@$(call print_step,"Embedding assets files...")
 	@go-bindata \
+		-pkg web \
 		-prefix $(DIST_DIR)/assets \
 		-tags 'builtin_assets' \
-		-o cmd/facette/bindata.go $(DIST_DIR)/assets/...
+		-o web/bindata.go $(DIST_DIR)/assets/...
 else
 build-bin:
 endif
@@ -63,12 +65,13 @@ endif
 	@for bin in $(BIN_LIST); do \
 		$(GO) build -i \
 			-tags "$(TAGS)" \
-			-ldflags "-s -w \
-				-X main.version=$(VERSION) \
-				-X main.buildDate=$(BUILD_DATE) \
-				-X main.buildHash=$(BUILD_HASH) \
-			" \
-		-o bin/$$bin -v ./cmd/$$bin || ($(call print_error,"failed to build $$bin") && exit 1); \
+			-ldflags '-s -w \
+				-X "$(REPO_PATH)/version.Version=$(VERSION)" \
+				-X "$(REPO_PATH)/version.Branch=$(BRANCH)" \
+				-X "$(REPO_PATH)/version.Revision=$(REVISION)" \
+				-X "$(REPO_PATH)/version.BuildDate=$(BUILD_DATE)" \
+			' \
+		-o bin/$$bin -v ./cmd/$$bin || exit 1; \
 	done
 
 build-assets: ui/node_modules
@@ -88,7 +91,7 @@ test: test-bin
 test-bin:
 	@$(call print_step,"Testing packages...")
 	@for pkg in $(PKG_LIST); do \
-		$(GO) test -cover -v ./$$pkg || ($(call print_error,"failed to test $$pkg") && exit 1); \
+		$(GO) test -cover -v ./$$pkg || exit 1; \
 	done
 
 install: install-bin install-assets install-docs

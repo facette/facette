@@ -1,9 +1,12 @@
 package series
 
 import (
+	"fmt"
 	"math"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_Scale(t *testing.T) {
@@ -17,8 +20,7 @@ func Test_Scale(t *testing.T) {
 
 	series.Scale(Value(100))
 	if !compareSeries(series, expected) {
-		t.Logf("\nExpected %#v\nbut got  %#v", expected, series)
-		t.Fail()
+		assert.Fail(t, fmt.Sprintf("Not equal: \nexpected: %#v\nactual  : %#v", expected, series))
 	}
 }
 
@@ -76,10 +78,7 @@ func Test_Summarize(t *testing.T) {
 	seriesNeg.Summarize([]float64{20, 50, 90})
 
 	for _, c := range checks {
-		if c.series.Summary[c.label] != c.value {
-			t.Logf("\nExpected %s=%g\nbut got  %s=%g", c.label, c.value, c.label, c.series.Summary[c.label])
-			t.Fail()
-		}
+		assert.Equal(t, c.value, c.series.Summary[c.label])
 	}
 }
 

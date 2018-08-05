@@ -12,9 +12,9 @@ import (
 
 	"facette.io/facette/catalog"
 	"facette.io/facette/series"
+	"facette.io/facette/set"
 	"facette.io/logger"
 	"facette.io/maputil"
-	"github.com/fatih/set"
 	"github.com/ziutek/rrd"
 )
 
@@ -129,7 +129,7 @@ func (c *rrdConnector) Refresh(output chan<- *catalog.Record) error {
 
 		for ds := range indexes {
 			for _, cf := range set.StringSlice(cfs) {
-				metric := metric + "/" + ds + "/" + strings.ToLower(cf)
+				metric = metric + "/" + ds + "/" + strings.ToLower(cf)
 
 				c.metrics[source][metric] = &rrdMetric{
 					ds:   ds,
@@ -227,6 +227,8 @@ func (c *rrdConnector) walk(root, originalRoot string, walkFunc filepath.WalkFun
 
 	// Walk root directory
 	return filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		var realPath string
+
 		if err != nil {
 			c.log.Error("%s", err)
 			return nil
@@ -235,7 +237,7 @@ func (c *rrdConnector) walk(root, originalRoot string, walkFunc filepath.WalkFun
 		mode := info.Mode() & os.ModeType
 		if mode == os.ModeSymlink {
 			// Follow symbolic link if evaluation succeeds
-			realPath, err := filepath.EvalSymlinks(path)
+			realPath, err = filepath.EvalSymlinks(path)
 			if err != nil {
 				c.log.Error("%s", err)
 				return nil

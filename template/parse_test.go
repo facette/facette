@@ -1,29 +1,25 @@
 package template
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_Parse(t *testing.T) {
-	testParse([]string{"a", "b"}, false, "This {{ .a }} a {{ .b }}!", t)
+	actual, err := Parse("This {{ .a }} a {{ .b }}!")
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"a", "b"}, actual)
 }
 
-func Test_Parse_Fail_Syntax(t *testing.T) {
-	testParse(nil, true, "This {{ .a } a {{ .b }}!", t)
+func Test_Parse_SyntaxFail(t *testing.T) {
+	actual, err := Parse("This {{ .a } a {{ .b }}!")
+	assert.Equal(t, ErrInvalidTemplate, err)
+	assert.Nil(t, actual)
 }
 
-func Test_Parse_Fail_Ident(t *testing.T) {
-	testParse(nil, true, "This {{ .a }} a {{ b }}!", t)
-}
-
-func testParse(expected []string, expectedErr bool, data string, t *testing.T) {
-	result, err := Parse(data)
-	if expectedErr && err == nil || !expectedErr && err != nil {
-		t.Logf("\nExpected an error\nbut got  %#v", err)
-		t.Fail()
-	} else if !reflect.DeepEqual(result, expected) {
-		t.Logf("\nExpected %q\nbut got  %q", expected, result)
-		t.Fail()
-	}
+func Test_Parse_IdentFail(t *testing.T) {
+	actual, err := Parse("This {{ .a }} a {{ b }}!")
+	assert.Equal(t, ErrInvalidTemplate, err)
+	assert.Nil(t, actual)
 }

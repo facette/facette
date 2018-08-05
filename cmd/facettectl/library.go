@@ -147,7 +147,7 @@ func execLibraryRestore() error {
 		if err == io.EOF {
 			break
 		} else if err != nil {
-			die("%s", err)
+			die(err)
 		}
 
 		switch h.Typeflag {

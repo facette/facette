@@ -1,16 +1,22 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/signal"
-	"runtime"
-	"strings"
+	"runtime/debug"
 	"syscall"
 
-	"facette.io/facette/connector"
-	"facette.io/sqlstorage"
+	"facette.io/facette/backend"
+	"facette.io/facette/catalog"
+	"facette.io/facette/config"
+	"facette.io/facette/poller"
+	"facette.io/facette/version"
+	"facette.io/facette/web"
 	"github.com/cosiner/flag"
+	"github.com/oklog/run"
+	"github.com/pkg/errors"
 )
 
 type command struct {
@@ -20,92 +26,88 @@ type command struct {
 }
 
 func (*command) Metadata() map[string]flag.Flag {
-	return map[string]flag.Flag{
-		"": {
-			Usage: "Time series data visualization software",
-		},
-	}
+	return map[string]flag.Flag{"": {Usage: "Time series data visualization software"}}
 }
 
-var (
-	version   string
-	buildDate string
-	buildHash string
+var cmd command
 
-	cmd command
-)
-
-func main() {
-	var (
-		config  *config
-		service *Service
-		sigChan chan os.Signal
-		err     error
-	)
-
+func init() {
 	flagSet := flag.NewFlagSet(flag.Flag{}).ErrHandling(0)
 	flagSet.StructFlags(&cmd)
 
-	if err := flagSet.Parse(os.Args...); err != nil {
-		fmt.Printf("Error: %s\n", err)
+	err := flagSet.Parse(os.Args...)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 		flagSet.Help(false)
-		os.Exit(1)
-	}
-
-	if cmd.Version {
-		printVersion()
+		os.Exit(2)
+	} else if cmd.Version {
+		version.Print()
 		os.Exit(0)
 	}
+}
 
-	// Load service configuration
-	config, err = initConfig(cmd.Config)
+func main() {
+	var g run.Group
+
+	config, err := config.New(cmd.Config)
 	if err != nil {
-		goto end
+		die(errors.Wrap(err, "cannot initialize configuration"))
 	}
 
-	// Start service instance
-	service = NewService(config)
+	logger, err := newLogger(config)
+	if err != nil {
+		die(errors.Wrap(err, "cannot initialize logger"))
+	}
 
-	// Handle service signals
-	sigChan = make(chan os.Signal, 1)
-	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1)
+	// Catch panic and write its output to the logger
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Error("panic: %s\n%s", r, debug.Stack())
+			os.Exit(1)
+		}
+	}()
+
+	// Initialize subcomponents pre-requisites
+	backend, err := backend.New(config.Backend, logger.Context("backend"))
+	if err != nil {
+		die(errors.Wrap(err, "cannot initialize back-end"))
+	}
+	defer backend.Close()
+
+	searcher := catalog.NewSearcher()
+
+	// Run subcomponents and wait for them to finish their job
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	poller := poller.New(ctx, backend, searcher, config, logger.Context("poller"))
+	g.Add(func() error { return poller.Run() }, func(error) { poller.Shutdown(); cancel() })
+
+	web := web.NewHandler(ctx, backend, searcher, poller, config, logger.Context("http"))
+	g.Add(func() error { return web.Run() }, func(error) { web.Shutdown(); cancel() })
+
+	sc := make(chan os.Signal, 1)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1)
 
 	go func() {
-		for sig := range sigChan {
-			switch sig {
-			case syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM:
-				service.Shutdown()
-
+		for s := range sc {
+			switch s {
 			case syscall.SIGUSR1:
-				service.Refresh()
+				poller.RefreshAll()
+
+			default:
+				if ctx.Err() != context.Canceled {
+					logger.Notice("received shutdown signal, stopping")
+					cancel()
+				}
 			}
 		}
 	}()
 
-	err = service.Run()
-
-end:
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
-		os.Exit(1)
-	}
+	g.Run()
 }
 
-func printVersion() {
-	fmt.Printf("Version:     %s\n", version)
-	fmt.Printf("Build date:  %s\n", buildDate)
-	fmt.Printf("Build hash:  %s\n", buildHash)
-	fmt.Printf("Compiler:    %s (%s)\n", runtime.Version(), runtime.Compiler)
-
-	drivers := sqlstorage.Drivers()
-	if len(drivers) == 0 {
-		drivers = append(drivers, "none")
-	}
-	fmt.Printf("Drivers:     %s\n", strings.Join(drivers, ", "))
-
-	connectors := connector.Connectors()
-	if len(connectors) == 0 {
-		connectors = append(connectors, "none")
-	}
-	fmt.Printf("Connectors:  %s\n", strings.Join(connectors, ", "))
+func die(err error) {
+	fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+	os.Exit(1)
 }

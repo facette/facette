@@ -14,6 +14,7 @@ import (
 
 	"facette.io/facette/catalog"
 	"facette.io/facette/series"
+	"facette.io/facette/version"
 	"facette.io/httputil"
 	"facette.io/logger"
 	"facette.io/maputil"
@@ -73,7 +74,7 @@ func init() {
 		}
 
 		// Check remote instance URL
-		if _, err := url.Parse(c.url); err != nil {
+		if _, err = url.Parse(c.url); err != nil {
 			return nil, fmt.Errorf("unable to parse URL: %s", err)
 		}
 
@@ -103,7 +104,7 @@ func (c *graphiteConnector) Refresh(output chan<- *catalog.Record) error {
 		return fmt.Errorf("unable to set up HTTP request: %s", err)
 	}
 
-	req.Header.Add("User-Agent", "facette/"+version)
+	req.Header.Add("User-Agent", "facette/"+version.Version)
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := c.client.Do(req)
@@ -237,7 +238,7 @@ func graphiteBuildQueryURL(q *series.Query, graphiteSeries map[string]map[string
 
 	// Only specify `until' parameter if EndTime is still in the past
 	if q.EndTime.Before(now) {
-		queryURL += fmt.Sprintf("&until=-%ds", int(time.Now().Sub(q.EndTime).Seconds()))
+		queryURL += fmt.Sprintf("&until=-%ds", int(time.Since(q.EndTime).Seconds()))
 	}
 
 	return queryURL, nil

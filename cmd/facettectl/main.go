@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"facette.io/facette/version"
 	"github.com/cosiner/flag"
 	"github.com/mgutz/ansi"
 )
@@ -12,52 +13,47 @@ import (
 type command struct {
 	Address string `names:"-a, --address" usage:"Upstream socket address" default:"http://localhost:12003"`
 	Help    bool   `names:"-h, --help" usage:"Display this help and exit"`
+	Quiet   bool   `names:"-q, --quiet" usage:"Run in quiet mode"`
 	Timeout int    `names:"-t, --timeout" usage:"Upstream connection timeout" default:"30"`
 	Version bool   `names:"-V, --version" usage:"Display version information and exit"`
-	Quiet   bool   `names:"-q, --quiet" usage:"Run in quiet mode"`
 
 	Catalog catalogCommand `usage:"Manage catalog operations"`
 	Library libraryCommand `usage:"Manage library operations"`
 }
 
 func (*command) Metadata() map[string]flag.Flag {
-	return map[string]flag.Flag{
-		"": {
-			Usage: "Facette control utility",
-		},
-	}
+	return map[string]flag.Flag{"": {Usage: "Facette control utility"}}
 }
 
 var (
-	version   string
-	buildDate string
-	buildHash string
-
 	cmd     command
 	flagSet *flag.FlagSet
 )
 
-func main() {
-	var err error
-
+func init() {
 	flagSet = flag.NewFlagSet(flag.Flag{}).ErrHandling(0)
 	flagSet.StructFlags(&cmd)
 
-	if err := flagSet.Parse(os.Args...); err != nil {
-		fmt.Printf("Error: %s\n", err)
+	err := flagSet.Parse(os.Args...)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 		flagSet.Help(false)
-		os.Exit(1)
+		os.Exit(2)
+	} else if cmd.Version {
+		version.Print()
+		os.Exit(0)
 	}
+}
+
+func main() {
+	var err error
 
 	// Add default scheme to address if none provided
 	if !strings.HasPrefix(cmd.Address, "http://") && !strings.HasPrefix(cmd.Address, "https://") {
 		cmd.Address = "http://" + cmd.Address
 	}
 
-	if cmd.Version {
-		execVersion()
-		os.Exit(0)
-	} else if cmd.Catalog.Enable {
+	if cmd.Catalog.Enable {
 		err = execCatalog()
 	} else if cmd.Library.Enable {
 		err = execLibrary()
@@ -67,15 +63,15 @@ func main() {
 
 	if err != nil {
 		if err != errExecFailed {
-			die("%s", err)
+			die(err)
 		}
 
 		os.Exit(1)
 	}
 }
 
-func die(format string, v ...interface{}) {
-	printError(format, v...)
+func die(err error) {
+	printError("%s", err)
 	os.Exit(1)
 }
 

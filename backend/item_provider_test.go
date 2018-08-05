@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"facette.io/maputil"
+	"github.com/stretchr/testify/assert"
 )
 
 func testProviderNew() []*Provider {
@@ -13,13 +14,13 @@ func testProviderNew() []*Provider {
 				Name: "item1",
 			},
 			Connector: "connector1",
-			Settings: maputil.Map{
+			Settings: &maputil.Map{
 				"key1": "abc",
 				"key2": 123.456,
 			},
 			Filters: ProviderFilters{
-				ProviderFilter{Action: "action1", Target: "target1", Pattern: "pattern1", Into: "into1"},
-				ProviderFilter{Action: "action1", Target: "target1", Pattern: "pattern2"},
+				&ProviderFilter{Action: "action1", Target: "target1", Pattern: "pattern1", Into: "into1"},
+				&ProviderFilter{Action: "action1", Target: "target1", Pattern: "pattern2"},
 			},
 			RefreshInterval: 30,
 			Priority:        10,
@@ -31,7 +32,7 @@ func testProviderNew() []*Provider {
 				Name: "item2",
 			},
 			Connector: "connector2",
-			Settings: maputil.Map{
+			Settings: &maputil.Map{
 				"key1": "def",
 			},
 			RefreshInterval: 0,
@@ -45,7 +46,7 @@ func testProviderNew() []*Provider {
 			},
 			Connector: "connector3",
 			Filters: ProviderFilters{
-				ProviderFilter{Action: "action1", Target: "target1", Pattern: "pattern1", Into: "into1"},
+				&ProviderFilter{Action: "action1", Target: "target1", Pattern: "pattern1", Into: "into1"},
 			},
 			RefreshInterval: 10,
 			Priority:        0,
@@ -60,16 +61,8 @@ func testProviderCreate(b *Backend, testProviders []*Provider, t *testing.T) {
 
 func testProviderCreateInvalid(b *Backend, testProviders []*Provider, t *testing.T) {
 	testItemCreateInvalid(b, &Provider{}, testInterfaceToSlice(testProviders), t)
-
-	if err := b.Storage().Save(&Provider{Item: Item{Name: "name"}, RefreshInterval: -1}); err != ErrInvalidInterval {
-		t.Logf("\nExpected %#v\nbut got  %#v", ErrInvalidInterval, err)
-		t.Fail()
-	}
-
-	if err := b.Storage().Save(&Provider{Item: Item{Name: "name"}, Priority: -1}); err != ErrInvalidPriority {
-		t.Logf("\nExpected %#v\nbut got  %#v", ErrInvalidPriority, err)
-		t.Fail()
-	}
+	assert.Equal(t, ErrInvalidInterval, b.Storage().Save(&Provider{Item: Item{Name: "name"}, RefreshInterval: -1}))
+	assert.Equal(t, ErrInvalidPriority, b.Storage().Save(&Provider{Item: Item{Name: "name"}, Priority: -1}))
 }
 
 func testProviderGet(b *Backend, testProviders []*Provider, t *testing.T) {

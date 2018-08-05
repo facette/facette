@@ -1,4 +1,4 @@
 /bin
-/cmd/facette/bindata.go
 /dist
 /ui/node_modules
+/web/bindata.go

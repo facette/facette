@@ -105,7 +105,8 @@ func (g *Graph) Expand(attrs maputil.Map) error {
 	}
 
 	if g.backend != nil && g.LinkID != nil && *g.LinkID != "" {
-		if err := g.Resolve(); err != nil {
+		err = g.Resolve()
+		if err != nil {
 			return err
 		}
 

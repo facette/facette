@@ -1,11 +1,11 @@
 package catalog
 
 import (
-	"reflect"
 	"sort"
 	"testing"
 
 	"facette.io/sliceutil"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -25,152 +25,138 @@ func init() {
 		&Record{Origin: "origin2", Source: "source2", Metric: "metric3"},
 	}
 
+	for _, r := range testRecords {
+		testCatalogs[0].Insert(r)
+	}
 	testCatalogs[1].Insert(testRecords[2])
 }
 
 func Test_Catalog_Name(t *testing.T) {
-	if result := testCatalogs[0].Name(); result != "catalog1" {
-		t.Logf("\nExpected %#v\nbut got  %#v", "catalog1", result)
-		t.Fail()
-	}
+	assert.Equal(t, "catalog1", testCatalogs[0].Name())
 }
 
 func Test_Catalog_SetPriority(t *testing.T) {
 	testCatalogs[0].SetPriority(10)
-
-	if testCatalogs[0].priority != 10 {
-		t.Logf("\nExpected %#v\nbut got  %#v", 10, testCatalogs[0].priority)
-		t.Fail()
-	}
-}
-
-func Test_Catalog_Insert(t *testing.T) {
-	for _, r := range testRecords {
-		testCatalogs[0].Insert(r)
-	}
+	assert.Equal(t, 10, testCatalogs[0].priority)
 }
 
 func Test_Catalog_Origin(t *testing.T) {
 	origin, err := testCatalogs[0].Origin(testRecords[0].Origin)
-	if err != nil {
-		t.Logf("\nExpected <nil>\nbut got  %#v", err)
-		t.Fail()
-	} else if c := origin.Catalog(); !reflect.DeepEqual(c, testCatalogs[0]) {
-		t.Logf("\nExpected %#v\nbut got  %#v", testCatalogs[0], c)
-		t.Fail()
-	}
+	assert.Nil(t, err)
+	assert.Equal(t, testCatalogs[0], origin.Catalog())
 
-	expectedSources := []string{}
+	expected := []string{}
 	for _, r := range testRecords {
-		if r.Origin == testRecords[0].Origin && !sliceutil.Has(expectedSources, r.Source) {
-			expectedSources = append(expectedSources, r.Source)
+		if r.Origin == testRecords[0].Origin && !sliceutil.Has(expected, r.Source) {
+			expected = append(expected, r.Source)
 		}
 	}
-	sort.Strings(expectedSources)
+	sort.Strings(expected)
 
-	sources := []string{}
+	actual := []string{}
 	for _, s := range origin.Sources() {
-		sources = append(sources, s.Name)
+		actual = append(actual, s.Name)
 	}
 
-	if !reflect.DeepEqual(sources, expectedSources) {
-		t.Logf("\nExpected %#v\nbut got  %#v", expectedSources, sources)
-		t.Fail()
-	}
+	assert.Equal(t, expected, actual)
+}
+
+func Test_Catalog_Origin_Unknown(t *testing.T) {
+	origin, err := testCatalogs[0].Origin("unknown")
+	assert.Equal(t, ErrUnknownOrigin, err)
+	assert.Nil(t, origin)
 }
 
 func Test_Catalog_Origin_Sources(t *testing.T) {
-	expectedSources := []string{"source1"}
-
 	origin, _ := testCatalogs[0].Origin(testRecords[0].Origin)
-	sources := []string{}
+	actual := []string{}
 	for _, o := range origin.Sources() {
-		sources = append(sources, o.Name)
+		actual = append(actual, o.Name)
 	}
 
-	if !reflect.DeepEqual(sources, expectedSources) {
-		t.Logf("\nExpected %#v\nbut got  %#v", expectedSources, sources)
-		t.Fail()
-	}
+	assert.Equal(t, []string{"source1"}, actual)
 }
 
 func Test_Catalog_Origins(t *testing.T) {
-	expectedOrigins := []string{}
+	expected := []string{}
 	for _, r := range testRecords {
-		if !sliceutil.Has(expectedOrigins, r.Origin) {
-			expectedOrigins = append(expectedOrigins, r.Origin)
+		if !sliceutil.Has(expected, r.Origin) {
+			expected = append(expected, r.Origin)
 		}
 	}
-	sort.Strings(expectedOrigins)
+	sort.Strings(expected)
 
-	origins := []string{}
+	actual := []string{}
 	for _, o := range testCatalogs[0].Origins() {
-		origins = append(origins, o.Name)
+		actual = append(actual, o.Name)
 	}
 
-	if !reflect.DeepEqual(origins, expectedOrigins) {
-		t.Logf("\nExpected %#v\nbut got  %#v", expectedOrigins, origins)
-		t.Fail()
-	}
+	assert.Equal(t, expected, actual)
 }
 
 func Test_Catalog_Source(t *testing.T) {
-	expectedOrigin, _ := testCatalogs[0].Origin(testRecords[1].Origin)
+	origin, _ := testCatalogs[0].Origin(testRecords[1].Origin)
 
 	source, err := testCatalogs[0].Source(testRecords[1].Origin, testRecords[1].Source)
-	if err != nil {
-		t.Logf("\nExpected <nil>\nbut got  %#v", err)
-		t.Fail()
-	} else if o := source.Origin(); !reflect.DeepEqual(o, expectedOrigin) {
-		t.Logf("\nExpected %#v\nbut got  %#v", expectedOrigin, o)
-		t.Fail()
-	}
+	assert.Nil(t, err)
+	assert.Equal(t, origin, source.Origin())
 
-	expectedMetrics := []string{}
+	expected := []string{}
 	for _, r := range testRecords {
 		if r.Origin == testRecords[1].Origin && r.Source == testRecords[1].Source &&
-			!sliceutil.Has(expectedMetrics, r.Metric) {
-			expectedMetrics = append(expectedMetrics, r.Metric)
+			!sliceutil.Has(expected, r.Metric) {
+			expected = append(expected, r.Metric)
 		}
 	}
-	sort.Strings(expectedMetrics)
+	sort.Strings(expected)
 
-	metrics := []string{}
+	actual := []string{}
 	for _, m := range source.Metrics() {
-		metrics = append(metrics, m.Name)
+		actual = append(actual, m.Name)
 	}
-	sort.Strings(metrics)
+	sort.Strings(actual)
 
-	if !reflect.DeepEqual(metrics, expectedMetrics) {
-		t.Logf("\nExpected %#v\nbut got  %#v", expectedMetrics, metrics)
-		t.Fail()
-	}
+	assert.Equal(t, expected, actual)
+}
+
+func Test_Catalog_Source_Unknown(t *testing.T) {
+	source, err := testCatalogs[0].Source("unknown", testRecords[1].Source)
+	assert.Equal(t, ErrUnknownOrigin, err)
+	assert.Nil(t, source)
+
+	source, err = testCatalogs[0].Source(testRecords[1].Origin, "unknown")
+	assert.Equal(t, ErrUnknownSource, err)
+	assert.Nil(t, source)
 }
 
 func Test_Catalog_Source_Metrics(t *testing.T) {
-	expectedMetrics := []string{"metric1", "metric2"}
-
 	source, _ := testCatalogs[0].Source(testRecords[0].Origin, testRecords[0].Source)
-	metrics := []string{}
+	actual := []string{}
 	for _, o := range source.Metrics() {
-		metrics = append(metrics, o.Name)
+		actual = append(actual, o.Name)
 	}
 
-	if !reflect.DeepEqual(metrics, expectedMetrics) {
-		t.Logf("\nExpected %#v\nbut got  %#v", expectedMetrics, metrics)
-		t.Fail()
-	}
+	assert.Equal(t, []string{"metric1", "metric2"}, actual)
 }
 
 func Test_Catalog_Metric(t *testing.T) {
-	expectedSource, _ := testCatalogs[0].Source(testRecords[2].Origin, testRecords[2].Source)
+	source, _ := testCatalogs[0].Source(testRecords[2].Origin, testRecords[2].Source)
 
 	metric, err := testCatalogs[0].Metric(testRecords[2].Origin, testRecords[2].Source, testRecords[2].Metric)
-	if err != nil {
-		t.Logf("\nExpected <nil>\nbut got  %#v", err)
-		t.Fail()
-	} else if s := metric.Source(); !reflect.DeepEqual(s, expectedSource) {
-		t.Logf("\nExpected %#v\nbut got  %#v", expectedSource, s)
-		t.Fail()
-	}
+	assert.Nil(t, err)
+	assert.Equal(t, source, metric.Source())
+}
+
+func Test_Catalog_Metric_Unknown(t *testing.T) {
+	metric, err := testCatalogs[0].Metric("unknown", testRecords[2].Source, testRecords[2].Metric)
+	assert.Equal(t, ErrUnknownOrigin, err)
+	assert.Nil(t, metric)
+
+	metric, err = testCatalogs[0].Metric(testRecords[2].Origin, "unknown", testRecords[2].Metric)
+	assert.Equal(t, ErrUnknownSource, err)
+	assert.Nil(t, metric)
+
+	metric, err = testCatalogs[0].Metric(testRecords[2].Origin, testRecords[2].Source, "unknown")
+	assert.Equal(t, ErrUnknownMetric, err)
+	assert.Nil(t, metric)
 }

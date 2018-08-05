@@ -13,6 +13,7 @@ import (
 	"facette.io/facette/backend"
 	"facette.io/facette/catalog"
 	"facette.io/facette/series"
+	"facette.io/facette/version"
 	"facette.io/httputil"
 	"facette.io/logger"
 	"facette.io/maputil"
@@ -79,7 +80,7 @@ func (c *facetteConnector) Refresh(output chan<- *catalog.Record) error {
 		return fmt.Errorf("unable to set up HTTP request: %s", err)
 	}
 
-	req.Header.Add("User-Agent", "facette/"+version)
+	req.Header.Add("User-Agent", "facette/"+version.Version)
 
 	// Retrieve data from upstream catalog
 	resp, err := c.client.Do(req)
@@ -150,7 +151,7 @@ func (c *facetteConnector) Points(q *series.Query) ([]series.Series, error) {
 	}
 
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("User-Agent", "facette/"+version)
+	req.Header.Add("User-Agent", "facette/"+version.Version)
 
 	// Retrieve upstream data points
 	resp, err := c.client.Do(req)

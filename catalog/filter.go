@@ -5,7 +5,7 @@ import (
 	"regexp"
 
 	"facette.io/facette/backend"
-	"github.com/fatih/set"
+	"facette.io/facette/set"
 )
 
 const (
@@ -148,6 +148,6 @@ func (fc *FilterChain) applyAction(rule filterRule, record *Record, value *strin
 }
 
 type filterRule struct {
-	backend.ProviderFilter
+	*backend.ProviderFilter
 	re *regexp.Regexp
 }
