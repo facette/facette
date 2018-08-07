@@ -11,6 +11,7 @@ require (
 	facette.io/sqlstorage v0.0.0-20180722062226-9a160f84b339
 	github.com/cosiner/argv v0.0.0-20170225145430-13bacc38a0a5 // indirect
 	github.com/cosiner/flag v0.0.0-20170716090135-e5e06a5be4a3
+	github.com/davecgh/go-spew v1.1.0 // indirect
 	github.com/denisenkom/go-mssqldb v0.0.0-20180707235734-242fa5aa1b45 // indirect
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
 	github.com/go-sql-driver/mysql v1.4.0 // indirect
@@ -31,6 +32,8 @@ require (
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b
 	github.com/oklog/run v1.0.0
 	github.com/pkg/errors v0.8.0
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/stretchr/testify v1.2.2
 	github.com/vbatoufflet/httproute v0.0.0-20180726070139-ea5eb863770f
 	github.com/ziutek/rrd v0.0.0-20170125160940-86f4f09e7abb
 	golang.org/x/crypto v0.0.0-20180802221240-56440b844dfe // indirect
