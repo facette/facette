@@ -6,14 +6,17 @@ import (
 	"os"
 	"os/signal"
 	"runtime/debug"
+	"strings"
 	"syscall"
 
 	"facette.io/facette/backend"
 	"facette.io/facette/catalog"
 	"facette.io/facette/config"
+	"facette.io/facette/connector"
 	"facette.io/facette/poller"
 	"facette.io/facette/version"
 	"facette.io/facette/web"
+	"facette.io/sqlstorage"
 	"github.com/cosiner/flag"
 	"github.com/oklog/run"
 	"github.com/pkg/errors"
@@ -42,6 +45,11 @@ func init() {
 		os.Exit(2)
 	} else if cmd.Version {
 		version.Print()
+		fmt.Printf(
+			"   Drivers:     %s\n   Connectors:  %s\n",
+			strings.Join(sqlstorage.Drivers(), ", "),
+			strings.Join(connector.Connectors(), ", "),
+		)
 		os.Exit(0)
 	}
 }
