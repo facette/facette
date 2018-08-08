@@ -97,7 +97,7 @@ import (
 //
 // Note: regular expressions must follow the [RE2 syntax](https://github.com/google/re2).
 
-// api:method POST /api/v1/providers/ "Create a provider"
+// api:method POST /api/v1/providers "Create a provider"
 //
 // This endpoint creates a new catalog provider. Required fields:
 //
@@ -277,7 +277,7 @@ func (a *API) providerDelete(rw http.ResponseWriter, r *http.Request) {
 	a.backendDelete(rw, httproute.SetContextParam(r, "type", "providers"))
 }
 
-// api:method DELETE /api/v1/providers/ "Delete all providers"
+// api:method DELETE /api/v1/providers "Delete all providers"
 //
 // This endpoint deletes all providers.
 //
@@ -295,7 +295,7 @@ func (a *API) providerDeleteAll(rw http.ResponseWriter, r *http.Request) {
 	a.backendDeleteAll(rw, httproute.SetContextParam(r, "type", "providers"))
 }
 
-// api:method GET /api/v1/providers/ "List providers"
+// api:method GET /api/v1/providers "List providers"
 //
 // This endpoint returns providers. If a `filter` query parameter is given, only providers having
 // their name matching the filter will be returned.

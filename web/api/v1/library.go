@@ -15,7 +15,7 @@ var libraryTypes = []string{
 	"metricgroups",
 }
 
-// api:method GET /api/v1/library/ "Get library summary"
+// api:method GET /api/v1/library "Get library summary"
 //
 // This endpoint returns library items count per type.
 //

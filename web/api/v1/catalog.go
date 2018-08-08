@@ -23,7 +23,7 @@ import (
 //  * `metrics`
 //
 
-// api:method GET /api/v1/catalog/ "Get catalog summary"
+// api:method GET /api/v1/catalog "Get catalog summary"
 //
 // This endpoint returns catalog entries count per type.
 //
@@ -53,7 +53,7 @@ func (a *API) catalogSummary(rw http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(rw, result, http.StatusOK)
 }
 
-// api:method GET /api/v1/catalog/:type/ "List catalog entries of a given type"
+// api:method GET /api/v1/catalog/:type "List catalog entries of a given type"
 //
 // This endpoint returns catalog entries of a given type. If a `filter` query parameter is given, only entries having
 // their name matching the filter will be returned.

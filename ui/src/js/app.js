@@ -163,9 +163,6 @@ app.config(function($httpProvider, $locationProvider, $resourceProvider, $routeP
         };
     });
 
-    // Don't strip trailing slash on requests
-    $resourceProvider.defaults.stripTrailingSlashes = false;
-
     // Setup translation
     var locale = localStorage.getItem('locale');
 

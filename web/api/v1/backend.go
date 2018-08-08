@@ -24,7 +24,7 @@ var backendTypes = []string{
 	"metricgroups",
 }
 
-// api:method POST /api/v1/library/:type/ "Create a library item"
+// api:method POST /api/v1/library/:type "Create a library item"
 //
 // This endpoint creates a new item and stores it to the back-end database.
 //
@@ -481,7 +481,7 @@ func (a *API) backendDelete(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusNoContent)
 }
 
-// api:method DELETE /api/v1/library/:type/ "Delete library items of a given type"
+// api:method DELETE /api/v1/library/:type "Delete library items of a given type"
 //
 // This endpoint deletes all items of a given type.
 //
@@ -550,7 +550,7 @@ func (a *API) backendDeleteAll(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusNoContent)
 }
 
-// api:method GET /api/v1/library/:type/ "List library items of a given type"
+// api:method GET /api/v1/library/:type "List library items of a given type"
 //
 // This endpoint returns library items of a given type. If a `filter` query parameter is given, only items having
 // their name matching the filter will be returned.

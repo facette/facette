@@ -30,7 +30,7 @@ type bulkResponseEntry struct {
 	Data    interface{} `json:"data"`
 }
 
-// api:method POST /api/v1/bulk/ "Bulk requests execution"
+// api:method POST /api/v1/bulk "Bulk requests execution"
 //
 // This endpoint expects a request providing as body a list of API requests to execute in bulk, and returns a list of
 // API responses corresponding to the requests. The format for describing an API request in a bulk list is:

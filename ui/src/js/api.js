@@ -40,7 +40,7 @@ app.factory('catalog', function($resource) {
 });
 
 app.factory('info', function($resource) {
-    return $resource('api/v1/', null, {
+    return $resource('api/v1', null, {
         get: {
             method: 'GET'
         }

@@ -50,14 +50,14 @@ func NewAPI(
 	root.Endpoint("/bulk").
 		Post(api.bulkExec)
 
-	root.Endpoint("/catalog/").
+	root.Endpoint("/catalog").
 		Get(api.catalogSummary)
-	root.Endpoint("/catalog/:type/").
+	root.Endpoint("/catalog/:type").
 		Get(api.catalogList)
 	root.Endpoint("/catalog/:type/*").
 		Get(api.catalogGet)
 
-	root.Endpoint("/library/").
+	root.Endpoint("/library").
 		Get(api.librarySummary)
 	root.Endpoint("/library/parse").
 		Post(api.libraryParse)
@@ -65,7 +65,7 @@ func NewAPI(
 		Post(api.librarySearch)
 	root.Endpoint("/library/collections/tree").
 		Get(api.libraryCollectionTree)
-	root.Endpoint("/library/:type/").
+	root.Endpoint("/library/:type").
 		Delete(api.backendDeleteAll).
 		Get(api.backendList).
 		Post(api.backendCreate)
@@ -75,7 +75,7 @@ func NewAPI(
 		Patch(api.backendUpdate).
 		Put(api.backendUpdate)
 
-	root.Endpoint("/providers/").
+	root.Endpoint("/providers").
 		Delete(api.providerDeleteAll).
 		Get(api.providerList).
 		Post(api.providerCreate)
