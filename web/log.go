@@ -1,5 +1,3 @@
-// +build !builtin_assets
-
 package web
 
 import (
