@@ -253,6 +253,10 @@ func (c *Collection) treeEntry() *CollectionTreeEntry {
 		entry.Label = c.Name
 	}
 
+	if c.Alias != nil {
+		entry.Alias = *c.Alias
+	}
+
 	return entry
 }
 
@@ -341,6 +345,7 @@ func (c CollectionTree) Swap(i, j int) {
 type CollectionTreeEntry struct {
 	ID       string          `json:"id,omitempty"`
 	Label    string          `json:"label,omitempty"`
+	Alias    string          `json:"alias,omitempty"`
 	Parent   string          `json:"parent,omitempty"`
 	Children *CollectionTree `json:"children,omitempty"`
 }
