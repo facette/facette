@@ -113,7 +113,7 @@ var config = {
                 'node_modules/angular-ui-tree/dist/angular-ui-tree.js',
                 'node_modules/angular-paging/dist/paging.js',
                 'node_modules/ng-sortable/dist/ng-sortable.js',
-                'node_modules/angular-tooltips/dist/angular-tooltips.js',
+                'node_modules/angularjs-tooltips/dist/angular-tooltips.js',
                 'node_modules/angular-bootstrap-colorpicker/js/bootstrap-colorpicker-module.js',
                 'node_modules/angularjs-bootstrap-datetimepicker/src/js/datetimepicker.js',
                 'node_modules/angular-hotkeys/build/hotkeys.js',

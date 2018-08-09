@@ -53,10 +53,6 @@ angular-sanitize@1.6.9:
   version "1.6.9"
   resolved "https://registry.yarnpkg.com/angular-sanitize/-/angular-sanitize-1.6.9.tgz#1adba33f6f513e5f93e3aca8071bef53666739ea"
 
-angular-tooltips@1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/angular-tooltips/-/angular-tooltips-1.0.5.tgz#3587240935b34f5e3a3b85ecd5ad16dfedf8fb74"
-
 angular-translate-interpolation-messageformat@2.17.0:
   version "2.17.0"
   resolved "https://registry.yarnpkg.com/angular-translate-interpolation-messageformat/-/angular-translate-interpolation-messageformat-2.17.0.tgz#49ba512946c9b7bf5c8fd88bca527556420abe31"
@@ -108,6 +104,10 @@ angularjs-bootstrap-datetimepicker@1.1.4:
   dependencies:
     angular "^1.6.4"
     moment "^2.18.1"
+
+angularjs-tooltips@1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/angularjs-tooltips/-/angularjs-tooltips-1.0.5.tgz#6de4b5a76bfacf4369ebc164f5edaab5f61363e3"
 
 ansi-gray@^0.1.1:
   version "0.1.1"

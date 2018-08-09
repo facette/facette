@@ -1,5 +1,4 @@
 var app = angular.module('facette', [
-    '720kb.tooltips',
     'angular-inview',
     'angular-page-visibility',
     'as.sortable',
@@ -25,6 +24,7 @@ var app = angular.module('facette', [
     'ngRoute',
     'ngSanitize',
     'pascalprecht.translate',
+    'tooltips',
     'ui.bootstrap.datetimepicker',
     'ui.dateTimeInput',
     'ui.select',
