@@ -38,7 +38,7 @@ var filterActions = [
 
     pagingLimit = 20,
 
-    graphPadding = 24,
+    graphMargin = 24,
 
     graphTypeArea = 'area',
     graphTypeLine = 'line',

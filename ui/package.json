@@ -5,7 +5,6 @@
   "license": "BSD",
   "private": true,
   "dependencies": {
-    "angular_page_visibility": "https://github.com/mz026/angular_page_visibility#0.0.4",
     "angular-bootstrap-colorpicker": "3.0.32",
     "angular-date-time-input": "1.2.1",
     "angular-hotkeys": "1.7.0",
@@ -19,8 +18,10 @@
     "angular-translate": "2.18.1",
     "angular-ui-tree": "2.22.6",
     "angular": "1.7.3",
+    "angular_page_visibility": "https://github.com/mz026/angular_page_visibility#0.0.4",
     "angularjs-bootstrap-datetimepicker": "1.1.4",
     "angularjs-tooltips": "1.0.5",
+    "boula": "0.3.0",
     "d3": "4.12.0",
     "font-awesome": "4.7.0",
     "jquery": "3.3.1",

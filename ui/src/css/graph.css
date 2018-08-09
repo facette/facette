@@ -7,7 +7,9 @@
 	position: relative;
 }
 
-.graph.frame {
+.graph.frame,
+.graph.frame .graph-caontainer,
+.graph.frame .graph-canvas {
 	min-height: 100%;
 }
 
@@ -36,7 +38,6 @@
 .graph-container {
 	align-items: center;
 	display: flex;
-	flex-grow: 1;
 	justify-content: center;
 	width: 100%;
 }
@@ -101,8 +102,8 @@
 	display: block;
 }
 
-.graph-fold,
-.graph-legend,
+.graph-toggle-fold,
+.graph-toggle-legend,
 .graph-step-backward,
 .graph-step-forward,
 .graph-menu {
@@ -111,61 +112,61 @@
 	text-align: center;
 }
 
-.graph-fold,
-.graph-legend,
+.graph-toggle-fold,
+.graph-toggle-legend,
 .graph-step-backward,
 .graph-step-forward {
 	cursor: pointer;
 }
 
-.graph-fold,
-.graph-legend {
+.graph-toggle-fold,
+.graph-toggle-legend {
 	font-size: 0.8rem;
 	line-height: 1.5rem;
 	min-width: 4rem;
 	text-align: center;
 }
 
-.graph-fold .fa,
+.graph-toggle-fold .fa,
 .graph-step-backward .fa,
 .graph-step-forward .fa {
 	display: block;
 }
 
-.graph-fold .fa,
-.graph-legend .fa {
+.graph-toggle-fold .fa,
+.graph-toggle-legend .fa {
 	display: inline-block;
 }
 
-.graph-fold {
+.graph-toggle-fold {
 	border-radius: 0 0 0.25rem 0.25rem;
 	transform: translateY(-1.5rem);
 	transition: transform .2s ease-in-out;
 }
 
-.graph-fold.active,
-.graph-fold:hover {
+.graph-toggle-fold.active,
+.graph-toggle-fold:hover {
 	transform: translateY(0);
 }
 
-.grid2 .graph-fold,
-.grid3 .graph-fold {
+.grid2 .graph-toggle-fold,
+.grid3 .graph-toggle-fold {
 	border-bottom-left-radius: 0;
 	position: absolute;
 	left: 0;
 }
 
-.graph-fold,
-.graph-legend {
+.graph-toggle-fold,
+.graph-toggle-legend {
 	padding: 0 1rem;
 }
 
-.graph-fold .fa,
-.graph-legend .fa {
+.graph-toggle-fold .fa,
+.graph-toggle-legend .fa {
 	margin-right: 0.35rem;
 }
 
-.graph-legend {
+.graph-toggle-legend {
 	border-radius: 0.25rem 0.25rem 0 0;
 }
 
@@ -266,9 +267,20 @@
 	font-size: 1.1rem;
 }
 
+.graph-container,
+.graph-canvas {
+	min-height: 20rem;
+}
+
 .graph-container {
 	background-color: #fff;
-	min-height: 20rem;
+	flex-direction: column;
+	flex-grow: 1;
+}
+
+.graph-canvas {
+	display: none;
+	min-width: 100%;
 }
 
 .graph.frame .graph-container {
@@ -276,8 +288,7 @@
 }
 
 .graph.empty .graph-container,
-.graph.error .graph-container,
-.graph.loading .graph-container {
+.graph.error .graph-container {
 	background-color: transparent;
 }
 
@@ -285,130 +296,22 @@
 	user-select: none;
 }
 
-.chart path,
-.chart line {
-	fill: none;
-}
-
-.chart-background {
-	fill: #fff;
-}
-
-.chart-line {
-	stroke-width: 1.5;
-}
-
-.chart-constant {
-	stroke: #d00;
-}
-
-.chart-series.fade {
-	opacity: 0.15;
-}
-
-.chart-series.fade .chart-area,
-.chart-series.highlight .chart-area {
-	visibility: hidden;
-}
-
-.chart-axis,
-.chart-legend {
-	cursor: default;
-	user-select: none;
-}
-
-.chart-axis .domain,
-.chart-axis .tick line {
-	stroke: #aaa;
-}
-
-.chart-axis .tick text {
-	fill: #444;
-}
-
-.chart-axis-y path,
-.chart-axis-y line {
+.graph-cursor {
+	background-color: #aaa;
 	display: none;
-}
-
-.chart-title {
-	fill: #444;
-	font-size: 1.25rem;
-}
-
-.chart-subtitle,
-.chart-axis-legend {
-	fill: #777;
-	font-size: 0.9rem;
-}
-
-.chart-grid {
-	stroke: #eee;
-}
-
-.chart-cursor {
-	stroke: #aaa;
-}
-
-.chart-zoom {
-	fill: rgba(41, 128, 185, 0.35);
+	height: 1px;
 	pointer-events: none;
+	position: absolute;
+	width: 1px;
+	will-change: height, left, top;
 }
 
-.chart-event {
-	cursor: crosshair;
-}
-
-.chart-legend {
-	font-size: 0.9rem;
-}
-
-.chart-legend-row.disabled,
-.chart-legend-row.error,
-.chart-tooltip tbody tr.disabled {
-	opacity: 0.25;
-}
-
-.chart-legend-row.error {
-	pointer-events: none;
-}
-
-.chart-legend-icon {
-	fill: #fff;
-	font-family: FontAwesome;
-	font-size: inherit;
-	font-style: normal;
-	font-weight: normal;
-	text-rendering: auto;
-	-moz-osx-font-smoothing: grayscale;
-	-webkit-font-smoothing: antialiased;
-}
-
-.chart-legend-name,
-.chart-legend-key,
-.chart-legend-value {
-	dominant-baseline: middle;
-}
-
-.chart-legend-name,
-.chart-legend-value {
-	cursor: pointer;
-}
-
-.chart-legend-row.disabled .chart-legend-value,
-.chart-legend-row.error .chart-legend-name {
-	cursor: default;
-}
-
-.chart-legend-key {
-	fill: #777;
-}
-
-.chart-tooltip {
+.graph-tooltip {
 	background-color: rgba(34, 34, 34, 0.9);
 	border-radius: 0.2rem;
 	box-sizing: border-box;
 	color: #fff;
+	display: none;
 	font-size: 0.9rem;
 	line-height: 1.5rem;
 	margin: 0 2rem;
@@ -418,43 +321,46 @@
 	z-index: 200;
 }
 
-.chart-tooltip table {
+.graph-tooltip table {
 	border-spacing: 0 0.25rem;
 	white-space: nowrap;
 	width: 1px;
 }
 
-.chart-tooltip thead th,
-.chart-tooltip tbody th.total {
+.graph-tooltip thead th,
+.graph-tooltip tfoot th {
 	color: #aaa;
 	font-weight: 500;
 }
 
-.chart-tooltip tbody {
+.graph-tooltip tbody,
+.graph-tooltip tfoot {
 	text-align: right;
 }
 
-.chart-tooltip tbody th {
+.graph-tooltip tbody th {
 	font-weight: normal;
 	text-align: left;
 	width: 100%;
 }
 
-.chart-tooltip tbody th,
-.chart-tooltip tbody td {
+.graph-tooltip tbody th,
+.graph-tooltip tbody td,
+.graph-tooltip tfoot td,
+.graph-tooltip tfoot td {
 	padding: 0 0.5rem;
 	white-space: nowrap;
 }
 
-.chart-tooltip tbody .null {
+.graph-tooltip tbody .null {
 	color: #aaa;
 }
 
-.chart-tooltip tbody th.total {
+.graph-tooltip tfoot th {
 	text-align: right;
 }
 
-.chart-tooltip-color {
+.graph-tooltip .color {
 	border-radius: 0.1rem;
 	display: inline-block;
 	height: 0.75rem;
@@ -463,8 +369,62 @@
 	width: 0.75rem;
 }
 
+.graph-zoom {
+    background-color: rgba(41, 128, 185, 0.35);
+    display: none;
+    height: 1px;
+    pointer-events: none;
+    position: absolute;
+    width: 1px;
+    will-change: height, left, top, width;
+}
+
+.graph-legend {
+	align-self: flex-start;
+	line-height: 1.75rem;
+	font-size: 0.9rem;
+}
+
+.graph-legend table {
+	border-spacing: 0;
+}
+
+.graph-legend tr.disabled {
+	opacity: 0.35;
+	pointer-events: none;
+}
+
+.graph-legend th {
+	font-weight: normal;
+}
+
+.graph-legend .label {
+	align-items: center;
+	cursor: pointer;
+	display: flex;
+	pointer-events: auto;
+	margin-right: 0.65rem;
+}
+
+.graph-legend .key {
+	opacity: 0.5;
+	padding: 0 0.65rem 0 1.35rem;
+}
+
+.graph-legend .value {
+	cursor: pointer;
+}
+
+.graph-legend .label .color {
+	border-radius: 0.1rem;
+	display: inline-block;
+	height: 0.8rem;
+	margin-right: 0.5rem;
+	width: 1rem;
+}
+
 @media screen and (max-width: 1024px) {
-	.graph-fold {
+	.graph-toggle-fold {
 		border-bottom-left-radius: 0;
 		left: 0;
 		position: absolute;

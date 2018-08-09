@@ -31,7 +31,7 @@
 		</menu>
 
 		<div class="graph-slides">
-			<div class="graph-fold" ng-class="{active: foldActive}" ng-if="!frame">
+			<div class="graph-toggle-fold" ng-class="{active: foldActive}" ng-if="!frame">
 				<div ng-click="toggleFold(true)" ng-show="!folded"><span class="fa fa-chevron-up"></span> {{ 'label.graphs_fold' | translate }}</div>
 			</div>
 
@@ -40,7 +40,7 @@
 				<div class="graph-step-forward fa fa-arrow-right" ng-click="moveStep(true)" ng-class="{active: stepActive == 'forward'}"></div>
 			</div>
 
-			<div class="graph-legend" ng-show="!error">
+			<div class="graph-toggle-legend" ng-show="!error">
 				<div ng-click="toggleLegend(true)" ng-show="!legendActive"><span class="fa fa-chevron-down"></span> {{ 'label.graphs_show_legend' | translate }}</div>
 				<div ng-click="toggleLegend(false)" ng-show="legendActive"><span class="fa fa-chevron-up"></span> {{ 'label.graphs_hide_legend' | translate }}</div>
 			</div>
@@ -52,5 +52,29 @@
 		<message icon="clock-o" ng-class="{float: data}" ng-show="loading">{{ 'mesg.points_fetch' | translate }}</message>
 		<message icon="info-circle" ng-show="empty">{{ 'mesg.points_empty' | translate }}</a></message>
 		<message icon="times-circle" ng-show="error">{{ 'mesg.points_error' | translate }}</a></message>
+
+		<div class="graph-cursor"></div>
+		<div class="graph-tooltip"></div>
+		<div class="graph-zoom"></div>
+
+		<div class="graph-canvas">
+			<canvas></canvas>
+		</div>
+
+		<div class="graph-legend" ng-if="legendActive && chart">
+			<table>
+				<tr ng-class="{disabled: disabledSeries[idx]}" ng-repeat="(idx, series) in data.series">
+					<td><div class="label" ng-click="toggleSeries(idx)" ng-mouseenter="highlightSeries(idx, true)"
+							ng-mouseleave="highlightSeries(idx, false)">
+						<span class="color" ng-style="{backgroundColor: chart.config.series[idx].color}"></span>
+						{{ series.name }}
+					</div></td>
+					<th class="key" ng-repeat-start="key in legendColumns">{{ key }}</th>
+					<td class="value" ng-click="toggleLine(idx, key)" ng-repeat-end="">
+						{{ chart.config.axes.y.ticks.format(series.summary[key]) }}
+					</td>
+				</tr>
+			</table>
+		</div>
 	</div>
 </div>

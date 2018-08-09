@@ -117,7 +117,8 @@ var config = {
                 'node_modules/angular-bootstrap-colorpicker/js/bootstrap-colorpicker-module.js',
                 'node_modules/angularjs-bootstrap-datetimepicker/src/js/datetimepicker.js',
                 'node_modules/angular-hotkeys/build/hotkeys.js',
-                'node_modules/angular-date-time-input/src/dateTimeInput.js'
+                'node_modules/boula/dist/boula.js',
+                'node_modules/angular-date-time-input/src/dateTimeInput.js' // should be the last (vendoring issue)
             ],
             css: [
                 'node_modules/font-awesome/css/font-awesome.min.css'

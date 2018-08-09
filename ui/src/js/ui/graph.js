@@ -48,7 +48,10 @@ angular.module('facette.ui.graph', [])
     $scope.stepActive = null;
     $scope.folded = typeof $scope.options.folded == 'boolean' ? $scope.options.folded : false;
     $scope.legendActive = false;
-    $scope.zooming = false;
+    $scope.legendColumns = false;
+    $scope.lines = [];
+    $scope.disabledSeries = {};
+    $scope.zoomOrigin = null;
     $scope.exportLinks = {};
 
     var elementLeft = $element.offset().left,
@@ -115,97 +118,156 @@ angular.module('facette.ui.graph', [])
             return;
         }
 
-        var element = $element.children('.graph-container')[0],
+        var element = $element.find('.graph-canvas canvas')[0],
             startTime = moment($scope.data.start),
             endTime = moment($scope.data.end);
 
         var chartCfg = {
-            axis: {
+            axes: {
                 x: {
                     min: startTime.toDate(),
                     max: endTime.toDate(),
-                    tick: {
+                    ticks: {
                         count: Math.max(Math.floor($element.width() / 80), 2)
                     }
                 },
                 y: {
-                    label: $scope.data.options.yaxis_label || null,
-                    tick: {
+                    label: {
+                        text: $scope.data.options.yaxis_label || null,
+                    },
+                    lines: [],
+                    stack: $scope.data.options.stack_mode || false,
+                    ticks: {
                         count: 3
                     }
                 }
             },
             bindTo: element,
-            padding: graphPadding,
+            margin: graphMargin,
             series: [],
-            constants: $scope.data.options.constants || [],
-            stack: $scope.data.options.stack_mode,
-            title: $scope.data.options && $scope.data.options.title ? $scope.data.options.title : null,
-            subtitle: startTime.format(timeFormatDisplay) + ' — ' + endTime.format(timeFormatDisplay),
-            tooltip: {
-                date: {
-                    format: function(date) {
-                        return moment(date).format(timeFormatDisplay);
-                    }
+            titles: {
+                main: {
+                    text: $scope.data.options && $scope.data.options.title ? $scope.data.options.title : null
+                },
+                subtitle: {
+                    text: startTime.format(timeFormatDisplay) + ' — ' + endTime.format(timeFormatDisplay)
                 }
             },
             type: $scope.data.options.type,
-            zoom: {
-                enabled: true,
-                onStart: function() {
-                    $scope.zooming = true;
-                    $scope.$apply();
-                },
-                onSelect: function(start, end) {
-                    var startTime = moment(start);
-
-                    applyOptions({
-                        time: startTime.format(timeFormatRFC3339),
-                        range: timeToRange(moment(end).diff(startTime))
-                    });
-
-                    $scope.zooming = false;
-                    $scope.$apply();
-                }
-            },
             events: {
-                cursorMove: function(time) {
-                    $rootScope.$emit('PropagateCursorPosition', time, $scope);
+                handleEvent: function(e) {
+                    var boundaries = [];
+
+                    switch (e.type) {
+                    case 'mousedown':
+                        if (!$scope.zoomEl) {
+                            $scope.zoomEl = $element.find('.graph-zoom').css({
+                                top: $scope.chart.area.top + 'px',
+                                height: $scope.chart.area.height + 'px'
+                            });
+                        }
+
+                        updateZoom(e.layerX, null);
+
+                        break;
+
+                    case 'mouseup':
+                        if ($scope.zoomOrigin === null || $scope.zoomOrigin === e.layerX) {
+                            break;
+                        }
+
+                        boundaries = [
+                            $scope.chart.xScale.invert($scope.zoomOrigin - $scope.chart.area.left),
+                            $scope.chart.xScale.invert(e.layerX - $scope.chart.area.left),
+                        ];
+                        boundaries.sort();
+
+                        applyOptions({
+                            start_time: moment(boundaries[0]).format(timeFormatRFC3339),
+                            end_time: moment(boundaries[1]).format(timeFormatRFC3339),
+                        });
+                        $scope.$apply();
+
+                        updateZoom(null, null);
+
+                        break;
+
+                    case 'mouseleave':
+                        if ($scope.cursorEl) {
+                            $scope.cursorEl.css({display: 'none'});
+                        }
+
+                        updateTooltip(null);
+
+                        break;
+
+                    case 'mousemove':
+                        if ($scope.zoomOrigin !== null) {
+                            updateZoom(null, e.layerX);
+                        }
+
+                        if (
+                            e.layerX >= $scope.chart.area.left &&
+                            e.layerX <= $scope.chart.area.left + $scope.chart.area.width &&
+                            e.layerY >= $scope.chart.area.top &&
+                            e.layerY <= $scope.chart.area.top + $scope.chart.area.height
+                        ) {
+                            $scope.chart.canvas.style.cursor = "crosshair";
+
+                            $rootScope.$emit('PropagateCursorPosition',
+                                $scope.chart.xScale.invert(e.layerX - $scope.chart.area.left));
+
+                            updateTooltip(e);
+                        } else {
+                            $scope.chart.canvas.style.cursor = null;
+                            $rootScope.$emit('PropagateCursorPosition', null);
+                            updateTooltip(null);
+                        }
+
+                        break;
+                    }
                 }
             }
         };
 
+        // Apply constants
+        if ($scope.data.options.constants) {
+            $scope.data.options.constants.forEach(function(value) {
+                chartCfg.axes.y.lines.push({label: value, y: value, color: 'red'});
+            });
+        }
+
         // Set Y-Axis extremes and centering
         if ($scope.data.options.yaxis_min) {
-            chartCfg.axis.y.min = $scope.data.options.yaxis_min;
+            chartCfg.axes.y.min = $scope.data.options.yaxis_min;
         }
 
         if ($scope.data.options.yaxis_max) {
-            chartCfg.axis.y.max = $scope.data.options.yaxis_max;
+            chartCfg.axes.y.max = $scope.data.options.yaxis_max;
         }
 
         if (typeof $scope.data.options.yaxis_center == 'boolean') {
-            chartCfg.axis.y.center = $scope.data.options.yaxis_center;
+            chartCfg.axes.y.center = $scope.data.options.yaxis_center;
         }
 
         // Define unit formatter
         switch ($scope.data.options.yaxis_unit) {
         case graphYAxisUnitMetric:
-            chartCfg.axis.y.tick.format = d3.format('.2s');
+            chartCfg.axes.y.ticks.format = d3.format('.2s');
             break;
 
         case graphYAxisUnitBinary:
-            chartCfg.axis.y.tick.format = function(value) {
+            chartCfg.axes.y.ticks.format = function(value) {
                 return formatSize(value);
             };
             break;
 
         default:
-            chartCfg.axis.y.tick.format = d3.format('.2r');
+            chartCfg.axes.y.ticks.format = d3.format('.2r');
         }
 
         // Append series to chart
-        angular.forEach($scope.data.series, function(series) {
+        angular.forEach($scope.data.series, function(series, idx) {
             if (series.points === null) {
                 $scope.partial = true;
             }
@@ -213,11 +275,14 @@ angular.module('facette.ui.graph', [])
             var entry = {
                 name: series.name,
                 points: series.points,
-                summary: series.summary
             };
 
             if (series.options && series.options.color) {
                 entry.color = series.options.color;
+            }
+
+            if ($scope.disabledSeries[idx]) {
+                entry.disabled = true;
             }
 
             chartCfg.series.push(entry);
@@ -228,7 +293,18 @@ angular.module('facette.ui.graph', [])
         elementWidth = undefined;
 
         try {
-            $scope.chart = chart[$scope.chart ? 'update' : 'create'](chartCfg);
+             if (!$scope.chart) {
+                element.parentNode.style.display = 'flex';
+                $scope.chart = new boula(chartCfg);
+            } else {
+                $scope.chart.update(chartCfg);
+            }
+
+            $scope.chart.draw();
+            if ($scope.legendActive) {
+                $timeout(updateLegend, 0);
+            }
+
             $scope.$parent.$emit('GraphLoaded', $scope.index, $scope.graphId);
         } catch (e) {
             console.error('Failed to render graph: ' + e.name + (e.message ? ': ' + e.message : ''));
@@ -322,7 +398,8 @@ angular.module('facette.ui.graph', [])
             $scope.error = true;
 
             // Remove old rendered graph
-            $element.find('.graph-container svg').remove();
+            var canvas = $element.find('.graph-canvas canvas')[0];
+            canvas.clearRect(0, 0, canvas.width, canvas.height);
         });
     }
 
@@ -330,16 +407,6 @@ angular.module('facette.ui.graph', [])
         $scope.$parent.$emit('GraphChanged', $scope.index, $scope.graphId, {
             folded: $scope.folded,
             legendActive: $scope.legendActive
-        });
-    }
-
-    function resetLink() {
-        if (!$scope.exportLinks) {
-            return;
-        }
-
-        angular.forEach($scope.exportLinks, function(link) {
-            link.removeAttr('download').removeAttr('href');
         });
     }
 
@@ -358,6 +425,134 @@ angular.module('facette.ui.graph', [])
         $scope.timeout = $timeout(fetchData, $scope.refreshInterval * 1000);
     }
 
+    function updateLegend() {
+        var legendColumns = graphSummaryBase;
+        $scope.data.series.forEach(function(series) {
+            var keys = Object.keys(series.summary);
+            keys.sort();
+
+            keys.forEach(function(key) {
+                if (legendColumns.indexOf(key) == -1) {
+                    legendColumns.push(key);
+                }
+            })
+        });
+        $scope.legendColumns = legendColumns;
+
+        $element.find('.graph-legend').css({
+            paddingBottom: ($scope.chart.config.margin / 2) + 'px',
+            paddingLeft: $scope.chart.area.left + 'px',
+            paddingRight: $scope.chart.config.margin + 'px',
+        });
+    }
+
+    function updateTooltip(e) {
+        if (!$scope.tooltipEl) {
+            $scope.tooltipEl = $element.find('.graph-tooltip');
+        }
+
+        if (e === null) {
+            // Reset tooltip state
+            $scope.tooltipEl.css({
+                bottom: null,
+                display: 'none',
+                left: null,
+                right: null,
+                top: $scope.chart.config.margin,
+            });
+
+            return;
+        }
+
+        var date = $scope.chart.xScale.invert(e.layerX - $scope.chart.area.left),
+            bisector = d3.bisector(function(a) { return a[0] * 1000; }).left,
+            total = 0;
+
+        var tooltip = '<table>';
+
+        tooltip += '<thead><tr><th colspan="2">' + moment(date).format(timeFormatDisplay) + '</th></tr></thead>';
+
+        tooltip += '<tbody>';
+        $scope.chart.config.series.map(function(series) {
+            var idx = series.points ? bisector(series.points, date, 1) : -1,
+                value = idx != -1 && series.points[idx] ? series.points[idx][1] : null;
+
+            if (value) {
+                total += value;
+            }
+
+            tooltip += '<tr>';
+            tooltip += '<th><span class="color" style="background-color: ' + series.color + ';"></span>' +
+                series.name + '</th>';
+            tooltip += '<td>' + $scope.chart.config.axes.y.ticks.format(value) + '</td>';
+            tooltip += '</tr>';
+        });
+        tooltip += '</tbody>';
+
+        tooltip += '<tfoot>';
+        tooltip += '<tr><th>Total:</th><td>' + $scope.chart.config.axes.y.ticks.format(total) + '</td></tr>';
+        tooltip += '</tfoot>';
+
+        tooltip += '</table>';
+
+        $scope.tooltipEl.html(tooltip);
+
+        // Check client height before update to prevent flicking
+        var height = $scope.tooltipEl.outerHeight(true),
+            width = $scope.tooltipEl.outerWidth(true);
+
+        var style = {
+            display: 'block',
+        };
+
+        if (e.layerX + width >= $scope.chart.width - $scope.chart.config.margin * 2) {
+            style.left = (e.layerX - width) + 'px';
+        } else {
+            style.left = e.layerX + 'px';
+        }
+
+        if (e.clientY - height >= $scope.chart.config.margin) {
+            style.top = (e.layerY - height) + 'px';
+        } else {
+            style.top = $scope.chart.config.margin + 'px';
+        }
+
+        $scope.tooltipEl.css(style);
+    }
+
+    function updateZoom(start, end) {
+        var style;
+
+        if (!$scope.zoomEl) {
+            return;
+        }
+
+        if (!start && !end) {
+            style = {
+                display: 'none',
+                width: 0,
+            };
+
+            $scope.zoomOrigin = null;
+        } else if (start && !end) {
+            style = {
+                display: 'block',
+                left: start + 'px',
+            };
+
+            $scope.zoomOrigin = start;
+        } else if (!start && end) {
+            style = {
+                left: Math.min(end, $scope.zoomOrigin) + 'px',
+                width: Math.abs(end - $scope.zoomOrigin) + 'px',
+            };
+        }
+
+        if (style) {
+            $scope.zoomEl.css(style);
+        }
+    }
+
     // Define scope functions
     $scope.export = function(e, type) {
         var name;
@@ -372,47 +567,27 @@ angular.module('facette.ui.graph', [])
 
         switch (type) {
         case 'png':
-            var data = $scope.chart.getSVG(),
-                canvas = document.createElement('canvas'),
-                context;
-
-            canvas.setAttribute('width', $scope.chart.svg.attr('width'));
-            canvas.setAttribute('height', $scope.chart.svg.attr('height'));
-
-            if (!canvas.getContext || !(context = canvas.getContext('2d'))) {
-                console.error('Your browser doesn’t support mandatory Canvas feature');
-                return;
-            }
-
-            name = slugify($scope.chart.config.title) +
+            name = slugify($scope.chart.config.titles.main.text) +
                 '_' + moment($scope.data.start).format(timeFormatFilename) +
                 '_' + moment($scope.data.end).format(timeFormatFilename) +
                 '.png';
 
-            var image = new Image(),
-                svg = new Blob([data], {type: 'image/svg+xml;charset=utf-8'}),
-                url = URL.createObjectURL(svg);
+            let png = $scope.chart.canvas.toDataURL("image/png");
 
-            image.onload = function() {
-                context.drawImage(image, 0, 0);
-
-                var png = canvas.toDataURL('image/png');
-
+            $timeout(function() {
                 $scope.exportLinks[type]
                     .attr('download', name)
                     .attr('href', png.replace('image/png', 'image/octet-stream'))
                     .get(0).click();
 
                 URL.revokeObjectURL(png);
-            };
-
-            image.src = url;
+            }, 0);
 
             break;
 
         case 'summary_csv':
         case 'summary_json':
-            name = slugify($scope.chart.config.title) +
+            name = slugify($scope.chart.config.titles.main.text) +
                 '_' + moment($scope.data.start).format(timeFormatFilename) +
                 '_' + moment($scope.data.end).format(timeFormatFilename) +
                 '_' + type.replace('_', '.');
@@ -451,6 +626,12 @@ angular.module('facette.ui.graph', [])
             }, 0);
 
             break;
+        }
+    };
+
+    $scope.highlightSeries = function(idx, state) {
+        if (!$scope.disabledSeries[idx]) {
+            $scope.chart.highlightSeries(idx, state);
         }
     };
 
@@ -535,17 +716,40 @@ angular.module('facette.ui.graph', [])
     };
 
     $scope.toggleLegend = function(state) {
+        $scope.legendActive = state;
+
         if (!$scope.chart) {
             return;
         }
 
-        $scope.legendActive = state;
-        $scope.chart.toggleLegend(state);
-
-        // Reset export link
-        resetLink();
+        if (state) {
+            $timeout(updateLegend, 0);
+        }
 
         emitChange();
+    };
+
+    $scope.toggleLine = function(idx, key) {
+        var id = 'line' + idx + '-' + key,
+            found = $scope.lines.indexOf(id);
+
+        if (found == -1) {
+            $scope.chart.addLine(id, {
+                label: $scope.data.series[idx].name + '/' + key,
+                y: $scope.data.series[idx].summary[key],
+            });
+            $scope.lines.push(id);
+        } else {
+            $scope.chart.removeLine(id);
+            $scope.lines.splice(found, 1);
+        }
+    };
+
+    $scope.toggleSeries = function(idx) {
+        var state = !$scope.disabledSeries[idx];
+        $scope.disabledSeries[idx] = state;
+        $scope.chart.highlightSeries(idx, !state);
+        $scope.chart.toggleSeries(idx, !state);
     };
 
     $scope.zoom = function(zoomIn) {
@@ -587,9 +791,6 @@ angular.module('facette.ui.graph', [])
         // Check if options have been modified
         $scope.modified = !angular.equals($scope.options, $scope.optionsRef);
 
-        // Reset export link
-        resetLink();
-
         fetchData();
     }
 
@@ -604,12 +805,25 @@ angular.module('facette.ui.graph', [])
         applyOptions(options, force);
     }));
 
-    unregisterCallbacks.push($rootScope.$on('PropagateCursorPosition', function(e, time, origScope) {
-        if (!$scope.chart || $scope === origScope) {
+    unregisterCallbacks.push($rootScope.$on('PropagateCursorPosition', function(e, date) {
+        if (!$scope.chart) {
             return;
         }
 
-        $scope.chart.toggleCursor(time);
+        if (!$scope.cursorEl) {
+            $scope.cursorEl = $element.find('.graph-cursor').css({
+                top: $scope.chart.area.top + 'px',
+                height: $scope.chart.area.height + 'px'
+            });
+        }
+
+        // $scope.chart.toggleCursor(time);
+        if (date >= $scope.chart.config.axes.x.min && date <= $scope.chart.config.axes.x.max) {
+            let position = $scope.chart.area.left + $scope.chart.xScale(date);
+            $scope.cursorEl.css({display: 'block', left: position + 'px'});
+        } else {
+            $scope.cursorEl.css({display: 'none'});
+        }
     }));
 
     unregisterCallbacks.push($rootScope.$on('ResetTimeRange', function() {
@@ -674,7 +888,7 @@ angular.module('facette.ui.graph', [])
     });
 
     $element.on('mousemove', function(e) {
-        if ($scope.zooming) {
+        if ($scope.zoomOrigin != null) {
             return;
         }
 
@@ -689,7 +903,7 @@ angular.module('facette.ui.graph', [])
         var changed = false,
             relX = e.pageX - elementLeft,
             relY = e.pageY - elementTop,
-            delta = graphPadding * 2;
+            delta = graphMargin * 2;
 
         if (!$scope.stepActive && relX <= delta) {
             $scope.stepActive = 'backward';
