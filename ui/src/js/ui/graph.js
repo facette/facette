@@ -360,6 +360,7 @@ angular.module('facette.ui.graph', [])
 
     // Define scope functions
     $scope.export = function(e, type) {
+        var name;
         if (!$scope.chart) {
             return;
         }
@@ -383,7 +384,7 @@ angular.module('facette.ui.graph', [])
                 return;
             }
 
-            var name = slugify($scope.chart.config.title) +
+            name = slugify($scope.chart.config.title) +
                 '_' + moment($scope.data.start).format(timeFormatFilename) +
                 '_' + moment($scope.data.end).format(timeFormatFilename) +
                 '.png';
@@ -411,7 +412,7 @@ angular.module('facette.ui.graph', [])
 
         case 'summary_csv':
         case 'summary_json':
-            var name = slugify($scope.chart.config.title) +
+            name = slugify($scope.chart.config.title) +
                 '_' + moment($scope.data.start).format(timeFormatFilename) +
                 '_' + moment($scope.data.end).format(timeFormatFilename) +
                 '_' + type.replace('_', '.');

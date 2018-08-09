@@ -26,15 +26,16 @@ chart.utils.stylesList = [
 ];
 
 chart.utils.inlineStyles = function(src, dst) {
-    var style = getComputedStyle(src, null);
+    var style = getComputedStyle(src, null),
+        i;
 
-    for (var i = 0, n = style.length; i < n; i++) {
+    for (i = 0, n = style.length; i < n; i++) {
         if (chart.utils.stylesList.indexOf(style[i]) != -1) {
             dst.style[style[i]] = style.getPropertyValue(style[i]);
         }
     }
 
-    for (var i in src.childNodes) {
+    for (i in src.childNodes) {
         if (src.childNodes[i].nodeType == 1) {
             chart.utils.inlineStyles(src.childNodes[i], dst.childNodes[i]);
         }
