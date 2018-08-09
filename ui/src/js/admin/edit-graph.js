@@ -788,12 +788,12 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
 
                 bulk.exec([
                     {
-                        endpoint: 'library/sourcegroups/',
+                        endpoint: 'library/sourcegroups',
                         method: 'GET',
                         params: angular.extend({fields: 'id,name'}, params)
                     },
                     {
-                        endpoint: 'catalog/sources/',
+                        endpoint: 'catalog/sources',
                         method: 'GET',
                         params: angular.extend({}, params)
                     }
@@ -835,12 +835,12 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
 
                 bulk.exec([
                     {
-                        endpoint: 'library/metricgroups/',
+                        endpoint: 'library/metricgroups',
                         method: 'GET',
                         params: angular.extend({fields: 'id,name'}, params)
                     },
                     {
-                        endpoint: 'catalog/metrics/',
+                        endpoint: 'catalog/metrics',
                         method: 'GET',
                         params: angular.extend({}, params)
                     }
