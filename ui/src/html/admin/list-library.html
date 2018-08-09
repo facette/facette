@@ -54,7 +54,7 @@
 							<menu>
 								<menuitem icon="info-circle" type="button" info="<table><tr><th class='label'>{{ 'label.identifier' | translate }}</th><td>{{ i.id }}</td></tr><tr ng-if='{{ section == 'collections' || section == 'graphs' }}'><th class='label'>{{ 'label.alias' | translate }}</th><td>{{ i.alias || '-' }}</td></tr></table>" info-direction="bottom-right"></menuitem>
 								<menuitem icon="clone" info="{{ 'label.' + section + '_clone' | translate }}" type="button" ng-click="$event.preventDefault(); clone(i)" ng-if="!readOnly"></menuitem>
-								<menuitem href="{{ ::baseURL }}browse/{{ section }}/{{ i.id }}" icon="arrow-circle-right" info="{{ 'label.' + section + '_goto' | translate }}" type="button" ng-if="!templates && (section == 'collections' || section == 'graphs')"></menuitem>
+								<menuitem href="{{ ::baseURL }}browse/{{ section }}/{{ i.alias || i.id }}" icon="arrow-circle-right" info="{{ 'label.' + section + '_goto' | translate }}" type="button" ng-if="!templates && (section == 'collections' || section == 'graphs')"></menuitem>
 							</menu>
 						</div>
 					</div>
