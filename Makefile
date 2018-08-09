@@ -19,7 +19,7 @@ GOOS ?= $(shell $(GO) env GOOS)
 GOARCH ?= $(shell $(GO) env GOARCH)
 
 YARN ?= yarn
-YARN_ARGS ?= --cwd ui
+YARN_ARGS ?= --emoji false --no-color --cwd ui
 
 PANDOC ?= pandoc
 PANDOC_ARGS = --standalone --to man

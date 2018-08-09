@@ -54,8 +54,8 @@
     "merge-stream": "1.0.1"
   },
   "scripts": {
-    "build": "gulp build",
-    "lint": "gulp lint",
-    "update-locales": "gulp update-locales"
+    "build": "gulp --no-color build",
+    "lint": "gulp --no-color lint",
+    "update-locales": "gulp --no-color update-locales"
   }
 }
