@@ -1,4 +1,4 @@
-<a class="treelabel" href="browse/collections/{{ ::c.id }}" ng-style="{paddingLeft: 'calc(2rem * ' + depth() + ')'}">
+<a class="treelabel" href="browse/collections/{{ ::(c.alias || c.id) }}" ng-style="{paddingLeft: 'calc(2rem * ' + depth() + ')'}">
 	<span class="toggle fa" ng-class="{'fa-folder': collapsed, 'fa-folder-open': !collapsed}" ng-click="$event.preventDefault(); c.children && c.children.length > 0 ? toggle(this) : ''">
 		<span class="fa fa-plus extra" ng-show="collapsed && c.children && c.children.length > 0"></span>
 	</span>
