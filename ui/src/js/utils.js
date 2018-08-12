@@ -66,8 +66,9 @@ function timeToRange(duration) {
 
 function slugify(input) {
     return input.toLowerCase()
-        .replace(/[^\w\- ]+/g, '')
-        .replace(/ +/g, '-');
+        .replace(/\./g, '_')
+        .replace(/[\s\-]+/g, '-')
+        .replace(/[^\w\-]+/g, '');
 }
 
 function parseFloatList(input) {
