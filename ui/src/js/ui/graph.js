@@ -572,7 +572,7 @@ angular.module('facette.ui.graph', [])
                 '_' + moment($scope.data.end).format(timeFormatFilename) +
                 '.png';
 
-            let png = $scope.chart.canvas.toDataURL("image/png");
+            var png = $scope.chart.canvas.toDataURL("image/png");
 
             $timeout(function() {
                 $scope.exportLinks[type]
@@ -817,9 +817,8 @@ angular.module('facette.ui.graph', [])
             });
         }
 
-        // $scope.chart.toggleCursor(time);
         if (date >= $scope.chart.config.axes.x.min && date <= $scope.chart.config.axes.x.max) {
-            let position = $scope.chart.area.left + $scope.chart.xScale(date);
+            var position = $scope.chart.area.left + $scope.chart.xScale(date);
             $scope.cursorEl.css({display: 'block', left: position + 'px'});
         } else {
             $scope.cursorEl.css({display: 'none'});
