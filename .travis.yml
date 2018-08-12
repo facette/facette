@@ -25,7 +25,7 @@ before_script:
 - mysql -e 'create database facette charset=utf8;'
 
 script:
-- make test
+- make ENV=development test
 
 notifications:
   email:
