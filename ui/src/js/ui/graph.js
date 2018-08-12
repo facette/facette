@@ -233,17 +233,37 @@ angular.module('facette.ui.graph', [])
         // Apply constants
         if ($scope.data.options.constants) {
             $scope.data.options.constants.forEach(function(value) {
-                chartCfg.axes.y.lines.push({label: value, y: value, color: 'red'});
+                chartCfg.axes.y.lines.push({label: true, y: value, color: 'red'});
             });
         }
 
         // Set Y-Axis extremes and centering
+        var max = 0,
+            min = 0;
+
+        if ($scope.data.options.yaxis_min || $scope.data.options.yaxis_max) {
+            $scope.data.series.forEach(function(series) {
+                if (series.summary.max > max) {
+                    max = series.summary.max;
+                }
+                if (series.summary.min < min) {
+                    min = series.summary.min;
+                }
+            });
+        }
+
         if ($scope.data.options.yaxis_min) {
             chartCfg.axes.y.min = $scope.data.options.yaxis_min;
+            if (min < $scope.data.options.yaxis_min) {
+                chartCfg.axes.y.lines.push({y: $scope.data.options.yaxis_min, color: 'red', dashed: true});
+            }
         }
 
         if ($scope.data.options.yaxis_max) {
             chartCfg.axes.y.max = $scope.data.options.yaxis_max;
+            if (max > $scope.data.options.yaxis_max) {
+                chartCfg.axes.y.lines.push({y: $scope.data.options.yaxis_max, color: 'red', dashed: true});
+            }
         }
 
         if (typeof $scope.data.options.yaxis_center == 'boolean') {
