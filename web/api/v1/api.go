@@ -3,10 +3,10 @@ package v1
 import (
 	"net/http"
 
-	"facette.io/facette/backend"
 	"facette.io/facette/catalog"
 	"facette.io/facette/config"
 	"facette.io/facette/poller"
+	"facette.io/facette/storage"
 	"facette.io/httputil"
 	"facette.io/logger"
 	"github.com/vbatoufflet/httproute"
@@ -18,7 +18,7 @@ const Prefix = "/api/v1"
 // API represents an API instance.
 type API struct {
 	router   *httproute.Router
-	backend  *backend.Backend
+	storage  *storage.Storage
 	searcher *catalog.Searcher
 	poller   *poller.Poller
 	config   *config.Config
@@ -28,7 +28,7 @@ type API struct {
 // NewAPI creates a new API instance.
 func NewAPI(
 	router *httproute.Router,
-	backend *backend.Backend,
+	storage *storage.Storage,
 	searcher *catalog.Searcher,
 	poller *poller.Poller,
 	config *config.Config,
@@ -36,7 +36,7 @@ func NewAPI(
 ) *API {
 	api := &API{
 		router:   router,
-		backend:  backend,
+		storage:  storage,
 		searcher: searcher,
 		poller:   poller,
 		config:   config,
@@ -66,14 +66,14 @@ func NewAPI(
 	root.Endpoint("/library/collections/tree").
 		Get(api.libraryCollectionTree)
 	root.Endpoint("/library/:type").
-		Delete(api.backendDeleteAll).
-		Get(api.backendList).
-		Post(api.backendCreate)
+		Delete(api.storageDeleteAll).
+		Get(api.storageList).
+		Post(api.storageCreate)
 	root.Endpoint("/library/:type/:id").
-		Delete(api.backendDelete).
-		Get(api.backendGet).
-		Patch(api.backendUpdate).
-		Put(api.backendUpdate)
+		Delete(api.storageDelete).
+		Get(api.storageGet).
+		Patch(api.storageUpdate).
+		Put(api.storageUpdate)
 
 	root.Endpoint("/providers").
 		Delete(api.providerDeleteAll).

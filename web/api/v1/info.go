@@ -26,9 +26,9 @@ type Info struct {
 
 // api:method GET /api/v1 "Get service version and supported features"
 //
-// This endpoint returns the SQL storage drivers and catalog connectors supported by the Facette back-end.
+// This endpoint returns the SQL storage drivers and catalog connectors supported by the Facette storage.
 //
-// If the back-end is not configured to hide build information details, it will also return the detailed build
+// If the storage is not configured to hide build information details, it will also return the detailed build
 // information.
 //
 // ---

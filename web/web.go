@@ -8,10 +8,10 @@ import (
 	"sync"
 	"time"
 
-	"facette.io/facette/backend"
 	"facette.io/facette/catalog"
 	"facette.io/facette/config"
 	"facette.io/facette/poller"
+	"facette.io/facette/storage"
 	"facette.io/facette/web/api/v1"
 	"facette.io/logger"
 	"github.com/vbatoufflet/httproute"
@@ -22,7 +22,7 @@ type Handler struct {
 	sync.Mutex
 
 	ctx      context.Context
-	backend  *backend.Backend
+	storage  *storage.Storage
 	searcher *catalog.Searcher
 	poller   *poller.Poller
 	config   *config.Config
@@ -34,7 +34,7 @@ type Handler struct {
 // NewHandler creates a new HTTP handler instance.
 func NewHandler(
 	ctx context.Context,
-	backend *backend.Backend,
+	storage *storage.Storage,
 	searcher *catalog.Searcher,
 	poller *poller.Poller,
 	config *config.Config,
@@ -42,7 +42,7 @@ func NewHandler(
 ) *Handler {
 	return &Handler{
 		ctx:      ctx,
-		backend:  backend,
+		storage:  storage,
 		searcher: searcher,
 		poller:   poller,
 		config:   config,
@@ -60,7 +60,7 @@ func (h *Handler) Run() error {
 		r.Use(h.handleLog)
 	}
 
-	v1.NewAPI(r, h.backend, h.searcher, h.poller, h.config, h.logger)
+	v1.NewAPI(r, h.storage, h.searcher, h.poller, h.config, h.logger)
 
 	r.Endpoint("/*").
 		Get(h.handleAsset)

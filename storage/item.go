@@ -1,4 +1,4 @@
-package backend
+package storage
 
 import (
 	"time"
@@ -7,7 +7,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// Item represents a back-end item instance.
+// Item represents a storage item instance.
 type Item struct {
 	Type        string    `gorm:"-" json:"type,omitempty"`
 	ID          string    `gorm:"type:varchar(36);not null;primary_key" json:"id"`
@@ -16,7 +16,7 @@ type Item struct {
 	Created     time.Time `gorm:"not null;default:current_timestamp" json:"created"`
 	Modified    time.Time `gorm:"not null;default:current_timestamp" json:"modified"`
 
-	backend *Backend
+	storage *Storage
 }
 
 // BeforeSave handles the ORM 'BeforeSave' callback.
@@ -52,7 +52,7 @@ func (i *Item) BeforeSave(scope *gorm.Scope) error {
 	return nil
 }
 
-// SetBackend sets the item internal back-end reference.
-func (i *Item) SetBackend(b *Backend) {
-	i.backend = b
+// SetStorage sets the item internal storage reference.
+func (i *Item) SetStorage(s *Storage) {
+	i.storage = s
 }

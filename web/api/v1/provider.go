@@ -3,7 +3,7 @@ package v1
 import (
 	"net/http"
 
-	"facette.io/facette/backend"
+	"facette.io/facette/storage"
 	"facette.io/httputil"
 	"facette.io/sqlstorage"
 	"github.com/vbatoufflet/httproute"
@@ -144,7 +144,7 @@ import (
 // responses:
 //   201:
 func (a *API) providerCreate(rw http.ResponseWriter, r *http.Request) {
-	a.backendCreate(rw, httproute.SetContextParam(r, "type", "providers"))
+	a.storageCreate(rw, httproute.SetContextParam(r, "type", "providers"))
 }
 
 // api:method GET /api/v1/providers/:id "Get a provider"
@@ -215,7 +215,7 @@ func (a *API) providerCreate(rw http.ResponseWriter, r *http.Request) {
 //           "enabled": true
 //         }
 func (a *API) providerGet(rw http.ResponseWriter, r *http.Request) {
-	a.backendGet(rw, httproute.SetContextParam(r, "type", "providers"))
+	a.storageGet(rw, httproute.SetContextParam(r, "type", "providers"))
 }
 
 // api:method PUT /api/v1/providers/:id "Update a provider"
@@ -254,7 +254,7 @@ func (a *API) providerGet(rw http.ResponseWriter, r *http.Request) {
 // responses:
 //   204:
 func (a *API) providerUpdate(rw http.ResponseWriter, r *http.Request) {
-	a.backendUpdate(rw, httproute.SetContextParam(r, "type", "providers"))
+	a.storageUpdate(rw, httproute.SetContextParam(r, "type", "providers"))
 }
 
 // api:method DELETE /api/v1/providers/:id "Delete a provider"
@@ -274,7 +274,7 @@ func (a *API) providerUpdate(rw http.ResponseWriter, r *http.Request) {
 // responses:
 //   204:
 func (a *API) providerDelete(rw http.ResponseWriter, r *http.Request) {
-	a.backendDelete(rw, httproute.SetContextParam(r, "type", "providers"))
+	a.storageDelete(rw, httproute.SetContextParam(r, "type", "providers"))
 }
 
 // api:method DELETE /api/v1/providers "Delete all providers"
@@ -292,7 +292,7 @@ func (a *API) providerDelete(rw http.ResponseWriter, r *http.Request) {
 // responses:
 //   204:
 func (a *API) providerDeleteAll(rw http.ResponseWriter, r *http.Request) {
-	a.backendDeleteAll(rw, httproute.SetContextParam(r, "type", "providers"))
+	a.storageDeleteAll(rw, httproute.SetContextParam(r, "type", "providers"))
 }
 
 // api:method GET /api/v1/providers "List providers"
@@ -341,7 +341,7 @@ func (a *API) providerDeleteAll(rw http.ResponseWriter, r *http.Request) {
 //           }
 //         ]
 func (a *API) providerList(rw http.ResponseWriter, r *http.Request) {
-	a.backendList(rw, httproute.SetContextParam(r, "type", "providers"))
+	a.storageList(rw, httproute.SetContextParam(r, "type", "providers"))
 }
 
 // api:method POST /api/v1/providers/:id/refresh "Refresh a provider"
@@ -355,10 +355,10 @@ func (a *API) providerList(rw http.ResponseWriter, r *http.Request) {
 func (a *API) providerRefresh(rw http.ResponseWriter, r *http.Request) {
 	id := httproute.ContextParam(r, "id").(string)
 
-	provider := backend.Provider{}
+	provider := storage.Provider{}
 
-	// Request item from back-end
-	if err := a.backend.Storage().Get("id", id, &provider, false); err == sqlstorage.ErrItemNotFound {
+	// Request item from storage
+	if err := a.storage.SQL().Get("id", id, &provider, false); err == sqlstorage.ErrItemNotFound {
 		httputil.WriteJSON(rw, newMessage(err), http.StatusNotFound)
 		return
 	} else if err != nil {

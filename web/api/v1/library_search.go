@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"facette.io/facette/backend"
+	"facette.io/facette/storage"
 	"facette.io/httputil"
 )
 
@@ -98,12 +98,12 @@ func (a *API) librarySearch(rw http.ResponseWriter, r *http.Request) {
 
 	// Get requested types for request or fallback to 'all'
 	if len(req.Types) == 0 {
-		req.Types = append(req.Types, backendTypes...)
+		req.Types = append(req.Types, storageTypes...)
 	}
 
 	types := []interface{}{}
 	for _, typ := range req.Types {
-		if item, ok := a.backendItem(typ); ok {
+		if item, ok := a.storageItem(typ); ok {
 			types = append(types, item)
 		}
 	}
@@ -122,7 +122,7 @@ func (a *API) librarySearch(rw http.ResponseWriter, r *http.Request) {
 
 	sort := parseListParam(r, "sort", []string{"name"})
 
-	// Apply back-end storage modifiers
+	// Apply storage modifiers
 	for k, v := range req.Terms {
 		if s, ok := v.(string); ok {
 			req.Terms[k] = applyModifier(s)
@@ -130,9 +130,9 @@ func (a *API) librarySearch(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	// Execute search request
-	result := []*backend.Item{}
+	result := []*storage.Item{}
 
-	count, err := a.backend.Storage().Search(types, &result, req.Terms, sort, offset, limit)
+	count, err := a.storage.SQL().Search(types, &result, req.Terms, sort, offset, limit)
 	if err != nil {
 		a.logger.Error("failed to perform search: %s", err)
 		httputil.WriteJSON(rw, newMessage(errUnhandledError), http.StatusInternalServerError)

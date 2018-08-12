@@ -21,7 +21,7 @@ func (h *Handler) handleAsset(rw http.ResponseWriter, r *http.Request) {
 	)
 
 	// Stop handling assets if frontend is disabled
-	if !h.config.Frontend.Enabled {
+	if !h.config.UI.Enabled {
 		rw.WriteHeader(http.StatusForbidden)
 		return
 	}

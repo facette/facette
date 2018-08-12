@@ -1,4 +1,4 @@
-package backend
+package storage
 
 import (
 	"sort"
@@ -10,7 +10,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// Collection represents a back-end collection item instance.
+// Collection represents a storage collection item instance.
 type Collection struct {
 	Item
 	Entries    []*CollectionEntry `json:"entries,omitempty"`
@@ -28,8 +28,8 @@ type Collection struct {
 }
 
 // NewCollection creates a new collection item instance.
-func (b *Backend) NewCollection() *Collection {
-	return &Collection{Item: Item{backend: b}}
+func (s *Storage) NewCollection() *Collection {
+	return &Collection{Item: Item{storage: s}}
 }
 
 // BeforeSave handles the ORM 'BeforeSave' callback.
@@ -106,7 +106,7 @@ func (c *Collection) Expand(attrs maputil.Map) error {
 		c.Attributes.Merge(attrs, true)
 	}
 
-	if c.backend != nil && c.LinkID != nil && *c.LinkID != "" {
+	if c.storage != nil && c.LinkID != nil && *c.LinkID != "" {
 		err := c.Resolve(nil)
 		if err != nil {
 			return err
@@ -149,7 +149,7 @@ func (c *Collection) Expand(attrs maputil.Map) error {
 			attrs.Merge(c.Attributes, true)
 			attrs.Merge(entry.Attributes, true)
 
-			entry.Graph.backend = c.backend
+			entry.Graph.storage = c.storage
 			entry.Graph.Expand(attrs)
 
 			if v, ok := entry.Graph.Options["title"]; ok {
@@ -175,7 +175,7 @@ func (c *Collection) HasParent() bool {
 func (c *Collection) Resolve(cache map[string]*Collection) error {
 	if c.resolved {
 		return nil
-	} else if c.backend == nil {
+	} else if c.storage == nil {
 		return ErrUnresolvableItem
 	}
 
@@ -185,8 +185,8 @@ func (c *Collection) Resolve(cache map[string]*Collection) error {
 				c.Link = link
 			}
 		} else {
-			c.Link = c.backend.NewCollection()
-			if err := c.backend.Storage().Get("id", *c.LinkID, c.Link, true); err != nil {
+			c.Link = c.storage.NewCollection()
+			if err := c.storage.SQL().Get("id", *c.LinkID, c.Link, true); err != nil {
 				return err
 			}
 		}
@@ -198,8 +198,8 @@ func (c *Collection) Resolve(cache map[string]*Collection) error {
 				c.Parent = parent
 			}
 		} else {
-			c.Parent = c.backend.NewCollection()
-			if err := c.backend.Storage().Get("id", *c.ParentID, c.Parent, true); err != nil {
+			c.Parent = c.storage.NewCollection()
+			if err := c.storage.SQL().Get("id", *c.ParentID, c.Parent, true); err != nil {
 				return err
 			}
 		}
@@ -215,7 +215,7 @@ func (c *Collection) Resolve(cache map[string]*Collection) error {
 
 	if len(ids) > 0 {
 		graphs := []*Graph{}
-		if err := c.backend.Storage().Get("id", ids, &graphs, false); err != nil {
+		if err := c.storage.SQL().Get("id", ids, &graphs, false); err != nil {
 			return err
 		}
 
@@ -260,7 +260,7 @@ func (c *Collection) treeEntry() *CollectionTreeEntry {
 	return entry
 }
 
-// CollectionEntry represents a back-end collection entry instance.
+// CollectionEntry represents a storage collection entry instance.
 type CollectionEntry struct {
 	Index        int         `gorm:"type:int NOT NULL;primary_key" json:"-"`
 	Collection   *Collection `json:"-"`
@@ -271,13 +271,13 @@ type CollectionEntry struct {
 	Options      maputil.Map `gorm:"type:text" json:"options,omitempty"`
 }
 
-// CollectionTree represents a back-end collection tree instance.
+// CollectionTree represents a storage collection tree instance.
 type CollectionTree []*CollectionTreeEntry
 
-// NewCollectionTree creates a new back-end collection tree instance.
-func (b *Backend) NewCollectionTree(root string) (*CollectionTree, error) {
+// NewCollectionTree creates a new storage collection tree instance.
+func (s *Storage) NewCollectionTree(root string) (*CollectionTree, error) {
 	collections := []*Collection{}
-	if _, err := b.Storage().List(&collections, nil, nil, 0, 0, false); err != nil {
+	if _, err := s.SQL().List(&collections, nil, nil, 0, 0, false); err != nil {
 		return nil, err
 	}
 
@@ -292,7 +292,7 @@ func (b *Backend) NewCollectionTree(root string) (*CollectionTree, error) {
 			continue
 		}
 
-		c.backend = b
+		c.storage = s
 		c.Resolve(collectionsCache)
 		c.Expand(nil)
 
@@ -305,7 +305,7 @@ func (b *Backend) NewCollectionTree(root string) (*CollectionTree, error) {
 			parentID := *c.ParentID
 
 			if _, ok := entries[parentID]; !ok {
-				c.Parent.backend = b
+				c.Parent.storage = s
 				c.Parent.Resolve(collectionsCache)
 				c.Parent.Expand(nil)
 
@@ -341,7 +341,7 @@ func (c CollectionTree) Swap(i, j int) {
 	c[i], c[j] = c[j], c[i]
 }
 
-// CollectionTreeEntry represents a back-end collections tree entry instance.
+// CollectionTreeEntry represents a storage collections tree entry instance.
 type CollectionTreeEntry struct {
 	ID       string          `json:"id,omitempty"`
 	Label    string          `json:"label,omitempty"`

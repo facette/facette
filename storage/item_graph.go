@@ -1,4 +1,4 @@
-package backend
+package storage
 
 import (
 	"database/sql/driver"
@@ -26,9 +26,9 @@ type Graph struct {
 	expanded bool
 }
 
-// NewGraph creates a new back-end graph item instance.
-func (b *Backend) NewGraph() *Graph {
-	return &Graph{Item: Item{backend: b}}
+// NewGraph creates a new storage graph item instance.
+func (s *Storage) NewGraph() *Graph {
+	return &Graph{Item: Item{storage: s}}
 }
 
 // BeforeSave handles the ORM 'BeforeSave' callback.
@@ -104,7 +104,7 @@ func (g *Graph) Expand(attrs maputil.Map) error {
 		g.Attributes.Merge(attrs, true)
 	}
 
-	if g.backend != nil && g.LinkID != nil && *g.LinkID != "" {
+	if g.storage != nil && g.LinkID != nil && *g.LinkID != "" {
 		err = g.Resolve()
 		if err != nil {
 			return err
@@ -153,13 +153,13 @@ func (g *Graph) Expand(attrs maputil.Map) error {
 func (g *Graph) Resolve() error {
 	if g.resolved {
 		return nil
-	} else if g.backend == nil {
+	} else if g.storage == nil {
 		return ErrUnresolvableItem
 	}
 
 	if g.LinkID != nil && *g.LinkID != "" {
-		g.Link = g.backend.NewGraph()
-		if err := g.backend.Storage().Get("id", *g.LinkID, g.Link, false); err != nil {
+		g.Link = g.storage.NewGraph()
+		if err := g.storage.SQL().Get("id", *g.LinkID, g.Link, false); err != nil {
 			return err
 		}
 	}

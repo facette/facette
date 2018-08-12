@@ -6,9 +6,9 @@ import (
 	"sort"
 	"strings"
 
-	"facette.io/facette/backend"
 	"facette.io/facette/pattern"
 	"facette.io/facette/set"
+	"facette.io/facette/storage"
 	"facette.io/httputil"
 )
 
@@ -79,7 +79,7 @@ func (a *API) seriesExpand(rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	// Get expand request from received data
-	series := []*backend.Series{}
+	series := []*storage.Series{}
 	if err := httputil.BindJSON(r, &series); err == httputil.ErrInvalidContentType {
 		httputil.WriteJSON(rw, newMessage(err), http.StatusUnsupportedMediaType)
 		return
@@ -89,7 +89,7 @@ func (a *API) seriesExpand(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := make([][]*backend.Series, len(series))
+	result := make([][]*storage.Series, len(series))
 
 	for i, s := range series {
 		result[i] = a.expandSeries(s, false)
@@ -98,18 +98,18 @@ func (a *API) seriesExpand(rw http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(rw, result, http.StatusOK)
 }
 
-func (a *API) expandSeries(series *backend.Series, existOnly bool) []*backend.Series {
+func (a *API) expandSeries(series *storage.Series, existOnly bool) []*storage.Series {
 	var hasGroup bool
 
-	out := []*backend.Series{}
+	out := []*storage.Series{}
 
 	sourcesSet := set.New()
-	if strings.HasPrefix(series.Source, backend.GroupPrefix) {
-		id := strings.TrimPrefix(series.Source, backend.GroupPrefix)
+	if strings.HasPrefix(series.Source, storage.GroupPrefix) {
+		id := strings.TrimPrefix(series.Source, storage.GroupPrefix)
 
-		// Request source group from back-end
-		group := backend.SourceGroup{}
-		if err := a.backend.Storage().Get("id", id, &group, false); err != nil {
+		// Request source group from storage
+		group := storage.SourceGroup{}
+		if err := a.storage.SQL().Get("id", id, &group, false); err != nil {
 			a.logger.Warning("unable to expand %s source group: %s", id, err)
 			return nil
 		}
@@ -132,12 +132,12 @@ func (a *API) expandSeries(series *backend.Series, existOnly bool) []*backend.Se
 	}
 
 	metricsSet := set.New()
-	if strings.HasPrefix(series.Metric, backend.GroupPrefix) {
-		id := strings.TrimPrefix(series.Metric, backend.GroupPrefix)
+	if strings.HasPrefix(series.Metric, storage.GroupPrefix) {
+		id := strings.TrimPrefix(series.Metric, storage.GroupPrefix)
 
-		// Request metric group from back-end
-		group := backend.MetricGroup{}
-		if err := a.backend.Storage().Get("id", id, &group, false); err != nil {
+		// Request metric group from storage
+		group := storage.MetricGroup{}
+		if err := a.storage.SQL().Get("id", id, &group, false); err != nil {
 			a.logger.Warning("unable to expand %s metric group: %s", id, err)
 			return nil
 		}
@@ -183,7 +183,7 @@ func (a *API) expandSeries(series *backend.Series, existOnly bool) []*backend.Se
 				name = series.Name
 			}
 
-			out = append(out, &backend.Series{
+			out = append(out, &storage.Series{
 				Name:    name,
 				Origin:  series.Origin,
 				Source:  source,

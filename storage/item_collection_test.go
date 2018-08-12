@@ -1,4 +1,4 @@
-package backend
+package storage
 
 import (
 	"testing"
@@ -45,72 +45,72 @@ func testCollectionNew() []*Collection {
 	}
 }
 
-func testCollectionCreate(b *Backend, testCollections []*Collection, t *testing.T) {
-	testItemCreate(b, &Collection{}, testInterfaceToSlice(testCollections), t)
+func testCollectionCreate(s *Storage, testCollections []*Collection, t *testing.T) {
+	testItemCreate(s, &Collection{}, testInterfaceToSlice(testCollections), t)
 }
 
-func testCollectionCreateInvalid(b *Backend, testCollections []*Collection, t *testing.T) {
-	testItemCreateInvalid(b, &Collection{}, testInterfaceToSlice(testCollections), t)
+func testCollectionCreateInvalid(s *Storage, testCollections []*Collection, t *testing.T) {
+	testItemCreateInvalid(s, &Collection{}, testInterfaceToSlice(testCollections), t)
 	alias := "invalid!"
-	assert.Equal(t, ErrInvalidAlias, b.Storage().Save(&Collection{Item: Item{Name: "name"}, Alias: &alias}))
+	assert.Equal(t, ErrInvalidAlias, s.SQL().Save(&Collection{Item: Item{Name: "name"}, Alias: &alias}))
 }
 
-func testCollectionGet(b *Backend, testCollections []*Collection, t *testing.T) {
-	testItemGet(b, &Collection{}, testInterfaceToSlice(testCollections), t)
+func testCollectionGet(s *Storage, testCollections []*Collection, t *testing.T) {
+	testItemGet(s, &Collection{}, testInterfaceToSlice(testCollections), t)
 }
 
-func testCollectionGetUnknown(b *Backend, testCollections []*Collection, t *testing.T) {
-	testItemGetUnknown(b, &Collection{}, testInterfaceToSlice(testCollections), t)
+func testCollectionGetUnknown(s *Storage, testCollections []*Collection, t *testing.T) {
+	testItemGetUnknown(s, &Collection{}, testInterfaceToSlice(testCollections), t)
 }
 
-func testCollectionUpdate(b *Backend, testCollections []*Collection, t *testing.T) {
-	testItemUpdate(b, &Collection{}, testInterfaceToSlice(testCollections), t)
+func testCollectionUpdate(s *Storage, testCollections []*Collection, t *testing.T) {
+	testItemUpdate(s, &Collection{}, testInterfaceToSlice(testCollections), t)
 
 	val := ""
 	testCollections[0].Alias = &val
 	testCollections[0].LinkID = &val
 	testCollections[0].ParentID = &val
 
-	assert.Nil(t, b.Storage().Save(testCollections[0]))
+	assert.Nil(t, s.SQL().Save(testCollections[0]))
 
 	collection := &Collection{}
-	assert.Nil(t, b.Storage().Get("name", "item1", collection, true))
+	assert.Nil(t, s.SQL().Get("name", "item1", collection, true))
 	assert.Nil(t, collection.Alias)
 	assert.Nil(t, collection.LinkID)
 	assert.Nil(t, collection.ParentID)
 	assert.Equal(t, testCollections[0], collection)
 }
 
-func testCollectionCount(b *Backend, testCollections []*Collection, t *testing.T) {
-	testItemCount(b, &Collection{}, testInterfaceToSlice(testCollections), t)
+func testCollectionCount(s *Storage, testCollections []*Collection, t *testing.T) {
+	testItemCount(s, &Collection{}, testInterfaceToSlice(testCollections), t)
 }
 
-func testCollectionList(b *Backend, testCollections []*Collection, testGraphs []*Graph, t *testing.T) {
+func testCollectionList(s *Storage, testCollections []*Collection, testGraphs []*Graph, t *testing.T) {
 	for _, graph := range testGraphs {
-		assert.Nil(t, b.Storage().Save(graph))
+		assert.Nil(t, s.SQL().Save(graph))
 	}
 	testCollections[1].Entries = append(testCollections[1].Entries, &CollectionEntry{GraphID: testGraphs[1].ID})
-	testItemList(b, &Collection{}, testInterfaceToSlice(testCollections), t)
+	testItemList(s, &Collection{}, testInterfaceToSlice(testCollections), t)
 }
 
-func testCollectionDelete(b *Backend, testCollections []*Collection, t *testing.T) {
-	testItemDelete(b, &Collection{}, testInterfaceToSlice(testCollections), t)
+func testCollectionDelete(s *Storage, testCollections []*Collection, t *testing.T) {
+	testItemDelete(s, &Collection{}, testInterfaceToSlice(testCollections), t)
 }
 
-func testCollectionDeleteAll(b *Backend, testCollections []*Collection, t *testing.T) {
-	testItemDeleteAll(b, &Collection{}, testInterfaceToSlice(testCollections), t)
-	assert.Nil(t, b.Storage().Delete(&Graph{}))
+func testCollectionDeleteAll(s *Storage, testCollections []*Collection, t *testing.T) {
+	testItemDeleteAll(s, &Collection{}, testInterfaceToSlice(testCollections), t)
+	assert.Nil(t, s.SQL().Delete(&Graph{}))
 }
 
-func testCollectionResolve(b *Backend, testCollections []*Collection, t *testing.T) {
+func testCollectionResolve(s *Storage, testCollections []*Collection, t *testing.T) {
 	assert.Equal(t, ErrUnresolvableItem, testCollections[2].Resolve(nil))
-	testCollections[1].SetBackend(b)
-	testCollections[2].SetBackend(b)
+	testCollections[1].SetStorage(s)
+	testCollections[2].SetStorage(s)
 	assert.Nil(t, testCollections[2].Resolve(nil))
 	assert.Equal(t, testCollections[1], testCollections[2].Link)
 }
 
-func testCollectionExpand(b *Backend, testCollections []*Collection, t *testing.T) {
+func testCollectionExpand(s *Storage, testCollections []*Collection, t *testing.T) {
 	collection := testCollections[2].Clone()
 	assert.Nil(t, collection.Expand(maputil.Map{"source": "other1"}))
 	assert.Equal(t, "other1", collection.Options["title"])
@@ -121,7 +121,7 @@ func testCollectionExpand(b *Backend, testCollections []*Collection, t *testing.
 	assert.Equal(t, testCollections[2].Attributes["source"], collection.Options["title"])
 }
 
-func testCollectionTree(b *Backend, testCollections []*Collection, t *testing.T) {
+func testCollectionTree(s *Storage, testCollections []*Collection, t *testing.T) {
 	expected := &CollectionTree{
 		{
 			ID:    testCollections[0].ID,
@@ -137,7 +137,7 @@ func testCollectionTree(b *Backend, testCollections []*Collection, t *testing.T)
 		},
 	}
 
-	tree, err := b.NewCollectionTree("")
+	tree, err := s.NewCollectionTree("")
 	assert.Nil(t, err)
 	assert.Len(t, *tree, len(*expected))
 	assert.Equal(t, expected, tree)

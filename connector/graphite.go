@@ -115,7 +115,7 @@ func (c *graphiteConnector) Refresh(output chan<- *catalog.Record) error {
 
 	// Parse back-end response
 	if err = graphiteCheckBackendResponse(resp); err != nil {
-		return fmt.Errorf("invalid HTTP backend response: %s", err)
+		return fmt.Errorf("invalid HTTP back-end response: %s", err)
 	}
 
 	data, err := ioutil.ReadAll(resp.Body)
@@ -185,7 +185,7 @@ func (c *graphiteConnector) Points(q *series.Query) ([]series.Series, error) {
 
 	// Parse back-end response
 	if err = graphiteCheckBackendResponse(rsp); err != nil {
-		return nil, fmt.Errorf("graphite[%s]: invalid HTTP backend response: %s", c.name, err)
+		return nil, fmt.Errorf("graphite[%s]: invalid HTTP back-end response: %s", c.name, err)
 	}
 
 	data, err := ioutil.ReadAll(rsp.Body)

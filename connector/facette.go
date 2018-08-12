@@ -10,9 +10,9 @@ import (
 	"net/url"
 	"time"
 
-	"facette.io/facette/backend"
 	"facette.io/facette/catalog"
 	"facette.io/facette/series"
+	"facette.io/facette/storage"
 	"facette.io/facette/version"
 	"facette.io/httputil"
 	"facette.io/logger"
@@ -117,16 +117,16 @@ func (c *facetteConnector) Points(q *series.Query) ([]series.Series, error) {
 		StartTime: q.StartTime,
 		EndTime:   q.EndTime,
 		Sample:    q.Sample,
-		Graph: &backend.Graph{
-			Item: backend.Item{
+		Graph: &storage.Graph{
+			Item: storage.Item{
 				Name: "facette",
 			},
-			Groups: backend.SeriesGroups{
+			Groups: storage.SeriesGroups{
 				{
-					Series: func(series []series.QuerySeries) []*backend.Series {
-						out := make([]*backend.Series, len(series))
+					Series: func(series []series.QuerySeries) []*storage.Series {
+						out := make([]*storage.Series, len(series))
 						for i, s := range series {
-							out[i] = &backend.Series{
+							out[i] = &storage.Series{
 								Name:   fmt.Sprintf("series%d", i),
 								Origin: s.Origin,
 								Source: s.Source,

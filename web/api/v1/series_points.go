@@ -5,9 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"facette.io/facette/backend"
 	"facette.io/facette/connector"
 	"facette.io/facette/series"
+	"facette.io/facette/storage"
 	"facette.io/facette/template"
 	"facette.io/facette/timerange"
 	"facette.io/httputil"
@@ -111,9 +111,9 @@ func (a *API) seriesPoints(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Request item from backend
+	// Request item from storage
 	if req.ID != "" {
-		req.Graph = a.backend.NewGraph()
+		req.Graph = a.storage.NewGraph()
 
 		// Check for aliased item if identifier value isn't valid
 		column := "id"
@@ -121,7 +121,7 @@ func (a *API) seriesPoints(rw http.ResponseWriter, r *http.Request) {
 			column = "alias"
 		}
 
-		if err = a.backend.Storage().Get(column, req.ID, req.Graph, false); err == sqlstorage.ErrItemNotFound {
+		if err = a.storage.SQL().Get(column, req.ID, req.Graph, false); err == sqlstorage.ErrItemNotFound {
 			httputil.WriteJSON(rw, newMessage(err), http.StatusNotFound)
 			return
 		} else if err != nil {
@@ -130,8 +130,8 @@ func (a *API) seriesPoints(rw http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else if req.Graph != nil {
-		// Register back-end (needed for graph expansion)
-		req.Graph.Item.SetBackend(a.backend)
+		// Register storage (needed for graph expansion)
+		req.Graph.Item.SetStorage(a.storage)
 	} else {
 		httputil.WriteJSON(rw, newMessage(errInvalidParameter), http.StatusBadRequest)
 		return
@@ -211,7 +211,7 @@ func (a *API) seriesPoints(rw http.ResponseWriter, r *http.Request) {
 func (a *API) executeRequest(req *series.Request, forceNormalize bool) []series.ResponseSeries {
 	// Expand groups series
 	for _, group := range req.Graph.Groups {
-		expandedSeries := []*backend.Series{}
+		expandedSeries := []*storage.Series{}
 		for _, s := range group.Series {
 			expandedSeries = append(expandedSeries, a.expandSeries(s, true)...)
 		}

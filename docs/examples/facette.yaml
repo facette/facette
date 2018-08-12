@@ -12,7 +12,7 @@ graceful_timeout: 30
 log_path:
 log_level: info
 
-backend:
+storage:
   debug: false
 
   ### SQLite
@@ -35,7 +35,7 @@ backend:
   #user: facette
   #password: ********
 
-frontend:
+ui:
   enabled: true
 
 default_time_range: -1h

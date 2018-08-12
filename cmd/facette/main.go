@@ -9,11 +9,11 @@ import (
 	"strings"
 	"syscall"
 
-	"facette.io/facette/backend"
 	"facette.io/facette/catalog"
 	"facette.io/facette/config"
 	"facette.io/facette/connector"
 	"facette.io/facette/poller"
+	"facette.io/facette/storage"
 	"facette.io/facette/version"
 	"facette.io/facette/web"
 	"facette.io/sqlstorage"
@@ -76,11 +76,11 @@ func main() {
 	}()
 
 	// Initialize subcomponents pre-requisites
-	backend, err := backend.New(config.Backend, logger.Context("backend"))
+	storage, err := storage.New(config.Storage, logger.Context("storage"))
 	if err != nil {
-		die(errors.Wrap(err, "cannot initialize back-end"))
+		die(errors.Wrap(err, "cannot initialize storage"))
 	}
-	defer backend.Close()
+	defer storage.Close()
 
 	searcher := catalog.NewSearcher()
 
@@ -88,10 +88,10 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	poller := poller.New(ctx, backend, searcher, config, logger.Context("poller"))
+	poller := poller.New(ctx, storage, searcher, config, logger.Context("poller"))
 	g.Add(func() error { return poller.Run() }, func(error) { poller.Shutdown(); cancel() })
 
-	web := web.NewHandler(ctx, backend, searcher, poller, config, logger.Context("http"))
+	web := web.NewHandler(ctx, storage, searcher, poller, config, logger.Context("http"))
 	g.Add(func() error { return web.Run() }, func(error) { web.Shutdown(); cancel() })
 
 	sc := make(chan os.Signal, 1)

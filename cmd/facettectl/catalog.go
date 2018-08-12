@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"facette.io/facette/backend"
+	"facette.io/facette/storage"
 	"github.com/mgutz/ansi"
 	"github.com/pkg/errors"
 )
@@ -30,7 +30,7 @@ func execCatalog() error {
 func execCatalogRefresh() error {
 	var errored bool
 
-	providers := []backend.Provider{}
+	providers := []storage.Provider{}
 	if err := apiRequest("GET", "/providers/?fields=id,name", nil, nil, &providers); err != nil {
 		return errors.Wrap(err, "failed to retrieve providers")
 	}

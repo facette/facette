@@ -1,4 +1,4 @@
-package backend
+package storage
 
 import (
 	"testing"
@@ -67,65 +67,65 @@ func testGraphNew() []*Graph {
 	}
 }
 
-func testGraphCreate(b *Backend, testGraphs []*Graph, t *testing.T) {
-	testItemCreate(b, &Graph{}, testInterfaceToSlice(testGraphs), t)
+func testGraphCreate(s *Storage, testGraphs []*Graph, t *testing.T) {
+	testItemCreate(s, &Graph{}, testInterfaceToSlice(testGraphs), t)
 }
 
-func testGraphCreateInvalid(b *Backend, testGraphs []*Graph, t *testing.T) {
-	testItemCreateInvalid(b, &Graph{}, testInterfaceToSlice(testGraphs), t)
+func testGraphCreateInvalid(s *Storage, testGraphs []*Graph, t *testing.T) {
+	testItemCreateInvalid(s, &Graph{}, testInterfaceToSlice(testGraphs), t)
 	alias := "invalid!"
-	assert.Equal(t, ErrInvalidAlias, b.Storage().Save(&Graph{Item: Item{Name: "name"}, Alias: &alias}))
+	assert.Equal(t, ErrInvalidAlias, s.SQL().Save(&Graph{Item: Item{Name: "name"}, Alias: &alias}))
 }
 
-func testGraphGet(b *Backend, testGraphs []*Graph, t *testing.T) {
-	testItemGet(b, &Graph{}, testInterfaceToSlice(testGraphs), t)
+func testGraphGet(s *Storage, testGraphs []*Graph, t *testing.T) {
+	testItemGet(s, &Graph{}, testInterfaceToSlice(testGraphs), t)
 }
 
-func testGraphGetUnknown(b *Backend, testGraphs []*Graph, t *testing.T) {
-	testItemGetUnknown(b, &Graph{}, testInterfaceToSlice(testGraphs), t)
+func testGraphGetUnknown(s *Storage, testGraphs []*Graph, t *testing.T) {
+	testItemGetUnknown(s, &Graph{}, testInterfaceToSlice(testGraphs), t)
 }
 
-func testGraphUpdate(b *Backend, testGraphs []*Graph, t *testing.T) {
-	testItemUpdate(b, &Graph{}, testInterfaceToSlice(testGraphs), t)
+func testGraphUpdate(s *Storage, testGraphs []*Graph, t *testing.T) {
+	testItemUpdate(s, &Graph{}, testInterfaceToSlice(testGraphs), t)
 
 	val := ""
 	testGraphs[0].Alias = &val
 	testGraphs[0].LinkID = &val
 
-	assert.Nil(t, b.Storage().Save(testGraphs[0]))
+	assert.Nil(t, s.SQL().Save(testGraphs[0]))
 
 	graph := &Graph{}
-	assert.Nil(t, b.Storage().Get("name", "item1", graph, true))
+	assert.Nil(t, s.SQL().Get("name", "item1", graph, true))
 	assert.Nil(t, graph.Alias)
 	assert.Nil(t, graph.LinkID)
 	assert.Equal(t, testGraphs[0], graph)
 }
 
-func testGraphCount(b *Backend, testGraphs []*Graph, t *testing.T) {
-	testItemCount(b, &Graph{}, testInterfaceToSlice(testGraphs), t)
+func testGraphCount(s *Storage, testGraphs []*Graph, t *testing.T) {
+	testItemCount(s, &Graph{}, testInterfaceToSlice(testGraphs), t)
 }
 
-func testGraphList(b *Backend, testGraphs []*Graph, t *testing.T) {
-	testItemList(b, &Graph{}, testInterfaceToSlice(testGraphs), t)
+func testGraphList(s *Storage, testGraphs []*Graph, t *testing.T) {
+	testItemList(s, &Graph{}, testInterfaceToSlice(testGraphs), t)
 }
 
-func testGraphDelete(b *Backend, testGraphs []*Graph, t *testing.T) {
-	testItemDelete(b, &Graph{}, testInterfaceToSlice(testGraphs), t)
+func testGraphDelete(s *Storage, testGraphs []*Graph, t *testing.T) {
+	testItemDelete(s, &Graph{}, testInterfaceToSlice(testGraphs), t)
 }
 
-func testGraphDeleteAll(b *Backend, testGraphs []*Graph, t *testing.T) {
-	testItemDeleteAll(b, &Graph{}, testInterfaceToSlice(testGraphs), t)
+func testGraphDeleteAll(s *Storage, testGraphs []*Graph, t *testing.T) {
+	testItemDeleteAll(s, &Graph{}, testInterfaceToSlice(testGraphs), t)
 }
 
-func testGraphResolve(b *Backend, testGraphs []*Graph, t *testing.T) {
+func testGraphResolve(s *Storage, testGraphs []*Graph, t *testing.T) {
 	assert.Equal(t, ErrUnresolvableItem, testGraphs[2].Resolve())
-	testGraphs[1].SetBackend(b)
-	testGraphs[2].SetBackend(b)
+	testGraphs[1].SetStorage(s)
+	testGraphs[2].SetStorage(s)
 	assert.Nil(t, testGraphs[2].Resolve())
 	assert.Equal(t, testGraphs[1], testGraphs[2].Link)
 }
 
-func testGraphExpand(b *Backend, testGraphs []*Graph, t *testing.T) {
+func testGraphExpand(s *Storage, testGraphs []*Graph, t *testing.T) {
 	graph := testGraphs[2].Clone()
 	assert.Nil(t, graph.Expand(nil))
 	assert.Equal(t, graph.Attributes["source"], graph.Groups[0].Series[0].Source)

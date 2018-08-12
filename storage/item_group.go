@@ -1,4 +1,4 @@
-package backend
+package storage
 
 import (
 	"database/sql/driver"
@@ -21,9 +21,9 @@ type SourceGroup struct {
 	Patterns GroupPatterns `gorm:"type:text;not null" json:"patterns"`
 }
 
-// NewSourceGroup creates a new back-end source group item instance.
-func (b *Backend) NewSourceGroup() *SourceGroup {
-	return &SourceGroup{Item: Item{backend: b}}
+// NewSourceGroup creates a new storage source group item instance.
+func (s *Storage) NewSourceGroup() *SourceGroup {
+	return &SourceGroup{Item: Item{storage: s}}
 }
 
 // BeforeSave handles the ORM 'BeforeSave' callback.
@@ -60,9 +60,9 @@ type MetricGroup struct {
 	Patterns GroupPatterns `gorm:"type:text;not null" json:"patterns"`
 }
 
-// NewMetricGroup creates a new back-end metric group item instance.
-func (b *Backend) NewMetricGroup() *MetricGroup {
-	return &MetricGroup{Item: Item{backend: b}}
+// NewMetricGroup creates a new storage metric group item instance.
+func (s *Storage) NewMetricGroup() *MetricGroup {
+	return &MetricGroup{Item: Item{storage: s}}
 }
 
 // BeforeSave handles the ORM 'BeforeSave' callback.

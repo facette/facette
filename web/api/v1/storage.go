@@ -7,7 +7,7 @@ import (
 	"reflect"
 	"strings"
 
-	"facette.io/facette/backend"
+	"facette.io/facette/storage"
 	"facette.io/facette/template"
 	"facette.io/httputil"
 	"facette.io/jsonutil"
@@ -16,7 +16,7 @@ import (
 	"github.com/vbatoufflet/httproute"
 )
 
-var backendTypes = []string{
+var storageTypes = []string{
 	"providers",
 	"collections",
 	"graphs",
@@ -26,7 +26,7 @@ var backendTypes = []string{
 
 // api:method POST /api/v1/library/:type "Create a library item"
 //
-// This endpoint creates a new item and stores it to the back-end database.
+// This endpoint creates a new item and stores it to the storage database.
 //
 // The `inherit` query parameter can be used to inherit fields from an existing item, then applying new values with
 // received body payload.
@@ -47,7 +47,7 @@ var backendTypes = []string{
 //   in: query
 // responses:
 //   201:
-func (a *API) backendCreate(rw http.ResponseWriter, r *http.Request) {
+func (a *API) storageCreate(rw http.ResponseWriter, r *http.Request) {
 	if a.config.ReadOnly {
 		httputil.WriteJSON(rw, newMessage(errReadOnly), http.StatusForbidden)
 		return
@@ -55,18 +55,18 @@ func (a *API) backendCreate(rw http.ResponseWriter, r *http.Request) {
 
 	typ := httproute.ContextParam(r, "type").(string)
 
-	// Initialize new back-end item
-	item, ok := a.backendItem(typ)
+	// Initialize new storage item
+	item, ok := a.storageItem(typ)
 	if !ok {
 		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	// Retrieve existing item data from back-end if inheriting
+	// Retrieve existing item data from storage if inheriting
 	rv := reflect.ValueOf(item)
 
 	if id := httproute.QueryParam(r, "inherit"); id != "" {
-		if err := a.backend.Storage().Get("id", id, rv.Interface(), false); err == sqlstorage.ErrItemNotFound {
+		if err := a.storage.SQL().Get("id", id, rv.Interface(), false); err == sqlstorage.ErrItemNotFound {
 			httputil.WriteJSON(rw, newMessage(err), http.StatusNotFound)
 			return
 		} else if err != nil {
@@ -110,13 +110,13 @@ func (a *API) backendCreate(rw http.ResponseWriter, r *http.Request) {
 		reflect.Indirect(rv).FieldByName("Enabled").SetBool(true)
 	}
 
-	// Insert item into back-end
-	if err := a.backend.Storage().Save(rv.Interface()); err != nil {
+	// Insert item into storage
+	if err := a.storage.SQL().Save(rv.Interface()); err != nil {
 		switch err {
 		case sqlstorage.ErrItemConflict:
 			httputil.WriteJSON(rw, newMessage(err), http.StatusConflict)
 
-		case backend.ErrInvalidAlias, backend.ErrInvalidID, backend.ErrInvalidName, backend.ErrInvalidPattern,
+		case storage.ErrInvalidAlias, storage.ErrInvalidID, storage.ErrInvalidName, storage.ErrInvalidPattern,
 			sqlstorage.ErrMissingField, sqlstorage.ErrUnknownReference:
 			httputil.WriteJSON(rw, newMessage(err), http.StatusBadRequest)
 
@@ -130,11 +130,11 @@ func (a *API) backendCreate(rw http.ResponseWriter, r *http.Request) {
 
 	id := reflect.Indirect(rv).FieldByName("ID").String()
 
-	a.logger.Debug("inserted %q item into backend", id)
+	a.logger.Debug("inserted %q item into storage", id)
 
 	// Start new provider upon creation
 	if typ == "providers" {
-		go a.poller.StartWorker(rv.Interface().(*backend.Provider))
+		go a.poller.StartWorker(rv.Interface().(*storage.Provider))
 	}
 
 	http.Redirect(rw, r, strings.TrimRight(r.URL.Path, "/")+"/"+id, http.StatusCreated)
@@ -233,14 +233,14 @@ func (a *API) backendCreate(rw http.ResponseWriter, r *http.Request) {
 //           },
 //           "template": true
 //         }
-func (a *API) backendGet(rw http.ResponseWriter, r *http.Request) {
+func (a *API) storageGet(rw http.ResponseWriter, r *http.Request) {
 	var result interface{}
 
 	typ := httproute.ContextParam(r, "type").(string)
 	id := httproute.ContextParam(r, "id").(string)
 
-	// Initialize new back-end item
-	item, ok := a.backendItem(typ)
+	// Initialize new storage item
+	item, ok := a.storageItem(typ)
 	if !ok {
 		rw.WriteHeader(http.StatusNotFound)
 		return
@@ -254,10 +254,10 @@ func (a *API) backendGet(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Request item from back-end
+	// Request item from storage
 	rv := reflect.ValueOf(item)
 
-	if err := a.backend.Storage().Get(column, id, rv.Interface(), true); err == sqlstorage.ErrItemNotFound {
+	if err := a.storage.SQL().Get(column, id, rv.Interface(), true); err == sqlstorage.ErrItemNotFound {
 		httputil.WriteJSON(rw, newMessage(err), http.StatusNotFound)
 		return
 	} else if err != nil {
@@ -269,10 +269,10 @@ func (a *API) backendGet(rw http.ResponseWriter, r *http.Request) {
 	// Handle collection expansion request
 	if parseBoolParam(r, "expand") {
 		if typ == "collections" {
-			c := rv.Interface().(*backend.Collection)
+			c := rv.Interface().(*storage.Collection)
 			c.Expand(nil)
 		} else if typ == "graphs" {
-			g := rv.Interface().(*backend.Graph)
+			g := rv.Interface().(*storage.Graph)
 			g.Expand(nil)
 		}
 	}
@@ -326,7 +326,7 @@ func (a *API) backendGet(rw http.ResponseWriter, r *http.Request) {
 //   in: path
 // responses:
 //   204:
-func (a *API) backendUpdate(rw http.ResponseWriter, r *http.Request) {
+func (a *API) storageUpdate(rw http.ResponseWriter, r *http.Request) {
 	if a.config.ReadOnly {
 		httputil.WriteJSON(rw, newMessage(errReadOnly), http.StatusForbidden)
 		return
@@ -335,18 +335,18 @@ func (a *API) backendUpdate(rw http.ResponseWriter, r *http.Request) {
 	typ := httproute.ContextParam(r, "type").(string)
 	id := httproute.ContextParam(r, "id").(string)
 
-	// Initialize new back-end item
-	item, ok := a.backendItem(typ)
+	// Initialize new storage item
+	item, ok := a.storageItem(typ)
 	if !ok {
 		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	// Retrieve existing item data from back-end if patching
+	// Retrieve existing item data from storage if patching
 	rv := reflect.ValueOf(item)
 
 	if r.Method == "PATCH" {
-		if err := a.backend.Storage().Get("id", id, rv.Interface(), true); err == sqlstorage.ErrItemNotFound {
+		if err := a.storage.SQL().Get("id", id, rv.Interface(), true); err == sqlstorage.ErrItemNotFound {
 			httputil.WriteJSON(rw, newMessage(err), http.StatusNotFound)
 			return
 		} else if err != nil {
@@ -381,13 +381,13 @@ func (a *API) backendUpdate(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Update item in back-end
-	if err := a.backend.Storage().Save(rv.Interface()); err != nil {
+	// Update item in storage
+	if err := a.storage.SQL().Save(rv.Interface()); err != nil {
 		switch err {
 		case sqlstorage.ErrItemConflict:
 			httputil.WriteJSON(rw, newMessage(err), http.StatusConflict)
 
-		case backend.ErrInvalidAlias, backend.ErrInvalidID, backend.ErrInvalidName, backend.ErrInvalidPattern,
+		case storage.ErrInvalidAlias, storage.ErrInvalidID, storage.ErrInvalidName, storage.ErrInvalidPattern,
 			sqlstorage.ErrMissingField, sqlstorage.ErrUnknownReference:
 			httputil.WriteJSON(rw, newMessage(err), http.StatusBadRequest)
 
@@ -399,12 +399,12 @@ func (a *API) backendUpdate(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.logger.Debug("updated %s item from back-end", id)
+	a.logger.Debug("updated %s item from storage", id)
 
 	// Restart provider on update
 	if typ == "providers" {
-		if err := a.backend.Storage().Get("id", id, rv.Interface(), false); err == nil {
-			go a.poller.StopWorker(rv.Interface().(*backend.Provider), true)
+		if err := a.storage.SQL().Get("id", id, rv.Interface(), false); err == nil {
+			go a.poller.StopWorker(rv.Interface().(*storage.Provider), true)
 		}
 	}
 
@@ -432,7 +432,7 @@ func (a *API) backendUpdate(rw http.ResponseWriter, r *http.Request) {
 //   in: path
 // responses:
 //   204:
-func (a *API) backendDelete(rw http.ResponseWriter, r *http.Request) {
+func (a *API) storageDelete(rw http.ResponseWriter, r *http.Request) {
 	if a.config.ReadOnly {
 		httputil.WriteJSON(rw, newMessage(errReadOnly), http.StatusForbidden)
 		return
@@ -441,17 +441,17 @@ func (a *API) backendDelete(rw http.ResponseWriter, r *http.Request) {
 	typ := httproute.ContextParam(r, "type").(string)
 	id := httproute.ContextParam(r, "id").(string)
 
-	// Initialize new back-end item
-	item, ok := a.backendItem(typ)
+	// Initialize new storage item
+	item, ok := a.storageItem(typ)
 	if !ok {
 		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	// Request item from back-end
+	// Request item from storage
 	rv := reflect.ValueOf(item)
 
-	if err := a.backend.Storage().Get("id", id, rv.Interface(), false); err == sqlstorage.ErrItemNotFound {
+	if err := a.storage.SQL().Get("id", id, rv.Interface(), false); err == sqlstorage.ErrItemNotFound {
 		httputil.WriteJSON(rw, newMessage(err), http.StatusNotFound)
 		return
 	} else if err != nil {
@@ -460,8 +460,8 @@ func (a *API) backendDelete(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Delete item from back-end
-	err := a.backend.Storage().Delete(rv.Interface())
+	// Delete item from storage
+	err := a.storage.SQL().Delete(rv.Interface())
 	if err == sqlstorage.ErrItemNotFound {
 		httputil.WriteJSON(rw, newMessage(err), http.StatusNotFound)
 		return
@@ -471,11 +471,11 @@ func (a *API) backendDelete(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.logger.Debug("deleted %s item from back-end", id)
+	a.logger.Debug("deleted %s item from storage", id)
 
 	// Stop provider upon deletion
 	if typ == "providers" {
-		go a.poller.StopWorker(rv.Interface().(*backend.Provider), false)
+		go a.poller.StopWorker(rv.Interface().(*storage.Provider), false)
 	}
 
 	rw.WriteHeader(http.StatusNoContent)
@@ -498,7 +498,7 @@ func (a *API) backendDelete(rw http.ResponseWriter, r *http.Request) {
 //   in: path
 // responses:
 //   204:
-func (a *API) backendDeleteAll(rw http.ResponseWriter, r *http.Request) {
+func (a *API) storageDeleteAll(rw http.ResponseWriter, r *http.Request) {
 	var rv reflect.Value
 
 	if a.config.ReadOnly {
@@ -508,8 +508,8 @@ func (a *API) backendDeleteAll(rw http.ResponseWriter, r *http.Request) {
 
 	typ := httproute.ContextParam(r, "type").(string)
 
-	// Initialize new back-end item
-	item, ok := a.backendItem(typ)
+	// Initialize new storage item
+	item, ok := a.storageItem(typ)
 	if !ok {
 		rw.WriteHeader(http.StatusNotFound)
 		return
@@ -521,11 +521,11 @@ func (a *API) backendDeleteAll(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Request items list from back-end
+	// Request items list from storage
 	if typ == "providers" {
 		rv = reflect.New(reflect.MakeSlice(reflect.SliceOf(reflect.TypeOf(item)), 0, 0).Type())
 
-		_, err := a.backend.Storage().List(rv.Interface(), nil, nil, 0, 0, false)
+		_, err := a.storage.SQL().List(rv.Interface(), nil, nil, 0, 0, false)
 		if err == sqlstorage.ErrUnknownColumn {
 			httputil.WriteJSON(rw, newMessage(err), http.StatusBadRequest)
 			return
@@ -536,14 +536,14 @@ func (a *API) backendDeleteAll(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	a.backend.Storage().Delete(reflect.ValueOf(item).Interface())
+	a.storage.SQL().Delete(reflect.ValueOf(item).Interface())
 
-	a.logger.Debug("deleted %s from back-end", typ)
+	a.logger.Debug("deleted %s from storage", typ)
 
 	// Stop provider upon deletion
 	if typ == "providers" {
 		for i, n := 0, reflect.Indirect(rv).Len(); i < n; i++ {
-			go a.poller.StopWorker(reflect.Indirect(rv).Index(i).Interface().(*backend.Provider), false)
+			go a.poller.StopWorker(reflect.Indirect(rv).Index(i).Interface().(*storage.Provider), false)
 		}
 	}
 
@@ -638,11 +638,11 @@ func (a *API) backendDeleteAll(rw http.ResponseWriter, r *http.Request) {
 //             "name": "load"
 //           }
 //         ]
-func (a *API) backendList(rw http.ResponseWriter, r *http.Request) {
+func (a *API) storageList(rw http.ResponseWriter, r *http.Request) {
 	typ := httproute.ContextParam(r, "type").(string)
 
-	// Initialize new back-end item
-	item, ok := a.backendItem(typ)
+	// Initialize new storage item
+	item, ok := a.storageItem(typ)
 	if !ok {
 		rw.WriteHeader(http.StatusNotFound)
 		return
@@ -682,7 +682,7 @@ func (a *API) backendList(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Request items list from back-end
+	// Request items list from storage
 	rv := reflect.New(reflect.MakeSlice(reflect.SliceOf(reflect.TypeOf(item)), 0, 0).Type())
 
 	offset, err := parseIntParam(r, "offset")
@@ -699,7 +699,7 @@ func (a *API) backendList(rw http.ResponseWriter, r *http.Request) {
 
 	sort := parseListParam(r, "sort", []string{"name"})
 
-	count, err := a.backend.Storage().List(rv.Interface(), filters, sort, offset, limit, true)
+	count, err := a.storage.SQL().List(rv.Interface(), filters, sort, offset, limit, true)
 	if err == sqlstorage.ErrUnknownColumn {
 		httputil.WriteJSON(rw, newMessage(err), http.StatusBadRequest)
 		return
@@ -723,7 +723,7 @@ func (a *API) backendList(rw http.ResponseWriter, r *http.Request) {
 
 	for i, n := 0, reflect.Indirect(rv).Len(); i < n; i++ {
 		if typ == "collections" && parseBoolParam(r, "expand") {
-			collection := reflect.Indirect(rv).Index(i).Interface().(*backend.Collection)
+			collection := reflect.Indirect(rv).Index(i).Interface().(*storage.Collection)
 			collection.Expand(nil)
 
 			result = append(result, jsonutil.FilterStruct(collection, fields))
@@ -736,22 +736,22 @@ func (a *API) backendList(rw http.ResponseWriter, r *http.Request) {
 	httputil.WriteJSON(rw, result, http.StatusOK)
 }
 
-func (a *API) backendItem(typ string) (interface{}, bool) {
+func (a *API) storageItem(typ string) (interface{}, bool) {
 	switch typ {
 	case "providers":
-		return a.backend.NewProvider(), true
+		return a.storage.NewProvider(), true
 
 	case "collections":
-		return a.backend.NewCollection(), true
+		return a.storage.NewCollection(), true
 
 	case "graphs":
-		return a.backend.NewGraph(), true
+		return a.storage.NewGraph(), true
 
 	case "sourcegroups":
-		return a.backend.NewSourceGroup(), true
+		return a.storage.NewSourceGroup(), true
 
 	case "metricgroups":
-		return a.backend.NewMetricGroup(), true
+		return a.storage.NewMetricGroup(), true
 
 	}
 

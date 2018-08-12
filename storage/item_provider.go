@@ -1,4 +1,4 @@
-package backend
+package storage
 
 import (
 	"database/sql/driver"
@@ -8,7 +8,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// Provider represents a back-end provider item instance.
+// Provider represents a storage provider item instance.
 type Provider struct {
 	Item
 	Connector       string          `gorm:"type:varchar(32);not null" json:"connector"`
@@ -19,9 +19,9 @@ type Provider struct {
 	Enabled         bool            `gorm:"not null;default:true" json:"enabled"`
 }
 
-// NewProvider creates a new back-end provider item instance.
-func (b *Backend) NewProvider() *Provider {
-	return &Provider{Item: Item{backend: b}}
+// NewProvider creates a new storage provider item instance.
+func (s *Storage) NewProvider() *Provider {
+	return &Provider{Item: Item{storage: s}}
 }
 
 // BeforeSave handles the ORM 'BeforeSave' callback.
@@ -37,7 +37,7 @@ func (p *Provider) BeforeSave(scope *gorm.Scope) error {
 	return nil
 }
 
-// ProviderFilters represents a list of back-end provider filters.
+// ProviderFilters represents a list of storage provider filters.
 type ProviderFilters []*ProviderFilter
 
 // Value marshals the provider filter entries for compatibility with SQL drivers.
@@ -51,7 +51,7 @@ func (pf *ProviderFilters) Scan(v interface{}) error {
 	return scanValue(v, pf)
 }
 
-// ProviderFilter represents a back-end provider filter entry instance.
+// ProviderFilter represents a storage provider filter entry instance.
 type ProviderFilter struct {
 	Action  string `json:"action"`
 	Target  string `json:"target"`

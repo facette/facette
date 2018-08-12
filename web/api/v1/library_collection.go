@@ -3,7 +3,7 @@ package v1
 import (
 	"net/http"
 
-	"facette.io/facette/backend"
+	"facette.io/facette/storage"
 	"facette.io/httputil"
 	"facette.io/sqlstorage"
 	"github.com/hashicorp/go-uuid"
@@ -26,13 +26,13 @@ func (a *API) libraryCollectionTree(rw http.ResponseWriter, r *http.Request) {
 
 	root := httproute.QueryParam(r, "parent")
 	if root != "" {
-		var c backend.Collection
+		var c storage.Collection
 
 		// If provided parent value is not a valid UUID it is probably an alias, resolve it to get the actual UUID value
 		if _, err := uuid.ParseUUID(root); err != nil {
-			if err := a.backend.Storage().Get("alias", root, &c, false); err == sqlstorage.ErrItemNotFound {
+			if err := a.storage.SQL().Get("alias", root, &c, false); err == sqlstorage.ErrItemNotFound {
 				a.logger.Error("unable to get collections tree: %s", err)
-				httputil.WriteJSON(rw, newMessage(backend.ErrInvalidAlias), http.StatusBadRequest)
+				httputil.WriteJSON(rw, newMessage(storage.ErrInvalidAlias), http.StatusBadRequest)
 				return
 			}
 
@@ -40,7 +40,7 @@ func (a *API) libraryCollectionTree(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	tree, err := a.backend.NewCollectionTree(root)
+	tree, err := a.storage.NewCollectionTree(root)
 	if err != nil {
 		a.logger.Error("unable to get collections tree: %s", err)
 		httputil.WriteJSON(rw, newMessage(errUnhandledError), http.StatusInternalServerError)

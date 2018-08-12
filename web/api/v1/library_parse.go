@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"facette.io/facette/backend"
+	"facette.io/facette/storage"
 	"facette.io/facette/template"
 	"facette.io/httputil"
 )
@@ -86,8 +86,8 @@ func (a *API) libraryParse(rw http.ResponseWriter, r *http.Request) {
 		paths := []string{Prefix + "/library/" + req.Type + "/" + req.ID}
 
 		if req.Type == "collections" {
-			collection := backend.Collection{}
-			if err := a.backend.Storage().Get("id", req.ID, &collection, true); err == nil {
+			collection := storage.Collection{}
+			if err := a.storage.SQL().Get("id", req.ID, &collection, true); err == nil {
 				for _, entry := range collection.Entries {
 					paths = append(paths, Prefix+"/library/graphs/"+entry.GraphID)
 				}

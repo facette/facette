@@ -3,9 +3,9 @@ package poller
 import (
 	"time"
 
-	"facette.io/facette/backend"
 	"facette.io/facette/catalog"
 	"facette.io/facette/connector"
+	"facette.io/facette/storage"
 	"facette.io/logger"
 )
 
@@ -17,7 +17,7 @@ const (
 
 type worker struct {
 	poller     *Poller
-	provider   *backend.Provider
+	provider   *storage.Provider
 	logger     *logger.Logger
 	connector  connector.Connector
 	catalog    *catalog.Catalog
@@ -26,7 +26,7 @@ type worker struct {
 	cmdChan    chan int
 }
 
-func newWorker(poller *Poller, provider *backend.Provider, logger *logger.Logger) (*worker, error) {
+func newWorker(poller *Poller, provider *storage.Provider, logger *logger.Logger) (*worker, error) {
 	// Initialize provider connector handler
 	c, err := connector.NewConnector(provider.Connector, provider.Name, provider.Settings, logger)
 	if err != nil {

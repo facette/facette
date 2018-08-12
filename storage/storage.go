@@ -1,4 +1,4 @@
-package backend
+package storage
 
 import (
 	"regexp"
@@ -12,15 +12,15 @@ var (
 	nameRegexp = regexp.MustCompile(`(?i)^[a-z0-9](?:[a-z0-9\-_\.]*[a-z0-9])?$`)
 )
 
-// Backend represents a back-end instance.
-type Backend struct {
+// Storage represents a storage instance.
+type Storage struct {
 	config  *maputil.Map
 	log     *logger.Logger
 	storage *sqlstorage.Storage
 }
 
-// New creates a new back-end instance.
-func New(config *maputil.Map, log *logger.Logger) (*Backend, error) {
+// New creates a new storage instance.
+func New(config *maputil.Map, log *logger.Logger) (*Storage, error) {
 	// Initialize storage
 	storage, err := sqlstorage.NewStorage("facette", config, log)
 	if err != nil {
@@ -52,19 +52,19 @@ func New(config *maputil.Map, log *logger.Logger) (*Backend, error) {
 
 	storage.Association(&Collection{}, "Entries")
 
-	return &Backend{
+	return &Storage{
 		config:  config,
 		log:     log,
 		storage: storage,
 	}, nil
 }
 
-// Close closes the back-end storage.
-func (b *Backend) Close() error {
-	return b.storage.Close()
+// Close closes the storage.
+func (s *Storage) Close() error {
+	return s.storage.Close()
 }
 
-// Storage returns the back-end storage instance.
-func (b *Backend) Storage() *sqlstorage.Storage {
-	return b.storage
+// SQL returns the storage underlying SQL storage instance.
+func (s *Storage) SQL() *sqlstorage.Storage {
+	return s.storage
 }

@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"sync"
 
-	"facette.io/facette/backend"
 	"facette.io/facette/catalog"
 	"facette.io/facette/config"
+	"facette.io/facette/storage"
 	"facette.io/logger"
 	"github.com/pkg/errors"
 )
@@ -17,7 +17,7 @@ type Poller struct {
 	sync.Mutex
 
 	ctx      context.Context
-	backend  *backend.Backend
+	storage  *storage.Storage
 	searcher *catalog.Searcher
 	config   *config.Config
 	logger   *logger.Logger
@@ -28,14 +28,14 @@ type Poller struct {
 // New creates a new poller instance.
 func New(
 	ctx context.Context,
-	backend *backend.Backend,
+	storage *storage.Storage,
 	searcher *catalog.Searcher,
 	config *config.Config,
 	logger *logger.Logger,
 ) *Poller {
 	return &Poller{
 		ctx:      ctx,
-		backend:  backend,
+		storage:  storage,
 		searcher: searcher,
 		config:   config,
 		logger:   logger,
@@ -46,12 +46,12 @@ func New(
 
 // Run starts polling the providers.
 func (p *Poller) Run() error {
-	var providers []*backend.Provider
+	var providers []*storage.Provider
 
 	p.logger.Info("started")
 
-	// Get providers list from back-end
-	_, err := p.backend.Storage().List(&providers, map[string]interface{}{"enabled": true}, nil, 0, 0, false)
+	// Get providers list from storage
+	_, err := p.storage.SQL().List(&providers, map[string]interface{}{"enabled": true}, nil, 0, 0, false)
 	if err != nil {
 		return errors.Wrap(err, "cannot list providers")
 	}
@@ -79,8 +79,8 @@ func (p *Poller) Shutdown() {
 	}
 }
 
-// StartWorker starts a new poller worker given a back-end provider.
-func (p *Poller) StartWorker(prov *backend.Provider) {
+// StartWorker starts a new poller worker given a storage provider.
+func (p *Poller) StartWorker(prov *storage.Provider) {
 	var err error
 
 	p.Lock()
@@ -106,7 +106,7 @@ func (p *Poller) StartWorker(prov *backend.Provider) {
 }
 
 // StopWorker stops an existing poller worker.
-func (p *Poller) StopWorker(prov *backend.Provider, update bool) {
+func (p *Poller) StopWorker(prov *storage.Provider, update bool) {
 	p.Lock()
 	if w, ok := p.workers[prov.ID]; ok {
 		w.Shutdown()
@@ -131,7 +131,7 @@ func (p *Poller) RefreshAll() {
 }
 
 // Refresh triggers a refresh on an existing poller worker.
-func (p *Poller) Refresh(prov backend.Provider) {
+func (p *Poller) Refresh(prov storage.Provider) {
 	p.Lock()
 	defer p.Unlock()
 

@@ -4,7 +4,7 @@ import (
 	"sync"
 	"testing"
 
-	"facette.io/facette/backend"
+	"facette.io/facette/storage"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -56,7 +56,7 @@ func Test_Filter_Rewrite(t *testing.T) {
 			OriginalSource: "host3_example_net", OriginalMetric: "cpu.percent-wait"},
 	}
 
-	assert.Equal(t, expected, runTestFilter(&backend.ProviderFilters{
+	assert.Equal(t, expected, runTestFilter(&storage.ProviderFilters{
 		{Action: "rewrite", Target: "origin", Pattern: "^origin(\\d+)$", Into: "origin-$1"},
 		{Action: "rewrite", Target: "source", Pattern: "_", Into: "."},
 		{Action: "rewrite", Target: "metric", Pattern: "^interface-(.+)\\.if_(.+)\\.(.+)$", Into: "net.$1.$2.$3"},
@@ -73,7 +73,7 @@ func Test_Filter_Discard(t *testing.T) {
 			OriginalOrigin: "origin1", OriginalSource: "host2_example_net", OriginalMetric: "load.load.longterm"},
 	}
 
-	assert.Equal(t, expected, runTestFilter(&backend.ProviderFilters{
+	assert.Equal(t, expected, runTestFilter(&storage.ProviderFilters{
 		{Action: "discard", Target: "origin", Pattern: "origin2"},
 		{Action: "discard", Target: "source", Pattern: "host1_example_net"},
 		{Action: "discard", Target: "metric", Pattern: "^interface"},
@@ -90,7 +90,7 @@ func Test_Filter_Sieve(t *testing.T) {
 			OriginalOrigin: "origin1", OriginalSource: "host1_example_net", OriginalMetric: "load.load.longterm"},
 	}
 
-	assert.Equal(t, expected, runTestFilter(&backend.ProviderFilters{
+	assert.Equal(t, expected, runTestFilter(&storage.ProviderFilters{
 		{Action: "sieve", Target: "origin", Pattern: "origin1"},
 		{Action: "sieve", Target: "source", Pattern: "host1_example_net"},
 		{Action: "sieve", Target: "metric", Pattern: "load"},
@@ -107,14 +107,14 @@ func Test_Filter_Combined(t *testing.T) {
 			OriginalOrigin: "origin1", OriginalSource: "host1_example_net", OriginalMetric: "load.load.longterm"},
 	}
 
-	assert.Equal(t, expected, runTestFilter(&backend.ProviderFilters{
+	assert.Equal(t, expected, runTestFilter(&storage.ProviderFilters{
 		{Action: "sieve", Target: "source", Pattern: "host1_example_net"},
 		{Action: "discard", Target: "metric", Pattern: "interface"},
 		{Action: "rewrite", Target: "metric", Pattern: "load\\.load", Into: "load"},
 	}, len(expected)))
 }
 
-func runTestFilter(filters *backend.ProviderFilters, expectedLen int) []Record {
+func runTestFilter(filters *storage.ProviderFilters, expectedLen int) []Record {
 	testRecords := []Record{
 		{Origin: "origin1", Source: "host1_example_net", Metric: "interface-eth0.if_octets.rx"},
 		{Origin: "origin1", Source: "host1_example_net", Metric: "interface-eth0.if_octets.tx"},

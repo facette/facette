@@ -1,6 +1,6 @@
 // +build !disable_driver_pgsql
 
-package backend
+package storage
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	pgsqlBackend      *Backend
+	pgsqlStorage      *Storage
 	pgsqlProviders    []*Provider
 	pgsqlSourceGroups []*SourceGroup
 	pgsqlMetricGroups []*MetricGroup
@@ -51,9 +51,9 @@ func init() {
 		config.Set("password", v)
 	}
 
-	pgsqlBackend, err = New(&config, log)
+	pgsqlStorage, err = New(&config, log)
 	if err != nil {
-		panic(errors.Wrap(err, "failed to initialize PostgreSQL backend"))
+		panic(errors.Wrap(err, "failed to initialize PostgreSQL storage"))
 	}
 
 	pgsqlProviders = testProviderNew()
@@ -64,201 +64,201 @@ func init() {
 }
 
 func Test_PgSQL_Providers_Create(t *testing.T) {
-	testProviderCreate(pgsqlBackend, pgsqlProviders, t)
+	testProviderCreate(pgsqlStorage, pgsqlProviders, t)
 }
 
 func Test_PgSQL_Providers_Create_Invalid(t *testing.T) {
-	testProviderCreateInvalid(pgsqlBackend, pgsqlProviders, t)
+	testProviderCreateInvalid(pgsqlStorage, pgsqlProviders, t)
 }
 
 func Test_PgSQL_Providers_Get(t *testing.T) {
-	testProviderGet(pgsqlBackend, pgsqlProviders, t)
+	testProviderGet(pgsqlStorage, pgsqlProviders, t)
 }
 
 func Test_PgSQL_Providers_Get_Unknown(t *testing.T) {
-	testProviderGetUnknown(pgsqlBackend, pgsqlProviders, t)
+	testProviderGetUnknown(pgsqlStorage, pgsqlProviders, t)
 }
 
 func Test_PgSQL_Providers_Update(t *testing.T) {
-	testProviderUpdate(pgsqlBackend, pgsqlProviders, t)
+	testProviderUpdate(pgsqlStorage, pgsqlProviders, t)
 }
 
 func Test_PgSQL_Providers_Delete(t *testing.T) {
-	testProviderDelete(pgsqlBackend, pgsqlProviders, t)
+	testProviderDelete(pgsqlStorage, pgsqlProviders, t)
 }
 
 func Test_PgSQL_Providers_List(t *testing.T) {
-	testProviderList(pgsqlBackend, pgsqlProviders, t)
+	testProviderList(pgsqlStorage, pgsqlProviders, t)
 }
 
 func Test_PgSQL_Providers_Count(t *testing.T) {
-	testProviderCount(pgsqlBackend, pgsqlProviders, t)
+	testProviderCount(pgsqlStorage, pgsqlProviders, t)
 }
 
 func Test_PgSQL_Providers_Delete_All(t *testing.T) {
-	testProviderDeleteAll(pgsqlBackend, pgsqlProviders, t)
+	testProviderDeleteAll(pgsqlStorage, pgsqlProviders, t)
 }
 
 func Test_PgSQL_SourceGroups_Create(t *testing.T) {
-	testSourceGroupCreate(pgsqlBackend, pgsqlSourceGroups, t)
+	testSourceGroupCreate(pgsqlStorage, pgsqlSourceGroups, t)
 }
 
 func Test_PgSQL_SourceGroups_Create_Invalid(t *testing.T) {
-	testSourceGroupCreateInvalid(pgsqlBackend, pgsqlSourceGroups, t)
+	testSourceGroupCreateInvalid(pgsqlStorage, pgsqlSourceGroups, t)
 }
 
 func Test_PgSQL_SourceGroups_Get(t *testing.T) {
-	testSourceGroupGet(pgsqlBackend, pgsqlSourceGroups, t)
+	testSourceGroupGet(pgsqlStorage, pgsqlSourceGroups, t)
 }
 
 func Test_PgSQL_SourceGroups_Get_Unknown(t *testing.T) {
-	testSourceGroupGetUnknown(pgsqlBackend, pgsqlSourceGroups, t)
+	testSourceGroupGetUnknown(pgsqlStorage, pgsqlSourceGroups, t)
 }
 
 func Test_PgSQL_SourceGroups_Update(t *testing.T) {
-	testSourceGroupUpdate(pgsqlBackend, pgsqlSourceGroups, t)
+	testSourceGroupUpdate(pgsqlStorage, pgsqlSourceGroups, t)
 }
 
 func Test_PgSQL_SourceGroups_Delete(t *testing.T) {
-	testSourceGroupDelete(pgsqlBackend, pgsqlSourceGroups, t)
+	testSourceGroupDelete(pgsqlStorage, pgsqlSourceGroups, t)
 }
 
 func Test_PgSQL_SourceGroups_List(t *testing.T) {
-	testSourceGroupList(pgsqlBackend, pgsqlSourceGroups, t)
+	testSourceGroupList(pgsqlStorage, pgsqlSourceGroups, t)
 }
 
 func Test_PgSQL_SourceGroups_Count(t *testing.T) {
-	testSourceGroupCount(pgsqlBackend, pgsqlSourceGroups, t)
+	testSourceGroupCount(pgsqlStorage, pgsqlSourceGroups, t)
 }
 
 func Test_PgSQL_SourceGroups_Delete_All(t *testing.T) {
-	testSourceGroupDeleteAll(pgsqlBackend, pgsqlSourceGroups, t)
+	testSourceGroupDeleteAll(pgsqlStorage, pgsqlSourceGroups, t)
 }
 
 func Test_PgSQL_MetricGroups_Create(t *testing.T) {
-	testMetricGroupCreate(pgsqlBackend, pgsqlMetricGroups, t)
+	testMetricGroupCreate(pgsqlStorage, pgsqlMetricGroups, t)
 }
 
 func Test_PgSQL_MetricGroups_Create_Invalid(t *testing.T) {
-	testMetricGroupCreateInvalid(pgsqlBackend, pgsqlMetricGroups, t)
+	testMetricGroupCreateInvalid(pgsqlStorage, pgsqlMetricGroups, t)
 }
 
 func Test_PgSQL_MetricGroups_Get(t *testing.T) {
-	testMetricGroupGet(pgsqlBackend, pgsqlMetricGroups, t)
+	testMetricGroupGet(pgsqlStorage, pgsqlMetricGroups, t)
 }
 
 func Test_PgSQL_MetricGroups_Get_Unknown(t *testing.T) {
-	testMetricGroupGetUnknown(pgsqlBackend, pgsqlMetricGroups, t)
+	testMetricGroupGetUnknown(pgsqlStorage, pgsqlMetricGroups, t)
 }
 
 func Test_PgSQL_MetricGroups_Update(t *testing.T) {
-	testMetricGroupUpdate(pgsqlBackend, pgsqlMetricGroups, t)
+	testMetricGroupUpdate(pgsqlStorage, pgsqlMetricGroups, t)
 }
 
 func Test_PgSQL_MetricGroups_Delete(t *testing.T) {
-	testMetricGroupDelete(pgsqlBackend, pgsqlMetricGroups, t)
+	testMetricGroupDelete(pgsqlStorage, pgsqlMetricGroups, t)
 }
 
 func Test_PgSQL_MetricGroups_List(t *testing.T) {
-	testMetricGroupList(pgsqlBackend, pgsqlMetricGroups, t)
+	testMetricGroupList(pgsqlStorage, pgsqlMetricGroups, t)
 }
 
 func Test_PgSQL_MetricGroups_Count(t *testing.T) {
-	testMetricGroupCount(pgsqlBackend, pgsqlMetricGroups, t)
+	testMetricGroupCount(pgsqlStorage, pgsqlMetricGroups, t)
 }
 
 func Test_PgSQL_MetricGroups_Delete_All(t *testing.T) {
-	testMetricGroupDeleteAll(pgsqlBackend, pgsqlMetricGroups, t)
+	testMetricGroupDeleteAll(pgsqlStorage, pgsqlMetricGroups, t)
 }
 
 func Test_PgSQL_Graphs_Create(t *testing.T) {
-	testGraphCreate(pgsqlBackend, pgsqlGraphs, t)
+	testGraphCreate(pgsqlStorage, pgsqlGraphs, t)
 }
 
 func Test_PgSQL_Graphs_Create_Invalid(t *testing.T) {
-	testGraphCreateInvalid(pgsqlBackend, pgsqlGraphs, t)
+	testGraphCreateInvalid(pgsqlStorage, pgsqlGraphs, t)
 }
 
 func Test_PgSQL_Graphs_Get(t *testing.T) {
-	testGraphGet(pgsqlBackend, pgsqlGraphs, t)
+	testGraphGet(pgsqlStorage, pgsqlGraphs, t)
 }
 
 func Test_PgSQL_Graphs_Get_Unknown(t *testing.T) {
-	testGraphGetUnknown(pgsqlBackend, pgsqlGraphs, t)
+	testGraphGetUnknown(pgsqlStorage, pgsqlGraphs, t)
 }
 
 func Test_PgSQL_Graphs_Update(t *testing.T) {
-	testGraphUpdate(pgsqlBackend, pgsqlGraphs, t)
+	testGraphUpdate(pgsqlStorage, pgsqlGraphs, t)
 }
 
 func Test_PgSQL_Graphs_Delete(t *testing.T) {
-	testGraphDelete(pgsqlBackend, pgsqlGraphs, t)
+	testGraphDelete(pgsqlStorage, pgsqlGraphs, t)
 }
 
 func Test_PgSQL_Graphs_List(t *testing.T) {
-	testGraphList(pgsqlBackend, pgsqlGraphs, t)
+	testGraphList(pgsqlStorage, pgsqlGraphs, t)
 }
 
 func Test_PgSQL_Graphs_Count(t *testing.T) {
-	testGraphCount(pgsqlBackend, pgsqlGraphs, t)
+	testGraphCount(pgsqlStorage, pgsqlGraphs, t)
 }
 
 func Test_PgSQL_Graphs_Resolve(t *testing.T) {
-	testGraphResolve(pgsqlBackend, pgsqlGraphs, t)
+	testGraphResolve(pgsqlStorage, pgsqlGraphs, t)
 }
 
 func Test_PgSQL_Graphs_Expand(t *testing.T) {
-	testGraphExpand(pgsqlBackend, pgsqlGraphs, t)
+	testGraphExpand(pgsqlStorage, pgsqlGraphs, t)
 }
 
 func Test_PgSQL_Graphs_Delete_All(t *testing.T) {
-	testGraphDeleteAll(pgsqlBackend, pgsqlGraphs, t)
+	testGraphDeleteAll(pgsqlStorage, pgsqlGraphs, t)
 }
 
 func Test_PgSQL_Collections_Create(t *testing.T) {
-	testCollectionCreate(pgsqlBackend, pgsqlCollections, t)
+	testCollectionCreate(pgsqlStorage, pgsqlCollections, t)
 }
 
 func Test_PgSQL_Collections_Create_Invalid(t *testing.T) {
-	testCollectionCreateInvalid(pgsqlBackend, pgsqlCollections, t)
+	testCollectionCreateInvalid(pgsqlStorage, pgsqlCollections, t)
 }
 
 func Test_PgSQL_Collections_Get(t *testing.T) {
-	testCollectionGet(pgsqlBackend, pgsqlCollections, t)
+	testCollectionGet(pgsqlStorage, pgsqlCollections, t)
 }
 
 func Test_PgSQL_Collections_Get_Unknown(t *testing.T) {
-	testCollectionGetUnknown(pgsqlBackend, pgsqlCollections, t)
+	testCollectionGetUnknown(pgsqlStorage, pgsqlCollections, t)
 }
 
 func Test_PgSQL_Collections_Update(t *testing.T) {
-	testCollectionUpdate(pgsqlBackend, pgsqlCollections, t)
+	testCollectionUpdate(pgsqlStorage, pgsqlCollections, t)
 }
 
 func Test_PgSQL_Collections_Delete(t *testing.T) {
-	testCollectionDelete(pgsqlBackend, pgsqlCollections, t)
+	testCollectionDelete(pgsqlStorage, pgsqlCollections, t)
 }
 
 func Test_PgSQL_Collections_List(t *testing.T) {
-	testCollectionList(pgsqlBackend, pgsqlCollections, pgsqlGraphs, t)
+	testCollectionList(pgsqlStorage, pgsqlCollections, pgsqlGraphs, t)
 }
 
 func Test_PgSQL_Collections_Count(t *testing.T) {
-	testCollectionCount(pgsqlBackend, pgsqlCollections, t)
+	testCollectionCount(pgsqlStorage, pgsqlCollections, t)
 }
 
 func Test_PgSQL_Collections_Resolve(t *testing.T) {
-	testCollectionResolve(pgsqlBackend, pgsqlCollections, t)
+	testCollectionResolve(pgsqlStorage, pgsqlCollections, t)
 }
 
 func Test_PgSQL_Collections_Expand(t *testing.T) {
-	testCollectionExpand(pgsqlBackend, pgsqlCollections, t)
+	testCollectionExpand(pgsqlStorage, pgsqlCollections, t)
 }
 
 func Test_PgSQL_Collections_Tree(t *testing.T) {
-	testCollectionTree(pgsqlBackend, pgsqlCollections, t)
+	testCollectionTree(pgsqlStorage, pgsqlCollections, t)
 }
 
 func Test_PgSQL_Collections_Delete_All(t *testing.T) {
-	testCollectionDeleteAll(pgsqlBackend, pgsqlCollections, t)
+	testCollectionDeleteAll(pgsqlStorage, pgsqlCollections, t)
 }

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"regexp"
 
-	"facette.io/facette/backend"
 	"facette.io/facette/set"
+	"facette.io/facette/storage"
 )
 
 const (
@@ -50,7 +50,7 @@ type FilterChain struct {
 }
 
 // NewFilterChain creates a new catalog filtering chain instance.
-func NewFilterChain(rules *backend.ProviderFilters) *FilterChain {
+func NewFilterChain(rules *storage.ProviderFilters) *FilterChain {
 	fc := &FilterChain{
 		Input:    make(chan *Record),
 		Output:   make(chan *Record),
@@ -148,6 +148,6 @@ func (fc *FilterChain) applyAction(rule filterRule, record *Record, value *strin
 }
 
 type filterRule struct {
-	*backend.ProviderFilter
+	*storage.ProviderFilter
 	re *regexp.Regexp
 }

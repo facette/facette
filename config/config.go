@@ -18,31 +18,32 @@ const (
 	defaultLogLevel         = "info"
 	defaultSyslogFacility   = "daemon"
 	defaultSyslogTag        = "facette"
-	defaultFrontendEnabled  = true
+	defaultStorageDriver    = "sqlite"
+	defaultUIEnabled        = true
 	defaultTimeRange        = "-1h"
 	defaultHideBuildDetails = false
 )
 
 // Config represents a configuration instance.
 type Config struct {
-	Listen           string          `yaml:"listen"`
-	SocketMode       string          `yaml:"socket_mode"`
-	SocketUser       string          `yaml:"socket_user"`
-	SocketGroup      string          `yaml:"socket_group"`
-	GracefulTimeout  int             `yaml:"graceful_timeout"`
-	RootPath         string          `yaml:"root_path"`
-	LogPath          string          `yaml:"log_path"`
-	LogLevel         string          `yaml:"log_level"`
-	SyslogLevel      string          `yaml:"syslog_level"`
-	SyslogFacility   string          `yaml:"syslog_facility"`
-	SyslogTag        string          `yaml:"syslog_tag"`
-	SyslogAddress    string          `yaml:"syslog_address"`
-	SyslogTransport  string          `yaml:"syslog_transport"`
-	Frontend         *FrontendConfig `yaml:"frontend"`
-	Backend          *maputil.Map    `yaml:"backend"`
-	DefaultTimeRange string          `yaml:"default_time_range"`
-	HideBuildDetails bool            `yaml:"hide_build_details"`
-	ReadOnly         bool            `yaml:"read_only"`
+	Listen           string       `yaml:"listen"`
+	SocketMode       string       `yaml:"socket_mode"`
+	SocketUser       string       `yaml:"socket_user"`
+	SocketGroup      string       `yaml:"socket_group"`
+	GracefulTimeout  int          `yaml:"graceful_timeout"`
+	RootPath         string       `yaml:"root_path"`
+	LogPath          string       `yaml:"log_path"`
+	LogLevel         string       `yaml:"log_level"`
+	SyslogLevel      string       `yaml:"syslog_level"`
+	SyslogFacility   string       `yaml:"syslog_facility"`
+	SyslogTag        string       `yaml:"syslog_tag"`
+	SyslogAddress    string       `yaml:"syslog_address"`
+	SyslogTransport  string       `yaml:"syslog_transport"`
+	Storage          *maputil.Map `yaml:"storage"`
+	UI               *UIConfig    `yaml:"ui"`
+	DefaultTimeRange string       `yaml:"default_time_range"`
+	HideBuildDetails bool         `yaml:"hide_build_details"`
+	ReadOnly         bool         `yaml:"read_only"`
 }
 
 // New creates a new configuration instance, initializing its content based on a provided configuration file.
@@ -55,8 +56,11 @@ func New(path string) (*Config, error) {
 		LogLevel:        defaultLogLevel,
 		SyslogFacility:  defaultSyslogFacility,
 		SyslogTag:       defaultSyslogTag,
-		Frontend: &FrontendConfig{
-			Enabled: defaultFrontendEnabled,
+		UI: &UIConfig{
+			Enabled: defaultUIEnabled,
+		},
+		Storage: &maputil.Map{
+			"driver": defaultStorageDriver,
 		},
 		DefaultTimeRange: defaultTimeRange,
 		HideBuildDetails: defaultHideBuildDetails,

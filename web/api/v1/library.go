@@ -39,9 +39,9 @@ func (a *API) librarySummary(rw http.ResponseWriter, r *http.Request) {
 	// Get item types list and information
 	result := map[string]int{}
 	for _, typ := range libraryTypes {
-		item, _ := a.backendItem(typ)
+		item, _ := a.storageItem(typ)
 
-		count, err := a.backend.Storage().Count(item)
+		count, err := a.storage.SQL().Count(item)
 		if err != nil {
 			a.logger.Error("failed to fetch count: %s", err)
 			httputil.WriteJSON(rw, newMessage(errUnhandledError), http.StatusInternalServerError)

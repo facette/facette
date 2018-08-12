@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"facette.io/facette/backend"
+	"facette.io/facette/storage"
 	"github.com/mgutz/ansi"
 	"github.com/pkg/errors"
 )
@@ -36,8 +36,8 @@ type collectionRef struct {
 }
 
 var (
-	// Backend types are listed according to their restoration order
-	backendTypes = []string{
+	// Storage types are listed according to their restoration order
+	storageTypes = []string{
 		"providers",
 		"sourcegroups",
 		"metricgroups",
@@ -80,8 +80,8 @@ func execLibraryDump() error {
 	tw := tar.NewWriter(gzw)
 	defer tw.Close()
 
-	// Loop through back-end types and dump data
-	for _, typ := range backendTypes {
+	// Loop through storage types and dump data
+	for _, typ := range storageTypes {
 		if err := dumpLibraryType(tw, typ); err != nil {
 			printError("failed to dump %s: %s", typ, err)
 			errored = true
@@ -124,7 +124,7 @@ func execLibraryRestore() error {
 
 	// Perform library cleanup if merging is not requested
 	if !cmd.Library.Restore.Merge {
-		for _, typ := range backendTypes {
+		for _, typ := range storageTypes {
 			if !cmd.Quiet {
 				fmt.Printf("purging %s...\n", typ)
 			}
@@ -189,7 +189,7 @@ func dumpLibraryType(w *tar.Writer, typ string) error {
 
 	// IMPORTANT:
 	// Templates and parent collections *MUST* be dumped first in order to be restored first
-	// to preserve back-end items relationships.
+	// to preserve storage items relationships.
 
 	endpoint := "/" + typ
 	if typ != "providers" {
@@ -205,7 +205,7 @@ func dumpLibraryType(w *tar.Writer, typ string) error {
 	}
 
 	// Retrieve items list
-	items := []backend.Item{}
+	items := []storage.Item{}
 	if err := apiRequest("GET", endpoint+"?fields=id,created,modified"+params, nil, nil, &items); err != nil {
 		return errors.Wrap(err, "failed to retrieve items")
 	}
@@ -225,7 +225,7 @@ func dumpLibraryType(w *tar.Writer, typ string) error {
 			cur, stack = stack[0], stack[1:]
 
 			for _, c := range cur {
-				items = append(items, backend.Item{ID: c.ID})
+				items = append(items, storage.Item{ID: c.ID})
 				if len(c.Children) > 0 {
 					stack = append(stack, c.Children)
 				}

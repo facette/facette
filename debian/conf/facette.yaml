@@ -10,7 +10,7 @@ graceful_timeout: 30
 log_path: /var/log/facette/facette.log
 log_level: info
 
-backend:
+storage:
   ### SQLite
   driver: sqlite
   path: /var/lib/facette/data.db
