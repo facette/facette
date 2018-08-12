@@ -4,6 +4,8 @@
 			<menuitem href="{{ ::baseURL }}admin/" icon="cog" label="{{ 'label.admin_panel' | translate }}" type="button" ng-if="!inAdmin"></menuitem>
 			<menuitem href="{{ ::baseURL }}" icon="sign-out" label="{{ 'label.admin_panel_exit' | translate }}" type="button" ng-if="inAdmin"></menuitem>
 			<menuitem type="separator"></menuitem>
+			<menuitem href="https://docs.facette.io/" target="_blank" icon="book" label="{{ 'label.documentation' | translate }}" type="button"></menuitem>
+			<menuitem type="separator"></menuitem>
 			<menuitem icon="language" label="{{ 'label.language' | translate }}" type="button">
 				<menu>
 					<menuitem label="{{ label }}" type="button" ng-click="changeLocale(code)" ng-repeat="(code, label) in locales"></menuitem>

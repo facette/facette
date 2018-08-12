@@ -54,6 +54,7 @@
     "label.connectors_type_select": "Sélectionnez un type…",
     "label.default": "défaut",
     "label.desc": "Description",
+    "label.documentation": "Documentation",
     "label.drivers": "Pilotes de stockage",
     "label.error": "Erreur",
     "label.filters": "Filtres",

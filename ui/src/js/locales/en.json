@@ -54,6 +54,7 @@
     "label.connectors_type_select": "Select a connector type…",
     "label.default": "default",
     "label.desc": "Description",
+    "label.documentation": "Documentation",
     "label.drivers": "Back-end drivers",
     "label.error": "Error",
     "label.filters": "Filters",
