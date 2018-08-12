@@ -587,7 +587,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
             }
         } catch (e) {}
 
-        return chart.colors[idx % chart.colors.length];
+        return boula.colors[idx % boula.colors.length];
     };
 
     $scope.validateOptionsClose = function() {
