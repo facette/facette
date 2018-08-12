@@ -415,6 +415,10 @@
 	cursor: pointer;
 }
 
+.graph-legend .value.active span {
+	text-decoration: underline;
+}
+
 .graph-legend .label .color {
 	border-radius: 0.1rem;
 	display: inline-block;

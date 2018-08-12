@@ -49,7 +49,7 @@ angular.module('facette.ui.graph', [])
     $scope.folded = typeof $scope.options.folded == 'boolean' ? $scope.options.folded : false;
     $scope.legendActive = false;
     $scope.legendColumns = false;
-    $scope.lines = [];
+    $scope.lines = {};
     $scope.disabledSeries = {};
     $scope.zoomOrigin = null;
     $scope.exportLinks = {};
@@ -236,6 +236,11 @@ angular.module('facette.ui.graph', [])
                 chartCfg.axes.y.lines.push({label: true, y: value, color: 'red'});
             });
         }
+
+        // Apply existing lines
+        Object.keys($scope.lines).forEach(function(key) {
+            chartCfg.axes.y.lines.push($scope.lines[key]);
+        });
 
         // Set Y-Axis extremes and centering
         var max = 0,
@@ -750,18 +755,17 @@ angular.module('facette.ui.graph', [])
     };
 
     $scope.toggleLine = function(idx, key) {
-        var id = 'line' + idx + '-' + key,
-            found = $scope.lines.indexOf(id);
+        var id = 'line' + idx + '-' + key;
 
-        if (found == -1) {
-            $scope.chart.addLine(id, {
+        if ($scope.lines[id]) {
+            $scope.chart.removeLine(id);
+            delete $scope.lines[id];
+        } else {
+            $scope.lines[id] = {
                 label: $scope.data.series[idx].name + '/' + key,
                 y: $scope.data.series[idx].summary[key],
-            });
-            $scope.lines.push(id);
-        } else {
-            $scope.chart.removeLine(id);
-            $scope.lines.splice(found, 1);
+            };
+            $scope.chart.addLine(id, $scope.lines[id]);
         }
     };
 

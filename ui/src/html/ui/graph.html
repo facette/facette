@@ -70,7 +70,8 @@
 						{{ series.name }}
 					</div></td>
 					<th class="key" ng-repeat-start="key in legendColumns">{{ key }}</th>
-					<td class="value" ng-click="toggleLine(idx, key)" ng-repeat-end="">
+					<td class="value" ng-class="{active: lines['line'+idx+'-'+key]}" ng-click="toggleLine(idx, key)"
+							ng-repeat-end="">
 						{{ chart.config.axes.y.ticks.format(series.summary[key]) }}
 					</td>
 				</tr>
