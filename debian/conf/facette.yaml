@@ -33,7 +33,6 @@ backend:
 
 frontend:
   enabled: true
-  assets_dir: /usr/share/facette/assets
 
 hide_build_details: true
 

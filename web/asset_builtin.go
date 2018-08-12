@@ -1,4 +1,6 @@
 // +build builtin_assets
+//
+//go:generate go-bindata -pkg web -prefix ../dist/assets -tags builtin_assets -o bindata.go ../dist/assets/...
 
 package web
 

@@ -12,6 +12,10 @@ PREFIX ?= /usr/local
 
 ENV ?= production
 
+ifeq ($(ENV),production)
+TAGS := $(TAGS) builtin_assets
+endif
+
 GO ?= vgo
 GOLINT ?= golint
 
@@ -46,23 +50,17 @@ all: build
 
 clean:
 	@$(call print_step,"Cleaning files...")
-	@rm -rf bin/ dist/
+	@rm -rf bin/ dist/ web/bindata.go
 
 build: build-bin build-assets build-docs
 
 ifneq ($(filter builtin_assets,$(TAGS)),)
 build-bin: build-assets
-	@$(call print_step,"Embedding assets files...")
-	@go-bindata \
-		-pkg web \
-		-prefix $(DIST_DIR)/assets \
-		-tags 'builtin_assets' \
-		-o web/bindata.go $(DIST_DIR)/assets/...
 else
 build-bin:
 endif
 	@$(call print_step,"Building binaries for $(GOOS)/$(GOARCH)...")
-	@for bin in $(BIN_LIST); do \
+	@$(GO) generate -tags "$(TAGS)" ./... && for bin in $(BIN_LIST); do \
 		$(GO) build -i \
 			-tags "$(TAGS)" \
 			-ldflags '-s -w \
@@ -94,15 +92,11 @@ test-bin:
 		$(GO) test -cover -tags "$(TAGS)" -v ./$$pkg || exit 1; \
 	done
 
-install: install-bin install-assets install-docs
+install: install-bin install-docs
 
 install-bin: build-bin
 	@$(call print_step,"Installing binaries...")
 	@install -d -m 0755 $(PREFIX)/bin && install -m 0755 bin/* $(PREFIX)/bin/
-
-install-assets: build-assets
-	@$(call print_step,"Installing assets...")
-	@install -d -m 0755 $(PREFIX)/share/facette && cp -r $(DIST_DIR)/assets $(PREFIX)/share/facette/
 
 install-docs: build-docs
 ifneq ($(filter build_docs,$(TAGS)),)

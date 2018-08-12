@@ -37,7 +37,6 @@ backend:
 
 frontend:
   enabled: true
-  assets_dir: /usr/local/share/facette/assets
 
 default_time_range: -1h
 

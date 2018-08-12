@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-var builtinAssets = false
+var assetsDir = filepath.Join(filepath.Dir(os.Args[0]), "../dist/assets")
 
 func (h *Handler) handleAsset(rw http.ResponseWriter, r *http.Request) {
 	var (
@@ -39,7 +39,7 @@ func (h *Handler) handleAsset(rw http.ResponseWriter, r *http.Request) {
 		isDefault = true
 	}
 
-	filePath = filepath.Join(h.config.Frontend.AssetsDir, filePath)
+	filePath = filepath.Join(assetsDir, filePath)
 
 	// Check for existing asset file
 	if fi, err := os.Stat(filePath); err != nil {

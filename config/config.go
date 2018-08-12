@@ -11,17 +11,16 @@ import (
 )
 
 const (
-	defaultListen            = "localhost:12003"
-	defaultGracefulTimeout   = 30
-	defaultRootPath          = "/"
-	defaultLogPath           = "-"
-	defaultLogLevel          = "info"
-	defaultSyslogFacility    = "daemon"
-	defaultSyslogTag         = "facette"
-	defaultFrontendEnabled   = true
-	defaultFrontendAssetsDir = "assets"
-	defaultTimeRange         = "-1h"
-	defaultHideBuildDetails  = false
+	defaultListen           = "localhost:12003"
+	defaultGracefulTimeout  = 30
+	defaultRootPath         = "/"
+	defaultLogPath          = "-"
+	defaultLogLevel         = "info"
+	defaultSyslogFacility   = "daemon"
+	defaultSyslogTag        = "facette"
+	defaultFrontendEnabled  = true
+	defaultTimeRange        = "-1h"
+	defaultHideBuildDetails = false
 )
 
 // Config represents a configuration instance.
@@ -57,8 +56,7 @@ func New(path string) (*Config, error) {
 		SyslogFacility:  defaultSyslogFacility,
 		SyslogTag:       defaultSyslogTag,
 		Frontend: &FrontendConfig{
-			Enabled:   defaultFrontendEnabled,
-			AssetsDir: defaultFrontendAssetsDir,
+			Enabled: defaultFrontendEnabled,
 		},
 		DefaultTimeRange: defaultTimeRange,
 		HideBuildDetails: defaultHideBuildDetails,
@@ -76,7 +74,6 @@ func New(path string) (*Config, error) {
 	}
 
 	config.RootPath = strings.TrimSuffix(config.RootPath, "/")
-	config.Frontend.AssetsDir = strings.TrimSuffix(config.Frontend.AssetsDir, "/")
 
 	// Check for settings validity
 	if !timerange.IsValid(config.DefaultTimeRange) {

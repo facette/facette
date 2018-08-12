@@ -88,9 +88,6 @@ func (h *Handler) Run() error {
 	}
 
 	h.logger.Info("listening on %q", addr)
-	if builtinAssets {
-		h.logger.Info("serving web assets from built-in files")
-	}
 
 	h.Lock()
 	h.server = &http.Server{

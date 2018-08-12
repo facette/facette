@@ -1,4 +1,3 @@
 debian/conf/facette.yaml  etc/facette
 usr/bin/facette  usr/bin
 usr/bin/facettectl  usr/bin
-usr/share/facette/assets  usr/share/facette
