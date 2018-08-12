@@ -74,7 +74,7 @@ endif
 
 build-assets: ui/node_modules
 	@$(call print_step,"Building assets...")
-	@$(YARN) $(YARN_ARGS) build --env $(ENV)
+	@rm -rf $(DIST_DIR)/assets/ && $(YARN) $(YARN_ARGS) build --env $(ENV)
 
 build-docs:
 ifneq ($(filter build_docs,$(TAGS)),)

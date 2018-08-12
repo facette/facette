@@ -5,6 +5,7 @@
   "license": "BSD",
   "private": true,
   "dependencies": {
+    "angular": "1.7.3",
     "angular-bootstrap-colorpicker": "3.0.32",
     "angular-date-time-input": "1.2.1",
     "angular-hotkeys": "1.7.0",
@@ -13,11 +14,10 @@
     "angular-resource": "1.7.3",
     "angular-route": "1.7.3",
     "angular-sanitize": "1.7.3",
+    "angular-translate": "2.18.1",
     "angular-translate-interpolation-messageformat": "2.18.1",
     "angular-translate-loader-static-files": "2.18.1",
-    "angular-translate": "2.18.1",
     "angular-ui-tree": "2.22.6",
-    "angular": "1.7.3",
     "angular_page_visibility": "https://github.com/mz026/angular_page_visibility#0.0.4",
     "angularjs-bootstrap-datetimepicker": "1.1.4",
     "angularjs-tooltips": "1.0.5",
@@ -52,7 +52,8 @@
     "gulp-uglify": "2.0.0",
     "gulp-uglifycss": "1.1.0",
     "jshint": "2.9.6",
-    "merge-stream": "1.0.1"
+    "merge-stream": "1.0.1",
+    "tmp": "0.0.33"
   },
   "scripts": {
     "build": "gulp --no-color build",

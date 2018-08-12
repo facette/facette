@@ -18,10 +18,14 @@ var fs = require('fs'),
     revDelete = require('gulp-rev-delete-original'),
     revReplace = require('gulp-rev-replace'),
     templatecache = require('gulp-angular-templatecache'),
+    tmp = require('tmp'),
     translateextract = require('gulp-angular-translate-extract'),
     uglify = require('gulp-uglify'),
     uglifycss = require('gulp-uglifycss'),
     vendor = require('gulp-concat-vendor');
+
+var dist_dir = path.resolve(__dirname, '../dist'),
+    tmp_dir = tmp.dirSync({unsafeCleanup: true}).name;
 
 var config = {
     pkg: JSON.parse(fs.readFileSync('./package.json')),
@@ -31,7 +35,6 @@ var config = {
         ' * Website: <%= pkg.homepage %>\n' +
         ' * License: <%= pkg.license %>\n' +
         ' */\n',
-    dist_dir: path.resolve(__dirname, "../dist"),
     files: {
         script: [
             'src/js/extend.js',
@@ -164,19 +167,19 @@ gulp.task('lint', [
 
 gulp.task('build-scripts', ['build-html'], function() {
     return merge(
-        gulp.src(config.files.script.concat([config.dist_dir + '/tmp/templates.js']))
+        gulp.src(config.files.script.concat([tmp_dir + '/templates.js']))
             .pipe(concat('facette.js'))
             .pipe(header(config.banner + '\n(function() {\n\n"use strict";\n\n', {pkg: config.pkg}))
             .pipe(footer('\n}());\n'))
             .pipe(environments.production(uglify({mangle: false, preserveComments: 'license'})))
             .pipe(chmod(644))
-            .pipe(gulp.dest(config.dist_dir + '/assets/js')),
+            .pipe(gulp.dest(dist_dir + '/assets/js')),
 
         gulp.src(config.files.vendor.js)
             .pipe(vendor('vendor.js'))
             .pipe(environments.production(uglify({preserveComments: 'license'})))
             .pipe(chmod(644))
-            .pipe(gulp.dest(config.dist_dir + '/assets/js'))
+            .pipe(gulp.dest(dist_dir + '/assets/js'))
     );
 });
 
@@ -196,7 +199,7 @@ gulp.task('build-styles',function() {
             .pipe(autoprefixer())
             .pipe(environments.production(uglifycss()))
             .pipe(chmod(644))
-            .pipe(gulp.dest(config.dist_dir + '/assets/css')),
+            .pipe(gulp.dest(dist_dir + '/assets/css')),
 
         gulp.src(config.files.style_print)
             .pipe(concat('style-print.css'))
@@ -204,7 +207,7 @@ gulp.task('build-styles',function() {
             .pipe(autoprefixer())
             .pipe(environments.production(uglifycss()))
             .pipe(chmod(644))
-            .pipe(gulp.dest(config.dist_dir + '/assets/css'))
+            .pipe(gulp.dest(dist_dir + '/assets/css'))
     );
 });
 
@@ -212,15 +215,15 @@ gulp.task('copy-styles', function() {
     return merge(
         gulp.src(config.files.vendor.css)
             .pipe(chmod(644))
-            .pipe(gulp.dest(config.dist_dir + '/assets/css')),
+            .pipe(gulp.dest(dist_dir + '/assets/css')),
 
         gulp.src(config.files.vendor.fonts)
             .pipe(chmod(644))
-            .pipe(gulp.dest(config.dist_dir + '/assets/fonts')),
+            .pipe(gulp.dest(dist_dir + '/assets/fonts')),
 
         gulp.src(config.files.vendor.images)
             .pipe(chmod(644))
-            .pipe(gulp.dest(config.dist_dir + '/assets/images'))
+            .pipe(gulp.dest(dist_dir + '/assets/images'))
     );
 });
 
@@ -239,20 +242,20 @@ gulp.task('build-html', function() {
                 return 'templates/' + url;
             }
         }))
-        .pipe(gulp.dest(config.dist_dir + '/tmp'));
+        .pipe(gulp.dest(tmp_dir));
 });
 
 gulp.task('copy-html', function() {
     return gulp.src('src/html/index.html')
         .pipe(chmod(644))
-        .pipe(gulp.dest(config.dist_dir + '/assets/html'));
+        .pipe(gulp.dest(dist_dir + '/assets/html'));
 });
 
 gulp.task('build-locales', function() {
     return gulp.src('src/js/locales/*.json')
         .pipe(jsonminify())
         .pipe(chmod(644))
-        .pipe(gulp.dest(config.dist_dir + '/assets/js/locales'));
+        .pipe(gulp.dest(dist_dir + '/assets/js/locales'));
 });
 
 gulp.task('update-locales', function() {
@@ -269,16 +272,16 @@ gulp.task('update-locales', function() {
 });
 
 gulp.task('rev-rename', buildTasks, function() {
-    return gulp.src(config.dist_dir + '/assets/{css,fonts,images,js}/*', {base: config.dist_dir + '/assets'})
+    return gulp.src(dist_dir + '/assets/{css,fonts,images,js}/*', {base: dist_dir + '/assets'})
         .pipe(rev())
         .pipe(revDelete())
-        .pipe(gulp.dest(config.dist_dir + '/assets'))
+        .pipe(gulp.dest(dist_dir + '/assets'))
         .pipe(rev.manifest('rev-manifest.json'))
-        .pipe(gulp.dest(config.dist_dir + '/tmp'));
+        .pipe(gulp.dest(tmp_dir));
 });
 
 gulp.task('rev-replace', ['rev-rename'], function() {
-    return gulp.src(config.dist_dir + '/assets/*/*', {base: config.dist_dir + '/assets'})
-        .pipe(revReplace({manifest: gulp.src(config.dist_dir + '/tmp/rev-manifest.json')}))
-        .pipe(gulp.dest(config.dist_dir + '/assets'));
+    return gulp.src(dist_dir + '/assets/*/*', {base: dist_dir + '/assets'})
+        .pipe(revReplace({manifest: gulp.src(tmp_dir + '/rev-manifest.json')}))
+        .pipe(gulp.dest(dist_dir + '/assets'));
 });
