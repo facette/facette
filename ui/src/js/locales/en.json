@@ -300,7 +300,7 @@
     "mesg.graphs_folded": "Click to open folded graph",
     "mesg.graphs_yaxis_unit_binary": "Binary: display units using IEC representation",
     "mesg.graphs_yaxis_unit_duration": "Duration: display units using duration representation",
-    "mesg.graphs_yaxis_unit_fixed": "Fixed: display units as is",
+    "mesg.graphs_yaxis_unit_fixed": "Fixed: display units as they are",
     "mesg.graphs_yaxis_unit_metric": "Metric: display units using SI representation",
     "mesg.groups_collapse": "You are about to collapse the group, removing its series from any previous associations. Are you sure?",
     "mesg.items_delete": "You are about to delete the “{name}” item. Are you sure?",
