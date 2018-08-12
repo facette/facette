@@ -119,8 +119,8 @@ dist: dist-source dist-bin dist-docker
 dist-source:
 	@$(call print_step,"Building source archive...")
 	@install -d -m 0755 $(DIST_DIR) && $(TAR) -czf $(DIST_DIR)/$(NAME)_$(VERSION).tar.gz \
-		--transform "flags=r;s/^/$(NAME)-$(VERSION)/" \
-		--exclude=.git --exclude=.vscode --exclude=bin --exclude=dist .
+		--transform "flags=r;s|^\./|$(NAME)-$(VERSION)/|" \
+		--exclude=.git --exclude=.vscode --exclude=bin --exclude=dist --exclude=node_modules .
 
 dist-bin: build-bin
 	@$(call print_step,"Building binary archive...")
