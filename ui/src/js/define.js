@@ -46,6 +46,7 @@ var filterActions = [
     graphYAxisUnitFixed = 'fixed',
     graphYAxisUnitMetric = 'metric',
     graphYAxisUnitBinary = 'binary',
+    graphYAxisUnitDuration = 'duration',
 
     graphStackModeNone = null,
     graphStackModeNormal = 'normal',

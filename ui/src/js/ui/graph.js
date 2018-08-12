@@ -287,6 +287,12 @@ angular.module('facette.ui.graph', [])
             };
             break;
 
+        case graphYAxisUnitDuration:
+            chartCfg.axes.y.ticks.format = function(value) {
+                return formatDuration(value, $scope.data.options.yaxis_unit_base);
+            };
+            break;
+
         default:
             chartCfg.axes.y.ticks.format = d3.format('.2r');
         }

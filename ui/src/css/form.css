@@ -41,6 +41,10 @@ input,
 	margin-right: 0.65rem;
 }
 
+.column .ui-select-container + input {
+	margin-top: 0.5em;
+}
+
 button:last-child,
 input:last-child,
 .autocomplete:last-child,

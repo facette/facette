@@ -169,14 +169,17 @@
 
 							<column>
 								<label>{{ 'label.graphs_yaxis_unit' | translate }}
-									<span class="info fa fa-question-circle" title="{{ 'mesg.graphs_yaxis_unit_fixed' | translate }}<br>{{ 'mesg.graphs_yaxis_unit_metric' | translate }}<br>{{ 'mesg.graphs_yaxis_unit_binary' | translate }}" title-direction="right"></span>
+									<span class="info fa fa-question-circle" title="{{ 'mesg.graphs_yaxis_unit_fixed' | translate }}<br>{{ 'mesg.graphs_yaxis_unit_metric' | translate }}<br>{{ 'mesg.graphs_yaxis_unit_binary' | translate }}<br>{{ 'mesg.graphs_yaxis_unit_duration' | translate }}" title-direction="right"></span>
 								</label>
-								<input id="axis-unit-fixed" name="axis-unit" type="radio" value="fixed" ng-model="item.options.yaxis_unit">
-								<label for="axis-unit-fixed" tabindex="0">{{ 'label.graphs_yaxis_unit_fixed' | translate }}</label>
-								<input id="axis-unit-metric" name="axis-unit" type="radio" value="metric" ng-model="item.options.yaxis_unit">
-								<label for="axis-unit-metric" tabindex="0">{{ 'label.graphs_yaxis_unit_metric' | translate }}</label>
-								<input id="axis-unit-binary" name="axis-unit" type="radio" value="binary" ng-model="item.options.yaxis_unit">
-								<label for="axis-unit-binary" tabindex="0">{{ 'label.graphs_yaxis_unit_binary' | translate }}</label>
+								<ui-select theme="selectize" ng-model="selectedOptions.main.yaxis_unit">
+									<ui-select-match placeholder="{{ 'label.graphs_yaxis_unit_select' | translate }}">
+										<span ng-bind="$select.selected.name"></span>
+									</ui-select-match>
+									<ui-select-choices repeat="t in (graphYAxisUnits | filter: $select.search)">
+										<span ng-bind="t.name"></span>
+									</ui-select-choices>
+								</ui-select>
+								<input type="text" pattern="[muµn]?s" placeholder="{{ 'label.graphs_yaxis_unit_base_placeholder' | translate }}" ng-model="item.options.yaxis_unit_base" ng-if="item.options.yaxis_unit == 'duration'">
 							</column>
 						</columns>
 					</div>

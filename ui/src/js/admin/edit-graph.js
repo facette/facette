@@ -895,6 +895,13 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
                 {name: 'Percent', value: graphStackModePercent}
             ];
 
+            $scope.graphYAxisUnits = [
+                {name: 'Fixed', value: graphYAxisUnitFixed},
+                {name: 'Metric', value: graphYAxisUnitMetric},
+                {name: 'Binary', value: graphYAxisUnitBinary},
+                {name: 'Duration', value: graphYAxisUnitDuration}
+            ];
+
             $scope.resetSeries(true, true);
 
             // Restore or set main options
@@ -912,6 +919,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
 
             applyOptions($scope.graphTypes, 'type');
             applyOptions($scope.graphStackModes, 'stack_mode');
+            applyOptions($scope.graphYAxisUnits, 'yaxis_unit');
 
             // Select first field
             $scope.$applyAsync(function() { angular.element('#origin input').focus(); });
