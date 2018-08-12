@@ -22,7 +22,7 @@
 				<input type="text" pattern="[a-zA-Z0-9](?:[a-zA-Z0-9\-_\.]*[a-zA-Z0-9])?" ng-class="{danger: conflict.name || validated && !item.name}" ng-model="item.name">
 
 				<label>{{ 'label.desc' | translate }}</label>
-				<textarea type="text" ng-model="item.description"></textarea>
+				<textarea ng-model="item.description"></textarea>
 
 				<h2>{{ 'label.providers_params' | translate }}</h2>
 
