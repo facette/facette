@@ -28,7 +28,7 @@ type worker struct {
 
 func newWorker(poller *Poller, provider *storage.Provider, logger *logger.Logger) (*worker, error) {
 	// Initialize provider connector handler
-	c, err := connector.NewConnector(provider.Connector, provider.Name, provider.Settings, logger)
+	c, err := connector.New(provider.Connector, provider.Name, provider.Settings, logger)
 	if err != nil {
 		return nil, err
 	}

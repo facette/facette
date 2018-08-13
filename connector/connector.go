@@ -9,26 +9,26 @@ import (
 	"facette.io/maputil"
 )
 
-const connectorDefaultTimeout int = 10
+const defaultTimeout = 10
 
 var connectors = make(map[string]func(string, *maputil.Map, *logger.Logger) (Connector, error))
 
 // Connector represents a connector handler interface.
 type Connector interface {
 	Name() string
-	Refresh(chan<- *catalog.Record) error
 	Points(*series.Query) ([]series.Series, error)
+	Refresh(chan<- *catalog.Record) error
 }
 
-// NewConnector creates a new instance of a connector handler.
-func NewConnector(typ, name string, settings *maputil.Map, log *logger.Logger) (Connector, error) {
+// New creates a new instance of a connector handler.
+func New(typ, name string, settings *maputil.Map, logger *logger.Logger) (Connector, error) {
 	// Check for existing connector handler
 	if _, ok := connectors[typ]; !ok {
 		return nil, ErrUnsupportedConnector
 	}
 
 	// Return new connector handler instance
-	return connectors[typ](name, settings, log)
+	return connectors[typ](name, settings, logger)
 }
 
 // Connectors returns the list of supported connectors.
@@ -37,7 +37,6 @@ func Connectors() []string {
 	for name := range connectors {
 		list = append(list, name)
 	}
-
 	sort.Strings(list)
 
 	return list

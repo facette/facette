@@ -18,44 +18,32 @@ import (
 	"github.com/ziutek/rrd"
 )
 
-type rrdMetric struct {
-	ds   string
-	path string
-	step time.Duration
-	cf   string
-}
-
-// rrdConnector implements the connector handler for RRD files.
-type rrdConnector struct {
-	name    string
-	path    string
-	daemon  string
-	pattern *regexp.Regexp
-	metrics map[string]map[string]*rrdMetric
-	log     *logger.Logger
-}
-
 func init() {
-	connectors["rrd"] = func(name string, settings *maputil.Map, log *logger.Logger) (Connector, error) {
-		var err error
+	connectors["rrd"] = func(name string, settings *maputil.Map, logger *logger.Logger) (Connector, error) {
+		var (
+			pattern string
+			err     error
+		)
 
 		c := &rrdConnector{
 			name:    name,
 			metrics: make(map[string]map[string]*rrdMetric),
-			log:     log,
+			logger:  logger,
 		}
 
 		// Get connector handler settings
-		if c.path, err = settings.GetString("path", "."); err != nil {
+		c.path, err = settings.GetString("path", ".")
+		if err != nil {
 			return nil, err
 		}
 		c.path = strings.TrimRight(c.path, "/")
 
-		if c.daemon, err = settings.GetString("daemon", ""); err != nil {
+		c.daemon, err = settings.GetString("daemon", "")
+		if err != nil {
 			return nil, err
 		}
 
-		pattern, err := settings.GetString("pattern", "")
+		pattern, err = settings.GetString("pattern", "")
 		if err != nil {
 			return nil, err
 		} else if pattern == "" {
@@ -63,12 +51,23 @@ func init() {
 		}
 
 		// Check and compile regexp pattern
-		if c.pattern, err = compilePattern(pattern); err != nil {
+		c.pattern, err = compilePattern(pattern)
+		if err != nil {
 			return nil, fmt.Errorf("unable to compile pattern: %s", err)
 		}
 
 		return c, nil
 	}
+}
+
+// rrdConnector represents a RRD connector instance.
+type rrdConnector struct {
+	name    string
+	path    string
+	daemon  string
+	pattern *regexp.Regexp
+	metrics map[string]map[string]*rrdMetric
+	logger  *logger.Logger
 }
 
 // Name returns the name of the current connector.
@@ -79,14 +78,14 @@ func (c *rrdConnector) Name() string {
 // Refresh triggers the connector data refresh.
 func (c *rrdConnector) Refresh(output chan<- *catalog.Record) error {
 	// Search for files and parse their path for source/metric pairs
-	walkFunc := func(path string, info os.FileInfo, err error) error {
+	walkFunc := func(path string, fi os.FileInfo, err error) error {
 		if err != nil {
-			c.log.Error("%s", err)
+			c.logger.Error("%s", err)
 			return nil
 		}
 
 		// Skip non-files
-		mode := info.Mode() & os.ModeType
+		mode := fi.Mode() & os.ModeType
 		if mode != 0 {
 			return nil
 		}
@@ -94,7 +93,7 @@ func (c *rrdConnector) Refresh(output chan<- *catalog.Record) error {
 		// Get matching pattern elements
 		m, err := matchPattern(c.pattern, strings.TrimPrefix(path, c.path+"/"))
 		if err != nil {
-			c.log.Error("%s", err)
+			c.logger.Error("%s", err)
 			return nil
 		}
 
@@ -105,24 +104,24 @@ func (c *rrdConnector) Refresh(output chan<- *catalog.Record) error {
 		}
 
 		// Extract information from .rrd file
-		rinfo, err := rrd.Info(path)
+		info, err := rrd.Info(path)
 		if err != nil {
-			c.log.Error("failed to extract info: %s", err)
+			c.logger.Error("failed to extract info: %s", err)
 			return nil
 		}
 
 		// Extract consolidation functions list
 		cfs := set.New()
-		if cf, ok := rinfo["rra.cf"].([]interface{}); ok {
+		if cf, ok := info["rra.cf"].([]interface{}); ok {
 			for _, entry := range cf {
-				if name, ok := entry.(string); ok {
-					cfs.Add(name)
+				if v, ok := entry.(string); ok {
+					cfs.Add(v)
 				}
 			}
 		}
 
 		// Parse RRD information for indexes
-		indexes, ok := rinfo["ds.index"].(map[string]interface{})
+		indexes, ok := info["ds.index"].(map[string]interface{})
 		if !ok {
 			return nil
 		}
@@ -132,10 +131,10 @@ func (c *rrdConnector) Refresh(output chan<- *catalog.Record) error {
 				metric = metric + "/" + ds + "/" + strings.ToLower(cf)
 
 				c.metrics[source][metric] = &rrdMetric{
-					ds:   ds,
-					path: path,
-					step: time.Duration(rinfo["step"].(uint)) * time.Second,
-					cf:   cf,
+					DS:   ds,
+					Path: path,
+					Step: time.Duration(info["step"].(uint)) * time.Second,
+					CF:   cf,
 				}
 
 				output <- &catalog.Record{
@@ -176,15 +175,15 @@ func (c *rrdConnector) Points(q *series.Query) ([]series.Series, error) {
 		}
 
 		name := fmt.Sprintf("series%d", i)
-		path := strings.Replace(c.metrics[s.Source][s.Metric].path, ":", "\\:", -1)
+		path := strings.Replace(c.metrics[s.Source][s.Metric].Path, ":", "\\:", -1)
 
-		xport.Def(name+"_def", path, c.metrics[s.Source][s.Metric].ds, c.metrics[s.Source][s.Metric].cf)
+		xport.Def(name+"_def", path, c.metrics[s.Source][s.Metric].DS, c.metrics[s.Source][s.Metric].CF)
 		xport.CDef(name+"_cdef", name+"_def")
 		xport.XportDef(name+"_cdef", name)
 
 		// Only keep the highest step
-		if c.metrics[s.Source][s.Metric].step > step {
-			step = c.metrics[s.Source][s.Metric].step
+		if c.metrics[s.Source][s.Metric].Step > step {
+			step = c.metrics[s.Source][s.Metric].Step
 		}
 	}
 
@@ -221,25 +220,25 @@ func (c *rrdConnector) Points(q *series.Query) ([]series.Series, error) {
 
 func (c *rrdConnector) walk(root, originalRoot string, walkFunc filepath.WalkFunc) error {
 	if _, err := os.Stat(root); err != nil {
-		c.log.Error("%s", err)
+		c.logger.Error("%s", err)
 		return nil
 	}
 
 	// Walk root directory
-	return filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+	return filepath.Walk(root, func(path string, fi os.FileInfo, err error) error {
 		var realPath string
 
 		if err != nil {
-			c.log.Error("%s", err)
+			c.logger.Error("%s", err)
 			return nil
 		}
 
-		mode := info.Mode() & os.ModeType
+		mode := fi.Mode() & os.ModeType
 		if mode == os.ModeSymlink {
 			// Follow symbolic link if evaluation succeeds
 			realPath, err = filepath.EvalSymlinks(path)
 			if err != nil {
-				c.log.Error("%s", err)
+				c.logger.Error("%s", err)
 				return nil
 			}
 
@@ -250,6 +249,13 @@ func (c *rrdConnector) walk(root, originalRoot string, walkFunc filepath.WalkFun
 			path = originalRoot + strings.TrimPrefix(path, root)
 		}
 
-		return walkFunc(path, info, err)
+		return walkFunc(path, fi, err)
 	})
+}
+
+type rrdMetric struct {
+	DS   string
+	Path string
+	Step time.Duration
+	CF   string
 }

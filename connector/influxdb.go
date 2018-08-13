@@ -13,6 +13,7 @@ import (
 
 	"facette.io/facette/catalog"
 	"facette.io/facette/series"
+	"facette.io/facette/version"
 	"facette.io/logger"
 	"facette.io/maputil"
 	influxdb "github.com/influxdata/influxdb/client/v2"
@@ -20,40 +21,16 @@ import (
 	"github.com/influxdata/influxql"
 )
 
-type influxDBMap struct {
-	source []string
-	metric []string
-	glue   string
-	maps   map[string]map[string]influxDBMapEntry
-}
-
-type influxDBMapEntry struct {
-	column string
-	terms  map[string]string
-}
-
-// influxdbConnector implements the connector handler for an InfluxDB instance.
-type influxdbConnector struct {
-	name          string
-	url           string
-	timeout       int
-	allowInsecure bool
-	username      string
-	password      string
-	database      string
-	pattern       *regexp.Regexp
-	mapping       influxDBMap
-	client        influxdb.Client
-}
-
 func init() {
-	connectors["influxdb"] = func(name string, settings *maputil.Map, log *logger.Logger) (Connector, error) {
+	connectors["influxdb"] = func(name string, settings *maputil.Map, logger *logger.Logger) (Connector, error) {
 		var (
-			glue string
-			err  error
+			pattern string
+			mapping maputil.Map
+			glue    string
+			err     error
 		)
 
-		c := &influxdbConnector{
+		c := &influxDBConnector{
 			name: name,
 			mapping: influxDBMap{
 				glue: ".",
@@ -62,63 +39,70 @@ func init() {
 		}
 
 		// Load provider configuration
-		if c.url, err = settings.GetString("url", ""); err != nil {
+		c.url, err = settings.GetString("url", "")
+		if err != nil {
 			return nil, err
 		} else if c.url == "" {
 			return nil, ErrMissingConnectorSetting("url")
 		}
-		normalizeURL(&c.url)
+		c.url = normalizeURL(c.url)
 
-		if c.timeout, err = settings.GetInt("timeout", connectorDefaultTimeout); err != nil {
+		c.timeout, err = settings.GetInt("timeout", defaultTimeout)
+		if err != nil {
 			return nil, err
 		}
 
-		if c.allowInsecure, err = settings.GetBool("allow_insecure_tls", false); err != nil {
+		c.allowInsecure, err = settings.GetBool("allow_insecure_tls", false)
+		if err != nil {
 			return nil, err
 		}
 
-		if c.username, err = settings.GetString("username", ""); err != nil {
+		c.username, err = settings.GetString("username", "")
+		if err != nil {
 			return nil, err
 		}
 
-		if c.password, err = settings.GetString("password", ""); err != nil {
+		c.password, err = settings.GetString("password", "")
+		if err != nil {
 			return nil, err
 		}
 
-		if c.database, err = settings.GetString("database", ""); err != nil {
+		c.database, err = settings.GetString("database", "")
+		if err != nil {
 			return nil, err
 		} else if c.database == "" {
 			return nil, ErrMissingConnectorSetting("database")
 		}
 
-		if v, _ := settings.GetString("pattern", ""); v != "" && settings.Has("mapping") {
-			return nil, fmt.Errorf("connector settings allows either %q or %q, not both", "pattern", "mapping")
-		} else if !settings.Has("pattern") && !settings.Has("mapping") {
-			return nil, fmt.Errorf("connector settings %q or %q must be specified", "pattern", "mapping")
-		}
-
-		pattern, err := settings.GetString("pattern", "")
+		pattern, err = settings.GetString("pattern", "")
 		if err != nil {
 			return nil, err
+		}
+
+		mapping, err = settings.GetMap("mapping", nil)
+		if err != nil {
+			return nil, err
+		}
+
+		if pattern != "" && mapping != nil {
+			return nil, fmt.Errorf("connector settings allows either \"pattern\n or \"mapping\", not both")
+		} else if pattern == "" && mapping == nil {
+			return nil, fmt.Errorf("missing \"pattern\" or \"mapping\" connector settings")
 		}
 
 		if pattern != "" {
-			if c.pattern, err = compilePattern(pattern); err != nil {
+			c.pattern, err = compilePattern(pattern)
+			if err != nil {
 				return nil, fmt.Errorf("unable to compile regexp pattern: %s", err)
 			}
-		}
-
-		mapping, err := settings.GetMap("mapping", nil)
-		if err != nil {
-			return nil, err
-		}
-
-		if mapping != nil {
-			if c.mapping.source, err = mapping.GetStringSlice("source", nil); err != nil {
+		} else if mapping != nil {
+			c.mapping.source, err = mapping.GetStringSlice("source", nil)
+			if err != nil {
 				return nil, err
 			}
 
-			if c.mapping.metric, err = mapping.GetStringSlice("metric", nil); err != nil {
+			c.mapping.metric, err = mapping.GetStringSlice("metric", nil)
+			if err != nil {
 				return nil, err
 			}
 
@@ -131,15 +115,16 @@ func init() {
 		}
 
 		// Check remote instance URL
-		if _, err = url.Parse(c.url); err != nil {
+		_, err = url.Parse(c.url)
+		if err != nil {
 			return nil, fmt.Errorf("unable to parse URL: %s", err)
 		}
 
-		// Create new client instance
 		c.client, err = influxdb.NewHTTPClient(influxdb.HTTPConfig{
 			Addr:               c.url,
 			Username:           c.username,
 			Password:           c.password,
+			UserAgent:          "facette/" + version.Version,
 			Timeout:            time.Duration(c.timeout) * time.Second,
 			InsecureSkipVerify: c.allowInsecure,
 		})
@@ -151,13 +136,114 @@ func init() {
 	}
 }
 
-// Name returns the name of the current connector.
-func (c *influxdbConnector) Name() string {
+type influxDBConnector struct {
+	name          string
+	url           string
+	timeout       int
+	allowInsecure bool
+	username      string
+	password      string
+	database      string
+	pattern       *regexp.Regexp
+	mapping       influxDBMap
+	client        influxdb.Client
+}
+
+func (c *influxDBConnector) Name() string {
 	return c.name
 }
 
-// Refresh triggers the connector data refresh.
-func (c *influxdbConnector) Refresh(output chan<- *catalog.Record) error {
+func (c *influxDBConnector) Points(q *series.Query) ([]series.Series, error) {
+	var queries []string
+
+	l := len(q.Series)
+	if l == 0 {
+		return nil, fmt.Errorf("requested series list is empty")
+	}
+
+	results := make([]series.Series, l)
+
+	// Prepare query
+	for _, s := range q.Series {
+		var (
+			series string
+			parts  []string
+		)
+
+		_, ok := c.mapping.maps[s.Source]
+		if !ok {
+			return nil, fmt.Errorf("unknown series source %q", s.Source)
+		} else if _, ok := c.mapping.maps[s.Source][s.Metric]; !ok {
+			return nil, fmt.Errorf("unknown series metric %q for source %q", s.Source, s.Metric)
+		}
+
+		mapping := c.mapping.maps[s.Source][s.Metric]
+
+		for term, value := range mapping.terms {
+			if term == "" {
+				series = value
+			} else {
+				parts = append(parts, fmt.Sprintf("%s = %s", influxql.QuoteIdent(term), influxql.QuoteString(value)))
+			}
+		}
+
+		parts = append(parts, fmt.Sprintf(
+			"time > %ds and time < %ds order by asc",
+			q.StartTime.Unix(),
+			q.EndTime.Unix(),
+		))
+
+		queries = append(queries, fmt.Sprintf(
+			"select %s, time from %s where %s",
+			mapping.column, strconv.Quote(series),
+			strings.Join(parts, " and "),
+		))
+	}
+
+	query := influxdb.Query{
+		Command:  strings.Join(queries, "; "),
+		Database: c.database,
+	}
+
+	// Execute query
+	resp, err := c.client.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch points: %s", err)
+	} else if resp.Error() != nil {
+		return nil, fmt.Errorf("failed to fetch points: %s", resp.Error())
+	}
+
+	// Parse results received from back-end
+	for i, r := range resp.Results {
+		if r.Err != "" {
+			continue
+		}
+
+		results[i] = series.Series{}
+		for _, s := range r.Series {
+			for _, v := range s.Values {
+				time, err := time.Parse(time.RFC3339Nano, v[0].(string))
+				if err != nil {
+					return nil, fmt.Errorf("failed to parse time: %s", v[0])
+				}
+
+				value, err := v[1].(json.Number).Float64()
+				if err != nil {
+					return nil, fmt.Errorf("failed to parse value: %s", v[1])
+				}
+
+				results[i].Points = append(results[i].Points, series.Point{
+					Time:  time,
+					Value: series.Value(value),
+				})
+			}
+		}
+	}
+
+	return results, nil
+}
+
+func (c *influxDBConnector) Refresh(output chan<- *catalog.Record) error {
 	// Query back-end for sample rows (used to detect numerical values)
 	columnsMap := make(map[string][]string)
 
@@ -166,20 +252,20 @@ func (c *influxdbConnector) Refresh(output chan<- *catalog.Record) error {
 		Database: c.database,
 	}
 
-	response, err := c.client.Query(q)
+	resp, err := c.client.Query(q)
 	if err != nil {
 		return fmt.Errorf("failed to fetch sample rows: %s", err)
-	} else if response.Error() != nil {
-		return fmt.Errorf("failed to fetch sample rows: %s", response.Error())
+	} else if resp.Error() != nil {
+		return fmt.Errorf("failed to fetch sample rows: %s", resp.Error())
 	}
 
-	if len(response.Results) != 1 {
-		return fmt.Errorf("failed to retrieve sample rows: expected 1 result but got %d", len(response.Results))
-	} else if response.Results[0].Err != "" {
-		return fmt.Errorf("failed to retrieve sample rows: %s", response.Results[0].Err)
+	if len(resp.Results) != 1 {
+		return fmt.Errorf("failed to retrieve sample rows: expected 1 result but got %d", len(resp.Results))
+	} else if resp.Results[0].Err != "" {
+		return fmt.Errorf("failed to retrieve sample rows: %s", resp.Results[0].Err)
 	}
 
-	for _, s := range response.Results[0].Series {
+	for _, s := range resp.Results[0].Series {
 		if len(s.Values) == 0 {
 			continue
 		}
@@ -228,21 +314,21 @@ func (c *influxdbConnector) Refresh(output chan<- *catalog.Record) error {
 			Database: c.database,
 		}
 
-		response, err = c.client.Query(q)
+		resp, err = c.client.Query(q)
 		if err != nil {
 			return fmt.Errorf("failed to fetch series: %s", err)
-		} else if response.Error() != nil {
-			return fmt.Errorf("failed to fetch series: %s", response.Error())
+		} else if resp.Error() != nil {
+			return fmt.Errorf("failed to fetch series: %s", resp.Error())
 		}
 
-		if len(response.Results) != 1 {
-			return fmt.Errorf("failed to retrieve series: expected 1 result but got %d", len(response.Results))
-		} else if response.Results[0].Err != "" {
-			return fmt.Errorf("failed to retrieve series: %s", response.Results[0].Err)
+		if len(resp.Results) != 1 {
+			return fmt.Errorf("failed to retrieve series: expected 1 result but got %d", len(resp.Results))
+		} else if resp.Results[0].Err != "" {
+			return fmt.Errorf("failed to retrieve series: %s", resp.Results[0].Err)
 		}
 
 		// Parse results for sources and metrics
-		for _, s := range response.Results[0].Series {
+		for _, s := range resp.Results[0].Series {
 			for i := range s.Values {
 				seriesColumns, err := mapSeriesColumns(s.Values[i][0].(string))
 				if err != nil {
@@ -302,96 +388,6 @@ func (c *influxdbConnector) Refresh(output chan<- *catalog.Record) error {
 	return nil
 }
 
-// Points retrieves the time series data according to the query parameters and a time interval.
-func (c *influxdbConnector) Points(q *series.Query) ([]series.Series, error) {
-	var queries []string
-
-	l := len(q.Series)
-	if l == 0 {
-		return nil, fmt.Errorf("influxdb[%s]: requested series list is empty", c.name)
-	}
-
-	results := make([]series.Series, l)
-
-	// Prepare query
-	for _, s := range q.Series {
-		var (
-			series string
-			parts  []string
-		)
-
-		if _, ok := c.mapping.maps[s.Source]; !ok {
-			return nil, fmt.Errorf("unknown series source `%s'", s.Source)
-		} else if _, ok := c.mapping.maps[s.Source][s.Metric]; !ok {
-			return nil, fmt.Errorf("unknown series metric `%s' for source `%s'", s.Source, s.Metric)
-		}
-
-		mapping := c.mapping.maps[s.Source][s.Metric]
-
-		for term, value := range mapping.terms {
-			if term == "" {
-				series = value
-			} else {
-				parts = append(parts, fmt.Sprintf("%s = %s", influxql.QuoteIdent(term), influxql.QuoteString(value)))
-			}
-		}
-
-		parts = append(parts, fmt.Sprintf(
-			"time > %ds and time < %ds order by asc",
-			q.StartTime.Unix(),
-			q.EndTime.Unix(),
-		))
-
-		queries = append(queries, fmt.Sprintf(
-			"select %s, time from %s where %s",
-			mapping.column, strconv.Quote(series),
-			strings.Join(parts, " and "),
-		))
-	}
-
-	query := influxdb.Query{
-		Command:  strings.Join(queries, "; "),
-		Database: c.database,
-	}
-
-	// Execute query
-	response, err := c.client.Query(query)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch points: %s", err)
-	} else if response.Error() != nil {
-		return nil, fmt.Errorf("failed to fetch points: %s", response.Error())
-	}
-
-	// Parse results received from back-end
-	for i, r := range response.Results {
-		if r.Err != "" {
-			continue
-		}
-
-		results[i] = series.Series{}
-		for _, s := range r.Series {
-			for _, v := range s.Values {
-				time, err := time.Parse(time.RFC3339Nano, v[0].(string))
-				if err != nil {
-					return nil, fmt.Errorf("failed to parse time: %s", v[0])
-				}
-
-				value, err := v[1].(json.Number).Float64()
-				if err != nil {
-					return nil, fmt.Errorf("failed to parse value: %s", v[1])
-				}
-
-				results[i].Points = append(results[i].Points, series.Point{
-					Time:  time,
-					Value: series.Value(value),
-				})
-			}
-		}
-	}
-
-	return results, nil
-}
-
 func mapKey(seriesColumns map[string]string, item string) (string, string) {
 	if item == "name" {
 		return "", seriesColumns["name"]
@@ -416,4 +412,16 @@ func mapSeriesColumns(series string) (map[string]string, error) {
 	columns["name"] = series[:idx]
 
 	return columns, nil
+}
+
+type influxDBMap struct {
+	source []string
+	metric []string
+	glue   string
+	maps   map[string]map[string]influxDBMapEntry
+}
+
+type influxDBMapEntry struct {
+	column string
+	terms  map[string]string
 }
