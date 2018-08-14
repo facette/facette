@@ -1,10 +1,17 @@
 cloud.google.com/go v0.25.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
+cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 facette.io/httputil v0.0.0-20180722062017-03702f5439d5 h1:/GRUNgjnMg8cpAWAOvkZTDbWk5wY3kkpOJ4CQ0INlnw=
 facette.io/httputil v0.0.0-20180722062017-03702f5439d5/go.mod h1:nJojrTx2I7ZNj2t9p7RMsuiVqVB8Xm2HV12pj4hOtKQ=
+facette.io/httputil v0.0.0-20180814055451-1ca62de25998 h1:2rzKsFgKb1+yiu7q3TJdDV0QwTuTEv/vmCxYtGvfTu4=
+facette.io/httputil v0.0.0-20180814055451-1ca62de25998/go.mod h1:nJojrTx2I7ZNj2t9p7RMsuiVqVB8Xm2HV12pj4hOtKQ=
 facette.io/jsonutil v0.0.0-20180805145150-4f1093d886f5 h1:6J1INw/c/nPSBgj0+2g+hUPFUiScEv4HwbnbfwvqRXI=
 facette.io/jsonutil v0.0.0-20180805145150-4f1093d886f5/go.mod h1:sKiTJOIVBhuzXiZrSkmWuZzFsmaEDJM4g+kMjDKWQLw=
+facette.io/jsonutil v0.0.0-20180814055939-cd7adf9cd498 h1:FEiUqgv2qT/oQcH8QyNZOT+J7rjckbXJHuLVZr2nwyI=
+facette.io/jsonutil v0.0.0-20180814055939-cd7adf9cd498/go.mod h1:sKiTJOIVBhuzXiZrSkmWuZzFsmaEDJM4g+kMjDKWQLw=
 facette.io/logger v0.0.0-20180722062109-da270acfbf33 h1:gzPJoiP3sgDDFRPlCFJAW+VN/zsu7xWZX+FEnhfc0YE=
 facette.io/logger v0.0.0-20180722062109-da270acfbf33/go.mod h1:/5TpAyPW658xSxgFLkta3oSS+X6HkulEMGslM2er3xI=
+facette.io/logger v0.0.0-20180814050940-25259d27b771 h1:3rEv/mI3y8J00JAPtyrUZGubTlGelTAacA1takEzoPk=
+facette.io/logger v0.0.0-20180814050940-25259d27b771/go.mod h1:/5TpAyPW658xSxgFLkta3oSS+X6HkulEMGslM2er3xI=
 facette.io/maputil v0.0.0-20180722062138-ae1af0135367 h1:vnf3Ew+eqXjVHkx0k5wHDCFeeOrpxcHRv079RhBaIvY=
 facette.io/maputil v0.0.0-20180722062138-ae1af0135367/go.mod h1:CNeWWvTH+TA5XXWZ/96HLSUmG3nLSJ6LLrtOCBb0bi8=
 facette.io/natsort v0.0.0-20180722062153-6f9d4f1908ea h1:4eJF2KxQPi/NDCJExaHRZ4cwoTjk7uQCek2DaT1UAoc=
@@ -16,6 +23,8 @@ facette.io/sqlstorage v0.0.0-20180722062226-9a160f84b339/go.mod h1:Z8hv7tjWu4yVs
 github.com/cosiner/argv v0.0.0-20170225145430-13bacc38a0a5/go.mod h1:p/NrK5tF6ICIly4qwEDsf6VDirFiWWz0FenfYBwJaKQ=
 github.com/cosiner/flag v0.0.0-20170716090135-e5e06a5be4a3 h1:A2Fm0RTuDy/2oc0sywGhEq+7FR/TQLu9H1sNn1LW2IA=
 github.com/cosiner/flag v0.0.0-20170716090135-e5e06a5be4a3/go.mod h1:PgTiVSHKuMtff0Fmwn67NYMCIZnQ6REkWYyYs/9bwb0=
+github.com/cosiner/flag v0.1.1 h1:OOjnkS23PIhPBJmdWZXjIJEm7QSEEtoaWB/6/uiiwxM=
+github.com/cosiner/flag v0.1.1/go.mod h1:PgTiVSHKuMtff0Fmwn67NYMCIZnQ6REkWYyYs/9bwb0=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/denisenkom/go-mssqldb v0.0.0-20180707235734-242fa5aa1b45/go.mod h1:xN/JuLBIz4bjkxNmByTiV1IbhfnYb6oo99phBn4Eqhc=
@@ -63,6 +72,9 @@ github.com/vbatoufflet/httproute v0.0.0-20180726070139-ea5eb863770f/go.mod h1:s0
 github.com/ziutek/rrd v0.0.0-20170125160940-86f4f09e7abb h1:PyyvUBJ5QfaEKL/IRe0kzckEWMmufuCWEokPOx9RLHo=
 github.com/ziutek/rrd v0.0.0-20170125160940-86f4f09e7abb/go.mod h1:kncaQbFuKfmLNOnFKb9VQJ6qWV61iHxIxUQZBZvbEfA=
 golang.org/x/crypto v0.0.0-20180802221240-56440b844dfe/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
+golang.org/x/crypto v0.0.0-20180808211826-de0752318171/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
+golang.org/x/sys v0.0.0-20180810173357-98c5dad5d1a0/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
+google.golang.org/appengine v1.1.0/go.mod h1:EbEs0AVv82hx2wNQdGPgUI5lhzA/G0D9YwlJXL52JkM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v2 v2.2.1 h1:mUhvW9EsL+naU5Q3cakzfE91YhliOondGd6ZrsDBHQE=

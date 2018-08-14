@@ -22,6 +22,9 @@ GOLINT ?= golint
 GOOS ?= $(shell $(GO) env GOOS)
 GOARCH ?= $(shell $(GO) env GOARCH)
 
+GO111MODULE=on
+export GO111MODULE
+
 YARN ?= yarn
 YARN_ARGS ?= --emoji false --no-color --cwd ui
 

@@ -1,0 +1,17 @@
+---
+language: go
+
+go:
+- "1.10"
+
+install:
+- go get -u github.com/stretchr/testify/assert
+
+script:
+- go test -cover -v
+
+notifications:
+  email:
+  - vincent@batoufflet.info
+
+# vim: ts=2 sw=2 et
