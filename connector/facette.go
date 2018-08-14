@@ -25,7 +25,7 @@ const (
 )
 
 func init() {
-	connectors["facette"] = func(name string, settings *maputil.Map, log *logger.Logger) (Connector, error) {
+	connectors["facette"] = func(name string, settings *maputil.Map, logger *logger.Logger) (Connector, error) {
 		var err error
 
 		c := &facetteConnector{

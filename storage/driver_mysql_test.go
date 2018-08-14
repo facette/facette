@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"testing"
 
+	"facette.io/logger"
 	"facette.io/maputil"
 	"github.com/pkg/errors"
 )
@@ -49,7 +50,8 @@ func init() {
 		config.Set("password", v)
 	}
 
-	mysqlStorage, err = New(&config, log)
+	logger, _ := logger.NewLogger()
+	mysqlStorage, err = New(&config, logger)
 	if err != nil {
 		panic(errors.Wrap(err, "failed to initialize MySQL storage"))
 	}

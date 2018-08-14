@@ -8,6 +8,7 @@ import (
 	"os"
 	"testing"
 
+	"facette.io/logger"
 	"facette.io/maputil"
 	"github.com/pkg/errors"
 )
@@ -42,7 +43,8 @@ func init() {
 		config.Set("path", sqliteTempFile)
 	}
 
-	sqliteStorage, err = New(&config, log)
+	logger, _ := logger.NewLogger()
+	sqliteStorage, err = New(&config, logger)
 	if err != nil {
 		panic(errors.Wrap(err, "failed to initialize SQLite storage"))
 	}

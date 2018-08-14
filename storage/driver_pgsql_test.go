@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"testing"
 
+	"facette.io/logger"
 	"facette.io/maputil"
 	"github.com/pkg/errors"
 )
@@ -51,7 +52,8 @@ func init() {
 		config.Set("password", v)
 	}
 
-	pgsqlStorage, err = New(&config, log)
+	logger, _ := logger.NewLogger()
+	pgsqlStorage, err = New(&config, logger)
 	if err != nil {
 		panic(errors.Wrap(err, "failed to initialize PostgreSQL storage"))
 	}

@@ -15,14 +15,14 @@ var (
 // Storage represents a storage instance.
 type Storage struct {
 	config  *maputil.Map
-	log     *logger.Logger
+	logger  *logger.Logger
 	storage *sqlstorage.Storage
 }
 
 // New creates a new storage instance.
-func New(config *maputil.Map, log *logger.Logger) (*Storage, error) {
+func New(config *maputil.Map, logger *logger.Logger) (*Storage, error) {
 	// Initialize storage
-	storage, err := sqlstorage.NewStorage("facette", config, log)
+	storage, err := sqlstorage.NewStorage("facette", config, logger)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func New(config *maputil.Map, log *logger.Logger) (*Storage, error) {
 
 	return &Storage{
 		config:  config,
-		log:     log,
+		logger:  logger,
 		storage: storage,
 	}, nil
 }
