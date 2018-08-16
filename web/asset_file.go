@@ -20,14 +20,14 @@ func (h *Handler) handleAsset(rw http.ResponseWriter, r *http.Request) {
 	)
 
 	// Stop handling assets if frontend is disabled
-	if !h.config.UI.Enabled {
+	if !h.config.HTTP.EnableUI {
 		rw.WriteHeader(http.StatusForbidden)
 		return
 	}
 
 	// Strip assets prefix and handle default path
-	if strings.HasPrefix(r.URL.Path, h.config.RootPath+"/assets") {
-		filePath = strings.TrimPrefix(r.URL.Path, h.config.RootPath+"/assets")
+	if strings.HasPrefix(r.URL.Path, h.config.HTTP.BasePath+"/assets") {
+		filePath = strings.TrimPrefix(r.URL.Path, h.config.HTTP.BasePath+"/assets")
 		isAsset = true
 	}
 

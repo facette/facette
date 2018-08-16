@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-MAINTAINER Development Team <dev@facette.io>
+LABEL maintainer="Development Team <dev@facette.io>"
 
 COPY . /tmp/build
 
@@ -9,7 +9,6 @@ RUN apk --no-cache add --virtual .build-deps git go make musl-dev nodejs rrdtool
     install -D /tmp/build/docs/examples/facette.yaml /etc/facette/facette.yaml && \
     sed -i -r \
         -e 's/listen: localhost:12003/listen: :12003/' \
-        -e 's/path: data.db/path: \/var\/lib\/facette\/data.db/' \
         /etc/facette/facette.yaml && \
     rm -rf /tmp/build && \
     apk del .build-deps

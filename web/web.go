@@ -56,7 +56,8 @@ func (h *Handler) Run() error {
 
 	// Initialize HTTP router
 	r := httproute.NewRouter()
-	if h.config.LogLevel == "debug" {
+	if h.config.Logger.File != nil && h.config.Logger.File.Level == "debug" ||
+		h.config.Logger.Syslog != nil && h.config.Logger.Syslog.Level == "debug" {
 		r.Use(h.handleLog)
 	}
 
@@ -66,7 +67,7 @@ func (h *Handler) Run() error {
 		Get(h.handleAsset)
 
 	proto := "tcp"
-	addr := h.config.Listen
+	addr := h.config.HTTP.Listen
 
 	if strings.HasPrefix(addr, "unix:") {
 		proto = "unix"
@@ -122,7 +123,7 @@ func (h *Handler) Shutdown() {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(h.ctx, time.Duration(h.config.GracefulTimeout)*time.Second)
+	ctx, cancel := context.WithTimeout(h.ctx, time.Duration(h.config.HTTP.GracefulTimeout)*time.Second)
 	defer cancel()
 
 	h.server.Shutdown(ctx)

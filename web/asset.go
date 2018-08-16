@@ -20,7 +20,7 @@ func (h *Handler) serveDefault(rw http.ResponseWriter, text string) {
 
 	buf := bytes.NewBuffer(nil)
 
-	data := struct{ RootPath string }{h.config.RootPath + "/"}
+	data := struct{ BasePath string }{h.config.HTTP.BasePath + "/"}
 
 	err = tmpl.Execute(buf, data)
 	if err != nil {

@@ -1,25 +1,59 @@
 ---
-listen: localhost:12003
-#listen: unix:/var/run/facette.sock
-#socket_mode: 644
-#socket_user: facette
-#socket_group: facette
+logger:
+  ### File
+  file:
+    # Logging level (error, warning, notice, info or debug)
+    level: info
 
-graceful_timeout: 30
+    # Log file path (uses stdout if left empty or set to "-")
+    path:
 
-#root_path: /facette
+  ### Syslog
+  #syslog:
+  #  # Logging level (error, warning, notice, info or debug)
+  #  level: info
 
-log_path:
-log_level: info
+  #  # Syslog facility name
+  #  facility: daemon
+
+  #  # Syslog tag
+  #  tag: facette
+
+  #  # Syslog address (defaults to local Syslog if left empty)
+  #  address:
+
+  #  # Network transport for Syslog instance (used if address is specified)
+  #  transport: udp
+
+http:
+  listen: localhost:12003
+  # or
+  #listen: unix:/var/run/facette.sock?mode=0644&user=facette&group=facette
+
+  # Timeout before forcefully shutdown remaining connections (in seconds)
+  #graceful_timeout: 30
+
+  # Root path behind which the service is located
+  #base_path: /
+
+  # Allow/Prevent modifications through API calls
+  read_only: false
+
+  # Enable and serve UI assets
+  enable_ui: true
+
+  # Expose/Hide version and build information via/from the API
+  expose_version: true
 
 storage:
+  # Print SQL storage debugging messages
   debug: false
 
-  ### SQLite
+  ### SQLite storage engine parameters
   driver: sqlite
   path: /var/lib/facette/data.db
 
-  ### PostgreSQL
+  ### PostgreSQL storage engine parameters
   #driver: pgsql
   #host: localhost
   #port: 5432
@@ -27,7 +61,7 @@ storage:
   #user: facette
   #password: ********
 
-  ### MySQL
+  ### MySQL storage engine parameters
   #driver: mysql
   #host: localhost
   #port: 3306
@@ -35,13 +69,8 @@ storage:
   #user: facette
   #password: ********
 
-ui:
-  enabled: true
-
-default_time_range: -1h
-
-hide_build_details: false
-
-read_only: false
+# Defaults
+defaults:
+  time_range: -1h
 
 # vim: ts=2 sw=2 et

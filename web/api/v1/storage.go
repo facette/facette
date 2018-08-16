@@ -48,7 +48,7 @@ var storageTypes = []string{
 // responses:
 //   201:
 func (a *API) storageCreate(rw http.ResponseWriter, r *http.Request) {
-	if a.config.ReadOnly {
+	if a.config.HTTP.ReadOnly {
 		httputil.WriteJSON(rw, newMessage(errReadOnly), http.StatusForbidden)
 		return
 	}
@@ -327,7 +327,7 @@ func (a *API) storageGet(rw http.ResponseWriter, r *http.Request) {
 // responses:
 //   204:
 func (a *API) storageUpdate(rw http.ResponseWriter, r *http.Request) {
-	if a.config.ReadOnly {
+	if a.config.HTTP.ReadOnly {
 		httputil.WriteJSON(rw, newMessage(errReadOnly), http.StatusForbidden)
 		return
 	}
@@ -433,7 +433,7 @@ func (a *API) storageUpdate(rw http.ResponseWriter, r *http.Request) {
 // responses:
 //   204:
 func (a *API) storageDelete(rw http.ResponseWriter, r *http.Request) {
-	if a.config.ReadOnly {
+	if a.config.HTTP.ReadOnly {
 		httputil.WriteJSON(rw, newMessage(errReadOnly), http.StatusForbidden)
 		return
 	}
@@ -501,7 +501,7 @@ func (a *API) storageDelete(rw http.ResponseWriter, r *http.Request) {
 func (a *API) storageDeleteAll(rw http.ResponseWriter, r *http.Request) {
 	var rv reflect.Value
 
-	if a.config.ReadOnly {
+	if a.config.HTTP.ReadOnly {
 		httputil.WriteJSON(rw, newMessage(errReadOnly), http.StatusForbidden)
 		return
 	}

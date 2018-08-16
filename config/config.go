@@ -10,60 +10,21 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const (
-	defaultListen           = "localhost:12003"
-	defaultGracefulTimeout  = 30
-	defaultRootPath         = "/"
-	defaultLogPath          = "-"
-	defaultLogLevel         = "info"
-	defaultSyslogFacility   = "daemon"
-	defaultSyslogTag        = "facette"
-	defaultStorageDriver    = "sqlite"
-	defaultUIEnabled        = true
-	defaultTimeRange        = "-1h"
-	defaultHideBuildDetails = false
-)
-
 // Config represents a configuration instance.
 type Config struct {
-	Listen           string       `yaml:"listen"`
-	SocketMode       string       `yaml:"socket_mode"`
-	SocketUser       string       `yaml:"socket_user"`
-	SocketGroup      string       `yaml:"socket_group"`
-	GracefulTimeout  int          `yaml:"graceful_timeout"`
-	RootPath         string       `yaml:"root_path"`
-	LogPath          string       `yaml:"log_path"`
-	LogLevel         string       `yaml:"log_level"`
-	SyslogLevel      string       `yaml:"syslog_level"`
-	SyslogFacility   string       `yaml:"syslog_facility"`
-	SyslogTag        string       `yaml:"syslog_tag"`
-	SyslogAddress    string       `yaml:"syslog_address"`
-	SyslogTransport  string       `yaml:"syslog_transport"`
-	Storage          *maputil.Map `yaml:"storage"`
-	UI               *UIConfig    `yaml:"ui"`
-	DefaultTimeRange string       `yaml:"default_time_range"`
-	HideBuildDetails bool         `yaml:"hide_build_details"`
-	ReadOnly         bool         `yaml:"read_only"`
+	Logger   *LoggerConfig   `yaml:"logger"`
+	HTTP     *HTTPConfig     `yaml:"http"`
+	Storage  *maputil.Map    `yaml:"storage"`
+	Defaults *DefaultsConfig `yaml:"defaults"`
 }
 
 // New creates a new configuration instance, initializing its content based on a provided configuration file.
 func New(path string) (*Config, error) {
 	config := &Config{
-		Listen:          defaultListen,
-		GracefulTimeout: defaultGracefulTimeout,
-		RootPath:        defaultRootPath,
-		LogPath:         defaultLogPath,
-		LogLevel:        defaultLogLevel,
-		SyslogFacility:  defaultSyslogFacility,
-		SyslogTag:       defaultSyslogTag,
-		UI: &UIConfig{
-			Enabled: defaultUIEnabled,
-		},
-		Storage: &maputil.Map{
-			"driver": defaultStorageDriver,
-		},
-		DefaultTimeRange: defaultTimeRange,
-		HideBuildDetails: defaultHideBuildDetails,
+		Logger:   newLoggerConfig(),
+		HTTP:     newHTTPConfig(),
+		Storage:  newStorageConfig(),
+		Defaults: newDefaultsConfig(),
 	}
 
 	if path != "" {
@@ -72,16 +33,22 @@ func New(path string) (*Config, error) {
 			return nil, err
 		}
 
-		if err := yaml.Unmarshal(data, config); err != nil {
+		err = yaml.Unmarshal(data, config)
+		if err != nil {
 			return nil, err
 		}
 	}
 
-	config.RootPath = strings.TrimSuffix(config.RootPath, "/")
+	err := normalizeHTTPConfig(config.HTTP)
+	if err != nil {
+		return nil, err
+	}
 
-	// Check for settings validity
-	if !timerange.IsValid(config.DefaultTimeRange) {
-		return nil, fmt.Errorf("invalid default time range %q", config.DefaultTimeRange)
+	// Normalize settings and check for their validity
+	config.HTTP.BasePath = strings.TrimSuffix(config.HTTP.BasePath, "/")
+
+	if !timerange.IsValid(config.Defaults.TimeRange) {
+		return nil, fmt.Errorf("invalid default time range %q", config.Defaults.TimeRange)
 	}
 
 	return config, nil

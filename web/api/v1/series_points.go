@@ -159,7 +159,7 @@ func (a *API) seriesPoints(rw http.ResponseWriter, r *http.Request) {
 			if value, ok := req.Graph.Options["range"].(string); ok {
 				req.Range = value
 			} else {
-				req.Range = a.config.DefaultTimeRange
+				req.Range = a.config.Defaults.TimeRange
 			}
 		}
 

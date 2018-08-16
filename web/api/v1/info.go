@@ -69,6 +69,6 @@ func (a *API) infoGet(rw http.ResponseWriter, r *http.Request) {
 		BuildDate:  jsonutil.NullString(version.BuildDate),
 		Drivers:    sqlstorage.Drivers(),
 		Connectors: connector.Connectors(),
-		ReadOnly:   a.config.ReadOnly,
+		ReadOnly:   a.config.HTTP.ReadOnly,
 	}, http.StatusOK)
 }

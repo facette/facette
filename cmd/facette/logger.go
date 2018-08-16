@@ -8,20 +8,20 @@ import (
 func newLogger(config *config.Config) (*logger.Logger, error) {
 	var loggers []interface{}
 
-	if config.LogPath != "" {
+	if config.Logger.File != nil {
 		loggers = append(loggers, logger.FileConfig{
-			Level: config.LogLevel,
-			Path:  config.LogPath,
+			Level: config.Logger.File.Level,
+			Path:  config.Logger.File.Path,
 		})
 	}
 
-	if config.SyslogLevel != "" {
+	if config.Logger.Syslog != nil {
 		loggers = append(loggers, logger.SyslogConfig{
-			Level:     config.SyslogLevel,
-			Facility:  config.SyslogFacility,
-			Tag:       config.SyslogTag,
-			Address:   config.SyslogAddress,
-			Transport: config.SyslogTransport,
+			Level:     config.Logger.Syslog.Level,
+			Facility:  config.Logger.Syslog.Facility,
+			Tag:       config.Logger.Syslog.Tag,
+			Address:   config.Logger.Syslog.Address,
+			Transport: config.Logger.Syslog.Transport,
 		})
 	}
 

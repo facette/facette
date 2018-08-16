@@ -25,8 +25,8 @@ func (h *Handler) handleAsset(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get file data from built-in assets
-	if strings.HasPrefix(r.URL.Path, h.config.RootPath+"/assets/") {
-		filePath = strings.TrimPrefix(r.URL.Path, h.config.RootPath+"/assets/")
+	if strings.HasPrefix(r.URL.Path, h.config.UI.BasePath+"/assets/") {
+		filePath = strings.TrimPrefix(r.URL.Path, h.config.UI.BasePath+"/assets/")
 		isAsset = true
 	}
 
