@@ -83,6 +83,7 @@ func (h *Handler) Run() error {
 	if proto == "unix" {
 		err = h.initSocket(addr)
 		if err != nil {
+			h.logger.Error("failed to initialize socket: %s", err)
 			return err
 		}
 	}
