@@ -12,9 +12,11 @@ import (
 
 // Config represents a configuration instance.
 type Config struct {
+	DataDir  string          `yaml:"data_dir"`
 	Logger   *LoggerConfig   `yaml:"logger"`
 	HTTP     *HTTPConfig     `yaml:"http"`
 	Storage  *maputil.Map    `yaml:"storage"`
+	Cache    *CacheConfig    `yaml:"cache"`
 	Defaults *DefaultsConfig `yaml:"defaults"`
 }
 
@@ -24,6 +26,7 @@ func New(path string) (*Config, error) {
 		Logger:   newLoggerConfig(),
 		HTTP:     newHTTPConfig(),
 		Storage:  newStorageConfig(),
+		Cache:    newCacheConfig(),
 		Defaults: newDefaultsConfig(),
 	}
 

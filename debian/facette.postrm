@@ -26,6 +26,7 @@ case "$1" in
     remove)
         unset_perms /etc/facette
         unset_perms /etc/facette/facette.yaml
+        unset_perms /var/cache/facette
         unset_perms /var/lib/facette
         unset_perms /var/log/facette
 
@@ -33,8 +34,7 @@ case "$1" in
     ;;
 
     purge)
-        rm -rf /var/lib/facette
-        rm -rf /etc/facette
+        rm -rf /etc/facette /var/cache/facette /var/lib/facette
     ;;
 
     upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)

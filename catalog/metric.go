@@ -1,39 +1,25 @@
 package catalog
 
+import "facette.io/maputil"
+
 // Metric represents a catalog metric instance.
 type Metric struct {
-	Name         string
-	OriginalName string
-	source       *Source
-	connector    interface{}
+	Name       string
+	Attributes *maputil.Map
+	source     *Source
 }
 
-// Source returns the parent source from the catalog metric.
+// Catalog returns the parent catalog of the origin.
+func (m *Metric) Catalog() *Catalog {
+	return m.source.origin.catalog
+}
+
+// Origin returns the parent origin of the source.
+func (m *Metric) Origin() *Origin {
+	return m.source.origin
+}
+
+// Source returns the parent origin of the source.
 func (m *Metric) Source() *Source {
-	m.source.origin.catalog.RLock()
-	defer m.source.origin.catalog.RUnlock()
-
 	return m.source
-}
-
-// Connector returns the connector handler associated to the catalog metric.
-func (m *Metric) Connector() interface{} {
-	m.source.origin.catalog.RLock()
-	defer m.source.origin.catalog.RUnlock()
-
-	return m.connector
-}
-
-type metricList []*Metric
-
-func (l metricList) Len() int {
-	return len(l)
-}
-
-func (l metricList) Less(i, j int) bool {
-	return l[i].Name < l[j].Name
-}
-
-func (l metricList) Swap(i, j int) {
-	l[i], l[j] = l[j], l[i]
 }

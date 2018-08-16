@@ -86,13 +86,8 @@ func NewFilterChain(rules *storage.ProviderFilters) *FilterChain {
 	// Start filtering routine
 	go func() {
 		for record := range fc.Input {
-			// Keep a copy of original names
-			record.OriginalOrigin = record.Origin
-			record.OriginalSource = record.Source
-			record.OriginalMetric = record.Metric
-
 			// Forward record if no rule defined
-			if len(fc.rules) == 0 {
+			if len(fc.rules) == 0 || record == nil {
 				fc.Output <- record
 				continue
 			}

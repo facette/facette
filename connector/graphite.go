@@ -16,6 +16,7 @@ import (
 	"facette.io/httputil"
 	"facette.io/logger"
 	"facette.io/maputil"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -32,7 +33,6 @@ func init() {
 
 		c := &graphiteConnector{
 			name:   name,
-			series: make(map[string]map[string]string),
 			logger: logger,
 		}
 
@@ -87,7 +87,6 @@ type graphiteConnector struct {
 	allowInsecure bool
 	pattern       *regexp.Regexp
 	client        *http.Client
-	series        map[string]map[string]string
 	logger        *logger.Logger
 }
 
@@ -101,11 +100,11 @@ func (c *graphiteConnector) Points(query *series.Query) ([]series.Series, error)
 		results []series.Series
 	)
 
-	if len(query.Series) == 0 {
-		return nil, fmt.Errorf("requested series list is empty")
+	if len(query.Metrics) == 0 {
+		return nil, fmt.Errorf("requested metrics list is empty")
 	}
 
-	queryURL, err := graphiteBuildQueryURL(query, c.series)
+	queryURL, err := graphiteBuildQueryURL(query)
 	if err != nil {
 		return nil, fmt.Errorf("unable to build query URL: %s", err)
 	}
@@ -168,31 +167,32 @@ func (c *graphiteConnector) Refresh(output chan<- *catalog.Record) error {
 
 		sourceName, metricName = seriesMatch[0], seriesMatch[1]
 
-		if _, ok := c.series[sourceName]; !ok {
-			c.series[sourceName] = make(map[string]string)
-		}
-
-		c.series[sourceName][metricName] = s
-
 		output <- &catalog.Record{
-			Origin:    c.name,
-			Source:    sourceName,
-			Metric:    metricName,
-			Connector: c,
+			Origin: c.name,
+			Source: sourceName,
+			Metric: metricName,
+			Attributes: &maputil.Map{
+				"series": s,
+			},
 		}
 	}
 
 	return nil
 }
 
-func graphiteBuildQueryURL(query *series.Query, graphiteSeries map[string]map[string]string) (string, error) {
+func graphiteBuildQueryURL(query *series.Query) (string, error) {
 	now := time.Now()
 	fromTime := 0
 
 	queryURL := "format=json"
 
-	for _, series := range query.Series {
-		queryURL += fmt.Sprintf("&target=%s", url.QueryEscape(graphiteSeries[series.Source][series.Metric]))
+	for _, m := range query.Metrics {
+		series, err := m.Attributes.GetString("series", "")
+		if err != nil {
+			return "", errors.Wrap(ErrInvalidAttribute, "series")
+		}
+
+		queryURL += fmt.Sprintf("&target=%s", url.QueryEscape(series))
 	}
 
 	if query.StartTime.Before(now) {

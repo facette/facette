@@ -216,7 +216,7 @@ func (a *API) catalogGet(rw http.ResponseWriter, r *http.Request) {
 			if i == 0 {
 				item.Name = o.Name
 			}
-			providers.Add(o.Catalog().Name())
+			providers.Add(o.Catalog().Name)
 		}
 
 		item.Providers = set.StringSlice(providers)
@@ -240,7 +240,7 @@ func (a *API) catalogGet(rw http.ResponseWriter, r *http.Request) {
 				item.Name = s.Name
 			}
 			origins.Add(s.Origin().Name)
-			providers.Add(s.Origin().Catalog().Name())
+			providers.Add(s.Catalog().Name)
 		}
 
 		item.Origins = set.StringSlice(origins)
@@ -268,8 +268,8 @@ func (a *API) catalogGet(rw http.ResponseWriter, r *http.Request) {
 				item.Name = m.Name
 			}
 			sources.Add(m.Source().Name)
-			origins.Add(m.Source().Origin().Name)
-			providers.Add(m.Source().Origin().Catalog().Name())
+			origins.Add(m.Origin().Name)
+			providers.Add(m.Catalog().Name)
 		}
 
 		item.Sources = set.StringSlice(sources)
@@ -290,10 +290,7 @@ func (a *API) catalogSearch(typ, name string, r *http.Request) []interface{} {
 
 	switch typ {
 	case "origins":
-		for _, o := range a.searcher.Origins(
-			name,
-			-1,
-		) {
+		for _, o := range a.searcher.Origins(name) {
 			search = append(search, o)
 		}
 
@@ -301,7 +298,6 @@ func (a *API) catalogSearch(typ, name string, r *http.Request) []interface{} {
 		for _, s := range a.searcher.Sources(
 			httproute.QueryParam(r, "origin"),
 			name,
-			-1,
 		) {
 			search = append(search, s)
 		}
@@ -311,7 +307,6 @@ func (a *API) catalogSearch(typ, name string, r *http.Request) []interface{} {
 			httproute.QueryParam(r, "origin"),
 			httproute.QueryParam(r, "source"),
 			name,
-			-1,
 		) {
 			search = append(search, m)
 		}

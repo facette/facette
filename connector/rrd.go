@@ -3,6 +3,7 @@
 package connector
 
 import (
+	"encoding/gob"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -15,6 +16,7 @@ import (
 	"facette.io/facette/set"
 	"facette.io/logger"
 	"facette.io/maputil"
+	"github.com/pkg/errors"
 	"github.com/ziutek/rrd"
 )
 
@@ -26,9 +28,8 @@ func init() {
 		)
 
 		c := &rrdConnector{
-			name:    name,
-			metrics: make(map[string]map[string]*rrdMetric),
-			logger:  logger,
+			name:   name,
+			logger: logger,
 		}
 
 		// Get connector handler settings
@@ -58,6 +59,9 @@ func init() {
 
 		return c, nil
 	}
+
+	// Register type for catalog dump
+	gob.Register(time.Duration(0))
 }
 
 // rrdConnector represents a RRD connector instance.
@@ -66,16 +70,97 @@ type rrdConnector struct {
 	path    string
 	daemon  string
 	pattern *regexp.Regexp
-	metrics map[string]map[string]*rrdMetric
 	logger  *logger.Logger
 }
 
-// Name returns the name of the current connector.
 func (c *rrdConnector) Name() string {
 	return c.name
 }
 
-// Refresh triggers the connector data refresh.
+func (c *rrdConnector) Points(q *series.Query) ([]series.Series, error) {
+	var stepMax time.Duration
+
+	if len(q.Metrics) == 0 {
+		return nil, fmt.Errorf("requested metrics list is empty")
+	}
+
+	// Initialize new RRD exporter
+	xport := rrd.NewExporter()
+	if c.daemon != "" {
+		xport.SetDaemon(c.daemon)
+	}
+
+	// Prepare RRD definitions
+	for idx, m := range q.Metrics {
+		var step time.Duration
+
+		path, err := m.Attributes.GetString("path", "")
+		if err != nil {
+			return nil, errors.Wrap(ErrInvalidAttribute, "path")
+		}
+		path = strings.Replace(path, ":", "\\:", -1)
+
+		ds, err := m.Attributes.GetString("ds", "")
+		if err != nil {
+			return nil, errors.Wrap(ErrInvalidAttribute, "ds")
+		}
+
+		cf, err := m.Attributes.GetString("cf", "")
+		if err != nil {
+			return nil, errors.Wrap(ErrInvalidAttribute, "cf")
+		}
+
+		if v, err := m.Attributes.GetInterface("step", nil); err != nil {
+			return nil, errors.Wrap(ErrInvalidAttribute, "step")
+		} else if v, ok := v.(time.Duration); !ok {
+			return nil, errors.Wrap(ErrInvalidAttribute, "step")
+		} else {
+			step = v
+		}
+
+		name := fmt.Sprintf("series%d", idx)
+
+		xport.Def(name+"_def", path, ds, cf)
+		xport.CDef(name+"_cdef", name+"_def")
+		xport.XportDef(name+"_cdef", name)
+
+		// Only keep the highest step
+		if step > stepMax {
+			stepMax = step
+		}
+	}
+
+	// Set fallback step if none found
+	if stepMax == 0 {
+		stepMax = q.EndTime.Sub(q.StartTime) / time.Duration(series.DefaultSample)
+	}
+
+	// Retrieve data points
+	data, err := xport.Xport(q.StartTime, q.EndTime, stepMax)
+	if err != nil {
+		return nil, err
+	}
+
+	result := []series.Series{}
+	for idx := range data.Legends {
+		s := series.Series{}
+
+		// FIXME: skip last garbage entry (see https://github.com/ziutek/rrd/pull/13)
+		for i, n := 0, data.RowCnt-1; i < n; i++ {
+			s.Points = append(s.Points, series.Point{
+				Time:  q.StartTime.Add(data.Step * time.Duration(i)),
+				Value: series.Value(data.ValueAt(idx, i)),
+			})
+		}
+
+		result = append(result, s)
+	}
+
+	data.FreeValues()
+
+	return result, nil
+}
+
 func (c *rrdConnector) Refresh(output chan<- *catalog.Record) error {
 	// Search for files and parse their path for source/metric pairs
 	walkFunc := func(path string, fi os.FileInfo, err error) error {
@@ -98,10 +183,6 @@ func (c *rrdConnector) Refresh(output chan<- *catalog.Record) error {
 		}
 
 		source, metric := m[0], m[1]
-
-		if _, ok := c.metrics[source]; !ok {
-			c.metrics[source] = make(map[string]*rrdMetric)
-		}
 
 		// Extract information from .rrd file
 		info, err := rrd.Info(path)
@@ -128,20 +209,16 @@ func (c *rrdConnector) Refresh(output chan<- *catalog.Record) error {
 
 		for ds := range indexes {
 			for _, cf := range set.StringSlice(cfs) {
-				metricName := metric + "/" + ds + "/" + strings.ToLower(cf)
-
-				c.metrics[source][metricName] = &rrdMetric{
-					DS:   ds,
-					Path: path,
-					Step: time.Duration(info["step"].(uint)) * time.Second,
-					CF:   cf,
-				}
-
 				output <- &catalog.Record{
-					Origin:    c.name,
-					Source:    source,
-					Metric:    metricName,
-					Connector: c,
+					Origin: c.name,
+					Source: source,
+					Metric: metric + "/" + ds + "/" + strings.ToLower(cf),
+					Attributes: &maputil.Map{
+						"path": path,
+						"ds":   ds,
+						"cf":   cf,
+						"step": time.Duration(info["step"].(uint)) * time.Second,
+					},
 				}
 			}
 		}
@@ -150,72 +227,6 @@ func (c *rrdConnector) Refresh(output chan<- *catalog.Record) error {
 	}
 
 	return c.walk(c.path, "", walkFunc)
-}
-
-// Points retrieves the time series data according to the query parameters and a time interval.
-func (c *rrdConnector) Points(q *series.Query) ([]series.Series, error) {
-	var step time.Duration
-
-	if len(q.Series) == 0 {
-		return nil, series.ErrEmptySeries
-	}
-
-	// Initialize new RRD exporter
-	xport := rrd.NewExporter()
-	if c.daemon != "" {
-		xport.SetDaemon(c.daemon)
-	}
-
-	// Prepare RRD definitions
-	for i, s := range q.Series {
-		if _, ok := c.metrics[s.Source]; !ok {
-			return nil, ErrUnknownSource
-		} else if _, ok := c.metrics[s.Source][s.Metric]; !ok {
-			return nil, ErrUnknownMetric
-		}
-
-		name := fmt.Sprintf("series%d", i)
-		path := strings.Replace(c.metrics[s.Source][s.Metric].Path, ":", "\\:", -1)
-
-		xport.Def(name+"_def", path, c.metrics[s.Source][s.Metric].DS, c.metrics[s.Source][s.Metric].CF)
-		xport.CDef(name+"_cdef", name+"_def")
-		xport.XportDef(name+"_cdef", name)
-
-		// Only keep the highest step
-		if c.metrics[s.Source][s.Metric].Step > step {
-			step = c.metrics[s.Source][s.Metric].Step
-		}
-	}
-
-	// Set fallback step if none found
-	if step == 0 {
-		step = q.EndTime.Sub(q.StartTime) / time.Duration(series.DefaultSample)
-	}
-
-	// Retrieve data points
-	data, err := xport.Xport(q.StartTime, q.EndTime, step)
-	if err != nil {
-		return nil, err
-	}
-
-	result := []series.Series{}
-	for idx := range data.Legends {
-		s := series.Series{}
-
-		// FIXME: skip last garbage entry (see https://github.com/ziutek/rrd/pull/13)
-		for i, n := 0, data.RowCnt-1; i < n; i++ {
-			s.Points = append(s.Points, series.Point{
-				Time:  q.StartTime.Add(data.Step * time.Duration(i)),
-				Value: series.Value(data.ValueAt(idx, i)),
-			})
-		}
-
-		result = append(result, s)
-	}
-
-	data.FreeValues()
-
-	return result, nil
 }
 
 func (c *rrdConnector) walk(root, originalRoot string, walkFunc filepath.WalkFunc) error {
@@ -251,11 +262,4 @@ func (c *rrdConnector) walk(root, originalRoot string, walkFunc filepath.WalkFun
 
 		return walkFunc(path, fi, err)
 	})
-}
-
-type rrdMetric struct {
-	DS   string
-	Path string
-	Step time.Duration
-	CF   string
 }

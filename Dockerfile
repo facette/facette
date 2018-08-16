@@ -11,6 +11,7 @@ RUN apk --no-cache add --virtual .build-deps git go make musl-dev nodejs rrdtool
     sed -i -r \
         -e "s|listen: localhost:12003|listen: :12003|" \
         -e "s|path: var/data.db|path: /var/lib/facette/data.db|" \
+        -e "s|path: var/cache|path: /var/cache/facette|" \
         /etc/facette/facette.yaml && \
     rm -rf /root/go && \
     apk del .build-deps

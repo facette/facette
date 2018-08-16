@@ -3,6 +3,7 @@
 package connector
 
 import (
+	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -19,6 +20,7 @@ import (
 	influxdb "github.com/influxdata/influxdb/client/v2"
 	influxmodels "github.com/influxdata/influxdb/models"
 	"github.com/influxdata/influxql"
+	"github.com/pkg/errors"
 )
 
 func init() {
@@ -32,9 +34,8 @@ func init() {
 
 		c := &influxDBConnector{
 			name: name,
-			mapping: influxDBMap{
-				glue: ".",
-				maps: make(map[string]map[string]influxDBMapEntry),
+			mapping: &influxDBMapping{
+				Glue: ".",
 			},
 		}
 
@@ -96,12 +97,12 @@ func init() {
 				return nil, err
 			}
 		} else if mapping != nil {
-			c.mapping.source, err = mapping.GetStringSlice("source", nil)
+			c.mapping.Source, err = mapping.GetStringSlice("source", nil)
 			if err != nil {
 				return nil, err
 			}
 
-			c.mapping.metric, err = mapping.GetStringSlice("metric", nil)
+			c.mapping.Metric, err = mapping.GetStringSlice("metric", nil)
 			if err != nil {
 				return nil, err
 			}
@@ -110,7 +111,7 @@ func init() {
 			if err != nil {
 				return nil, err
 			} else if glue != "" {
-				c.mapping.glue = glue
+				c.mapping.Glue = glue
 			}
 		}
 
@@ -134,6 +135,9 @@ func init() {
 
 		return c, nil
 	}
+
+	// Register type for catalog dump
+	gob.Register(map[string]string{})
 }
 
 type influxDBConnector struct {
@@ -145,7 +149,7 @@ type influxDBConnector struct {
 	password      string
 	database      string
 	pattern       *regexp.Regexp
-	mapping       influxDBMap
+	mapping       *influxDBMapping
 	client        influxdb.Client
 }
 
@@ -156,30 +160,35 @@ func (c *influxDBConnector) Name() string {
 func (c *influxDBConnector) Points(q *series.Query) ([]series.Series, error) {
 	var queries []string
 
-	l := len(q.Series)
+	l := len(q.Metrics)
 	if l == 0 {
-		return nil, fmt.Errorf("requested series list is empty")
+		return nil, fmt.Errorf("requested metrics list is empty")
 	}
 
 	results := make([]series.Series, l)
 
 	// Prepare query
-	for _, s := range q.Series {
+	for _, m := range q.Metrics {
 		var (
+			terms  map[string]string
 			series string
 			parts  []string
 		)
 
-		_, ok := c.mapping.maps[s.Source]
-		if !ok {
-			return nil, fmt.Errorf("unknown series source %q", s.Source)
-		} else if _, ok := c.mapping.maps[s.Source][s.Metric]; !ok {
-			return nil, fmt.Errorf("unknown series metric %q for source %q", s.Source, s.Metric)
+		column, err := m.Attributes.GetString("column", "")
+		if err != nil || column == "" {
+			return nil, errors.Wrap(ErrInvalidAttribute, "column")
 		}
 
-		mapping := c.mapping.maps[s.Source][s.Metric]
+		if v, err := m.Attributes.GetInterface("terms", nil); err != nil {
+			return nil, errors.Wrap(ErrInvalidAttribute, "terms")
+		} else if v, ok := v.(map[string]string); !ok {
+			return nil, errors.Wrap(ErrInvalidAttribute, "terms")
+		} else {
+			terms = v
+		}
 
-		for term, value := range mapping.terms {
+		for term, value := range terms {
 			if term == "" {
 				series = value
 			} else {
@@ -195,7 +204,7 @@ func (c *influxDBConnector) Points(q *series.Query) ([]series.Series, error) {
 
 		queries = append(queries, fmt.Sprintf(
 			"select %s, time from %s where %s",
-			mapping.column, strconv.Quote(series),
+			column, strconv.Quote(series),
 			strings.Join(parts, " and "),
 		))
 	}
@@ -289,21 +298,14 @@ func (c *influxDBConnector) Refresh(output chan<- *catalog.Record) error {
 				// FIXME: we should return the matchPattern() error to the caller via the eventChan
 				seriesMatch, _ := matchPattern(c.pattern, series)
 
-				if _, ok := c.mapping.maps[seriesMatch[0]]; !ok {
-					c.mapping.maps[seriesMatch[0]] = make(map[string]influxDBMapEntry)
-				}
-
-				c.mapping.maps[seriesMatch[0]][seriesMatch[1]+c.mapping.glue+metric] = influxDBMapEntry{
-					terms:  map[string]string{"": seriesMatch[0] + c.mapping.glue + seriesMatch[1]},
-					column: metric,
-				}
-
-				// Send record to catalog
 				output <- &catalog.Record{
-					Origin:    c.name,
-					Source:    seriesMatch[0],
-					Metric:    seriesMatch[1] + c.mapping.glue + metric,
-					Connector: c,
+					Origin: c.name,
+					Source: seriesMatch[0],
+					Metric: seriesMatch[1] + c.mapping.Glue + metric,
+					Attributes: &maputil.Map{
+						"column": metric,
+						"terms":  map[string]string{"": seriesMatch[0] + c.mapping.Glue + seriesMatch[1]},
+					},
 				}
 			}
 		}
@@ -340,45 +342,37 @@ func (c *influxDBConnector) Refresh(output chan<- *catalog.Record) error {
 				terms := make(map[string]string)
 
 				// Map source
-				for _, item := range c.mapping.source {
+				for _, item := range c.mapping.Source {
 					term, part := mapKey(seriesColumns, item)
 					if part != "" {
 						terms[term] = part
 						parts = append(parts, part)
 					}
 				}
-				sourceName := strings.Join(parts, c.mapping.glue)
+				sourceName := strings.Join(parts, c.mapping.Glue)
 
 				// Map metric
 				parts = []string{}
-				for _, item := range c.mapping.metric {
+				for _, item := range c.mapping.Metric {
 					term, part := mapKey(seriesColumns, item)
 					if part != "" {
 						terms[term] = part
 						parts = append(parts, part)
 					}
 				}
-				metricName := strings.Join(parts, c.mapping.glue)
+				metricName := strings.Join(parts, c.mapping.Glue)
 
 				terms[""] = seriesColumns["name"]
 
-				// Initialize metric mapping terms if needed
-				if _, ok := c.mapping.maps[sourceName]; !ok {
-					c.mapping.maps[sourceName] = make(map[string]influxDBMapEntry)
-				}
-
-				for _, col := range columnsMap[seriesColumns["name"]] {
-					c.mapping.maps[sourceName][metricName+c.mapping.glue+col] = influxDBMapEntry{
-						column: col,
-						terms:  terms,
-					}
-
-					// Send record to catalog
+				for _, column := range columnsMap[seriesColumns["name"]] {
 					output <- &catalog.Record{
-						Origin:    c.name,
-						Source:    sourceName,
-						Metric:    metricName + c.mapping.glue + col,
-						Connector: c,
+						Origin: c.name,
+						Source: sourceName,
+						Metric: metricName + c.mapping.Glue + column,
+						Attributes: &maputil.Map{
+							"column": column,
+							"terms":  terms,
+						},
 					}
 				}
 			}
@@ -414,14 +408,8 @@ func mapSeriesColumns(series string) (map[string]string, error) {
 	return columns, nil
 }
 
-type influxDBMap struct {
-	source []string
-	metric []string
-	glue   string
-	maps   map[string]map[string]influxDBMapEntry
-}
-
-type influxDBMapEntry struct {
-	column string
-	terms  map[string]string
+type influxDBMapping struct {
+	Source []string
+	Metric []string
+	Glue   string
 }

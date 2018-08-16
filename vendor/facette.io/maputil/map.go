@@ -71,6 +71,16 @@ func (m Map) GetInt(key string, fallback int) (int, error) {
 	return val.(int), err
 }
 
+// GetInterface returns the interface value associated with a key.
+func (m Map) GetInterface(key string, fallback interface{}) (interface{}, error) {
+	val, ok := m[key]
+	if !ok {
+		val = fallback
+	}
+
+	return val, nil
+}
+
 // GetMap returns the map value associated with a key.
 func (m Map) GetMap(key string, fallback Map) (Map, error) {
 	val, err := m.getKey(reflect.Map, key, fallback)
@@ -106,11 +116,15 @@ func (m Map) GetString(key, fallback string) (string, error) {
 
 // GetStringSlice returns the string value associated with a key.
 func (m Map) GetStringSlice(key string, fallback []string) ([]string, error) {
-	out := []string{}
+	var out []string
 
 	val, err := m.getKey(reflect.Slice, key, fallback)
 
 	rv := reflect.ValueOf(val)
+	if !rv.IsValid() {
+		return nil, err
+	}
+
 	count := rv.Len()
 	for i := 0; i < count; i++ {
 		out = append(out, fmt.Sprintf("%v", rv.Index(i).Interface()))

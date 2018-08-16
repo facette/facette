@@ -115,7 +115,7 @@ func (a *API) expandSeries(series *storage.Series, existOnly bool) []*storage.Se
 		}
 
 		// Loop through sources checking for patterns matching
-		for _, s := range a.searcher.Sources(series.Origin, "", -1) {
+		for _, s := range a.searcher.Sources(series.Origin, "") {
 			for _, p := range group.Patterns {
 				if match, err := pattern.Match(p, s.Name); err != nil {
 					a.logger.Error("failed to match filter: %s", err)
@@ -143,7 +143,7 @@ func (a *API) expandSeries(series *storage.Series, existOnly bool) []*storage.Se
 		}
 
 		// Loop through metrics checking for patterns matching
-		for _, m := range a.searcher.Metrics(series.Origin, "", "", -1) {
+		for _, m := range a.searcher.Metrics(series.Origin, "", "") {
 			// Skip if metric source does not match an existing metric
 			if existOnly && !sourcesSet.Has(m.Source().Name) {
 				continue

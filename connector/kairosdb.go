@@ -17,6 +17,7 @@ import (
 	"facette.io/httputil"
 	"facette.io/logger"
 	"facette.io/maputil"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -42,10 +43,7 @@ func init() {
 	connectors["kairosdb"] = func(name string, settings *maputil.Map, logger *logger.Logger) (Connector, error) {
 		var err error
 
-		c := &kairosDBConnector{
-			name:    name,
-			metrics: make(map[string]map[string]*kairosDBMetric),
-		}
+		c := &kairosDBConnector{name: name}
 
 		// Get connector handler settings
 		c.url, err = settings.GetString("url", "")
@@ -96,11 +94,99 @@ type kairosDBConnector struct {
 	timeout       int
 	allowInsecure bool
 	client        *http.Client
-	metrics       map[string]map[string]*kairosDBMetric
 }
 
 func (c *kairosDBConnector) Name() string {
 	return c.name
+}
+
+func (c *kairosDBConnector) Points(query *series.Query) ([]series.Series, error) {
+	if len(query.Metrics) == 0 {
+		return nil, fmt.Errorf("requested metrics list is empty")
+	}
+
+	step := query.EndTime.Sub(query.StartTime) / time.Duration(query.Sample) // FIXME: use q.Step()
+	sampling := step.Nanoseconds() / 1000000
+
+	q := kairosDBQuery{
+		StartAbsolute: query.StartTime.Unix() * 1000,
+		EndAbsolute:   query.EndTime.Unix() * 1000,
+		Metrics:       []kairosDBQueryMetric{},
+	}
+
+	for _, m := range query.Metrics {
+		var tag []string
+
+		name, err := m.Attributes.GetString("name", "")
+		if err != nil {
+			return nil, errors.Wrap(ErrInvalidAttribute, "name")
+		}
+
+		aggregator, err := m.Attributes.GetString("aggregator", "")
+		if err != nil {
+			return nil, errors.Wrap(ErrInvalidAttribute, "aggregator")
+		}
+
+		if v, err := m.Attributes.GetInterface("tag", nil); err != nil {
+			return nil, errors.Wrap(ErrInvalidAttribute, "tag")
+		} else if v, ok := v.([]string); !ok {
+			return nil, errors.Wrap(ErrInvalidAttribute, "tag")
+		} else {
+			tag = v
+		}
+
+		q.Metrics = append(q.Metrics, kairosDBQueryMetric{
+			Name: name,
+			Tags: map[string]interface{}{
+				tag[0]: []string{tag[1]},
+			},
+			Aggregators: []kairosDBQueryAggregator{{
+				Name: aggregator,
+				Sampling: kairosDBQuerySampling{
+					Value: sampling,
+					Unit:  "milliseconds",
+				}},
+			},
+		})
+	}
+
+	body, err := json.Marshal(q)
+	if err != nil {
+		return nil, fmt.Errorf("unable to marshal tags request: %s", err)
+	}
+
+	req, err := http.NewRequest("POST", c.url+kairosDBURLDatapointsQuery, bytes.NewReader(body))
+	if err != nil {
+		return nil, fmt.Errorf("unable to set up HTTP request: %s", err)
+	}
+	req.Header.Add("User-Agent", "facette/"+version.Version)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("unable to perform HTTP request: %s", err)
+	}
+	defer resp.Body.Close()
+
+	pr := kairosDBResponse{}
+	if err := httputil.BindJSON(resp, &pr); err != nil {
+		return nil, fmt.Errorf("unable to unmarshal JSON data: %s", err)
+	}
+
+	result := []series.Series{}
+	for _, q := range pr.Queries {
+		s := series.Series{}
+		for _, value := range q.Results[0].Values {
+			s.Points = append(s.Points, series.Point{
+				Time:  time.Unix(int64(value[0]/1000), 0),
+				Value: series.Value(value[1]),
+			})
+		}
+
+		result = append(result, s)
+	}
+
+	return result, nil
 }
 
 func (c *kairosDBConnector) Refresh(output chan<- *catalog.Record) error {
@@ -168,21 +254,15 @@ func (c *kairosDBConnector) Refresh(output chan<- *catalog.Record) error {
 					metric := r.Name + "/" + aggr
 
 					for _, value := range values {
-						if _, ok := c.metrics[value]; !ok {
-							c.metrics[value] = make(map[string]*kairosDBMetric)
-						}
-
-						c.metrics[value][metric] = &kairosDBMetric{
-							Name:       r.Name,
-							Aggregator: aggr,
-							Tag:        [2]string{key, value},
-						}
-
 						output <- &catalog.Record{
-							Origin:    c.name,
-							Source:    value,
-							Metric:    metric,
-							Connector: c,
+							Origin: c.name,
+							Source: value,
+							Metric: metric,
+							Attributes: &maputil.Map{
+								"name":       r.Name,
+								"aggregator": aggr,
+								"tag":        []string{key, value},
+							},
 						}
 					}
 				}
@@ -191,83 +271,6 @@ func (c *kairosDBConnector) Refresh(output chan<- *catalog.Record) error {
 	}
 
 	return nil
-}
-
-func (c *kairosDBConnector) Points(query *series.Query) ([]series.Series, error) {
-	step := query.EndTime.Sub(query.StartTime) / time.Duration(query.Sample) // FIXME: use q.Step()
-	sampling := step.Nanoseconds() / 1000000
-
-	q := kairosDBQuery{
-		StartAbsolute: query.StartTime.Unix() * 1000,
-		EndAbsolute:   query.EndTime.Unix() * 1000,
-		Metrics:       []kairosDBQueryMetric{},
-	}
-
-	for _, s := range query.Series {
-		if _, ok := c.metrics[s.Source]; !ok {
-			return nil, ErrUnknownSource
-		} else if _, ok := c.metrics[s.Source][s.Metric]; !ok {
-			return nil, ErrUnknownMetric
-		}
-
-		q.Metrics = append(q.Metrics, kairosDBQueryMetric{
-			Name: c.metrics[s.Source][s.Metric].Name,
-			Tags: map[string]interface{}{
-				c.metrics[s.Source][s.Metric].Tag[0]: []string{c.metrics[s.Source][s.Metric].Tag[1]},
-			},
-			Aggregators: []kairosDBQueryAggregator{{
-				Name: c.metrics[s.Source][s.Metric].Aggregator,
-				Sampling: kairosDBQuerySampling{
-					Value: sampling,
-					Unit:  "milliseconds",
-				}},
-			},
-		})
-	}
-
-	body, err := json.Marshal(q)
-	if err != nil {
-		return nil, fmt.Errorf("unable to marshal tags request: %s", err)
-	}
-
-	req, err := http.NewRequest("POST", c.url+kairosDBURLDatapointsQuery, bytes.NewReader(body))
-	if err != nil {
-		return nil, fmt.Errorf("unable to set up HTTP request: %s", err)
-	}
-	req.Header.Add("User-Agent", "facette/"+version.Version)
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("unable to perform HTTP request: %s", err)
-	}
-	defer resp.Body.Close()
-
-	pr := kairosDBResponse{}
-	if err := httputil.BindJSON(resp, &pr); err != nil {
-		return nil, fmt.Errorf("unable to unmarshal JSON data: %s", err)
-	}
-
-	result := []series.Series{}
-	for _, q := range pr.Queries {
-		s := series.Series{}
-		for _, value := range q.Results[0].Values {
-			s.Points = append(s.Points, series.Point{
-				Time:  time.Unix(int64(value[0]/1000), 0),
-				Value: series.Value(value[1]),
-			})
-		}
-
-		result = append(result, s)
-	}
-
-	return result, nil
-}
-
-type kairosDBMetric struct {
-	Name       string
-	Aggregator string
-	Tag        [2]string
 }
 
 type kairosDBQuery struct {

@@ -62,7 +62,6 @@ func (p *Poller) Run() error {
 	for _, prov := range providers {
 		p.StartWorker(prov)
 	}
-	p.searcher.ApplyPriorities()
 
 	// Wait for main context cancellation
 	<-p.ctx.Done()

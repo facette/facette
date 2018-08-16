@@ -10,50 +10,28 @@ import (
 
 func Test_Filter_Rewrite(t *testing.T) {
 	expected := []Record{
-		{Origin: "origin-1", Source: "host1.example.net", Metric: "net.eth0.octets.rx", OriginalOrigin: "origin1",
-			OriginalSource: "host1_example_net", OriginalMetric: "interface-eth0.if_octets.rx"},
-		{Origin: "origin-1", Source: "host1.example.net", Metric: "net.eth0.octets.tx", OriginalOrigin: "origin1",
-			OriginalSource: "host1_example_net", OriginalMetric: "interface-eth0.if_octets.tx"},
-		{Origin: "origin-1", Source: "host1.example.net", Metric: "net.eth0.packets.rx", OriginalOrigin: "origin1",
-			OriginalSource: "host1_example_net", OriginalMetric: "interface-eth0.if_packets.rx"},
-		{Origin: "origin-1", Source: "host1.example.net", Metric: "net.eth0.packets.tx", OriginalOrigin: "origin1",
-			OriginalSource: "host1_example_net", OriginalMetric: "interface-eth0.if_packets.tx"},
-		{Origin: "origin-1", Source: "host1.example.net", Metric: "load.load.shortterm", OriginalOrigin: "origin1",
-			OriginalSource: "host1_example_net", OriginalMetric: "load.load.shortterm"},
-		{Origin: "origin-1", Source: "host1.example.net", Metric: "load.load.midterm", OriginalOrigin: "origin1",
-			OriginalSource: "host1_example_net", OriginalMetric: "load.load.midterm"},
-		{Origin: "origin-1", Source: "host1.example.net", Metric: "load.load.longterm", OriginalOrigin: "origin1",
-			OriginalSource: "host1_example_net", OriginalMetric: "load.load.longterm"},
-		{Origin: "origin-1", Source: "host2.example.net", Metric: "net.eth0.octets.rx", OriginalOrigin: "origin1",
-			OriginalSource: "host2_example_net", OriginalMetric: "interface-eth0.if_octets.rx"},
-		{Origin: "origin-1", Source: "host2.example.net", Metric: "net.eth0.octets.tx", OriginalOrigin: "origin1",
-			OriginalSource: "host2_example_net", OriginalMetric: "interface-eth0.if_octets.tx"},
-		{Origin: "origin-1", Source: "host2.example.net", Metric: "net.eth0.packets.rx", OriginalOrigin: "origin1",
-			OriginalSource: "host2_example_net", OriginalMetric: "interface-eth0.if_packets.rx"},
-		{Origin: "origin-1", Source: "host2.example.net", Metric: "net.eth0.packets.tx", OriginalOrigin: "origin1",
-			OriginalSource: "host2_example_net", OriginalMetric: "interface-eth0.if_packets.tx"},
-		{Origin: "origin-1", Source: "host2.example.net", Metric: "load.load.shortterm", OriginalOrigin: "origin1",
-			OriginalSource: "host2_example_net", OriginalMetric: "load.load.shortterm"},
-		{Origin: "origin-1", Source: "host2.example.net", Metric: "load.load.midterm", OriginalOrigin: "origin1",
-			OriginalSource: "host2_example_net", OriginalMetric: "load.load.midterm"},
-		{Origin: "origin-1", Source: "host2.example.net", Metric: "load.load.longterm", OriginalOrigin: "origin1",
-			OriginalSource: "host2_example_net", OriginalMetric: "load.load.longterm"},
-		{Origin: "origin-2", Source: "host3.example.net", Metric: "cpu.percent-idle", OriginalOrigin: "origin2",
-			OriginalSource: "host3_example_net", OriginalMetric: "cpu.percent-idle"},
-		{Origin: "origin-2", Source: "host3.example.net", Metric: "cpu.percent-interrupt", OriginalOrigin: "origin2",
-			OriginalSource: "host3_example_net", OriginalMetric: "cpu.percent-interrupt"},
-		{Origin: "origin-2", Source: "host3.example.net", Metric: "cpu.percent-nice", OriginalOrigin: "origin2",
-			OriginalSource: "host3_example_net", OriginalMetric: "cpu.percent-nice"},
-		{Origin: "origin-2", Source: "host3.example.net", Metric: "cpu.percent-softirq", OriginalOrigin: "origin2",
-			OriginalSource: "host3_example_net", OriginalMetric: "cpu.percent-softirq"},
-		{Origin: "origin-2", Source: "host3.example.net", Metric: "cpu.percent-steal", OriginalOrigin: "origin2",
-			OriginalSource: "host3_example_net", OriginalMetric: "cpu.percent-steal"},
-		{Origin: "origin-2", Source: "host3.example.net", Metric: "cpu.percent-system", OriginalOrigin: "origin2",
-			OriginalSource: "host3_example_net", OriginalMetric: "cpu.percent-system"},
-		{Origin: "origin-2", Source: "host3.example.net", Metric: "cpu.percent-user", OriginalOrigin: "origin2",
-			OriginalSource: "host3_example_net", OriginalMetric: "cpu.percent-user"},
-		{Origin: "origin-2", Source: "host3.example.net", Metric: "cpu.percent-wait", OriginalOrigin: "origin2",
-			OriginalSource: "host3_example_net", OriginalMetric: "cpu.percent-wait"},
+		{Origin: "origin-1", Source: "host1.example.net", Metric: "net.eth0.octets.rx"},
+		{Origin: "origin-1", Source: "host1.example.net", Metric: "net.eth0.octets.tx"},
+		{Origin: "origin-1", Source: "host1.example.net", Metric: "net.eth0.packets.rx"},
+		{Origin: "origin-1", Source: "host1.example.net", Metric: "net.eth0.packets.tx"},
+		{Origin: "origin-1", Source: "host1.example.net", Metric: "load.load.shortterm"},
+		{Origin: "origin-1", Source: "host1.example.net", Metric: "load.load.midterm"},
+		{Origin: "origin-1", Source: "host1.example.net", Metric: "load.load.longterm"},
+		{Origin: "origin-1", Source: "host2.example.net", Metric: "net.eth0.octets.rx"},
+		{Origin: "origin-1", Source: "host2.example.net", Metric: "net.eth0.octets.tx"},
+		{Origin: "origin-1", Source: "host2.example.net", Metric: "net.eth0.packets.rx"},
+		{Origin: "origin-1", Source: "host2.example.net", Metric: "net.eth0.packets.tx"},
+		{Origin: "origin-1", Source: "host2.example.net", Metric: "load.load.shortterm"},
+		{Origin: "origin-1", Source: "host2.example.net", Metric: "load.load.midterm"},
+		{Origin: "origin-1", Source: "host2.example.net", Metric: "load.load.longterm"},
+		{Origin: "origin-2", Source: "host3.example.net", Metric: "cpu.percent-idle"},
+		{Origin: "origin-2", Source: "host3.example.net", Metric: "cpu.percent-interrupt"},
+		{Origin: "origin-2", Source: "host3.example.net", Metric: "cpu.percent-nice"},
+		{Origin: "origin-2", Source: "host3.example.net", Metric: "cpu.percent-softirq"},
+		{Origin: "origin-2", Source: "host3.example.net", Metric: "cpu.percent-steal"},
+		{Origin: "origin-2", Source: "host3.example.net", Metric: "cpu.percent-system"},
+		{Origin: "origin-2", Source: "host3.example.net", Metric: "cpu.percent-user"},
+		{Origin: "origin-2", Source: "host3.example.net", Metric: "cpu.percent-wait"},
 	}
 
 	assert.Equal(t, expected, runTestFilter(&storage.ProviderFilters{
@@ -65,12 +43,9 @@ func Test_Filter_Rewrite(t *testing.T) {
 
 func Test_Filter_Discard(t *testing.T) {
 	expected := []Record{
-		{Origin: "origin1", Source: "host2_example_net", Metric: "load.load.shortterm",
-			OriginalOrigin: "origin1", OriginalSource: "host2_example_net", OriginalMetric: "load.load.shortterm"},
-		{Origin: "origin1", Source: "host2_example_net", Metric: "load.load.midterm",
-			OriginalOrigin: "origin1", OriginalSource: "host2_example_net", OriginalMetric: "load.load.midterm"},
-		{Origin: "origin1", Source: "host2_example_net", Metric: "load.load.longterm",
-			OriginalOrigin: "origin1", OriginalSource: "host2_example_net", OriginalMetric: "load.load.longterm"},
+		{Origin: "origin1", Source: "host2_example_net", Metric: "load.load.shortterm"},
+		{Origin: "origin1", Source: "host2_example_net", Metric: "load.load.midterm"},
+		{Origin: "origin1", Source: "host2_example_net", Metric: "load.load.longterm"},
 	}
 
 	assert.Equal(t, expected, runTestFilter(&storage.ProviderFilters{
@@ -82,12 +57,9 @@ func Test_Filter_Discard(t *testing.T) {
 
 func Test_Filter_Sieve(t *testing.T) {
 	expected := []Record{
-		{Origin: "origin1", Source: "host1_example_net", Metric: "load.load.shortterm",
-			OriginalOrigin: "origin1", OriginalSource: "host1_example_net", OriginalMetric: "load.load.shortterm"},
-		{Origin: "origin1", Source: "host1_example_net", Metric: "load.load.midterm",
-			OriginalOrigin: "origin1", OriginalSource: "host1_example_net", OriginalMetric: "load.load.midterm"},
-		{Origin: "origin1", Source: "host1_example_net", Metric: "load.load.longterm",
-			OriginalOrigin: "origin1", OriginalSource: "host1_example_net", OriginalMetric: "load.load.longterm"},
+		{Origin: "origin1", Source: "host1_example_net", Metric: "load.load.shortterm"},
+		{Origin: "origin1", Source: "host1_example_net", Metric: "load.load.midterm"},
+		{Origin: "origin1", Source: "host1_example_net", Metric: "load.load.longterm"},
 	}
 
 	assert.Equal(t, expected, runTestFilter(&storage.ProviderFilters{
@@ -99,12 +71,9 @@ func Test_Filter_Sieve(t *testing.T) {
 
 func Test_Filter_Combined(t *testing.T) {
 	expected := []Record{
-		{Origin: "origin1", Source: "host1_example_net", Metric: "load.shortterm",
-			OriginalOrigin: "origin1", OriginalSource: "host1_example_net", OriginalMetric: "load.load.shortterm"},
-		{Origin: "origin1", Source: "host1_example_net", Metric: "load.midterm",
-			OriginalOrigin: "origin1", OriginalSource: "host1_example_net", OriginalMetric: "load.load.midterm"},
-		{Origin: "origin1", Source: "host1_example_net", Metric: "load.longterm",
-			OriginalOrigin: "origin1", OriginalSource: "host1_example_net", OriginalMetric: "load.load.longterm"},
+		{Origin: "origin1", Source: "host1_example_net", Metric: "load.shortterm"},
+		{Origin: "origin1", Source: "host1_example_net", Metric: "load.midterm"},
+		{Origin: "origin1", Source: "host1_example_net", Metric: "load.longterm"},
 	}
 
 	assert.Equal(t, expected, runTestFilter(&storage.ProviderFilters{

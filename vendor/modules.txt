@@ -4,7 +4,7 @@ facette.io/httputil
 facette.io/jsonutil
 # facette.io/logger v0.0.0-20180814050940-25259d27b771
 facette.io/logger
-# facette.io/maputil v0.0.0-20180722062138-ae1af0135367
+# facette.io/maputil v0.0.0-20180815074129-b05a479d419f
 facette.io/maputil
 # facette.io/natsort v0.0.0-20180722062153-6f9d4f1908ea
 facette.io/natsort

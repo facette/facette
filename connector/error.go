@@ -6,6 +6,8 @@ import (
 )
 
 var (
+	// ErrInvalidAttribute represents an invalid attribute error.
+	ErrInvalidAttribute = errors.New("invalid attribute")
 	// ErrMissingMetricPattern represents a missing metric pattern keyword error.
 	ErrMissingMetricPattern = errors.New("missing \"metric\" pattern keyword")
 	// ErrMissingSourcePattern represents a missing source pattern keyword error.

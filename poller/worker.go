@@ -1,6 +1,8 @@
 package poller
 
 import (
+	"os"
+	"path/filepath"
 	"time"
 
 	"facette.io/facette/catalog"
@@ -38,7 +40,6 @@ func newWorker(poller *Poller, provider *storage.Provider, logger *logger.Logger
 		logger:    logger,
 		provider:  provider,
 		connector: c,
-		catalog:   catalog.NewCatalog(provider.Name),
 		filters:   catalog.NewFilterChain(&provider.Filters),
 		cmdChan:   make(chan int),
 	}, nil
@@ -52,13 +53,27 @@ func (w *worker) Run() {
 
 	w.logger.Debug("started")
 
-	// Register catalog into main searcher instance
-	w.poller.searcher.Register(w.catalog)
+	// Restore previous catalog state for a warm startup
+	statePath := w.catalogDumpPath()
 
-	// Set catalog priority if defined
-	if w.provider.Priority > 0 {
-		w.logger.Debug("setting %q catalog priority to %d", w.provider.Name, w.provider.Priority)
-		w.catalog.SetPriority(w.provider.Priority)
+	_, err := os.Stat(statePath)
+	if err == nil {
+		start := time.Now()
+
+		catalog := catalog.New(w.provider.Name, w.connector)
+		if w.provider.Priority > 0 {
+			catalog.Priority = w.provider.Priority
+		}
+
+		err = catalog.Restore(statePath)
+		if err != nil {
+			w.logger.Warning("failed to restore catalog state: %s", err)
+		}
+
+		w.catalog = catalog
+		w.poller.searcher.Register(w.catalog)
+
+		w.logger.Debug("restored previous catalog state in %s", time.Since(start))
 	}
 
 	// Create new time ticker for automatic refresh
@@ -85,11 +100,39 @@ func (w *worker) Run() {
 				w.logger.Debug("refreshing %q provider", w.provider.Name)
 
 				go func() {
+					catalog := catalog.New(w.provider.Name, w.connector)
+					if w.provider.Priority > 0 {
+						catalog.Priority = w.provider.Priority
+					}
+
+					for record := range w.filters.Output {
+						if record == nil {
+							break
+						}
+
+						w.logger.Debug("appending record %s in %q catalog", record, w.provider.Name)
+						catalog.Insert(record)
+					}
+
+					// Register or replace catalog into searcher
+					if w.catalog != nil {
+						w.poller.searcher.Unregister(w.catalog)
+					}
+					w.catalog = catalog
+					w.poller.searcher.Register(w.catalog)
+				}()
+
+				go func() {
 					w.refreshing = true
+
 					err := w.connector.Refresh(w.filters.Input)
 					if err != nil {
 						w.logger.Error("provider %q encountered an error: %s", w.provider.Name, err)
 					}
+
+					// Send nil record to stop processing
+					w.filters.Input <- nil
+
 					w.refreshing = false
 				}()
 
@@ -102,11 +145,6 @@ func (w *worker) Run() {
 				goto stop
 			}
 
-		case record := <-w.filters.Output:
-			// Append new metric into provider catalog
-			w.logger.Debug("appending record %s in %q catalog", record, w.provider.Name)
-			w.catalog.Insert(record)
-
 		case msg := <-w.filters.Messages:
 			w.logger.Debug("%s", msg)
 		}
@@ -117,8 +155,29 @@ stop:
 }
 
 func (w *worker) Shutdown() {
-	// Unregister catalog from main searcher instance
-	w.poller.searcher.Unregister(w.catalog)
+	if w.catalog != nil {
+		// Unregister catalog from searcher instance
+		w.poller.searcher.Unregister(w.catalog)
+
+		// Dump current catalog state for future warm startup
+		statePath := w.catalogDumpPath()
+
+		stateDirPath := filepath.Dir(statePath)
+		_, err := os.Stat(stateDirPath)
+		if os.IsNotExist(err) {
+			err = os.MkdirAll(stateDirPath, 0750)
+			if err != nil {
+				w.logger.Error("failed to create state directory: %s", err)
+			}
+		}
+
+		if err == nil {
+			err = w.catalog.Dump(statePath)
+			if err != nil {
+				w.logger.Warning("failed to dump catalog state: %s", err)
+			}
+		}
+	}
 
 	w.cmdChan <- workerCmdShutdown
 	close(w.cmdChan)
@@ -130,4 +189,8 @@ func (w *worker) Refresh() {
 	}
 
 	w.cmdChan <- workerCmdRefresh
+}
+
+func (w *worker) catalogDumpPath() string {
+	return filepath.Join(w.poller.config.Cache.Path, "state", w.provider.Name+".catalog")
 }

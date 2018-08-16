@@ -69,6 +69,10 @@ storage:
   #user: facette
   #password: ********
 
+cache:
+  # Cache directory path
+  path: var/cache
+
 defaults:
   # Default time range
   time_range: -1h

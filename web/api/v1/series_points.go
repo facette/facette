@@ -232,7 +232,7 @@ func (a *API) executeRequest(req *series.Request, forceNormalize bool) []series.
 		}
 
 		count := len(points)
-		expected := len(q.query.Series)
+		expected := len(q.query.Metrics)
 		if count != expected {
 			a.logger.Error("unable to fetch points: expected %d series but got %d", expected, count)
 			continue
@@ -383,14 +383,14 @@ func (a *API) dispatchQueries(req *series.Request) []pointQuery {
 				continue
 			}
 
-			search := a.searcher.Metrics(s.Origin, s.Source, s.Metric, 1)
+			search := a.searcher.Metrics(s.Origin, s.Source, s.Metric)
 			if len(search) == 0 {
 				a.logger.Warning("unable to find series metric: %s", s)
 				continue
 			}
 
 			// Get series connector and provider name
-			c := search[0].Connector().(connector.Connector)
+			c := search[0].Catalog().Connector.(connector.Connector)
 			provName := c.Name()
 
 			// Initialize provider-specific point query
@@ -400,7 +400,6 @@ func (a *API) dispatchQueries(req *series.Request) []pointQuery {
 						StartTime: req.StartTime,
 						EndTime:   req.EndTime,
 						Sample:    req.Sample,
-						Series:    []series.QuerySeries{},
 					},
 					queryMap:  [][2]int{},
 					connector: c,
@@ -408,12 +407,7 @@ func (a *API) dispatchQueries(req *series.Request) []pointQuery {
 			}
 
 			// Append new series to point query and save series index
-			providers[provName].query.Series = append(providers[provName].query.Series, series.QuerySeries{
-				Origin: search[0].Source().Origin().OriginalName,
-				Source: search[0].Source().OriginalName,
-				Metric: search[0].OriginalName,
-			})
-
+			providers[provName].query.Metrics = append(providers[provName].query.Metrics, search[0])
 			providers[provName].queryMap = append(providers[provName].queryMap, [2]int{i, j})
 		}
 	}

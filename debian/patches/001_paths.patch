@@ -1,7 +1,7 @@
-Index: build/docs/examples/facette.yaml
+Index: facette/docs/examples/facette.yaml
 ===================================================================
---- build.orig/docs/examples/facette.yaml
-+++ build/docs/examples/facette.yaml
+--- facette.orig/docs/examples/facette.yaml
++++ facette/docs/examples/facette.yaml
 @@ -6,7 +6,7 @@ logger:
      level: info
  
@@ -20,3 +20,12 @@ Index: build/docs/examples/facette.yaml
  
    ### PostgreSQL
    #driver: pgsql
+@@ -71,7 +71,7 @@ storage:
+ 
+ cache:
+   # Cache directory path
+-  path: var/cache
++  path: /var/cache/facette
+ 
+ defaults:
+   # Default time range

@@ -5,7 +5,7 @@ require (
 	facette.io/httputil v0.0.0-20180814055451-1ca62de25998
 	facette.io/jsonutil v0.0.0-20180814055939-cd7adf9cd498
 	facette.io/logger v0.0.0-20180814050940-25259d27b771
-	facette.io/maputil v0.0.0-20180722062138-ae1af0135367
+	facette.io/maputil v0.0.0-20180815074129-b05a479d419f
 	facette.io/natsort v0.0.0-20180722062153-6f9d4f1908ea
 	facette.io/sliceutil v0.0.0-20180722062214-6331e327f72d
 	facette.io/sqlstorage v0.0.0-20180722062226-9a160f84b339

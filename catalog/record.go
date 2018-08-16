@@ -1,16 +1,17 @@
 package catalog
 
-import "fmt"
+import (
+	"fmt"
 
-// Record represents a catalog record.
+	"facette.io/maputil"
+)
+
+// Record represents a catalog record instance.
 type Record struct {
-	Origin         string
-	Source         string
-	Metric         string
-	OriginalOrigin string
-	OriginalSource string
-	OriginalMetric string
-	Connector      interface{}
+	Origin     string
+	Source     string
+	Metric     string
+	Attributes *maputil.Map
 }
 
 func (r Record) String() string {

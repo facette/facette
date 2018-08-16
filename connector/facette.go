@@ -87,19 +87,19 @@ func (c *facetteConnector) Points(query *series.Query) ([]series.Series, error) 
 			},
 			Groups: storage.SeriesGroups{
 				{
-					Series: func(series []series.QuerySeries) []*storage.Series {
-						out := make([]*storage.Series, len(series))
-						for i, s := range series {
-							out[i] = &storage.Series{
-								Name:   fmt.Sprintf("series%d", i),
-								Origin: s.Origin,
-								Source: s.Source,
-								Metric: s.Metric,
+					Series: func(metrics []*catalog.Metric) []*storage.Series {
+						out := make([]*storage.Series, len(metrics))
+						for idx, m := range metrics {
+							out[idx] = &storage.Series{
+								Name:   fmt.Sprintf("series%d", idx),
+								Origin: m.Origin().Name,
+								Source: m.Source().Name,
+								Metric: m.Name,
 							}
 						}
 
 						return out
-					}(query.Series),
+					}(query.Metrics),
 				},
 			},
 		},
@@ -164,10 +164,9 @@ func (c *facetteConnector) Refresh(output chan<- *catalog.Record) error {
 		for source, metrics := range sources {
 			for _, metric := range metrics {
 				output <- &catalog.Record{
-					Origin:    origin,
-					Source:    source,
-					Metric:    metric,
-					Connector: c,
+					Origin: origin,
+					Source: source,
+					Metric: metric,
 				}
 			}
 		}

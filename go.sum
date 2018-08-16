@@ -14,6 +14,8 @@ facette.io/logger v0.0.0-20180814050940-25259d27b771 h1:3rEv/mI3y8J00JAPtyrUZGub
 facette.io/logger v0.0.0-20180814050940-25259d27b771/go.mod h1:/5TpAyPW658xSxgFLkta3oSS+X6HkulEMGslM2er3xI=
 facette.io/maputil v0.0.0-20180722062138-ae1af0135367 h1:vnf3Ew+eqXjVHkx0k5wHDCFeeOrpxcHRv079RhBaIvY=
 facette.io/maputil v0.0.0-20180722062138-ae1af0135367/go.mod h1:CNeWWvTH+TA5XXWZ/96HLSUmG3nLSJ6LLrtOCBb0bi8=
+facette.io/maputil v0.0.0-20180815074129-b05a479d419f h1:NP/wty7j0IymumJHachpvaWiQ6WoP3hAtgOPHfI3DeI=
+facette.io/maputil v0.0.0-20180815074129-b05a479d419f/go.mod h1:CNeWWvTH+TA5XXWZ/96HLSUmG3nLSJ6LLrtOCBb0bi8=
 facette.io/natsort v0.0.0-20180722062153-6f9d4f1908ea h1:4eJF2KxQPi/NDCJExaHRZ4cwoTjk7uQCek2DaT1UAoc=
 facette.io/natsort v0.0.0-20180722062153-6f9d4f1908ea/go.mod h1:npRYmtaITVom7rcSo+pRURltHSG2r4TQM1cdqJ2dUB0=
 facette.io/sliceutil v0.0.0-20180722062214-6331e327f72d h1:HbSkUDhcxJyqC+B3bpapkT37SKIXg5AXEMn592X2PrM=
