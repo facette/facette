@@ -73,7 +73,7 @@ func (e *Endpoint) Methods() []string {
 		return []string{"DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"}
 	}
 
-	methods := []string{"OPTIONS"}
+	methods := []string{}
 	for method := range e.handlers {
 		methods = append(methods, method)
 
@@ -86,9 +86,17 @@ func (e *Endpoint) Methods() []string {
 	if hasGet && !hasHead {
 		methods = append(methods, "HEAD")
 	}
+	if _, ok := e.handlers["OPTIONS"]; !ok {
+		methods = append(methods, "OPTIONS")
+	}
 	sort.Strings(methods)
 
 	return methods
+}
+
+// Options registers a OPTIONS method handler.
+func (e *Endpoint) Options(f http.HandlerFunc) *Endpoint {
+	return e.register("OPTIONS", f)
 }
 
 // Patch registers a PATCH method handler.
@@ -150,6 +158,8 @@ func (e *Endpoint) serve(rw http.ResponseWriter, r *http.Request) {
 			rw.WriteHeader(http.StatusMethodNotAllowed)
 			return
 		}
+	} else if r.Method == "OPTIONS" {
+		rw.Header().Add("Allow", strings.Join(e.Methods(), ", "))
 	}
 
 	handler(rw, r)

@@ -31,7 +31,7 @@
 					<ui-select-match placeholder="{{ 'label.connectors_type_select' | translate }}">
 						<span ng-bind="$select.selected"></span>
 					</ui-select-match>
-					<ui-select-choices repeat="t in (connectorTypes | filter: $select.search)">
+					<ui-select-choices repeat="t in (connectors | filter: $select.search)">
 						<span ng-bind="t"></span>
 					</ui-select-choices>
 				</ui-select>

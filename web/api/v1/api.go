@@ -45,7 +45,7 @@ func NewAPI(
 
 	root := router.Endpoint(Prefix).
 		Use(handleCache).
-		Get(api.infoGet)
+		Options(api.optionsGet)
 
 	root.Endpoint("/bulk").
 		Post(api.bulkExec)
@@ -91,6 +91,9 @@ func NewAPI(
 		Post(api.seriesExpand)
 	root.Endpoint("/series/points").
 		Post(api.seriesPoints)
+
+	root.Endpoint("/version").
+		Get(api.versionGet)
 
 	root.Endpoint("/*").
 		Any(handleNotFound)

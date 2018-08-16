@@ -154,7 +154,7 @@ app.config(function($httpProvider, $locationProvider, $resourceProvider, $routeP
 
                     if (response.status == 403) {
                         // Force read-only recheck
-                        $rootScope.checkReadOnly();
+                        $rootScope.getOptions();
                     }
                 }
 
@@ -210,7 +210,7 @@ app.config(function($httpProvider, $locationProvider, $resourceProvider, $routeP
 });
 
 app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope, $route, $timeout, $translate, $window,
-    info, ngDialog, storage) {
+    ngDialog, options, storage) {
 
     $rootScope.baseURL = $browser.baseHref();
     $rootScope.title = null;
@@ -330,17 +330,17 @@ app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope
     };
 
     // Handle read-only instance
+    $rootScope.connectors = [];
     $rootScope.readOnly = false;
 
-    $rootScope.checkReadOnly = function() {
-        info.get(null, function(data) {
-            if (data.read_only) {
-                $rootScope.readOnly = true;
-            }
+    $rootScope.getOptions = function() {
+        options.get(null, function(data) {
+            $rootScope.connectors = data.connectors;
+            $rootScope.readOnly = data.read_only;
         });
     };
 
-    $rootScope.checkReadOnly();
+    $rootScope.getOptions();
 
     // Extend location
     $location.skipReload = function() {

@@ -1,4 +1,4 @@
-app.controller('AdminEditProviderController', function($routeParams, $scope, adminEdit, globalHotkeys, info) {
+app.controller('AdminEditProviderController', function($routeParams, $scope, adminEdit, globalHotkeys) {
     $scope.section = 'providers';
     $scope.id = $routeParams.id;
 
@@ -31,14 +31,6 @@ app.controller('AdminEditProviderController', function($routeParams, $scope, adm
     adminEdit.load($scope, function() {
         // Select first field
         $scope.$applyAsync(function() { angular.element('.pane :input:visible:first').select(); });
-
-        // Fill connectors list
-        $scope.connectorTypes = [];
-        info.get(null, function(data) {
-            if (data.connectors) {
-                $scope.connectorTypes = data.connectors;
-            }
-        });
 
         // Set filter actions and targets
         $scope.filterActions = filterActions;

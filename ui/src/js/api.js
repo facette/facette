@@ -39,14 +39,6 @@ app.factory('catalog', function($resource) {
     });
 });
 
-app.factory('info', function($resource) {
-    return $resource('api/v1', null, {
-        get: {
-            method: 'GET'
-        }
-    });
-});
-
 app.factory('library', function($resource) {
     return $resource('api/v1/library/:type/:id', {
         type: '@type',
@@ -152,25 +144,10 @@ app.factory('libraryAction', function($resource) {
     });
 });
 
-app.factory('series', function($resource) {
-    return $resource('api/v1/series/:action', {
-        action: '@action'
-    }, {
-        expand: {
-            method: 'POST',
-            params: {
-                action: 'expand'
-            },
-            isArray: true,
-            transformRequest: apiTransformRequest
-        },
-        points: {
-            method: 'POST',
-            params: {
-                action: 'points',
-                normalize: '@normalize'
-            },
-            transformRequest: apiTransformRequest
+app.factory('options', function($resource) {
+    return $resource('api/v1', null, {
+        get: {
+            method: 'OPTIONS'
         }
     });
 });
@@ -225,6 +202,37 @@ app.factory('providersAction', function($resource) {
                 id: '@id',
                 action: 'refresh'
             }
+        }
+    });
+});
+
+app.factory('series', function($resource) {
+    return $resource('api/v1/series/:action', {
+        action: '@action'
+    }, {
+        expand: {
+            method: 'POST',
+            params: {
+                action: 'expand'
+            },
+            isArray: true,
+            transformRequest: apiTransformRequest
+        },
+        points: {
+            method: 'POST',
+            params: {
+                action: 'points',
+                normalize: '@normalize'
+            },
+            transformRequest: apiTransformRequest
+        }
+    });
+});
+
+app.factory('version', function($resource) {
+    return $resource('api/v1/version', null, {
+        get: {
+            method: 'GET'
         }
     });
 });

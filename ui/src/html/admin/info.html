@@ -8,7 +8,7 @@
 	</header>
 
 	<section>
-		<h1>{{ 'label.build_info' | translate }}</h1>
+		<h1>{{ 'label.version_info' | translate }}</h1>
 
 		<table class="list">
 			<tbody>
@@ -16,25 +16,25 @@
 					<th class="listcolumn heading">{{ 'label.version' | translate }}</th>
 					<td class="listcolumn main expand">{{ info.version }}</td>
 				</tr>
-				<tr class="listrow" ng-if="info.build_date">
-					<th class="listcolumn heading">{{ 'label.build_date' | translate }}</th>
-					<td class="listcolumn main expand">{{ info.build_date }}</td>
+				<tr class="listrow" ng-if="info.branch">
+					<th class="listcolumn heading">{{ 'label.branch' | translate }}</th>
+					<td class="listcolumn main expand">{{ info.branch }}</td>
 				</tr>
-				<tr class="listrow" ng-if="info.build_hash">
-					<th class="listcolumn heading">{{ 'label.build_hash' | translate }}</th>
-					<td class="listcolumn main expand">{{ info.build_hash }}</td>
+				<tr class="listrow" ng-if="info.revision">
+					<th class="listcolumn heading">{{ 'label.revision' | translate }}</th>
+					<td class="listcolumn main expand">{{ info.revision }}</td>
 				</tr>
 				<tr class="listrow" ng-if="info.compiler">
 					<th class="listcolumn heading">{{ 'label.compiler' | translate }}</th>
 					<td class="listcolumn main expand">{{ info.compiler }}</td>
 				</tr>
-				<tr class="listrow">
-					<th class="listcolumn heading">{{ 'label.drivers' | translate }}</th>
-					<td class="listcolumn main expand pre">{{ info.drivers.join('\n') }}</td>
+				<tr class="listrow" ng-if="info.build_date">
+					<th class="listcolumn heading">{{ 'label.build_date' | translate }}</th>
+					<td class="listcolumn main expand">{{ info.build_date }}</td>
 				</tr>
 				<tr class="listrow">
 					<th class="listcolumn heading">{{ 'label.connectors' | translate }}</th>
-					<td class="listcolumn main expand pre">{{ info.connectors.join('\n') }}</td>
+					<td class="listcolumn main expand pre">{{ connectors.join('\n') }}</td>
 				</tr>
 				<tr class="listrow">
 					<th class="listcolumn heading">{{ 'label.website' | translate }}</th>
