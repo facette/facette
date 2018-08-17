@@ -4,6 +4,8 @@ language: go
 go:
 - "1.10"
 
+go_import_path: facette.io/facette
+
 dist: trusty
 
 services:
