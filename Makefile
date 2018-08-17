@@ -34,6 +34,10 @@ else
 TAR ?= tar
 endif
 
+tput = $(shell tty 1>/dev/null 2>&1 && tput $1)
+print_step = echo "$(call tput,setaf 4)***$(call tput,sgr0) $1"
+uniq = $(if $1,$(firstword $1) $(call uniq,$(filter-out $(firstword $1),$1)))
+
 GIT_HOOKS := $(patsubst misc/git-hooks/%,.git/hooks/%,$(wildcard misc/git-hooks/*))
 
 BIN_LIST := $(patsubst cmd/%,%,$(wildcard cmd/*))
@@ -42,10 +46,6 @@ MAN_LIST := $(patsubst docs/man/%.md,%,$(wildcard docs/man/*.[0-9].md))
 UI_LIST := $(shell find ui/src -type f)
 
 DIST_DIR ?= dist
-
-tput = $(shell tty 1>/dev/null 2>&1 && tput $1)
-print_step = echo "$(call tput,setaf 4)***$(call tput,sgr0) $1"
-uniq = $(if $1,$(firstword $1) $(call uniq,$(filter-out $(firstword $1),$1)))
 
 all: build
 
