@@ -20,7 +20,7 @@ type libraryCommand struct {
 
 	Dump struct {
 		Enable bool
-		Output string `names:"-o, --ouput" usage:"Dump output file path"`
+		Output string `names:"-o, --output" usage:"Dump output file path"`
 	} `usage:"Dump data from library" expand:"1"`
 
 	Restore struct {
