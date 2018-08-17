@@ -1,6 +1,6 @@
 % FACETTE(1) facette
 % Vincent Batoufflet <vincent@batoufflet.info>, Marc Falzon <marc@falzon.me>
-% March 28, 2017
+% August 17, 2018
 
 # NAME
 
@@ -12,18 +12,18 @@ facette [*options*]
 
 # DESCRIPTION
 
-Facette is a web application to display time series data from various sources — such as collectd, Graphite, InfluxDB
-or KairosDB.
+Facette is a web application to display time series data from various sources
+— such as collectd, Graphite, InfluxDB or KairosDB.
 
 # OPTIONS
 
--c *file*
-:   Specify the application configuration file path (default: /etc/facette/facette.yaml).
+-c, --config=*/etc/facette/facette.yaml*
+:   Specify the application configuration file path.
 
--h
+-h, --help
 :   Display application help and exit.
 
--V
+-V, --version
 :   Display the application version and exit.
 
 # SIGNALS
