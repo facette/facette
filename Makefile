@@ -91,7 +91,7 @@ test: test-bin
 test-bin:
 	@$(call print_step,"Testing packages...")
 	@for pkg in $(PKG_LIST); do \
-		$(GO) test -cover -tags "$(TAGS)" -v ./$$pkg || exit 1; \
+		$(GO) test -count=1 -cover -tags "$(TAGS)" -v ./$$pkg || exit 1; \
 	done
 
 install: install-bin install-docs
