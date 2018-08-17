@@ -17,9 +17,6 @@ before_install:
 - sudo apt-get -qq update
 - sudo apt-get install -y librrd-dev
 
-install:
-- go get -u golang.org/x/vgo
-
 before_script:
 - psql -c 'create database facette;' -U postgres
 - mysql -e 'create database facette charset=utf8;'
