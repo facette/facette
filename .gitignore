@@ -1,4 +1,6 @@
 /bin
+/debian/changelog
 /dist
 /ui/node_modules
+/var
 /web/bindata.go

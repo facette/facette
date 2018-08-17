@@ -1,3 +1,6 @@
-build
-node_modules
-bindata.go
+bin
+debian
+dist
+ui/node_modules
+var
+web/bindata.go

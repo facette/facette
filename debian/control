@@ -3,10 +3,15 @@ Section: utils
 Priority: optional
 Maintainer: Development Team <dev@facette.io>
 Build-Depends:
- debhelper (>= 9), dh-systemd,
+ debhelper (>= 9),
+ dh-systemd,
+ golang-go (>= 2:1.10~),
  librrd-dev (>= 1.4),
+ nodejs (>= 8.0.0~),
  pandoc,
-Standards-Version: 3.9.5
+ pkg-config,
+ quilt,
+Standards-Version: 3.9.8
 Homepage: https://facette.io/
 
 Package: facette

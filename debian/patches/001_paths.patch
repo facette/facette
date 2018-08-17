@@ -1,0 +1,22 @@
+Index: build/docs/examples/facette.yaml
+===================================================================
+--- build.orig/docs/examples/facette.yaml
++++ build/docs/examples/facette.yaml
+@@ -6,7 +6,7 @@ logger:
+     level: info
+ 
+     # Log file path (uses stdout if left empty or set to "-")
+-    path:
++    path: /var/log/facette/facette.log
+ 
+   ### Syslog
+   #syslog:
+@@ -51,7 +51,7 @@ storage:
+ 
+   ### SQLite
+   driver: sqlite
+-  path: var/data.db
++  path: /var/lib/facette/data.db
+ 
+   ### PostgreSQL
+   #driver: pgsql

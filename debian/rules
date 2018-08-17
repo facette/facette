@@ -4,7 +4,7 @@ DPKG_EXPORT_BUILDFLAGS = 1
 include /usr/share/dpkg/default.mk
 
 %:
-	dh $@ --with=systemd
+	dh $@ --with=quilt --with=systemd
 
 override_dh_auto_build:
 	@#noop

@@ -13,23 +13,20 @@ PREFIX ?= /usr/local
 ENV ?= production
 
 ifeq ($(ENV),production)
-TAGS := $(TAGS) builtin_assets
+override TAGS += builtin_assets
 endif
 
-GO ?= vgo
+GO ?= go
 GOLINT ?= golint
 
 GOOS ?= $(shell $(GO) env GOOS)
 GOARCH ?= $(shell $(GO) env GOARCH)
 
-GO111MODULE ?= on
-export GO111MODULE
-
 YARN ?= yarn
 YARN_ARGS ?= --emoji false --no-color --cwd ui
 
 PANDOC ?= pandoc
-PANDOC_ARGS = --standalone --to man
+PANDOC_ARGS := --standalone --to man
 
 ifeq ($(shell uname -s),Darwin)
 TAR ?= gtar
@@ -40,8 +37,9 @@ endif
 GIT_HOOKS := $(patsubst misc/git-hooks/%,.git/hooks/%,$(wildcard misc/git-hooks/*))
 
 BIN_LIST := $(patsubst cmd/%,%,$(wildcard cmd/*))
-PKG_LIST = $(call uniq,$(dir $(wildcard */*.go)))
-MAN_LIST = $(patsubst docs/man/%.md,%,$(wildcard docs/man/*.[0-9].md))
+PKG_LIST := $(call uniq,$(dir $(wildcard */*.go)))
+MAN_LIST := $(patsubst docs/man/%.md,%,$(wildcard docs/man/*.[0-9].md))
+UI_LIST := $(shell find ui/src -type f)
 
 DIST_DIR ?= dist
 
@@ -66,12 +64,12 @@ endif
 	@$(GO) generate -tags "$(TAGS)" ./... && for bin in $(BIN_LIST); do \
 		$(GO) build -i \
 			-tags "$(TAGS)" \
-			-ldflags '-s -w \
-				-X "$(REPO_PATH)/version.Version=$(VERSION)" \
-				-X "$(REPO_PATH)/version.Branch=$(BRANCH)" \
-				-X "$(REPO_PATH)/version.Revision=$(REVISION)" \
-				-X "$(REPO_PATH)/version.BuildDate=$(BUILD_DATE)" \
-			' \
+			-ldflags "-s -w \
+				-X '$(REPO_PATH)/version.Version=$(VERSION)' \
+				-X '$(REPO_PATH)/version.Branch=$(BRANCH)' \
+				-X '$(REPO_PATH)/version.Revision=$(REVISION)' \
+				-X '$(REPO_PATH)/version.BuildDate=$(BUILD_DATE)' \
+			" \
 		-o bin/$$bin -v ./cmd/$$bin || exit 1; \
 	done
 
@@ -80,9 +78,10 @@ build-assets: ui/node_modules
 	@rm -rf $(DIST_DIR)/assets/ && $(YARN) $(YARN_ARGS) build --env $(ENV)
 
 build-docs:
-ifneq ($(filter build_docs,$(TAGS)),)
+ifeq ($(filter skip_docs,$(TAGS)),)
 	@$(call print_step,"Generating manual pages...")
 	@for man in $(MAN_LIST); do \
+		echo $$man; \
 		install -d -m 0755 $(DIST_DIR)/man && $(PANDOC) $(PANDOC_ARGS) docs/man/$$man.md >$(DIST_DIR)/man/$$man; \
 	done
 endif
@@ -123,12 +122,17 @@ dist-source:
 	@$(call print_step,"Building source archive...")
 	@install -d -m 0755 $(DIST_DIR) && $(TAR) -czf $(DIST_DIR)/$(NAME)_$(VERSION).tar.gz \
 		--transform "flags=r;s|^\./|$(NAME)-$(VERSION)/|" \
-		--exclude=.git --exclude=.vscode --exclude=bin --exclude=dist --exclude=node_modules .
+		--exclude=.git --exclude=.vscode --exclude=bin --exclude=bindata.go --exclude=dist \
+		--exclude=node_modules --exclude=var .
 
 dist-bin: build-bin
 	@$(call print_step,"Building binary archive...")
 	@install -d -m 0755 $(DIST_DIR) && $(TAR) -czf $(DIST_DIR)/$(NAME)_$(VERSION)_$(GOOS)_$(GOARCH).tar.gz \
 		--transform "flags=r;s/.*\//$(NAME)-$(VERSION)\//" ./bin/* ./CHANGES.md ./README.md
+
+dist-deb:
+	@$(call print_step,"Building Debian packages...")
+	@./misc/scripts/build-debian.sh
 
 dist-docker:
 	@$(call print_step,"Building Docker image...")

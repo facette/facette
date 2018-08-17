@@ -46,14 +46,14 @@ http:
   expose_version: true
 
 storage:
-  # Print SQL storage debugging messages
+  # Enable SQL storage debugging
   debug: false
 
-  ### SQLite storage engine parameters
+  ### SQLite
   driver: sqlite
-  path: /var/lib/facette/data.db
+  path: var/data.db
 
-  ### PostgreSQL storage engine parameters
+  ### PostgreSQL
   #driver: pgsql
   #host: localhost
   #port: 5432
@@ -61,7 +61,7 @@ storage:
   #user: facette
   #password: ********
 
-  ### MySQL storage engine parameters
+  ### MySQL
   #driver: mysql
   #host: localhost
   #port: 3306
@@ -69,8 +69,8 @@ storage:
   #user: facette
   #password: ********
 
-# Defaults
 defaults:
+  # Default time range
   time_range: -1h
 
 # vim: ts=2 sw=2 et
