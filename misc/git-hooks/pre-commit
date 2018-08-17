@@ -1,0 +1,18 @@
+#!/bin/sh
+
+export IFS=$'\n'
+
+files=$(git diff --cached --diff-filter=ACM --name-only | grep "\.go$")
+[ -z "${files}" ] && exit 0
+
+unformatted=$(gofmt -l $files)
+[ -z "${unformatted}" ] && exit 0
+
+echo "Some files formatting differs from gofmt's. Please run:" >&2
+for file in ${unformatted}; do
+    printf "  gofmt -w %q\n" ${file} >&2
+done
+
+exit 1
+
+# vim: ts=4 sw=4 et
