@@ -93,7 +93,7 @@ func init() {
 		if pattern != "" {
 			c.pattern, err = compilePattern(pattern)
 			if err != nil {
-				return nil, fmt.Errorf("unable to compile regexp pattern: %s", err)
+				return nil, err
 			}
 		} else if mapping != nil {
 			c.mapping.source, err = mapping.GetStringSlice("source", nil)

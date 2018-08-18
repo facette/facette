@@ -22,6 +22,7 @@ type Poller struct {
 	config   *config.Config
 	logger   *logger.Logger
 	workers  map[string]*worker
+	errors   map[string]error
 	wg       *sync.WaitGroup
 }
 
@@ -40,6 +41,7 @@ func New(
 		config:   config,
 		logger:   logger,
 		workers:  make(map[string]*worker),
+		errors:   make(map[string]error),
 		wg:       &sync.WaitGroup{},
 	}
 }
@@ -75,7 +77,9 @@ func (p *Poller) Run() error {
 // Shutdown stops the providers polling.
 func (p *Poller) Shutdown() {
 	for _, w := range p.workers {
-		go p.StopWorker(w.provider, false)
+		if w != nil {
+			go p.StopWorker(w.provider, false)
+		}
 	}
 }
 
@@ -95,13 +99,15 @@ func (p *Poller) StartWorker(prov *storage.Provider) {
 		return
 	}
 
-	// Initialize new provider worker and perform initial refresh
+	// Initialize new poller worker and perform initial refresh
 	p.workers[prov.ID], err = newWorker(p, prov, p.logger.Context(fmt.Sprintf("poller[%s]", prov.Name)))
 	if err != nil {
+		p.errors[prov.ID] = err
 		p.logger.Error("failed to start %q worker: %s", prov.Name, err)
 		return
 	}
 
+	p.errors[prov.ID] = nil
 	go p.workers[prov.ID].Run()
 }
 
@@ -118,6 +124,12 @@ func (p *Poller) StopWorker(prov *storage.Provider, update bool) {
 	if update {
 		p.StartWorker(prov)
 	}
+}
+
+// WorkerError returns the error returned on poller worker initialization.
+func (p *Poller) WorkerError(id string) error {
+	err, _ := p.errors[id]
+	return err
 }
 
 // RefreshAll triggers a refresh on all the registered poller workers.

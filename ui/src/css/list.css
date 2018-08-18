@@ -164,6 +164,10 @@ thead .listcolumn.heading {
 	margin-left: 0.25rem;
 }
 
+.listcolumn.main .name .error {
+	color: #e74c3c;
+}
+
 .listcolumn.main .note {
 	white-space: nowrap;
 }

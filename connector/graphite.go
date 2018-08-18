@@ -71,7 +71,7 @@ func init() {
 		// Check and compile regexp pattern
 		c.pattern, err = compilePattern(pattern)
 		if err != nil {
-			return nil, fmt.Errorf("unable to compile regexp pattern: %s", err)
+			return nil, err
 		}
 
 		c.client = httputil.NewClient(time.Duration(c.timeout)*time.Second, true, c.allowInsecure)

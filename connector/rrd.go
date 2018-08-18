@@ -53,7 +53,7 @@ func init() {
 		// Check and compile regexp pattern
 		c.pattern, err = compilePattern(pattern)
 		if err != nil {
-			return nil, fmt.Errorf("unable to compile pattern: %s", err)
+			return nil, err
 		}
 
 		return c, nil

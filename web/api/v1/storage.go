@@ -722,14 +722,27 @@ func (a *API) storageList(rw http.ResponseWriter, r *http.Request) {
 	result := []map[string]interface{}{}
 
 	for i, n := 0, reflect.Indirect(rv).Len(); i < n; i++ {
+		var entry map[string]interface{}
+
 		if typ == "collections" && parseBoolParam(r, "expand") {
 			collection := reflect.Indirect(rv).Index(i).Interface().(*storage.Collection)
 			collection.Expand(nil)
 
-			result = append(result, jsonutil.FilterStruct(collection, fields))
+			entry = jsonutil.FilterStruct(collection, fields)
 		} else {
-			result = append(result, jsonutil.FilterStruct(reflect.Indirect(rv).Index(i).Interface(), fields))
+			entry = jsonutil.FilterStruct(reflect.Indirect(rv).Index(i).Interface(), fields)
 		}
+
+		if typ == "providers" {
+			err := a.poller.WorkerError(reflect.Indirect(rv).Index(i).Elem().FieldByName("ID").String())
+			if err != nil {
+				entry["error"] = err.Error()
+			} else {
+				entry["error"] = nil
+			}
+		}
+
+		result = append(result, entry)
 	}
 
 	rw.Header().Set("X-Total-Records", fmt.Sprintf("%d", count))
