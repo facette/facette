@@ -115,7 +115,9 @@ func (p *Poller) StartWorker(prov *storage.Provider) {
 func (p *Poller) StopWorker(prov *storage.Provider, update bool) {
 	p.Lock()
 	if w, ok := p.workers[prov.ID]; ok {
-		w.Shutdown()
+		if w != nil {
+			w.Shutdown()
+		}
 		delete(p.workers, prov.ID)
 	}
 	p.Unlock()
