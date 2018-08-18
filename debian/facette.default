@@ -2,8 +2,5 @@
 # sourced by /etc/init.d/facette
 # installed at /etc/default/facette by the maintainer scripts
 
-# Enable/Disable facette
-ENABLED=false
-
 # Arguments for facette daemon
 DAEMON_ARGS=""

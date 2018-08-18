@@ -16,7 +16,7 @@ Homepage: https://facette.io/
 
 Package: facette
 Architecture: any
-Depends: adduser, ${shlibs:Depends}, ${misc:Depends}
+Depends: adduser, daemon, ${shlibs:Depends}, ${misc:Depends}
 Description: time series data visualization software
  Facette is a web application to visualize time series data from various
  sources such as collectd, Graphite, InfluxDB or KairosDB.

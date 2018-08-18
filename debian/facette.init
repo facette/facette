@@ -9,36 +9,39 @@ fi
 # Required-Stop:     $remote_fs $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: time series data visualization software
-# Description:       time series data visualization software
+# Short-Description: Time series data visualization software
+# Description:       Time series data visualization software
 ### END INIT INFO
 
-# Author: Development Team <dev@facette.io>
-
 NAME="facette"
-DESC="$NAME"
+DESC="Time series data visualization software"
+USER="facette"
+GROUP="facette"
 
-[ -e /etc/default/$NAME ] && . /etc/default/$NAME
+[ -r /etc/default/$NAME ] && . /etc/default/$NAME
 
-DAEMON="/usr/bin/$NAME"
+DAEMON=/usr/bin/$NAME
 
-PIDDIR="/var/run/$NAME"
-PIDFILE="$PIDDIR/$NAME.pid"
+LOGFILE="/var/log/facette/facette.log"
+PIDFILE="/var/run/facette/facette.pid"
 
-[ ! -d "$PIDDIR" ] && install -d 0755 -o facette -g facette $PIDDIR
+HELPER="/usr/bin/daemon"
+HELPER_ARGS="--name=$NAME --output=$LOGFILE --pidfile=$PIDFILE --user=$USER:$GROUP"
 
-do_start_cmd_override() {
-    if [ "$ENABLED" != "true" ]; then
-        log_warning_msg "Not starting, disabled via /etc/default/$NAME"
-        exit 0
-    fi
+do_start_prepare() {
+    install -d 0755 -o $USER -g $GROUP $(dirname $PIDFILE)
+}
 
-    start-stop-daemon --start --quiet --background --chuid facette:facette --pidfile $PIDFILE \
-        --make-pidfile --name $NAME --exec $DAEMON --test >/dev/null \
-        || return 1
-    start-stop-daemon --start --quiet --background --chuid facette:facette --pidfile $PIDFILE \
-        --make-pidfile --name $NAME --exec $DAEMON -- $DAEMON_ARGS \
-        || return 2
+do_start_cmd() {
+    $HELPER $HELPER_ARGS --running && return 1
+    $HELPER $HELPER_ARGS -- $DAEMON $DAEMON_ARGS || return 2
+}
+
+do_stop_cmd() {
+    $HELPER $HELPER_ARGS --running || return 1
+    $HELPER $HELPER_ARGS --stop || return 2
+    sleep 2s
+    $HELPER $HELPER_ARGS --running && return 2
 }
 
 # vim: ft=sh ts=4 sw=4 et
