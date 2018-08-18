@@ -161,7 +161,7 @@ func (c *graphiteConnector) Refresh(output chan<- *catalog.Record) error {
 
 		seriesMatch, err := matchPattern(c.pattern, s)
 		if err != nil {
-			c.logger.Error("%s", err)
+			c.logger.Warning("%s", err)
 			continue
 		}
 

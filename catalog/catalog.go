@@ -18,7 +18,15 @@ func New(name string, connector interface{}) *Catalog {
 }
 
 // Insert inserts a new record into the catalog.
-func (c *Catalog) Insert(r *Record) {
+func (c *Catalog) Insert(r *Record) error {
+	if r.Origin == "" {
+		return ErrEmptyOrigin
+	} else if r.Source == "" {
+		return ErrEmptySource
+	} else if r.Metric == "" {
+		return ErrEmptyMetric
+	}
+
 	origin, ok := c.Origins[r.Origin]
 	if !ok {
 		c.Origins[r.Origin] = &Origin{
@@ -47,6 +55,8 @@ func (c *Catalog) Insert(r *Record) {
 			source:     source,
 		}
 	}
+
+	return nil
 }
 
 // Origin returns an existing origin from the catalog or an error if the origin doesn't exist.

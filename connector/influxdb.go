@@ -37,6 +37,7 @@ func init() {
 			mapping: &influxDBMapping{
 				Glue: ".",
 			},
+			logger: logger,
 		}
 
 		// Load provider configuration
@@ -151,6 +152,7 @@ type influxDBConnector struct {
 	pattern       *regexp.Regexp
 	mapping       *influxDBMapping
 	client        influxdb.Client
+	logger        *logger.Logger
 }
 
 func (c *influxDBConnector) Name() string {
@@ -295,8 +297,11 @@ func (c *influxDBConnector) Refresh(output chan<- *catalog.Record) error {
 	if c.pattern != nil { // Pattern-based mapping
 		for series, metricColumns := range columnsMap {
 			for _, metric := range metricColumns {
-				// FIXME: we should return the matchPattern() error to the caller via the eventChan
-				seriesMatch, _ := matchPattern(c.pattern, series)
+				seriesMatch, err := matchPattern(c.pattern, series)
+				if err != nil {
+					c.logger.Warning("%s", err)
+					continue
+				}
 
 				output <- &catalog.Record{
 					Origin: c.name,

@@ -110,8 +110,13 @@ func (w *worker) Run() {
 							break
 						}
 
-						w.logger.Debug("appending record %s in %q catalog", record, w.provider.Name)
-						catalog.Insert(record)
+						err := catalog.Insert(record)
+						if err != nil {
+							w.logger.Warning("failed to insert record %s to catalog: %s", record, err)
+							continue
+						}
+
+						w.logger.Debug("inserted record %s in %q catalog", record, w.provider.Name)
 					}
 
 					// Register or replace catalog into searcher

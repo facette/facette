@@ -178,7 +178,7 @@ func (c *rrdConnector) Refresh(output chan<- *catalog.Record) error {
 		// Get matching pattern elements
 		m, err := matchPattern(c.pattern, strings.TrimPrefix(path, c.path+"/"))
 		if err != nil {
-			c.logger.Error("%s", err)
+			c.logger.Warning("%s", err)
 			return nil
 		}
 
