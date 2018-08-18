@@ -128,9 +128,9 @@ func (c *rrdConnector) Refresh(output chan<- *catalog.Record) error {
 
 		for ds := range indexes {
 			for _, cf := range set.StringSlice(cfs) {
-				metric = metric + "/" + ds + "/" + strings.ToLower(cf)
+				metricName := metric + "/" + ds + "/" + strings.ToLower(cf)
 
-				c.metrics[source][metric] = &rrdMetric{
+				c.metrics[source][metricName] = &rrdMetric{
 					DS:   ds,
 					Path: path,
 					Step: time.Duration(info["step"].(uint)) * time.Second,
@@ -140,7 +140,7 @@ func (c *rrdConnector) Refresh(output chan<- *catalog.Record) error {
 				output <- &catalog.Record{
 					Origin:    c.name,
 					Source:    source,
-					Metric:    metric,
+					Metric:    metricName,
 					Connector: c,
 				}
 			}
