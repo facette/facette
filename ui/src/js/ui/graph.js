@@ -913,7 +913,10 @@ angular.module('facette.ui.graph', [])
             $scope.resizeTimeout = null;
         }
 
-        $scope.resizeTimeout = $timeout(draw, 50);
+        $scope.resizeTimeout = $timeout(function() {
+            Object.assign(element, {height: null, width: null}); // TODO: integrate reset in boula?
+            draw();
+        }, 50);
     });
 
     $element.on('mousemove', function(e) {
