@@ -383,10 +383,13 @@
 	align-self: flex-start;
 	line-height: 1.75rem;
 	font-size: 0.9rem;
+	max-width: 100%;
+	overflow-x: auto;
 }
 
 .graph-legend table {
 	border-spacing: 0;
+	white-space: nowrap;
 }
 
 .graph-legend tr.disabled {

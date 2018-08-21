@@ -485,6 +485,7 @@ angular.module('facette.ui.graph', [])
             paddingBottom: ($scope.chart.config.margin / 2) + 'px',
             paddingLeft: $scope.chart.area.left + 'px',
             paddingRight: $scope.chart.config.margin + 'px',
+            maxWidth: 'calc(100% - ' + ($scope.chart.area.left + $scope.chart.config.margin) + 'px)',
         });
     }
 
