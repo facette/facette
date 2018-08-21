@@ -148,6 +148,9 @@ angular.module('facette.ui.graph', [])
                     }
                 }
             },
+            background: {
+                color: 'white',
+            },
             bindTo: element,
             margin: graphMargin,
             series: [],
