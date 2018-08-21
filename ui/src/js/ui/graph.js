@@ -160,7 +160,9 @@ angular.module('facette.ui.graph', [])
 
                     switch (e.type) {
                     case 'mousedown':
-                        if (!$scope.zoomEl) {
+                        if (e.button == 2) {
+                            break;
+                        } else if (!$scope.zoomEl) {
                             $scope.zoomEl = $element.find('.graph-zoom').css({
                                 top: $scope.chart.area.top + 'px',
                                 height: $scope.chart.area.height + 'px'
@@ -172,7 +174,7 @@ angular.module('facette.ui.graph', [])
                         break;
 
                     case 'mouseup':
-                        if ($scope.zoomOrigin === null || $scope.zoomOrigin === e.layerX) {
+                        if (e.button == 2 || $scope.zoomOrigin === null || $scope.zoomOrigin === e.layerX) {
                             break;
                         }
 
