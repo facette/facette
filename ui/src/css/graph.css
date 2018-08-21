@@ -8,9 +8,9 @@
 }
 
 .graph.frame,
-.graph.frame .graph-caontainer,
+.graph.frame .graph-container,
 .graph.frame .graph-canvas {
-	min-height: 100%;
+	min-height: 100vh;
 }
 
 .graph:hover .graph-slides,
