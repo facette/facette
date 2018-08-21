@@ -127,7 +127,7 @@ app.controller('BrowseGraphController', function($location, $rootScope, $routePa
     $scope.setGrid = function(size) {
         $scope.gridSize = size;
         storage.set('browse-grid', $scope.section + '-' + $scope.id, size);
-        $timeout(function() { $rootScope.$emit('RedrawGraph'); }, 0);
+        angular.element($window).trigger('resize');
     };
 
     $scope.toggleLegends = function(state) {

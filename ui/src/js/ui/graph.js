@@ -113,7 +113,9 @@ angular.module('facette.ui.graph', [])
         }
     }
 
-    function draw() {
+    function draw(resize) {
+        resize = typeof resize == 'boolean' ? resize : false;
+
         if (!$scope.data) {
             return;
         }
@@ -121,6 +123,10 @@ angular.module('facette.ui.graph', [])
         var element = $element.find('.graph-canvas canvas')[0],
             startTime = moment($scope.data.start),
             endTime = moment($scope.data.end);
+
+        if (resize) {
+            Object.assign(element, {height: null, width: null});
+        }
 
         var chartCfg = {
             axes: {
@@ -916,8 +922,7 @@ angular.module('facette.ui.graph', [])
         }
 
         $scope.resizeTimeout = $timeout(function() {
-            Object.assign(element, {height: null, width: null}); // TODO: integrate reset in boula?
-            draw();
+            draw(true);
         }, 50);
     });
 
