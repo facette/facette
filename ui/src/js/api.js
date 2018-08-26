@@ -1,7 +1,5 @@
 function apiTransformRequest(data) {
     delete data.type;
-    delete data.normalize;
-
     return JSON.stringify(data);
 }
 
@@ -222,7 +220,6 @@ app.factory('series', function($resource) {
             method: 'POST',
             params: {
                 action: 'points',
-                normalize: '@normalize'
             },
             transformRequest: apiTransformRequest
         }

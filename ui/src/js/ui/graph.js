@@ -370,7 +370,7 @@ angular.module('facette.ui.graph', [])
         $scope.summary = {};
 
         var query = {
-            normalize: 1
+            normalize: true,
         };
 
         angular.forEach(['start_time', 'end_time', 'time', 'range'], function(key) {

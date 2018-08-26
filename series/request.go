@@ -17,4 +17,5 @@ type Request struct {
 	ID         string         `json:"id"`
 	Graph      *storage.Graph `json:"graph"`
 	Attributes maputil.Map    `json:"attributes,omitempty"`
+	Normalize  bool           `json:"normalize"`
 }

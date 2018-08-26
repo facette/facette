@@ -192,7 +192,7 @@ func (a *API) seriesPoints(rw http.ResponseWriter, r *http.Request) {
 	points := series.Response{
 		Start:   req.StartTime.Format(time.RFC3339),
 		End:     req.EndTime.Format(time.RFC3339),
-		Series:  a.executeRequest(req, parseBoolParam(r, "normalize")),
+		Series:  a.executeRequest(req, req.Normalize),
 		Options: req.Graph.Options,
 	}
 
