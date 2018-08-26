@@ -2,7 +2,7 @@ package config
 
 // DefaultsConfig represents a service defaults configuration instance.
 type DefaultsConfig struct {
-	TimeRange string `yaml:"time_range"`
+	TimeRange string `json:"time_range" yaml:"time_range"`
 }
 
 func newDefaultsConfig() *DefaultsConfig {

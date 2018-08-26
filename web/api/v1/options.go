@@ -3,14 +3,16 @@ package v1
 import (
 	"net/http"
 
+	"facette.io/facette/config"
 	"facette.io/facette/connector"
 	"facette.io/httputil"
 )
 
 // Options represents an API options instance.
 type Options struct {
-	Connectors []string `json:"connectors"`
-	ReadOnly   bool     `json:"read_only"`
+	Connectors []string               `json:"connectors"`
+	Defaults   *config.DefaultsConfig `json:"defaults"`
+	ReadOnly   bool                   `json:"read_only"`
 }
 
 // api:section options "Options"
@@ -42,6 +44,7 @@ func (a *API) optionsGet(rw http.ResponseWriter, r *http.Request) {
 
 	httputil.WriteJSON(rw, Options{
 		Connectors: connector.Connectors(),
+		Defaults:   a.config.Defaults,
 		ReadOnly:   a.config.HTTP.ReadOnly,
 	}, http.StatusOK)
 }
