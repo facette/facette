@@ -14,7 +14,7 @@ import (
 
 // Poller represents a poller instance.
 type Poller struct {
-	sync.Mutex
+	sync.RWMutex
 
 	ctx      context.Context
 	storage  *storage.Storage
@@ -75,6 +75,9 @@ func (p *Poller) Run() error {
 
 // Shutdown stops the providers polling.
 func (p *Poller) Shutdown() {
+	p.RLock()
+	defer p.RUnlock()
+
 	for _, w := range p.workers {
 		if w != nil {
 			go p.StopWorker(w.provider, false)
@@ -135,8 +138,8 @@ func (p *Poller) WorkerError(id string) error {
 
 // RefreshAll triggers a refresh on all the registered poller workers.
 func (p *Poller) RefreshAll() {
-	p.Lock()
-	defer p.Unlock()
+	p.RLock()
+	defer p.RUnlock()
 
 	for _, w := range p.workers {
 		go w.Refresh()
@@ -145,8 +148,8 @@ func (p *Poller) RefreshAll() {
 
 // Refresh triggers a refresh on an existing poller worker.
 func (p *Poller) Refresh(prov storage.Provider) {
-	p.Lock()
-	defer p.Unlock()
+	p.RLock()
+	defer p.RUnlock()
 
 	if w, ok := p.workers[prov.ID]; ok {
 		go w.Refresh()
