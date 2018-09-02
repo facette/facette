@@ -11,6 +11,7 @@ import (
 	"facette.io/facette/template"
 	"facette.io/httputil"
 	"facette.io/jsonutil"
+	"facette.io/sliceutil"
 	"facette.io/sqlstorage"
 	"github.com/hashicorp/go-uuid"
 	"github.com/vbatoufflet/httproute"
@@ -714,7 +715,7 @@ func (a *API) storageList(rw http.ResponseWriter, r *http.Request) {
 	if fields == nil {
 		fields = []string{"id", "name", "description", "created", "modified"}
 		if typ == "providers" {
-			fields = append(fields, "enabled")
+			fields = append(fields, "enabled", "error")
 		}
 	}
 
@@ -733,7 +734,7 @@ func (a *API) storageList(rw http.ResponseWriter, r *http.Request) {
 			entry = jsonutil.FilterStruct(reflect.Indirect(rv).Index(i).Interface(), fields)
 		}
 
-		if typ == "providers" {
+		if typ == "providers" && sliceutil.Has(fields, "error") {
 			err := a.poller.WorkerError(reflect.Indirect(rv).Index(i).Elem().FieldByName("ID").String())
 			if err != nil {
 				entry["error"] = err.Error()
