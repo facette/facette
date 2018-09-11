@@ -242,7 +242,6 @@
     "label.search": "Recherche",
     "label.separator_comma": "séparé par des virgules",
     "label.series_add": "Ajouter une série",
-    "label.series_consolidate_interpolate": "Interpoler les points manquants",
     "label.series_consolidate_select": "Sélectionnez une consolidation…",
     "label.series_consolidate": "Consolidation",
     "label.series_define": "Définition des séries",

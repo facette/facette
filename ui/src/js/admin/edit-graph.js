@@ -321,14 +321,6 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
             $scope.groupItem.consolidate = groupConsolidateAverage;
         }
 
-        if (!$scope.groupItem.options) {
-            $scope.groupItem.options = {};
-        }
-
-        if ($scope.groupItem.options.interpolate === undefined) {
-            $scope.groupItem.options.interpolate = true;
-        }
-
         $scope.selectedOptions.group = {
             operator: $scope.groupOperators[$scope.groupItem.operator],
             consolidate: $scope.groupConsolidations[$scope.groupItem.consolidate - 1]

@@ -263,7 +263,6 @@ func (a *API) executeRequest(req *series.Request, forceNormalize bool) []series.
 	for i, group := range req.Graph.Groups {
 		var (
 			consolidate int
-			interpolate bool
 			err         error
 		)
 
@@ -290,11 +289,6 @@ func (a *API) executeRequest(req *series.Request, forceNormalize bool) []series.
 			consolidate = v
 		}
 
-		interpolate = true
-		if v, ok := group.Options["interpolate"].(bool); ok {
-			interpolate = v
-		}
-
 		if ok, _ := group.Options["zero_nulls"].(bool); ok {
 			for _, s := range data[i] {
 				s.ZeroNulls()
@@ -302,7 +296,7 @@ func (a *API) executeRequest(req *series.Request, forceNormalize bool) []series.
 		}
 
 		// Normalize series and apply operations
-		data[i], err = series.Normalize(data[i], req.StartTime, req.EndTime, req.Sample, consolidate, interpolate)
+		data[i], err = series.Normalize(data[i], req.StartTime, req.EndTime, req.Sample, consolidate)
 		if err != nil {
 			a.logger.Error("failed to normalize series: %s", err)
 			continue

@@ -2,6 +2,7 @@ package series
 
 import (
 	"math"
+	"sort"
 	"time"
 )
 
@@ -114,13 +115,7 @@ func (b bucket) Consolidate(consolidation int) Point {
 }
 
 // Normalize aligns multiple point series on a common time step, consolidates points samples if necessary.
-func Normalize(
-	series []Series,
-	startTime, endTime time.Time,
-	sample int,
-	consolidation int,
-	interpolate bool,
-) ([]Series, error) {
+func Normalize(series []Series, startTime, endTime time.Time, sample int, consolidation int) ([]Series, error) {
 	if sample <= 0 {
 		return nil, ErrInvalidSample
 	}
@@ -173,48 +168,52 @@ func Normalize(
 		}
 
 		// Consolidate point buckets
-		lastKnown := -1
+		unknownGaps := map[int][]int{}
+		unknownGapLast := 0
+		unknownLast := -1
 
 		for j := range buckets[i] {
 			result[i].Points[j] = buckets[i][j].Consolidate(consolidation)
 
-			if interpolate {
-				// Keep reference of last and next known points
-				if lastKnown != -1 {
-					result[i].Points[j].prev = &result[i].Points[lastKnown]
-				}
-
-				if !result[i].Points[j].Value.IsNaN() {
-					if lastKnown != -1 {
-						for k := lastKnown; k < j; k++ {
-							result[i].Points[k].next = &result[i].Points[j]
-						}
-					}
-
-					lastKnown = j
-				}
-			}
-
 			// Align consolidated points timestamps among normalized series lists
 			result[i].Points[j].Time = buckets[i][j].startTime.Add(time.Duration(step.Seconds() * float64(j))).
 				Round(time.Second)
+
+			if result[i].Points[j].Value.IsNaN() {
+				if unknownLast != -1 {
+					gap := j - unknownLast
+
+					if _, ok := unknownGaps[gap]; !ok {
+						unknownGaps[gap] = []int{}
+					}
+
+					// Check for first value if gap is consistent
+					if unknownGapLast != -1 {
+						if gap == unknownGapLast {
+							unknownGaps[gap] = append(unknownGaps[gap], j-gap*2)
+							unknownGapLast = -1
+						} else {
+							unknownGapLast = gap
+						}
+					}
+
+					unknownGaps[gap] = append(unknownGaps[gap], j)
+				}
+
+				unknownLast = j
+			}
 		}
 
-		// Interpolate missing points
-		if !interpolate {
-			continue
-		}
-
-		for j, point := range result[i].Points {
-			if !point.Value.IsNaN() || point.Value.IsNaN() && (point.prev == nil || point.next == nil) {
+		// Cleanup series from regular gaps
+		for _, indexes := range unknownGaps {
+			if len(indexes) < 2 {
 				continue
 			}
 
-			a := float64(point.next.Value-point.prev.Value) / float64(point.next.Time.UnixNano()-
-				point.prev.Time.UnixNano())
-			b := float64(point.prev.Value) - a*float64(point.Time.UnixNano())
-
-			result[i].Points[j].Value = Value(a*float64(point.next.Time.UnixNano()) + b)
+			sort.Sort(sort.Reverse(sort.IntSlice(indexes)))
+			for _, idx := range indexes {
+				result[i].Points = append(result[i].Points[:idx], result[i].Points[idx+1:]...)
+			}
 		}
 	}
 

@@ -242,7 +242,6 @@
     "label.search": "Search",
     "label.separator_comma": "separated by comma",
     "label.series_add": "Add series",
-    "label.series_consolidate_interpolate": "Interpolate missing points",
     "label.series_consolidate_select": "Select a consolidation…",
     "label.series_consolidate": "Consolidation",
     "label.series_define": "Define series",
