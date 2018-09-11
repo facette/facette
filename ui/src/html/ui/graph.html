@@ -64,8 +64,7 @@
 		<div class="graph-legend" ng-if="legendActive && chart">
 			<table>
 				<tr ng-class="{disabled: disabledSeries[idx]}" ng-repeat="(idx, series) in data.series">
-					<td><div class="label" ng-click="toggleSeries(idx)" ng-mouseenter="highlightSeries(idx, true)"
-							ng-mouseleave="highlightSeries(idx, false)">
+					<td><div class="label" ng-click="selectSeries(idx, $event.shiftKey)">
 						<span class="color" ng-style="{backgroundColor: chart.config.series[idx].color}"></span>
 						{{ series.name }}
 					</div></td>

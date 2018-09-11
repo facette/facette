@@ -672,12 +672,6 @@ angular.module('facette.ui.graph', [])
         }
     };
 
-    $scope.highlightSeries = function(idx, state) {
-        if (!$scope.disabledSeries[idx]) {
-            $scope.chart.highlightSeries(idx, state);
-        }
-    };
-
     $scope.moveStep = function(forward) {
         forward = typeof forward == 'boolean' ? forward : false;
 
@@ -717,6 +711,14 @@ angular.module('facette.ui.graph', [])
 
     $scope.refresh = function() {
         fetchData();
+    };
+
+    $scope.selectSeries = function(idx, toggle) {
+        $scope.chart.selectSeries(idx, toggle);
+        $scope.disabledSeries = $scope.chart.config.series.reduce((state, series, seriesIdx) => {
+            state[seriesIdx] = series.disabled;
+            return state;
+        }, {});
     };
 
     $scope.setRange = function(range) {
@@ -785,13 +787,6 @@ angular.module('facette.ui.graph', [])
             };
             $scope.chart.addLine(id, $scope.lines[id]);
         }
-    };
-
-    $scope.toggleSeries = function(idx) {
-        var state = !$scope.disabledSeries[idx];
-        $scope.disabledSeries[idx] = state;
-        $scope.chart.highlightSeries(idx, !state);
-        $scope.chart.toggleSeries(idx, !state);
     };
 
     $scope.zoom = function(zoomIn) {
