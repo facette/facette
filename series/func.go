@@ -212,7 +212,9 @@ func Normalize(series []Series, startTime, endTime time.Time, sample int, consol
 
 			sort.Sort(sort.Reverse(sort.IntSlice(indexes)))
 			for _, idx := range indexes {
-				result[i].Points = append(result[i].Points[:idx], result[i].Points[idx+1:]...)
+				if idx < len(result[i].Points) { // FIXME: find why in some cases index is greater than number of points
+					result[i].Points = append(result[i].Points[:idx], result[i].Points[idx+1:]...)
+				}
 			}
 		}
 	}
