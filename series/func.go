@@ -2,7 +2,6 @@ package series
 
 import (
 	"math"
-	"sort"
 	"time"
 )
 
@@ -168,54 +167,12 @@ func Normalize(series []Series, startTime, endTime time.Time, sample int, consol
 		}
 
 		// Consolidate point buckets
-		unknownGaps := map[int][]int{}
-		unknownGapLast := 0
-		unknownLast := -1
-
 		for j := range buckets[i] {
 			result[i].Points[j] = buckets[i][j].Consolidate(consolidation)
 
 			// Align consolidated points timestamps among normalized series lists
 			result[i].Points[j].Time = buckets[i][j].startTime.Add(time.Duration(step.Seconds() * float64(j))).
 				Round(time.Second)
-
-			if result[i].Points[j].Value.IsNaN() {
-				if unknownLast != -1 {
-					gap := j - unknownLast
-
-					if _, ok := unknownGaps[gap]; !ok {
-						unknownGaps[gap] = []int{}
-					}
-
-					// Check for first value if gap is consistent
-					if unknownGapLast != -1 {
-						if gap == unknownGapLast {
-							unknownGaps[gap] = append(unknownGaps[gap], j-gap*2)
-							unknownGapLast = -1
-						} else {
-							unknownGapLast = gap
-						}
-					}
-
-					unknownGaps[gap] = append(unknownGaps[gap], j)
-				}
-
-				unknownLast = j
-			}
-		}
-
-		// Cleanup series from regular gaps
-		for _, indexes := range unknownGaps {
-			if len(indexes) < 2 {
-				continue
-			}
-
-			sort.Sort(sort.Reverse(sort.IntSlice(indexes)))
-			for _, idx := range indexes {
-				if idx < len(result[i].Points) { // FIXME: find why in some cases index is greater than number of points
-					result[i].Points = append(result[i].Points[:idx], result[i].Points[idx+1:]...)
-				}
-			}
 		}
 	}
 

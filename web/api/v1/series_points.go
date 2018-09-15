@@ -2,6 +2,7 @@ package v1
 
 import (
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
@@ -259,6 +260,7 @@ func (a *API) executeRequest(req *series.Request, forceNormalize bool) []series.
 	}
 
 	// Generate points series
+	gaps := make(map[int][]struct{})
 	result := []series.ResponseSeries{}
 	for i, group := range req.Graph.Groups {
 		var (
@@ -300,6 +302,19 @@ func (a *API) executeRequest(req *series.Request, forceNormalize bool) []series.
 		if err != nil {
 			a.logger.Error("failed to normalize series: %s", err)
 			continue
+		}
+
+		// Keep reference of null values for future gaps cleanup
+		for _, series := range data[i] {
+			for idx, point := range series.Points {
+				if point.Value.IsNaN() {
+					_, ok := gaps[idx]
+					if !ok {
+						gaps[idx] = []struct{}{}
+					}
+					gaps[idx] = append(gaps[idx], struct{}{})
+				}
+			}
 		}
 
 		switch group.Operator {
@@ -361,6 +376,22 @@ func (a *API) executeRequest(req *series.Request, forceNormalize bool) []series.
 				Name:    group.Series[j].Name,
 				Options: group.Series[j].Options,
 			})
+		}
+	}
+
+	// Cleanup gaps being present at the same position in all series
+	dataLen := len(data)
+	indexes := []int{}
+	for idx := range gaps {
+		if len(gaps[idx]) == dataLen {
+			indexes = append(indexes, idx)
+		}
+	}
+	sort.Sort(sort.Reverse(sort.IntSlice(indexes)))
+
+	for _, series := range result {
+		for _, idx := range indexes {
+			series.Points = append(series.Points[:idx], series.Points[idx+1:]...)
 		}
 	}
 
