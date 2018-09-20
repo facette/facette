@@ -391,7 +391,9 @@ func (a *API) executeRequest(req *series.Request, forceNormalize bool) []series.
 
 	for _, series := range result {
 		for _, idx := range indexes {
-			series.Points = append(series.Points[:idx], series.Points[idx+1:]...)
+			if idx < len(series.Points) { // FIXME: find why index goes beyond points length
+				series.Points = append(series.Points[:idx], series.Points[idx+1:]...)
+			}
 		}
 	}
 
