@@ -191,7 +191,7 @@ angular.module('facette.ui.graph', [])
                             $scope.chart.xScale.invert($scope.zoomOrigin - $scope.chart.area.left),
                             $scope.chart.xScale.invert(e.layerX - $scope.chart.area.left),
                         ];
-                        boundaries.sort();
+                        boundaries.sort(function(a, b) { return a > b ? 1 : a < b ? -1 : 0; });
 
                         applyOptions({
                             start_time: moment(boundaries[0]).format(timeFormatRFC3339),
