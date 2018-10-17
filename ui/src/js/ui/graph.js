@@ -715,7 +715,7 @@ angular.module('facette.ui.graph', [])
 
     $scope.selectSeries = function(idx, toggle) {
         $scope.chart.selectSeries(idx, toggle);
-        $scope.disabledSeries = $scope.chart.config.series.reduce((state, series, seriesIdx) => {
+        $scope.disabledSeries = $scope.chart.config.series.reduce(function(state, series, seriesIdx) {
             state[seriesIdx] = series.disabled;
             return state;
         }, {});
