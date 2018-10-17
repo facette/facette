@@ -220,9 +220,13 @@ func (a *API) executeRequest(req *series.Request, forceNormalize bool) []series.
 	}
 
 	// Dispatch point queries among providers
+	dataLen := 0
 	data := make([][]series.Series, len(req.Graph.Groups))
 	for i, group := range req.Graph.Groups {
-		data[i] = make([]series.Series, len(group.Series))
+		seriesLen := len(group.Series)
+
+		dataLen += seriesLen
+		data[i] = make([]series.Series, seriesLen)
 	}
 
 	for _, q := range a.dispatchQueries(req) {
@@ -380,13 +384,17 @@ func (a *API) executeRequest(req *series.Request, forceNormalize bool) []series.
 	}
 
 	// Cleanup gaps being present at the same position in all series
-	dataLen := len(data)
 	indexes := []int{}
 	for idx := range gaps {
 		if len(gaps[idx]) == dataLen {
 			indexes = append(indexes, idx)
 		}
 	}
+
+	if len(indexes) == 0 {
+		return result
+	}
+
 	sort.Sort(sort.Reverse(sort.IntSlice(indexes)))
 
 	for _, series := range result {

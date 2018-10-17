@@ -133,6 +133,19 @@ func Normalize(series []Series, startTime, endTime time.Time, sample int, consol
 	// Dispatch points into proper time step buckets and then apply consolidation function
 	for i, s := range series {
 		if s.Points == nil {
+			// Generate NaN points for whole series if none found (needed for gap detection)
+			result[i] = Series{
+				Points:  make([]Point, sample),
+				Summary: make(map[string]Value),
+			}
+
+			for j := 0; j < sample; j++ {
+				result[i].Points[j] = Point{
+					Time:  startTime.Add(time.Duration(j) * step).Round(time.Second),
+					Value: Value(math.NaN()),
+				}
+			}
+
 			continue
 		}
 
@@ -141,7 +154,7 @@ func Normalize(series []Series, startTime, endTime time.Time, sample int, consol
 		// Initialize time steps
 		for j := 0; j < sample; j++ {
 			buckets[i][j] = bucket{
-				startTime: startTime.Add(time.Duration(j) * step),
+				startTime: startTime.Add(time.Duration(j) * step).Round(time.Second),
 				points:    make([]Point, 0),
 			}
 		}
@@ -169,10 +182,6 @@ func Normalize(series []Series, startTime, endTime time.Time, sample int, consol
 		// Consolidate point buckets
 		for j := range buckets[i] {
 			result[i].Points[j] = buckets[i][j].Consolidate(consolidation)
-
-			// Align consolidated points timestamps among normalized series lists
-			result[i].Points[j].Time = buckets[i][j].startTime.Add(time.Duration(step.Seconds() * float64(j))).
-				Round(time.Second)
 		}
 	}
 
