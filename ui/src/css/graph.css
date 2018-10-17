@@ -405,8 +405,9 @@
 	align-items: center;
 	cursor: pointer;
 	display: flex;
-	pointer-events: auto;
 	margin-right: 0.65rem;
+	pointer-events: auto;
+	user-select: none;
 }
 
 .graph-legend .key {
