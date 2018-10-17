@@ -364,12 +364,12 @@ beeper@^1.0.0:
   resolved "https://registry.yarnpkg.com/beeper/-/beeper-1.1.1.tgz#e6d5ea8c5dad001304a70b22638447f69cb2f809"
   integrity sha1-5tXqjF2tABMEpwsiY4RH9pyy+Ak=
 
-boula@0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/boula/-/boula-0.4.0.tgz#43d8964fae63f8d508f824b366c11d5857cf4e60"
-  integrity sha512-2fg5nuRiHtBK+Zu8eegGpTLiBRGCQwZe+8wb3KvTd6fOsk/eSdVLpJpvjnalzd08dlm1wJ2zUfN2RboFcYAQ5A==
+boula@0.4.1:
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/boula/-/boula-0.4.1.tgz#82449864bcabb7de90cbf729c7e13b01763e8e17"
+  integrity sha512-j/fRe+vKpw5ubxdRSiSygW3esk9qHZOsaLmJPcgE3U3DHRa+hRM0JEsmCXNXIPfkmwKb3+kiKYWhCPl1Sh/Vcg==
   dependencies:
-    d3 "5.5.0"
+    d3 "5.7.0"
 
 brace-expansion@^1.0.0, brace-expansion@^1.1.7:
   version "1.1.11"
@@ -1068,10 +1068,10 @@ d3@4.12.0:
     d3-voronoi "1.1.2"
     d3-zoom "1.7.1"
 
-d3@5.5.0:
-  version "5.5.0"
-  resolved "https://registry.yarnpkg.com/d3/-/d3-5.5.0.tgz#948413b91b988a6597f3e4c3e941d3b530bfee63"
-  integrity sha512-HRDSYvT3n7kMvJH7Avp7iR0Xsz97bkCFka9aOg04EdyXyiAP8yQzUpLH3712y9R7ffVo1g94t1OYFHBB0yI9vQ==
+d3@5.7.0:
+  version "5.7.0"
+  resolved "https://registry.yarnpkg.com/d3/-/d3-5.7.0.tgz#f189d338bdde62acf02f308918e0ec34dd7568f9"
+  integrity sha512-8KEIfx+dFm8PlbJN9PI0suazrZ41QcaAufsKE9PRcqYPWLngHIyWJZX96n6IQKePGgeSu0l7rtlueSSNq8Zc3g==
   dependencies:
     d3-array "1"
     d3-axis "1"
