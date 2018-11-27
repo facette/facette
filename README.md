@@ -1,4 +1,5 @@
 Facette [![Travis CI][travis-badge]][travis-url]
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Ffacette%2Ffacette.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Ffacette%2Ffacette?ref=badge_shield)
 =======
 
 [Facette][project-url] is a open source web application to display time
@@ -47,3 +48,7 @@ To make the things easier, we will ask for the following:
 [project-url]: https://facette.io/
 [travis-badge]: https://api.travis-ci.org/facette/facette.svg?branch=master
 [travis-url]: https://travis-ci.org/facette/facette
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Ffacette%2Ffacette.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Ffacette%2Ffacette?ref=badge_large)
