@@ -19,7 +19,7 @@ func Test_Scale(t *testing.T) {
 	}
 
 	series.Scale(Value(100))
-	if !compareSeries(series, expected) {
+	if !compareSeries(expected, series) {
 		assert.Fail(t, fmt.Sprintf("Not equal: \nexpected: %#v\nactual  : %#v", expected, series))
 	}
 }
@@ -82,7 +82,7 @@ func Test_Summarize(t *testing.T) {
 	}
 }
 
-func compareSeries(actual, expected Series) bool {
+func compareSeries(expected, actual Series) bool {
 	if len(actual.Points) != len(expected.Points) {
 		return false
 	}

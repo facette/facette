@@ -31,15 +31,15 @@ const (
 )
 
 type bucket struct {
-	startTime time.Time
-	points    []Point
+	points []Point
+	time   time.Time
 }
 
 // Consolidate consolidates points buckets based on consolidation function.
 func (b bucket) Consolidate(consolidation int) Point {
 	point := Point{
+		Time:  b.time,
 		Value: Value(math.NaN()),
-		Time:  b.startTime,
 	}
 
 	length := len(b.points)
@@ -64,13 +64,6 @@ func (b bucket) Consolidate(consolidation int) Point {
 			point.Value = Value(sum / float64(sumCount))
 		}
 
-		if length == 1 {
-			point.Time = b.points[0].Time
-		} else {
-			// Interpolate median time
-			point.Time = b.points[0].Time.Add(b.points[length-1].Time.Sub(b.points[0].Time) / 2)
-		}
-
 	case ConsolidateSum:
 		sum := 0.0
 		sumCount := 0
@@ -87,25 +80,23 @@ func (b bucket) Consolidate(consolidation int) Point {
 			point.Value = Value(sum)
 		}
 
-		point.Time = b.points[length-1].Time
-
 	case ConsolidateFirst:
-		point = b.points[0]
+		point.Value = b.points[0].Value
 
 	case ConsolidateLast:
-		point = b.points[length-1]
+		point.Value = b.points[length-1].Value
 
 	case ConsolidateMax:
 		for _, p := range b.points {
 			if !p.Value.IsNaN() && p.Value > point.Value || point.Value.IsNaN() {
-				point = p
+				point.Value = p.Value
 			}
 		}
 
 	case ConsolidateMin:
 		for _, p := range b.points {
 			if !p.Value.IsNaN() && p.Value < point.Value || point.Value.IsNaN() {
-				point = p
+				point.Value = p.Value
 			}
 		}
 	}
@@ -154,8 +145,8 @@ func Normalize(series []Series, startTime, endTime time.Time, sample int, consol
 		// Initialize time steps
 		for j := 0; j < sample; j++ {
 			buckets[i][j] = bucket{
-				startTime: startTime.Add(time.Duration(j) * step).Round(time.Second),
-				points:    make([]Point, 0),
+				points: make([]Point, 0),
+				time:   startTime.Add(time.Duration(j) * (step + 1)).Round(time.Second),
 			}
 		}
 

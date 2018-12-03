@@ -16,7 +16,7 @@ var (
 
 func init() {
 	testBucket = bucket{
-		startTime: time.Unix(0, 0),
+		time: time.Unix(0, 0),
 		points: []Point{
 			{Time: time.Unix(0, 0), Value: 17},
 			{Time: time.Unix(30, 0), Value: 25},
@@ -66,11 +66,11 @@ func init() {
 }
 
 func Test_Consolidate_Average(t *testing.T) {
-	assert.Equal(t, Point{Time: time.Unix(60, 0), Value: 11.75}, testBucket.Consolidate(ConsolidateAverage))
+	assert.Equal(t, Point{Time: time.Unix(0, 0), Value: 11.75}, testBucket.Consolidate(ConsolidateAverage))
 }
 
 func Test_Consolidate_Sum(t *testing.T) {
-	assert.Equal(t, Point{Time: time.Unix(120, 0), Value: 47}, testBucket.Consolidate(ConsolidateSum))
+	assert.Equal(t, Point{Time: time.Unix(0, 0), Value: 47}, testBucket.Consolidate(ConsolidateSum))
 }
 
 func Test_Consolidate_First(t *testing.T) {
@@ -78,15 +78,15 @@ func Test_Consolidate_First(t *testing.T) {
 }
 
 func Test_Consolidate_Last(t *testing.T) {
-	assert.Equal(t, Point{Time: time.Unix(120, 0), Value: 2}, testBucket.Consolidate(ConsolidateLast))
+	assert.Equal(t, Point{Time: time.Unix(0, 0), Value: 2}, testBucket.Consolidate(ConsolidateLast))
 }
 
 func Test_Consolidate_Min(t *testing.T) {
-	assert.Equal(t, Point{Time: time.Unix(120, 0), Value: 2}, testBucket.Consolidate(ConsolidateMin))
+	assert.Equal(t, Point{Time: time.Unix(0, 0), Value: 2}, testBucket.Consolidate(ConsolidateMin))
 }
 
 func Test_Consolidate_Max(t *testing.T) {
-	assert.Equal(t, Point{Time: time.Unix(30, 0), Value: 25}, testBucket.Consolidate(ConsolidateMax))
+	assert.Equal(t, Point{Time: time.Unix(0, 0), Value: 25}, testBucket.Consolidate(ConsolidateMax))
 }
 
 func Test_Normalize_Average(t *testing.T) {
@@ -380,7 +380,7 @@ func Test_Average(t *testing.T) {
 
 	series, err := Average(testSeries)
 	assert.Nil(t, err)
-	if !compareSeries(series, expected) {
+	if !compareSeries(expected, series) {
 		assert.Fail(t, fmt.Sprintf("Not equal: \nexpected: %#v\nactual  : %#v", expected, series))
 	}
 }
@@ -392,7 +392,7 @@ func Test_Sum(t *testing.T) {
 
 	series, err := Sum(testSeries)
 	assert.Nil(t, err)
-	if !compareSeries(series, expected) {
+	if !compareSeries(expected, series) {
 		assert.Fail(t, fmt.Sprintf("Not equal: \nexpected: %#v\nactual  : %#v", expected, series))
 	}
 }
@@ -405,7 +405,7 @@ func testNormalize(expected []Series, consolidation int, t *testing.T) {
 	assert.Len(t, series, len(expected))
 
 	for i, s := range series {
-		if !compareSeries(s, expected[i]) {
+		if !compareSeries(expected[i], s) {
 			assert.Fail(t, fmt.Sprintf("Not equal: \nexpected: %#v\nactual  : %#v", expected[i], s))
 		}
 	}
