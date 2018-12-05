@@ -55,7 +55,7 @@ func (h *Handler) Run() error {
 	h.logger.Info("started")
 
 	// Initialize HTTP router
-	r := httprouter.NewRouter()
+	r := httprouter.New()
 	if h.config.Logger.File != nil && h.config.Logger.File.Level == "debug" ||
 		h.config.Logger.Syslog != nil && h.config.Logger.Syslog.Level == "debug" {
 		r.Use(h.handleLog)

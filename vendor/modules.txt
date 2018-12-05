@@ -52,7 +52,7 @@ github.com/pkg/errors
 github.com/pmezard/go-difflib/difflib
 # github.com/stretchr/testify v1.2.2
 github.com/stretchr/testify/assert
-# github.com/vbatoufflet/httprouter v0.0.0-20181205055055-57b290ec23a6
+# github.com/vbatoufflet/httprouter v0.0.0-20181205060457-8c71425e86c8
 github.com/vbatoufflet/httprouter
 # github.com/ziutek/rrd v0.0.0-20170125160940-86f4f09e7abb
 github.com/ziutek/rrd

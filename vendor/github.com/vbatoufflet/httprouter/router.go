@@ -9,8 +9,8 @@ type Router struct {
 	root *Endpoint
 }
 
-// NewRouter creates a new HTTP router instance.
-func NewRouter() *Router {
+// New creates a new HTTP router instance.
+func New() *Router {
 	return &Router{
 		root: newEndpoint(""),
 	}

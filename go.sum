@@ -65,8 +65,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.2.2 h1:bSDNvY7ZPG5RlJ8otE/7V6gMiyenm9RtJ7IUVIAoJ1w=
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
-github.com/vbatoufflet/httprouter v0.0.0-20181205055055-57b290ec23a6 h1:TqQRWxdeheLQ5OCZc3KdOcipHKqHZiXZo1VU2FzLG/M=
-github.com/vbatoufflet/httprouter v0.0.0-20181205055055-57b290ec23a6/go.mod h1:pUnPMa8Xwo9dJjZbZIrSdfVprVjY9Zlv+mH5nAvVL5g=
+github.com/vbatoufflet/httprouter v0.0.0-20181205060457-8c71425e86c8 h1:RddIyiV0TDarsuuR5WKXQIC/TIj8cn9GTEoOi9OTCbY=
+github.com/vbatoufflet/httprouter v0.0.0-20181205060457-8c71425e86c8/go.mod h1:pUnPMa8Xwo9dJjZbZIrSdfVprVjY9Zlv+mH5nAvVL5g=
 github.com/ziutek/rrd v0.0.0-20170125160940-86f4f09e7abb h1:PyyvUBJ5QfaEKL/IRe0kzckEWMmufuCWEokPOx9RLHo=
 github.com/ziutek/rrd v0.0.0-20170125160940-86f4f09e7abb/go.mod h1:kncaQbFuKfmLNOnFKb9VQJ6qWV61iHxIxUQZBZvbEfA=
 golang.org/x/crypto v0.0.0-20180808211826-de0752318171 h1:vYogbvSFj2YXcjQxFHu/rASSOt9sLytpCaSkiwQ135I=
