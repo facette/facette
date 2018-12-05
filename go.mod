@@ -24,7 +24,6 @@ require (
 	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
 	github.com/jinzhu/now v0.0.0-20180511015916-ed742868f2ae // indirect
 	github.com/kr/pretty v0.1.0 // indirect
-	github.com/kr/pty v1.1.2 // indirect
 	github.com/lib/pq v0.0.0-20180523175426-90697d60dd84 // indirect
 	github.com/mattn/go-colorable v0.0.9 // indirect
 	github.com/mattn/go-isatty v0.0.3 // indirect
@@ -34,7 +33,7 @@ require (
 	github.com/pkg/errors v0.8.0
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/testify v1.2.2
-	github.com/vbatoufflet/httproute v0.0.0-20180816132102-0473cab559d9
+	github.com/vbatoufflet/httprouter v0.0.0-20181205055055-57b290ec23a6
 	github.com/ziutek/rrd v0.0.0-20170125160940-86f4f09e7abb
 	golang.org/x/crypto v0.0.0-20180808211826-de0752318171 // indirect
 	golang.org/x/sys v0.0.0-20180810173357-98c5dad5d1a0 // indirect

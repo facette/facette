@@ -1,4 +1,4 @@
-# httproute: HTTP router [![GoDoc][godoc-badge]][godoc-url] [![Travis CI][travis-badge]][travis-url]
+# httprouter: HTTP router [![GoDoc][godoc-badge]][godoc-url] [![Travis CI][travis-badge]][travis-url]
 
 Basic HTTP router for Go.
 
@@ -14,11 +14,11 @@ import (
         "log"
         "net/http"
 
-        "github.com/vbatoufflet/httproute"
+        "github.com/vbatoufflet/httprouter"
 )
 
 func main() {
-        r := httproute.NewRouter()
+        r := httprouter.NewRouter()
 
         r.Endpoint("/foo").
                 Get(handleFoo).
@@ -41,7 +41,7 @@ func main() {
 }
 
 func handleBar(rw http.ResponseWriter, r *http.Request) {
-        fmt.Fprintf(rw, "Received %q\n", httproute.ContextParam(r, "baz").(string))
+        fmt.Fprintf(rw, "Received %q\n", httprouter.ContextParam(r, "baz").(string))
 }
 
 func handleDefault(rw http.ResponseWriter, r *http.Request) {
@@ -69,7 +69,7 @@ Received "baz"
 Default here!
 ```
 
-[godoc-badge]: https://godoc.org/github.com/vbatoufflet/httproute?status.svg
-[godoc-url]: https://godoc.org/github.com/vbatoufflet/httproute
-[travis-badge]: https://api.travis-ci.org/vbatoufflet/httproute.svg
-[travis-url]: https://travis-ci.org/vbatoufflet/httproute
+[godoc-badge]: https://godoc.org/github.com/vbatoufflet/httprouter?status.svg
+[godoc-url]: https://godoc.org/github.com/vbatoufflet/httprouter
+[travis-badge]: https://api.travis-ci.org/vbatoufflet/httprouter.svg
+[travis-url]: https://travis-ci.org/vbatoufflet/httprouter

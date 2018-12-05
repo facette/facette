@@ -7,7 +7,7 @@ import (
 	"facette.io/httputil"
 	"facette.io/sqlstorage"
 	"github.com/hashicorp/go-uuid"
-	"github.com/vbatoufflet/httproute"
+	"github.com/vbatoufflet/httprouter"
 )
 
 // api:method GET /api/v1/library/collections/tree "Get collections tree"
@@ -24,7 +24,7 @@ import (
 func (a *API) libraryCollectionTree(rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	root := httproute.QueryParam(r, "parent")
+	root := httprouter.QueryParam(r, "parent")
 	if root != "" {
 		var c storage.Collection
 

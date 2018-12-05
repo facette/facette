@@ -11,7 +11,7 @@ import (
 	"facette.io/facette/pattern"
 	"facette.io/facette/set"
 	"facette.io/httputil"
-	"github.com/vbatoufflet/httproute"
+	"github.com/vbatoufflet/httprouter"
 )
 
 // api:section catalog "Catalog"
@@ -98,7 +98,7 @@ func (a *API) catalogSummary(rw http.ResponseWriter, r *http.Request) {
 func (a *API) catalogList(rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	typ := httproute.ContextParam(r, "type").(string)
+	typ := httprouter.ContextParam(r, "type").(string)
 
 	search := a.catalogSearch(typ, "", r)
 	if search == nil {
@@ -107,7 +107,7 @@ func (a *API) catalogList(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	// Fill result list
-	filter := httproute.QueryParam(r, "filter")
+	filter := httprouter.QueryParam(r, "filter")
 
 	s := set.New()
 	for _, item := range search {
@@ -194,7 +194,7 @@ func (a *API) catalogGet(rw http.ResponseWriter, r *http.Request) {
 
 	var result interface{}
 
-	typ := httproute.ContextParam(r, "type").(string)
+	typ := httprouter.ContextParam(r, "type").(string)
 	name := strings.TrimPrefix(r.URL.Path, Prefix+"/catalog/"+typ+"/")
 
 	search := a.catalogSearch(typ, name, r)
@@ -296,7 +296,7 @@ func (a *API) catalogSearch(typ, name string, r *http.Request) []interface{} {
 
 	case "sources":
 		for _, s := range a.searcher.Sources(
-			httproute.QueryParam(r, "origin"),
+			httprouter.QueryParam(r, "origin"),
 			name,
 		) {
 			search = append(search, s)
@@ -304,8 +304,8 @@ func (a *API) catalogSearch(typ, name string, r *http.Request) []interface{} {
 
 	case "metrics":
 		for _, m := range a.searcher.Metrics(
-			httproute.QueryParam(r, "origin"),
-			httproute.QueryParam(r, "source"),
+			httprouter.QueryParam(r, "origin"),
+			httprouter.QueryParam(r, "source"),
 			name,
 		) {
 			search = append(search, m)

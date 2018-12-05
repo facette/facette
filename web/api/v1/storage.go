@@ -14,7 +14,7 @@ import (
 	"facette.io/sliceutil"
 	"facette.io/sqlstorage"
 	"github.com/hashicorp/go-uuid"
-	"github.com/vbatoufflet/httproute"
+	"github.com/vbatoufflet/httprouter"
 )
 
 var storageTypes = []string{
@@ -54,7 +54,7 @@ func (a *API) storageCreate(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	typ := httproute.ContextParam(r, "type").(string)
+	typ := httprouter.ContextParam(r, "type").(string)
 
 	// Initialize new storage item
 	item, ok := a.storageItem(typ)
@@ -66,7 +66,7 @@ func (a *API) storageCreate(rw http.ResponseWriter, r *http.Request) {
 	// Retrieve existing item data from storage if inheriting
 	rv := reflect.ValueOf(item)
 
-	if id := httproute.QueryParam(r, "inherit"); id != "" {
+	if id := httprouter.QueryParam(r, "inherit"); id != "" {
 		if err := a.storage.SQL().Get("id", id, rv.Interface(), false); err == sqlstorage.ErrItemNotFound {
 			httputil.WriteJSON(rw, newMessage(err), http.StatusNotFound)
 			return
@@ -237,8 +237,8 @@ func (a *API) storageCreate(rw http.ResponseWriter, r *http.Request) {
 func (a *API) storageGet(rw http.ResponseWriter, r *http.Request) {
 	var result interface{}
 
-	typ := httproute.ContextParam(r, "type").(string)
-	id := httproute.ContextParam(r, "id").(string)
+	typ := httprouter.ContextParam(r, "type").(string)
+	id := httprouter.ContextParam(r, "id").(string)
 
 	// Initialize new storage item
 	item, ok := a.storageItem(typ)
@@ -333,8 +333,8 @@ func (a *API) storageUpdate(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	typ := httproute.ContextParam(r, "type").(string)
-	id := httproute.ContextParam(r, "id").(string)
+	typ := httprouter.ContextParam(r, "type").(string)
+	id := httprouter.ContextParam(r, "id").(string)
 
 	// Initialize new storage item
 	item, ok := a.storageItem(typ)
@@ -439,8 +439,8 @@ func (a *API) storageDelete(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	typ := httproute.ContextParam(r, "type").(string)
-	id := httproute.ContextParam(r, "id").(string)
+	typ := httprouter.ContextParam(r, "type").(string)
+	id := httprouter.ContextParam(r, "id").(string)
 
 	// Initialize new storage item
 	item, ok := a.storageItem(typ)
@@ -507,7 +507,7 @@ func (a *API) storageDeleteAll(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	typ := httproute.ContextParam(r, "type").(string)
+	typ := httprouter.ContextParam(r, "type").(string)
 
 	// Initialize new storage item
 	item, ok := a.storageItem(typ)
@@ -640,7 +640,7 @@ func (a *API) storageDeleteAll(rw http.ResponseWriter, r *http.Request) {
 //           }
 //         ]
 func (a *API) storageList(rw http.ResponseWriter, r *http.Request) {
-	typ := httproute.ContextParam(r, "type").(string)
+	typ := httprouter.ContextParam(r, "type").(string)
 
 	// Initialize new storage item
 	item, ok := a.storageItem(typ)
@@ -652,12 +652,12 @@ func (a *API) storageList(rw http.ResponseWriter, r *http.Request) {
 	// Check for list filter
 	filters := make(map[string]interface{})
 
-	if v := httproute.QueryParam(r, "filter"); v != "" {
+	if v := httprouter.QueryParam(r, "filter"); v != "" {
 		filters["name"] = applyModifier(v)
 	}
 
 	if typ == "collections" || typ == "graphs" {
-		switch httproute.QueryParam(r, "kind") {
+		switch httprouter.QueryParam(r, "kind") {
 		case "raw":
 			filters["template"] = false
 
@@ -672,12 +672,12 @@ func (a *API) storageList(rw http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if v := httproute.QueryParam(r, "link"); v != "" {
+		if v := httprouter.QueryParam(r, "link"); v != "" {
 			filters["link"] = v
 		}
 
 		if typ == "collections" {
-			if v := httproute.QueryParam(r, "parent"); v != "" {
+			if v := httprouter.QueryParam(r, "parent"); v != "" {
 				filters["parent"] = v
 			}
 		}

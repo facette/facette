@@ -14,7 +14,7 @@ import (
 	"facette.io/facette/storage"
 	"facette.io/facette/web/api/v1"
 	"facette.io/logger"
-	"github.com/vbatoufflet/httproute"
+	"github.com/vbatoufflet/httprouter"
 )
 
 // Handler represents a HTTP handler serving the various endpoints.
@@ -55,7 +55,7 @@ func (h *Handler) Run() error {
 	h.logger.Info("started")
 
 	// Initialize HTTP router
-	r := httproute.NewRouter()
+	r := httprouter.NewRouter()
 	if h.config.Logger.File != nil && h.config.Logger.File.Level == "debug" ||
 		h.config.Logger.Syslog != nil && h.config.Logger.Syslog.Level == "debug" {
 		r.Use(h.handleLog)

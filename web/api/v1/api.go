@@ -9,7 +9,7 @@ import (
 	"facette.io/facette/storage"
 	"facette.io/httputil"
 	"facette.io/logger"
-	"github.com/vbatoufflet/httproute"
+	"github.com/vbatoufflet/httprouter"
 )
 
 // Prefix represents the versioned API prefix.
@@ -17,7 +17,7 @@ const Prefix = "/api/v1"
 
 // API represents an API instance.
 type API struct {
-	router   *httproute.Router
+	router   *httprouter.Router
 	storage  *storage.Storage
 	searcher *catalog.Searcher
 	poller   *poller.Poller
@@ -27,7 +27,7 @@ type API struct {
 
 // NewAPI creates a new API instance.
 func NewAPI(
-	router *httproute.Router,
+	router *httprouter.Router,
 	storage *storage.Storage,
 	searcher *catalog.Searcher,
 	poller *poller.Poller,

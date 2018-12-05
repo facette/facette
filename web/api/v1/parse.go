@@ -6,16 +6,16 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/vbatoufflet/httproute"
+	"github.com/vbatoufflet/httprouter"
 )
 
 func parseBoolParam(r *http.Request, name string) bool {
-	vs := httproute.QueryParam(r, name)
+	vs := httprouter.QueryParam(r, name)
 	return vs == "1" || vs == "true"
 }
 
 func parseIntParam(r *http.Request, name string) (int, error) {
-	vs := httproute.QueryParam(r, name)
+	vs := httprouter.QueryParam(r, name)
 
 	v, err := strconv.Atoi(vs)
 	if vs != "" && err != nil {
