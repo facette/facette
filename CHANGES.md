@@ -1,6 +1,20 @@
 CHANGES
 =======
 
+0.5.0rc1 (2019-01-20)
+---------------------
+
+* Add warm startup support
+* Add Syslog logging support
+* Add keyboard shortcuts support
+* Add duration Y axis unit support
+* Add Y axis extreme bounds support
+* Add aliases support in the URLs
+* Add automatic series points gap detection
+* Switch graph rendering to HTML Canvas
+* Rearrange configuration
+* Minor UI improvements and fixes
+
 0.4.1 (2018-07-21)
 ------------------
 
