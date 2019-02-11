@@ -115,11 +115,11 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
         // Parse series for attribute names
         angular.forEach(item.groups, function(group) {
             angular.forEach(group.series, function(series) {
-                var subkeys = (
+                var subkeys = Array.from((
                     series.origin + '\x1e' +
                     series.source + '\x1e' +
                     series.metric
-                ).matchAll(templateRegexp);
+                ).matchAll(templateRegexp));
 
                 if (subkeys.length > 0) {
                     series.template = true;
