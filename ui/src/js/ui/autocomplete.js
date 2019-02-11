@@ -44,7 +44,7 @@ angular.module('facette.ui.autocomplete', [])
     $scope.handleKey = function(e) {
         switch (e.which) {
         case 13: // <Enter>
-            if ($scope.entries !== undefined) {
+            if ($scope.entries !== undefined && $scope.entries.length > 0) {
                 $scope.select(e, $scope.entries[$scope.index]);
             } else if ($scope.allowOverride && !$scope.selected) {
                 $scope.select(e, {label: e.target.value, value: e.target.value});
