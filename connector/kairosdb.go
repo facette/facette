@@ -21,6 +21,7 @@ import (
 )
 
 const (
+	kairosDBRefreshBulkSize    = 500
 	kairosDBURLDatapointsQuery = "/api/v1/datapoints/query"
 	kairosDBURLMetricNames     = "/api/v1/metricnames"
 )
@@ -215,54 +216,66 @@ func (c *kairosDBConnector) Refresh(output chan<- *catalog.Record) error {
 	}
 
 	// Retrieve metrics associated tags
-	q := kairosDBQuery{Metrics: []kairosDBQueryMetric{}}
-	for _, metric := range mr.Results {
-		q.Metrics = append(q.Metrics, kairosDBQueryMetric{Name: metric})
-	}
+	count := len(mr.Results)
+	for count > 0 {
+		var metrics []string
 
-	body, err := json.Marshal(q)
-	if err != nil {
-		return fmt.Errorf("unable to marshal tags request: %s", err)
-	}
+		if count > kairosDBRefreshBulkSize {
+			count = kairosDBRefreshBulkSize
+		}
 
-	req, err = http.NewRequest("POST", c.url+kairosDBURLDatapointsQuery+"/tags", bytes.NewReader(body))
-	if err != nil {
-		return fmt.Errorf("unable to set up HTTP request: %s", err)
-	}
-	req.Header.Add("User-Agent", "facette/"+version.Version)
-	req.Header.Set("Content-Type", "application/json")
+		metrics, mr.Results = mr.Results[:count], mr.Results[count:]
+		count = len(mr.Results)
 
-	resp, err = c.client.Do(req)
-	if err != nil {
-		return fmt.Errorf("unable to perform HTTP request: %s", err)
-	}
-	defer resp.Body.Close()
+		q := kairosDBQuery{Metrics: []kairosDBQueryMetric{}}
+		for _, metric := range metrics {
+			q.Metrics = append(q.Metrics, kairosDBQueryMetric{Name: metric})
+		}
 
-	r := kairosDBResponse{}
-	if err := httputil.BindJSON(resp, &r); err != nil {
-		return fmt.Errorf("unable to unmarshal JSON data: %s", err)
-	}
+		body, err := json.Marshal(q)
+		if err != nil {
+			return fmt.Errorf("unable to marshal tags request: %s", err)
+		}
 
-	for _, q := range r.Queries {
-		for _, r := range q.Results {
-			for key, values := range r.Tags {
-				if !tags.Has(key) {
-					continue
-				}
+		req, err = http.NewRequest("POST", c.url+kairosDBURLDatapointsQuery+"/tags", bytes.NewReader(body))
+		if err != nil {
+			return fmt.Errorf("unable to set up HTTP request: %s", err)
+		}
+		req.Header.Add("User-Agent", "facette/"+version.Version)
+		req.Header.Set("Content-Type", "application/json")
 
-				for _, aggr := range c.aggregators {
-					metric := r.Name + "/" + aggr
+		resp, err = c.client.Do(req)
+		if err != nil {
+			return fmt.Errorf("unable to perform HTTP request: %s", err)
+		}
+		defer resp.Body.Close()
 
-					for _, value := range values {
-						output <- &catalog.Record{
-							Origin: c.name,
-							Source: value,
-							Metric: metric,
-							Attributes: &maputil.Map{
-								"name":       r.Name,
-								"aggregator": aggr,
-								"tag":        []string{key, value},
-							},
+		r := kairosDBResponse{}
+		if err := httputil.BindJSON(resp, &r); err != nil {
+			return fmt.Errorf("unable to unmarshal JSON data: %s", err)
+		}
+
+		for _, q := range r.Queries {
+			for _, r := range q.Results {
+				for key, values := range r.Tags {
+					if !tags.Has(key) {
+						continue
+					}
+
+					for _, aggr := range c.aggregators {
+						metric := r.Name + "/" + aggr
+
+						for _, value := range values {
+							output <- &catalog.Record{
+								Origin: c.name,
+								Source: value,
+								Metric: metric,
+								Attributes: &maputil.Map{
+									"name":       r.Name,
+									"aggregator": aggr,
+									"tag":        []string{key, value},
+								},
+							}
 						}
 					}
 				}
