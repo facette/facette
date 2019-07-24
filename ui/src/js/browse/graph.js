@@ -296,11 +296,18 @@ app.controller('BrowseGraphController', function($location, $rootScope, $routePa
 
                 $scope.graphs = graphs;
             } else {
+                var options = angular.extend({embeddable_path: 'graphs/' + $scope.id}, globalOptions);
+
+                var state = graphsState['0_' + $scope.id];
+                if (state && typeof state.folded == 'boolean') {
+                    options.folded = state.folded;
+                }
+
                 // Set entries to single graph display
                 $scope.graphs = [{
                     index: 0,
                     id: $scope.id,
-                    options: angular.extend({embeddable_path: 'graphs/' + $scope.id}, globalOptions),
+                    options: options,
                     hidden: false,
                     title: title
                 }];
