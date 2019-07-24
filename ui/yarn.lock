@@ -58,20 +58,20 @@ angular-paging@2.2.2:
   resolved "https://registry.yarnpkg.com/angular-paging/-/angular-paging-2.2.2.tgz#702f574d6d140690035eac64395fe311f7987fbb"
   integrity sha1-cC9XTW0UBpADXqxkOV/jEfeYf7s=
 
-angular-resource@1.7.3:
-  version "1.7.3"
-  resolved "https://registry.yarnpkg.com/angular-resource/-/angular-resource-1.7.3.tgz#0b378d203cc15a8f2807ab1b2279a262d6bfff80"
-  integrity sha512-kfdpoP/aQv3EtRiBrOUBsjvp7zxKEg/FEZZSHaOD56AwRb+FjDhRstgaiB5+6YJLr45WVJU6QyVUriwwpD+0VQ==
+angular-resource@1.7.8:
+  version "1.7.8"
+  resolved "https://registry.yarnpkg.com/angular-resource/-/angular-resource-1.7.8.tgz#9577dbcc02cdbb76398febc5fc7ee103c86c5c50"
+  integrity sha512-zuPQ0ZX9Q8WnZ0KMtJlKYUSIXWRQSbFzMkRV9zG8cYYSsMAZlXar5Hqmd5gzxC3O28AGM7BCEJ+iYs3UNL4qdA==
 
-angular-route@1.7.3:
-  version "1.7.3"
-  resolved "https://registry.yarnpkg.com/angular-route/-/angular-route-1.7.3.tgz#245c7ea7d18514c1d08201588092db7df210e7c6"
-  integrity sha512-/x6kLCeiG9BCi4DZeuuPfK1G05w69uwu7x69hL4eqSq5VOUkmkbFK1oM2pIKPwkATSYT2QKK0rwPydZNBUvCsw==
+angular-route@1.7.8:
+  version "1.7.8"
+  resolved "https://registry.yarnpkg.com/angular-route/-/angular-route-1.7.8.tgz#d502aa605dcbb253a93e844c0adf51c9bc36b9fa"
+  integrity sha512-VVk89PH0fsY5kfbx+N7IVX1IwnaPWYhMGY0uA+rjej2v1sjvrTx1SLkxUK4E0UpW1hXeLJhN7ncBcwoBiPtAtA==
 
-angular-sanitize@1.7.3:
-  version "1.7.3"
-  resolved "https://registry.yarnpkg.com/angular-sanitize/-/angular-sanitize-1.7.3.tgz#e1ddaa7337724f9554066fd9e9123486b8881c4a"
-  integrity sha512-2t5BXXx0/4qGdGp54eCvT+1fM+yFP2ub5TnNFIpJDeSrPwlQD8ThesOWxEsBnr+3UVKTE/TzX2Q4g8qjQXhDzw==
+angular-sanitize@1.7.8:
+  version "1.7.8"
+  resolved "https://registry.yarnpkg.com/angular-sanitize/-/angular-sanitize-1.7.8.tgz#87d59f754bb18d286dfd9d6ce867299c094c6719"
+  integrity sha512-sVq51is1cVNiPytH4JIEd7iRW0OBIRQGNETWkz1c/jnLv2sBf9oDxEd8enwDz/W2ULBIpqJPK/3AsIxmZyh9pA==
 
 angular-translate-interpolation-messageformat@2.18.1:
   version "2.18.1"
@@ -100,7 +100,12 @@ angular-ui-tree@2.22.6:
   resolved "https://registry.yarnpkg.com/angular-ui-tree/-/angular-ui-tree-2.22.6.tgz#849727fdd1d13d84c1a590bb08934cc224e5a407"
   integrity sha512-VzuXM6NdYeQD0Y1RF5oTYc3o8yoW9mtxhnJs5Fvwu40V1Alzq7ybJj+kvApXZ69M0mvRd8LLM+3Q4pI26md+fA==
 
-angular@1.7.3, "angular@>=1.2.26 <=1.7", angular@^1.6.4, angular@^1.x:
+angular@1.7.8:
+  version "1.7.8"
+  resolved "https://registry.yarnpkg.com/angular/-/angular-1.7.8.tgz#b77ede272ce1b261e3be30c1451a0b346905a3c9"
+  integrity sha512-wtef/y4COxM7ZVhddd7JtAAhyYObq9YXKar9tsW7558BImeVYteJiTxCKeJOL45lJ/+7B4wrAC49j8gTFYEthg==
+
+"angular@>=1.2.26 <=1.7", angular@^1.6.4, angular@^1.x:
   version "1.7.3"
   resolved "https://registry.yarnpkg.com/angular/-/angular-1.7.3.tgz#0f25a661d079fc84d5ccc877a2ef9d7178575ddb"
   integrity sha512-hQRhU56shs72y88cS0Uy9g+UAMHoztJ3V+r+iF8o1AK/Bpu8ewmjFDk9j2LjSuN05a9mhxW1rOHnYKOwyTS/Zg==
@@ -2433,10 +2438,10 @@ isstream@0.1.x, isstream@~0.1.2:
   resolved "https://registry.yarnpkg.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
   integrity sha1-R+Y/evVa+m+S4VAOaQ64uFKcCZo=
 
-jquery@3.3.1:
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.3.1.tgz#958ce29e81c9790f31be7792df5d4d95fc57fbca"
-  integrity sha512-Ubldcmxp5np52/ENotGxlLe6aGMvmF4R8S6tZjsP6Knsaxd/xp3Zrh50cG93lR6nPXyUFwzN3ZSOQI0wRJNdGg==
+jquery@3.4.1:
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.4.1.tgz#714f1f8d9dde4bdfa55764ba37ef214630d80ef2"
+  integrity sha512-36+AdBzCL+y6qjw5Tx7HgzeGCzC81MDDgaUP8ld2zhx58HdqXGoBd+tHdrBMiyjGQs0Hxs/MLZTu/eHNJJuWPw==
 
 js-yaml@~3.4.0:
   version "3.4.6"
