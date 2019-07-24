@@ -1,6 +1,14 @@
 CHANGES
 =======
 
+0.5.0 (2019-07-24)
+------------------
+
+* Improve KairosDB tags queries memory consumption
+* Fix broken graphs unfolding and state restoration in browse UI
+* Fix graphs Y-Axis minimum value display
+* Fix bad template detection in graphs edition
+
 0.5.0rc1 (2019-01-20)
 ---------------------
 
