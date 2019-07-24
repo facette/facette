@@ -45,16 +45,25 @@
 .graph .message {
 	color: #7f8c8d;
 	margin: 0;
-	padding: 0;
+}
+
+.graph .message.centered {
+	bottom: 0;
+	left: 0;
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: auto;
 }
 
 .graph .message.float {
 	background-color: rgba(236, 240, 241, 0.9);
+	bottom: auto;
 	font-size: 0.9rem;
 	left: 1rem;
 	line-height: 1.5rem;
-	padding: 0.5rem 1rem;
 	position: absolute;
+	right: auto;
 	top: 1rem;
 	width: auto;
 }
@@ -279,7 +288,6 @@
 }
 
 .graph-canvas {
-	display: none;
 	min-width: 100%;
 }
 
