@@ -364,10 +364,10 @@ beeper@^1.0.0:
   resolved "https://registry.yarnpkg.com/beeper/-/beeper-1.1.1.tgz#e6d5ea8c5dad001304a70b22638447f69cb2f809"
   integrity sha1-5tXqjF2tABMEpwsiY4RH9pyy+Ak=
 
-boula@0.4.1:
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/boula/-/boula-0.4.1.tgz#82449864bcabb7de90cbf729c7e13b01763e8e17"
-  integrity sha512-j/fRe+vKpw5ubxdRSiSygW3esk9qHZOsaLmJPcgE3U3DHRa+hRM0JEsmCXNXIPfkmwKb3+kiKYWhCPl1Sh/Vcg==
+boula@0.4.2:
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/boula/-/boula-0.4.2.tgz#a2839eb6a9896703d821aca8033f5c9c7db96fec"
+  integrity sha512-rceJmaYgUCwXcQiCXl7LXDCXQE6pjVH7BxJzLDXDkLbm+ueDeBs8JwLTvn473h+egseUreyyM+B/JA49un9pCQ==
   dependencies:
     d3 "5.7.0"
 
