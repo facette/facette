@@ -320,7 +320,7 @@ app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope
         storage.set('global-sidebar', 'collapsed', $rootScope.sidebarCollapse);
 
         // Trigger resize event to force graphs redraw
-        angular.element($window).trigger('resize');
+        angular.element($window).trigger('resize', 'from-sidebar');
     };
 
     // Handle local preferences reset
@@ -413,7 +413,11 @@ app.run(function($anchorScroll, $browser, $location, $pageVisibility, $rootScope
         $rootScope.loaded = true;
     });
 
-    angular.element($window).on('resize', function() {
+    angular.element($window).on('resize', function(e, source) {
+        if (source == 'from-sidebar') {
+            return;
+        }
+
         if ($rootScope.resizeTimeout) {
             $timeout.cancel($rootScope.resizeTimeout);
             $rootScope.resizeTimeout = null;
