@@ -108,7 +108,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
 
         angular.forEach(entries, function(input) {
             if (input) {
-                keys = keys.concat(input.matchAll(templateRegexp));
+                keys = keys.concat(Array.from(input.matchAll(templateRegexp), function(m) { return m[1]; }));
             }
         });
 
@@ -119,7 +119,7 @@ app.controller('AdminEditGraphController', function($q, $rootScope, $routeParams
                     series.origin + '\x1e' +
                     series.source + '\x1e' +
                     series.metric
-                ).matchAll(templateRegexp));
+                ).matchAll(templateRegexp), function(m) { return m[1]; });
 
                 if (subkeys.length > 0) {
                     series.template = true;

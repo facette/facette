@@ -79,14 +79,14 @@ app.controller('AdminEditCollectionController', function($q, $routeParams, $scop
 
             angular.forEach(entries, function(input) {
                 if (input) {
-                    keys = keys.concat(input.matchAll(templateRegexp));
+                    keys = keys.concat(Array.from(input.matchAll(templateRegexp), function(m) { return m[1]; }));
                 }
             });
 
             // Parse graphs for attribute fields
             angular.forEach($scope.item.entries, function(entry) {
                 angular.forEach(entry.attributes, function(attr) {
-                    keys = keys.concat(attr.matchAll(templateRegexp));
+                    keys = keys.concat(Array.from(attr.matchAll(templateRegexp), function(m) { return m[1]; }));
                 });
             });
 
