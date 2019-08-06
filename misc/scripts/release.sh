@@ -10,7 +10,7 @@ trap 'cp -f ${tmp_dir}/* ${src_dir}/dist/; rm -rf ${tmp_dir}' EXIT INT QUIT TERM
 
 version=$(awk '$1 == "VERSION" { print $3 }' Makefile)
 
-# Binary buils
+# Binary builds
 while read env; do
     docker run --rm -v ${src_dir}:/root/go/src/facette.io/facette facette/buildenv:${env} make dist-bin
     mv dist/*.tar.gz ${tmp_dir}/
@@ -30,6 +30,7 @@ bionic-amd64
 stretch-amd64
 stretch-arm64
 stretch-armel
+stretch-armhf
 EOF
 
 # Docker image build
