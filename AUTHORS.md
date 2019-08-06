@@ -13,6 +13,7 @@ Thank you to the people who have contributed to make Facette better :)
 
 * Alexandre Macabies <https://github.com/Zopieux>
 * Andreas Schulze <https://github.com/iaean>
+* Clar Fon <https://github.com/clarfon>
 * Fabien Rousseau <https://github.com/fabienrousseau>
 * Florian Forster <https://github.com/octo>
 * Guillaume Delacour <https://github.com/guikcd>
