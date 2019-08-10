@@ -1,6 +1,14 @@
 CHANGES
 =======
 
+0.5.1 (2019-08-10)
+------------------
+
+* Fix templates markup faulty detection
+* Fix automatic sidebar collapse issue in responsive mode
+* Fix missing "base_path" prefix on API endpoint when set in configuration
+* Update outdated JS build dependencies
+
 0.5.0 (2019-07-24)
 ------------------
 
