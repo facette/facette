@@ -83,13 +83,13 @@ func (a *API) libraryParse(rw http.ResponseWriter, r *http.Request) {
 		}
 
 		// Make internal request to retrieve item
-		paths := []string{Prefix + "/library/" + req.Type + "/" + req.ID}
+		paths := []string{a.prefix + "/library/" + req.Type + "/" + req.ID}
 
 		if req.Type == "collections" {
 			collection := storage.Collection{}
 			if err := a.storage.SQL().Get("id", req.ID, &collection, true); err == nil {
 				for _, entry := range collection.Entries {
-					paths = append(paths, Prefix+"/library/graphs/"+entry.GraphID)
+					paths = append(paths, a.prefix+"/library/graphs/"+entry.GraphID)
 				}
 			}
 		}
