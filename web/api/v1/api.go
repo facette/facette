@@ -2,6 +2,7 @@ package v1
 
 import (
 	"net/http"
+	"path/filepath"
 
 	"facette.io/facette/catalog"
 	"facette.io/facette/config"
@@ -23,6 +24,7 @@ type API struct {
 	poller   *poller.Poller
 	config   *config.Config
 	logger   *logger.Logger
+	prefix   string
 }
 
 // NewAPI creates a new API instance.
@@ -41,9 +43,14 @@ func NewAPI(
 		poller:   poller,
 		config:   config,
 		logger:   logger,
+		prefix:   Prefix,
 	}
 
-	root := router.Endpoint(Prefix).
+	if config.HTTP.BasePath != "" {
+		api.prefix = filepath.Join(config.HTTP.BasePath, api.prefix)
+	}
+
+	root := router.Endpoint(api.prefix).
 		Use(handleCache).
 		Options(api.optionsGet)
 

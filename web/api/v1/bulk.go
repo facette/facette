@@ -125,7 +125,7 @@ func (a *API) bulkExec(rw http.ResponseWriter, r *http.Request) {
 		// Prepare sub-request
 		rec := httptest.NewRecorder()
 
-		r, err := http.NewRequest(entry.Method, Prefix+"/"+strings.TrimLeft(entry.Endpoint, "/"),
+		r, err := http.NewRequest(entry.Method, a.prefix+"/"+strings.TrimLeft(entry.Endpoint, "/"),
 			bytes.NewReader(entry.Data))
 		if err != nil {
 			a.logger.Error("unable to generate bulk sub-request: %s", err)

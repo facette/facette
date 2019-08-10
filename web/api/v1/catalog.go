@@ -195,7 +195,7 @@ func (a *API) catalogGet(rw http.ResponseWriter, r *http.Request) {
 	var result interface{}
 
 	typ := httprouter.ContextParam(r, "type").(string)
-	name := strings.TrimPrefix(r.URL.Path, Prefix+"/catalog/"+typ+"/")
+	name := strings.TrimPrefix(r.URL.Path, a.prefix+"/catalog/"+typ+"/")
 
 	search := a.catalogSearch(typ, name, r)
 	if len(search) == 0 {
