@@ -26,6 +26,7 @@ Thank you to the people who have contributed to make Facette better :)
 * Maxime Guillet <https://github.com/maximeguillet>
 * Michael Crosby <https://github.com/crosbymichael>
 * Nicolas Leclercq <https://github.com/exzz>
+* MitaliBo <https://github.com/MitaliBo>
 * Orane Marchal <https://oranemarchal.info/en/>
 * peterdevel <https://github.com/peterdevel>
 * Romain Tartière <https://github.com/smortex>
