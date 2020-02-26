@@ -117,7 +117,7 @@ CHANGES
 * Move plots API URL away from library into a dedicated route
 * Prevent loop when using Facette connectors relying on each others
 * Update connectors example configurations
-* Update thirdparty packages
+* Update third-party packages
 * Fix crash when cloning collection
 * Fix parsing issue when multiple percentiles are provided
 * Fix plot lines z-index issue
@@ -145,8 +145,8 @@ CHANGES
 0.2.1 (2014-10-13)
 ------------------
 
-* Add support for influxdb >= 0.8
-* Fix issues with unitialized autofill option
+* Add support for InfluxDB >= 0.8
+* Fix issues with uninitialized autofill option
 * Fix bad legend rendering in embeddable mode
 * Fix missing facette connector build in Makefile
 * Fix broken facette connector following last code refactoring
@@ -178,7 +178,7 @@ CHANGES
 * Remove refresh API calls
 * Updated provider filter rules format
 * Various bug fixes
-* UI improvments
+* UI improvements
 
 0.1.2 (2014-08-01)
 ------------------
@@ -197,7 +197,7 @@ CHANGES
 * Fix JS console errors caused by duplicate names check
 * Fix scale precision issue (#65)
 * Makefile improvements
-* Minor bugfixes
+* Minor bug fixes
 
 0.1.0 (2014-07-01)
 ------------------
