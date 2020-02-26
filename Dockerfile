@@ -6,7 +6,7 @@ COPY . /root/go/src/facette.io/facette
 
 RUN apk --no-cache add --virtual .build-deps git go make musl-dev nodejs rrdtool-dev yarn && \
     GOBIN=/usr/local/bin go get github.com/jteeuwen/go-bindata/... && \
-    make -C /root/go/src/facette.io/facette build install && \
+    make TAGS="skip_docs" -C /root/go/src/facette.io/facette build install && \
     install -D /root/go/src/facette.io/facette/docs/examples/facette.yaml /etc/facette/facette.yaml && \
     sed -i -r \
         -e "s|listen: localhost:12003|listen: :12003|" \
