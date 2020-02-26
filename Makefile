@@ -1,7 +1,7 @@
 # -*- Makefile -*-
 
 NAME := facette
-VERSION := 0.5.0dev
+VERSION := 0.6.0dev
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 REVISION := $(shell git rev-parse HEAD)
 BUILD_DATE := $(shell date +"%F %T")
