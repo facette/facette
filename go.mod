@@ -20,7 +20,7 @@ require (
 	github.com/hashicorp/go-uuid v0.0.0-20180228145832-27454136f036
 	github.com/influxdata/influxdb v1.6.1
 	github.com/influxdata/influxql v0.0.0-20180717201005-c661ab7db8ad
-	github.com/jinzhu/gorm v1.9.1
+	github.com/jinzhu/gorm v1.9.10
 	github.com/jinzhu/inflection v0.0.0-20180308033659-04140366298a // indirect
 	github.com/jinzhu/now v0.0.0-20180511015916-ed742868f2ae // indirect
 	github.com/kr/pretty v0.1.0 // indirect
