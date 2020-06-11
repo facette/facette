@@ -63,12 +63,12 @@ func (scope *Scope) SQLDB() SQLCommon {
 
 // Dialect get dialect
 func (scope *Scope) Dialect() Dialect {
-	return scope.db.parent.dialect
+	return scope.db.dialect
 }
 
 // Quote used to quote string to escape them for database
 func (scope *Scope) Quote(str string) string {
-	if strings.Index(str, ".") != -1 {
+	if strings.Contains(str, ".") {
 		newStrs := []string{}
 		for _, str := range strings.Split(str, ".") {
 			newStrs = append(newStrs, scope.Dialect().Quote(str))
@@ -134,7 +134,7 @@ func (scope *Scope) Fields() []*Field {
 // FieldByName find `gorm.Field` with field name or db name
 func (scope *Scope) FieldByName(name string) (field *Field, ok bool) {
 	var (
-		dbName           = ToDBName(name)
+		dbName           = ToColumnName(name)
 		mostMatchedField *Field
 	)
 
@@ -277,6 +277,23 @@ func (scope *Scope) AddToVars(value interface{}) string {
 	return scope.Dialect().BindVar(len(scope.SQLVars))
 }
 
+// IsCompleteParentheses check if the string has complete parentheses to prevent SQL injection
+func (scope *Scope) IsCompleteParentheses(value string) bool {
+	count := 0
+	for i, _ := range value {
+		if value[i] == 40 { // (
+			count++
+		} else if value[i] == 41 { // )
+			count--
+		}
+		if count < 0 {
+			break
+		}
+		i++
+	}
+	return count == 0
+}
+
 // SelectAttrs return selected attributes
 func (scope *Scope) SelectAttrs() []string {
 	if scope.selectAttrs == nil {
@@ -330,7 +347,7 @@ func (scope *Scope) TableName() string {
 // QuotedTableName return quoted table name
 func (scope *Scope) QuotedTableName() (name string) {
 	if scope.Search != nil && len(scope.Search.tableName) > 0 {
-		if strings.Index(scope.Search.tableName, " ") != -1 {
+		if strings.Contains(scope.Search.tableName, " ") {
 			return scope.Search.tableName
 		}
 		return scope.Quote(scope.Search.tableName)
@@ -358,7 +375,7 @@ func (scope *Scope) Raw(sql string) *Scope {
 
 // Exec perform generated SQL
 func (scope *Scope) Exec() *Scope {
-	defer scope.trace(NowFunc())
+	defer scope.trace(scope.db.nowFunc())
 
 	if !scope.HasError() {
 		if result, err := scope.SQLDB().Exec(scope.SQL, scope.SQLVars...); scope.Err(err) == nil {
@@ -402,7 +419,7 @@ func (scope *Scope) InstanceGet(name string) (interface{}, bool) {
 // Begin start a transaction
 func (scope *Scope) Begin() *Scope {
 	if db, ok := scope.SQLDB().(sqlDb); ok {
-		if tx, err := db.Begin(); err == nil {
+		if tx, err := db.Begin(); scope.Err(err) == nil {
 			scope.db.db = interface{}(tx).(SQLCommon)
 			scope.InstanceSet("gorm:started_transaction", true)
 		}
@@ -486,8 +503,10 @@ func (scope *Scope) scan(rows *sql.Rows, columns []string, fields []*Field) {
 		values[index] = &ignored
 
 		selectFields = fields
+		offset := 0
 		if idx, ok := selectedColumnsMap[column]; ok {
-			selectFields = selectFields[idx+1:]
+			offset = idx + 1
+			selectFields = selectFields[offset:]
 		}
 
 		for fieldIndex, field := range selectFields {
@@ -501,7 +520,7 @@ func (scope *Scope) scan(rows *sql.Rows, columns []string, fields []*Field) {
 					resetFields[index] = field
 				}
 
-				selectedColumnsMap[column] = fieldIndex
+				selectedColumnsMap[column] = offset + fieldIndex
 
 				if field.IsNormal {
 					break
@@ -554,6 +573,10 @@ func (scope *Scope) buildCondition(clause map[string]interface{}, include bool) 
 		}
 
 		if value != "" {
+			if !scope.IsCompleteParentheses(value) {
+				scope.Err(fmt.Errorf("incomplete parentheses found: %v", value))
+				return
+			}
 			if !include {
 				if comparisonRegexp.MatchString(value) {
 					str = fmt.Sprintf("NOT (%v)", value)
@@ -586,10 +609,10 @@ func (scope *Scope) buildCondition(clause map[string]interface{}, include bool) 
 			scope.Err(fmt.Errorf("invalid query condition: %v", value))
 			return
 		}
-
+		scopeQuotedTableName := newScope.QuotedTableName()
 		for _, field := range newScope.Fields() {
 			if !field.IsIgnored && !field.IsBlank {
-				sqls = append(sqls, fmt.Sprintf("(%v.%v %s %v)", quotedTableName, scope.Quote(field.DBName), equalSQL, scope.AddToVars(field.Field.Interface())))
+				sqls = append(sqls, fmt.Sprintf("(%v.%v %s %v)", scopeQuotedTableName, scope.Quote(field.DBName), equalSQL, scope.AddToVars(field.Field.Interface())))
 			}
 		}
 		return strings.Join(sqls, " AND ")
@@ -692,12 +715,12 @@ func (scope *Scope) buildSelectQuery(clause map[string]interface{}) (str string)
 
 	buff := bytes.NewBuffer([]byte{})
 	i := 0
-	for pos := range str {
+	for pos, char := range str {
 		if str[pos] == '?' {
 			buff.WriteString(replacements[i])
 			i++
 		} else {
-			buff.WriteByte(str[pos])
+			buff.WriteRune(char)
 		}
 	}
 
@@ -853,6 +876,14 @@ func (scope *Scope) inlineCondition(values ...interface{}) *Scope {
 }
 
 func (scope *Scope) callCallbacks(funcs []*func(s *Scope)) *Scope {
+	defer func() {
+		if err := recover(); err != nil {
+			if db, ok := scope.db.db.(sqlTx); ok {
+				db.Rollback()
+			}
+			panic(err)
+		}
+	}()
 	for _, f := range funcs {
 		(*f)(scope)
 		if scope.skipLeft {
@@ -862,7 +893,7 @@ func (scope *Scope) callCallbacks(funcs []*func(s *Scope)) *Scope {
 	return scope
 }
 
-func convertInterfaceToMap(values interface{}, withIgnoredField bool) map[string]interface{} {
+func convertInterfaceToMap(values interface{}, withIgnoredField bool, db *DB) map[string]interface{} {
 	var attrs = map[string]interface{}{}
 
 	switch value := values.(type) {
@@ -870,7 +901,7 @@ func convertInterfaceToMap(values interface{}, withIgnoredField bool) map[string
 		return value
 	case []interface{}:
 		for _, v := range value {
-			for key, value := range convertInterfaceToMap(v, withIgnoredField) {
+			for key, value := range convertInterfaceToMap(v, withIgnoredField, db) {
 				attrs[key] = value
 			}
 		}
@@ -880,10 +911,10 @@ func convertInterfaceToMap(values interface{}, withIgnoredField bool) map[string
 		switch reflectValue.Kind() {
 		case reflect.Map:
 			for _, key := range reflectValue.MapKeys() {
-				attrs[ToDBName(key.Interface().(string))] = reflectValue.MapIndex(key).Interface()
+				attrs[ToColumnName(key.Interface().(string))] = reflectValue.MapIndex(key).Interface()
 			}
 		default:
-			for _, field := range (&Scope{Value: values}).Fields() {
+			for _, field := range (&Scope{Value: values, db: db}).Fields() {
 				if !field.IsBlank && (withIgnoredField || !field.IsIgnored) {
 					attrs[field.DBName] = field.Field.Interface()
 				}
@@ -895,19 +926,19 @@ func convertInterfaceToMap(values interface{}, withIgnoredField bool) map[string
 
 func (scope *Scope) updatedAttrsWithValues(value interface{}) (results map[string]interface{}, hasUpdate bool) {
 	if scope.IndirectValue().Kind() != reflect.Struct {
-		return convertInterfaceToMap(value, false), true
+		return convertInterfaceToMap(value, false, scope.db), true
 	}
 
 	results = map[string]interface{}{}
 
-	for key, value := range convertInterfaceToMap(value, true) {
+	for key, value := range convertInterfaceToMap(value, true, scope.db) {
 		if field, ok := scope.FieldByName(key); ok && scope.changeableField(field) {
 			if _, ok := value.(*expr); ok {
 				hasUpdate = true
 				results[field.DBName] = value
 			} else {
 				err := field.Set(value)
-				if field.IsNormal {
+				if field.IsNormal && !field.IsIgnored {
 					hasUpdate = true
 					if err == ErrUnaddressable {
 						results[field.DBName] = value
@@ -922,7 +953,7 @@ func (scope *Scope) updatedAttrsWithValues(value interface{}) (results map[strin
 }
 
 func (scope *Scope) row() *sql.Row {
-	defer scope.trace(NowFunc())
+	defer scope.trace(scope.db.nowFunc())
 
 	result := &RowQueryResult{}
 	scope.InstanceSet("row_query_result", result)
@@ -932,7 +963,7 @@ func (scope *Scope) row() *sql.Row {
 }
 
 func (scope *Scope) rows() (*sql.Rows, error) {
-	defer scope.trace(NowFunc())
+	defer scope.trace(scope.db.nowFunc())
 
 	result := &RowsQueryResult{}
 	scope.InstanceSet("row_query_result", result)
@@ -974,6 +1005,10 @@ func (scope *Scope) pluck(column string, value interface{}) *Scope {
 		return scope
 	}
 
+	if dest.Len() > 0 {
+		dest.Set(reflect.Zero(dest.Type()))
+	}
+
 	if query, ok := scope.Search.selects["query"]; !ok || !scope.isQueryForColumn(query, column) {
 		scope.Search.Select(column)
 	}
@@ -997,8 +1032,15 @@ func (scope *Scope) pluck(column string, value interface{}) *Scope {
 func (scope *Scope) count(value interface{}) *Scope {
 	if query, ok := scope.Search.selects["query"]; !ok || !countingQueryRegexp.MatchString(fmt.Sprint(query)) {
 		if len(scope.Search.group) != 0 {
-			scope.Search.Select("count(*) FROM ( SELECT count(*) as name ")
-			scope.Search.group += " ) AS count_table"
+			if len(scope.Search.havingConditions) != 0 {
+				scope.prepareQuerySQL()
+				scope.Search = &search{}
+				scope.Search.Select("count(*)")
+				scope.Search.Table(fmt.Sprintf("( %s ) AS count_table", scope.SQL))
+			} else {
+				scope.Search.Select("count(*) FROM ( SELECT count(*) as name ")
+				scope.Search.group += " ) AS count_table"
+			}
 		} else {
 			scope.Search.Select("count(*)")
 		}
@@ -1113,8 +1155,8 @@ func (scope *Scope) createJoinTable(field *StructField) {
 				if field, ok := scope.FieldByName(fieldName); ok {
 					foreignKeyStruct := field.clone()
 					foreignKeyStruct.IsPrimaryKey = false
-					foreignKeyStruct.TagSettings["IS_JOINTABLE_FOREIGNKEY"] = "true"
-					delete(foreignKeyStruct.TagSettings, "AUTO_INCREMENT")
+					foreignKeyStruct.TagSettingsSet("IS_JOINTABLE_FOREIGNKEY", "true")
+					foreignKeyStruct.TagSettingsDelete("AUTO_INCREMENT")
 					sqlTypes = append(sqlTypes, scope.Quote(relationship.ForeignDBNames[idx])+" "+scope.Dialect().DataTypeOf(foreignKeyStruct))
 					primaryKeys = append(primaryKeys, scope.Quote(relationship.ForeignDBNames[idx]))
 				}
@@ -1124,8 +1166,8 @@ func (scope *Scope) createJoinTable(field *StructField) {
 				if field, ok := toScope.FieldByName(fieldName); ok {
 					foreignKeyStruct := field.clone()
 					foreignKeyStruct.IsPrimaryKey = false
-					foreignKeyStruct.TagSettings["IS_JOINTABLE_FOREIGNKEY"] = "true"
-					delete(foreignKeyStruct.TagSettings, "AUTO_INCREMENT")
+					foreignKeyStruct.TagSettingsSet("IS_JOINTABLE_FOREIGNKEY", "true")
+					foreignKeyStruct.TagSettingsDelete("AUTO_INCREMENT")
 					sqlTypes = append(sqlTypes, scope.Quote(relationship.AssociationForeignDBNames[idx])+" "+scope.Dialect().DataTypeOf(foreignKeyStruct))
 					primaryKeys = append(primaryKeys, scope.Quote(relationship.AssociationForeignDBNames[idx]))
 				}
@@ -1173,7 +1215,7 @@ func (scope *Scope) createTable() *Scope {
 }
 
 func (scope *Scope) dropTable() *Scope {
-	scope.Raw(fmt.Sprintf("DROP TABLE %v%s", scope.QuotedTableName(), scope.getTableOptions())).Exec()
+	scope.Raw(fmt.Sprintf("DROP TABLE %v", scope.QuotedTableName())).Exec()
 	return scope
 }
 
@@ -1215,12 +1257,18 @@ func (scope *Scope) addForeignKey(field string, dest string, onDelete string, on
 }
 
 func (scope *Scope) removeForeignKey(field string, dest string) {
-	keyName := scope.Dialect().BuildKeyName(scope.TableName(), field, dest)
-
+	keyName := scope.Dialect().BuildKeyName(scope.TableName(), field, dest, "foreign")
 	if !scope.Dialect().HasForeignKey(scope.TableName(), keyName) {
 		return
 	}
-	var query = `ALTER TABLE %s DROP CONSTRAINT %s;`
+	var mysql mysql
+	var query string
+	if scope.Dialect().GetName() == mysql.GetName() {
+		query = `ALTER TABLE %s DROP FOREIGN KEY %s;`
+	} else {
+		query = `ALTER TABLE %s DROP CONSTRAINT %s;`
+	}
+
 	scope.Raw(fmt.Sprintf(query, scope.QuotedTableName(), scope.quoteIfPossible(keyName))).Exec()
 }
 
@@ -1254,25 +1302,27 @@ func (scope *Scope) autoIndex() *Scope {
 	var uniqueIndexes = map[string][]string{}
 
 	for _, field := range scope.GetStructFields() {
-		if name, ok := field.TagSettings["INDEX"]; ok {
+		if name, ok := field.TagSettingsGet("INDEX"); ok {
 			names := strings.Split(name, ",")
 
 			for _, name := range names {
 				if name == "INDEX" || name == "" {
 					name = scope.Dialect().BuildKeyName("idx", scope.TableName(), field.DBName)
 				}
-				indexes[name] = append(indexes[name], field.DBName)
+				name, column := scope.Dialect().NormalizeIndexAndColumn(name, field.DBName)
+				indexes[name] = append(indexes[name], column)
 			}
 		}
 
-		if name, ok := field.TagSettings["UNIQUE_INDEX"]; ok {
+		if name, ok := field.TagSettingsGet("UNIQUE_INDEX"); ok {
 			names := strings.Split(name, ",")
 
 			for _, name := range names {
 				if name == "UNIQUE_INDEX" || name == "" {
 					name = scope.Dialect().BuildKeyName("uix", scope.TableName(), field.DBName)
 				}
-				uniqueIndexes[name] = append(uniqueIndexes[name], field.DBName)
+				name, column := scope.Dialect().NormalizeIndexAndColumn(name, field.DBName)
+				uniqueIndexes[name] = append(uniqueIndexes[name], column)
 			}
 		}
 	}
@@ -1293,6 +1343,7 @@ func (scope *Scope) autoIndex() *Scope {
 }
 
 func (scope *Scope) getColumnAsArray(columns []string, values ...interface{}) (results [][]interface{}) {
+	resultMap := make(map[string][]interface{})
 	for _, value := range values {
 		indirectValue := indirect(reflect.ValueOf(value))
 
@@ -1311,7 +1362,10 @@ func (scope *Scope) getColumnAsArray(columns []string, values ...interface{}) (r
 				}
 
 				if hasValue {
-					results = append(results, result)
+					h := fmt.Sprint(result...)
+					if _, exist := resultMap[h]; !exist {
+						resultMap[h] = result
+					}
 				}
 			}
 		case reflect.Struct:
@@ -1326,11 +1380,16 @@ func (scope *Scope) getColumnAsArray(columns []string, values ...interface{}) (r
 			}
 
 			if hasValue {
-				results = append(results, result)
+				h := fmt.Sprint(result...)
+				if _, exist := resultMap[h]; !exist {
+					resultMap[h] = result
+				}
 			}
 		}
 	}
-
+	for _, v := range resultMap {
+		results = append(results, v)
+	}
 	return
 }
 
