@@ -5,9 +5,13 @@ After=network.target
 
 [Service]
 Type=simple
+ExecStartPre=/bin/mkdir -p /run/facette
+ExecStartPre=/bin/chown facette: /run/facette
+ExecStartPre=/bin/bash -c 'rm -f $(grep "listen.*unix:.*\.sock" /etc/facette/facette.yaml|cut -d: -f3)'
 ExecStart=/usr/bin/facette
 User=facette
 Group=facette
+PermissionsStartOnly=true
 
 [Install]
 WantedBy=multi-user.target
