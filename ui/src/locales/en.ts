@@ -184,6 +184,7 @@ export default {
                 add: "Add target",
             },
         },
+        format: "Format",
         fullscreen: {
             enter: "Enter full screen",
             leave: "Leave full screen",
@@ -240,7 +241,9 @@ export default {
         },
         metrics: {
             _: "Metric | Metrics",
+            fetching: "Fetch metrics…",
             filter: "Filter metrics",
+            matching: "Matching {0} metric | Matching {0} metrics",
         },
         moreActions: "More actions…",
         name: {

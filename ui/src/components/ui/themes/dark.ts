@@ -53,6 +53,14 @@ export default {
     "dropdown-color": "var(--color)",
     "dropdown-shadow": "rgba(0, 0, 0, 0.5)",
 
+    // highlight
+    "highlight-color": "#ddd",
+    "highlight-function-color": "#ec407a",
+    "highlight-label-color": "#03a9f4",
+    "highlight-name-color": "white",
+    "highlight-number-color": "#ff9800",
+    "highlight-string-color": "#8bc34a",
+
     // input
     "input-background": "#333",
     "input-height": "2.25rem",

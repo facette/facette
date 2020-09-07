@@ -9,9 +9,7 @@ const alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 const digits = "0123456789";
 
-export function formatPosition(pos: Position): string {
-    return `${pos.line}:${pos.char}`;
-}
+const spaces = " \t";
 
 function isDigit(c: string): boolean {
     return digits.includes(c);
@@ -19,10 +17,6 @@ function isDigit(c: string): boolean {
 
 function isIdentChar(c: string): boolean {
     return (alpha + digits + "_").includes(c);
-}
-
-function isSpace(c: string): boolean {
-    return " \t\n".includes(c);
 }
 
 export interface Token {
@@ -38,6 +32,7 @@ export enum TokenType {
     IDENT = "ident", // ident
     NUMBER = "number", // 123.45
     STRING = "string", // "abc" or 'abc'
+    SPACE = "space", // " " or \t
     NEWLINE = "new line", // \n
     BADESCAPE = "bad escape", // \b
 
@@ -59,6 +54,8 @@ export interface Position {
 }
 
 export class Parser {
+    private emitSpaces: boolean;
+
     private last: Position | null = null;
 
     private lastCh: string | null = null;
@@ -67,16 +64,17 @@ export class Parser {
 
     private pos: Position = {line: 1, char: 1};
 
-    private text = "";
+    private text: string;
 
-    public constructor(text: string) {
+    public constructor(text: string, emitSpaces = false) {
         this.text = text;
+        this.emitSpaces = emitSpaces;
     }
 
     public expect(type: string): Token {
         const tok = this.next();
         if (tok.type !== type) {
-            throw Error(`expected ${type} but got ${tok.type} at ${formatPosition(tok.pos)}`);
+            throw Error(`expected ${type} but got ${tok.type} at ${tok.pos.line}:${tok.pos.char}`);
         }
 
         return tok;
@@ -103,6 +101,24 @@ export class Parser {
         return this.peeked;
     }
 
+    public peekChar(): string {
+        const c = this.read();
+        this.unread();
+        return c;
+    }
+
+    public tokens(): Array<Token> {
+        const tokens: Array<Token> = [];
+
+        let tok = this.next();
+        while (tok.type !== TokenType.EOF) {
+            tokens.push(tok);
+            tok = this.next();
+        }
+
+        return tokens;
+    }
+
     private read(): string {
         const c: string = this.text.slice(0, 1);
         this.text = this.text.slice(1);
@@ -125,7 +141,10 @@ export class Parser {
 
         for (;;) {
             const c = this.read();
-            if (!set.includes(c)) {
+            if (c === "") {
+                break;
+            } else if (!set.includes(c)) {
+                this.unread();
                 break;
             }
 
@@ -137,62 +156,73 @@ export class Parser {
 
     private scan(): Token {
         let c = this.read();
-        while (isSpace(c)) {
-            c = this.read();
+
+        if (!this.emitSpaces) {
+            while (c !== "" && (spaces + "\n").includes(c)) {
+                c = this.read();
+            }
         }
 
+        const pos = Object.assign({}, this.pos);
+
         if (c === "") {
-            return this.tokenAtPos(TokenType.EOF);
+            return this.tokenAtPos(TokenType.EOF, pos);
         } else if (c === "-" || isDigit(c)) {
             this.unread();
-            return this.scanNumber();
+            return this.tokenAtPos(TokenType.NUMBER, pos, this.scanNumber());
         } else if (isIdentChar(c)) {
             this.unread();
-            return this.scanIdent();
+            return this.tokenAtPos(TokenType.IDENT, pos, this.scanIdent());
         } else if (c === '"' || c === "'") {
             this.unread();
-            return this.scanString();
+            return this.tokenAtPos(TokenType.STRING, pos, this.scanString());
+        } else if (spaces.includes(c)) {
+            this.unread();
+            return this.tokenAtPos(TokenType.SPACE, pos, this.run(spaces));
+        } else if (c === "\n") {
+            return this.tokenAtPos(TokenType.NEWLINE, pos, c);
+        } else if (c === "\\") {
+            const next = this.read();
+            return this.tokenAtPos(TokenType.BADESCAPE, pos, c + next);
         } else if (c === "=") {
             const next = this.read();
             if (next === "~") {
-                return this.tokenAtPos(TokenType.EQREGEXP);
+                return this.tokenAtPos(TokenType.EQREGEXP, pos, "=~");
             }
 
             this.unread();
 
-            return this.tokenAtPos(TokenType.EQ);
+            return this.tokenAtPos(TokenType.EQ, pos, "=");
         } else if (c === "!") {
             const next = this.read();
             if (next === "=") {
-                return this.tokenAtPos(TokenType.NEQ);
+                return this.tokenAtPos(TokenType.NEQ, pos, "!=");
             } else if (next === "~") {
-                return this.tokenAtPos(TokenType.NEQREGEXP);
+                return this.tokenAtPos(TokenType.NEQREGEXP, pos, "!~");
             }
 
             this.unread();
         } else if (c === "{") {
-            return this.tokenAtPos(TokenType.LBRACE);
+            return this.tokenAtPos(TokenType.LBRACE, pos, c);
         } else if (c === "}") {
-            return this.tokenAtPos(TokenType.RBRACE);
+            return this.tokenAtPos(TokenType.RBRACE, pos, c);
         } else if (c === "(") {
-            return this.tokenAtPos(TokenType.LPAREN);
+            return this.tokenAtPos(TokenType.LPAREN, pos, c);
         } else if (c === ")") {
-            return this.tokenAtPos(TokenType.RPAREN);
+            return this.tokenAtPos(TokenType.RPAREN, pos, c);
         } else if (c === ",") {
-            return this.tokenAtPos(TokenType.COMMA);
+            return this.tokenAtPos(TokenType.COMMA, pos, c);
         }
 
-        return this.tokenAtPos(TokenType.INVALID, c);
+        return this.tokenAtPos(TokenType.INVALID, pos, c);
     }
 
-    private scanIdent(): Token {
+    private scanIdent(): string {
         let s = "";
 
         for (;;) {
             const c = this.read();
-            if (c === "") {
-                break;
-            } else if (isIdentChar(c)) {
+            if (c !== "" && isIdentChar(c)) {
                 s += c;
             } else {
                 this.unread();
@@ -200,10 +230,10 @@ export class Parser {
             }
         }
 
-        return this.tokenAtPos(TokenType.IDENT, s);
+        return s;
     }
 
-    private scanNumber(): Token {
+    private scanNumber(): string {
         let s = "";
 
         let next = this.read();
@@ -238,26 +268,25 @@ export class Parser {
             this.unread();
         }
 
-        return this.tokenAtPos(TokenType.NUMBER, s);
+        return s;
     }
 
-    private scanString(): Token {
+    private scanString(): string {
         const quote = this.read();
 
         let s = "";
+        let terminated = false;
 
-        for (;;) {
+        loop: for (;;) {
             const c = this.read();
 
             switch (c) {
                 case quote:
-                    return this.tokenAtPos(TokenType.STRING, s);
+                    terminated = true;
+                    break loop;
 
                 case "":
-                    return this.tokenAtPos(TokenType.EOF, s);
-
-                case "\n":
-                    return this.tokenAtPos(TokenType.NEWLINE, s);
+                    break loop;
 
                 case "\\": {
                     const next = this.read();
@@ -265,11 +294,14 @@ export class Parser {
                         case "\\":
                         case '"':
                         case "'":
-                            s += next;
+                            s += "\\" + next;
                             break;
 
                         default:
-                            return this.tokenAtPos(TokenType.BADESCAPE, c + next);
+                            this.unread();
+                            this.text = "\\" + this.text;
+
+                            break loop;
                     }
 
                     break;
@@ -279,10 +311,16 @@ export class Parser {
                     s += c;
             }
         }
+
+        if (terminated) {
+            s += quote;
+        }
+
+        return quote + s;
     }
 
-    private tokenAtPos(type: TokenType, text = ""): Token {
-        return {type, pos: Object.assign({}, this.pos), text};
+    private tokenAtPos(type: TokenType, pos: Position, text = ""): Token {
+        return {type, pos, text};
     }
 
     private unread(): void {

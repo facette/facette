@@ -167,9 +167,7 @@
                                 </v-table-cell>
 
                                 <v-table-cell grow>
-                                    <span class="monospace truncate" v-tooltip="series.value.expr">
-                                        {{ series.value.expr }}
-                                    </span>
+                                    <v-highlight :content="formatExpr(series.value.expr, true)"></v-highlight>
                                 </v-table-cell>
 
                                 <v-table-cell>
@@ -326,6 +324,7 @@ import {useUI} from "@/components/ui";
 import {formatDate} from "@/helpers/date";
 import {objectNameValidity} from "@/helpers/validity";
 import api from "@/lib/api";
+import {formatExpr} from "@/lib/expr";
 import {parseChartVariables, renderChart, resolveVariables} from "@/lib/objects";
 import {State} from "@/store";
 
@@ -759,6 +758,7 @@ export default {
             erred,
             form,
             formatDate,
+            formatExpr,
             i18n,
             link,
             loading,

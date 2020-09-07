@@ -44,7 +44,10 @@ function keyCode(key: string): string {
 function handle(ev: KeyboardEvent): void {
     // Skip shortcuts handling when active element is an input, or when only a
     // modifier key has been pressed.
-    if (document.activeElement?.matches("input, select, textarea") || modifierKeys.includes(ev.key.toLowerCase())) {
+    if (
+        document.activeElement?.matches('input, select, textarea, [contenteditable="true"]') ||
+        modifierKeys.includes(ev.key.toLowerCase())
+    ) {
         return;
     }
 

@@ -10,8 +10,10 @@ import {App, Component} from "vue";
 
 import ChartComponent from "./chart/chart.vue";
 import DatetimeComponent from "./datetime/datetime.vue";
+import EditorComponent from "./editor/editor.vue";
 import GridComponent from "./grid/grid.vue";
 import GridItemComponent from "./grid/grid-item.vue";
+import HighlightComponent from "./highlight/highlight.vue";
 import LabelsComponent from "./labels/labels.vue";
 import MessageErrorComponent from "./message/error.vue";
 import ModalConfirmComponent from "./modal/confirm.vue";
@@ -25,8 +27,10 @@ import TextComponent from "./text/text.vue";
 const components: Record<string, Component> = {
     ChartComponent,
     DatetimeComponent,
+    EditorComponent,
     GridComponent,
     GridItemComponent,
+    HighlightComponent,
     LabelsComponent,
     MessageErrorComponent,
     ModalConfirmComponent,

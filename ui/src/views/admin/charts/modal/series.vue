@@ -10,14 +10,33 @@
         <template v-slot="modal">
             <v-form>
                 <v-label>{{ i18n.t("labels.series._", 1) }}</v-label>
-                <v-input
-                    class="monospace"
-                    required
-                    spellcheck="false"
-                    type="textarea"
-                    v-autofocus
-                    v-model:value="series.expr"
-                ></v-input>
+                <v-editor required v-autofocus v-model:value="series.expr" @update:value="onUpdate"></v-editor>
+
+                <v-toolbar>
+                    <v-label v-if="loadingMetrics">
+                        <v-spinner
+                            :size="16"
+                            :stroke-width="2"
+                            :style="{'--accent': 'var(--color)', '--spinner-background': 'var(--input-background)'}"
+                        ></v-spinner>
+
+                        <span>{{ i18n.t("labels.metrics.fetching") }}</span>
+                    </v-label>
+
+                    <template v-else-if="error">
+                        <v-label icon="exclamation-triangle">{{ error }}</v-label>
+                    </template>
+
+                    <template v-else>
+                        <v-label icon="check">{{ i18n.t("labels.ok") }}</v-label>
+
+                        <v-spacer></v-spacer>
+
+                        <v-label icon="dot-circle" v-if="metricsCount !== null">
+                            {{ i18n.t("labels.metrics.matching", [metricsCount], metricsCount) }}
+                        </v-label>
+                    </template>
+                </v-toolbar>
 
                 <v-flex class="columns">
                     <v-flex direction="column">
@@ -38,11 +57,21 @@
                 </v-flex>
 
                 <template v-slot:bottom>
+                    <v-button icon="indent" @click="format" @mousedown.prevent>
+                        {{ i18n.t("labels.format") }}
+                    </v-button>
+
+                    <v-spacer></v-spacer>
+
                     <v-button @click="modal.close(false)">
                         {{ i18n.t("labels.cancel") }}
                     </v-button>
 
-                    <v-button :disabled="!series.expr || !series.options.axis" primary @click="modal.close(series)">
+                    <v-button
+                        :disabled="!series.expr || !series.options.axis || Boolean(error)"
+                        primary
+                        @click="modal.close(series)"
+                    >
                         {{ i18n.t("labels.series.set") }}
                     </v-button>
                 </template>
@@ -58,6 +87,9 @@ import {ref} from "vue";
 import {useI18n} from "vue-i18n";
 
 import {SelectOption} from "types/ui";
+
+import api from "@/lib/api";
+import {formatExpr, parseExpr} from "@/lib/expr";
 
 export interface ModalChartSeriesParams {
     edit: boolean;
@@ -76,7 +108,12 @@ export default {
     setup(): Record<string, unknown> {
         const i18n = useI18n();
 
+        let checkTimeout: number | null = null;
+
         const edit = ref(false);
+        const error = ref<string | null>(null);
+        const loadingMetrics = ref(false);
+        const metricsCount = ref<number | null>(null);
         const series = ref<ChartSeries>(cloneDeep(defaultSeries));
 
         const axes = ref<Array<SelectOption>>([
@@ -84,16 +121,63 @@ export default {
             {label: i18n.t("labels.charts.axes.right"), value: "right"},
         ]);
 
+        const checkExpr = async (value: string): Promise<void> => {
+            try {
+                const expr = parseExpr(value);
+
+                error.value = null;
+
+                if (expr.type === "matcher") {
+                    loadingMetrics.value = true;
+
+                    metricsCount.value = await api
+                        .metrics({match: value})
+                        .then(
+                            response => Promise.resolve(response.total ?? null),
+                            () => Promise.resolve(null),
+                        )
+                        .finally(() => {
+                            loadingMetrics.value = false;
+                        });
+                } else {
+                    metricsCount.value = null;
+                }
+            } catch (e) {
+                error.value = e.message;
+            }
+        };
+
+        const format = (): void => {
+            series.value.expr = formatExpr(series.value.expr);
+        };
+
         const onShow = (params: ModalChartSeriesParams): void => {
             edit.value = params.edit;
             series.value = merge({}, defaultSeries, params.series);
+
+            if (series.value.expr) {
+                checkExpr(series.value.expr);
+            }
+        };
+
+        const onUpdate = (value: string): void => {
+            if (checkTimeout !== null) {
+                clearTimeout(checkTimeout);
+            }
+
+            checkTimeout = setTimeout(() => checkExpr(value), 1000);
         };
 
         return {
             axes,
             edit,
+            error,
+            format,
             i18n,
+            loadingMetrics,
+            metricsCount,
             onShow,
+            onUpdate,
             series,
         };
     },
@@ -108,7 +192,40 @@ export default {
     ::v-deep(.v-modal-content) {
         @include content;
 
-        min-width: 35vw;
+        width: 35vw;
+
+        .v-editor {
+            border-radius: 0.2rem 0.2rem 0 0;
+
+            .v-editor-input {
+                height: 10rem;
+                min-height: 10rem;
+                resize: vertical;
+            }
+
+            + .v-toolbar {
+                background-color: var(--dark-gray);
+                border-radius: 0 0 0.2rem 0.2rem;
+                height: 2rem;
+                line-height: 2rem;
+                margin-top: 0;
+                padding: 0 0.25rem;
+
+                .v-label {
+                    .v-spinner {
+                        margin-right: 0.5rem;
+                    }
+
+                    span {
+                        opacity: 0.5;
+                    }
+                }
+
+                .v-icon {
+                    font-size: 0.8rem;
+                }
+            }
+        }
 
         .columns .column {
             @include form;
