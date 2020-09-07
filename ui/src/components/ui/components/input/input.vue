@@ -270,6 +270,7 @@ export default {
 
     textarea {
         min-height: 6.25rem;
+        tab-size: 4;
     }
 }
 </style>

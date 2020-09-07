@@ -89,7 +89,7 @@ export default {
     "sidebar-active-color": "white",
     "sidebar-background": "#171717",
     "sidebar-color": "var(--color)",
-    "sidebar-focus-background": "#444",
+    "sidebar-focus-background": "#333",
     "sidebar-focus-color": "white",
     "sidebar-toolbar-background": "#222",
     "sidebar-toolbar-focus-background": "#333",

@@ -48,7 +48,7 @@
                 </template>
 
                 <template v-else-if="tab === 'keyboard'">
-                    <v-form class="third">
+                    <v-form>
                         <v-markdown :content="i18n.t('help.keyboard.shortcuts')"></v-markdown>
 
                         <v-checkbox type="toggle" v-model:value="settings.shortcuts">

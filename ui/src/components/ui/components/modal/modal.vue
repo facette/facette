@@ -143,7 +143,9 @@ export default {
         border-radius: 0.2rem;
         box-shadow: 0 0.2rem 1rem var(--modal-content-shadow);
         margin: 10vh 0;
+        max-height: 80vh;
         min-width: 25vw;
+        overflow: auto;
         padding: 2rem;
         position: relative;
 
