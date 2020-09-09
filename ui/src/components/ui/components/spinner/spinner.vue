@@ -13,10 +13,10 @@
                 <circle
                     stroke="var(--accent)"
                     stroke-linecap="round"
-                    stroke-dasharray="32,128"
                     :cx="half"
                     :cy="half"
                     :r="innerHalf"
+                    :stroke-dasharray="dash"
                 />
             </g>
         </svg>
@@ -38,10 +38,17 @@ export default {
         },
     },
     setup(props: Record<string, any>): Record<string, unknown> {
+        const dash = computed(() => {
+            const q = (Math.PI * half.value) / 2;
+            return `${q},${q * 3}`;
+        });
+
         const half = computed(() => props.size / 2);
+
         const innerHalf = computed(() => (props.size - props.strokeWidth) / 2);
 
         return {
+            dash,
             half,
             innerHalf,
         };
