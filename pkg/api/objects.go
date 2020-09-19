@@ -12,9 +12,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"facette.io/facette/pkg/catalog"
 	"facette.io/facette/pkg/connector"
 	"facette.io/facette/pkg/errors"
+	"facette.io/facette/pkg/filter"
 	"facette.io/facette/pkg/series"
 	"facette.io/facette/pkg/template"
 )
@@ -538,7 +538,7 @@ type ProviderConnector connector.Config
 
 // ProviderFilters are provider filters.
 // +store:generate=type
-type ProviderFilters []catalog.FilterRule
+type ProviderFilters []filter.Rule
 
 // ProviderList is a list of provider API objects.
 type ProviderList []Provider

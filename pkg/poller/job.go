@@ -15,6 +15,7 @@ import (
 	"facette.io/facette/pkg/api"
 	"facette.io/facette/pkg/catalog"
 	"facette.io/facette/pkg/connector"
+	"facette.io/facette/pkg/filter"
 )
 
 type job struct {
@@ -104,13 +105,11 @@ func (j *job) Poll() {
 		}
 	}()
 
-	// TODO: handle provider filters
-
 	go j.connector.Metrics(j.ctx, ch, errCh)
 
 	section := catalog.NewSection(j.connector)
 
-	for metric := range ch {
+	for metric := range filter.New(ch, j.provider.Filters) {
 		err := section.Insert(metric)
 		if err != nil {
 			j.log.Warn("invalid metric discarded", zap.Error(err), zap.String("metric", metric.Labels.String()))

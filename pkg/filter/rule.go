@@ -3,7 +3,7 @@
 // Licensed under the terms of the BSD 3-Clause License; a copy of the license
 // is available at: https://opensource.org/licenses/BSD-3-Clause
 
-package catalog
+package filter
 
 import (
 	"fmt"
@@ -13,54 +13,54 @@ import (
 	"facette.io/facette/pkg/errors"
 )
 
-// FilterRule is a catalog metrics filter rule.
-type FilterRule struct {
-	Action  FilterAction      `json:"action"`
+// Rule is a metrics filter rule.
+type Rule struct {
+	Action  Action            `json:"action"`
 	Label   string            `json:"label"`
-	Pattern FilterPattern     `json:"pattern"`
+	Pattern Pattern           `json:"pattern"`
 	Into    string            `json:"into,omitempty"`
 	Targets map[string]string `json:"targets,omitempty"`
 }
 
-// FilterAction is a catalog metrics filter action.
-type FilterAction string
+// Action is a metrics filter action.
+type Action string
 
 // UnmarshalText satisfies the encoding.TextUnmarshaler interface.
-func (f *FilterAction) UnmarshalText(b []byte) error {
+func (a *Action) UnmarshalText(b []byte) error {
 	if len(b) == 0 {
 		return errors.New("invalid filter action")
 	}
 
-	switch v := FilterAction(b); v {
-	case FilterActionDiscard, FilterActionRelabel, FilterActionRewrite, FilterActionSieve:
-		*f = v
+	switch v := Action(b); v {
+	case ActionDiscard, ActionRelabel, ActionRewrite, ActionSieve:
+		*a = v
 		return nil
 	}
 
 	return fmt.Errorf("invalid filter action: %s", b)
 }
 
-// Filter actions:
+// Actions:
 const (
-	FilterActionDiscard FilterAction = "discard"
-	FilterActionRelabel FilterAction = "relabel"
-	FilterActionRewrite FilterAction = "rewrite"
-	FilterActionSieve   FilterAction = "sieve"
+	ActionDiscard Action = "discard"
+	ActionRelabel Action = "relabel"
+	ActionRewrite Action = "rewrite"
+	ActionSieve   Action = "sieve"
 )
 
-// FilterPattern is a catalog metrics filter pattern.
-type FilterPattern struct {
+// Pattern is a metrics filter pattern.
+type Pattern struct {
 	s  string
 	re *regexp.Regexp
 }
 
 // MarshalText satisfies the encoding.TextMarshaler interface.
-func (f FilterPattern) MarshalText() ([]byte, error) {
+func (f Pattern) MarshalText() ([]byte, error) {
 	return []byte(f.s), nil
 }
 
 // UnmarshalText satisfies the encoding.TextUnmarshaler interface.
-func (f *FilterPattern) UnmarshalText(b []byte) error {
+func (f *Pattern) UnmarshalText(b []byte) error {
 	f.s = string(b)
 
 	var err error

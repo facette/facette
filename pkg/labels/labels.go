@@ -38,6 +38,16 @@ func (l Labels) Copy() Labels {
 	return append(Labels(nil), l...)
 }
 
+// Delete deletes a label given its name.
+func (l *Labels) Delete(name string) {
+	for idx, label := range *l {
+		if label.Name == name {
+			*l = append((*l)[:idx], (*l)[idx+1:]...)
+			break
+		}
+	}
+}
+
 // Get returns the value associated with the given name. It returns an empty
 // string if not found.
 func (l Labels) Get(name string) string {
@@ -106,6 +116,19 @@ func (l *Labels) Pop(name string) string {
 	}
 
 	return v
+}
+
+// Set sets the value for the given label name. It will replace any preexisting
+// value present for that name.
+func (l *Labels) Set(name, value string) {
+	for idx, label := range *l {
+		if label.Name == name {
+			(*l)[idx].Value = value
+			break
+		}
+	}
+
+	*l = append(*l, Label{Name: name, Value: value})
 }
 
 // String satisfies the fmt.Stringer interface.
