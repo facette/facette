@@ -16,7 +16,6 @@
                     <v-label v-if="loadingMetrics">
                         <v-spinner
                             :size="16"
-                            :stroke-width="2"
                             :style="{'--accent': 'var(--color)', '--spinner-background': 'var(--input-background)'}"
                         ></v-spinner>
 

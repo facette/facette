@@ -32,10 +32,6 @@ export default {
             default: 48,
             type: Number,
         },
-        strokeWidth: {
-            default: 3,
-            type: Number,
-        },
     },
     setup(props: Record<string, any>): Record<string, unknown> {
         const dash = computed(() => {
@@ -45,12 +41,15 @@ export default {
 
         const half = computed(() => props.size / 2);
 
-        const innerHalf = computed(() => (props.size - props.strokeWidth) / 2);
+        const innerHalf = computed(() => (props.size - strokeWidth.value) / 2);
+
+        const strokeWidth = computed(() => Math.max(2, props.size / 16));
 
         return {
             dash,
             half,
             innerHalf,
+            strokeWidth,
         };
     },
 };

@@ -14,7 +14,7 @@
         @range-chart="onRangeChart"
         @refresh-chart="update()"
     >
-        <v-spinner :size="16" :stroke-width="2" v-if="loading"></v-spinner>
+        <v-spinner :size="16" v-if="loading"></v-spinner>
 
         <v-message v-else-if="!value || !series">{{ i18n.t("messages.data.none") }}</v-message>
 

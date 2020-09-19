@@ -32,7 +32,7 @@
             <v-label>{{ title }}</v-label>
 
             <v-message type="placeholder" v-if="dashboardsLoading">
-                <v-spinner :size="16" :stroke-width="2"></v-spinner>
+                <v-spinner :size="16"></v-spinner>
                 {{ i18n.t("messages.dashboards.loading") }}
             </v-message>
 
