@@ -21,7 +21,9 @@
 
                     <v-label>{{ i18n.t("labels.filters._", 1) }}</v-label>
                     <v-input
-                        :placeholder="i18n.t('labels.placeholders.example', ['{__provider__=&quot;prometheus&quot;}'])"
+                        :placeholder="
+                            i18n.t('labels.placeholders.example', [`{${ProviderLabel}=&quot;prometheus&quot;}`])
+                        "
                         v-model:value="variable.filter"
                     ></v-input>
                 </template>
@@ -62,6 +64,8 @@ import {useI18n} from "vue-i18n";
 import {TemplateVariable} from "types/api";
 import {SelectOption, Tab} from "types/ui";
 
+import {ProviderLabel} from "@/lib/labels";
+
 export interface ModalTemplateVariableParams {
     available: Array<TemplateVariable>;
     variable: TemplateVariable;
@@ -100,6 +104,7 @@ export default {
         return {
             i18n,
             onShow,
+            ProviderLabel,
             tabs,
             variable,
             variables,

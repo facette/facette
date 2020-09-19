@@ -21,7 +21,7 @@
                 <v-label>{{ i18n.t("labels.labels", 1) }}</v-label>
                 <v-input
                     :help="i18n.t('help.filters.label')"
-                    :placeholder="i18n.t('labels.placeholders.example', ['__name__'])"
+                    :placeholder="i18n.t('labels.placeholders.example', [NameLabel])"
                     v-model:value="rule.label"
                 ></v-input>
 
@@ -79,6 +79,8 @@ import {useI18n} from "vue-i18n";
 
 import {FilterRule} from "types/api";
 import {SelectOption} from "types/ui";
+
+import {NameLabel} from "@/lib/labels";
 
 export interface ModalProviderFilterParams {
     edit: boolean;
@@ -144,6 +146,7 @@ export default {
             edit,
             i18n,
             label,
+            NameLabel,
             onShow,
             removeTarget,
             rule,

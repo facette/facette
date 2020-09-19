@@ -213,7 +213,7 @@
                                             icon="arrow-alt-circle-right"
                                             :to="{
                                                 name: 'admin-metrics-list',
-                                                query: {filter: `{__provider__=${JSON.stringify(obj.value.name)}}`},
+                                                query: {query: `{${ProviderLabel}=${JSON.stringify(obj.value.name)}}`},
                                             }"
                                         >
                                             {{ i18n.t("labels.goto.metrics") }}
@@ -306,6 +306,7 @@ import {useUI} from "@/components/ui";
 import {formatDate} from "@/helpers/date";
 import {objectNameValidity} from "@/helpers/validity";
 import api from "@/lib/api";
+import {ProviderLabel} from "@/lib/labels";
 import {State} from "@/store";
 
 interface Options {
@@ -598,6 +599,7 @@ export default {
             objects,
             options,
             pollProviders,
+            ProviderLabel,
             selection,
             selectionEnabled,
             table,

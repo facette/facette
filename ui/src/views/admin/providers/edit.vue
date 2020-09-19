@@ -203,6 +203,7 @@ import {useUI} from "@/components/ui";
 import {formatDate} from "@/helpers/date";
 import {objectNameValidity} from "@/helpers/validity";
 import api from "@/lib/api";
+import {ProviderLabel} from "@/lib/labels";
 import {State} from "@/store";
 
 import ModalProviderFilterComponent, {ModalProviderFilterParams} from "./modal/filter.vue";
@@ -323,7 +324,7 @@ export default {
                 go && provider.value?.name
                     ? {
                           name: "admin-metrics-list",
-                          query: {filter: `{__provider__=${JSON.stringify(provider.value.name)}}`},
+                          query: {filter: `{${ProviderLabel}=${JSON.stringify(provider.value.name)}}`},
                       }
                     : {name: "admin-providers-list"},
             );
