@@ -1,9 +1,0 @@
-{
-    "files.exclude": {
-        "**/.git": true,
-        "**/.DS_Store": true,
-        "node_modules": true,
-        "package-lock.json": true
-    },
-    "python.pythonPath": "/usr/local/opt/python@3.8/bin/python3.8"
-}
