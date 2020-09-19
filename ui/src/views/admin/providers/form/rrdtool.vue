@@ -36,6 +36,8 @@
 <script lang="ts">
 import {useI18n} from "vue-i18n";
 
+import {Provider} from "types/api";
+
 export default {
     inheritAttrs: false,
     props: {

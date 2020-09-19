@@ -35,6 +35,8 @@
 import {ref} from "vue";
 import {useI18n} from "vue-i18n";
 
+import {TimeRange} from "types/api";
+
 import {dateFormatDisplay} from "@/components/chart";
 import {parseDate} from "@/helpers/date";
 

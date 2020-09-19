@@ -85,6 +85,7 @@ import merge from "lodash/merge";
 import {ref} from "vue";
 import {useI18n} from "vue-i18n";
 
+import {ChartSeries} from "types/api";
 import {SelectOption} from "types/ui";
 
 import api from "@/lib/api";

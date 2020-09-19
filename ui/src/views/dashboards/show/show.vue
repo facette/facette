@@ -289,6 +289,7 @@ import {useI18n} from "vue-i18n";
 import {useRouter} from "vue-router";
 import {useStore} from "vuex";
 
+import {APIResponse, Chart, Dashboard, DashboardItem, Reference, TemplateVariable, TimeRange} from "types/api";
 import {SelectOption} from "types/ui";
 
 import common from "@/common";

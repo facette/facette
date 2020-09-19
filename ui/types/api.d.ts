@@ -5,41 +5,41 @@
  * is available at: https://opensource.org/licenses/BSD-3-Clause
  */
 
-declare type APIError = "notFound" | "unhandled" | null;
+export declare type APIError = "notFound" | "unhandled" | null;
 
-declare interface APIResponse<T> {
+export declare interface APIResponse<T> {
     data?: T;
     total?: number;
     error?: string;
 }
 
-declare interface BulkRequest {
+export declare interface BulkRequest {
     endpoint: string;
     method: string;
     params?: Record<string, unknown>;
     data?: unknown;
 }
 
-declare interface BulkResult {
+export declare interface BulkResult {
     status: number;
     headers: Record<string, string>;
     response: APIResponse<unknown>;
 }
 
-declare interface ListParams {
+export declare interface ListParams {
     limit?: number;
     offset?: number;
     sort?: string;
     [key: string]: unknown;
 }
 
-declare interface Labels {
+export declare interface Labels {
     entries(name?: boolean): Record<string, string>;
     name(): string | null;
     toString(): string;
 }
 
-declare interface Options {
+export declare interface Options {
     connectors: Array<string>;
     driver: {
         name: string;
@@ -47,43 +47,43 @@ declare interface Options {
     };
 }
 
-declare interface Point {
+export declare interface Point {
     0: number;
     1: number | null;
 }
 
-declare interface SeriesQuery {
+export declare interface SeriesQuery {
     from?: string;
     to?: string;
     step?: number | string;
     exprs: Array<string>;
 }
 
-declare interface SeriesResult {
+export declare interface SeriesResult {
     from: string;
     to: string;
     step: number;
     series: Array<Series>;
 }
 
-declare interface Series {
+export declare interface Series {
     name: string;
     points: Array<Point>;
     summary: SeriesSummary;
 }
 
-declare type SeriesSummary = Record<string, number>;
+export declare type SeriesSummary = Record<string, number>;
 
-declare interface TestResult {
+export declare interface TestResult {
     success: boolean;
 }
 
-declare interface TimeRange {
+export declare interface TimeRange {
     from?: string;
     to?: string;
 }
 
-declare interface Version {
+export declare interface Version {
     version?: string;
     branch?: string;
     revision?: string;
@@ -92,21 +92,21 @@ declare interface Version {
 }
 
 // Objects
-declare interface ObjectBase {
+export declare interface ObjectBase {
     id: string;
     name: string;
     createdAt?: Date;
     modifiedAt?: Date;
 }
 
-declare interface Chart extends ObjectBase {
+export declare interface Chart extends ObjectBase {
     options?: ChartOptions;
     series?: Array<ChartSeries>;
     link?: string;
     template?: boolean;
 }
 
-declare interface ChartOptions {
+export declare interface ChartOptions {
     axes?: ChartAxes;
     legend?: boolean;
     markers?: Array<Marker>;
@@ -115,23 +115,23 @@ declare interface ChartOptions {
     variables?: Array<TemplateVariable>;
 }
 
-declare interface ChartAxes {
+export declare interface ChartAxes {
     x?: ChartXAxis;
     y?: ChartYAxes;
 }
 
-declare interface ChartXAxis {
+export declare interface ChartXAxis {
     show?: boolean;
 }
 
-declare interface ChartYAxes {
+export declare interface ChartYAxes {
     center?: boolean;
     left?: ChartYAxis;
     right?: ChartYAxis;
     stack?: StackMode;
 }
 
-declare interface ChartYAxis {
+export declare interface ChartYAxis {
     show?: boolean;
     label?: string;
     max?: number;
@@ -139,35 +139,35 @@ declare interface ChartYAxis {
     unit?: Unit;
 }
 
-declare interface Marker {
+export declare interface Marker {
     color?: string;
     label?: string;
     value: number;
     axis?: "left" | "right";
 }
 
-declare type StackMode = "" | "normal" | "percent";
+export declare type StackMode = "" | "normal" | "percent";
 
-declare interface Unit {
+export declare interface Unit {
     type?: UnitType;
     base?: string;
 }
 
-declare type UnitType = "" | "binary" | "count" | "duration" | "metric";
+export declare type UnitType = "" | "binary" | "count" | "duration" | "metric";
 
-declare type ChartType = "area" | "bar" | "line";
+export declare type ChartType = "area" | "bar" | "line";
 
-declare interface ChartSeries {
+export declare interface ChartSeries {
     expr: string;
     options?: ChartSeriesOptions;
 }
 
-declare interface ChartSeriesOptions {
+export declare interface ChartSeriesOptions {
     color?: string;
     axis?: "left" | "right";
 }
 
-declare interface Dashboard extends ObjectBase {
+export declare interface Dashboard extends ObjectBase {
     options?: DashboardOptions;
     layout?: GridLayout;
     items?: Array<DashboardItem>;
@@ -177,33 +177,33 @@ declare interface Dashboard extends ObjectBase {
     references?: Array<Reference>;
 }
 
-declare interface DashboardOptions {
+export declare interface DashboardOptions {
     title?: string;
     variables?: Array<TemplateVariable>;
 }
 
-declare interface DashboardItem {
+export declare interface DashboardItem {
     type: DashboardItemType;
     layout: GridItemLayout;
     options?: Record<string, unknown>;
 }
 
-declare type DashboardItemType = "chart" | "text";
+export declare type DashboardItemType = "chart" | "text";
 
-declare interface GridLayout {
+export declare interface GridLayout {
     columns: number;
     rowHeight: number;
     rows: number;
 }
 
-declare interface GridItemLayout {
+export declare interface GridItemLayout {
     x: number;
     y: number;
     w: number;
     h: number;
 }
 
-declare interface Provider extends ObjectBase {
+export declare interface Provider extends ObjectBase {
     connector: ProviderConnector;
     filters?: Array<FilterRule>;
     pollInterval?: number;
@@ -211,12 +211,12 @@ declare interface Provider extends ObjectBase {
     error?: string;
 }
 
-declare interface ProviderConnector {
+export declare interface ProviderConnector {
     type: string;
     settings: Record<string, unknown>;
 }
 
-declare interface FilterRule {
+export declare interface FilterRule {
     action: FilterAction;
     label: string;
     pattern: string;
@@ -224,14 +224,14 @@ declare interface FilterRule {
     targets?: Record<string, string>;
 }
 
-declare type FilterAction = "discard" | "relabel" | "rewrite" | "sieve";
+export declare type FilterAction = "discard" | "relabel" | "rewrite" | "sieve";
 
-declare interface Reference {
+export declare interface Reference {
     type: string;
     value: unknown;
 }
 
-declare interface TemplateVariable {
+export declare interface TemplateVariable {
     name: string;
     value?: string;
     label?: string;

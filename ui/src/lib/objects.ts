@@ -7,6 +7,8 @@
 
 import cloneDeep from "lodash/cloneDeep";
 
+import {BulkRequest, Chart, Dashboard, DashboardItem, DashboardItemType, Reference, TemplateVariable} from "types/api";
+
 import common from "@/common";
 
 import api from "./api";

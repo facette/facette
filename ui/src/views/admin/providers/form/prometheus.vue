@@ -33,6 +33,8 @@
 import {computed} from "vue";
 import {useI18n} from "vue-i18n";
 
+import {Provider} from "types/api";
+
 export default {
     inheritAttrs: false,
     props: {

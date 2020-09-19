@@ -5,6 +5,19 @@
  * is available at: https://opensource.org/licenses/BSD-3-Clause
  */
 
+import {
+    APIResponse,
+    BulkRequest,
+    BulkResult,
+    ListParams,
+    ObjectBase,
+    Options,
+    SeriesQuery,
+    SeriesResult,
+    TestResult,
+    Version,
+} from "types/api";
+
 import {Labels} from "@/lib/labels";
 
 export const prefix = "/api/v1";

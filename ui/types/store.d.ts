@@ -5,7 +5,7 @@
  * is available at: https://opensource.org/licenses/BSD-3-Clause
  */
 
-declare interface Modifiers {
+export declare interface Modifiers {
     alt: boolean;
     shift: boolean;
 }

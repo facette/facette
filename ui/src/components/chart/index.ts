@@ -5,6 +5,8 @@
  * is available at: https://opensource.org/licenses/BSD-3-Clause
  */
 
+import {TimeRange} from "types/api";
+
 export interface Range {
     unit: string;
     amount: number;

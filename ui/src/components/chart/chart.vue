@@ -152,6 +152,8 @@ import {SetupContext, computed, onBeforeUnmount, onMounted, ref, watch} from "vu
 import {useI18n} from "vue-i18n";
 import {useStore} from "vuex";
 
+import {Chart, Series, SeriesQuery, SeriesResult, SeriesSummary, TimeRange} from "types/api";
+
 import common from "@/common";
 import {ModalTimeRangeParams} from "@/components/modal/time-range.vue";
 import {useUI} from "@/components/ui";

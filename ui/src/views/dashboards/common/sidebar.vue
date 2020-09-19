@@ -70,6 +70,7 @@ import {useI18n} from "vue-i18n";
 import {useRouter} from "vue-router";
 import {useStore} from "vuex";
 
+import {Chart, Dashboard, DashboardItem} from "types/api";
 import {SelectOption} from "types/ui";
 
 import common from "@/common";

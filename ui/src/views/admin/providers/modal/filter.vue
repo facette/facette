@@ -77,6 +77,7 @@ import merge from "lodash/merge";
 import {computed, nextTick, ref, watch} from "vue";
 import {useI18n} from "vue-i18n";
 
+import {FilterRule} from "types/api";
 import {SelectOption} from "types/ui";
 
 export interface ModalProviderFilterParams {

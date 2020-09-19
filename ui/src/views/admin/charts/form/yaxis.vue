@@ -43,6 +43,8 @@
 <script lang="ts">
 import {useI18n} from "vue-i18n";
 
+import {ChartYAxis} from "types/api";
+
 export default {
     inheritAttrs: false,
     props: {

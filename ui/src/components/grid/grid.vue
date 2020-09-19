@@ -91,6 +91,8 @@ import cloneDeep from "lodash/cloneDeep";
 import ResizeObserver from "resize-observer-polyfill";
 import {SetupContext, computed, nextTick, onBeforeUnmount, onMounted, ref, watch} from "vue";
 
+import {GridItemLayout, GridLayout} from "types/api";
+
 import common from "@/common";
 
 interface GridItem {

@@ -63,6 +63,8 @@ import natsort from "natsort";
 import {useI18n} from "vue-i18n";
 import {SetupContext, computed} from "vue";
 
+import {TemplateVariable} from "types/api";
+
 import {useUI} from "@/components/ui";
 
 import {ModalTemplateVariableParams} from "../modal/template-variable.vue";

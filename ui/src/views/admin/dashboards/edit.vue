@@ -145,6 +145,7 @@ import {useI18n} from "vue-i18n";
 import {onBeforeRouteLeave, onBeforeRouteUpdate, useRouter} from "vue-router";
 import {useStore} from "vuex";
 
+import {APIResponse, Chart, Dashboard, TemplateVariable} from "types/api";
 import {FormComponent, SelectOption} from "types/ui";
 
 import common, {namePattern} from "@/common";

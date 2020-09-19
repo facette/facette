@@ -5,6 +5,8 @@
  * is available at: https://opensource.org/licenses/BSD-3-Clause
  */
 
+import {Unit} from "types/api";
+
 import {
     BinaryUnit,
     CountUnit,

@@ -8,6 +8,9 @@
 import {computed, watch} from "vue";
 import {NavigationGuardNext, RouteLocationNormalized} from "vue-router";
 
+import {APIError, APIResponse, BulkResult} from "types/api";
+import {Modifiers} from "types/store";
+
 import i18n from "@/i18n";
 import router from "@/router";
 import store from "@/store";

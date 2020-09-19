@@ -8,6 +8,8 @@
 import {RouteLocationNormalized} from "vue-router";
 import {MutationPayload, MutationTree, Store, createStore} from "vuex";
 
+import {APIError, DashboardItem, Options, TimeRange} from "types/api";
+import {Modifiers} from "types/store";
 import {Notification} from "types/ui";
 
 const persistKey = "facette";
