@@ -138,7 +138,9 @@ func (c *Connector) Query(ctx context.Context, q *connector.Query) (connector.Re
 
 // Test tests for validity of the time series connector.
 func (c *Connector) Test(ctx context.Context) error {
-	_, err := c.api.Config(ctx)
+	now := time.Now().UTC()
+
+	_, _, err := c.api.LabelNames(ctx, now, now.Add(-1*time.Hour))
 	if err != nil {
 		return httpclient.Error(err)
 	}
