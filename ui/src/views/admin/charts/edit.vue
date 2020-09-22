@@ -227,7 +227,7 @@
                                 <h2>{{ i18n.t("labels.charts.axes.x") }}</h2>
 
                                 <v-checkbox type="toggle" v-model:value="chart.options.axes.x.show">
-                                    {{ i18n.t("labels.show") }}
+                                    {{ i18n.t("labels.show._") }}
                                 </v-checkbox>
                             </v-flex>
                         </v-flex>
@@ -246,7 +246,7 @@
                             <template v-slot:header>
                                 <v-table-cell></v-table-cell>
                                 <v-table-cell>{{ i18n.t("labels.value") }}</v-table-cell>
-                                <v-table-cell>{{ i18n.t("labels.labels", 1) }}</v-table-cell>
+                                <v-table-cell>{{ i18n.t("labels.labels._", 1) }}</v-table-cell>
                                 <v-table-cell grow>{{ i18n.t("labels.charts.axes._", 1) }}</v-table-cell>
                                 <v-table-cell></v-table-cell>
                             </template>

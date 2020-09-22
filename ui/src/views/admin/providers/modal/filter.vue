@@ -18,7 +18,7 @@
                     v-model:value="rule.action"
                 ></v-select>
 
-                <v-label>{{ i18n.t("labels.labels", 1) }}</v-label>
+                <v-label>{{ i18n.t("labels.labels._", 1) }}</v-label>
                 <v-input
                     :help="i18n.t('help.filters.label')"
                     :placeholder="i18n.t('labels.placeholders.example', [NameLabel])"
@@ -33,7 +33,7 @@
                     <v-flex class="target" :key="index" v-for="(target, index) in targets">
                         <v-input
                             :delay="350"
-                            :placeholder="i18n.t('labels.labels', 1)"
+                            :placeholder="i18n.t('labels.labels._', 1)"
                             :ref="index === targets.length - 1 ? 'label' : undefined"
                             v-model:value="target.key"
                         ></v-input>

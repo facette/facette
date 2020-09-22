@@ -32,10 +32,12 @@ import {useI18n} from "vue-i18n";
 import {useRouter} from "vue-router";
 import {useStore} from "vuex";
 
+import {Chart} from "types/api";
+
 import {State} from "@/store";
 
 export interface ModalChartPreviewParams {
-    exprs: Array<string>;
+    expr: string;
 }
 
 const defaultChart: Chart = {
@@ -63,7 +65,7 @@ export default {
         };
 
         const onShow = (params: ModalChartPreviewParams): void => {
-            chart.value.series = params.exprs.map(expr => ({expr}));
+            chart.value.series = [{expr: params.expr}];
         };
 
         return {

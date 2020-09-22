@@ -21,13 +21,15 @@ func (h handler) ListLabels(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	filter := httprouter.QueryParam(r, "filter")
+
 	matcher, err := matcherFromRequest(r)
 	if err != nil {
 		h.WriteError(rw, errors.Wrap(api.ErrInvalid, err.Error()))
 		return
 	}
 
-	labels := h.catalog.Labels(matcher)
+	labels := h.catalog.Labels(matcher, filter)
 	total := int64(len(labels))
 
 	if opts.Limit > 0 {
@@ -71,20 +73,44 @@ func (h handler) ListValues(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	filter := httprouter.QueryParam(r, "filter")
+
 	matcher, err := matcherFromRequest(r)
 	if err != nil {
 		h.WriteError(rw, errors.Wrap(api.ErrInvalid, err.Error()))
 		return
 	}
 
-	values := h.catalog.Values(httprouter.ContextParam(r, "label").(string), matcher)
-	total := int64(len(values))
+	var names []string
 
-	if opts.Limit > 0 {
-		applyCatalogPagination(&values, total, opts.Offset, opts.Limit)
+	v := httprouter.QueryParam(r, "name")
+	if v != "" {
+		names = append(names, v)
+	} else {
+		names = h.catalog.Labels(matcher, "")
 	}
 
-	httpjson.Write(rw, api.Response{Data: values, Total: total}, http.StatusOK)
+	values := map[string]api.LabelValues{}
+
+	for _, name := range names {
+		subValues := h.catalog.Values(name, matcher, filter)
+
+		total := int64(len(subValues))
+		if total == 0 {
+			continue
+		}
+
+		if opts.Limit > 0 {
+			applyCatalogPagination(&subValues, total, opts.Offset, opts.Limit)
+		}
+
+		values[name] = api.LabelValues{
+			Values: subValues,
+			Total:  total,
+		}
+	}
+
+	httpjson.Write(rw, api.Response{Data: values}, http.StatusOK)
 }
 
 func applyCatalogPagination(entries *[]string, total, offset, limit int64) {

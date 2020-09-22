@@ -167,6 +167,9 @@ export default {
             summaryJSON: "Summary as JSON…",
             textMarkdown: "Save as Markdown…",
         },
+        expr: {
+            none: "No expression",
+        },
         filters: {
             _: "Filter | Filters",
             action: {
@@ -223,7 +226,11 @@ export default {
                 enable: "Enable keyboard shortcuts",
             },
         },
-        labels: "Label | Labels",
+        labels: {
+            _: "Label | Labels",
+            explorer: "Labels explorer",
+            search: "Search labels",
+        },
         language: {
             _: "Language",
             select: "Select a language…",
@@ -289,6 +296,7 @@ export default {
             setInterval: "Set interval",
         },
         reset: "Reset",
+        results: "Results",
         retry: "Retry",
         saveAndGo: "Save and Go",
         series: {
@@ -304,7 +312,10 @@ export default {
             display: "Display settings",
             personal: "Personal settings",
         },
-        show: "Show",
+        show: {
+            _: "Show",
+            more: "Show more",
+        },
         system: "System",
         templates: {
             _: "Template | Templates",

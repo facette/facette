@@ -46,7 +46,7 @@ func Test_Catalog_Labels(t *testing.T) {
 			expected: []string{"__name__", "abc", "def"},
 		},
 	} {
-		assert.Equal(t, test.expected, testCatalog.Labels(test.matcher))
+		assert.Equal(t, test.expected, testCatalog.Labels(test.matcher, ""))
 	}
 }
 
@@ -113,7 +113,7 @@ func Test_Catalog_Values(t *testing.T) {
 			expected: []string{"123"},
 		},
 	} {
-		assert.Equal(t, test.expected, testCatalog.Values(test.label, test.matcher))
+		assert.Equal(t, test.expected, testCatalog.Values(test.label, test.matcher, ""))
 	}
 }
 

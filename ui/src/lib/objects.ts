@@ -138,7 +138,7 @@ export async function resolveVariables(variables: Array<TemplateVariable>): Prom
     variables.forEach(variable => {
         if (variable.dynamic) {
             req.push({
-                endpoint: `/labels/${variable.label}/values`,
+                endpoint: `/labels/values?name=${variable.label}`,
                 method: "GET",
                 params: variable.filter ? {match: variable.filter} : undefined,
             });

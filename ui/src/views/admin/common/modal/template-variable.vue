@@ -12,7 +12,7 @@
                 <v-tablist :tabs="tabs" v-model:value="variable.dynamic"></v-tablist>
 
                 <template v-if="variable.dynamic">
-                    <v-label>{{ i18n.t("labels.labels", 1) }}</v-label>
+                    <v-label>{{ i18n.t("labels.labels._", 1) }}</v-label>
                     <v-input
                         :placeholder="i18n.t('labels.placeholders.example', ['instance'])"
                         v-autofocus.select

@@ -39,6 +39,11 @@ export declare interface Labels {
     toString(): string;
 }
 
+export declare interface LabelValues {
+    values: Array<string>;
+    total: number;
+}
+
 export declare interface Options {
     connectors: Array<string>;
     driver: {

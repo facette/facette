@@ -8,6 +8,7 @@ package catalog
 
 import (
 	"sort"
+	"strings"
 	"sync"
 
 	"facette.io/facette/pkg/labels"
@@ -37,12 +38,14 @@ func (c *Catalog) Link(name string, section *Section) {
 
 // Labels returns all labels names matching the given labels matcher from the
 // catalog.
-func (c *Catalog) Labels(matcher labels.Matcher) []string {
+func (c *Catalog) Labels(matcher labels.Matcher, filter string) []string {
 	ls := set.New()
 
 	for _, metric := range c.Metrics(matcher) {
 		for _, label := range metric.Labels {
-			ls.Add(label.Name)
+			if filter == "" || strings.Contains(label.Name, filter) {
+				ls.Add(label.Name)
+			}
 		}
 	}
 
@@ -77,12 +80,12 @@ func (c *Catalog) Unlink(name string) {
 
 // Values returns all metrics values matching the given label name and labels
 // matcher.
-func (c *Catalog) Values(label string, matcher labels.Matcher) []string {
+func (c *Catalog) Values(label string, matcher labels.Matcher, filter string) []string {
 	values := set.New()
 
 	for _, metric := range c.Metrics(matcher) {
 		for _, l := range metric.Labels {
-			if l.Name == label {
+			if l.Name == label && (filter == "" || strings.Contains(l.Value, filter)) {
 				values.Add(l.Value)
 			}
 		}

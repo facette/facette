@@ -9,11 +9,11 @@
 
 <template>
     <v-checkbox type="toggle" v-model:value="axis.show">
-        {{ i18n.t("labels.show") }}
+        {{ i18n.t("labels.show._") }}
     </v-checkbox>
 
     <div class="reveal" :class="{visible: axis.show}">
-        <v-label>{{ i18n.t("labels.labels", 1) }}</v-label>
+        <v-label>{{ i18n.t("labels.labels._", 1) }}</v-label>
         <v-input :delay="350" :help="i18n.t('help.charts.axes.label')" v-model:value="axis.label"></v-input>
 
         <v-flex>

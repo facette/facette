@@ -73,7 +73,7 @@ func Register(
 	endpoint = root.Endpoint("/labels")
 	endpoint.
 		Get(h.ListLabels)
-	endpoint.Endpoint("/:label/values").
+	endpoint.Endpoint("/values").
 		Get(h.ListValues)
 
 	root.Endpoint("/metrics").

@@ -9,6 +9,7 @@ import {
     APIResponse,
     BulkRequest,
     BulkResult,
+    LabelValues,
     ListParams,
     ObjectBase,
     Options,
@@ -83,16 +84,16 @@ export class API {
         return fetch(`${prefix}/${type}/${id}`, {method: "DELETE"}).then(onFetch);
     }
 
-    public metrics(params?: ListParams): Promise<APIResponse<Array<Labels>>> {
-        return fetch(createURL(`${prefix}/metrics`, params))
-            .then(onFetch)
-            .then(response => {
-                if (response.data) {
-                    response.data = response.data?.map((metric: string) => new Labels(metric));
-                }
+    public labels(params?: ListParams): Promise<APIResponse<Array<string>>> {
+        return fetch(createURL(`${prefix}/labels`, params)).then(onFetch);
+    }
 
-                return Promise.resolve(response);
-            });
+    public labelValues(params?: ListParams): Promise<APIResponse<Record<string, LabelValues>>> {
+        return fetch(createURL(`${prefix}/labels/values`, params)).then(onFetch);
+    }
+
+    public metrics(params?: ListParams): Promise<APIResponse<Array<Labels>>> {
+        return fetch(createURL(`${prefix}/metrics`, params)).then(onFetch);
     }
 
     public object<T extends ObjectBase>(type: ObjectType, id: string, params?: ListParams): Promise<APIResponse<T>> {

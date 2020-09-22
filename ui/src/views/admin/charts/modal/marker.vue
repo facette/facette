@@ -12,7 +12,7 @@
                 <v-label>{{ i18n.t("labels.value") }}</v-label>
                 <v-input required type="number" v-autofocus v-model:value.number="marker.value"></v-input>
 
-                <v-label>{{ i18n.t("labels.labels", 1) }}</v-label>
+                <v-label>{{ i18n.t("labels.labels._", 1) }}</v-label>
                 <v-input
                     :placeholder="i18n.t('labels.placeholders.default', [marker.value])"
                     v-model:value="marker.label"

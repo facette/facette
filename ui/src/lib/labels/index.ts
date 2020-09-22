@@ -7,6 +7,10 @@
 
 import {parseMatcher} from "./parse";
 
+export {parseMatcher};
+
+export {matcherToString} from "./format";
+
 export type Matcher = Array<MatcherCond>;
 
 export interface MatcherCond {
@@ -23,6 +27,8 @@ export enum Op {
 }
 
 export const NameLabel = "__name__";
+
+export const ProviderLabel = "__provider__";
 
 export class Labels {
     private value: Record<string, string>;
@@ -59,8 +65,10 @@ export class Labels {
         let s = this.name() ?? "";
 
         const ls = this.entries(false);
-        if (ls) {
-            s += `{${Object.keys(ls).map(key => `${key}=${JSON.stringify(ls[key])}`)}}`;
+        if (Object.keys(ls).length > 0) {
+            s += `{${Object.keys(ls)
+                .sort()
+                .map(key => `${key}=${JSON.stringify(ls[key])}`)}}`;
         }
 
         return s;
