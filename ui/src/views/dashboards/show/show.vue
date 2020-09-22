@@ -284,7 +284,16 @@
 import cloneDeep from "lodash/cloneDeep";
 import isEqual from "lodash/isEqual";
 import {DateTime} from "luxon";
-import {ComponentPublicInstance, computed, onBeforeMount, onBeforeUnmount, onMounted, ref, watch} from "vue";
+import {
+    ComponentPublicInstance,
+    WatchStopHandle,
+    computed,
+    onBeforeMount,
+    onBeforeUnmount,
+    onMounted,
+    ref,
+    watch,
+} from "vue";
 import {useI18n} from "vue-i18n";
 import {useRouter} from "vue-router";
 import {useStore} from "vuex";
@@ -835,7 +844,9 @@ export default {
                 dashboardRefs.value = {};
                 store.commit("loading", true);
 
-                getDashboard();
+                if (router.currentRoute.value.name?.toString().endsWith("-show")) {
+                    getDashboard();
+                }
             },
         );
 

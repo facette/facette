@@ -454,6 +454,10 @@ export default {
         watch(
             () => router.currentRoute.value.params.section,
             () => {
+                if (!router.currentRoute.value.name?.toString().endsWith("-edit")) {
+                    return;
+                }
+
                 invalid.value = !form.value?.checkValidity();
                 updateRouteData();
             },

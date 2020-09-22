@@ -482,6 +482,10 @@ export default {
         watch(
             () => router.currentRoute.value.params,
             (to, from) => {
+                if (!router.currentRoute.value.name?.toString().endsWith("-edit")) {
+                    return;
+                }
+
                 if (to.id !== from.id) {
                     reset(true);
                 } else if (to.section !== from.section) {
