@@ -55,6 +55,10 @@
 
                 <v-spinner :size="24" v-if="accordion === null"></v-spinner>
 
+                <v-message class="placeholder" v-else-if="Object.keys(labels).length === 0">
+                    {{ i18n.t("messages.labels.none") }}
+                </v-message>
+
                 <template v-else>
                     <template :key="name" v-for="(entry, name, index) in sortLabels(labels)">
                         <v-divider v-if="index > 0"></v-divider>
@@ -92,15 +96,9 @@
                     <v-label>{{ i18n.t("labels.results") }}</v-label>
                 </div>
 
-                <v-table ref="table" v-model:value="metrics">
-                    <template v-slot:placeholder>
-                        <v-table-cell colspan="2">
-                            <v-message type="info">
-                                {{ i18n.t("messages.metrics.none") }}
-                            </v-message>
-                        </v-table-cell>
-                    </template>
+                <v-message type="info" v-if="metrics.length === 0">{{ i18n.t("messages.metrics.none") }}</v-message>
 
+                <v-table ref="table" v-model:value="metrics" v-else>
                     <template v-slot="metric">
                         <v-table-cell class="monospace" grow>
                             <v-highlight :content="formatExpr(metric.value, true)"></v-highlight>
@@ -390,7 +388,6 @@ export default {
         align-items: center;
         background-color: var(--input-background);
         border-radius: 0.2rem;
-        cursor: pointer;
         display: flex;
         line-height: 2.5rem;
         margin-bottom: 1.5rem;
@@ -444,12 +441,18 @@ export default {
                 }
             }
 
-            .v-spinner {
+            .v-spinner,
+            .v-message.placeholder {
                 bottom: 0;
                 left: 0;
                 position: absolute;
                 right: 0;
                 top: var(--table-row-height);
+            }
+
+            .v-message.placeholder {
+                justify-content: center;
+                color: var(--gray);
             }
 
             .v-divider {
@@ -498,18 +501,19 @@ export default {
                 padding: 0 0.75rem;
             }
 
+            .v-message,
             .v-table {
                 width: calc(100vw - var(--sidebar-width) - var(--content-padding) * 3 - 20rem);
+            }
 
-                ::v-deep() {
-                    tr:first-child {
-                        border-top-color: transparent;
-                    }
+            .v-table ::v-deep() {
+                tr:first-child {
+                    border-top-color: transparent;
+                }
 
-                    .monospace {
-                        font-size: 0.8rem;
-                        white-space: normal;
-                    }
+                .monospace {
+                    font-size: 0.8rem;
+                    white-space: normal;
                 }
             }
 

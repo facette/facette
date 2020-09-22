@@ -433,6 +433,7 @@ export default {
         },
         labels: {
             emptyDiscarded: "Labels having empty values will be discarded",
+            none: "No labels found",
         },
         lastModified: "Last modified on {0}",
         markers: {
