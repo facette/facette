@@ -38,7 +38,7 @@ export default {
 
 .v-content {
     min-height: 100vh;
-    padding: 2.25rem;
+    padding: var(--content-padding);
     position: relative;
     transition: margin-left 0.2s var(--timing-function);
     will-change: margin-left;

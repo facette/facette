@@ -45,6 +45,9 @@ export default {
     "checkbox-color": "var(--dark-gray)",
     "checkbox-focus": "var(--color)",
 
+    // content
+    "content-padding": "2.25rem",
+
     // divider
     "divider-background": "#eaeaea",
 

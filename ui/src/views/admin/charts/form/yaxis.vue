@@ -76,7 +76,7 @@ export default {
     }
 
     .v-flex.column + .column {
-        margin-left: 2.25rem;
+        margin-left: var(--content-padding);
     }
 }
 </style>

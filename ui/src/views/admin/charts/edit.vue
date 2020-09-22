@@ -795,7 +795,7 @@ export default {
     .preview {
         background-color: var(--background);
         border-bottom: 1px solid var(--sidebar-background);
-        margin: -2.25rem -2.25rem 2.25rem;
+        margin: calc(-1 * var(--content-padding)) calc(-1 * var(--content-padding)) var(--content-padding);
         padding: 1rem;
         position: sticky;
         top: calc(var(--toolbar-size) * 2);
@@ -821,7 +821,7 @@ export default {
         }
 
         .v-message {
-            margin-top: 2.25rem;
+            margin-top: var(--content-padding);
         }
     }
 

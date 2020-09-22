@@ -6,10 +6,15 @@
  */
 
 @mixin content {
-    h1 .count {
-        color: var(--gray);
-        font-size: 1.35rem;
-        margin-left: 1rem;
+    h1 {
+        line-height: 2.5rem;
+        margin-bottom: 1.125rem;
+
+        .count {
+            color: var(--gray);
+            font-size: 1.35rem;
+            margin-left: 1rem;
+        }
     }
 
     dl {
