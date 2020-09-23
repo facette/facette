@@ -418,7 +418,7 @@ export default {
         const getObjects = (): void => {
             const listParams: ListParams = {
                 limit,
-                offset: (options.value.page - 1) * limit,
+                offset: (options.value.page - 1) * limit || undefined,
             };
 
             if (templatable.value && options.value.kind) {
