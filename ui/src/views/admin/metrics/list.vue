@@ -23,7 +23,11 @@
 
             <v-divider vertical></v-divider>
 
-            <v-button icon="sync-alt" @click="getMetrics" v-shortcut="{keys: 'r', help: i18n.t('labels.refresh.list')}">
+            <v-button
+                icon="sync-alt"
+                @click="getMetrics()"
+                v-shortcut="{keys: 'r', help: i18n.t('labels.refresh.list')}"
+            >
                 {{ i18n.t("labels.refresh._") }}
             </v-button>
         </v-toolbar>
@@ -82,11 +86,11 @@
                             >
                                 {{ value }}
                             </v-button>
-                        </div>
 
-                        <v-button class="more" @click="showMore(name)" v-if="entry.values.length < entry.total">
-                            {{ i18n.t("labels.show.more") }}
-                        </v-button>
+                            <v-button class="more" @click="showMore(name)" v-if="entry.values.length < entry.total">
+                                {{ i18n.t("labels.show.more") }}
+                            </v-button>
+                        </div>
                     </template>
                 </template>
             </div>
@@ -96,7 +100,9 @@
                     <v-label>{{ i18n.t("labels.results") }}</v-label>
                 </div>
 
-                <v-message type="info" v-if="metrics.length === 0">{{ i18n.t("messages.metrics.none") }}</v-message>
+                <v-message type="info" v-if="!loading && metrics.length === 0">
+                    {{ i18n.t("messages.metrics.none") }}
+                </v-message>
 
                 <v-table ref="table" v-model:value="metrics" v-else>
                     <template v-slot="metric">
@@ -122,7 +128,7 @@
 </template>
 
 <script lang="ts">
-import {ComponentPublicInstance, computed, onBeforeMount, onMounted, ref, watch} from "vue";
+import {ComponentPublicInstance, computed, nextTick, onBeforeMount, onMounted, ref, watch} from "vue";
 import {useI18n} from "vue-i18n";
 import {useRouter} from "vue-router";
 import {useStore} from "vuex";
@@ -148,7 +154,7 @@ const defaultOptions: Options = {
     filter: "",
 };
 
-const limit = 10;
+const limit = 20;
 
 export default {
     components: {
@@ -179,13 +185,17 @@ export default {
             navigator.clipboard.writeText(value).then(() => ui.notify(i18n.t("messages.copied"), "success"));
         };
 
-        const getMetrics = (metricsAppend = false): void => {
-            if (!metricsAppend) {
+        const getMetrics = (append = false): void => {
+            if (!append) {
                 accordion.value = null;
+                labels.value = {};
+                metrics.value = [];
+                page.value = 1;
+                total.value = 0;
 
                 api.labelValues({
+                    limit: limit / 2,
                     filter: options.value.filter || undefined,
-                    limit,
                     match: options.value.expr || undefined,
                 }).then(response => {
                     if (response.data === undefined) {
@@ -199,13 +209,15 @@ export default {
                         return out;
                     }, {});
                 });
-            }
 
-            store.commit("loading", true);
+                store.commit("loading", true);
+            } else {
+                page.value++;
+            }
 
             api.metrics({
                 limit,
-                offset: (page.value - 1) * limit,
+                offset: (page.value - 1) * limit || undefined,
                 match: options.value.expr || undefined,
             })
                 .then(response => {
@@ -213,8 +225,12 @@ export default {
                         return Promise.reject("cannot get metrics");
                     }
 
-                    if (metricsAppend) {
+                    if (append) {
                         metrics.value = metrics.value.concat(response.data);
+
+                        if (spinner.value?.$el.classList.contains("in-viewport")) {
+                            getMetrics(true);
+                        }
                     } else {
                         metrics.value = response.data;
                         page.value = 1;
@@ -222,7 +238,9 @@ export default {
                     }
                 }, onFetchRejected)
                 .finally(() => {
-                    store.commit("loading", false);
+                    if (!append) {
+                        store.commit("loading", false);
+                    }
                 });
         };
 
@@ -242,8 +260,8 @@ export default {
         const showMore = (name: string): void => {
             api.labelValues({
                 limit,
+                offset: labels.value[name].values.length || undefined,
                 name,
-                offset: labels.value[name].values.length,
             }).then(response => {
                 if (response.data !== undefined) {
                     labels.value[name].values = labels.value[name].values.concat(response.data[name].values);
@@ -271,7 +289,6 @@ export default {
 
             const idx = matcher.value.findIndex(m => m.name === name);
             if (idx !== -1) {
-                console.debug(matcher.value[idx].value, value);
                 if (matcher.value[idx].value === value) {
                     matcher.value.splice(idx, 1);
                 } else {
@@ -327,20 +344,33 @@ export default {
             );
         });
 
+        onBeforeMount(() => {
+            intersection?.disconnect();
+        });
+
         watch(pages, to => {
             if (page.value < to) {
-                if (intersection === null && spinner.value !== null) {
-                    intersection = new IntersectionObserver(
-                        entries => {
-                            if (entries[0].intersectionRatio > 0) {
-                                page.value++;
-                                getMetrics(true);
-                            }
-                        },
-                        {threshold: 0},
-                    );
+                if (intersection === null) {
+                    nextTick(() => {
+                        const el = spinner.value?.$el as HTMLElement | undefined;
+                        if (!el) {
+                            throw Error("cannot get spinner");
+                        }
 
-                    intersection.observe(spinner.value.$el);
+                        intersection = new IntersectionObserver(
+                            entries => {
+                                if (entries[0].intersectionRatio > 0) {
+                                    el.classList.add("in-viewport");
+                                    getMetrics(true);
+                                } else {
+                                    el.classList.remove("in-viewport");
+                                }
+                            },
+                            {threshold: 0},
+                        );
+
+                        intersection.observe(el);
+                    });
                 }
             } else {
                 intersection?.disconnect();
