@@ -284,16 +284,7 @@
 import cloneDeep from "lodash/cloneDeep";
 import isEqual from "lodash/isEqual";
 import {DateTime} from "luxon";
-import {
-    ComponentPublicInstance,
-    WatchStopHandle,
-    computed,
-    onBeforeMount,
-    onBeforeUnmount,
-    onMounted,
-    ref,
-    watch,
-} from "vue";
+import {ComponentPublicInstance, computed, onBeforeMount, onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {useI18n} from "vue-i18n";
 import {useRouter} from "vue-router";
 import {useStore} from "vuex";

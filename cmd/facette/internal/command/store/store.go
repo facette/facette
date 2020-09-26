@@ -51,9 +51,11 @@ var Command = &cli.Command{
 }
 
 func dump(ctx *cli.Context) error {
+	// TODO: implement
 	return nil
 }
 
 func restore(ctx *cli.Context) error {
+	// TODO: implement
 	return nil
 }

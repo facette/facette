@@ -78,6 +78,7 @@ func (s *Store) dump(db *gorm.DB, objects types.ObjectList, ch chan<- api.Object
 	return nil
 }
 
+// CancelRestore cancels back-end storage objects restauration.
 func (s *Store) CancelRestore() {
 	if s.restoreCancel != nil {
 		s.restoreCancel()
@@ -126,7 +127,6 @@ stop:
 		tx.Rollback()
 		return s.driver.Error(err)
 	}
-
 
 	return tx.Commit().Error
 }

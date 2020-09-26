@@ -44,7 +44,7 @@ func Load(path string) (*Config, error) {
 	cfg := DefaultConfig()
 
 	if path != "" {
-		f, err := os.OpenFile(path, os.O_RDONLY, 0)
+		f, err := os.OpenFile(path, os.O_RDONLY, 0) // nolint:gosec
 		if os.IsNotExist(err) {
 			return cfg, nil
 		} else if err != nil {

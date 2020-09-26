@@ -45,7 +45,7 @@ func New(in <-chan catalog.Metric, rules []Rule) <-chan catalog.Metric {
 
 			out <- metric
 		skip:
-		}
+		} // nolint:wsl
 
 		close(out)
 	}()

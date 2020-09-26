@@ -37,7 +37,7 @@ export default {
 
         const onTooltip = ((ev: CustomEvent<TooltipEvent>): void => {
             state.value = ev.type === "tooltip-show" ? ev.detail.state : null;
-        }) as EventListener;
+        }) as (ev: Event) => void;
 
         onMounted(() => {
             document.addEventListener("tooltip-show", onTooltip);
