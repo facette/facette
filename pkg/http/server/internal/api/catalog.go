@@ -10,6 +10,7 @@ import (
 
 	"batou.dev/httprouter"
 	"facette.io/facette/pkg/api"
+	"facette.io/facette/pkg/catalog"
 	"facette.io/facette/pkg/errors"
 	httpjson "facette.io/facette/pkg/http/json"
 )
@@ -29,7 +30,7 @@ func (h handler) ListLabels(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	labels := h.catalog.Labels(matcher, filter)
+	labels := h.catalog.Labels(&catalog.ListOptions{Filter: filter, Matcher: matcher})
 	total := int64(len(labels))
 
 	if opts.Limit > 0 {
@@ -53,7 +54,7 @@ func (h handler) ListMetrics(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	metrics := []string{}
-	for _, metric := range h.catalog.Metrics(matcher) {
+	for _, metric := range h.catalog.Metrics(&catalog.ListOptions{Matcher: matcher}) {
 		metrics = append(metrics, metric.String())
 	}
 
@@ -87,13 +88,13 @@ func (h handler) ListValues(rw http.ResponseWriter, r *http.Request) {
 	if v != "" {
 		names = append(names, v)
 	} else {
-		names = h.catalog.Labels(matcher, "")
+		names = h.catalog.Labels(&catalog.ListOptions{Matcher: matcher})
 	}
 
-	values := map[string]api.LabelValues{}
+	values := []api.LabelValues{}
 
 	for _, name := range names {
-		subValues := h.catalog.Values(name, matcher, filter)
+		subValues := h.catalog.Values(name, &catalog.ListOptions{Filter: filter, Matcher: matcher})
 
 		total := int64(len(subValues))
 		if total == 0 {
@@ -104,10 +105,11 @@ func (h handler) ListValues(rw http.ResponseWriter, r *http.Request) {
 			applyCatalogPagination(&subValues, total, opts.Offset, opts.Limit)
 		}
 
-		values[name] = api.LabelValues{
+		values = append(values, api.LabelValues{
+			Name:   name,
 			Values: subValues,
 			Total:  total,
-		}
+		})
 	}
 
 	httpjson.Write(rw, api.Response{Data: values}, http.StatusOK)

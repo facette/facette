@@ -43,7 +43,7 @@ func (s *Section) Insert(metric Metric) error {
 // Query returns all metrics matching the given labels matcher from the catalog
 // section.
 func (s *Section) Query(matcher labels.Matcher) []Metric {
-	if matcher == nil {
+	if len(matcher) == 0 {
 		return append([]Metric(nil), s.metrics...)
 	}
 

@@ -162,8 +162,6 @@ export default {
         position: absolute;
         right: 0.65rem;
         top: 0.65rem;
-        white-space: pre-wrap;
-        word-break: break-all;
 
         ::v-deep(.v-highlight-line) {
             min-height: 1rem;

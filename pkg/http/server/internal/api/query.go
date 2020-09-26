@@ -59,11 +59,11 @@ func (h handler) ExecQuery(rw http.ResponseWriter, r *http.Request) {
 	}}, http.StatusOK)
 }
 
-func dispatchQuery(q *series.Query, catalog *catalog.Catalog) []connectorQuery {
+func dispatchQuery(q *series.Query, cat *catalog.Catalog) []connectorQuery {
 	dispatch := map[string]connectorQuery{}
 
 	for _, matcher := range series.MatchersFromExprs(q.Exprs...) {
-		for _, metric := range catalog.Metrics(matcher) {
+		for _, metric := range cat.Metrics(&catalog.ListOptions{Matcher: matcher}) {
 			provider := metric.Labels.Get(labels.Provider)
 
 			_, ok := dispatch[provider]

@@ -33,39 +33,41 @@ func (c *Catalog) Link(name string, section *Section) {
 	c.l.Lock()
 	defer c.l.Unlock()
 
+	sort.Slice(section.metrics, func(i, j int) bool {
+		return section.metrics[i].String() < section.metrics[j].String()
+	})
+
 	c.sections[name] = section
 }
 
 // Labels returns all labels names matching the given labels matcher from the
 // catalog.
-func (c *Catalog) Labels(matcher labels.Matcher, filter string) []string {
-	ls := set.New()
+func (c *Catalog) Labels(opts *ListOptions) []string {
+	s := set.New()
 
-	for _, metric := range c.Metrics(matcher) {
+	for _, metric := range c.Metrics(opts) {
 		for _, label := range metric.Labels {
-			if filter == "" || strings.Contains(label.Name, filter) {
-				ls.Add(label.Name)
+			if opts.Filter == "" || strings.Contains(label.Name, opts.Filter) {
+				s.Add(label.Name)
 			}
 		}
 	}
 
-	result := set.StringSlice(ls)
-	sort.Strings(result)
+	labels := set.StringSlice(s)
+	sort.Slice(labels, func(i, j int) bool {
+		return strings.ToLower(labels[i]) < strings.ToLower(labels[j])
+	})
 
-	return result
+	return labels
 }
 
 // Metrics returns all metrics matching the given labels matcher from the
 // catalog.
-func (c *Catalog) Metrics(matcher labels.Matcher) []Metric {
+func (c *Catalog) Metrics(opts *ListOptions) []Metric {
 	metrics := []Metric{}
 	for _, section := range c.sections {
-		metrics = append(metrics, section.Query(matcher)...)
+		metrics = append(metrics, section.Query(opts.Matcher)...)
 	}
-
-	sort.Slice(metrics, func(i, j int) bool {
-		return metrics[i].String() < metrics[j].String()
-	})
 
 	return metrics
 }
@@ -80,19 +82,25 @@ func (c *Catalog) Unlink(name string) {
 
 // Values returns all metrics values matching the given label name and labels
 // matcher.
-func (c *Catalog) Values(label string, matcher labels.Matcher, filter string) []string {
-	values := set.New()
+func (c *Catalog) Values(label string, opts *ListOptions) []string {
+	s := set.New()
 
-	for _, metric := range c.Metrics(matcher) {
+	for _, metric := range c.Metrics(opts) {
 		for _, l := range metric.Labels {
-			if l.Name == label && (filter == "" || strings.Contains(l.Value, filter)) {
-				values.Add(l.Value)
+			if l.Name == label && (opts.Filter == "" || strings.Contains(l.Value, opts.Filter)) {
+				s.Add(l.Value)
 			}
 		}
 	}
 
-	result := set.StringSlice(values)
-	sort.Strings(result)
+	values := set.StringSlice(s)
+	sort.Strings(values)
 
-	return result
+	return values
+}
+
+// ListOptions are catalog listing options.
+type ListOptions struct {
+	Filter  string
+	Matcher labels.Matcher
 }

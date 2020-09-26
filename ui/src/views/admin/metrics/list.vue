@@ -23,11 +23,7 @@
 
             <v-divider vertical></v-divider>
 
-            <v-button
-                icon="sync-alt"
-                @click="getMetrics()"
-                v-shortcut="{keys: 'r', help: i18n.t('labels.refresh.list')}"
-            >
+            <v-button icon="sync-alt" @click="refresh" v-shortcut="{keys: 'r', help: i18n.t('labels.refresh.list')}">
                 {{ i18n.t("labels.refresh._") }}
             </v-button>
         </v-toolbar>
@@ -52,7 +48,7 @@
                         type="search"
                         :delay="350"
                         :placeholder="i18n.t('labels.labels.search')"
-                        v-model:value="options.filter"
+                        v-model:value="filter"
                         v-shortcut="{keys: 's', help: i18n.t('labels.labels.search')}"
                     ></v-input>
                 </div>
@@ -64,30 +60,34 @@
                 </v-message>
 
                 <template v-else>
-                    <template :key="name" v-for="(entry, name, index) in sortLabels(labels)">
+                    <template :key="index" v-for="(entry, index) in labels">
                         <v-divider v-if="index > 0"></v-divider>
 
                         <v-button
                             class="label"
                             :badge="entry.total"
-                            :icon="accordion[name] ? 'angle-up' : 'angle-down'"
-                            @click="toggleAccordion(name)"
+                            :icon="accordion[entry.name] ? 'angle-down' : 'angle-right'"
+                            @click="toggleAccordion(entry.name)"
                         >
-                            {{ name }}
+                            {{ entry.name }}
                         </v-button>
 
-                        <div class="values" v-show="accordion[name]">
+                        <div class="values" v-show="accordion[entry.name]">
                             <v-button
-                                :icon="hasEqMatcherCond(name, value) ? 'check-circle' : ''"
+                                :icon="hasEqMatcherCond(entry.name, value) ? 'check-circle' : ''"
                                 :key="index"
-                                @click="toggleMatcher(name, value)"
+                                @click="toggleMatcher(entry.name, value)"
                                 v-tooltip="value"
                                 v-for="(value, index) in entry.values"
                             >
                                 {{ value }}
                             </v-button>
 
-                            <v-button class="more" @click="showMore(name)" v-if="entry.values.length < entry.total">
+                            <v-button
+                                class="more"
+                                @click="showMore(entry.name)"
+                                v-if="entry.values.length < entry.total"
+                            >
                                 {{ i18n.t("labels.show.more") }}
                             </v-button>
                         </div>
@@ -104,22 +104,29 @@
                     {{ i18n.t("messages.metrics.none") }}
                 </v-message>
 
-                <v-table ref="table" v-model:value="metrics" v-else>
-                    <template v-slot="metric">
-                        <v-table-cell class="monospace" grow>
-                            <v-highlight :content="formatExpr(metric.value, true)"></v-highlight>
-                        </v-table-cell>
+                <div class="items">
+                    <div
+                        class="item"
+                        :class="{expanded: expandState[index]}"
+                        :key="index"
+                        v-for="(metric, index) in metrics"
+                    >
+                        <v-icon
+                            class="expand"
+                            :icon="expandState[index] ? 'angle-down' : 'angle-right'"
+                            @click="expandMetric(index)"
+                        ></v-icon>
 
-                        <v-table-cell>
-                            <v-button
-                                class="reveal icon"
-                                icon="far/copy"
-                                @click="clipboardCopy(metric.value.toString())"
-                                v-tooltip="i18n.t('labels.clipboard.copy')"
-                            ></v-button>
-                        </v-table-cell>
-                    </template>
-                </v-table>
+                        <v-highlight :content="formatExpr(metric, !expandState[index])"></v-highlight>
+
+                        <v-button
+                            class="reveal"
+                            icon="far/copy"
+                            @click="clipboardCopy(metric.toString())"
+                            v-tooltip="i18n.t('labels.clipboard.copy')"
+                        ></v-button>
+                    </div>
+                </div>
 
                 <v-spinner ref="spinner" :size="24" v-if="loading || page < pages"></v-spinner>
             </div>
@@ -146,12 +153,10 @@ import ModalChartPreviewComponent, {ModalChartPreviewParams} from "./modal/chart
 
 interface Options {
     expr: string;
-    filter: string;
 }
 
 const defaultOptions: Options = {
     expr: "",
-    filter: "",
 };
 
 const limit = 20;
@@ -171,7 +176,9 @@ export default {
         let intersection: IntersectionObserver | null = null;
 
         const accordion = ref<Record<string, boolean> | null>(null);
-        const labels = ref<Record<string, LabelValues>>({});
+        const expandState = ref<Record<number, boolean>>({});
+        const filter = ref("");
+        const labels = ref<Array<LabelValues>>([]);
         const matcher = ref<Matcher>([]);
         const metrics = ref<Array<Labels>>([]);
         const options = ref(Object.assign({}, defaultOptions));
@@ -185,30 +192,37 @@ export default {
             navigator.clipboard.writeText(value).then(() => ui.notify(i18n.t("messages.copied"), "success"));
         };
 
+        const expandMetric = (index: number): void => {
+            expandState.value[index] = !expandState.value[index];
+        };
+
+        const getLabels = (): void => {
+            accordion.value = null;
+            labels.value = [];
+
+            api.labelValues({
+                limit: limit / 2,
+                filter: filter.value || undefined,
+                match: options.value.expr || undefined,
+            }).then(response => {
+                if (response.data === undefined) {
+                    return;
+                }
+
+                labels.value = response.data;
+
+                accordion.value = response.data.reduce((out: Record<string, boolean>, values: LabelValues) => {
+                    out[values.name] = true;
+                    return out;
+                }, {});
+            });
+        };
+
         const getMetrics = (append = false): void => {
             if (!append) {
-                accordion.value = null;
-                labels.value = {};
                 metrics.value = [];
                 page.value = 1;
                 total.value = 0;
-
-                api.labelValues({
-                    limit: limit / 2,
-                    filter: options.value.filter || undefined,
-                    match: options.value.expr || undefined,
-                }).then(response => {
-                    if (response.data === undefined) {
-                        return;
-                    }
-
-                    labels.value = response.data;
-
-                    accordion.value = Object.keys(response.data).reduce((out: Record<string, boolean>, key: string) => {
-                        out[key] = true;
-                        return out;
-                    }, {});
-                });
 
                 store.commit("loading", true);
             } else {
@@ -257,25 +271,26 @@ export default {
             } as ModalChartPreviewParams);
         };
 
+        const refresh = (): void => {
+            getLabels();
+            getMetrics();
+        };
+
         const showMore = (name: string): void => {
+            const idx = labels.value.findIndex(a => a.name === name);
+            if (idx === -1) {
+                return;
+            }
+
             api.labelValues({
                 limit,
-                offset: labels.value[name].values.length || undefined,
+                offset: labels.value[idx].values.length || undefined,
                 name,
             }).then(response => {
                 if (response.data !== undefined) {
-                    labels.value[name].values = labels.value[name].values.concat(response.data[name].values);
+                    labels.value[idx].values = labels.value[idx].values.concat(response.data[idx].values);
                 }
             });
-        };
-
-        const sortLabels = (labels: Record<string, LabelValues>): Record<string, LabelValues> => {
-            return Object.keys(labels)
-                .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
-                .reduce((out: Record<string, LabelValues>, name: string) => {
-                    out[name] = labels[name];
-                    return out;
-                }, {});
         };
 
         const toggleAccordion = (name: string): void => {
@@ -299,18 +314,15 @@ export default {
                 matcher.value.push({op: Op.EQ, name, value});
             }
 
+            filter.value = "";
+
             options.value = {
-                filter: "",
                 expr: matcherToString(matcher.value),
             };
         };
 
         onBeforeMount(() => {
             const query = router.currentRoute.value.query as Record<string, string>;
-
-            if (query.filter) {
-                options.value.filter = query.filter;
-            }
 
             if (query.expr) {
                 try {
@@ -325,12 +337,8 @@ export default {
 
             watch(
                 options,
-                (to: Options): void => {
+                (to): void => {
                     const query: Record<string, string> = {};
-
-                    if (to.filter !== "") {
-                        query.filter = to.filter;
-                    }
 
                     if (to.expr !== "") {
                         query.expr = to.expr;
@@ -338,6 +346,7 @@ export default {
 
                     router.replace({query});
 
+                    getLabels();
                     getMetrics();
                 },
                 {deep: true, immediate: true},
@@ -347,6 +356,8 @@ export default {
         onBeforeMount(() => {
             intersection?.disconnect();
         });
+
+        watch(filter, () => getLabels());
 
         watch(pages, to => {
             if (page.value < to) {
@@ -382,8 +393,10 @@ export default {
             accordion,
             clipboardCopy,
             erred,
+            expandMetric,
+            expandState,
+            filter,
             formatExpr,
-            getMetrics,
             hasEqMatcherCond,
             i18n,
             labels,
@@ -395,8 +408,8 @@ export default {
             page,
             pages,
             previewChart,
+            refresh,
             showMore,
-            sortLabels,
             spinner,
             toggleAccordion,
             toggleMatcher,
@@ -457,6 +470,7 @@ export default {
             overflow-y: auto;
             padding-bottom: 0.25rem;
             position: relative;
+            min-width: 20rem;
             width: 20rem;
 
             .top {
@@ -524,6 +538,7 @@ export default {
         }
 
         .list {
+            flex-grow: 1;
             overflow-y: auto;
 
             .top {
@@ -531,19 +546,56 @@ export default {
                 padding: 0 0.75rem;
             }
 
-            .v-message,
-            .v-table {
-                width: calc(100vw - var(--sidebar-width) - var(--content-padding) * 3 - 20rem);
-            }
+            .item {
+                align-items: center;
+                display: flex;
+                padding: 0.25rem 0;
 
-            .v-table ::v-deep() {
-                tr:first-child {
-                    border-top-color: transparent;
+                & + .item {
+                    border-top: 1px solid var(--table-row-border);
                 }
 
-                .monospace {
-                    font-size: 0.8rem;
-                    white-space: normal;
+                .expand {
+                    align-self: flex-start;
+                    color: var(--gray);
+                    cursor: pointer;
+                    height: var(--button-height);
+                    min-width: 2rem;
+                }
+
+                .v-highlight {
+                    tab-size: 4;
+                    width: calc(100% - 2.75rem);
+
+                    ::v-deep(.v-highlight-line) {
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+                }
+
+                &.expanded .v-highlight {
+                    padding: 0.5rem 0;
+
+                    ::v-deep(.v-highlight-line) {
+                        white-space: unset;
+                    }
+                }
+
+                .reveal {
+                    align-self: flex-start;
+                    display: none;
+                    margin-left: 0.75rem;
+                }
+
+                &:hover {
+                    .v-highlight {
+                        width: calc(100% - 5rem);
+                    }
+
+                    .reveal {
+                        display: unset;
+                    }
                 }
             }
 

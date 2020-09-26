@@ -88,7 +88,7 @@ export class API {
         return fetch(createURL(`${prefix}/labels`, params)).then(onFetch);
     }
 
-    public labelValues(params?: ListParams): Promise<APIResponse<Record<string, LabelValues>>> {
+    public labelValues(params?: ListParams): Promise<APIResponse<Array<LabelValues>>> {
         return fetch(createURL(`${prefix}/labels/values`, params)).then(onFetch);
     }
 

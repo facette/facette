@@ -40,6 +40,7 @@ export declare interface Labels {
 }
 
 export declare interface LabelValues {
+    name: string;
     values: Array<string>;
     total: number;
 }

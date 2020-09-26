@@ -7,6 +7,7 @@ package api
 
 // LabelValues are an API label values.
 type LabelValues struct {
+	Name   string   `json:"name"`
 	Values []string `json:"values"`
 	Total  int64    `json:"total"`
 }

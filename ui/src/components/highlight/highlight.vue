@@ -109,6 +109,10 @@ export default {
 
 <style lang="scss" scoped>
 .v-highlight {
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-all;
+
     ::v-deep(.v-highlight-line) {
         color: var(--highlight-color);
 
