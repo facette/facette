@@ -20,10 +20,10 @@ export declare interface BulkRequest {
     data?: unknown;
 }
 
-export declare interface BulkResult {
+export declare interface BulkResult<T = unknown> {
     status: number;
     headers: Record<string, string>;
-    response: APIResponse<unknown>;
+    response: APIResponse<T>;
 }
 
 export declare interface ListParams {

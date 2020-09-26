@@ -7,7 +7,16 @@
 
 import cloneDeep from "lodash/cloneDeep";
 
-import {BulkRequest, Chart, Dashboard, DashboardItem, DashboardItemType, Reference, TemplateVariable} from "types/api";
+import {
+    BulkRequest,
+    Chart,
+    Dashboard,
+    DashboardItem,
+    DashboardItemType,
+    LabelValues,
+    Reference,
+    TemplateVariable,
+} from "types/api";
 
 import common from "@/common";
 
@@ -150,9 +159,11 @@ export async function resolveVariables(variables: Array<TemplateVariable>): Prom
     const data: Record<string, Array<string>> = {};
 
     if (req.length > 0) {
-        await api.bulk(req).then(response => {
+        await api.bulk<Array<LabelValues>>(req).then(response => {
             response.data?.forEach((result, index) => {
-                data[labels[index]] = result.response.data as Array<string>;
+                if (result.response.data !== undefined) {
+                    data[labels[index]] = result.response.data[0].values;
+                }
             });
         }, onBulkRejected);
     }

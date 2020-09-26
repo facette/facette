@@ -56,14 +56,14 @@ export async function onFetch(response: Response): Promise<any> {
 }
 
 export class API {
-    public bulk(req: Array<BulkRequest>): Promise<APIResponse<Array<BulkResult>>> {
+    public bulk<T = unknown>(req: Array<BulkRequest>): Promise<APIResponse<Array<BulkResult<T>>>> {
         return fetch(`${prefix}/bulk`, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(req),
         })
             .then(onFetch)
-            .then((response: APIResponse<Array<BulkResult>>) => {
+            .then((response: APIResponse<Array<BulkResult<T>>>) => {
                 if (response.data && response.data.filter(result => result.status >= 400).length > 0) {
                     return Promise.reject(response);
                 }
