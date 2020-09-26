@@ -441,6 +441,10 @@ export default {
             margin-right: 1rem;
         }
 
+        .v-highlight {
+            line-height: inherit;
+        }
+
         .placeholder {
             opacity: var(--placeholder-opacity);
         }
