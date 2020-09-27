@@ -167,27 +167,31 @@
                                 </v-table-cell>
 
                                 <v-table-cell grow>
-                                    <v-highlight :content="formatExpr(series.value.expr, true)"></v-highlight>
+                                    <v-highlight
+                                        class="link"
+                                        :content="formatExpr(series.value.expr, true)"
+                                        @click="editSeries(series.index)"
+                                    ></v-highlight>
                                 </v-table-cell>
 
                                 <v-table-cell>
                                     {{ i18n.t(`labels.charts.axes.${series.value.options?.axis || "left"}`) }}
                                 </v-table-cell>
 
-                                <v-table-cell>
-                                    <v-button
-                                        class="reveal"
-                                        icon="pencil-alt"
-                                        @click="editSeries(series.index)"
-                                        v-tooltip="i18n.t('labels.series.edit')"
-                                    ></v-button>
+                                <v-table-cell class="more">
+                                    <v-button class="icon" dropdown-anchor="right" icon="ellipsis-v">
+                                        <template v-slot:dropdown>
+                                            <v-button icon="minus" @click="removeSeries(series.index)">
+                                                {{ i18n.t("labels.remove") }}
+                                            </v-button>
 
-                                    <v-button
-                                        class="reveal"
-                                        icon="times"
-                                        @click="removeSeries(series.index)"
-                                        v-tooltip="i18n.t('labels.series.remove')"
-                                    ></v-button>
+                                            <v-divider></v-divider>
+
+                                            <v-button icon="clone" @click="duplicateObject(obj.value)">
+                                                {{ i18n.t("labels.duplicate") }}
+                                            </v-button>
+                                        </template>
+                                    </v-button>
                                 </v-table-cell>
                             </template>
                         </v-table>
@@ -260,7 +264,7 @@
                                 </v-table-cell>
 
                                 <v-table-cell>
-                                    {{ marker.value.value }}
+                                    <span class="link" @click="editMarker(marker.index)">{{ marker.value.value }}</span>
                                 </v-table-cell>
 
                                 <v-table-cell>
@@ -279,20 +283,14 @@
                                     </v-flex>
                                 </v-table-cell>
 
-                                <v-table-cell>
-                                    <v-button
-                                        class="reveal"
-                                        icon="pencil-alt"
-                                        @click="editMarker(marker.index)"
-                                        v-tooltip="i18n.t('labels.markers.edit')"
-                                    ></v-button>
-
-                                    <v-button
-                                        class="reveal"
-                                        icon="times"
-                                        @click="removeMarker(marker.index)"
-                                        v-tooltip="i18n.t('labels.markers.remove')"
-                                    ></v-button>
+                                <v-table-cell class="more">
+                                    <v-button class="icon" dropdown-anchor="right" icon="ellipsis-v">
+                                        <template v-slot:dropdown>
+                                            <v-button icon="minus" @click="removeMarker(marker.index)">
+                                                {{ i18n.t("labels.remove") }}
+                                            </v-button>
+                                        </template>
+                                    </v-button>
                                 </v-table-cell>
                             </template>
                         </v-table>

@@ -62,7 +62,7 @@
         }
     }
 
-    .v-table-row {
+    ::v-deep(.v-table-row) {
         .link {
             cursor: pointer;
             text-decoration: none;
@@ -71,6 +71,10 @@
                 outline: none;
                 text-decoration: underline;
             }
+        }
+
+        .more {
+            padding-right: 0;
         }
 
         .reveal {

@@ -156,7 +156,7 @@ export default {
             font-size: 1rem;
             height: var(--toolbar-size);
             left: 0;
-            line-height: var(--toolbar-size);
+            line-height: var(--toolbar-size) !important;
             margin: 0;
             padding: 0 1.25rem;
             position: absolute;

@@ -105,7 +105,7 @@
             <template v-if="$route.params.section === 'filters'">
                 <h1>{{ i18n.t("labels.filters._", 2) }}</h1>
 
-                <v-form class="half">
+                <v-form>
                     <v-message type="info" v-if="!provider.filters?.length">
                         {{ i18n.t("messages.filters.none") }}
                     </v-message>
@@ -125,7 +125,7 @@
 
                         <template v-slot="item">
                             <v-table-cell>
-                                {{ item.value.action }}
+                                <span class="link" @click="editFilter(item.index)">{{ item.value.action }}</span>
                             </v-table-cell>
 
                             <v-table-cell grow>
@@ -144,20 +144,14 @@
                                 </v-flex>
                             </v-table-cell>
 
-                            <v-table-cell>
-                                <v-button
-                                    class="reveal"
-                                    icon="pencil-alt"
-                                    @click="editFilter(item.index)"
-                                    v-tooltip="i18n.t('labels.filters.edit')"
-                                ></v-button>
-
-                                <v-button
-                                    class="reveal"
-                                    icon="times"
-                                    @click="removeFilter(item.index)"
-                                    v-tooltip="i18n.t('labels.filters.remove')"
-                                ></v-button>
+                            <v-table-cell class="more">
+                                <v-button class="icon" dropdown-anchor="right" icon="ellipsis-v">
+                                    <template v-slot:dropdown>
+                                        <v-button icon="minus" @click="removeFilter(item.index)">
+                                            {{ i18n.t("labels.remove") }}
+                                        </v-button>
+                                    </template>
+                                </v-button>
                             </v-table-cell>
                         </template>
                     </v-table>

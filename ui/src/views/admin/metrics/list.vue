@@ -553,7 +553,7 @@ export default {
             .item {
                 align-items: center;
                 display: flex;
-                padding: 0.25rem 0;
+                padding: 0.125rem 0;
 
                 & + .item {
                     border-top: 1px solid var(--table-row-border);

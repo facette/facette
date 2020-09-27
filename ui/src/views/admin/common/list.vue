@@ -205,7 +205,7 @@
                             {{ formatDate(obj.value.modifiedAt, i18n.t("date.long")) }}
                         </v-table-cell>
 
-                        <v-table-cell>
+                        <v-table-cell class="more">
                             <v-button class="icon" dropdown-anchor="right" icon="ellipsis-v">
                                 <template v-slot:dropdown>
                                     <template v-if="type === 'providers'">
@@ -246,12 +246,14 @@
                                         <v-divider></v-divider>
                                     </template>
 
-                                    <v-button icon="clone" @click="cloneObject(obj.value)">
-                                        {{ i18n.t("labels.clone") }}
-                                    </v-button>
-
                                     <v-button icon="trash" @click="deleteObjects([obj.value])">
                                         {{ i18n.t("labels.delete") }}
+                                    </v-button>
+
+                                    <v-divider></v-divider>
+
+                                    <v-button icon="clone" @click="duplicateObject(obj.value)">
+                                        {{ i18n.t("labels.duplicate") }}
                                     </v-button>
 
                                     <template v-if="type == 'providers'">
@@ -270,7 +272,7 @@
                                         </v-button>
 
                                         <v-button
-                                            icon="sync-alt"
+                                            icon="arrow-alt-circle-down"
                                             :disabled="!obj.value.enabled"
                                             @click="pollProviders([obj.value])"
                                         >
@@ -369,22 +371,22 @@ export default {
             selection.value = [];
         };
 
-        const cloneObject = async (obj: ObjectBase): Promise<void> => {
+        const duplicateObject = async (obj: ObjectBase): Promise<void> => {
             const name = await ui.modal<string | false>("prompt", {
                 button: {
-                    label: i18n.t("labels.clone"),
+                    label: i18n.t(`labels.${props.type}.duplicate`),
                     primary: true,
                 },
                 input: {
                     customValidity: objectNameValidity(props.type),
                     required: true,
-                    value: `${obj.name}-clone`,
+                    value: `${obj.name}-copy`,
                 },
                 message: i18n.t(`labels.${props.type}.name`),
             } as ModalPromptParams);
 
             if (name !== false) {
-                api.cloneObject(props.type, obj.id, {name}).then(() => getObjects());
+                api.duplicateObject(props.type, obj.id, {name}).then(() => getObjects());
             }
         };
 
@@ -587,8 +589,8 @@ export default {
         return {
             applyFilter,
             clearSelection,
-            cloneObject,
             deleteObjects,
+            duplicateObject,
             erred,
             filter,
             formatDate,

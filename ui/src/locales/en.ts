@@ -99,6 +99,7 @@ export default {
             },
             create: "Create chart",
             delete: "Delete chart | Delete charts",
+            duplicate: "Duplicate chart",
             edit: "Edit chart",
             legend: {
                 _: "Legend",
@@ -127,7 +128,6 @@ export default {
         clipboard: {
             copy: "Copy to clipboard",
         },
-        clone: "Clone",
         close: "Close",
         color: "Color",
         connectors: {
@@ -138,6 +138,7 @@ export default {
         dashboards: {
             _: "Dashboard | Dashboards",
             delete: "Delete dashboard | Delete dashboards",
+            duplicate: "Duplicate dashboard",
             edit: "Edit dashboard",
             filter: "Filter dashboards",
             name: "Dashboard name",
@@ -159,6 +160,7 @@ export default {
         display: "Display",
         displayHelp: "Display this help",
         documentation: "Documentation",
+        duplicate: "Duplicate",
         empty: "Empty",
         export: {
             _: "Export",
@@ -177,10 +179,8 @@ export default {
                 select: "Select an action…",
             },
             add: "Add filter",
-            edit: "Edit filter",
             into: "Into",
             pattern: "Pattern",
-            remove: "Remove filter",
             set: "Set filter",
             targets: {
                 _: "Targets",
@@ -242,8 +242,6 @@ export default {
         markers: {
             _: "Marker | Markers",
             add: "Add marker",
-            edit: "Edit marker",
-            remove: "Remove marker",
             set: "Set marker",
         },
         metrics: {
@@ -270,6 +268,7 @@ export default {
             delete: "Delete provider | Delete providers",
             disable: "Disable",
             disabled: "Providers is disabled",
+            duplicate: "Duplicate provider",
             enable: "Enable",
             enabled: "Providers is enabled",
             filter: "Filter providers",
@@ -295,6 +294,7 @@ export default {
             reset: "Reset interval",
             setInterval: "Set interval",
         },
+        remove: "Remove",
         reset: "Reset",
         results: "Results",
         retry: "Retry",
@@ -302,8 +302,6 @@ export default {
         series: {
             _: "Series | Series",
             add: "Add series",
-            edit: "Edit series",
-            remove: "Remove series",
             set: "Set series",
         },
         settings: {

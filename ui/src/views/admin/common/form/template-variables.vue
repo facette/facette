@@ -10,7 +10,7 @@
         {{ i18n.t("messages.variables.none") }}
     </v-message>
 
-    <v-table class="half" v-model:value="variables" v-else>
+    <v-table v-model:value="variables" v-else>
         <template v-slot:header>
             <v-table-cell>{{ i18n.t("labels.name._") }}</v-table-cell>
             <v-table-cell grow>{{ i18n.t("labels.properties") }}</v-table-cell>
@@ -19,7 +19,7 @@
 
         <template v-slot="variable">
             <v-table-cell>
-                {{ variable.value.name }}
+                <span class="link" @click="editVariable(variable.index)">{{ variable.value.name }}</span>
             </v-table-cell>
 
             <v-table-cell grow>
@@ -37,21 +37,18 @@
                 </span>
             </v-table-cell>
 
-            <v-table-cell>
-                <v-button
-                    class="reveal"
-                    icon="pencil-alt"
-                    @click="editVariable(variable.index)"
-                    v-tooltip="i18n.t('labels.variables.edit')"
-                ></v-button>
-
-                <v-button
-                    class="reveal"
-                    icon="eraser"
-                    :disabled="!variableDefined(variable.value)"
-                    @click="clearVariable(variable.index)"
-                    v-tooltip="i18n.t('labels.variables.clear')"
-                ></v-button>
+            <v-table-cell class="more">
+                <v-button class="icon" dropdown-anchor="right" icon="ellipsis-v">
+                    <template v-slot:dropdown>
+                        <v-button
+                            icon="eraser"
+                            :disabled="!variableDefined(variable.value)"
+                            @click="clearVariable(variable.index)"
+                        >
+                            {{ i18n.t("labels.variables.clear") }}
+                        </v-button>
+                    </template>
+                </v-button>
             </v-table-cell>
         </template>
     </v-table>

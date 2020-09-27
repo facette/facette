@@ -72,16 +72,16 @@ export class API {
             });
     }
 
-    public cloneObject(type: ObjectType, id: string, obj: Record<string, unknown>): Promise<void> {
+    public delete(type: ObjectType, id: string): Promise<void> {
+        return fetch(`${prefix}/${type}/${id}`, {method: "DELETE"}).then(onFetch);
+    }
+
+    public duplicateObject(type: ObjectType, id: string, obj: Record<string, unknown>): Promise<void> {
         return fetch(createURL(`${prefix}/${type}`, {copy: id}), {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(obj),
         }).then(onFetch);
-    }
-
-    public delete(type: ObjectType, id: string): Promise<void> {
-        return fetch(`${prefix}/${type}/${id}`, {method: "DELETE"}).then(onFetch);
     }
 
     public labels(params?: ListParams): Promise<APIResponse<Array<string>>> {
