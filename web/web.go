@@ -4,6 +4,7 @@ import (
 	"context"
 	"net"
 	"net/http"
+	"net/http/pprof"
 	"strings"
 	"sync"
 	"time"
@@ -62,6 +63,11 @@ func (h *Handler) Run() error {
 	}
 
 	v1.NewAPI(r, h.storage, h.searcher, h.poller, h.config, h.logger)
+
+	debug := r.Endpoint("/debug/pprof/")
+	debug.Any(pprof.Index)
+	debug.Endpoint("/:action").Any(pprof.Index)
+	debug.Endpoint("/symbol").Any(pprof.Symbol)
 
 	r.Endpoint("/*").
 		Get(h.handleAsset)
